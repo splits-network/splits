@@ -40,7 +40,12 @@ RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/packages ./packages
+COPY --from=build /app/packages/shared-config/dist ./node_modules/@splits-network/shared-config/dist
+COPY --from=build /app/packages/shared-config/package.json ./node_modules/@splits-network/shared-config/
+COPY --from=build /app/packages/shared-types/dist ./node_modules/@splits-network/shared-types/dist
+COPY --from=build /app/packages/shared-types/package.json ./node_modules/@splits-network/shared-types/
+COPY --from=build /app/packages/shared-logging/dist ./node_modules/@splits-network/shared-logging/dist
+COPY --from=build /app/packages/shared-logging/package.json ./node_modules/@splits-network/shared-logging/
 COPY --from=build /app/services/ats-service/dist ./services/ats-service/dist
 COPY --from=build /app/services/ats-service/package.json ./services/ats-service/
 EXPOSE 3002
