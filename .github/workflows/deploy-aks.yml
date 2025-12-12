@@ -43,7 +43,24 @@ jobs:
             - name: Build and push image
               run: |
                   IMAGE_TAG=${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.service.name }}:${{ github.sha }}
-                  docker build -f ${{ matrix.service.path }}/Dockerfile -t $IMAGE_TAG --target production .
+
+                  # Build with appropriate build args based on service
+                  if [ "${{ matrix.service.name }}" = "portal" ]; then
+                    docker build \
+                      -f ${{ matrix.service.path }}/Dockerfile \
+                      -t $IMAGE_TAG \
+                      --target production \
+                      --build-arg NEXT_PUBLIC_API_URL=https://api.splits.network/api \
+                      --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }} \
+                      .
+                  else
+                    docker build \
+                      -f ${{ matrix.service.path }}/Dockerfile \
+                      -t $IMAGE_TAG \
+                      --target production \
+                      .
+                  fi
+
                   docker push $IMAGE_TAG
 
                   # Also tag as latest
