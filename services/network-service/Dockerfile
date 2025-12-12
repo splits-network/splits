@@ -27,6 +27,11 @@ FROM base AS build
 COPY --from=dependencies /app ./
 COPY packages ./packages
 COPY services/network-service ./services/network-service
+# Build shared packages first
+RUN pnpm --filter @splits-network/shared-config build
+RUN pnpm --filter @splits-network/shared-types build
+RUN pnpm --filter @splits-network/shared-logging build
+# Then build service
 RUN pnpm --filter @splits-network/network-service build
 
 # Production stage
