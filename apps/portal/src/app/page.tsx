@@ -232,7 +232,7 @@ export default async function HomePage() {
                                     "Splits Network helped me triple my placement rate. The collaboration tools make working with other recruiters seamless."
                                 </p>
                                 <div className="flex items-center gap-3">
-                                    <div className="avatar placeholder">
+                                    <div className="avatar avatar-placeholder">
                                         <div className="bg-primary text-primary-content rounded-full w-12">
                                             <span>SJ</span>
                                         </div>
@@ -259,7 +259,7 @@ export default async function HomePage() {
                                     "As a company, this platform gave us access to specialized recruiters we couldn't afford to hire full-time. Game changer."
                                 </p>
                                 <div className="flex items-center gap-3">
-                                    <div className="avatar placeholder">
+                                    <div className="avatar avatar-placeholder">
                                         <div className="bg-secondary text-secondary-content rounded-full w-12">
                                             <span>MC</span>
                                         </div>
@@ -286,7 +286,7 @@ export default async function HomePage() {
                                     "The transparency and fair fee splits make this the only platform I use for split placements now. Highly recommended!"
                                 </p>
                                 <div className="flex items-center gap-3">
-                                    <div className="avatar placeholder">
+                                    <div className="avatar avatar-placeholder">
                                         <div className="bg-accent text-accent-content rounded-full w-12">
                                             <span>ER</span>
                                         </div>

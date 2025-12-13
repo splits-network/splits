@@ -22,8 +22,7 @@ export function Footer() {
                     {/* Brand Column */}
                     <div className="lg:col-span-2">
                         <div className="flex items-center gap-2 mb-4">
-                            <i className="fa-solid fa-network-wired text-2xl text-primary"></i>
-                            <span className="text-2xl font-bold">Splits Network</span>
+                            <span className="text-2xl font-bold">The Splits Network</span>
                         </div>
                         <p className="text-base-content/70 mb-6 max-w-md">
                             The modern platform for split-fee recruiting. Connecting specialized recruiters with companies seeking top talent.
