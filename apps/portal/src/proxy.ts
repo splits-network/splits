@@ -9,9 +9,16 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
-    if (!isPublicRoute(request)) {
-        await auth.protect();
+    const path = request.nextUrl.pathname;
+    
+    // Skip auth for static files (including video files)
+    const isStaticFile = /\.(ico|png|jpg|jpeg|svg|gif|webp|mp4|webm|ogg|mp3|wav|pdf)$/i.test(path);
+    
+    if (isStaticFile || isPublicRoute(request)) {
+        return;
     }
+    
+    await auth.protect();
 });
 
 export const config = {

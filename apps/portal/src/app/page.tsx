@@ -31,7 +31,7 @@ export default async function HomePage() {
                 {/* Content */}
                 <div className="hero-content text-center max-w-5xl relative z-10">
                     <div>
-                        <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                        <h1 className="text-6xl font-bold mb-6 text-primary">
                             Split-Fee Recruiting,
                             <br />
                             Reimagined
@@ -68,7 +68,7 @@ export default async function HomePage() {
             </section>
 
             {/* Stats Section */}
-            <section className="py-16 bg-primary">
+            <section className="py-32 bg-primary">
                 <div className="container mx-auto px-4">
                     <div className="stats stats-vertical bg-base-100 lg:stats-horizontal shadow w-full">
                         <div className="stat place-items-center">
