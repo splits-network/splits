@@ -13,8 +13,23 @@ export default async function HomePage() {
     return (
         <>
             {/* Hero Section */}
-            <section className="hero min-h-[80vh] bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10">
-                <div className="hero-content text-center max-w-5xl">
+            <section className="hero min-h-[80vh] relative overflow-hidden">
+                {/* Video Background */}
+                <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover opacity-20"
+                >
+                    <source src="/ads.mp4" type="video/mp4" />
+                </video>
+                
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-base-100/80 to-secondary/10"></div>
+                
+                {/* Content */}
+                <div className="hero-content text-center max-w-5xl relative z-10">
                     <div>
                         <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                             Split-Fee Recruiting,
