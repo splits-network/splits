@@ -51,6 +51,7 @@ export interface Job {
     status: JobStatus;
     created_at: Date;
     updated_at: Date;
+    company?: Company;  // Enriched data from service layer
 }
 
 export interface Candidate {

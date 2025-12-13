@@ -39,7 +39,7 @@ export class AtsService {
         const enrichedJobs = await Promise.all(
             jobs.map(async (job) => {
                 const company = await this.repository.findCompanyById(job.company_id);
-                return { ...job, company };
+                return { ...job, company: company ?? undefined };
             })
         );
         
@@ -54,7 +54,7 @@ export class AtsService {
         
         // Enrich with company data
         const company = await this.repository.findCompanyById(job.company_id);
-        return { ...job, company };
+        return { ...job, company: company ?? undefined };
     }
 
     async getJobsByCompanyId(companyId: string): Promise<Job[]> {
