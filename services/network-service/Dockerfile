@@ -40,16 +40,24 @@ FROM node:20-alpine AS production
 RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/packages/shared-config/dist ./node_modules/@splits-network/shared-config/dist
-COPY --from=build /app/packages/shared-config/package.json ./node_modules/@splits-network/shared-config/
-COPY --from=build /app/packages/shared-types/dist ./node_modules/@splits-network/shared-types/dist
-COPY --from=build /app/packages/shared-types/package.json ./node_modules/@splits-network/shared-types/
-COPY --from=build /app/packages/shared-logging/dist ./node_modules/@splits-network/shared-logging/dist
-COPY --from=build /app/packages/shared-logging/package.json ./node_modules/@splits-network/shared-logging/
-COPY --from=build /app/packages/shared-fastify/dist ./node_modules/@splits-network/shared-fastify/dist
-COPY --from=build /app/packages/shared-fastify/package.json ./node_modules/@splits-network/shared-fastify/
-COPY --from=build /app/services/network-service/dist ./services/network-service/dist
+
+# Copy package files for production install
+COPY --from=build /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
+COPY --from=build /app/packages/shared-config/package.json ./packages/shared-config/
+COPY --from=build /app/packages/shared-fastify/package.json ./packages/shared-fastify/
+COPY --from=build /app/packages/shared-logging/package.json ./packages/shared-logging/
+COPY --from=build /app/packages/shared-types/package.json ./packages/shared-types/
 COPY --from=build /app/services/network-service/package.json ./services/network-service/
+
+# Production install (only dependencies, no devDependencies)
+RUN pnpm install --prod --frozen-lockfile
+
+# Copy built artifacts
+COPY --from=build /app/packages/shared-config/dist ./packages/shared-config/dist
+COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
+COPY --from=build /app/packages/shared-logging/dist ./packages/shared-logging/dist
+COPY --from=build /app/packages/shared-fastify/dist ./packages/shared-fastify/dist
+COPY --from=build /app/services/network-service/dist ./services/network-service/dist
+
 EXPOSE 3003
 CMD ["node", "services/network-service/dist/index.js"]
