@@ -9,6 +9,7 @@ import { buildServer, errorHandler } from '@splits-network/shared-fastify';
 import { NotificationRepository } from './repository';
 import { EmailService } from './email';
 import { EventConsumer } from './consumer';
+import { ServiceRegistry } from './clients';
 
 async function main() {
     const baseConfig = loadBaseConfig('notification-service');
@@ -16,11 +17,21 @@ async function main() {
     const rabbitConfig = loadRabbitMQConfig();
     const resendConfig = await loadResendConfigFromVault();
 
+    // Load service URLs from environment
+    const identityServiceUrl = process.env.IDENTITY_SERVICE_URL || 'http://localhost:3001';
+    const atsServiceUrl = process.env.ATS_SERVICE_URL || 'http://localhost:3002';
+    const networkServiceUrl = process.env.NETWORK_SERVICE_URL || 'http://localhost:3003';
+
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
         level: baseConfig.nodeEnv === 'development' ? 'debug' : 'info',
         prettyPrint: baseConfig.nodeEnv === 'development',
     });
+
+    logger.info(
+        { identityServiceUrl, atsServiceUrl, networkServiceUrl },
+        'Service URLs configured'
+    );
 
     const app = await buildServer({
         logger,
@@ -45,8 +56,16 @@ async function main() {
         logger
     );
 
+    // Initialize service registry for inter-service calls
+    const services = new ServiceRegistry(
+        identityServiceUrl,
+        atsServiceUrl,
+        networkServiceUrl,
+        logger
+    );
+
     // Initialize event consumer
-    const consumer = new EventConsumer(rabbitConfig.url, emailService, logger);
+    const consumer = new EventConsumer(rabbitConfig.url, emailService, services, logger);
     await consumer.connect();
 
     // Optional: Add HTTP endpoint for manual notifications

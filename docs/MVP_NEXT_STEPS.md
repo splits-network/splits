@@ -18,82 +18,104 @@
 ## Priority 1: Critical MVP Features (Week 1-2)
 
 ### 1. Billing Service Implementation
-**Status:** Scaffold only, needs full implementation
-**Required:**
-- [ ] Stripe SDK integration
-- [ ] Plans CRUD endpoints
-- [ ] Subscriptions CRUD endpoints
-- [ ] Checkout session creation
-- [ ] Webhook handler for Stripe events
-- [ ] Subscription status sync
-**Files:** `services/billing-service/src/`
+**Status:** ✅ Core Implementation Complete
+**Completed:**
+- [x] Stripe SDK integration (Stripe API 2025-11-17.clover)
+- [x] Plans CRUD endpoints (GET /plans, GET /plans/:id, POST /plans)
+- [x] Subscriptions CRUD endpoints (GET by recruiter, status check, POST create, cancel)
+- [x] Webhook handler for Stripe events (with signature verification)
+- [x] Subscription status sync from Stripe
+**Remaining:**
+- [ ] Checkout session creation for frontend flow
+- [ ] Integration tests
+**Files:** `services/billing-service/src/` ✅
 
 ### 2. Notification Service Implementation
-**Status:** Consumer scaffold only
-**Required:**
-- [ ] Resend SDK integration
-- [ ] Email templates (inline HTML for now)
-  - Application submitted notification
-  - Stage change notification
-  - Placement created notification
-- [ ] RabbitMQ consumers for events
-- [ ] Email sending logic with error handling
-**Files:** `services/notification-service/src/`
+**Status:** ✅ Core Implementation Complete
+**Completed:**
+- [x] Resend SDK integration
+- [x] Email templates (inline HTML)
+  - Application submitted notification ✅
+  - Stage change notification ✅
+  - Placement created notification ✅
+- [x] RabbitMQ consumers for events (application_created, stage_changed, placement_created)
+- [x] Email sending logic with error handling
+- [x] Notification logging to database (status tracking)
+- [x] Error handling with nack/requeue logic
+**Remaining:**
+- [ ] Fetch actual user/job/candidate data from services (currently logs placeholders)
+- [ ] Integration tests
+**Files:** `services/notification-service/src/` ✅
 
 ### 3. Frontend Portal - Core Pages
-**Status:** Auth pages only, no dashboard
-**Required:**
-- [ ] Layout with sidebar navigation
-- [ ] Dashboard (recruiter view)
-  - Active roles count
-  - Candidates in process
-  - Recent activity
-- [ ] Roles list page
-  - Table with filters
-  - Job cards/rows
-- [ ] Role detail & pipeline view
-  - Candidate list by stage
-  - Stage pills
-- [ ] Submit candidate modal/form
-- [ ] Candidate detail page
-- [ ] Placements & earnings page (recruiter view)
-**Files:** `apps/portal/src/app/`
+**Status:** ✅ Core Pages Complete
+**Completed:**
+- [x] Layout with sidebar navigation
+- [x] Dashboard (recruiter view) with stats cards and activity feed
+- [x] Roles list page (/roles) - Table with real API data
+- [x] Role detail & pipeline view (/roles/[id])
+  - Candidate list by stage ✅
+  - Stage pills ✅
+  - Submit candidate modal ✅
+- [x] Placements & earnings page (/placements) - Full implementation
+- [x] Candidates page (/candidates) - Structure created
+- [x] Admin page (/admin) - Structure created
+- [x] Stage change UI (dropdown in pipeline)
+- [x] Hire flow (mark as hired with salary input)
+**Remaining:**
+- [ ] Candidate detail page (dedicated page)
+- [ ] Company dashboard view
+- [ ] Role management page (company view)
+- [ ] Admin functionality (role assignments, recruiter approval)
+**Files:** `apps/portal/src/app/` ✅
 
-### 4. API Gateway - Missing Routes
-**Required:**
-- [ ] `/api/roles` GET with recruiter filtering (aggregates ATS + Network)
-- [ ] `/api/subscriptions/me` proxy to billing
-- [ ] Role-based authorization middleware
+### 4. API Gateway - Routes & Features
+**Status:** ✅ Core Routes Complete
+**Completed:**
+- [x] All job endpoints (GET /api/jobs, GET /api/jobs/:id, POST, PATCH)
+- [x] All application endpoints (GET, POST, PATCH stage, GET by job)
+- [x] All placement endpoints (GET /api/placements, GET /api/placements/:id, POST)
+- [x] Recruiter endpoints (GET /api/recruiters, GET /api/recruiters/:id, POST)
+- [x] Role assignment endpoints (GET /api/recruiters/:recruiterId/jobs, POST /api/assignments)
+- [x] Billing endpoints (GET /api/plans, GET/POST /api/subscriptions)
+- [x] Company endpoint (POST /api/companies)
+- [x] `/api/me` with Clerk sync
+**Remaining:**
+- [ ] GET /api/roles with recruiter filtering (aggregates ATS + Network)
+- [ ] Role-based authorization middleware (RBAC)
 - [ ] Correlation ID logging
-**Files:** `services/api-gateway/src/routes.ts`
+- [ ] Integration tests
+**Files:** `services/api-gateway/src/routes.ts` ✅
 
 ## Priority 2: Polish & Integration (Week 3)
 
 ### 5. External Service Configuration
-- [ ] Clerk tenant configured
+- [ ] Clerk tenant fully configured for production
 - [ ] Clerk webhooks (user.created, user.updated)
-- [ ] Stripe account + products/prices
-- [ ] Stripe webhooks configured
+- [ ] Stripe account + products/prices configured
+- [ ] Stripe webhooks configured and tested
 - [ ] Resend account + verified domain
-- [ ] Environment variables documented
+- [x] Environment variables structured (using .env pattern)
+- [ ] Environment variables fully documented
 
-### 6. Missing API Endpoints
+### 6. Missing API Features & Enhancements
 - [ ] GET /api/placements with filters (recruiter_id, company_id, date_range)
 - [ ] GET /api/recruiters/:id/stats (submissions count, placements count)
 - [ ] GET /api/companies/:id endpoint
 - [ ] PATCH /api/companies/:id endpoint
+- [ ] Pagination for list endpoints
+- [ ] GET /api/roles endpoint (aggregated view)
 
 ### 7. Company User Experience
-- [ ] Company dashboard view
+- [ ] Company dashboard view (distinct from recruiter view)
 - [ ] Role management page (create/edit jobs)
-- [ ] Candidate pipeline management
-- [ ] Hire flow (mark as hired + salary input)
-- [ ] Placement view for companies
+- [ ] Enhanced candidate pipeline management
+- [ ] Bulk operations (reject multiple, etc.)
 
 ### 8. Admin Experience
-- [ ] Admin dashboard overview
-- [ ] Role assignment UI
-- [ ] Recruiter approval flow
+- [ ] Admin dashboard overview with platform metrics
+- [ ] Role assignment UI (assign recruiters to jobs)
+- [ ] Recruiter approval flow (pending -> active)
 - [ ] Placement audit view
 
 ## Priority 3: Production Readiness (Week 4)
@@ -106,11 +128,16 @@
 - [ ] API endpoint testing (Postman/automated)
 
 ### 10. DevOps & Deployment
-- [ ] Kubernetes manifests (Deployments, Services, Ingress)
-- [ ] Environment secrets management
-- [ ] GitHub Actions CI/CD
-- [ ] Staging environment deployment
-- [ ] Production deployment guide
+- [x] Kubernetes manifests (Deployments, Services, Ingress) ✅
+- [x] Namespace configuration ✅
+- [x] Cert-manager ClusterIssuer ✅
+- [x] Redis and RabbitMQ deployments ✅
+- [ ] Dockerfiles optimized for production (multi-stage builds)
+- [ ] Environment secrets management (Kubernetes Secrets)
+- [ ] Health check endpoints per service
+- [ ] GitHub Actions CI/CD pipeline
+- [-] Staging environment deployment
+- [ ] Production deployment guide and runbook
 
 ### 11. Documentation
 - [ ] API documentation (OpenAPI/Swagger)
@@ -120,33 +147,47 @@
 
 ## Recommended Next Steps (This Week)
 
-### Option A: Build Frontend (Fastest to Demo)
-Start with portal pages to have something visual to show design partners:
-1. Implement dashboard page (recruiter view)
-2. Implement roles list page
-3. Implement role detail + submit candidate flow
-4. Test with existing backend APIs
+### ✅ Completed Foundation:
+- Billing service with Stripe integration
+- Notification service with Resend integration
+- All core frontend pages (dashboard, roles, placements, candidates, admin)
+- Kubernetes deployment manifests
+- Full API Gateway routing
 
-### Option B: Complete Backend Services (More Stable)
-Finish backend services so frontend can be built against complete APIs:
-1. Implement billing service (Stripe integration)
-2. Implement notification service (Resend integration)
-3. Add missing gateway routes
-4. Test all APIs with Postman
+### 🎯 Priority Focus Areas:
 
-### Option C: Parallel Tracks (Fastest Overall)
-- **Backend Dev:** Billing + Notification services
-- **Frontend Dev:** Dashboard + Roles pages
-- **DevOps:** Start Kubernetes manifests
+**Option A: External Integrations & Polish (Recommended)**
+1. Configure external services:
+   - Set up Clerk webhooks for user sync
+   - Configure Stripe products and webhook endpoints
+   - Verify Resend sender domain
+2. Complete notification service data fetching (replace placeholders)
+3. Add checkout session flow in billing service
+4. Test end-to-end flows with real external APIs
+
+**Option B: Enhanced Features**
+1. Implement role-based authorization (RBAC) in gateway
+2. Add GET /api/roles with recruiter filtering
+3. Build out admin functionality (recruiter approval, role assignments)
+4. Add pagination to list endpoints
+
+**Option C: Testing & Production Readiness**
+1. Write integration tests for all services
+2. Add health check endpoints
+3. Optimize Dockerfiles (multi-stage builds)
+4. Set up CI/CD pipeline
+5. Create production deployment guide
 
 ## Known Gaps & Decisions Needed
 
-1. **Resume uploads:** Currently not implemented. Decision: Phase 2?
-2. **Multi-recruiter splits:** Current code assumes single recruiter. Phase 2?
-3. **RLS (Row-Level Security):** Currently disabled in Supabase. Add for production?
-4. **Rate limiting strategy:** Current is basic. Need per-user limits?
-5. **Caching strategy:** Redis available but not used yet for dashboard queries
-6. **File storage:** If resume uploads needed, use Supabase Storage?
+1. **Email data fetching:** Notification service has email templates but needs to fetch actual user/job/candidate data from other services (currently logs placeholders)
+2. **Checkout sessions:** Billing service needs checkout session creation for frontend subscription flow
+3. **Multi-recruiter splits:** Current code assumes single recruiter per placement. Decision: Phase 2
+4. **RLS (Row-Level Security):** Currently disabled in Supabase. Decision: Add for production?
+5. **Rate limiting strategy:** Current is basic per-IP. Need per-user limits?
+6. **Caching strategy:** Redis available but not used yet for dashboard queries
+7. **File storage:** If resume uploads needed, use Supabase Storage? (Not critical for Phase 1)
+8. **RBAC:** Role-based authorization is not yet implemented (currently just auth check)
 
 ## Success Metrics for MVP
 
@@ -160,9 +201,23 @@ Finish backend services so frontend can be built against complete APIs:
 
 ## Estimated Timeline
 
-- **Week 1:** Billing + Notification services, Start frontend
-- **Week 2:** Complete frontend core pages, API polish
-- **Week 3:** Testing, bug fixes, company/admin views
-- **Week 4:** Production deployment, design partner onboarding
+**✅ Completed (Weeks 1-2):**
+- Billing service with Stripe integration
+- Notification service with Resend integration
+- All core frontend pages (dashboard, roles, placements, candidates, admin)
+- Kubernetes deployment manifests for all services
+- Full API Gateway routing and proxying
 
-**Target MVP Date:** January 6, 2026 (4 weeks from now)
+**🔄 Current Week (Week 3): External Integrations & Polish**
+- Configure Clerk/Stripe/Resend external accounts
+- Complete notification service data fetching
+- Add checkout session creation
+- Test end-to-end flows
+
+**Week 4: Production Readiness**
+- Integration testing
+- Health checks and monitoring
+- CI/CD pipeline
+- Production deployment preparation
+
+**Target MVP Date:** January 6, 2026 (3 weeks remaining from December 13, 2025)

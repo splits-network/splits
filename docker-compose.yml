@@ -146,6 +146,9 @@ services:
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
       RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-noreply@splits.network}
+      IDENTITY_SERVICE_URL: http://identity-service:3001
+      ATS_SERVICE_URL: http://ats-service:3002
+      NETWORK_SERVICE_URL: http://network-service:3003
     volumes:
       - ./services/notification-service/src:/app/services/notification-service/src
       - ./packages:/app/packages

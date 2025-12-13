@@ -33,7 +33,17 @@ export class AtsService {
 
     // Job methods
     async getJobs(filters?: { status?: string; search?: string }): Promise<Job[]> {
-        return await this.repository.findJobs(filters);
+        const jobs = await this.repository.findJobs(filters);
+        
+        // Enrich with company data
+        const enrichedJobs = await Promise.all(
+            jobs.map(async (job) => {
+                const company = await this.repository.findCompanyById(job.company_id);
+                return { ...job, company };
+            })
+        );
+        
+        return enrichedJobs;
     }
 
     async getJobById(id: string): Promise<Job> {
@@ -41,7 +51,10 @@ export class AtsService {
         if (!job) {
             throw new Error(`Job ${id} not found`);
         }
-        return job;
+        
+        // Enrich with company data
+        const company = await this.repository.findCompanyById(job.company_id);
+        return { ...job, company };
     }
 
     async getJobsByCompanyId(companyId: string): Promise<Job[]> {

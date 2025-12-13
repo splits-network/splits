@@ -15,7 +15,7 @@
 - [x] Database migrations organized per service
 - [x] Supabase PostgREST schemas exposed (ats, identity, network, billing, notifications)
 - [x] Database permissions granted to service_role for all schemas
-- [ ] Kubernetes manifests created
+- [x] Kubernetes manifests created (all services, ingress, cert-manager, namespace)
 - [ ] CI/CD pipeline setup (GitHub Actions)
 
 ### Shared Packages
@@ -81,24 +81,28 @@
 - [x] Repository structure created
 - [x] Service layer created
 - [x] Database schema `billing.*` created in Supabase
-- [ ] Stripe SDK integration
-- [ ] Plans endpoints (GET list, POST create)
-- [ ] Subscriptions endpoints (GET /subscriptions/me)
-- [ ] Checkout session creation (POST /subscriptions/checkout-session)
-- [ ] Stripe webhook handler (POST /webhooks/stripe)
-- [ ] Subscription status sync from Stripe
+- [x] Stripe SDK integration (using Stripe API version 2025-11-17.clover)
+- [x] Plans endpoints (GET /plans, GET /plans/:id, POST /plans)
+- [x] Subscriptions endpoints (GET /subscriptions/recruiter/:recruiterId, GET /subscriptions/recruiter/:recruiterId/status)
+- [x] Subscription creation endpoint (POST /subscriptions)
+- [x] Stripe webhook handler (POST /webhooks/stripe with signature verification)
+- [x] Subscription status sync from Stripe
+- [x] Subscription cancellation endpoint (POST /subscriptions/:recruiterId/cancel)
 - [ ] Integration tests
 
 ### Notification Service
 - [x] Event consumer structure created
 - [x] Email module structure created
-- [ ] Resend SDK integration
-- [ ] Email templates (application.created, stage_changed, placement.created)
-- [ ] RabbitMQ consumer for application.created event
-- [ ] RabbitMQ consumer for application.stage_changed event
-- [ ] RabbitMQ consumer for placement.created event
-- [ ] Email sending via Resend
-- [ ] Error handling and retry logic
+- [x] Resend SDK integration (Resend client initialized)
+- [x] Email templates (application.created, stage_changed, placement.created) - inline HTML
+- [x] RabbitMQ consumer for application.created event (event binding complete)
+- [x] RabbitMQ consumer for application.stage_changed event (event binding complete)
+- [x] RabbitMQ consumer for placement.created event (event binding complete)
+- [x] Email sending via Resend (sendEmail method with notification logging)
+- [x] Error handling and retry logic (nack on failure, notification status tracking)
+- [x] Notification logging to database (status: pending/sent/failed)
+- [x] Full data fetching from services (HTTP client for identity, ats, network services)
+- [x] Service URLs configured via environment variables
 - [ ] Integration tests
 ### API Gateway
 - [x] Fastify server setup
@@ -120,11 +124,16 @@
 - [x] `/api/recruiters` → network-service proxy
 - [x] `/api/recruiters/:id` → network-service proxy
 - [x] `/api/role-assignments` → network-service proxy
-- [ ] `/api/subscriptions/me` → billing-service proxy
+- [x] `/api/assignments` POST → network-service proxy for role assignments
+- [x] `/api/recruiters/:recruiterId/jobs` → network-service proxy
+- [x] `/api/plans` → billing-service proxy
+- [x] `/api/subscriptions` POST → billing-service proxy
+- [x] `/api/subscriptions/recruiter/:recruiterId` → billing-service proxy
+- [x] `/api/companies` POST → ats-service proxy
+- [x] `/api/placements` GET with full list support
 - [ ] Authorization logic (role-based access control) - Currently auth only, no RBAC
 - [ ] Recruiter-specific job filtering (GET /api/jobs with recruiter context)
 - [ ] Request/response logging with correlation IDs
-- [ ] Integration testslogging with correlation IDs
 - [ ] Integration tests
 
 ### Frontend - Portal App
@@ -135,20 +144,20 @@
 - [x] `(authenticated)` route group layout with auth protection
 - [x] Layout with sidebar navigation
 - [x] Top bar with org switcher and user menu
-- [x] Dashboard page (recruiter view) - `/dashboard`
+- [x] Dashboard page (recruiter view) - `/dashboard` (implemented with stats cards and activity feed)
 - [ ] Dashboard page (company view) - Deferred
 - [ ] Dashboard page (admin view) - Deferred
 - [x] Roles list page - `/roles` (wired to real API, fully working with authentication)
-- [x] Role detail & pipeline view page - `/roles/[id]`
+- [x] Role detail & pipeline view page - `/roles/[id]` (full pipeline with stage management)
 - [x] Submit candidate form/modal (wired to real API)
 - [x] Candidate pipeline table component (wired to real API)
-- [x] Candidates page placeholder - `/candidates`
+- [x] Candidates page - `/candidates` (page structure implemented)
+- [x] Admin page - `/admin` (page structure implemented)
+- [x] Placements & earnings page (recruiter view) - `/placements` (full implementation)
 - [ ] Candidate detail page - To be added
 - [x] Stage change UI (dropdown in pipeline table)
 - [x] Hire flow (mark as hired with salary input)
-- [x] Placements & earnings page (recruiter view) - `/placements`
 - [ ] Role management page (company view) - Deferred
-- [ ] Admin overview page - `/admin` placeholder exists
 - [ ] Role assignment UI (admin) - Deferred
 - [ ] Placement audit view (admin) - Deferred
 - [x] Subscription status indicator
@@ -156,6 +165,7 @@
 - [x] API client singleton for gateway calls
 - [x] All components wired to real backend APIs (no mock data)
 - [x] Development seed data script created and executed
+- [x] All frontend pages have page.tsx files created
 
 ### Integration & Testing
 - [ ] End-to-end test: Recruiter signup and onboarding
@@ -179,11 +189,15 @@
 - [ ] Environment variables documentation
 
 ### DevOps & Deployment
+- [x] Dockerfiles created for all services and portal
+- [x] Kubernetes Deployments per service (api-gateway, ats, identity, network, billing, notification, portal)
+- [x] Kubernetes Services per service (via deployment manifests)
+- [x] Ingress configuration (ingress.yaml with TLS)
+- [x] Cert-manager ClusterIssuer configured
+- [x] Namespace configuration (splits-network)
+- [x] Redis and RabbitMQ deployments created
 - [ ] Dockerfiles optimized for production
-- [ ] Kubernetes Deployments per service
-- [ ] Kubernetes Services per service
-- [ ] Ingress configuration
-- [ ] Secret management in Kubernetes
+- [ ] Secret management in Kubernetes (currently using env vars)
 - [ ] Health check endpoints per service
 - [ ] Monitoring setup (metrics, logs)
 - [-] Staging environment deployment (later phase)
