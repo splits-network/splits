@@ -77,16 +77,16 @@ export function Header() {
                 
                 <div className="flex-none space-x-2 ml-auto">
                     {/* Theme Toggle */}
-                    <label className="swap swap-rotate my-auto">
-                        <input 
-                            type="checkbox" 
-                            checked={isDark}
-                            onChange={handleThemeChange}
-                            className="theme-controller"
-                        />
-                        <i className="fa-solid fa-sun swap-off text-xl"></i>
-                        <i className="fa-solid fa-moon swap-on text-xl"></i>
-                    </label>
+                        <label className="swap swap-rotate cursor-pointer mt-1">
+                            <input 
+                                type="checkbox" 
+                                checked={isDark}
+                                onChange={handleThemeChange}
+                                className="theme-controller"
+                            />
+                            <i className="fa-solid fa-sun swap-off text-xl"></i>
+                            <i className="fa-solid fa-moon swap-on text-xl"></i>
+                        </label>
                     
                     {isSignedIn ? (
                         <>
