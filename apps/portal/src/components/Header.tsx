@@ -75,9 +75,9 @@ export function Header() {
                         </div>
                     )}
                 
-                <div className="flex-none gap-2 ml-auto">
+                <div className="flex-none space-x-2 ml-auto">
                     {/* Theme Toggle */}
-                    <label className="swap swap-rotate">
+                    <label className="swap swap-rotate my-auto">
                         <input 
                             type="checkbox" 
                             checked={isDark}
