@@ -11,11 +11,11 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - app.splits.network
+        - splits.network
         - api.splits.network
       secretName: splits-network-tls
   rules:
-    - host: app.splits.network
+    - host: splits.network
       http:
         paths:
           - path: /

@@ -46,11 +46,22 @@ FROM node:20-alpine AS production
 RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/packages ./packages
-COPY --from=build /app/apps/portal/.next ./apps/portal/.next
+
+# Copy package files for production install
+COPY --from=build /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
+COPY --from=build /app/packages/shared-config/package.json ./packages/shared-config/
+COPY --from=build /app/packages/shared-types/package.json ./packages/shared-types/
 COPY --from=build /app/apps/portal/package.json ./apps/portal/
+
+# Production install (only dependencies, no devDependencies)
+RUN pnpm install --prod --frozen-lockfile
+
+# Copy built artifacts
+COPY --from=build /app/packages/shared-config/dist ./packages/shared-config/dist
+COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
+COPY --from=build /app/apps/portal/.next ./apps/portal/.next
 COPY --from=build /app/apps/portal/public ./apps/portal/public
 COPY --from=build /app/apps/portal/next.config.mjs ./apps/portal/
+
 EXPOSE 3100
 CMD ["pnpm", "--filter", "@splits-network/portal", "start"]
