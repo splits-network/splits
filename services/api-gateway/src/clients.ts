@@ -7,7 +7,13 @@ export class ServiceClient {
         private logger: Logger
     ) {}
 
-    private async request<T>(method: string, path: string, data?: any, params?: Record<string, any>): Promise<T> {
+    private async request<T>(
+        method: string,
+        path: string,
+        data?: any,
+        params?: Record<string, any>,
+        correlationId?: string
+    ): Promise<T> {
         const url = new URL(path, this.baseUrl);
         
         if (params) {
@@ -17,15 +23,22 @@ export class ServiceClient {
         }
 
         this.logger.debug(
-            { service: this.serviceName, method, url: url.toString() },
+            { service: this.serviceName, method, url: url.toString(), correlationId },
             'Calling service'
         );
 
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+        };
+
+        // Propagate correlation ID to downstream services
+        if (correlationId) {
+            headers['x-correlation-id'] = correlationId;
+        }
+
         const options: RequestInit = {
             method,
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers,
         };
 
         if (data) {
@@ -36,12 +49,22 @@ export class ServiceClient {
             const response = await fetch(url.toString(), options);
 
             this.logger.debug(
-                { service: this.serviceName, status: response.status },
+                { service: this.serviceName, status: response.status, correlationId },
                 'Service response received'
             );
 
             if (!response.ok) {
-                throw new Error(`Service call failed with status ${response.status}`);
+                const errorBody = await response.text().catch(() => 'Unable to read error body');
+                this.logger.error(
+                    {
+                        service: this.serviceName,
+                        status: response.status,
+                        correlationId,
+                        error: errorBody,
+                    },
+                    'Service call failed'
+                );
+                throw new Error(`Service call failed with status ${response.status}: ${errorBody}`);
             }
 
             return await response.json() as T;
@@ -50,6 +73,7 @@ export class ServiceClient {
                 {
                     service: this.serviceName,
                     error: error.message,
+                    correlationId,
                 },
                 'Service call failed'
             );
@@ -57,20 +81,20 @@ export class ServiceClient {
         }
     }
 
-    async get<T>(path: string, params?: Record<string, any>): Promise<T> {
-        return this.request<T>('GET', path, undefined, params);
+    async get<T>(path: string, params?: Record<string, any>, correlationId?: string): Promise<T> {
+        return this.request<T>('GET', path, undefined, params, correlationId);
     }
 
-    async post<T>(path: string, data?: any): Promise<T> {
-        return this.request<T>('POST', path, data);
+    async post<T>(path: string, data?: any, correlationId?: string): Promise<T> {
+        return this.request<T>('POST', path, data, undefined, correlationId);
     }
 
-    async patch<T>(path: string, data?: any): Promise<T> {
-        return this.request<T>('PATCH', path, data);
+    async patch<T>(path: string, data?: any, correlationId?: string): Promise<T> {
+        return this.request<T>('PATCH', path, data, undefined, correlationId);
     }
 
-    async delete<T>(path: string): Promise<T> {
-        return this.request<T>('DELETE', path);
+    async delete<T>(path: string, correlationId?: string): Promise<T> {
+        return this.request<T>('DELETE', path, undefined, undefined, correlationId);
     }
 }
 

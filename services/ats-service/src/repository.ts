@@ -162,6 +162,31 @@ export class AtsRepository {
     }
 
     // Candidate methods
+    async findAllCandidates(filters?: { search?: string; limit?: number; offset?: number }): Promise<Candidate[]> {
+        let query = this.supabase
+            .schema('ats')
+            .from('candidates')
+            .select('*');
+
+        if (filters?.search) {
+            query = query.or(`full_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
+        }
+
+        query = query.order('created_at', { ascending: false });
+
+        if (filters?.limit) {
+            query = query.limit(filters.limit);
+        }
+        if (filters?.offset) {
+            query = query.range(filters.offset, filters.offset + (filters.limit || 50) - 1);
+        }
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+        return data || [];
+    }
+
     async findCandidateById(id: string): Promise<Candidate | null> {
         const { data, error } = await this.supabase
             .schema('ats')
@@ -254,6 +279,18 @@ export class AtsRepository {
             .from('applications')
             .select('*')
             .eq('job_id', jobId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    async findApplicationsByCandidateId(candidateId: string): Promise<Application[]> {
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('applications')
+            .select('*')
+            .eq('candidate_id', candidateId)
             .order('created_at', { ascending: false });
 
         if (error) throw error;

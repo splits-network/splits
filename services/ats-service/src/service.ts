@@ -102,6 +102,10 @@ export class AtsService {
     }
 
     // Candidate methods
+    async getCandidates(filters?: { search?: string; limit?: number; offset?: number }): Promise<Candidate[]> {
+        return await this.repository.findAllCandidates(filters);
+    }
+
     async getCandidateById(id: string): Promise<Candidate> {
         const candidate = await this.repository.findCandidateById(id);
         if (!candidate) {
@@ -149,6 +153,10 @@ export class AtsService {
 
     async getApplicationsByRecruiterId(recruiterId: string): Promise<Application[]> {
         return await this.repository.findApplicationsByRecruiterId(recruiterId);
+    }
+
+    async getApplicationsByCandidateId(candidateId: string): Promise<Application[]> {
+        return await this.repository.findApplicationsByCandidateId(candidateId);
     }
 
     async submitCandidate(

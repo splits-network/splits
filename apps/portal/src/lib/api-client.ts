@@ -93,6 +93,7 @@ export class ApiClient {
     }
 
     // Jobs/Roles
+    // Unfiltered - returns all jobs (admins only)
     async getJobs(filters?: { status?: string; search?: string }) {
         const params = new URLSearchParams();
         if (filters?.status && filters.status !== 'all') {
@@ -103,6 +104,19 @@ export class ApiClient {
         }
         const query = params.toString();
         return this.request(`/jobs${query ? `?${query}` : ''}`);
+    }
+
+    // Filtered by recruiter assignments - preferred for most UI
+    async getRoles(filters?: { status?: string; search?: string }) {
+        const params = new URLSearchParams();
+        if (filters?.status && filters.status !== 'all') {
+            params.append('status', filters.status);
+        }
+        if (filters?.search) {
+            params.append('search', filters.search);
+        }
+        const query = params.toString();
+        return this.request(`/roles${query ? `?${query}` : ''}`);
     }
 
     async getJob(id: string) {

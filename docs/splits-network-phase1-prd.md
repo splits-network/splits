@@ -16,7 +16,7 @@
 - [x] Supabase PostgREST schemas exposed (ats, identity, network, billing, notifications)
 - [x] Database permissions granted to service_role for all schemas
 - [x] Kubernetes manifests created (all services, ingress, cert-manager, namespace)
-- [ ] CI/CD pipeline setup (GitHub Actions)
+- [x] CI/CD pipeline setup (GitHub Actions)
 
 ### Shared Packages
 - [x] `shared-types` package created with domain models
@@ -41,12 +41,12 @@
 - [x] Service layer created
 - [x] Routes registered (users, organizations, memberships)
 - [x] Database schema `identity.*` created in Supabase
-- [ ] Clerk webhook integration for user sync
+- [x] Clerk webhook integration for user sync
 - [x] `/users/:id` endpoint (get user profile)
 - [x] `/sync-clerk-user` endpoint (internal)
 - [x] `/organizations` POST endpoint
 - [x] `/memberships` POST and DELETE endpoints
-- [ ] `/me` endpoint for current user profile
+- [x] `/me` endpoint for current user profile (via gateway `/api/me`)
 - [ ] Integration tests
 
 ### ATS Service
@@ -65,7 +65,7 @@
 - [x] Fee calculation logic implemented (50/50 split)
 - [x] Event publishing on key actions (application.created, stage_changed, placement.created)
 - [ ] Integration tests
-- [ ] GET /placements with filters (recruiter, company, date range)
+- [x] GET /placements with filters (recruiter, company, date range)
 
 ### Network Service
 - [x] Repository structure created
@@ -77,7 +77,7 @@
 - [x] GET /recruiters/:recruiterId/jobs (jobs assigned to recruiter)
 - [x] GET /jobs/:jobId/recruiters (recruiters assigned to job)
 - [x] **All network service endpoints wired through API Gateway** ✅
-- [ ] Basic recruiter stats (submissions, placements count) - To be added
+- [x] Basic recruiter stats (submissions, placements count, total earnings) - GET /recruiters/:id/stats
 - [ ] Integration tests
 
 ### Billing Service
@@ -148,8 +148,8 @@
 - [x] `/api/documents/:id` → document-service proxy
 - [x] `/api/documents` → document-service proxy (list with filters)
 - [x] `/api/documents/entity/:entityType/:entityId` → document-service proxy
-- [ ] Recruiter-specific job filtering (GET /api/roles endpoint with aggregated data)
-- [ ] Request/response logging with correlation IDs
+- [x] Recruiter-specific job filtering (GET /api/roles endpoint with aggregated data)
+- [x] Request/response logging with correlation IDs (implemented in API Gateway with propagation to services)
 - [ ] Integration tests
 
 ### Document Service
@@ -191,7 +191,7 @@
   - [x] Placement audit page (`/admin/placements`) with financial summary ✅
   - [x] Admin layout with role-based authorization and redirects ✅
 - [x] Placements & earnings page (recruiter view) - `/placements` (full implementation)
-- [ ] Candidate detail page - To be added
+- [x] Candidate detail page - `/candidates/[id]` (full implementation with applications and activity timeline)
 - [x] Stage change UI (dropdown in pipeline table)
 - [x] Hire flow (mark as hired with salary input)
 - [ ] Role management page (company view) - Deferred
@@ -220,9 +220,9 @@
 - [x] Copilot instructions created
 - [ ] API documentation (OpenAPI/Swagger per service)
 - [ ] Database schema documentation
-- [ ] Deployment guide (Kubernetes)
-- [ ] Local development setup guide
-- [ ] Environment variables documentation
+- [x] Deployment guide (Kubernetes)
+- [x] Local development setup guide
+- [x] Environment variables documentation
 
 ### DevOps & Deployment
 - [x] Dockerfiles created for all services and portal
@@ -233,7 +233,7 @@
 - [x] Namespace configuration (splits-network)
 - [x] Redis and RabbitMQ deployments created
 - [x] Document service added to Docker Compose
-- [ ] Dockerfiles optimized for production
+- [x] Dockerfiles optimized for production
 - [-] Secret management in Kubernetes (currently using env vars)
 - [x] Health check endpoints per service
 - [ ] Monitoring setup (metrics, logs)
@@ -262,7 +262,7 @@
 ### Performance
 - [x] **Pagination implemented on list endpoints** (jobs list with limit/offset) \u2705
 - [ ] Redis caching strategy for expensive queries
-- [ ] Database indexes created for common queries
+- [x] Database indexes created for common queries
 - [ ] Dashboard load time < 500ms server-side
 - [ ] API response time monitoring
 

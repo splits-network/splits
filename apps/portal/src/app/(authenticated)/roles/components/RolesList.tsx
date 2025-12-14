@@ -81,7 +81,8 @@ export default function RolesList() {
             }
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.getJobs({
+            // Use getRoles() which filters by recruiter assignments
+            const response: any = await client.getRoles({
                 status: statusFilter === 'all' ? undefined : statusFilter,
             });
             setJobs(response.data || []);

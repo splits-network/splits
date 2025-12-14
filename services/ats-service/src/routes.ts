@@ -151,10 +151,31 @@ export function registerRoutes(app: FastifyInstance, service: AtsService) {
 
     // Candidate routes
     app.get(
+        '/candidates',
+        async (request: FastifyRequest<{ Querystring: { search?: string; limit?: string; offset?: string } }>, reply: FastifyReply) => {
+            const { search, limit, offset } = request.query;
+            const candidates = await service.getCandidates({
+                search,
+                limit: limit ? parseInt(limit) : undefined,
+                offset: offset ? parseInt(offset) : undefined,
+            });
+            return reply.send({ data: candidates });
+        }
+    );
+
+    app.get(
         '/candidates/:id',
         async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
             const candidate = await service.getCandidateById(request.params.id);
             return reply.send({ data: candidate });
+        }
+    );
+
+    app.get(
+        '/candidates/:id/applications',
+        async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+            const applications = await service.getApplicationsByCandidateId(request.params.id);
+            return reply.send({ data: applications });
         }
     );
 

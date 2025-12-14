@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { IdentityService } from './service';
 import { NotFoundError, BadRequestError } from '@splits-network/shared-fastify';
+import { Webhook } from 'svix';
 
 interface SyncClerkUserBody {
     clerk_user_id: string;
@@ -87,6 +88,85 @@ export function registerRoutes(app: FastifyInstance, service: IdentityService) {
         async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
             await service.removeMembership(request.params.id);
             return reply.status(204).send();
+        }
+    );
+
+    // Clerk webhook handler
+    app.post(
+        '/webhooks/clerk',
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
+            
+            if (!webhookSecret) {
+                app.log.error('CLERK_WEBHOOK_SECRET not configured');
+                return reply.status(500).send({ error: 'Webhook secret not configured' });
+            }
+
+            // Get Svix headers for verification
+            const svixId = request.headers['svix-id'] as string;
+            const svixTimestamp = request.headers['svix-timestamp'] as string;
+            const svixSignature = request.headers['svix-signature'] as string;
+
+            if (!svixId || !svixTimestamp || !svixSignature) {
+                app.log.warn('Missing Svix headers');
+                return reply.status(400).send({ error: 'Missing Svix headers' });
+            }
+
+            // Verify the webhook
+            const wh = new Webhook(webhookSecret);
+            let evt: any;
+
+            try {
+                evt = wh.verify(JSON.stringify(request.body), {
+                    'svix-id': svixId,
+                    'svix-timestamp': svixTimestamp,
+                    'svix-signature': svixSignature,
+                });
+            } catch (err: any) {
+                app.log.error('Webhook signature verification failed:', err.message);
+                return reply.status(400).send({ error: 'Invalid signature' });
+            }
+
+            // Handle the event
+            const eventType = evt.type;
+            app.log.info(`Received Clerk webhook: ${eventType}`);
+
+            try {
+                switch (eventType) {
+                    case 'user.created':
+                    case 'user.updated': {
+                        const { id, email_addresses, first_name, last_name } = evt.data;
+                        const primaryEmail = email_addresses?.find((e: any) => e.id === evt.data.primary_email_address_id);
+                        
+                        if (!primaryEmail?.email_address) {
+                            app.log.warn(`No primary email for user ${id}`);
+                            return reply.send({ received: true });
+                        }
+
+                        const name = [first_name, last_name].filter(Boolean).join(' ') || primaryEmail.email_address.split('@')[0];
+                        
+                        await service.syncClerkUser(id, primaryEmail.email_address, name);
+                        app.log.info(`Synced user ${id} (${eventType})`);
+                        break;
+                    }
+
+                    case 'user.deleted': {
+                        const { id } = evt.data;
+                        // For now, we'll just log it. In production, consider soft-delete or anonymization
+                        app.log.info(`User deleted in Clerk: ${id} (consider cleanup)`);
+                        // TODO: Implement user deletion or anonymization if required
+                        break;
+                    }
+
+                    default:
+                        app.log.info(`Unhandled event type: ${eventType}`);
+                }
+
+                return reply.send({ received: true });
+            } catch (error: any) {
+                app.log.error('Error processing Clerk webhook:', error);
+                return reply.status(500).send({ error: 'Failed to process webhook' });
+            }
         }
     );
 }

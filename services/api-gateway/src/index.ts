@@ -3,6 +3,7 @@ import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler } from '@splits-network/shared-fastify';
 import rateLimit from '@fastify/rate-limit';
 import Redis from 'ioredis';
+import { randomUUID } from 'crypto';
 import { AuthMiddleware } from './auth';
 import { ServiceRegistry } from './clients';
 import { registerRoutes } from './routes';
@@ -40,6 +41,44 @@ async function main() {
         max: 100,
         timeWindow: '1 minute',
         redis,
+    });
+
+    // Add correlation ID and request logging middleware
+    app.addHook('onRequest', async (request, reply) => {
+        // Generate or use existing correlation ID
+        const correlationId = (request.headers['x-correlation-id'] as string) || randomUUID();
+        
+        // Store correlation ID in request context
+        (request as any).correlationId = correlationId;
+        
+        // Add correlation ID to response headers
+        reply.header('x-correlation-id', correlationId);
+        
+        // Log incoming request
+        logger.info({
+            correlationId,
+            method: request.method,
+            url: request.url,
+            headers: {
+                'user-agent': request.headers['user-agent'],
+                'content-type': request.headers['content-type'],
+            },
+            ip: request.ip,
+        }, 'Incoming request');
+    });
+
+    // Add response logging middleware
+    app.addHook('onResponse', async (request, reply) => {
+        const correlationId = (request as any).correlationId;
+        const responseTime = reply.getResponseTime();
+        
+        logger.info({
+            correlationId,
+            method: request.method,
+            url: request.url,
+            statusCode: reply.statusCode,
+            responseTime: `${responseTime.toFixed(2)}ms`,
+        }, 'Request completed');
     });
 
     // Initialize auth middleware

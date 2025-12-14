@@ -3,8 +3,13 @@ import { ServiceRegistry } from './clients';
 import { AuthContext } from './auth';
 import { requireRoles, AuthenticatedRequest, isRecruiter, isCompanyUser, isAdmin } from './rbac';
 
+// Helper to get correlation ID from request
+function getCorrelationId(request: FastifyRequest): string | undefined {
+    return (request as any).correlationId;
+}
+
 // Helper to resolve internal user ID and memberships from Clerk ID
-async function resolveUserContext(services: ServiceRegistry, auth: AuthContext): Promise<void> {
+async function resolveUserContext(services: ServiceRegistry, auth: AuthContext, correlationId?: string): Promise<void> {
     const identityService = services.get('identity');
     
     // Sync the Clerk user (idempotent - creates if missing, updates if changed)
@@ -12,12 +17,12 @@ async function resolveUserContext(services: ServiceRegistry, auth: AuthContext):
         clerk_user_id: auth.clerkUserId,
         email: auth.email,
         name: auth.name,
-    });
+    }, correlationId);
     
     const userId = syncResponse.data.id;
     
     // Get full user profile with memberships
-    const profileResponse: any = await identityService.get(`/users/${userId}`);
+    const profileResponse: any = await identityService.get(`/users/${userId}`, undefined, correlationId);
     
     // Update auth context with user ID and memberships
     auth.userId = userId;
@@ -30,7 +35,8 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
         if (request.url.startsWith('/api/')) {
             const req = request as AuthenticatedRequest;
             if (req.auth) {
-                await resolveUserContext(services, req.auth);
+                const correlationId = getCorrelationId(request);
+                await resolveUserContext(services, req.auth, correlationId);
             }
         }
     });
@@ -39,26 +45,92 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
     app.get('/api/me', async (request: FastifyRequest, reply: FastifyReply) => {
         const req = request as AuthenticatedRequest;
         const identityService = services.get('identity');
+        const correlationId = getCorrelationId(request);
         
         // User context already resolved by middleware
-        const profile = await identityService.get(`/users/${req.auth.userId}`);
+        const profile = await identityService.get(`/users/${req.auth.userId}`, undefined, correlationId);
         return reply.send(profile);
     });
 
+    // Roles endpoint - filtered by recruiter assignments
+    app.get('/api/roles', async (request: FastifyRequest, reply: FastifyReply) => {
+        const req = request as AuthenticatedRequest;
+        const atsService = services.get('ats');
+        const networkService = services.get('network');
+        const correlationId = getCorrelationId(request);
+
+        // Check if user is a recruiter
+        const isUserRecruiter = isRecruiter(req.auth);
+        const isUserAdmin = isAdmin(req.auth);
+
+        // Build query params
+        const queryParams = request.query as any;
+        let jobIds: string[] | undefined;
+
+        // If user is a recruiter (and not admin), filter by assigned jobs
+        if (isUserRecruiter && !isUserAdmin) {
+            // Get recruiter profile for this user
+            try {
+                const recruiterResponse: any = await networkService.get(
+                    `/recruiters/by-user/${req.auth.userId}`,
+                    undefined,
+                    correlationId
+                );
+                
+                if (recruiterResponse.data) {
+                    const recruiterId = recruiterResponse.data.id;
+                    
+                    // Get job IDs assigned to this recruiter
+                    const assignmentsResponse: any = await networkService.get(
+                        `/recruiters/${recruiterId}/jobs`,
+                        undefined,
+                        correlationId
+                    );
+                    
+                    jobIds = assignmentsResponse.data || [];
+                }
+            } catch (error) {
+                // If recruiter profile doesn't exist, return empty list
+                return reply.send({ data: [] });
+            }
+
+            // If no assignments, return empty
+            if (!jobIds || jobIds.length === 0) {
+                return reply.send({ data: [] });
+            }
+        }
+
+        // Get all jobs from ATS service
+        const queryString = new URLSearchParams(queryParams).toString();
+        const path = queryString ? `/jobs?${queryString}` : '/jobs';
+        const jobsResponse: any = await atsService.get(path, undefined, correlationId);
+        
+        let jobs = jobsResponse.data || [];
+
+        // Filter by assigned jobs if recruiter
+        if (jobIds) {
+            jobs = jobs.filter((job: any) => jobIds!.includes(job.id));
+        }
+
+        return reply.send({ data: jobs });
+    });
+
     // ATS service routes - Jobs
-    // Anyone authenticated can view jobs (later we'll filter by recruiter assignments)
+    // Anyone authenticated can view jobs (unfiltered - use /api/roles for recruiter-filtered view)
     app.get('/api/jobs', async (request: FastifyRequest, reply: FastifyReply) => {
         const atsService = services.get('ats');
+        const correlationId = getCorrelationId(request);
         const queryString = new URLSearchParams(request.query as any).toString();
         const path = queryString ? `/jobs?${queryString}` : '/jobs';
-        const data = await atsService.get(path);
+        const data = await atsService.get(path, undefined, correlationId);
         return reply.send(data);
     });
 
     app.get('/api/jobs/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         const { id } = request.params as { id: string };
         const atsService = services.get('ats');
-        const data = await atsService.get(`/jobs/${id}`);
+        const correlationId = getCorrelationId(request);
+        const data = await atsService.get(`/jobs/${id}`, undefined, correlationId);
         return reply.send(data);
     });
 
@@ -67,7 +139,8 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
         preHandler: requireRoles(['company_admin', 'platform_admin']),
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const atsService = services.get('ats');
-        const data = await atsService.post('/jobs', request.body);
+        const correlationId = getCorrelationId(request);
+        const data = await atsService.post('/jobs', request.body, correlationId);
         return reply.send(data);
     });
 
@@ -95,6 +168,29 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
         const { id } = request.params as { id: string };
         const atsService = services.get('ats');
         const data = await atsService.get(`/applications/${id}`);
+        return reply.send(data);
+    });
+
+    // ATS service routes - Candidates
+    app.get('/api/candidates', async (request: FastifyRequest, reply: FastifyReply) => {
+        const atsService = services.get('ats');
+        const queryString = new URLSearchParams(request.query as any).toString();
+        const path = queryString ? `/candidates?${queryString}` : '/candidates';
+        const data = await atsService.get(path);
+        return reply.send(data);
+    });
+
+    app.get('/api/candidates/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+        const { id } = request.params as { id: string };
+        const atsService = services.get('ats');
+        const data = await atsService.get(`/candidates/${id}`);
+        return reply.send(data);
+    });
+
+    app.get('/api/candidates/:id/applications', async (request: FastifyRequest, reply: FastifyReply) => {
+        const { id } = request.params as { id: string };
+        const atsService = services.get('ats');
+        const data = await atsService.get(`/candidates/${id}/applications`);
         return reply.send(data);
     });
 
