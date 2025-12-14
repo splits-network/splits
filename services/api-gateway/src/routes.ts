@@ -318,4 +318,50 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
         // Admins and company users see all jobs
         return reply.send({ data: jobs });
     });
+
+    // Document service routes
+    // Upload document (authenticated users)
+    app.post('/api/documents/upload', async (request: FastifyRequest, reply: FastifyReply) => {
+        const documentService = services.get('document');
+        // Note: Multipart handling will be done by document-service
+        // Gateway just proxies the request
+        const data = await documentService.post('/documents/upload', request.body);
+        return reply.send(data);
+    });
+
+    // Get document by ID
+    app.get('/api/documents/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+        const { id } = request.params as { id: string };
+        const documentService = services.get('document');
+        const data = await documentService.get(`/documents/${id}`);
+        return reply.send(data);
+    });
+
+    // List documents with filters
+    app.get('/api/documents', async (request: FastifyRequest, reply: FastifyReply) => {
+        const documentService = services.get('document');
+        const queryString = new URLSearchParams(request.query as any).toString();
+        const path = queryString ? `/documents?${queryString}` : '/documents';
+        const data = await documentService.get(path);
+        return reply.send(data);
+    });
+
+    // Get documents by entity
+    app.get('/api/documents/entity/:entityType/:entityId', async (request: FastifyRequest, reply: FastifyReply) => {
+        const { entityType, entityId } = request.params as { entityType: string; entityId: string };
+        const documentService = services.get('document');
+        const data = await documentService.get(`/documents/entity/${entityType}/${entityId}`);
+        return reply.send(data);
+    });
+
+    // Delete document (requires ownership check or admin role)
+    app.delete('/api/documents/:id', {
+        preHandler: requireRoles(['recruiter', 'company_admin', 'platform_admin']),
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const { id } = request.params as { id: string };
+        const documentService = services.get('document');
+        await documentService.delete(`/documents/${id}`);
+        return reply.status(204).send();
+    });
 }
+

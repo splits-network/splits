@@ -34,6 +34,7 @@
 - [x] `billing-service` scaffold with Fastify server
 - [x] `notification-service` scaffold with RabbitMQ consumer
 - [x] `api-gateway` scaffold with Clerk auth + rate limiting
+- [x] `document-service` scaffold with Supabase Storage integration
 
 ### Identity Service
 - [x] Repository structure created
@@ -143,8 +144,28 @@
   - [x] Applied to all protected endpoints (jobs, applications, placements, assignments, etc.)
   - [x] Helper functions: `isAdmin()`, `isRecruiter()`, `isCompanyUser()`, `hasRole()`
   - [x] Proper 403 Forbidden responses for insufficient permissions
+- [x] `/api/documents/upload` → document-service proxy
+- [x] `/api/documents/:id` → document-service proxy
+- [x] `/api/documents` → document-service proxy (list with filters)
+- [x] `/api/documents/entity/:entityType/:entityId` → document-service proxy
 - [ ] Recruiter-specific job filtering (GET /api/roles endpoint with aggregated data)
 - [ ] Request/response logging with correlation IDs
+- [ ] Integration tests
+
+### Document Service
+- [x] Repository structure created
+- [x] Service layer created
+- [x] Supabase Storage client integration
+- [x] Database schema `storage.*` created in Supabase
+- [x] Document upload endpoint (POST /documents/upload)
+- [x] Document retrieval with signed URLs (GET /documents/:id)
+- [x] Document listing with filters (GET /documents)
+- [x] Document deletion endpoint (DELETE /documents/:id)
+- [x] Get documents by entity (GET /documents/entity/:entityType/:entityId)
+- [x] File validation (type, size, MIME checks)
+- [x] Storage bucket management (candidate-documents, company-documents, system-documents)
+- [ ] Document processing status tracking (text extraction - future)
+- [ ] Virus scanning integration (future)
 - [ ] Integration tests
 
 ### Frontend - Portal App
@@ -205,12 +226,13 @@
 
 ### DevOps & Deployment
 - [x] Dockerfiles created for all services and portal
-- [x] Kubernetes Deployments per service (api-gateway, ats, identity, network, billing, notification, portal)
+- [x] Kubernetes Deployments per service (api-gateway, ats, identity, network, billing, notification, document, portal)
 - [x] Kubernetes Services per service (via deployment manifests)
 - [x] Ingress configuration (ingress.yaml with TLS)
 - [x] Cert-manager ClusterIssuer configured
 - [x] Namespace configuration (splits-network)
 - [x] Redis and RabbitMQ deployments created
+- [x] Document service added to Docker Compose
 - [ ] Dockerfiles optimized for production
 - [-] Secret management in Kubernetes (currently using env vars)
 - [x] Health check endpoints per service
@@ -335,6 +357,7 @@ Monorepo structure (conceptual):
   - `network-service/` – recruiters, role assignments, minimal performance stats.
   - `billing-service/` – plans, subscriptions, Stripe integration.
   - `notification-service/` – email notifications powered by Resend.
+  - `document-service/` – universal document storage and processing (Supabase Storage).
 - `packages/` – shared types, config, logging, Fastify helpers, service clients, etc.
 
 All backend services are Fastify-based Node.js services, deployed as separate pods in Kubernetes. Supabase Postgres is used as the database, with separate schemas per service.

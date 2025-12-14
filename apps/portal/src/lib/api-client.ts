@@ -185,6 +185,41 @@ export class ApiClient {
     async getMySubscription() {
         return this.request('/subscriptions/me');
     }
+
+    // Documents
+    async uploadDocument(formData: FormData) {
+        const url = `${this.baseUrl}/documents/upload`;
+        const headers: Record<string, string> = {};
+
+        if (this.token) {
+            headers['Authorization'] = `Bearer ${this.token}`;
+        }
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers,
+            body: formData, // Don't set Content-Type, let browser set it with boundary
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({ message: 'Upload failed' }));
+            throw new Error(error.message || `HTTP ${response.status}`);
+        }
+
+        return response.json();
+    }
+
+    async getDocument(id: string) {
+        return this.request(`/documents/${id}`);
+    }
+
+    async getDocumentsByEntity(entityType: string, entityId: string) {
+        return this.request(`/documents/entity/${entityType}/${entityId}`);
+    }
+
+    async deleteDocument(id: string) {
+        return this.request(`/documents/${id}`, { method: 'DELETE' });
+    }
 }
 
 // Export a singleton instance (for non-authenticated endpoints, if any)

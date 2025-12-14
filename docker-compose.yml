@@ -160,6 +160,29 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  document-service:
+    build:
+      context: .
+      dockerfile: services/document-service/Dockerfile
+      target: development
+    container_name: splits-document-service
+    ports:
+      - "3006:3006"
+    environment:
+      NODE_ENV: development
+      PORT: 3006
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      MAX_FILE_SIZE_MB: 10
+    volumes:
+      - ./services/document-service/src:/app/services/document-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    command: sh -c "cd /app/services/document-service && /app/node_modules/.pnpm/node_modules/.bin/tsx watch src/index.ts"
+
   api-gateway:
     build:
       context: .
@@ -180,6 +203,7 @@ services:
       ATS_SERVICE_URL: http://ats-service:3002
       NETWORK_SERVICE_URL: http://network-service:3003
       BILLING_SERVICE_URL: http://billing-service:3004
+      DOCUMENT_SERVICE_URL: http://document-service:3006
       CORS_ORIGIN: http://localhost:3100
       CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY}
       CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
@@ -228,6 +252,7 @@ services:
       NETWORK_SERVICE_URL: http://network-service:3003
       BILLING_SERVICE_URL: http://billing-service:3004
       NOTIFICATION_SERVICE_URL: http://notification-service:3005
+      DOCUMENT_SERVICE_URL: http://document-service:3006
       SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}

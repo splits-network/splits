@@ -5,6 +5,7 @@ import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import StageChangeDropdown from './StageChangeDropdown';
 import HireModal from './HireModal';
+import DocumentList from '@/components/DocumentList';
 
 interface Application {
     id: string;
@@ -35,6 +36,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
     const [loading, setLoading] = useState(true);
     const [selectedStage, setSelectedStage] = useState<string | null>(null);
     const [hireApplication, setHireApplication] = useState<Application | null>(null);
+    const [expandedCandidate, setExpandedCandidate] = useState<string | null>(null);
 
     useEffect(() => {
         fetchApplications();
@@ -144,52 +146,78 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
                                 <tbody>
                                     {filteredApplications.map((application) => {
                                         const stage = stages.find(s => s.key === application.stage);
+                                        const isExpanded = expandedCandidate === application.candidate_id;
                                         return (
-                                            <tr key={application.id} className="hover">
-                                                <td>
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="avatar placeholder">
-                                                            <div className="bg-neutral text-neutral-content rounded-full w-10">
-                                                                <span className="text-xs">
-                                                                    {application.candidate_id.substring(0, 2).toUpperCase()}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-medium">
-                                                                Candidate {application.candidate_id.substring(0, 8)}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <StageChangeDropdown
-                                                        currentStage={application.stage}
-                                                        stages={stages}
-                                                        onStageChange={(newStage) => handleStageChange(application.id, newStage)}
-                                                    />
-                                                </td>
-                                                <td>
-                                                    <div className={`badge ${application.status === 'active' ? 'badge-success' : 'badge-neutral'}`}>
-                                                        {application.status}
-                                                    </div>
-                                                </td>
-                                                <td className="max-w-xs truncate">{application.notes || '-'}</td>
-                                                <td>{new Date(application.created_at).toLocaleDateString()}</td>
-                                                <td>
-                                                    <div className="flex gap-2">
-                                                        {application.stage === 'offer' && application.status === 'active' && (
+                                            <>
+                                                <tr key={application.id} className="hover">
+                                                    <td>
+                                                        <div className="flex items-center gap-3">
                                                             <button
-                                                                className="btn btn-success btn-xs gap-1"
-                                                                onClick={() => setHireApplication(application)}
+                                                                className="btn btn-ghost btn-xs"
+                                                                onClick={() => setExpandedCandidate(isExpanded ? null : application.candidate_id)}
                                                             >
-                                                                <i className="fa-solid fa-check"></i>
-                                                                Hire
+                                                                <i className={`fa-solid fa-chevron-${isExpanded ? 'down' : 'right'}`}></i>
                                                             </button>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                                            <div className="avatar placeholder">
+                                                                <div className="bg-neutral text-neutral-content rounded-full w-10">
+                                                                    <span className="text-xs">
+                                                                        {application.candidate_id.substring(0, 2).toUpperCase()}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-medium">
+                                                                    Candidate {application.candidate_id.substring(0, 8)}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <StageChangeDropdown
+                                                            currentStage={application.stage}
+                                                            stages={stages}
+                                                            onStageChange={(newStage) => handleStageChange(application.id, newStage)}
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <div className={`badge ${application.status === 'active' ? 'badge-success' : 'badge-neutral'}`}>
+                                                            {application.status}
+                                                        </div>
+                                                    </td>
+                                                    <td className="max-w-xs truncate">{application.notes || '-'}</td>
+                                                    <td>{new Date(application.created_at).toLocaleDateString()}</td>
+                                                    <td>
+                                                        <div className="flex gap-2">
+                                                            {application.stage === 'offer' && application.status === 'active' && (
+                                                                <button
+                                                                    className="btn btn-success btn-xs gap-1"
+                                                                    onClick={() => setHireApplication(application)}
+                                                                >
+                                                                    <i className="fa-solid fa-check"></i>
+                                                                    Hire
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {isExpanded && (
+                                                    <tr key={`${application.id}-expanded`}>
+                                                        <td colSpan={6} className="bg-base-200">
+                                                            <div className="p-4">
+                                                                <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                                                    <i className="fa-solid fa-paperclip"></i>
+                                                                    Documents
+                                                                </h4>
+                                                                <DocumentList
+                                                                    entityType="candidate"
+                                                                    entityId={application.candidate_id}
+                                                                    showUpload={true}
+                                                                />
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </>
                                         );
                                     })}
                                 </tbody>
