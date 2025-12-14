@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useViewMode } from '@/hooks/useViewMode';
 
 interface Recruiter {
     id: string;
@@ -19,6 +20,7 @@ export default function RecruiterManagementPage() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'all' | 'pending' | 'active' | 'suspended'>('all');
     const [updatingId, setUpdatingId] = useState<string | null>(null);
+    const [viewMode, setViewMode] = useViewMode('adminRecruitersViewMode', 'table');
 
     useEffect(() => {
         loadRecruiters();
@@ -94,14 +96,15 @@ export default function RecruiterManagementPage() {
                 </div>
             </div>
 
-            {/* Filters */}
-            <div className="flex gap-2 flex-wrap">
-                <button
-                    onClick={() => setFilter('all')}
-                    className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-ghost'}`}
-                >
-                    All ({recruiters.length})
-                </button>
+            {/* Filters and View Toggle */}
+            <div className="flex gap-4 flex-wrap items-center justify-between">
+                <div className="flex gap-2 flex-wrap">
+                    <button
+                        onClick={() => setFilter('all')}
+                        className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-ghost'}`}
+                    >
+                        All ({recruiters.length})
+                    </button>
                 <button
                     onClick={() => setFilter('pending')}
                     className={`btn btn-sm ${filter === 'pending' ? 'btn-warning' : 'btn-ghost'}`}
@@ -123,9 +126,127 @@ export default function RecruiterManagementPage() {
                     <i className="fa-solid fa-ban mr-1"></i>
                     Suspended ({suspendedCount})
                 </button>
+                </div>
+                <div className="join">
+                    <button 
+                        className={`btn btn-sm join-item ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
+                        onClick={() => setViewMode('grid')}
+                        title="Grid View"
+                    >
+                        <i className="fa-solid fa-grip"></i>
+                    </button>
+                    <button 
+                        className={`btn btn-sm join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
+                        onClick={() => setViewMode('table')}
+                        title="Table View"
+                    >
+                        <i className="fa-solid fa-table"></i>
+                    </button>
+                </div>
             </div>
 
-            {/* Recruiters Table */}
+            {/* Recruiters Grid View */}
+            {viewMode === 'grid' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredRecruiters.length === 0 ? (
+                        <div className="col-span-full card bg-base-100 shadow-sm">
+                            <div className="card-body items-center text-center py-12">
+                                <i className="fa-solid fa-users text-6xl text-base-content/20"></i>
+                                <h3 className="text-xl font-semibold mt-4">No recruiters found</h3>
+                            </div>
+                        </div>
+                    ) : (
+                        filteredRecruiters.map((recruiter) => (
+                            <div key={recruiter.id} className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                                <div className="card-body">
+                                    <div className="flex justify-between items-start">
+                                        <div className="font-mono text-xs text-base-content/60">
+                                            {recruiter.id.slice(0, 8)}
+                                        </div>
+                                        {recruiter.status === 'pending' && (
+                                            <span className="badge badge-warning gap-1">
+                                                <i className="fa-solid fa-clock"></i>
+                                                Pending
+                                            </span>
+                                        )}
+                                        {recruiter.status === 'active' && (
+                                            <span className="badge badge-success gap-1">
+                                                <i className="fa-solid fa-check"></i>
+                                                Active
+                                            </span>
+                                        )}
+                                        {recruiter.status === 'suspended' && (
+                                            <span className="badge badge-error gap-1">
+                                                <i className="fa-solid fa-ban"></i>
+                                                Suspended
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="text-sm mt-2 min-h-[3rem]">
+                                        {recruiter.bio || <span className="text-base-content/40 italic">No bio provided</span>}
+                                    </p>
+                                    <div className="text-xs text-base-content/60 mt-2">
+                                        Joined {new Date(recruiter.created_at).toLocaleDateString()}
+                                    </div>
+                                    <div className="card-actions justify-end mt-4">
+                                        {recruiter.status === 'pending' && (
+                                            <button
+                                                onClick={() => updateRecruiterStatus(recruiter.id, 'active')}
+                                                disabled={updatingId === recruiter.id}
+                                                className="btn btn-sm btn-success"
+                                            >
+                                                {updatingId === recruiter.id ? (
+                                                    <span className="loading loading-spinner loading-xs"></span>
+                                                ) : (
+                                                    <>
+                                                        <i className="fa-solid fa-check"></i>
+                                                        Approve
+                                                    </>
+                                                )}
+                                            </button>
+                                        )}
+                                        {recruiter.status === 'active' && (
+                                            <button
+                                                onClick={() => updateRecruiterStatus(recruiter.id, 'suspended')}
+                                                disabled={updatingId === recruiter.id}
+                                                className="btn btn-sm btn-error"
+                                            >
+                                                {updatingId === recruiter.id ? (
+                                                    <span className="loading loading-spinner loading-xs"></span>
+                                                ) : (
+                                                    <>
+                                                        <i className="fa-solid fa-ban"></i>
+                                                        Suspend
+                                                    </>
+                                                )}
+                                            </button>
+                                        )}
+                                        {recruiter.status === 'suspended' && (
+                                            <button
+                                                onClick={() => updateRecruiterStatus(recruiter.id, 'active')}
+                                                disabled={updatingId === recruiter.id}
+                                                className="btn btn-sm btn-success"
+                                            >
+                                                {updatingId === recruiter.id ? (
+                                                    <span className="loading loading-spinner loading-xs"></span>
+                                                ) : (
+                                                    <>
+                                                        <i className="fa-solid fa-rotate-left"></i>
+                                                        Reactivate
+                                                    </>
+                                                )}
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            )}
+
+            {/* Recruiters Table View */}
+            {viewMode === 'table' && (
             <div className="card bg-base-100 shadow-sm">
                 <div className="card-body p-0">
                     <div className="overflow-x-auto">
@@ -238,6 +359,7 @@ export default function RecruiterManagementPage() {
                     </div>
                 </div>
             </div>
+            )}
         </div>
     );
 }

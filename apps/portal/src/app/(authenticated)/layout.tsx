@@ -17,8 +17,8 @@ export default async function AuthenticatedLayout({
     return (
         <div className="drawer lg:drawer-open">
             <input id="sidebar-drawer" type="checkbox" className="drawer-toggle" />
-            <div className="drawer-content flex flex-col">
-                <main className="flex-1 p-6 bg-base-200">
+            <div className="drawer-content flex flex-col bg-base-200">
+                <main className="flex-1 p-6 container mx-auto">
                     {children}
                 </main>
             </div>

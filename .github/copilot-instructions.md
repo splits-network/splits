@@ -202,6 +202,10 @@ When Copilot generates React/Next.js code:
 4. **Forms & Validation**
    - Use controlled components or `react-hook-form` if already present.
    - Validate required fields (e.g., candidate name/email, job title) both client-side and server-side.
+   - **IMPORTANT**: Follow the form control patterns defined in [`docs/guidance/form-controls.md`](../docs/guidance/form-controls.md).
+     - Always use `fieldset` wrapper, NOT `form-control`
+     - Use simple label markup: `<label className="label">Text</label>`
+     - Never use `-bordered` suffixes on inputs, selects, or textareas
 
 5. **No Business Logic in Components**
    - Components should orchestrate calls to the gateway and display data.
@@ -311,6 +315,7 @@ When setting up new services or apps:
 3. **References**
    - See `docs/splits-network-architecture.md` for detailed service responsibilities.
    - See `docs/splits-network-phase1-prd.md` for Phase 1 scope and data models.
+   - See `docs/guidance/form-controls.md` for form implementation standards.
    - Check `.vscode/mcp.json` for configured Supabase MCP server.
 
 ---

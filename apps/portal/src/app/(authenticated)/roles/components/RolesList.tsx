@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useViewMode } from '@/hooks/useViewMode';
 
 interface Job {
     id: string;
@@ -41,6 +42,7 @@ export default function RolesList() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [userRole, setUserRole] = useState<string | null>(null);
+    const [viewMode, setViewMode] = useViewMode('rolesViewMode');
 
     // Check if user can manage roles
     const canManageRole = userRole === 'company_admin' || userRole === 'platform_admin';
@@ -105,10 +107,10 @@ export default function RolesList() {
 
     return (
         <div className="space-y-6">
-            {/* Filters */}
+            {/* Filters and View Toggle */}
             <div className="card bg-base-100 shadow-sm">
                 <div className="card-body">
-                    <div className="flex flex-wrap gap-4">
+                    <div className="flex flex-wrap gap-4 items-end">
                         <div className="fieldset">
                             <label className="label">Status</label>
                             <select 
@@ -133,12 +135,28 @@ export default function RolesList() {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
+                        <div className="join">
+                            <button 
+                                className={`btn join-item ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
+                                onClick={() => setViewMode('grid')}
+                                title="Grid View"
+                            >
+                                <i className="fa-solid fa-grip"></i>
+                            </button>
+                            <button 
+                                className={`btn join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
+                                onClick={() => setViewMode('table')}
+                                title="Table View"
+                            >
+                                <i className="fa-solid fa-table"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Roles List */}
-            {filteredJobs.length > 0 ? (
+            {/* Roles List - Grid View */}
+            {viewMode === 'grid' && filteredJobs.length > 0 && (
                 <div className="grid grid-cols-1 gap-4">
                     {filteredJobs.map((job) => (
                         <div key={job.id} className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
@@ -196,7 +214,91 @@ export default function RolesList() {
                         </div>
                     ))}
                 </div>
-            ) : (
+            )}
+
+            {/* Roles List - Table View */}
+            {viewMode === 'table' && filteredJobs.length > 0 && (
+                <div className="card bg-base-100 shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th>Role Title</th>
+                                    <th>Location</th>
+                                    <th>Fee</th>
+                                    <th>Status</th>
+                                    <th>Posted</th>
+                                    <th className="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredJobs.map((job) => (
+                                    <tr key={job.id} className="hover">
+                                        <td>
+                                            <Link href={`/roles/${job.id}`} className="font-semibold hover:text-primary transition-colors">
+                                                {job.title}
+                                            </Link>
+                                            <div className="text-sm text-base-content/60 mt-1">
+                                                <i className="fa-solid fa-building mr-1"></i>
+                                                Company {job.company_id.substring(0, 8)}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {job.location ? (
+                                                <span className="flex items-center gap-1">
+                                                    <i className="fa-solid fa-location-dot"></i>
+                                                    {job.location}
+                                                </span>
+                                            ) : (
+                                                <span className="text-base-content/40">—</span>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <span className="flex items-center gap-1">
+                                                <i className="fa-solid fa-percent"></i>
+                                                {job.fee_percentage}%
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div className={`badge ${getStatusBadge(job.status)}`}>
+                                                {job.status}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span className="text-sm">
+                                                {new Date(job.created_at).toLocaleDateString()}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div className="flex gap-2 justify-end">
+                                                {canManageRole && (
+                                                    <Link 
+                                                        href={`/roles/${job.id}/edit`}
+                                                        className="btn btn-ghost btn-sm"
+                                                        title="Edit Role"
+                                                    >
+                                                        <i className="fa-solid fa-pen"></i>
+                                                    </Link>
+                                                )}
+                                                <Link 
+                                                    href={`/roles/${job.id}`}
+                                                    className="btn btn-primary btn-sm"
+                                                    title="View Pipeline"
+                                                >
+                                                    <i className="fa-solid fa-arrow-right"></i>
+                                                </Link>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
+            {/* Empty State */}
+            {filteredJobs.length === 0 && (
                 <div className="card bg-base-100 shadow-sm">
                     <div className="card-body text-center py-12">
                         <i className="fa-solid fa-briefcase text-6xl text-base-content/20"></i>
