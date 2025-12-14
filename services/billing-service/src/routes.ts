@@ -102,11 +102,6 @@ export function registerRoutes(
     // Stripe webhook
     app.post(
         '/webhooks/stripe',
-        {
-            config: {
-                rawBody: true,
-            },
-        },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const signature = request.headers['stripe-signature'];
 
