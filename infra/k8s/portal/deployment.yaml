@@ -28,6 +28,16 @@ spec:
               value: "https://api.splits.network/api"
             - name: NEXT_PUBLIC_API_GATEWAY_URL
               value: "https://api.splits.network"
+            - name: IDENTITY_SERVICE_URL
+              value: "http://identity-service.splits-network.svc.cluster.local:3001"
+            - name: ATS_SERVICE_URL
+              value: "http://ats-service.splits-network.svc.cluster.local:3002"
+            - name: NETWORK_SERVICE_URL
+              value: "http://network-service.splits-network.svc.cluster.local:3003"
+            - name: BILLING_SERVICE_URL
+              value: "http://billing-service.splits-network.svc.cluster.local:3004"
+            - name: NOTIFICATION_SERVICE_URL
+              value: "http://notification-service.splits-network.svc.cluster.local:3005"
             - name: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
               valueFrom:
                 secretKeyRef:
