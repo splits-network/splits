@@ -10,6 +10,20 @@ export class NetworkRepository {
         });
     }
 
+    // Health check
+    async healthCheck(): Promise<void> {
+        // Simple query to verify database connectivity
+        const { error } = await this.supabase
+            .schema('network')
+            .from('recruiters')
+            .select('id')
+            .limit(1);
+        
+        if (error) {
+            throw new Error(`Database health check failed: ${error.message}`);
+        }
+    }
+
     // Recruiter methods
     async findRecruiterById(id: string): Promise<Recruiter | null> {
         const { data, error } = await this.supabase

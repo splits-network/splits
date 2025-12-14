@@ -75,6 +75,32 @@ async function main() {
         return reply.send({ success: true });
     });
 
+    // Health check endpoint
+    app.get('/health', async (request, reply) => {
+        try {
+            // Check database connectivity
+            await repository.healthCheck();
+            // Check RabbitMQ connectivity
+            const rabbitHealthy = consumer.isConnected();
+            if (!rabbitHealthy) {
+                throw new Error('RabbitMQ not connected');
+            }
+            return reply.status(200).send({
+                status: 'healthy',
+                service: 'notification-service',
+                timestamp: new Date().toISOString(),
+            });
+        } catch (error) {
+            logger.error({ err: error }, 'Health check failed');
+            return reply.status(503).send({
+                status: 'unhealthy',
+                service: 'notification-service',
+                timestamp: new Date().toISOString(),
+                error: error instanceof Error ? error.message : 'Unknown error',
+            });
+        }
+    });
+
     // Graceful shutdown
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down gracefully');

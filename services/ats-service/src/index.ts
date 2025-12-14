@@ -41,6 +41,32 @@ async function main() {
     // Register routes
     registerRoutes(app, service);
 
+    // Health check endpoint
+    app.get('/health', async (request, reply) => {
+        try {
+            // Check database connectivity
+            await repository.healthCheck();
+            // Check RabbitMQ connectivity
+            const rabbitHealthy = eventPublisher.isConnected();
+            if (!rabbitHealthy) {
+                throw new Error('RabbitMQ not connected');
+            }
+            return reply.status(200).send({
+                status: 'healthy',
+                service: 'ats-service',
+                timestamp: new Date().toISOString(),
+            });
+        } catch (error) {
+            logger.error({ err: error }, 'Health check failed');
+            return reply.status(503).send({
+                status: 'unhealthy',
+                service: 'ats-service',
+                timestamp: new Date().toISOString(),
+                error: error instanceof Error ? error.message : 'Unknown error',
+            });
+        }
+    });
+
     // Graceful shutdown
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down gracefully');

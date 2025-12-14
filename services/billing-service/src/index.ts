@@ -51,6 +51,27 @@ async function main() {
     // Register routes
     registerRoutes(app, service, stripeConfig.webhookSecret);
 
+    // Health check endpoint
+    app.get('/health', async (request, reply) => {
+        try {
+            // Check database connectivity
+            await repository.healthCheck();
+            return reply.status(200).send({
+                status: 'healthy',
+                service: 'billing-service',
+                timestamp: new Date().toISOString(),
+            });
+        } catch (error) {
+            logger.error({ err: error }, 'Health check failed');
+            return reply.status(503).send({
+                status: 'unhealthy',
+                service: 'billing-service',
+                timestamp: new Date().toISOString(),
+                error: error instanceof Error ? error.message : 'Unknown error',
+            });
+        }
+    });
+
     // Start server
     try {
         await app.listen({ port: baseConfig.port, host: '0.0.0.0' });

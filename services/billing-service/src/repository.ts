@@ -10,6 +10,20 @@ export class BillingRepository {
         });
     }
 
+    // Health check
+    async healthCheck(): Promise<void> {
+        // Simple query to verify database connectivity
+        const { error } = await this.supabase
+            .schema('billing')
+            .from('plans')
+            .select('id')
+            .limit(1);
+        
+        if (error) {
+            throw new Error(`Database health check failed: ${error.message}`);
+        }
+    }
+
     // Plan methods
     async findPlanById(id: string): Promise<Plan | null> {
         const { data, error } = await this.supabase

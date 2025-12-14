@@ -64,6 +64,32 @@ async function main() {
     // Register routes
     registerRoutes(app, services);
 
+    // Health check endpoint (no auth required)
+    app.get('/health', async (request, reply) => {
+        try {
+            // Check Redis connectivity
+            await redis.ping();
+            
+            return reply.status(200).send({
+                status: 'healthy',
+                service: 'api-gateway',
+                timestamp: new Date().toISOString(),
+                checks: {
+                    redis: 'connected',
+                    auth: 'configured',
+                },
+            });
+        } catch (error) {
+            logger.error({ err: error }, 'Health check failed');
+            return reply.status(503).send({
+                status: 'unhealthy',
+                service: 'api-gateway',
+                timestamp: new Date().toISOString(),
+                error: error instanceof Error ? error.message : 'Unknown error',
+            });
+        }
+    });
+
     // Graceful shutdown
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down gracefully');
