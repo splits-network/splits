@@ -29,7 +29,7 @@ export class NotificationRepository {
         // Simple query to verify database connectivity
         const { error } = await this.supabase
             .schema('notifications')
-            .from('notification_logs')
+            .from('notification_log')
             .select('id')
             .limit(1);
         

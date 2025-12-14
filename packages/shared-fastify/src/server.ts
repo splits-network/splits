@@ -46,10 +46,8 @@ export async function buildServer(
         await app.register(helmet);
     }
 
-    // Health check endpoint
-    app.get('/health', async () => {
-        return { status: 'ok', timestamp: new Date().toISOString() };
-    });
+    // Note: Health check endpoint should be registered by each service
+    // to include service-specific dependency checks (DB, Redis, RabbitMQ, etc.)
 
     return app;
 }

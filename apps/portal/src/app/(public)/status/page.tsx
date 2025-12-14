@@ -25,7 +25,6 @@ export default function StatusPage() {
         services.map(s => ({ ...s, status: 'checking' as const }))
     );
     const [lastChecked, setLastChecked] = useState<Date>(new Date());
-    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const checkServiceHealth = async (service: typeof services[0]): Promise<ServiceHealth> => {
         const startTime = Date.now();
@@ -65,11 +64,9 @@ export default function StatusPage() {
     };
 
     const checkAllServices = async () => {
-        setIsRefreshing(true);
         const results = await Promise.all(services.map(checkServiceHealth));
         setServiceStatuses(results);
         setLastChecked(new Date());
-        setIsRefreshing(false);
     };
 
     useEffect(() => {
@@ -115,19 +112,11 @@ export default function StatusPage() {
                             </p>
                         </div>
                         <div className="text-right">
-                            <button
-                                className="btn btn-sm btn-ghost"
-                                onClick={checkAllServices}
-                                disabled={isRefreshing}
-                            >
-                                {isRefreshing ? (
-                                    <><i className="fa-solid fa-spinner fa-spin"></i> Checking...</>
-                                ) : (
-                                    <><i className="fa-solid fa-arrows-rotate"></i> Refresh</>
-                                )}
-                            </button>
-                            <p className="text-xs opacity-75 mt-1">
+                            <p className="text-xs opacity-75">
                                 Last checked: {lastChecked.toLocaleTimeString()}
+                            </p>
+                            <p className="text-xs opacity-60 mt-1">
+                                Auto-refreshes every 30 seconds
                             </p>
                         </div>
                     </div>

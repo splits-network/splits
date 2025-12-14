@@ -1,6 +1,18 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit } from '@/lib/rate-limit';
 
-export async function GET() {
+export const revalidate = 15;
+
+export async function GET(request: NextRequest) {
+    const rateLimitResponse = rateLimit(request, {
+        maxRequests: 10,
+        windowMs: 60 * 1000,
+    });
+    
+    if (rateLimitResponse) {
+        return rateLimitResponse;
+    }
+    
     try {
         const serviceUrl = process.env.NETWORK_SERVICE_URL || 'http://localhost:3003';
         const response = await fetch(`${serviceUrl}/health`, {
@@ -9,7 +21,12 @@ export async function GET() {
         });
         const data = await response.json();
         
-        return NextResponse.json(data, { status: response.status });
+        return NextResponse.json(data, { 
+            status: response.status,
+            headers: {
+                'Cache-Control': 'public, s-maxage=15, stale-while-revalidate=30',
+            },
+        });
     } catch (error) {
         return NextResponse.json(
             {

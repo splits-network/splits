@@ -51,11 +51,12 @@ services:
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
     volumes:
       - ./services/identity-service/src:/app/services/identity-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
     networks:
       - splits-network
     depends_on:
       - redis
-    command: sh -c "cd /app/services/identity-service && /app/node_modules/.pnpm/node_modules/.bin/tsx watch src/index.ts"
 
   ats-service:
     build:
