@@ -84,29 +84,29 @@ export function Footer() {
                         <h3 className="font-bold text-lg mb-4">Company</h3>
                         <ul className="space-y-2">
                             <li>
-                                <a href="#" className="link link-hover text-base-content/70 hover:text-base-content">
+                                <Link href="/about" className="link link-hover text-base-content/70 hover:text-base-content">
                                     About Us
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className="link link-hover text-base-content/70 hover:text-base-content">
+                                <Link href="/careers" className="link link-hover text-base-content/70 hover:text-base-content">
                                     Careers
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className="link link-hover text-base-content/70 hover:text-base-content">
+                                <Link href="/blog" className="link link-hover text-base-content/70 hover:text-base-content">
                                     Blog
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className="link link-hover text-base-content/70 hover:text-base-content">
+                                <Link href="/press" className="link link-hover text-base-content/70 hover:text-base-content">
                                     Press Kit
-                                </a>
+                                </Link>
                             </li>
                             <li>
-                                <a href="#" className="link link-hover text-base-content/70 hover:text-base-content">
+                                <Link href="/partners" className="link link-hover text-base-content/70 hover:text-base-content">
                                     Partners
-                                </a>
+                                </Link>
                             </li>
                         </ul>
                     </div>
