@@ -14,6 +14,20 @@ export class AtsRepository {
         this.supabase = createClient(supabaseUrl, supabaseKey);
     }
 
+    // Health check
+    async healthCheck(): Promise<void> {
+        // Simple query to verify database connectivity
+        const { error } = await this.supabase
+            .schema('ats')
+            .from('jobs')
+            .select('id')
+            .limit(1);
+        
+        if (error) {
+            throw new Error(`Database health check failed: ${error.message}`);
+        }
+    }
+
     // Company methods
     async findCompanyById(id: string): Promise<Company | null> {
         const { data, error } = await this.supabase

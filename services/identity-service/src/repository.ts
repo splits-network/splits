@@ -10,6 +10,20 @@ export class IdentityRepository {
         });
     }
 
+    // Health check
+    async healthCheck(): Promise<void> {
+        // Simple query to verify database connectivity
+        const { error } = await this.supabase
+            .schema('identity')
+            .from('users')
+            .select('id')
+            .limit(1);
+        
+        if (error) {
+            throw new Error(`Database health check failed: ${error.message}`);
+        }
+    }
+
     // User methods
     async findUserByClerkId(clerkUserId: string): Promise<User | null> {
         const { data, error } = await this.supabase

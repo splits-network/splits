@@ -239,6 +239,10 @@ export class EventConsumer {
         }
     }
 
+    isConnected(): boolean {
+        return this.connection !== null && this.channel !== null;
+    }
+
     async close(): Promise<void> {
         if (this.channel) await this.channel.close();
         if (this.connection) await (this.connection as any).close();

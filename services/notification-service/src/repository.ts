@@ -24,6 +24,20 @@ export class NotificationRepository {
         });
     }
 
+    // Health check
+    async healthCheck(): Promise<void> {
+        // Simple query to verify database connectivity
+        const { error } = await this.supabase
+            .schema('notifications')
+            .from('notification_logs')
+            .select('id')
+            .limit(1);
+        
+        if (error) {
+            throw new Error(`Database health check failed: ${error.message}`);
+        }
+    }
+
     async createNotificationLog(
         log: Omit<NotificationLog, 'id' | 'sent_at' | 'created_at'>
     ): Promise<NotificationLog> {
