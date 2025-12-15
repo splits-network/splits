@@ -477,6 +477,40 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
         return reply.send(data);
     });
     
+    // Get my proposals (for the current recruiter or all proposals for company admins)
+    app.get('/api/proposals/my-proposals', {
+        preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager']),
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const req = request as AuthenticatedRequest;
+        const networkService = services.get('network');
+        const correlationId = getCorrelationId(request);
+        
+        // Get user roles from memberships
+        const userRoles = req.auth.memberships.map(m => m.role);
+        
+        // If user is a recruiter, get their proposals
+        if (userRoles.includes('recruiter')) {
+            // Get recruiter ID for this user
+            const recruiterResponse: any = await networkService.get(
+                `/recruiters/by-user/${req.auth.userId}`,
+                undefined,
+                correlationId
+            );
+            
+            // Fetch proposals for this recruiter
+            const data = await networkService.get(
+                `/recruiters/${recruiterResponse.data.id}/proposals`,
+                request.query,
+                correlationId
+            );
+            return reply.send(data);
+        } else {
+            // Company admins/hiring managers see all proposals
+            // For now, return empty array - Phase 2 will implement company-wide proposal viewing
+            return reply.send({ data: [] });
+        }
+    });
+    
     // View proposal details
     app.get('/api/proposals/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         const { id } = request.params as { id: string };
