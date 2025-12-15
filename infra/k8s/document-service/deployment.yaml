@@ -30,6 +30,11 @@ spec:
                 secretKeyRef:
                   name: supabase-secrets
                   key: supabase-url
+            - name: SUPABASE_ANON_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-secrets
+                  key: supabase-anon-key
             - name: SUPABASE_SERVICE_ROLE_KEY
               valueFrom:
                 secretKeyRef:

@@ -59,6 +59,5 @@ COPY --from=build /app/packages/shared-logging/dist ./packages/shared-logging/di
 COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
 COPY --from=build /app/services/document-service/dist ./services/document-service/dist
 
-WORKDIR /app/services/document-service
 EXPOSE 3006
-CMD ["node", "dist/index.js"]
+CMD ["node", "services/document-service/dist/index.js"]
