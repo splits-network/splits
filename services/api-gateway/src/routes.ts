@@ -490,7 +490,7 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
 
     // Get my proposals (for the current recruiter or all proposals for company admins)
     app.get('/api/proposals/my-proposals', {
-        preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager']),
+        preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager', 'platform_admin']),
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const req = request as AuthenticatedRequest;
         const networkService = services.get('network');
@@ -516,7 +516,7 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
             );
             return reply.send(data);
         } else {
-            // Company admins/hiring managers see all proposals
+            // Company admins/hiring managers/platform admins see all proposals
             // For now, return empty array - Phase 2 will implement company-wide proposal viewing
             return reply.send({ data: [] });
         }
