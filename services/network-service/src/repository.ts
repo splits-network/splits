@@ -1,5 +1,11 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Recruiter, RoleAssignment } from '@splits-network/shared-types';
+import { 
+    Recruiter, 
+    RoleAssignment,
+    CandidateRoleAssignment,
+    CandidateRoleAssignmentState,
+    RecruiterReputation,
+} from '@splits-network/shared-types';
 
 export class NetworkRepository {
     private supabase: SupabaseClient;
@@ -144,8 +150,183 @@ export class NetworkRepository {
 
         if (error) throw error;
     }
-}
 
+    // ========================================================================
+    // Phase 2: Candidate-Role Assignments (Proposal State Machine)
+    // ========================================================================
+
+    async findCandidateRoleAssignment(jobId: string, candidateId: string): Promise<CandidateRoleAssignment | null> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('candidate_role_assignments')
+            .select('*')
+            .eq('job_id', jobId)
+            .eq('candidate_id', candidateId)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') return null;
+            throw error;
+        }
+        return data;
+    }
+
+    async getCandidateRoleAssignmentById(id: string): Promise<CandidateRoleAssignment | null> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('candidate_role_assignments')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') return null;
+            throw error;
+        }
+        return data;
+    }
+
+    async findCandidateRoleAssignmentsByRecruiter(
+        recruiterId: string,
+        state?: CandidateRoleAssignmentState
+    ): Promise<CandidateRoleAssignment[]> {
+        let query = this.supabase
+            .schema('network')
+            .from('candidate_role_assignments')
+            .select('*')
+            .eq('recruiter_id', recruiterId);
+
+        if (state) {
+            query = query.eq('state', state);
+        }
+
+        query = query.order('proposed_at', { ascending: false });
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return data || [];
+    }
+
+    async findCandidateRoleAssignmentsByJob(
+        jobId: string,
+        state?: CandidateRoleAssignmentState
+    ): Promise<CandidateRoleAssignment[]> {
+        let query = this.supabase
+            .schema('network')
+            .from('candidate_role_assignments')
+            .select('*')
+            .eq('job_id', jobId);
+
+        if (state) {
+            query = query.eq('state', state);
+        }
+
+        query = query.order('proposed_at', { ascending: false });
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return data || [];
+    }
+
+    async findTimedOutProposals(): Promise<CandidateRoleAssignment[]> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('candidate_role_assignments')
+            .select('*')
+            .eq('state', 'proposed')
+            .lt('response_due_at', new Date().toISOString());
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    async createCandidateRoleAssignment(assignment: any): Promise<CandidateRoleAssignment> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('candidate_role_assignments')
+            .insert(assignment)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async updateCandidateRoleAssignment(
+        id: string,
+        updates: Partial<CandidateRoleAssignment>
+    ): Promise<CandidateRoleAssignment> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('candidate_role_assignments')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    // ========================================================================
+    // Phase 2: Recruiter Reputation
+    // ========================================================================
+
+    async findRecruiterReputation(recruiterId: string): Promise<RecruiterReputation | null> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('recruiter_reputation')
+            .select('*')
+            .eq('recruiter_id', recruiterId)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') return null;
+            throw error;
+        }
+        return data;
+    }
+
+    async createRecruiterReputation(recruiterId: string): Promise<RecruiterReputation> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('recruiter_reputation')
+            .insert({ recruiter_id: recruiterId })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async updateRecruiterReputation(
+        recruiterId: string,
+        updates: Partial<RecruiterReputation>
+    ): Promise<RecruiterReputation> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('recruiter_reputation')
+            .update(updates)
+            .eq('recruiter_id', recruiterId)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async findTopRecruitersByReputation(limit: number = 10): Promise<RecruiterReputation[]> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('recruiter_reputation')
+            .select('*')
+            .order('reputation_score', { ascending: false })
+            .limit(limit);
+
+        if (error) throw error;
+        return data || [];
+    }
+}
 
 
 

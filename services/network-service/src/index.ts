@@ -6,6 +6,8 @@ import swaggerUi from '@fastify/swagger-ui';
 import { NetworkRepository } from './repository';
 import { NetworkService } from './service';
 import { registerRoutes } from './routes';
+import { registerPhase2Routes } from './routes-phase2';
+import { CandidateRoleAssignmentService, RecruiterReputationService } from './proposals';
 
 async function main() {
     const baseConfig = loadBaseConfig('network-service');
@@ -63,9 +65,16 @@ async function main() {
         dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
     );
     const service = new NetworkService(repository);
+    
+    // Phase 2 services
+    const proposalService = new CandidateRoleAssignmentService(repository);
+    const reputationService = new RecruiterReputationService(repository);
 
     // Register routes
     registerRoutes(app, service);
+    
+    // Register Phase 2 routes
+    registerPhase2Routes(app, proposalService, reputationService);
 
     // Health check endpoint
     app.get('/health', async (request, reply) => {

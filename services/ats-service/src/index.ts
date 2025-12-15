@@ -7,6 +7,7 @@ import { AtsRepository } from './repository';
 import { AtsService } from './service';
 import { EventPublisher } from './events';
 import { registerRoutes } from './routes';
+import { registerPhase2Routes } from './routes-phase2';
 import { CandidateOwnershipService, PlacementCollaborationService } from './ownership';
 import { PlacementLifecycleService } from './placement-lifecycle';
 
@@ -79,8 +80,11 @@ async function main() {
     const collaborationService = new PlacementCollaborationService(repository, eventPublisher);
     const lifecycleService = new PlacementLifecycleService(repository, eventPublisher);
 
-    // Register routes (pass Phase 2 services in future route updates)
+    // Register routes
     registerRoutes(app, service);
+    
+    // Register Phase 2 routes
+    registerPhase2Routes(app, ownershipService, collaborationService, lifecycleService);
 
     // Health check endpoint
     app.get('/health', async (request, reply) => {
