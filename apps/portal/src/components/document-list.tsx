@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import UploadDocumentModal from './UploadDocumentModal';
+import UploadDocumentModal from './upload-document-modal';
 
 interface Document {
     id: string;

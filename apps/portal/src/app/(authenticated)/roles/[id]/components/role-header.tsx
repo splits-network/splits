@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import SubmitCandidateModal from './SubmitCandidateModal';
+import SubmitCandidateModal from './submit-candidate-modal';
 
 interface Job {
     id: string;

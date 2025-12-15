@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import OwnershipAuditClient from './OwnershipAuditClient';
+import OwnershipAuditClient from './ownership-audit-client';
 
 export const metadata: Metadata = {
     title: 'Ownership Audit | Splits Network',

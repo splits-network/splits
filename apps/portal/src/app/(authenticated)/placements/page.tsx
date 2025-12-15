@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { useViewMode } from '@/hooks/useViewMode';
+import { useViewMode } from '@/hooks/use-view-mode';
 
 // Mock placements data
 const mockPlacements = [

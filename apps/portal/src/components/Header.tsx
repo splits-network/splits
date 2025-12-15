@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { useEffect, useState } from 'react';
-import { UserDropdown } from './UserDropdown';
+import { UserDropdown } from './user-dropdown';
 
 export function Header() {
     const pathname = usePathname();

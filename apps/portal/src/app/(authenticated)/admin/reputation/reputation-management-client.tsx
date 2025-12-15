@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import RecruiterReputationBadge from '@/components/RecruiterReputationBadge';
+import RecruiterReputationBadge from '@/components/recruiter-reputation-badge';
 
 interface RecruiterReputation {
     recruiter_user_id: string;

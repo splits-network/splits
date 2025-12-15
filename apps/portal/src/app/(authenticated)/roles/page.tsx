@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import Link from 'next/link';
-import RolesList from './components/RolesList';
+import RolesList from './components/roles-list';
 import { createAuthenticatedClient } from '@/lib/api-client';
 
 interface Membership {

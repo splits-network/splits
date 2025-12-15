@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import ProposalCard from '@/components/ProposalCard';
+import ProposalCard from '@/components/proposal-card';
 
 export default function ProposalsListClient() {
     const { getToken } = useAuth();

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import OwnershipBadge from '@/components/OwnershipBadge';
+import OwnershipBadge from '@/components/ownership-badge';
 
 interface CandidateDetailClientProps {
     candidateId: string;

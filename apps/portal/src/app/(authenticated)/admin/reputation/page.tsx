@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import ReputationManagementClient from './ReputationManagementClient';
+import ReputationManagementClient from './reputation-management-client';
 
 export const metadata: Metadata = {
     title: 'Reputation Management | Splits Network',

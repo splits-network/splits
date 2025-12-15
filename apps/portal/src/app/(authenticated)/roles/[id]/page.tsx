@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
-import RoleHeader from './components/RoleHeader';
-import CandidatePipeline from './components/CandidatePipeline';
+import RoleHeader from './components/role-header';
+import CandidatePipeline from './components/candidate-pipeline';
 
 // This would normally come from the API, but we'll let the client components handle it
 async function getJobData(id: string) {

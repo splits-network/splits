@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import StageChangeDropdown from './StageChangeDropdown';
-import HireModal from './HireModal';
-import DocumentList from '@/components/DocumentList';
+import StageChangeDropdown from './stage-change-dropdown';
+import HireModal from './hire-modal';
+import DocumentList from '@/components/document-list';
 
 interface Application {
     id: string;

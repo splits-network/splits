@@ -15,8 +15,7 @@ spec:
     spec:
       containers:
         - name: document-service
-          image: splits-network/document-service:latest
-          imagePullPolicy: IfNotPresent
+          image: ${ACR_SERVER}/document-service:${IMAGE_TAG}
           ports:
             - containerPort: 3006
           env:

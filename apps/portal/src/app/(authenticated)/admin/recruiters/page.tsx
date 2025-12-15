@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import { useViewMode } from '@/hooks/useViewMode';
+import { useViewMode } from '@/hooks/use-view-mode';
 
 interface Recruiter {
     id: string;
