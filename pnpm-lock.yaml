@@ -130,6 +130,28 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  packages/shared-job-queue:
+    dependencies:
+      '@splits-network/shared-config':
+        specifier: workspace:*
+        version: link:../shared-config
+      '@splits-network/shared-logging':
+        specifier: workspace:*
+        version: link:../shared-logging
+      amqplib:
+        specifier: ^0.10.5
+        version: 0.10.9
+    devDependencies:
+      '@types/amqplib':
+        specifier: ^0.10.5
+        version: 0.10.8
+      '@types/node':
+        specifier: ^22.10.5
+        version: 22.19.1
+      typescript:
+        specifier: ^5.7.3
+        version: 5.9.3
+
   packages/shared-logging:
     dependencies:
       pino:
@@ -223,6 +245,52 @@ importers:
         version: 2.86.2
       amqplib:
         specifier: ^0.10.9
+        version: 0.10.9
+      fastify:
+        specifier: ^5.6.2
+        version: 5.6.2
+    devDependencies:
+      '@types/amqplib':
+        specifier: ^0.10.5
+        version: 0.10.8
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.10.1
+      tsx:
+        specifier: ^4.19.2
+        version: 4.21.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  services/automation-service:
+    dependencies:
+      '@fastify/swagger':
+        specifier: ^9.5.0
+        version: 9.6.1
+      '@fastify/swagger-ui':
+        specifier: ^5.2.3
+        version: 5.2.3
+      '@splits-network/shared-config':
+        specifier: workspace:*
+        version: link:../../packages/shared-config
+      '@splits-network/shared-fastify':
+        specifier: workspace:*
+        version: link:../../packages/shared-fastify
+      '@splits-network/shared-job-queue':
+        specifier: workspace:*
+        version: link:../../packages/shared-job-queue
+      '@splits-network/shared-logging':
+        specifier: workspace:*
+        version: link:../../packages/shared-logging
+      '@splits-network/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
+      '@supabase/supabase-js':
+        specifier: ^2.86.2
+        version: 2.86.2
+      amqplib:
+        specifier: ^0.10.5
         version: 0.10.9
       fastify:
         specifier: ^5.6.2
@@ -2565,7 +2633,7 @@ snapshots:
 
   '@types/amqplib@0.10.8':
     dependencies:
-      '@types/node': 24.10.1
+      '@types/node': 22.19.1
 
   '@types/node@22.19.1':
     dependencies:
@@ -2589,7 +2657,7 @@ snapshots:
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 24.10.1
+      '@types/node': 22.19.1
 
   abstract-logging@2.0.1: {}
 
