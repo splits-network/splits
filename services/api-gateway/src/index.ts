@@ -22,14 +22,11 @@ async function main() {
     });
 
     // Initialize Redis for rate limiting
-    if (baseConfig.nodeEnv === 'production' && !redisConfig.password) {
-        throw new Error('REDIS_PASSWORD is required in production environment');
-    }
-
+    // Note: Password is optional if Redis is configured without authentication
     const redis = new Redis({
         host: redisConfig.host,
         port: redisConfig.port,
-        password: redisConfig.password,
+        password: redisConfig.password || undefined,
     });
 
     // CORS configuration - stricter in production
