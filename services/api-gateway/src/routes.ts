@@ -500,7 +500,7 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
             // Fetch proposals for this recruiter
             const data = await networkService.get(
                 `/recruiters/${recruiterResponse.data.id}/proposals`,
-                request.query,
+                request.query as Record<string, any>,
                 correlationId
             );
             return reply.send(data);
