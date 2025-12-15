@@ -122,63 +122,106 @@ export default async function AdminPage() {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Recruiter Management */}
-                <Link href="/admin/recruiters" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="card-body">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-primary/10 rounded-lg">
-                                <i className="fa-solid fa-user-check text-2xl text-primary"></i>
+            <div>
+                <h2 className="text-2xl font-bold mb-4">Phase 1 Management</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Recruiter Management */}
+                    <Link href="/admin/recruiters" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="card-body">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-primary/10 rounded-lg">
+                                    <i className="fa-solid fa-user-check text-2xl text-primary"></i>
+                                </div>
+                                <div>
+                                    <h3 className="card-title text-lg">Recruiter Management</h3>
+                                    <p className="text-sm text-base-content/70">
+                                        Approve and manage recruiters
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 className="card-title text-lg">Recruiter Management</h3>
-                                <p className="text-sm text-base-content/70">
-                                    Approve and manage recruiters
-                                </p>
-                            </div>
+                            {stats.pendingRecruiters > 0 && (
+                                <div className="badge badge-warning gap-2 mt-2">
+                                    <i className="fa-solid fa-clock"></i>
+                                    {stats.pendingRecruiters} pending approval
+                                </div>
+                            )}
                         </div>
-                        {stats.pendingRecruiters > 0 && (
-                            <div className="badge badge-warning gap-2 mt-2">
-                                <i className="fa-solid fa-clock"></i>
-                                {stats.pendingRecruiters} pending approval
-                            </div>
-                        )}
-                    </div>
-                </Link>
+                    </Link>
 
-                {/* Role Assignments */}
-                <Link href="/admin/assignments" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="card-body">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-secondary/10 rounded-lg">
-                                <i className="fa-solid fa-link text-2xl text-secondary"></i>
-                            </div>
-                            <div>
-                                <h3 className="card-title text-lg">Role Assignments</h3>
-                                <p className="text-sm text-base-content/70">
-                                    Assign recruiters to roles
-                                </p>
+                    {/* Role Assignments */}
+                    <Link href="/admin/assignments" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="card-body">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-secondary/10 rounded-lg">
+                                    <i className="fa-solid fa-link text-2xl text-secondary"></i>
+                                </div>
+                                <div>
+                                    <h3 className="card-title text-lg">Role Assignments</h3>
+                                    <p className="text-sm text-base-content/70">
+                                        Assign recruiters to roles
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </Link>
+                    </Link>
 
-                {/* Placement Audit */}
-                <Link href="/admin/placements" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
-                    <div className="card-body">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-success/10 rounded-lg">
-                                <i className="fa-solid fa-chart-line text-2xl text-success"></i>
-                            </div>
-                            <div>
-                                <h3 className="card-title text-lg">Placement Audit</h3>
-                                <p className="text-sm text-base-content/70">
-                                    Review all placements
-                                </p>
+                    {/* Placement Audit */}
+                    <Link href="/admin/placements" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="card-body">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-success/10 rounded-lg">
+                                    <i className="fa-solid fa-chart-line text-2xl text-success"></i>
+                                </div>
+                                <div>
+                                    <h3 className="card-title text-lg">Placement Audit</h3>
+                                    <p className="text-sm text-base-content/70">
+                                        Review all placements
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </Link>
+                    </Link>
+                </div>
+            </div>
+
+            {/* Phase 2 Management */}
+            <div>
+                <h2 className="text-2xl font-bold mb-4">Phase 2 Management</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Ownership Audit */}
+                    <Link href="/admin/ownership" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="card-body">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-accent/10 rounded-lg">
+                                    <i className="fa-solid fa-shield-halved text-2xl text-accent"></i>
+                                </div>
+                                <div>
+                                    <h3 className="card-title text-lg">Ownership Audit</h3>
+                                    <p className="text-sm text-base-content/70">
+                                        Review candidate ownership and sourcing conflicts
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </Link>
+
+                    {/* Reputation Management */}
+                    <Link href="/admin/reputation" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div className="card-body">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-warning/10 rounded-lg">
+                                    <i className="fa-solid fa-star text-2xl text-warning"></i>
+                                </div>
+                                <div>
+                                    <h3 className="card-title text-lg">Reputation Management</h3>
+                                    <p className="text-sm text-base-content/70">
+                                        Monitor and manage recruiter reputation scores
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </Link>
+                </div>
             </div>
         </div>
     );
