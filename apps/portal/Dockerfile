@@ -33,12 +33,14 @@ ENV SUPABASE_URL=$SUPABASE_URL
 ENV SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
 ENV SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
 COPY --from=dependencies /app ./
-COPY packages ./packages
+# Copy package source files (needed for Next.js transpilePackages)
+COPY packages/shared-config ./packages/shared-config
+COPY packages/shared-types ./packages/shared-types
 COPY apps/portal ./apps/portal
-# Build shared packages first
+# Build shared packages first (creates dist/ for other services)
 RUN pnpm --filter @splits-network/shared-config build
 RUN pnpm --filter @splits-network/shared-types build
-# Then build portal
+# Then build portal (will transpile packages from source)
 RUN pnpm --filter @splits-network/portal build
 
 # Production stage
