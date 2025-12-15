@@ -14,15 +14,16 @@ Phase 4 is about locking in network effects, expanding surfaces, and making Spli
 ## 0. Phase 4 Implementation Checklist
 
 ### Platform Expansion
-- [ ] Public API (read + write scopes)
-- [ ] Webhooks for partner integrations
-- [ ] External recruiter team support
-- [ ] Company ATS integrations
-- [ ] Identity federation for enterprise clients
+- [x] Public API (read + write scopes) - **OAuth 2.0, JWT tokens, 7 scopes**
+- [x] Webhooks for partner integrations - **13 event types, HMAC verification, retry logic**
+- [x] API versioning (v1) - **URL-based versioning, deprecation headers**
+- [x] External recruiter team support - **Teams database, 4 member roles, split configurations**
+- [x] Company ATS integrations - **Greenhouse integration, sync worker, encrypted credentials**
+- [ ] Identity federation for enterprise clients - **Planned: Okta, Azure AD**
 
 ### Network Effects
-- [ ] Recruiter team accounts
-- [ ] Agency-level economics and reporting
+- [x] Recruiter team accounts - **Full team hierarchy with owner/admin/member/collaborator**
+- [x] Agency-level economics and reporting - **4 split models, consolidated billing**
 - [ ] Cross-network candidate portability rules
 - [ ] Internal liquidity optimization
 - [ ] Invite-only premium roles
@@ -38,6 +39,25 @@ Phase 4 is about locking in network effects, expanding surfaces, and making Spli
 - [ ] Economic simulations
 - [ ] Regulatory readiness
 - [ ] Platform-level SLAs
+
+---
+
+**Implementation Status (as of December 15, 2025):**
+
+**✅ Completed:**
+- **Phase 4A: Platform APIs** - OAuth 2.0 system with 7 scopes, token manager, 4 REST routes
+- **Phase 4A: Webhooks** - 13 event types, HMAC-SHA256 signing, delivery service with retry logic (3 attempts with exponential backoff), 8 webhook management routes
+- **Phase 4A: API Versioning** - v1 routing in gateway, deprecation headers, Swagger documentation
+- **Phase 4B: Teams & Agencies** - Complete team hierarchy (5 tables: teams, members, splits, configurations, invitations), team service layer (485 lines), team repository (542 lines), 16 REST routes, team UI (2 pages: list + detail with tabs)
+- **Phase 4C: ATS Integrations** - Greenhouse API client (415 lines), integration service with AES-256 encryption (543 lines), sync worker with background queue processing (426 lines), 4 database tables (integrations, sync_logs, external_entity_map, sync_queue), 9 REST routes, 3 frontend pages (list, detail, new integration wizard), Docker deployment ready
+
+**🔄 In Progress:**
+- None currently
+
+**📋 Next Up:**
+- Phase 4D: Browser Extension (recruiter tools)
+- Phase 4E: Candidate Portal (lightweight status tracking)
+- Phase 4F: Company Widgets (embeddable intake forms)
 
 ---
 
@@ -287,6 +307,102 @@ Phase 4 is about locking in network effects, expanding surfaces, and making Spli
 - Consume webhooks from ATS platforms (faster updates)
 - Handle conflicts (e.g., role closed in both systems)
 - Retry failed syncs with exponential backoff
+
+---
+
+**✅ Implementation Notes (Phase 4C - Completed December 15, 2025):**
+
+**Database Schema (4 tables):**
+- `ats.integrations` - Stores integration configurations with encrypted API keys (AES-256-CBC)
+- `ats.sync_logs` - Audit trail of all sync operations with success/failure tracking
+- `ats.external_entity_map` - Maps Splits entities to ATS entities for bidirectional sync
+- `ats.sync_queue` - Async job queue for background processing with priority levels (1-10)
+
+**Backend Implementation:**
+- **Greenhouse Client** (`greenhouse-client.ts`, 415 lines):
+  - Board API for public job listings
+  - Harvest API for authenticated operations (jobs, candidates, applications, users, departments, offices)
+  - Webhook signature verification with HMAC-SHA256
+  - Rate limiting support with configurable delays
+  - Comprehensive error handling with typed responses
+
+- **Integration Service** (`integration-service.ts`, 551 lines):
+  - CRUD operations for integrations with encrypted credential storage
+  - Sync execution with direction support (pull_jobs, pull_candidates, push_candidates)
+  - External entity mapping for ID translation
+  - Queue management with priority-based scheduling
+  - Statistics tracking (total syncs, successes, failures, last sync time)
+
+- **Sync Worker** (`sync-worker.ts`, 426 lines):
+  - Background queue processor polling every 5 seconds (configurable)
+  - Batch processing (10 items per batch, configurable)
+  - Concurrent execution (max 5, configurable)
+  - Exponential backoff retry logic (1, 2, 4, 8, 16 minutes, max 3 retries)
+  - Periodic scheduling for regular syncs
+  - Health check endpoint
+  - Graceful shutdown handling
+
+- **REST API** (`routes.ts`, 254 lines):
+  - 9 endpoints for integration management
+  - CRUD operations with validation
+  - Manual sync triggers
+  - Statistics retrieval
+  - Queue item management
+
+**Frontend Implementation (3 pages, 680 lines):**
+- **List Page** (`integrations/page.tsx`, 312 lines):
+  - Grid view of all integrations with status indicators
+  - Last sync timestamp display
+  - Quick actions (view, sync, delete)
+  - Create new integration button
+
+- **Detail Page** (`integrations/[id]/page.tsx`, 441 lines):
+  - Tabbed interface (Overview, Sync History, Settings, Danger Zone)
+  - Real-time sync status with last 10 sync logs
+  - Manual sync trigger with direction selection
+  - Configuration management
+  - Delete integration with confirmation
+
+- **New Integration Wizard** (`integrations/new/page.tsx`, 427 lines):
+  - Multi-step form (Platform → Credentials → Sync Settings → Confirm)
+  - Platform selection (Greenhouse currently supported)
+  - Credential input with visibility toggle
+  - Test connection before saving
+  - Sync direction and frequency configuration
+
+**Docker Deployment:**
+- Separate container for sync worker (`ats-sync-worker`)
+- Dockerfile with multi-stage build
+- docker-compose.yml configuration with health checks
+- Environment variable configuration for all settings
+- Kubernetes manifests ready (Deployment, Service, ConfigMap, Secret)
+
+**Configuration:**
+- Schema-aware Supabase client (uses 'ats' schema by default)
+- Encrypted credential storage with secret key from environment
+- Configurable polling intervals, batch sizes, and concurrency limits
+- Webhook endpoints for real-time sync triggers from ATS platforms
+
+**Documentation:**
+- Comprehensive README with architecture, setup, and troubleshooting
+- API examples for all endpoints
+- Queue processing flow diagrams
+- Error handling and retry logic documentation
+
+**Known Limitations:**
+- Only Greenhouse integration implemented (Lever, Workable, Ashby pending)
+- Webhook consumption from ATS platforms not yet implemented (polling only)
+- No conflict resolution UI (uses last-write-wins currently)
+- Single-threaded worker (horizontal scaling requires queue coordination)
+
+**Next Steps for Phase 4C+:**
+- Add Lever, Workable, and Ashby integrations
+- Implement webhook consumption from ATS platforms
+- Add conflict resolution UI for manual intervention
+- Add horizontal scaling support with distributed queue coordination
+- Add sync analytics dashboard for admins
+
+---
 
 ### 4.2 Enterprise SSO & Identity Federation
 

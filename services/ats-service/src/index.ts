@@ -8,6 +8,7 @@ import { AtsService } from './service';
 import { EventPublisher } from './events';
 import { registerRoutes } from './routes';
 import { registerPhase2Routes } from './routes-phase2';
+import { registerIntegrationRoutes } from './integration-routes';
 import { CandidateOwnershipService, PlacementCollaborationService } from './ownership';
 import { PlacementLifecycleService } from './placement-lifecycle';
 
@@ -52,6 +53,7 @@ async function main() {
                 { name: 'candidates', description: 'Candidate management' },
                 { name: 'applications', description: 'Job applications and pipeline' },
                 { name: 'placements', description: 'Successful hires and placements' },
+                { name: 'integrations', description: 'ATS integration management' },
             ],
         },
     });
@@ -85,6 +87,9 @@ async function main() {
     
     // Register Phase 2 routes
     registerPhase2Routes(app, ownershipService, collaborationService, lifecycleService);
+    
+    // Register ATS integration routes (Phase 4C)
+    registerIntegrationRoutes(app);
 
     // Health check endpoint
     app.get('/health', async (request, reply) => {

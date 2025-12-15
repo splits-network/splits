@@ -5,8 +5,10 @@
     "main": "./dist/index.js",
     "scripts": {
         "dev": "tsx watch src/index.ts",
+        "dev:worker": "tsx watch src/sync-worker.ts",
         "build": "tsc -b",
         "start": "node dist/index.js",
+        "start:worker": "node dist/sync-worker.js",
         "clean": "rm -rf dist *.tsbuildinfo"
     },
     "dependencies": {

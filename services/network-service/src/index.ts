@@ -7,6 +7,7 @@ import { NetworkRepository } from './repository';
 import { NetworkService } from './service';
 import { registerRoutes } from './routes';
 import { registerPhase2Routes } from './routes-phase2';
+import { registerTeamRoutes } from './team-routes';
 import { CandidateRoleAssignmentService, RecruiterReputationService } from './proposals';
 
 async function main() {
@@ -34,7 +35,7 @@ async function main() {
         openapi: {
             info: {
                 title: 'Network Service API',
-                description: 'Recruiter network management - profiles, assignments, and statistics',
+                description: 'Recruiter network management - profiles, assignments, teams, and statistics',
                 version: '1.0.0',
             },
             servers: [
@@ -47,6 +48,7 @@ async function main() {
                 { name: 'recruiters', description: 'Recruiter profile management' },
                 { name: 'assignments', description: 'Job role assignments to recruiters' },
                 { name: 'stats', description: 'Recruiter performance statistics' },
+                { name: 'teams', description: 'Recruiting teams and agencies (Phase 4B)' },
             ],
         },
     });
@@ -75,6 +77,9 @@ async function main() {
     
     // Register Phase 2 routes
     registerPhase2Routes(app, proposalService, reputationService);
+    
+    // Register Phase 4B Team routes
+    await registerTeamRoutes(app);
 
     // Health check endpoint
     app.get('/health', async (request, reply) => {
