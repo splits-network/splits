@@ -1,50 +1,86 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-
 export interface BaseClientConfig {
     baseURL: string;
     timeout?: number;
     headers?: Record<string, string>;
 }
 
+export interface ApiResponse<T> {
+    data: T;
+    message?: string;
+}
+
 /**
- * Base HTTP client for service-to-service communication
+ * Base HTTP client for service-to-service communication using fetch
  */
 export class BaseClient {
-    protected client: AxiosInstance;
+    protected baseURL: string;
+    protected timeout: number;
+    protected headers: Record<string, string>;
 
     constructor(config: BaseClientConfig) {
-        this.client = axios.create({
-            baseURL: config.baseURL,
-            timeout: config.timeout || 10000,
-            headers: {
-                'Content-Type': 'application/json',
-                ...config.headers,
-            },
+        this.baseURL = config.baseURL;
+        this.timeout = config.timeout || 10000;
+        this.headers = {
+            'Content-Type': 'application/json',
+            ...config.headers,
+        };
+    }
+
+    protected async request<T>(path: string, options: RequestInit = {}): Promise<T> {
+        const url = `${this.baseURL}${path}`;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+        try {
+            const response = await fetch(url, {
+                ...options,
+                headers: {
+                    ...this.headers,
+                    ...options.headers,
+                },
+                signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({ message: 'Request failed' })) as { message?: string };
+                throw new Error(error.message || `HTTP ${response.status}`);
+            }
+
+            return response.json() as Promise<T>;
+        } catch (error: unknown) {
+            clearTimeout(timeoutId);
+            throw error;
+        }
+    }
+
+    protected async get<T>(path: string): Promise<T> {
+        return this.request<T>(path, { method: 'GET' });
+    }
+
+    protected async post<T>(path: string, data?: any): Promise<T> {
+        return this.request<T>(path, {
+            method: 'POST',
+            body: data ? JSON.stringify(data) : undefined,
         });
     }
 
-    protected async get<T>(path: string, config?: AxiosRequestConfig): Promise<T> {
-        const response = await this.client.get(path, config);
-        return response.data;
+    protected async put<T>(path: string, data?: any): Promise<T> {
+        return this.request<T>(path, {
+            method: 'PUT',
+            body: data ? JSON.stringify(data) : undefined,
+        });
     }
 
-    protected async post<T>(path: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-        const response = await this.client.post(path, data, config);
-        return response.data;
+    protected async patch<T>(path: string, data?: any): Promise<T> {
+        return this.request<T>(path, {
+            method: 'PATCH',
+            body: data ? JSON.stringify(data) : undefined,
+        });
     }
 
-    protected async put<T>(path: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-        const response = await this.client.put(path, data, config);
-        return response.data;
-    }
-
-    protected async patch<T>(path: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
-        const response = await this.client.patch(path, data, config);
-        return response.data;
-    }
-
-    protected async delete<T>(path: string, config?: AxiosRequestConfig): Promise<T> {
-        const response = await this.client.delete(path, config);
-        return response.data;
+    protected async delete<T>(path: string): Promise<T> {
+        return this.request<T>(path, { method: 'DELETE' });
     }
 }

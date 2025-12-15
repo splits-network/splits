@@ -9,8 +9,7 @@
     "dev": "tsc --watch"
   },
   "dependencies": {
-    "@splits-network/shared-types": "workspace:*",
-    "axios": "^1.7.9"
+    "@splits-network/shared-types": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

@@ -1,10 +1,5 @@
-import { BaseClient, BaseClientConfig } from './base-client';
+import { BaseClient, BaseClientConfig, ApiResponse } from './base-client';
 import { User, Organization, Membership } from '@splits-network/shared-types';
-
-export interface ApiResponse<T> {
-    data: T;
-    message?: string;
-}
 
 /**
  * Client for Identity Service

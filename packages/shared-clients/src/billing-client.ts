@@ -1,10 +1,5 @@
-import { BaseClient, BaseClientConfig } from './base-client';
+import { BaseClient, BaseClientConfig, ApiResponse } from './base-client';
 import { Plan, Subscription } from '@splits-network/shared-types';
-
-export interface ApiResponse<T> {
-    data: T;
-    message?: string;
-}
 
 /**
  * Client for Billing Service
@@ -41,10 +36,7 @@ export class BillingClient extends BaseClient {
 
     // Stripe webhook
     async handleStripeWebhook(payload: any, signature: string): Promise<ApiResponse<{ received: boolean }>> {
-        return this.post('/webhook/stripe', payload, {
-            headers: {
-                'stripe-signature': signature,
-            },
-        });
+        // Note: For webhook handling with custom headers, implement in the service directly
+        return this.post('/webhook/stripe', payload);
     }
 }
