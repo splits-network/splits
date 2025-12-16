@@ -3,6 +3,32 @@ import { ServiceRegistry } from './clients';
 import { AuthContext } from './auth';
 import { requireRoles, AuthenticatedRequest, isRecruiter, isCompanyUser, isAdmin } from './rbac';
 
+/**
+ * API Gateway Routes with RBAC Enforcement
+ * 
+ * RBAC Data Scoping Rules:
+ * 
+ * 1. Platform Admins (platform_admin):
+ *    - Full access to all data across all organizations
+ *    - No filtering applied
+ * 
+ * 2. Company Users (company_admin, hiring_manager):
+ *    - Can only view/manage data for their company's organization
+ *    - Jobs: filtered by company_id matching their organization
+ *    - Candidates: only those submitted to their company's jobs
+ *    - Applications: only for their company's jobs
+ *    - Placements: only for their company
+ * 
+ * 3. Recruiters (recruiter):
+ *    - Can only view/manage jobs explicitly assigned to them
+ *    - Jobs: filtered by role_assignments in network service
+ *    - Candidates: only their own submissions
+ *    - Applications: only for candidates they submitted
+ *    - Placements: only where they are the recruiter of record
+ * 
+ * Use /api/roles endpoint (not /api/jobs) for properly filtered job listings.
+ */
+
 // Helper to get correlation ID from request
 function getCorrelationId(request: FastifyRequest): string | undefined {
     return (request as any).correlationId;
@@ -52,23 +78,64 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
         return reply.send(profile);
     });
 
-    // Roles endpoint - filtered by recruiter assignments
+    // Roles endpoint - filtered by user role (RBAC enforced)
+    // - platform_admin: sees all jobs
+    // - company_admin/hiring_manager: sees only their company's jobs
+    // - recruiter: sees only jobs assigned to them
     app.get('/api/roles', async (request: FastifyRequest, reply: FastifyReply) => {
         const req = request as AuthenticatedRequest;
         const atsService = services.get('ats');
         const networkService = services.get('network');
+        const identityService = services.get('identity');
         const correlationId = getCorrelationId(request);
 
-        // Check if user is a recruiter
-        const isUserRecruiter = isRecruiter(req.auth);
         const isUserAdmin = isAdmin(req.auth);
+        const isUserCompany = isCompanyUser(req.auth);
+        const isUserRecruiter = isRecruiter(req.auth);
 
         // Build query params
         const queryParams = request.query as any;
         let jobIds: string[] | undefined;
+        let companyIds: string[] | undefined;
 
-        // If user is a recruiter (and not admin), filter by assigned jobs
-        if (isUserRecruiter && !isUserAdmin) {
+        // Platform admins see everything - no filtering
+        if (isUserAdmin) {
+            // No filtering needed
+        }
+        // Company users (company_admin, hiring_manager) see only their company's jobs
+        else if (isUserCompany) {
+            // Get user's company organization(s)
+            const companyMemberships = req.auth.memberships.filter(
+                m => m.role === 'company_admin' || m.role === 'hiring_manager'
+            );
+
+            if (companyMemberships.length === 0) {
+                return reply.send({ data: [] });
+            }
+
+            // Get company IDs for these organizations
+            // In Phase 1, organization_id maps 1:1 to a company
+            // Need to lookup companies by organization_id
+            try {
+                const companiesResponse: any = await atsService.get('/companies', undefined, correlationId);
+                const allCompanies = companiesResponse.data || [];
+                
+                // Filter to companies that belong to user's organizations
+                const orgIds = companyMemberships.map(m => m.organization_id);
+                companyIds = allCompanies
+                    .filter((c: any) => orgIds.includes(c.identity_organization_id))
+                    .map((c: any) => c.id);
+
+                if (companyIds.length === 0) {
+                    return reply.send({ data: [] });
+                }
+            } catch (error) {
+                request.log.error({ error, userId: req.auth.userId }, 'Failed to get company IDs for user');
+                return reply.send({ data: [] });
+            }
+        }
+        // Recruiters see only jobs assigned to them
+        else if (isUserRecruiter) {
             // Get recruiter profile for this user
             try {
                 const recruiterResponse: any = await networkService.get(
@@ -99,6 +166,10 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
                 return reply.send({ data: [] });
             }
         }
+        // Unknown role - deny access
+        else {
+            return reply.status(403).send({ error: 'Insufficient permissions to view roles' });
+        }
 
         // Get all jobs from ATS service
         const queryString = new URLSearchParams(queryParams).toString();
@@ -107,8 +178,12 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
 
         let jobs = jobsResponse.data || [];
 
-        // Filter by assigned jobs if recruiter
-        if (jobIds) {
+        // Apply filtering based on role
+        if (companyIds) {
+            // Filter to only jobs from user's companies
+            jobs = jobs.filter((job: any) => companyIds!.includes(job.company_id));
+        } else if (jobIds) {
+            // Filter to only assigned jobs for recruiters
             jobs = jobs.filter((job: any) => jobIds!.includes(job.id));
         }
 
