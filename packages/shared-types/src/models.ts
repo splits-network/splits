@@ -63,7 +63,34 @@ export interface Candidate {
     updated_at: Date;
 }
 
+// Masked candidate data for company users before acceptance
+export interface MaskedCandidate {
+    id: string;
+    email: string; // Will be "hidden@splits.network"
+    full_name: string; // Will be initials like "J.D."
+    linkedin_url?: string; // Will be undefined
+    created_at: Date;
+    updated_at: Date;
+    _masked: true; // Flag to indicate this is masked data
+}
+
 export type ApplicationStage = 'submitted' | 'screen' | 'interview' | 'offer' | 'hired' | 'rejected';
+
+// Audit log for tracking application actions
+export interface ApplicationAuditLog {
+    id: string;
+    application_id: string;
+    action: 'accepted' | 'rejected' | 'stage_changed' | 'viewed' | 'created';
+    performed_by_user_id?: string;
+    performed_by_role?: string;
+    company_id?: string;
+    old_value?: Record<string, any>;
+    new_value?: Record<string, any>;
+    metadata?: Record<string, any>;
+    ip_address?: string;
+    user_agent?: string;
+    created_at: Date;
+}
 
 export interface Application {
     id: string;
@@ -72,8 +99,14 @@ export interface Application {
     recruiter_id?: string;
     stage: ApplicationStage;
     notes?: string;
+    accepted_by_company: boolean;
+    accepted_at?: Date;
     created_at: Date;
     updated_at: Date;
+    // Enriched data from service layer
+    candidate?: Candidate | MaskedCandidate;
+    recruiter?: { id: string; name: string; email: string };
+    job?: Job;
 }
 
 export type PlacementState = 'hired' | 'active' | 'completed' | 'failed';

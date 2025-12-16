@@ -79,6 +79,10 @@ export interface UpdateApplicationStageDTO {
     notes?: string;
 }
 
+export interface AcceptApplicationDTO {
+    application_id: string;
+}
+
 export interface CreatePlacementDTO {
     application_id: string;
     salary: number;

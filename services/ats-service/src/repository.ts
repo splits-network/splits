@@ -8,6 +8,7 @@ import {
     CandidateSourcer,
     CandidateOutreach,
     PlacementCollaborator,
+    ApplicationAuditLog,
 } from '@splits-network/shared-types';
 
 export class AtsRepository {
@@ -262,6 +263,8 @@ export class AtsRepository {
     async findApplications(filters?: {
         recruiter_id?: string;
         job_id?: string;
+        job_ids?: string[];
+        candidate_id?: string;
         stage?: string
     }): Promise<Application[]> {
         let query = this.supabase
@@ -274,6 +277,12 @@ export class AtsRepository {
         }
         if (filters?.job_id) {
             query = query.eq('job_id', filters.job_id);
+        }
+        if (filters?.job_ids && filters.job_ids.length > 0) {
+            query = query.in('job_id', filters.job_ids);
+        }
+        if (filters?.candidate_id) {
+            query = query.eq('candidate_id', filters.candidate_id);
         }
         if (filters?.stage) {
             query = query.eq('stage', filters.stage);
@@ -622,6 +631,60 @@ export class AtsRepository {
             totalApplications,
             totalPlacements,
         };
+    }
+
+    // Audit log methods
+    async createAuditLog(log: Omit<ApplicationAuditLog, 'id' | 'created_at'>): Promise<ApplicationAuditLog> {
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('application_audit_log')
+            .insert({
+                application_id: log.application_id,
+                action: log.action,
+                performed_by_user_id: log.performed_by_user_id,
+                performed_by_role: log.performed_by_role,
+                company_id: log.company_id,
+                old_value: log.old_value,
+                new_value: log.new_value,
+                metadata: log.metadata,
+                ip_address: log.ip_address,
+                user_agent: log.user_agent,
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async getAuditLogsForApplication(applicationId: string): Promise<ApplicationAuditLog[]> {
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('application_audit_log')
+            .select('*')
+            .eq('application_id', applicationId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    async getAuditLogsForCompany(companyId: string, limit?: number): Promise<ApplicationAuditLog[]> {
+        let query = this.supabase
+            .schema('ats')
+            .from('application_audit_log')
+            .select('*')
+            .eq('company_id', companyId)
+            .order('created_at', { ascending: false });
+
+        if (limit) {
+            query = query.limit(limit);
+        }
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+        return data || [];
     }
 }
 

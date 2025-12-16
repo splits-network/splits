@@ -1,45 +1,53 @@
 import { NetworkRepository } from './repository';
-import { Recruiter, RoleAssignment, RecruiterStatus } from '@splits-network/shared-types';
-import { AtsClient } from './clients';
+import { RecruiterService } from './services/recruiters/service';
+import { AssignmentService } from './services/assignments/service';
+import { StatsService } from './services/stats/service';
+import { Recruiter, RecruiterStatus, RoleAssignment } from '@splits-network/shared-types';
 
+/**
+ * Main Network Service Coordinator
+ * Instantiates and exposes domain services, provides delegation methods
+ */
 export class NetworkService {
-    private atsClient: AtsClient;
+    // Domain services
+    public readonly recruiters: RecruiterService;
+    public readonly assignments: AssignmentService;
+    public readonly stats: StatsService;
 
     constructor(private repository: NetworkRepository) {
-        this.atsClient = new AtsClient();
+        // Initialize domain services
+        this.recruiters = new RecruiterService(repository);
+        this.assignments = new AssignmentService(repository);
+        this.stats = new StatsService(repository);
     }
+
+    // ========================================================================
+    // Delegation methods for backward compatibility
+    // ========================================================================
 
     // Recruiter methods
     async getRecruiterById(id: string): Promise<Recruiter> {
-        const recruiter = await this.repository.findRecruiterById(id);
-        if (!recruiter) {
-            throw new Error(`Recruiter ${id} not found`);
-        }
-        return recruiter;
+        return this.recruiters.getRecruiterById(id);
     }
 
     async getRecruiterByUserId(userId: string): Promise<Recruiter | null> {
-        return await this.repository.findRecruiterByUserId(userId);
+        return this.recruiters.getRecruiterByUserId(userId);
     }
 
     async getAllRecruiters(): Promise<Recruiter[]> {
-        return await this.repository.findAllRecruiters();
+        return this.recruiters.getAllRecruiters();
     }
 
     async createRecruiter(userId: string, bio?: string): Promise<Recruiter> {
-        return await this.repository.createRecruiter({
-            user_id: userId,
-            status: 'pending',
-            bio,
-        });
+        return this.recruiters.createRecruiter(userId, bio);
     }
 
     async updateRecruiterStatus(id: string, status: RecruiterStatus): Promise<Recruiter> {
-        return await this.repository.updateRecruiter(id, { status });
+        return this.recruiters.updateRecruiterStatus(id, status);
     }
 
     async updateRecruiterBio(id: string, bio: string): Promise<Recruiter> {
-        return await this.repository.updateRecruiter(id, { bio });
+        return this.recruiters.updateRecruiterBio(id, bio);
     }
 
     async getRecruiterStats(id: string): Promise<{
@@ -47,41 +55,20 @@ export class NetworkService {
         placements_count: number;
         total_earnings: number;
     }> {
-        // Verify recruiter exists
-        const recruiter = await this.getRecruiterById(id);
-
-        // Fetch applications (submissions) and placements from ATS service
-        const [applications, placements] = await Promise.all([
-            this.atsClient.getApplicationsByRecruiterId(id),
-            this.atsClient.getPlacementsByRecruiterId(id),
-        ]);
-
-        // Calculate total earnings from placements
-        const totalEarnings = placements.reduce((sum, placement) => {
-            return sum + (placement.recruiter_share || 0);
-        }, 0);
-
-        return {
-            submissions_count: applications.length,
-            placements_count: placements.length,
-            total_earnings: totalEarnings,
-        };
+        return this.recruiters.getRecruiterStats(id);
     }
 
-    // Role assignment methods
+    // Assignment methods
     async getAssignedJobsForRecruiter(recruiterId: string): Promise<string[]> {
-        const assignments = await this.repository.findRoleAssignmentsByRecruiterId(recruiterId);
-        return assignments.map((a) => a.job_id);
+        return this.assignments.getAssignedJobsForRecruiter(recruiterId);
     }
 
     async getAssignedRecruitersForJob(jobId: string): Promise<string[]> {
-        const assignments = await this.repository.findRoleAssignmentsByJobId(jobId);
-        return assignments.map((a) => a.recruiter_id);
+        return this.assignments.getAssignedRecruitersForJob(jobId);
     }
 
     async isRecruiterAssignedToJob(jobId: string, recruiterId: string): Promise<boolean> {
-        const assignment = await this.repository.findRoleAssignment(jobId, recruiterId);
-        return assignment !== null;
+        return this.assignments.isRecruiterAssignedToJob(jobId, recruiterId);
     }
 
     async assignRecruiterToJob(
@@ -89,27 +76,11 @@ export class NetworkService {
         recruiterId: string,
         assignedBy?: string
     ): Promise<RoleAssignment> {
-        // Verify recruiter exists and is active
-        const recruiter = await this.getRecruiterById(recruiterId);
-        if (recruiter.status !== 'active') {
-            throw new Error(`Recruiter ${recruiterId} is not active`);
-        }
-
-        // Check if already assigned
-        const existing = await this.repository.findRoleAssignment(jobId, recruiterId);
-        if (existing) {
-            return existing;
-        }
-
-        return await this.repository.createRoleAssignment({
-            job_id: jobId,
-            recruiter_id: recruiterId,
-            assigned_by: assignedBy,
-        });
+        return this.assignments.assignRecruiterToJob(jobId, recruiterId, assignedBy);
     }
 
     async unassignRecruiterFromJob(jobId: string, recruiterId: string): Promise<void> {
-        await this.repository.deleteRoleAssignment(jobId, recruiterId);
+        return this.assignments.unassignRecruiterFromJob(jobId, recruiterId);
     }
 
     // Helper method for checking if a user has recruiter access
@@ -124,6 +95,6 @@ export class NetworkService {
 
     // Stats methods
     async getStats(): Promise<{ totalRecruiters: number; activeRecruiters: number; pendingRecruiters: number }> {
-        return await this.repository.getRecruiterStats();
+        return this.stats.getStats();
     }
 }

@@ -2,17 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth, useUser } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useViewMode } from '@/hooks/use-view-mode';
 
 export default function CandidatesListClient() {
     const { getToken } = useAuth();
+    const { user } = useUser();
     const [candidates, setCandidates] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useViewMode('candidatesViewMode');
+    const [userRole, setUserRole] = useState<string | null>(null);
 
     useEffect(() => {
         async function loadCandidates() {
@@ -27,6 +29,24 @@ export default function CandidatesListClient() {
                 }
                 
                 const client = createAuthenticatedClient(token);
+                
+                // Get user profile to check role
+                const profileRes = await client.get('/me');
+                const profile = profileRes.data;
+                
+                // Determine user role
+                const membership = profile?.memberships?.[0];
+                const role = membership?.role;
+                setUserRole(role);
+                
+                // Company users should only see their submitted candidates via applications
+                if (role === 'company_admin' || role === 'hiring_manager') {
+                    // Redirect to applications page instead
+                    window.location.href = '/applications';
+                    return;
+                }
+                
+                // Recruiters and admins can see all candidates
                 const response = await client.get('/candidates');
                 setCandidates(response.data || []);
             } catch (err: any) {

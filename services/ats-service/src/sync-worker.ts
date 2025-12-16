@@ -6,7 +6,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { createLogger } from '@splits-network/shared-logging';
-import { ATSIntegrationService } from './integration-service';
+import { ATSIntegrationService } from './services/integrations/service';
 import type { SyncQueueItem } from '@splits-network/shared-types';
 
 interface WorkerConfig {

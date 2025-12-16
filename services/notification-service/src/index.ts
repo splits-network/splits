@@ -7,8 +7,8 @@ import {
 import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler } from '@splits-network/shared-fastify';
 import { NotificationRepository } from './repository';
-import { EmailService } from './email';
-import { EventConsumer } from './consumer';
+import { NotificationService } from './service';
+import { DomainEventConsumer } from './domain-consumer';
 import { ServiceRegistry } from './clients';
 
 async function main() {
@@ -43,13 +43,13 @@ async function main() {
 
     app.setErrorHandler(errorHandler);
 
-    // Initialize repository and email service
+    // Initialize repository and notification service
     const repository = new NotificationRepository(
         dbConfig.supabaseUrl,
         dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
     );
 
-    const emailService = new EmailService(
+    const notificationService = new NotificationService(
         repository,
         resendConfig.apiKey,
         resendConfig.fromEmail,
@@ -64,14 +64,21 @@ async function main() {
         logger
     );
 
-    // Initialize event consumer
-    const consumer = new EventConsumer(rabbitConfig.url, emailService, services, logger);
+    // Initialize domain event consumer
+    const consumer = new DomainEventConsumer(rabbitConfig.url, notificationService, services, logger);
     await consumer.connect();
 
     // Optional: Add HTTP endpoint for manual notifications
     app.post('/send-test-email', async (request, reply) => {
-        const { to, subject, html } = request.body as any;
-        await emailService.sendEmail(to, subject, html, { eventType: 'test' });
+        const { to, candidateName, jobTitle, companyName } = request.body as any;
+        
+        // Example: Send application created notification
+        await notificationService.sendApplicationCreated(to, {
+            candidateName: candidateName || 'Test Candidate',
+            jobTitle: jobTitle || 'Test Role',
+            companyName: companyName || 'Test Company',
+        });
+        
         return reply.send({ success: true });
     });
 

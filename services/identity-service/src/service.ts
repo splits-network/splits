@@ -1,70 +1,47 @@
+/**
+ * Identity Service - Main Coordinator
+ * Delegates to domain-specific services
+ */
+
 import { IdentityRepository } from './repository';
+import { UsersService } from './services/users/service';
+import { OrganizationsService } from './services/organizations/service';
+import { MembershipsService } from './services/memberships/service';
+import { WebhooksService } from './services/webhooks/service';
 import { User, Organization, Membership } from '@splits-network/shared-types';
-import { UserProfileDTO, MembershipDTO } from '@splits-network/shared-types';
+import { UserProfileDTO } from '@splits-network/shared-types';
 
 export class IdentityService {
-    constructor(private repository: IdentityRepository) { }
+    public readonly users: UsersService;
+    public readonly organizations: OrganizationsService;
+    public readonly memberships: MembershipsService;
+    public readonly webhooks: WebhooksService;
 
+    constructor(private repository: IdentityRepository) {
+        this.users = new UsersService(repository);
+        this.organizations = new OrganizationsService(repository);
+        this.memberships = new MembershipsService(repository);
+        this.webhooks = new WebhooksService(repository);
+    }
+
+    // Convenience delegation methods for backward compatibility
     async syncClerkUser(
         clerkUserId: string,
         email: string,
         name: string
     ): Promise<User> {
-        // Check if user already exists
-        let user = await this.repository.findUserByClerkId(clerkUserId);
-
-        if (user) {
-            // Update if email or name changed
-            if (user.email !== email || user.name !== name) {
-                user = await this.repository.updateUser(user.id, { email, name });
-            }
-            return user;
-        }
-
-        // Create new user
-        return await this.repository.createUser({
-            clerk_user_id: clerkUserId,
-            email,
-            name,
-        });
+        return this.users.syncClerkUser(clerkUserId, email, name);
     }
 
     async getUserProfile(userId: string): Promise<UserProfileDTO> {
-        const user = await this.repository.findUserById(userId);
-        if (!user) {
-            throw new Error(`User ${userId} not found`);
-        }
-
-        const memberships = await this.repository.findMembershipsByUserId(userId);
-
-        const membershipDTOs: MembershipDTO[] = [];
-        for (const membership of memberships) {
-            const org = await this.repository.findOrganizationById(
-                membership.organization_id
-            );
-            if (org) {
-                membershipDTOs.push({
-                    id: membership.id,
-                    organization_id: org.id,
-                    organization_name: org.name,
-                    role: membership.role,
-                });
-            }
-        }
-
-        return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            memberships: membershipDTOs,
-        };
+        return this.users.getUserProfile(userId);
     }
 
     async createOrganization(
         name: string,
         type: 'company' | 'platform'
     ): Promise<Organization> {
-        return await this.repository.createOrganization({ name, type });
+        return this.organizations.createOrganization(name, type);
     }
 
     async addMembership(
@@ -72,14 +49,10 @@ export class IdentityService {
         organizationId: string,
         role: 'recruiter' | 'company_admin' | 'hiring_manager' | 'platform_admin'
     ): Promise<Membership> {
-        return await this.repository.createMembership({
-            user_id: userId,
-            organization_id: organizationId,
-            role,
-        });
+        return this.memberships.addMembership(userId, organizationId, role);
     }
 
     async removeMembership(membershipId: string): Promise<void> {
-        await this.repository.deleteMembership(membershipId);
+        return this.memberships.removeMembership(membershipId);
     }
 }

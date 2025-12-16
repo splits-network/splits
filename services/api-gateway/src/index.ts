@@ -10,9 +10,9 @@ import { AuthMiddleware } from './auth';
 import { ServiceRegistry } from './clients';
 import { registerRoutes } from './routes';
 import { OAuthTokenManager } from './oauth';
-import { registerOAuthRoutes } from './oauth-routes';
+import { registerOAuthRoutes } from './routes/oauth-routes';
 import { registerVersionInfo } from './versioning';
-import { registerWebhookRoutes } from './webhook-routes';
+import { registerWebhookRoutes } from './routes/webhook-routes';
 import { WebhookDeliveryService } from './webhooks';
 
 async function main() {
@@ -98,15 +98,20 @@ async function main() {
                 { name: 'webhooks', description: 'Webhook subscription management' },
                 { name: 'meta', description: 'API metadata and versioning' },
                 { name: 'identity', description: 'User and organization management' },
-                { name: 'ats', description: 'Jobs, candidates, applications, and placements' },
-                { name: 'network', description: 'Recruiter profiles and role assignments' },
+                { name: 'roles', description: 'RBAC-filtered job listings' },
+                { name: 'jobs', description: 'Job management' },
+                { name: 'companies', description: 'Company management' },
+                { name: 'candidates', description: 'Candidate management' },
+                { name: 'applications', description: 'Application lifecycle' },
+                { name: 'placements', description: 'Placement management' },
+                { name: 'recruiters', description: 'Recruiter profiles and stats' },
+                { name: 'assignments', description: 'Recruiter-to-job assignments' },
+                { name: 'proposals', description: 'Job proposals (Phase 2)' },
+                { name: 'reputation', description: 'Recruiter reputation (Phase 2)' },
                 { name: 'billing', description: 'Subscription plans and billing' },
                 { name: 'documents', description: 'Document storage and retrieval' },
-                { name: 'phase2-ownership', description: 'Phase 2: Candidate sourcing and ownership protection' },
-                { name: 'phase2-placements', description: 'Phase 2: Placement lifecycle and guarantees' },
-                { name: 'phase2-collaboration', description: 'Phase 2: Multi-recruiter collaboration and splits' },
-                { name: 'phase2-proposals', description: 'Phase 2: Candidate proposals and workflows' },
-                { name: 'phase2-reputation', description: 'Phase 2: Recruiter reputation and scoring' },
+                { name: 'dashboards', description: 'Dashboard stats and insights' },
+                { name: 'admin', description: 'Platform admin and automation' },
             ],
         },
     });

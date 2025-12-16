@@ -7,10 +7,9 @@ import { AtsRepository } from './repository';
 import { AtsService } from './service';
 import { EventPublisher } from './events';
 import { registerRoutes } from './routes';
-import { registerPhase2Routes } from './routes-phase2';
-import { registerIntegrationRoutes } from './integration-routes';
-import { CandidateOwnershipService, PlacementCollaborationService } from './ownership';
-import { PlacementLifecycleService } from './placement-lifecycle';
+import { CandidateOwnershipService } from './services/candidates/ownership-service';
+import { PlacementCollaborationService } from './services/placements/collaboration-service';
+import { PlacementLifecycleService } from './services/placements/lifecycle-service';
 
 async function main() {
     const baseConfig = loadBaseConfig('ats-service');
@@ -82,14 +81,8 @@ async function main() {
     const collaborationService = new PlacementCollaborationService(repository, eventPublisher);
     const lifecycleService = new PlacementLifecycleService(repository, eventPublisher);
 
-    // Register routes
-    registerRoutes(app, service);
-    
-    // Register Phase 2 routes
-    registerPhase2Routes(app, ownershipService, collaborationService, lifecycleService);
-    
-    // Register ATS integration routes (Phase 4C)
-    registerIntegrationRoutes(app);
+    // Register all routes (Phase 1 and Phase 2)
+    registerRoutes(app, service, ownershipService, collaborationService, lifecycleService);
 
     // Health check endpoint
     app.get('/health', async (request, reply) => {

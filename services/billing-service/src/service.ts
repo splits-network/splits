@@ -1,9 +1,21 @@
 import Stripe from 'stripe';
 import { BillingRepository } from './repository';
-import { Plan, Subscription, SubscriptionStatus } from '@splits-network/shared-types';
 import { Logger } from '@splits-network/shared-logging';
+import { PlanService } from './services/plans/service';
+import { SubscriptionService } from './services/subscriptions/service';
+import { WebhookService } from './services/webhooks/service';
+import { Plan, Subscription } from '@splits-network/shared-types';
 
+/**
+ * Main Billing Service Coordinator
+ * Instantiates and exposes domain services, provides delegation methods
+ */
 export class BillingService {
+    // Domain services
+    public readonly plans: PlanService;
+    public readonly subscriptions: SubscriptionService;
+    public readonly webhooks: WebhookService;
+
     private stripe: Stripe;
 
     constructor(
@@ -14,19 +26,24 @@ export class BillingService {
         this.stripe = new Stripe(stripeSecretKey, {
             apiVersion: '2025-11-17.clover',
         });
+
+        // Initialize domain services
+        this.plans = new PlanService(repository);
+        this.subscriptions = new SubscriptionService(repository, stripeSecretKey, logger);
+        this.webhooks = new WebhookService(this.subscriptions, logger);
     }
+
+    // ========================================================================
+    // Delegation methods for backward compatibility
+    // ========================================================================
 
     // Plan methods
     async getPlanById(id: string): Promise<Plan> {
-        const plan = await this.repository.findPlanById(id);
-        if (!plan) {
-            throw new Error(`Plan ${id} not found`);
-        }
-        return plan;
+        return this.plans.getPlanById(id);
     }
 
     async getAllPlans(): Promise<Plan[]> {
-        return await this.repository.findAllPlans();
+        return this.plans.getAllPlans();
     }
 
     async createPlan(
@@ -35,22 +52,16 @@ export class BillingService {
         stripePriceId?: string,
         features: Record<string, any> = {}
     ): Promise<Plan> {
-        return await this.repository.createPlan({
-            name,
-            price_monthly: priceMonthly,
-            stripe_price_id: stripePriceId,
-            features,
-        });
+        return this.plans.createPlan(name, priceMonthly, stripePriceId, features);
     }
 
     // Subscription methods
     async getSubscriptionByRecruiterId(recruiterId: string): Promise<Subscription | null> {
-        return await this.repository.findSubscriptionByRecruiterId(recruiterId);
+        return this.subscriptions.getSubscriptionByRecruiterId(recruiterId);
     }
 
     async isRecruiterSubscriptionActive(recruiterId: string): Promise<boolean> {
-        const subscription = await this.getSubscriptionByRecruiterId(recruiterId);
-        return subscription?.status === 'active' || subscription?.status === 'trialing';
+        return this.subscriptions.isRecruiterSubscriptionActive(recruiterId);
     }
 
     async createSubscription(
@@ -58,129 +69,15 @@ export class BillingService {
         planId: string,
         stripeCustomerId?: string
     ): Promise<Subscription> {
-        const plan = await this.getPlanById(planId);
-
-        let stripeSubscriptionId: string | undefined;
-
-        // Create Stripe subscription if customer ID and price ID provided
-        if (stripeCustomerId && plan.stripe_price_id) {
-            try {
-                const stripeSubscription = await this.stripe.subscriptions.create({
-                    customer: stripeCustomerId,
-                    items: [{ price: plan.stripe_price_id }],
-                    payment_behavior: 'default_incomplete',
-                    expand: ['latest_invoice.payment_intent'],
-                });
-
-                stripeSubscriptionId = stripeSubscription.id;
-
-                return await this.repository.createSubscription({
-                    recruiter_id: recruiterId,
-                    plan_id: planId,
-                    stripe_subscription_id: stripeSubscriptionId,
-                    status: stripeSubscription.status as SubscriptionStatus,
-                    current_period_start: new Date((stripeSubscription as any).current_period_start * 1000),
-                    current_period_end: new Date((stripeSubscription as any).current_period_end * 1000),
-                    cancel_at: stripeSubscription.cancel_at
-                        ? new Date(stripeSubscription.cancel_at * 1000)
-                        : undefined,
-                });
-            } catch (error) {
-                this.logger.error({ err: error }, 'Failed to create Stripe subscription');
-                throw error;
-            }
-        }
-
-        // Create local subscription without Stripe (for testing/manual plans)
-        return await this.repository.createSubscription({
-            recruiter_id: recruiterId,
-            plan_id: planId,
-            status: 'trialing',
-        });
-    }
-
-    async handleStripeWebhook(event: Stripe.Event): Promise<void> {
-        this.logger.info({ type: event.type }, 'Processing Stripe webhook');
-
-        switch (event.type) {
-            case 'customer.subscription.created':
-            case 'customer.subscription.updated':
-                await this.handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
-                break;
-
-            case 'customer.subscription.deleted':
-                await this.handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
-                break;
-
-            default:
-                this.logger.debug({ type: event.type }, 'Unhandled webhook event type');
-        }
-    }
-
-    private async handleSubscriptionUpdated(stripeSubscription: Stripe.Subscription): Promise<void> {
-        const subscription = await this.repository.findSubscriptionByStripeId(stripeSubscription.id);
-
-        if (!subscription) {
-            this.logger.warn(
-                { stripe_subscription_id: stripeSubscription.id },
-                'Subscription not found for Stripe webhook'
-            );
-            return;
-        }
-
-        await this.repository.updateSubscription(subscription.id, {
-            status: stripeSubscription.status as SubscriptionStatus,
-            current_period_start: new Date((stripeSubscription as any).current_period_start * 1000),
-            current_period_end: new Date((stripeSubscription as any).current_period_end * 1000),
-            cancel_at: stripeSubscription.cancel_at
-                ? new Date(stripeSubscription.cancel_at * 1000)
-                : undefined,
-        });
-
-        this.logger.info(
-            { subscription_id: subscription.id, status: stripeSubscription.status },
-            'Subscription updated from Stripe webhook'
-        );
-    }
-
-    private async handleSubscriptionDeleted(stripeSubscription: Stripe.Subscription): Promise<void> {
-        const subscription = await this.repository.findSubscriptionByStripeId(stripeSubscription.id);
-
-        if (!subscription) {
-            this.logger.warn(
-                { stripe_subscription_id: stripeSubscription.id },
-                'Subscription not found for deletion webhook'
-            );
-            return;
-        }
-
-        await this.repository.updateSubscription(subscription.id, {
-            status: 'canceled',
-        });
-
-        this.logger.info({ subscription_id: subscription.id }, 'Subscription canceled from Stripe webhook');
+        return this.subscriptions.createSubscription(recruiterId, planId, stripeCustomerId);
     }
 
     async cancelSubscription(recruiterId: string): Promise<Subscription> {
-        const subscription = await this.getSubscriptionByRecruiterId(recruiterId);
-        if (!subscription) {
-            throw new Error('No active subscription found');
-        }
+        return this.subscriptions.cancelSubscription(recruiterId);
+    }
 
-        // Cancel in Stripe if connected
-        if (subscription.stripe_subscription_id) {
-            try {
-                await this.stripe.subscriptions.cancel(subscription.stripe_subscription_id);
-            } catch (error) {
-                this.logger.error({ err: error }, 'Failed to cancel Stripe subscription');
-                throw error;
-            }
-        }
-
-        // Update local record
-        return await this.repository.updateSubscription(subscription.id, {
-            status: 'canceled',
-            cancel_at: new Date(),
-        });
+    // Webhook methods
+    async handleStripeWebhook(event: Stripe.Event): Promise<void> {
+        return this.webhooks.handleStripeWebhook(event);
     }
 }

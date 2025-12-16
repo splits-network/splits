@@ -80,7 +80,7 @@ async function main() {
     );
     const service = new BillingService(repository, stripeConfig.secretKey, logger);
 
-    // Register routes
+    // Register all routes (plans, subscriptions, webhooks, payouts)
     registerRoutes(app, service, stripeConfig.webhookSecret);
 
     // Health check endpoint
