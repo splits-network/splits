@@ -91,6 +91,8 @@ export interface JobPreScreenQuestion {
     updated_at: Date;
 }
 
+export type CandidateVerificationStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
+
 export interface Candidate {
     id: string;
     email: string;
@@ -102,6 +104,10 @@ export interface Candidate {
     current_company?: string;
     user_id?: string; // If set, candidate is self-managed (has their own account); if null, recruiter-managed
     recruiter_id?: string; // SOURCER: The recruiter who brought this candidate to the platform (permanent credit for visibility, NOT editing)
+    verification_status: CandidateVerificationStatus; // Verification status: unverified (default when recruiter adds), pending, verified, rejected
+    verification_metadata?: Record<string, any>; // Additional verification details
+    verified_at?: Date;
+    verified_by_user_id?: string;
     created_at: Date;
     updated_at: Date;
 }
@@ -112,6 +118,7 @@ export interface MaskedCandidate {
     email: string; // Will be "hidden@splits.network"
     full_name: string; // Will be initials like "J.D."
     linkedin_url?: string; // Will be undefined
+    verification_status: CandidateVerificationStatus; // Show verification status even when masked
     created_at: Date;
     updated_at: Date;
     _masked: true; // Flag to indicate this is masked data

@@ -70,6 +70,36 @@ export default function CandidatesListClient() {
         });
     };
 
+    const getVerificationStatusBadge = (status: string) => {
+        switch (status) {
+            case 'verified':
+                return 'badge-success';
+            case 'pending':
+                return 'badge-warning';
+            case 'unverified':
+                return 'badge-neutral';
+            case 'rejected':
+                return 'badge-error';
+            default:
+                return 'badge-ghost';
+        }
+    };
+
+    const getVerificationStatusIcon = (status: string) => {
+        switch (status) {
+            case 'verified':
+                return 'fa-circle-check';
+            case 'pending':
+                return 'fa-clock';
+            case 'unverified':
+                return 'fa-circle-question';
+            case 'rejected':
+                return 'fa-circle-xmark';
+            default:
+                return 'fa-circle';
+        }
+    };
+
     const filteredCandidates = candidates.filter(candidate =>
         searchQuery === '' ||
         candidate.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -158,9 +188,16 @@ export default function CandidatesListClient() {
                                         </div>
                                     </div>
                                     <div className="flex-1">
-                                        <Link href={`/candidates/${candidate.id}`} className="hover:text-primary transition-colors">
-                                            <h3 className="card-title text-xl">{candidate.full_name}</h3>
-                                        </Link>
+                                        <div className="flex items-center gap-2">
+                                            <Link href={`/candidates/${candidate.id}`} className="hover:text-primary transition-colors">
+                                                <h3 className="card-title text-xl">{candidate.full_name}</h3>
+                                            </Link>
+                                            {candidate.verification_status && (
+                                                <span className={`badge badge-sm ${getVerificationStatusBadge(candidate.verification_status)} gap-1`}>
+                                                    <i className={`fa-solid ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
+                                                </span>
+                                            )}
+                                        </div>
                                         <div className="text-sm text-base-content/70 mt-1">
                                             <a href={`mailto:${candidate.email}`} className="link link-hover">
                                                 {candidate.email}
@@ -210,6 +247,7 @@ export default function CandidatesListClient() {
                                 <tr>
                                     <th>Candidate</th>
                                     <th>Email</th>
+                                    <th>Status</th>
                                     <th>LinkedIn</th>
                                     <th>Added</th>
                                     <th className="text-right">Actions</th>
@@ -234,6 +272,14 @@ export default function CandidatesListClient() {
                                             <a href={`mailto:${candidate.email}`} className="link link-hover text-sm">
                                                 {candidate.email}
                                             </a>
+                                        </td>
+                                        <td>
+                                            {candidate.verification_status && (
+                                                <span className={`badge badge-sm ${getVerificationStatusBadge(candidate.verification_status)} gap-1`}>
+                                                    <i className={`fa-solid ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
+                                                    {candidate.verification_status.charAt(0).toUpperCase() + candidate.verification_status.slice(1)}
+                                                </span>
+                                            )}
                                         </td>
                                         <td>
                                             {candidate.linkedin_url ? (

@@ -18,6 +18,7 @@ export class CandidateService {
             email: 'hidden@splits.network',
             full_name: initials,
             linkedin_url: undefined,
+            verification_status: candidate.verification_status, // Show verification status even when masked
             created_at: candidate.created_at,
             updated_at: candidate.updated_at,
             _masked: true,
@@ -49,6 +50,7 @@ export class CandidateService {
                 full_name: fullName,
                 linkedin_url: linkedinUrl,
                 recruiter_id: recruiterId, // SOURCER: Permanent credit for bringing candidate to platform
+                verification_status: 'unverified', // Default to unverified when recruiter adds candidate
             });
         }
         return candidate;

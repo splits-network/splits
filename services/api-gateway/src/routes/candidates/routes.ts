@@ -153,11 +153,11 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
                 
                 // Add recruiter_id to body for ATS service
                 const bodyWithRecruiter = {
-                    ...request.body,
+                    ...(request.body as Record<string, any>),
                     recruiter_id: recruiterId
                 };
                 
-                const candidateData = await atsService().post('/candidates', bodyWithRecruiter);
+                const candidateData: any = await atsService().post('/candidates', bodyWithRecruiter);
                 
                 // Create recruiter-candidate relationship in network service
                 if (candidateData.data?.id) {

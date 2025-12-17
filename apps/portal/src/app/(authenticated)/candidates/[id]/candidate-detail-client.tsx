@@ -134,6 +134,36 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
         }
     };
 
+    const getVerificationStatusBadge = (status: string) => {
+        switch (status) {
+            case 'verified':
+                return 'badge-success';
+            case 'pending':
+                return 'badge-warning';
+            case 'unverified':
+                return 'badge-neutral';
+            case 'rejected':
+                return 'badge-error';
+            default:
+                return 'badge-ghost';
+        }
+    };
+
+    const getVerificationStatusIcon = (status: string) => {
+        switch (status) {
+            case 'verified':
+                return 'fa-circle-check';
+            case 'pending':
+                return 'fa-clock';
+            case 'unverified':
+                return 'fa-circle-question';
+            case 'rejected':
+                return 'fa-circle-xmark';
+            default:
+                return 'fa-circle';
+        }
+    };
+
     const isRelationshipExpiringSoon = (endDate: string) => {
         const end = new Date(endDate);
         const now = new Date();
@@ -191,7 +221,15 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                                 </div>
                             </div>
                             <div className="flex-1">
-                                <h1 className="text-3xl font-bold">{candidate.full_name}</h1>
+                                <div className="flex items-center gap-3">
+                                    <h1 className="text-3xl font-bold">{candidate.full_name}</h1>
+                                    {candidate.verification_status && (
+                                        <span className={`badge ${getVerificationStatusBadge(candidate.verification_status)} gap-1`}>
+                                            <i className={`fa-solid ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
+                                            {candidate.verification_status.charAt(0).toUpperCase() + candidate.verification_status.slice(1)}
+                                        </span>
+                                    )}
+                                </div>
                                 <div className="flex items-center gap-4 mt-2 text-base-content/70">
                                     <div className="flex items-center gap-2">
                                         <i className="fa-solid fa-envelope"></i>
