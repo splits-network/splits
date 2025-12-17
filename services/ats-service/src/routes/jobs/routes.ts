@@ -41,7 +41,16 @@ export function registerJobRoutes(app: FastifyInstance, service: AtsService) {
                 salary_min,
                 salary_max,
                 description,
+                recruiter_description,
+                candidate_description,
+                employment_type,
+                open_to_relocation,
+                show_salary_range,
+                splits_fee_percentage,
+                job_owner_id,
                 status,
+                requirements,
+                pre_screen_questions,
             } = request.body as any;
 
             if (!title || !company_id || fee_percentage === undefined) {
@@ -54,7 +63,16 @@ export function registerJobRoutes(app: FastifyInstance, service: AtsService) {
                 salary_min,
                 salary_max,
                 description,
+                recruiter_description,
+                candidate_description,
+                employment_type,
+                open_to_relocation: open_to_relocation ?? false,
+                show_salary_range: show_salary_range ?? true,
+                splits_fee_percentage: splits_fee_percentage ?? 50,
+                job_owner_id,
                 status,
+                requirements,
+                pre_screen_questions,
             });
 
             return reply.status(201).send({ data: job });

@@ -191,6 +191,76 @@ export class AtsRepository {
         return data;
     }
 
+    // Job Requirements methods
+    async findJobRequirements(jobId: string): Promise<any[]> {
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('job_requirements')
+            .select('*')
+            .eq('job_id', jobId)
+            .order('sort_order', { ascending: true });
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    async createJobRequirement(requirement: any): Promise<any> {
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('job_requirements')
+            .insert(requirement)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async deleteJobRequirements(jobId: string): Promise<void> {
+        const { error } = await this.supabase
+            .schema('ats')
+            .from('job_requirements')
+            .delete()
+            .eq('job_id', jobId);
+
+        if (error) throw error;
+    }
+
+    // Job Pre-Screen Questions methods
+    async findJobPreScreenQuestions(jobId: string): Promise<any[]> {
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('job_pre_screen_questions')
+            .select('*')
+            .eq('job_id', jobId)
+            .order('sort_order', { ascending: true });
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    async createJobPreScreenQuestion(question: any): Promise<any> {
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('job_pre_screen_questions')
+            .insert(question)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async deleteJobPreScreenQuestions(jobId: string): Promise<void> {
+        const { error } = await this.supabase
+            .schema('ats')
+            .from('job_pre_screen_questions')
+            .delete()
+            .eq('job_id', jobId);
+
+        if (error) throw error;
+    }
+
     // Candidate methods
     async findAllCandidates(filters?: { search?: string; limit?: number; offset?: number }): Promise<Candidate[]> {
         let query = this.supabase

@@ -33,10 +33,19 @@ export default function NewRolePage() {
         fee_percentage: 20,
         salary_min: '',
         salary_max: '',
-        description: '',
+        description: '', // Deprecated, use recruiter_description
+        recruiter_description: '',
+        candidate_description: '',
         department: '',
         status: 'active',
+        employment_type: 'full_time' as 'full_time' | 'contract' | 'temporary',
+        open_to_relocation: false,
+        show_salary_range: true,
+        splits_fee_percentage: 50,
+        job_owner_id: '',
     });
+    const [requirements, setRequirements] = useState<Array<{ type: 'mandatory' | 'preferred', description: string }>>([]);
+    const [preScreenQuestions, setPreScreenQuestions] = useState<Array<{ question: string, question_type: 'text' | 'yes_no' | 'select' | 'multi_select', options?: string[], is_required: boolean }>>([]);
 
     useEffect(() => {
         async function initializeForm() {
@@ -134,15 +143,26 @@ export default function NewRolePage() {
                 company_id: formData.company_id,
                 fee_percentage: formData.fee_percentage,
                 status: formData.status,
+                employment_type: formData.employment_type,
+                open_to_relocation: formData.open_to_relocation,
+                show_salary_range: formData.show_salary_range,
+                splits_fee_percentage: formData.splits_fee_percentage,
             };
 
             console.log('Submitting job payload:', payload);
 
             if (formData.location) payload.location = formData.location;
             if (formData.department) payload.department = formData.department;
-            if (formData.description) payload.description = formData.description;
+            if (formData.recruiter_description) payload.recruiter_description = formData.recruiter_description;
+            if (formData.candidate_description) payload.candidate_description = formData.candidate_description;
+            if (formData.description) payload.description = formData.description; // Backward compatibility
             if (formData.salary_min) payload.salary_min = parseInt(formData.salary_min);
             if (formData.salary_max) payload.salary_max = parseInt(formData.salary_max);
+            if (formData.job_owner_id) payload.job_owner_id = formData.job_owner_id;
+            
+            // Add requirements and pre-screen questions
+            payload.requirements = requirements;
+            payload.pre_screen_questions = preScreenQuestions;
 
             await client.post('/jobs', payload);
             
@@ -285,7 +305,7 @@ export default function NewRolePage() {
 
                         {/* Salary Range */}
                         <div className="divider">Salary Range (Optional)</div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="fieldset">
                                 <label className="label">Minimum Salary</label>
                                 <input
@@ -307,18 +327,273 @@ export default function NewRolePage() {
                                     placeholder="e.g. 150000"
                                 />
                             </div>
+
+                            <div className="fieldset">
+                                <label className="label flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        className="checkbox checkbox-sm"
+                                        checked={formData.show_salary_range}
+                                        onChange={(e) => setFormData({ ...formData, show_salary_range: e.target.checked })}
+                                    />
+                                    <span>Show Salary Range to Candidates</span>
+                                </label>
+                            </div>
                         </div>
 
-                        {/* Description */}
+                        {/* Additional Details */}
+                        <div className="divider">Additional Details</div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="fieldset">
+                                <label className="label">Employment Type *</label>
+                                <select
+                                    className="select w-full"
+                                    value={formData.employment_type}
+                                    onChange={(e) => setFormData({ ...formData, employment_type: e.target.value as 'full_time' | 'contract' | 'temporary' })}
+                                    required
+                                >
+                                    <option value="full_time">Full-Time</option>
+                                    <option value="contract">Contract</option>
+                                    <option value="temporary">Temporary</option>
+                                </select>
+                            </div>
+
+                            <div className="fieldset">
+                                <label className="label flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        className="checkbox checkbox-sm"
+                                        checked={formData.open_to_relocation}
+                                        onChange={(e) => setFormData({ ...formData, open_to_relocation: e.target.checked })}
+                                    />
+                                    <span>Open to Relocation</span>
+                                </label>
+                            </div>
+
+                            <div className="fieldset">
+                                <label className="label">Splits Fee Percentage *</label>
+                                <input
+                                    type="number"
+                                    className="input w-full"
+                                    value={formData.splits_fee_percentage}
+                                    onChange={(e) => setFormData({ ...formData, splits_fee_percentage: parseFloat(e.target.value) })}
+                                    required
+                                    min="0"
+                                    max="100"
+                                    step="1"
+                                />
+                                <label className="label">
+                                    <span className="label-text-alt">Default 50% - recruiter split of placement fee</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* Descriptions */}
+                        <div className="divider">Job Descriptions</div>
                         <div className="fieldset">
-                            <label className="label">Job Description</label>
+                            <label className="label">Recruiter-Facing Description</label>
                             <textarea
                                 className="textarea w-full h-32"
-                                value={formData.description}
-                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                placeholder="Describe the role, requirements, and responsibilities..."
+                                value={formData.recruiter_description}
+                                onChange={(e) => setFormData({ ...formData, recruiter_description: e.target.value })}
+                                placeholder="Internal notes, hiring manager details, and context for recruiters..."
                             ></textarea>
+                            <label className="label">
+                                <span className="label-text-alt">Only visible to recruiters</span>
+                            </label>
                         </div>
+
+                        <div className="fieldset">
+                            <label className="label">Candidate-Facing Description</label>
+                            <textarea
+                                className="textarea w-full h-32"
+                                value={formData.candidate_description}
+                                onChange={(e) => setFormData({ ...formData, candidate_description: e.target.value })}
+                                placeholder="Public job posting text that candidates will see..."
+                            ></textarea>
+                            <label className="label">
+                                <span className="label-text-alt">Visible to candidates</span>
+                            </label>
+                        </div>
+
+                        {/* Requirements */}
+                        <div className="divider">Requirements</div>
+                        <div className="alert alert-info mb-4">
+                            <i className="fa-solid fa-circle-info"></i>
+                            <div>
+                                <p className="font-medium">Define what you're looking for in candidates</p>
+                                <p className="text-sm opacity-80">Mandatory requirements are must-haves that candidates should meet. Preferred requirements are nice-to-haves that make a candidate more competitive.</p>
+                            </div>
+                        </div>
+                        <div className="space-y-4">
+                            <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <div>
+                                        <label className="label">Mandatory Requirements</label>
+                                        <p className="text-xs text-base-content/60 -mt-1">Must-have qualifications (e.g., "JD from accredited university", "5+ years in role")</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-ghost"
+                                        onClick={() => setRequirements([...requirements, { type: 'mandatory', description: '' }])}
+                                    >
+                                        <i className="fa-solid fa-plus mr-1"></i>
+                                        Add Mandatory
+                                    </button>
+                                </div>
+                                {requirements.filter(r => r.type === 'mandatory').map((req, idx) => {
+                                    const actualIdx = requirements.findIndex(r => r === req);
+                                    return (
+                                        <div key={actualIdx} className="flex gap-2 mb-2">
+                                            <input
+                                                type="text"
+                                                className="input w-full"
+                                                value={req.description}
+                                                onChange={(e) => {
+                                                    const newReqs = [...requirements];
+                                                    newReqs[actualIdx].description = e.target.value;
+                                                    setRequirements(newReqs);
+                                                }}
+                                                placeholder="e.g., JD from accredited university"
+                                            />
+                                            <button
+                                                type="button"
+                                                className="btn btn-ghost btn-square"
+                                                onClick={() => setRequirements(requirements.filter((_, i) => i !== actualIdx))}
+                                            >
+                                                <i className="fa-solid fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <div>
+                                        <label className="label">Preferred Requirements</label>
+                                        <p className="text-xs text-base-content/60 -mt-1">Nice-to-have qualifications that make candidates more competitive</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-ghost"
+                                        onClick={() => setRequirements([...requirements, { type: 'preferred', description: '' }])}
+                                    >
+                                        <i className="fa-solid fa-plus mr-1"></i>
+                                        Add Preferred
+                                    </button>
+                                </div>
+                                {requirements.filter(r => r.type === 'preferred').map((req, idx) => {
+                                    const actualIdx = requirements.findIndex(r => r === req);
+                                    return (
+                                        <div key={actualIdx} className="flex gap-2 mb-2">
+                                            <input
+                                                type="text"
+                                                className="input w-full"
+                                                value={req.description}
+                                                onChange={(e) => {
+                                                    const newReqs = [...requirements];
+                                                    newReqs[actualIdx].description = e.target.value;
+                                                    setRequirements(newReqs);
+                                                }}
+                                                placeholder="e.g., Experience with React"
+                                            />
+                                            <button
+                                                type="button"
+                                                className="btn btn-ghost btn-square"
+                                                onClick={() => setRequirements(requirements.filter((_, i) => i !== actualIdx))}
+                                            >
+                                                <i className="fa-solid fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Pre-Screen Questions */}
+                        <div className="divider">Pre-Screen Questions</div>
+                        <div className="alert alert-info mb-4">
+                            <i className="fa-solid fa-circle-info"></i>
+                            <div>
+                                <p className="font-medium">Screen candidates before review</p>
+                                <p className="text-sm opacity-80">Ask specific questions to gather important information upfront. Question types: <strong>Text</strong> (open-ended), <strong>Yes/No</strong> (binary), <strong>Select</strong> (single choice), <strong>Multi-Select</strong> (multiple choices).</p>
+                            </div>
+                        </div>
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center mb-2">
+                                <div>
+                                    <label className="label">Questions for Candidates</label>
+                                    <p className="text-xs text-base-content/60 -mt-1">Examples: eligibility, clearance status, work authorization, relocation willingness</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-ghost"
+                                    onClick={() => setPreScreenQuestions([...preScreenQuestions, { question: '', question_type: 'text', is_required: true }])}
+                                >
+                                    <i className="fa-solid fa-plus mr-1"></i>
+                                    Add Question
+                                </button>
+                            </div>
+                            {preScreenQuestions.map((q, idx) => (
+                                <div key={idx} className="card bg-base-200 p-4">
+                                    <div className="space-y-3">
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                className="input flex-1"
+                                                value={q.question}
+                                                onChange={(e) => {
+                                                    const newQ = [...preScreenQuestions];
+                                                    newQ[idx].question = e.target.value;
+                                                    setPreScreenQuestions(newQ);
+                                                }}
+                                                placeholder="Enter question..."
+                                            />
+                                            <button
+                                                type="button"
+                                                className="btn btn-ghost btn-square"
+                                                onClick={() => setPreScreenQuestions(preScreenQuestions.filter((_, i) => i !== idx))}
+                                            >
+                                                <i className="fa-solid fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <select
+                                                className="select"
+                                                value={q.question_type}
+                                                onChange={(e) => {
+                                                    const newQ = [...preScreenQuestions];
+                                                    newQ[idx].question_type = e.target.value as any;
+                                                    setPreScreenQuestions(newQ);
+                                                }}
+                                            >
+                                                <option value="text">Text</option>
+                                                <option value="yes_no">Yes/No</option>
+                                                <option value="select">Select One</option>
+                                                <option value="multi_select">Multi-Select</option>
+                                            </select>
+                                            <label className="label flex items-center gap-2">
+                                                <input
+                                                    type="checkbox"
+                                                    className="checkbox checkbox-sm"
+                                                    checked={q.is_required}
+                                                    onChange={(e) => {
+                                                        const newQ = [...preScreenQuestions];
+                                                        newQ[idx].is_required = e.target.checked;
+                                                        setPreScreenQuestions(newQ);
+                                                    }}
+                                                />
+                                                <span>Required</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Description (Backward Compatibility) - Hidden */}
+                        <input type="hidden" value={formData.description} />
 
                         {/* Actions */}
                         <div className="flex gap-2 justify-end">

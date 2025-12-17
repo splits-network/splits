@@ -38,6 +38,10 @@ export interface Company {
 
 export type JobStatus = 'active' | 'paused' | 'filled' | 'closed';
 
+export type EmploymentType = 'full_time' | 'contract' | 'temporary';
+
+export type RequirementType = 'mandatory' | 'preferred';
+
 export interface Job {
     id: string;
     company_id: string;
@@ -47,11 +51,44 @@ export interface Job {
     salary_min?: number;
     salary_max?: number;
     fee_percentage: number;
-    description?: string;
+    description?: string; // Deprecated: use recruiter_description
+    recruiter_description?: string;
+    candidate_description?: string;
+    employment_type?: EmploymentType;
+    open_to_relocation: boolean;
+    show_salary_range: boolean;
+    splits_fee_percentage: number; // Default 50%
+    job_owner_id?: string; // Splits Network or recruiting partner GUID
     status: JobStatus;
     created_at: Date;
     updated_at: Date;
     company?: Company;  // Enriched data from service layer
+    requirements?: JobRequirement[]; // Enriched data from service layer
+    pre_screen_questions?: JobPreScreenQuestion[]; // Enriched data from service layer
+}
+
+export interface JobRequirement {
+    id: string;
+    job_id: string;
+    requirement_type: RequirementType;
+    description: string;
+    sort_order: number;
+    created_at: Date;
+    updated_at: Date;
+}
+
+export type PreScreenQuestionType = 'text' | 'yes_no' | 'select' | 'multi_select';
+
+export interface JobPreScreenQuestion {
+    id: string;
+    job_id: string;
+    question: string;
+    question_type: PreScreenQuestionType;
+    options?: string[]; // For select/multi_select types - stored as JSON
+    is_required: boolean;
+    sort_order: number;
+    created_at: Date;
+    updated_at: Date;
 }
 
 export interface Candidate {

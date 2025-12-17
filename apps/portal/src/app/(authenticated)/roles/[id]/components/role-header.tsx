@@ -16,8 +16,17 @@ interface Job {
     salary_min?: number;
     salary_max?: number;
     department?: string;
-    description?: string;
+    description?: string; // Deprecated
+    recruiter_description?: string;
+    candidate_description?: string;
+    employment_type?: 'full_time' | 'contract' | 'temporary';
+    open_to_relocation: boolean;
+    show_salary_range: boolean;
+    splits_fee_percentage: number;
+    job_owner_id?: string;
     created_at: string;
+    requirements?: Array<{ id: string; requirement_type: 'mandatory' | 'preferred'; description: string }>;
+    pre_screen_questions?: Array<{ id: string; question: string; question_type: string; is_required: boolean }>;
 }
 
 interface Membership {
@@ -178,7 +187,20 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                                             {job.department}
                                         </span>
                                     )}
-                                    {job.salary_min && job.salary_max && (
+                                    {job.employment_type && (
+                                        <span className="flex items-center gap-2">
+                                            <i className="fa-solid fa-clock"></i>
+                                            {job.employment_type === 'full_time' ? 'Full-Time' : 
+                                             job.employment_type === 'contract' ? 'Contract' : 'Temporary'}
+                                        </span>
+                                    )}
+                                    {job.open_to_relocation && (
+                                        <span className="flex items-center gap-2">
+                                            <i className="fa-solid fa-plane"></i>
+                                            Open to Relocation
+                                        </span>
+                                    )}
+                                    {job.show_salary_range && job.salary_min && job.salary_max && (
                                         <span className="flex items-center gap-2">
                                             <i className="fa-solid fa-dollar-sign"></i>
                                             ${(job.salary_min / 1000).toFixed(0)}k - ${(job.salary_max / 1000).toFixed(0)}k
@@ -187,6 +209,10 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                                     <span className="flex items-center gap-2">
                                         <i className="fa-solid fa-percent"></i>
                                         {job.fee_percentage}% fee
+                                    </span>
+                                    <span className="flex items-center gap-2">
+                                        <i className="fa-solid fa-handshake"></i>
+                                        {job.splits_fee_percentage}% recruiter split
                                     </span>
                                 </div>
                             </div>
@@ -265,10 +291,83 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                             </div>
                         </div>
 
-                        {job.description && (
+                        {(job.recruiter_description || job.description) && (
                             <div className="mt-6">
-                                <h3 className="font-semibold text-lg mb-2">Description</h3>
-                                <p className="text-base-content/80 whitespace-pre-wrap">{job.description}</p>
+                                <h3 className="font-semibold text-lg mb-2">
+                                    <i className="fa-solid fa-user-tie mr-2"></i>
+                                    Recruiter-Facing Description
+                                </h3>
+                                <p className="text-base-content/80 whitespace-pre-wrap">
+                                    {job.recruiter_description || job.description}
+                                </p>
+                            </div>
+                        )}
+
+                        {job.candidate_description && (
+                            <div className="mt-6">
+                                <h3 className="font-semibold text-lg mb-2">
+                                    <i className="fa-solid fa-user mr-2"></i>
+                                    Candidate-Facing Description
+                                </h3>
+                                <p className="text-base-content/80 whitespace-pre-wrap">
+                                    {job.candidate_description}
+                                </p>
+                            </div>
+                        )}
+
+                        {job.requirements && job.requirements.length > 0 && (
+                            <div className="mt-6">
+                                <h3 className="font-semibold text-lg mb-3">
+                                    <i className="fa-solid fa-list-check mr-2"></i>
+                                    Requirements
+                                </h3>
+                                {job.requirements.filter(r => r.requirement_type === 'mandatory').length > 0 && (
+                                    <div className="mb-4">
+                                        <h4 className="font-medium mb-2 text-base-content/80">Mandatory</h4>
+                                        <ul className="list-disc list-inside space-y-1">
+                                            {job.requirements
+                                                .filter(r => r.requirement_type === 'mandatory')
+                                                .map(r => (
+                                                    <li key={r.id}>{r.description}</li>
+                                                ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {job.requirements.filter(r => r.requirement_type === 'preferred').length > 0 && (
+                                    <div>
+                                        <h4 className="font-medium mb-2 text-base-content/80">Preferred</h4>
+                                        <ul className="list-disc list-inside space-y-1">
+                                            {job.requirements
+                                                .filter(r => r.requirement_type === 'preferred')
+                                                .map(r => (
+                                                    <li key={r.id} className="text-base-content/70">{r.description}</li>
+                                                ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {job.pre_screen_questions && job.pre_screen_questions.length > 0 && (
+                            <div className="mt-6">
+                                <h3 className="font-semibold text-lg mb-3">
+                                    <i className="fa-solid fa-clipboard-question mr-2"></i>
+                                    Pre-Screen Questions
+                                </h3>
+                                <div className="space-y-2">
+                                    {job.pre_screen_questions.map((q, idx) => (
+                                        <div key={q.id} className="flex gap-2">
+                                            <span className="text-base-content/60">{idx + 1}.</span>
+                                            <span>
+                                                {q.question}
+                                                {q.is_required && <span className="text-error ml-1">*</span>}
+                                                <span className="text-xs text-base-content/50 ml-2">
+                                                    ({q.question_type.replace('_', ' ')})
+                                                </span>
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </div>
