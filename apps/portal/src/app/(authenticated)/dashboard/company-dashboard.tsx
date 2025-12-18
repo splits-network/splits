@@ -359,7 +359,7 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
                                             key={activity.id}
                                             className="flex items-start gap-3 p-2 rounded-lg hover:bg-base-200 transition-colors cursor-pointer"
                                         >
-                                            <div className="avatar placeholder">
+                                            <div className="avatar avatar-placeholder">
                                                 <div className="bg-primary text-primary-content rounded-full w-8 h-8 text-sm">
                                                     <i className={`fa-solid ${getActivityIcon(activity.type)}`}></i>
                                                 </div>

@@ -19,6 +19,7 @@ spec:
     - hosts:
         - splits.network
         - api.splits.network
+        - applicant.network
       secretName: splits-network-tls
   rules:
     - host: splits.network
@@ -29,6 +30,16 @@ spec:
             backend:
               service:
                 name: portal
+                port:
+                  number: 80
+    - host: applicant.network
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: candidate
                 port:
                   number: 80
     - host: api.splits.network

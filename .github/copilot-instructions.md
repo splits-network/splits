@@ -316,6 +316,7 @@ When setting up new services or apps:
    - See `docs/splits-network-architecture.md` for detailed service responsibilities.
    - See `docs/splits-network-phase1-prd.md` for Phase 1 scope and data models.
    - See `docs/guidance/form-controls.md` for form implementation standards.
+   - See `docs/guidance/user-roles-and-permissions.md` for comprehensive RBAC, user roles, capabilities, restrictions, API endpoints, and workflows.
    - Check `.vscode/mcp.json` for configured Supabase MCP server.
 
 ---

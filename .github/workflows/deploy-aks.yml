@@ -31,6 +31,8 @@ jobs:
                       path: services/document-service
                     - name: portal
                       path: apps/portal
+                    - name: candidate
+                      path: apps/candidate
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
@@ -57,6 +59,15 @@ jobs:
                       -t $IMAGE_TAG \
                       --target production \
                       --build-arg NEXT_PUBLIC_API_URL=https://api.splits.network/api \
+                      --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }} \
+                      .
+                  elif [ "${{ matrix.service.name }}" = "candidate" ]; then
+                    docker build \
+                      -f ${{ matrix.service.path }}/Dockerfile \
+                      -t $IMAGE_TAG \
+                      --target production \
+                      --build-arg NEXT_PUBLIC_API_URL=https://api.splits.network/api \
+                      --build-arg NEXT_PUBLIC_APP_URL=https://applicant.network \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }} \
                       .
                   else
@@ -186,6 +197,18 @@ jobs:
             - name: Wait for Portal to be ready
               run: |
                   kubectl rollout status deployment/portal --timeout=180s --namespace=splits-network
+
+            - name: Deploy Candidate Website
+              run: |
+                  kubectl apply -f infra/k8s/candidate/ --namespace=splits-network
+
+            - name: Wait for Candidate Website to be ready
+              run: |
+                  kubectl rollout status deployment/candidate --timeout=180s --namespace=splits-network
+
+            - name: Deploy Ingress
+              run: |
+                  kubectl apply -f infra/k8s/ingress.yaml --namespace=splits-network
 
             - name: Get deployment status
               run: |

@@ -182,7 +182,7 @@ export default function IntegrationsPage() {
                 {/* Platform Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="avatar placeholder">
+                    <div className="avatar avatar-placeholder">
                       <div className="bg-primary text-primary-content rounded-full w-12">
                         <i className={`fa-solid ${getPlatformIcon(integration.platform)} text-xl`}></i>
                       </div>

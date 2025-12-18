@@ -249,7 +249,7 @@ export default function NewIntegrationPage() {
                 >
                   <div className="card-body">
                     <div className="flex items-start gap-4">
-                      <div className={`avatar placeholder`}>
+                      <div className={`avatar avatar-placeholder`}>
                         <div className={`bg-${config.color} text-${config.color}-content rounded-full w-12`}>
                           <i className={`fa-solid ${config.icon} text-xl`}></i>
                         </div>
@@ -281,7 +281,7 @@ export default function NewIntegrationPage() {
               >
                 <i className="fa-solid fa-arrow-left"></i>
               </button>
-              <div className={`avatar placeholder`}>
+              <div className={`avatar avatar-placeholder`}>
                 <div className={`bg-${platformConfig.color} text-${platformConfig.color}-content rounded-full w-12`}>
                   <i className={`fa-solid ${platformConfig.icon} text-xl`}></i>
                 </div>

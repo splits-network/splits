@@ -216,7 +216,7 @@ export default function RecruiterDashboard({ token, profile }: RecruiterDashboar
                                             key={activity.id}
                                             className="flex items-start gap-4 p-3 rounded-lg hover:bg-base-200 transition-colors cursor-pointer"
                                         >
-                                            <div className="avatar placeholder">
+                                            <div className="avatar avatar-placeholder">
                                                 <div className="bg-primary text-primary-content rounded-full w-10 h-10">
                                                     <i className={`fa-solid ${getActivityIcon(activity.type)}`}></i>
                                                 </div>
