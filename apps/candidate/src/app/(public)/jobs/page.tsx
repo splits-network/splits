@@ -90,7 +90,7 @@ function JobsContent() {
         params.set('limit', JOBS_PER_PAGE.toString());
         params.set('offset', offset.toString());
         
-        const response = await apiClient.get<JobsResponse>(`/api/public/jobs?${params.toString()}`);
+        const response = await apiClient.get<JobsResponse>(`/public/jobs?${params.toString()}`);
         setJobs(response.data || []);
         setTotal(response.total || 0);
         setError(null);
