@@ -47,7 +47,7 @@ spec:
                   name: resend-secrets
                   key: resend-api-key
             - name: RESEND_FROM_EMAIL
-              value: "noreply@splits.network"
+              value: "noreply@updates.splits.network"
             - name: IDENTITY_SERVICE_URL
               value: "http://identity-service:3001"
             - name: ATS_SERVICE_URL
