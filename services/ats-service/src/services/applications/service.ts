@@ -45,6 +45,10 @@ export class ApplicationService {
         recruiterId?: string,
         options: {
             linkedin_url?: string;
+            phone?: string;
+            location?: string;
+            current_title?: string;
+            current_company?: string;
             notes?: string;
         } = {}
     ): Promise<Application> {
@@ -54,12 +58,23 @@ export class ApplicationService {
             throw new Error(`Job ${jobId} not found`);
         }
 
-        // Find or create candidate
-        const candidate = await this.candidateService.findOrCreateCandidate(
+        // Find or create candidate (this sets recruiter_id as the sourcer)
+        let candidate = await this.candidateService.findOrCreateCandidate(
             candidateEmail,
             candidateName,
-            options.linkedin_url
+            options.linkedin_url,
+            recruiterId
         );
+
+        // Update additional fields if provided
+        if (options.phone || options.location || options.current_title || options.current_company) {
+            candidate = await this.candidateService.updateCandidate(candidate.id, {
+                phone: options.phone,
+                location: options.location,
+                current_title: options.current_title,
+                current_company: options.current_company,
+            });
+        }
 
         // Create application
         const application = await this.repository.createApplication({
@@ -91,7 +106,7 @@ export class ApplicationService {
             },
         });
 
-        // Publish event
+        // Publish event - network service will create recruiter_candidates relationship
         await this.eventPublisher.publish(
             'application.created',
             {
@@ -100,6 +115,7 @@ export class ApplicationService {
                 candidate_id: candidate.id,
                 recruiter_id: recruiterId,
                 company_id: job.company_id,
+                candidate_was_created: !candidate.created_at || (new Date().getTime() - new Date(candidate.created_at).getTime() < 1000), // New if created within last second
             },
             'ats-service'
         );

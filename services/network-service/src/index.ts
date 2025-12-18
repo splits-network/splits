@@ -8,6 +8,7 @@ import { NetworkService } from './service';
 import { registerRoutes } from './routes';
 import { CandidateRoleAssignmentService } from './services/proposals/service';
 import { RecruiterReputationService } from './services/reputation/service';
+import { DomainEventConsumer } from './domain-consumer';
 
 async function main() {
     const baseConfig = loadBaseConfig('network-service');
@@ -70,6 +71,25 @@ async function main() {
     // Phase 2 services
     const proposalService = new CandidateRoleAssignmentService(repository);
     const reputationService = new RecruiterReputationService(repository);
+
+    // Initialize and start domain event consumer (for recruiter-candidate relationships)
+    const rabbitMqUrl = process.env.RABBITMQ_URL || 'amqp://localhost';
+    const domainConsumer = new DomainEventConsumer(rabbitMqUrl, service, logger);
+    
+    try {
+        await domainConsumer.start();
+        logger.info('Domain event consumer started');
+    } catch (error) {
+        logger.warn({ err: error }, 'Failed to start domain event consumer - continuing without it');
+    }
+
+    // Graceful shutdown
+    process.on('SIGTERM', async () => {
+        logger.info('SIGTERM received, shutting down gracefully');
+        await domainConsumer.stop();
+        await app.close();
+        process.exit(0);
+    });
 
     // Register all routes (Phase 1, Phase 2, and Phase 4B)
     registerRoutes(app, service, proposalService, reputationService);

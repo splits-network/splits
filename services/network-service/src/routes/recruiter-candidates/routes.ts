@@ -7,7 +7,7 @@ export function registerRecruiterCandidateRoutes(app: FastifyInstance, service: 
         '/recruiter-candidates/:recruiterId/:candidateId',
         async (request: FastifyRequest<{ Params: { recruiterId: string; candidateId: string } }>, reply: FastifyReply) => {
             const { recruiterId, candidateId } = request.params;
-            const relationship = await service.findRecruiterCandidateRelationship(recruiterId, candidateId);
+            const relationship = await service.getRecruiterCandidateRelationship(recruiterId, candidateId);
             
             if (!relationship) {
                 return reply.status(404).send({ 
@@ -34,12 +34,22 @@ export function registerRecruiterCandidateRoutes(app: FastifyInstance, service: 
             }
             
             // Check if relationship already exists
-            const existing = await service.findRecruiterCandidateRelationship(recruiter_id, candidate_id);
+            const existing = await service.getRecruiterCandidateRelationship(recruiter_id, candidate_id);
             if (existing) {
                 return reply.send({ data: existing });
             }
             
-            const relationship = await service.createRecruiterCandidateRelationship(recruiter_id, candidate_id);
+            // Create new 12-month relationship
+            const relationshipEndDate = new Date();
+            relationshipEndDate.setMonth(relationshipEndDate.getMonth() + 12);
+            
+            const relationship = await service.createRecruiterCandidateRelationship({
+                recruiter_id,
+                candidate_id,
+                relationship_start_date: new Date().toISOString(),
+                relationship_end_date: relationshipEndDate.toISOString(),
+                status: 'active',
+            });
             return reply.status(201).send({ data: relationship });
         }
     );

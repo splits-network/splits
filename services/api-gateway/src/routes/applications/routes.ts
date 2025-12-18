@@ -48,10 +48,31 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const req = request as AuthenticatedRequest;
+        const networkService = services.get('network');
+        const correlationId = getCorrelationId(request);
+
+        // Get actual recruiter ID from network service using user ID
+        let recruiterId: string | undefined;
+        try {
+            const recruiterResponse: any = await networkService.get(
+                `/recruiters/by-user/${req.auth.userId}`,
+                undefined,
+                correlationId
+            );
+            recruiterId = recruiterResponse.data?.id;
+        } catch (error) {
+            request.log.error({ error, userId: req.auth.userId }, 'Failed to get recruiter ID');
+            return reply.status(403).send({ error: 'Active recruiter status required' });
+        }
+
+        if (!recruiterId) {
+            return reply.status(403).send({ error: 'Active recruiter status required' });
+        }
+
         const data = await atsService().post('/applications', {
             ...(request.body as any),
-            recruiter_id: req.auth.userId,
-        });
+            recruiter_id: recruiterId,
+        }, correlationId);
         return reply.send(data);
     });
 

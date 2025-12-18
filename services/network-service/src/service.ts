@@ -99,12 +99,20 @@ export class NetworkService {
     }
 
     // Recruiter-Candidate Relationship methods
-    async findRecruiterCandidateRelationship(recruiterId: string, candidateId: string) {
+    async getRecruiterCandidateRelationship(recruiterId: string, candidateId: string) {
         return this.repository.findRecruiterCandidateRelationship(recruiterId, candidateId);
     }
 
-    async createRecruiterCandidateRelationship(recruiterId: string, candidateId: string) {
-        return this.repository.createRecruiterCandidateRelationship(recruiterId, candidateId);
+    async createRecruiterCandidateRelationship(data: {
+        recruiter_id: string;
+        candidate_id: string;
+        relationship_start_date: string;
+        relationship_end_date: string;
+        status: 'active' | 'expired' | 'terminated';
+    }) {
+        // Note: repository method manages dates internally, but we'll keep this interface
+        // for flexibility and clarity from consumers
+        return this.repository.createRecruiterCandidateRelationship(data.recruiter_id, data.candidate_id);
     }
 
     async findCandidatesByRecruiterId(recruiterId: string) {
