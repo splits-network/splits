@@ -1,49 +1,21 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { formatSalary, formatDate } from '@/lib/utils';
+import { apiClient } from '@/lib/api-client';
 
-// Mock data - will be replaced with API calls
-const mockJob = {
-  id: '1',
-  title: 'Senior Software Engineer',
-  company: 'Tech Corp',
-  company_description: 'A leading technology company building the future of software.',
-  location: 'San Francisco, CA',
-  salary_min: 150000,
-  salary_max: 200000,
-  type: 'Full-time',
-  remote: true,
-  posted_at: '2025-12-15',
-  description: `We are seeking a talented Senior Software Engineer to join our growing team. 
-
-In this role, you will:
-- Design and build scalable backend systems
-- Mentor junior engineers
-- Collaborate with product and design teams
-- Write clean, maintainable code
-- Participate in code reviews and technical discussions
-
-This is an excellent opportunity to work on challenging problems with a talented team.`,
-  requirements: `Required:
-- 5+ years of software engineering experience
-- Strong proficiency in TypeScript/Node.js
-- Experience with modern web frameworks (React, Next.js)
-- Understanding of database design and optimization
-- Excellent communication skills
-
-Preferred:
-- Experience with microservices architecture
-- Knowledge of cloud platforms (AWS, GCP)
-- Open source contributions
-- Startup experience`,
-  benefits: `- Competitive salary and equity
-- Health, dental, and vision insurance
-- 401(k) matching
-- Flexible work schedule
-- Remote-friendly culture
-- Professional development budget
-- Unlimited PTO`,
-};
+interface Job {
+  id: string;
+  title: string;
+  company?: { name: string; description?: string };
+  location?: string;
+  salary_min?: number;
+  salary_max?: number;
+  employment_type?: string;
+  open_to_relocation?: boolean;
+  posted_at?: string;
+  description?: string;
+  candidate_description?: string;
+}
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -52,9 +24,15 @@ interface PageProps {
 export default async function JobDetailPage({ params }: PageProps) {
   const { id } = await params;
   
-  // TODO: Replace with API call
-  // const job = await apiClient.get(`/jobs/${id}`);
-  const job = mockJob;
+  let job: Job | null = null;
+  
+  try {
+    const response = await apiClient.get<{ data: Job }>(`/api/public/jobs/${id}`);
+    job = response.data;
+  } catch (error) {
+    console.error('Failed to fetch job:', error);
+    notFound();
+  }
 
   if (!job) {
     notFound();
@@ -72,37 +50,47 @@ export default async function JobDetailPage({ params }: PageProps) {
       <div className="card bg-base-100 shadow-lg mb-6">
         <div className="card-body">
           <h1 className="text-4xl font-bold mb-4">{job.title}</h1>
-          <h2 className="text-2xl font-semibold mb-4">{job.company}</h2>
+          <h2 className="text-2xl font-semibold mb-4">{job.company?.name || 'Company'}</h2>
 
           <div className="flex flex-wrap gap-4 mb-6">
-            <div className="badge badge-lg">
-              <i className="fa-solid fa-location-dot mr-2"></i>
-              {job.location}
-            </div>
-            <div className="badge badge-lg">
-              <i className="fa-solid fa-briefcase mr-2"></i>
-              {job.type}
-            </div>
-            {job.remote && (
+            {job.location && (
+              <div className="badge badge-lg">
+                <i className="fa-solid fa-location-dot mr-2"></i>
+                {job.location}
+              </div>
+            )}
+            {job.employment_type && (
+              <div className="badge badge-lg">
+                <i className="fa-solid fa-briefcase mr-2"></i>
+                {job.employment_type.replace('_', '-')}
+              </div>
+            )}
+            {job.open_to_relocation && (
               <div className="badge badge-lg badge-success">
                 <i className="fa-solid fa-house mr-2"></i>
                 Remote
               </div>
             )}
-            <div className="badge badge-lg">
-              <i className="fa-solid fa-calendar mr-2"></i>
-              Posted {formatDate(job.posted_at)}
-            </div>
+            {job.posted_at && (
+              <div className="badge badge-lg">
+                <i className="fa-solid fa-calendar mr-2"></i>
+                Posted {formatDate(job.posted_at)}
+              </div>
+            )}
           </div>
 
           <div className="divider"></div>
 
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-sm text-base-content/70 mb-1">Salary Range</p>
-              <p className="text-2xl font-bold text-primary">
-                {formatSalary(job.salary_min, job.salary_max)}
-              </p>
+              {job.salary_min && job.salary_max && (
+                <>
+                  <p className="text-sm text-base-content/70 mb-1">Salary Range</p>
+                  <p className="text-2xl font-bold text-primary">
+                    {formatSalary(job.salary_min, job.salary_max)}
+                  </p>
+                </>
+              )}
             </div>
             <div className="flex gap-2">
               <Link href="/sign-up" className="btn btn-primary btn-lg">
@@ -119,48 +107,30 @@ export default async function JobDetailPage({ params }: PageProps) {
       </div>
 
       {/* About Company */}
-      <div className="card bg-base-100 shadow-lg mb-6">
-        <div className="card-body">
-          <h3 className="card-title text-xl mb-4">
-            <i className="fa-solid fa-building"></i>
-            About {job.company}
-          </h3>
-          <p className="whitespace-pre-line">{job.company_description}</p>
+      {job.company?.description && (
+        <div className="card bg-base-100 shadow-lg mb-6">
+          <div className="card-body">
+            <h3 className="card-title text-xl mb-4">
+              <i className="fa-solid fa-building"></i>
+              About {job.company?.name || 'Company'}
+            </h3>
+            <p className="whitespace-pre-line">{job.company.description}</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Job Description */}
-      <div className="card bg-base-100 shadow-lg mb-6">
-        <div className="card-body">
-          <h3 className="card-title text-xl mb-4">
-            <i className="fa-solid fa-file-lines"></i>
-            Job Description
-          </h3>
-          <p className="whitespace-pre-line">{job.description}</p>
+      {(job.candidate_description || job.description) && (
+        <div className="card bg-base-100 shadow-lg mb-6">
+          <div className="card-body">
+            <h3 className="card-title text-xl mb-4">
+              <i className="fa-solid fa-file-lines"></i>
+              Job Description
+            </h3>
+            <p className="whitespace-pre-line">{job.candidate_description || job.description}</p>
+          </div>
         </div>
-      </div>
-
-      {/* Requirements */}
-      <div className="card bg-base-100 shadow-lg mb-6">
-        <div className="card-body">
-          <h3 className="card-title text-xl mb-4">
-            <i className="fa-solid fa-list-check"></i>
-            Requirements
-          </h3>
-          <p className="whitespace-pre-line">{job.requirements}</p>
-        </div>
-      </div>
-
-      {/* Benefits */}
-      <div className="card bg-base-100 shadow-lg mb-6">
-        <div className="card-body">
-          <h3 className="card-title text-xl mb-4">
-            <i className="fa-solid fa-gift"></i>
-            Benefits
-          </h3>
-          <p className="whitespace-pre-line">{job.benefits}</p>
-        </div>
-      </div>
+      )}
 
       {/* Apply CTA */}
       <div className="card bg-primary text-white shadow-lg">

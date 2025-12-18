@@ -181,7 +181,7 @@ async function main() {
     }
     const oauthTokenManager = new OAuthTokenManager(jwtSecret);
 
-    // Register auth hook for all /api routes (except webhooks and OAuth endpoints)
+    // Register auth hook for all /api routes (except webhooks, OAuth endpoints, and public routes)
     app.addHook('onRequest', async (request, reply) => {
         // Skip auth for webhook endpoints (verified by signature)
         if (request.url.includes('/webhooks/')) {
@@ -190,6 +190,11 @@ async function main() {
         
         // Skip auth for OAuth endpoints (they handle their own auth)
         if (request.url.startsWith('/oauth/') || request.url.includes('/.well-known/')) {
+            return;
+        }
+        
+        // Skip auth for public API endpoints (candidate website, etc.)
+        if (request.url.startsWith('/api/public/')) {
             return;
         }
         

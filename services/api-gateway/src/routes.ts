@@ -7,6 +7,7 @@ import { AuthenticatedRequest } from './rbac';
 import { registerIdentityRoutes } from './routes/identity/routes';
 import { registerRolesRoutes } from './routes/roles/routes';
 import { registerJobsRoutes } from './routes/jobs/routes';
+import { registerJobsPublicRoutes } from './routes/jobs/public-routes';
 import { registerCompaniesRoutes } from './routes/companies/routes';
 import { registerCandidatesRoutes } from './routes/candidates/routes';
 import { registerApplicationsRoutes } from './routes/applications/routes';
@@ -62,6 +63,7 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
 
     // Register all domain-specific routes
     registerNetworkPublicRoutes(app, services); // Public routes first (no auth required)
+    registerJobsPublicRoutes(app, services); // Public jobs for candidate website
     registerIdentityRoutes(app, services);
     registerRolesRoutes(app, services);
     registerJobsRoutes(app, services);

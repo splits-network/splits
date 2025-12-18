@@ -4,75 +4,21 @@ import Link from 'next/link';
 import { formatSalary, formatDate } from '@/lib/utils';
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
+import { apiClient } from '@/lib/api-client';
 
-// Mock data - will be replaced with API calls
-const mockJobs = [
-  {
-    id: '1',
-    title: 'Senior Software Engineer',
-    company: 'Tech Corp',
-    location: 'San Francisco, CA',
-    category: 'engineering',
-    salary_min: 150000,
-    salary_max: 200000,
-    type: 'full-time',
-    remote: true,
-    posted_at: '2025-12-15',
-    description: 'Join our engineering team to build amazing products...',
-  },
-  {
-    id: '2',
-    title: 'Product Manager',
-    company: 'Startup Inc',
-    location: 'New York, NY',
-    category: 'product',
-    salary_min: 120000,
-    salary_max: 160000,
-    type: 'full-time',
-    remote: false,
-    posted_at: '2025-12-14',
-    description: 'Lead product strategy and execution...',
-  },
-  {
-    id: '3',
-    title: 'UX Designer',
-    company: 'Design Studio',
-    location: 'Remote',
-    category: 'design',
-    salary_min: 90000,
-    salary_max: 130000,
-    type: 'full-time',
-    remote: true,
-    posted_at: '2025-12-13',
-    description: 'Create beautiful and intuitive user experiences...',
-  },
-  {
-    id: '4',
-    title: 'Sales Executive',
-    company: 'Sales Corp',
-    location: 'Chicago, IL',
-    category: 'sales',
-    salary_min: 80000,
-    salary_max: 120000,
-    type: 'full-time',
-    remote: false,
-    posted_at: '2025-12-12',
-    description: 'Drive revenue growth through strategic sales...',
-  },
-  {
-    id: '5',
-    title: 'Marketing Manager',
-    company: 'Marketing Agency',
-    location: 'Remote',
-    category: 'marketing',
-    salary_min: 95000,
-    salary_max: 135000,
-    type: 'full-time',
-    remote: true,
-    posted_at: '2025-12-11',
-    description: 'Lead marketing campaigns and strategy...',
-  },
-];
+interface Job {
+  id: string;
+  title: string;
+  company?: { name: string };
+  location?: string;
+  category?: string;
+  salary_min?: number;
+  salary_max?: number;
+  employment_type?: string;
+  open_to_relocation?: boolean;
+  posted_at?: string;
+  description?: string;
+}
 
 function JobsContent() {
   const searchParams = useSearchParams();
@@ -85,6 +31,28 @@ function JobsContent() {
   const [remoteFilter, setRemoteFilter] = useState(false);
   const [salaryFilter, setSalaryFilter] = useState('');
   const [recentFilter, setRecentFilter] = useState(false);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch jobs from API
+  useEffect(() => {
+    async function fetchJobs() {
+      try {
+        setLoading(true);
+        const response = await apiClient.get<{ data: Job[] }>('/api/public/jobs');
+        setJobs(response.data || []);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to fetch jobs:', err);
+        setError('Failed to load jobs. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchJobs();
+  }, []);
 
   useEffect(() => {
     // Initialize filters from URL params
@@ -104,10 +72,10 @@ function JobsContent() {
   }, [searchParams]);
 
   // Filter jobs based on current filters
-  const filteredJobs = mockJobs.filter((job) => {
+  const filteredJobs = jobs.filter((job) => {
     // Search query filter (title or company)
     if (searchQuery && !job.title.toLowerCase().includes(searchQuery.toLowerCase()) && 
-        !job.company.toLowerCase().includes(searchQuery.toLowerCase())) {
+        !job.company?.name.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false;
     }
 
@@ -117,17 +85,17 @@ function JobsContent() {
     }
 
     // Type filter
-    if (typeFilter && job.type !== typeFilter.toLowerCase()) {
+    if (typeFilter && job.employment_type !== typeFilter.toLowerCase().replace('-', '_')) {
       return false;
     }
 
     // Remote filter
-    if (remoteFilter && !job.remote) {
+    if (remoteFilter && !job.open_to_relocation) {
       return false;
     }
 
     // Salary filter (e.g., "100k+")
-    if (salaryFilter) {
+    if (salaryFilter && job.salary_min) {
       const minSalary = parseInt(salaryFilter.replace(/[^0-9]/g, '')) * 1000;
       if (job.salary_min < minSalary) {
         return false;
@@ -135,7 +103,7 @@ function JobsContent() {
     }
 
     // Recent filter (posted within last 3 days)
-    if (recentFilter) {
+    if (recentFilter && job.posted_at) {
       const jobDate = new Date(job.posted_at);
       const threeDaysAgo = new Date();
       threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
@@ -357,14 +325,32 @@ function JobsContent() {
       {/* Results Count */}
       <div className="mb-4">
         <p className="text-sm text-base-content/70">
-          Showing {filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'}
-          {hasActiveFilters && ` (filtered from ${mockJobs.length} total)`}
+          {loading ? (
+            'Loading jobs...'
+          ) : (
+            <>
+              Showing {filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'}
+              {hasActiveFilters && ` (filtered from ${jobs.length} total)`}
+            </>
+          )}
         </p>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="alert alert-error mb-4">
+          <i className="fa-solid fa-circle-exclamation"></i>
+          <span>{error}</span>
+        </div>
+      )}
+
       {/* Job Listings */}
       <div className="space-y-4">
-        {filteredJobs.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <span className="loading loading-spinner loading-lg"></span>
+          </div>
+        ) : filteredJobs.length === 0 ? (
           <div className="card bg-base-100 shadow-lg">
             <div className="card-body text-center py-12">
               <i className="fa-solid fa-briefcase text-6xl text-base-content/20 mb-4"></i>
@@ -390,29 +376,39 @@ function JobsContent() {
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <h2 className="card-title text-2xl mb-2">{job.title}</h2>
-                    <p className="text-lg font-semibold mb-2">{job.company}</p>
+                    <p className="text-lg font-semibold mb-2">{job.company?.name || 'Company'}</p>
                     <div className="flex flex-wrap gap-4 text-sm text-base-content/70 mb-4">
-                      <span>
-                        <i className="fa-solid fa-location-dot"></i> {job.location}
-                      </span>
-                      <span>
-                        <i className="fa-solid fa-briefcase"></i> {job.type}
-                      </span>
-                      {job.remote && (
+                      {job.location && (
+                        <span>
+                          <i className="fa-solid fa-location-dot"></i> {job.location}
+                        </span>
+                      )}
+                      {job.employment_type && (
+                        <span>
+                          <i className="fa-solid fa-briefcase"></i> {job.employment_type.replace('_', '-')}
+                        </span>
+                      )}
+                      {job.open_to_relocation && (
                         <span>
                           <i className="fa-solid fa-house"></i> Remote
                         </span>
                       )}
-                      <span>
-                        <i className="fa-solid fa-calendar"></i> Posted {formatDate(job.posted_at)}
-                      </span>
+                      {job.posted_at && (
+                        <span>
+                          <i className="fa-solid fa-calendar"></i> Posted {formatDate(job.posted_at)}
+                        </span>
+                      )}
                     </div>
-                    <p className="line-clamp-2 mb-4">{job.description}</p>
+                    {job.description && (
+                      <p className="line-clamp-2 mb-4">{job.description}</p>
+                    )}
                   </div>
                   <div className="text-right">
-                    <div className="badge badge-primary badge-lg mb-2">
-                      {formatSalary(job.salary_min, job.salary_max)}
-                    </div>
+                    {job.salary_min && job.salary_max && (
+                      <div className="badge badge-primary badge-lg mb-2">
+                        {formatSalary(job.salary_min, job.salary_max)}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
