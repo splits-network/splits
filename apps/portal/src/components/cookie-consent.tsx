@@ -34,7 +34,8 @@ export default function CookieConsent() {
     if (isSignedIn) {
       try {
         const token = await getToken();
-        const response = await fetch('/api/consent', {
+        const apiUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'https://api.splits.network';
+        const response = await fetch(`${apiUrl}/api/consent`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
