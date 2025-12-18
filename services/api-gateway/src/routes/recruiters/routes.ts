@@ -107,16 +107,16 @@ export function registerRecruitersRoutes(app: FastifyInstance, services: Service
         return reply.send(data);
     });
 
-    // Get recruiters for a candidate
-    app.get('/api/recruiter-candidates/candidate/:candidateId', {
-        schema: {
-            description: 'Get recruiters for a candidate',
-            tags: ['recruiters'],
-            security: [{ clerkAuth: [] }],
-        },
-    }, async (request: FastifyRequest, reply: FastifyReply) => {
-        const { candidateId } = request.params as { candidateId: string };
-        const data = await networkService().get(`/recruiter-candidates/candidate/${candidateId}`);
-        return reply.send(data);
-    });
+    // Get recruiters for a candidate - duplicated in the recruiter-candidates routes
+    // app.get('/api/recruiter-candidates/candidate/:candidateId', {
+    //     schema: {
+    //         description: 'Get recruiters for a candidate',
+    //         tags: ['recruiters'],
+    //         security: [{ clerkAuth: [] }],
+    //     },
+    // }, async (request: FastifyRequest, reply: FastifyReply) => {
+    //     const { candidateId } = request.params as { candidateId: string };
+    //     const data = await networkService().get(`/recruiter-candidates/candidate/${candidateId}`);
+    //     return reply.send(data);
+    // });
 }

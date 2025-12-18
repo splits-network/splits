@@ -13,6 +13,7 @@ import { registerCandidatesRoutes } from './routes/candidates/routes';
 import { registerApplicationsRoutes } from './routes/applications/routes';
 import { registerPlacementsRoutes } from './routes/placements/routes';
 import { registerRecruitersRoutes } from './routes/recruiters/routes';
+import { registerRecruiterCandidateRoutes } from './routes/recruiter-candidates/routes';
 import { registerAssignmentsRoutes } from './routes/assignments/routes';
 import { registerProposalsRoutes } from './routes/proposals/routes';
 import { registerReputationRoutes } from './routes/reputation/routes';
@@ -72,6 +73,7 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
     registerApplicationsRoutes(app, services);
     registerPlacementsRoutes(app, services);
     registerRecruitersRoutes(app, services);
+    registerRecruiterCandidateRoutes(app, services);
     registerAssignmentsRoutes(app, services);
     registerProposalsRoutes(app, services);
     registerReputationRoutes(app, services);

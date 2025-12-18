@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
+import { createAuthenticatedClient } from '@/lib/api-client';
 
 interface RecruiterCandidate {
     id: string;
@@ -32,6 +34,7 @@ interface InvitationWithCandidate extends RecruiterCandidate {
 
 export default function InvitationsPageClient() {
     const router = useRouter();
+    const { getToken } = useAuth();
     const [loading, setLoading] = useState(true);
     const [invitations, setInvitations] = useState<InvitationWithCandidate[]>([]);
     const [error, setError] = useState<string | null>(null);
@@ -46,55 +49,30 @@ export default function InvitationsPageClient() {
             setLoading(true);
             setError(null);
 
-            // Get current recruiter's profile
-            const recruiterResponse = await fetch('/api/proxy/network/recruiters/me', {
-                credentials: 'include',
-            });
-            
-            if (!recruiterResponse.ok) {
-                throw new Error('Failed to fetch recruiter profile');
+            const token = await getToken();
+            if (!token) {
+                throw new Error('Not authenticated');
             }
 
-            const recruiterData = await recruiterResponse.json();
-            const recruiterId = recruiterData.data?.id;
+            const client = createAuthenticatedClient(token);
 
-            if (!recruiterId) {
-                throw new Error('No recruiter profile found');
-            }
-
-            // Get all recruiter-candidate relationships
-            const relationshipsResponse = await fetch(
-                `/api/proxy/network/recruiter-candidates/recruiter/${recruiterId}`,
-                { credentials: 'include' }
-            );
-
-            if (!relationshipsResponse.ok) {
-                throw new Error('Failed to fetch invitations');
-            }
-
-            const relationshipsData = await relationshipsResponse.json();
-            const relationships: RecruiterCandidate[] = relationshipsData.data || [];
+            // Get all recruiter-candidate relationships for current user
+            const relationshipsResponse = await client.get('/recruiter-candidates/me');
+            const relationships: RecruiterCandidate[] = relationshipsResponse.data || [];
 
             // Fetch candidate details for each relationship
             const invitationsWithCandidates = await Promise.all(
                 relationships.map(async (rel) => {
                     try {
-                        const candidateResponse = await fetch(
-                            `/api/proxy/ats/candidates/${rel.candidate_id}`,
-                            { credentials: 'include' }
-                        );
-                        
-                        if (candidateResponse.ok) {
-                            const candidateData = await candidateResponse.json();
-                            return {
-                                ...rel,
-                                candidate: candidateData.data,
-                            };
-                        }
+                        const candidateResponse = await client.get(`/candidates/${rel.candidate_id}`);
+                        return {
+                            ...rel,
+                            candidate: candidateResponse.data,
+                        };
                     } catch (err) {
                         console.error('Failed to fetch candidate:', err);
+                        return rel;
                     }
-                    return rel;
                 })
             );
 
