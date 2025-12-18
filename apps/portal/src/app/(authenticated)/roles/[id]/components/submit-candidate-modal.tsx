@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 
@@ -9,18 +9,59 @@ interface SubmitCandidateModalProps {
     onClose: () => void;
 }
 
+interface ExistingCandidate {
+    id: string;
+    full_name: string;
+    email: string;
+    phone?: string;
+    location?: string;
+    current_title?: string;
+    current_company?: string;
+    linkedin_url?: string;
+}
+
 export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidateModalProps) {
     const { getToken } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [mode, setMode] = useState<'select' | 'new'>('select');
+    const [existingCandidates, setExistingCandidates] = useState<ExistingCandidate[]>([]);
+    const [selectedCandidateId, setSelectedCandidateId] = useState<string>('');
+    const [loadingCandidates, setLoadingCandidates] = useState(true);
     const [formData, setFormData] = useState({
         full_name: '',
         email: '',
+        phone: '',
+        location: '',
+        current_title: '',
+        current_company: '',
         linkedin_url: '',
         notes: '',
     });
     const [resumeFile, setResumeFile] = useState<File | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        fetchExistingCandidates();
+    }, []);
+
+    const fetchExistingCandidates = async () => {
+        try {
+            const token = await getToken();
+            if (!token) {
+                setLoadingCandidates(false);
+                return;
+            }
+
+            const client = createAuthenticatedClient(token);
+            const response: any = await client.get('/candidates');
+            setExistingCandidates(response.data || []);
+        } catch (err) {
+            console.error('Failed to fetch candidates:', err);
+        } finally {
+            setLoadingCandidates(false);
+        }
+    };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -54,18 +95,32 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
 
             const client = createAuthenticatedClient(token);
             
-            // Step 1: Submit candidate and create application
-            const response: any = await client.submitCandidate({
-                job_id: roleId,
-                ...formData,
-            });
+            let candidateId: string;
+            let response: any;
 
-            // Step 2: Upload resume if provided
-            if (resumeFile && response.data?.candidate?.id) {
+            if (mode === 'select' && selectedCandidateId) {
+                // Submit existing candidate to the job
+                response = await client.post('/applications', {
+                    job_id: roleId,
+                    candidate_id: selectedCandidateId,
+                    notes: formData.notes,
+                });
+                candidateId = selectedCandidateId;
+            } else {
+                // Create new candidate and submit
+                response = await client.submitCandidate({
+                    job_id: roleId,
+                    ...formData,
+                });
+                candidateId = response.data?.candidate?.id;
+            }
+
+            // Upload resume if provided
+            if (resumeFile && candidateId) {
                 const uploadFormData = new FormData();
                 uploadFormData.append('file', resumeFile);
                 uploadFormData.append('entity_type', 'candidate');
-                uploadFormData.append('entity_id', response.data.candidate.id);
+                uploadFormData.append('entity_id', candidateId);
                 uploadFormData.append('document_type', 'resume');
 
                 await client.uploadDocument(uploadFormData);
@@ -84,7 +139,25 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
     return (
         <div className="modal modal-open">
             <div className="modal-box max-w-2xl">
-                <h3 className="font-bold text-lg mb-4">Submit Candidate</h3>
+                <h3 className="font-bold text-lg mb-4">Submit Candidate to Role</h3>
+
+                {/* Mode Selection Tabs */}
+                <div className="tabs tabs-boxed bg-base-200 mb-4">
+                    <a
+                        className={`tab ${mode === 'select' ? 'tab-active' : ''}`}
+                        onClick={() => setMode('select')}
+                    >
+                        <i className="fa-solid fa-user-check mr-2"></i>
+                        Select Existing
+                    </a>
+                    <a
+                        className={`tab ${mode === 'new' ? 'tab-active' : ''}`}
+                        onClick={() => setMode('new')}
+                    >
+                        <i className="fa-solid fa-user-plus mr-2"></i>
+                        Add New
+                    </a>
+                </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {error && (
@@ -94,48 +167,147 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                         </div>
                     )}
 
-                    <div className="fieldset">
-                        <label className="label">Full Name *</label>
-                        <input
-                            type="text"
-                            className="input w-full"
-                            value={formData.full_name}
-                            onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                            required
-                        />
-                    </div>
+                    {mode === 'select' ? (
+                        <>
+                            {/* Existing Candidate Selection */}
+                            <div className="fieldset">
+                                <label className="label">Select Candidate *</label>
+                                {loadingCandidates ? (
+                                    <div className="flex justify-center py-4">
+                                        <span className="loading loading-spinner"></span>
+                                    </div>
+                                ) : existingCandidates.length > 0 ? (
+                                    <select
+                                        className="select w-full"
+                                        value={selectedCandidateId}
+                                        onChange={(e) => setSelectedCandidateId(e.target.value)}
+                                        required
+                                    >
+                                        <option value="">Choose a candidate...</option>
+                                        {existingCandidates.map((candidate) => (
+                                            <option key={candidate.id} value={candidate.id}>
+                                                {candidate.full_name} ({candidate.email})
+                                                {candidate.current_title && ` - ${candidate.current_title}`}
+                                                {candidate.current_company && ` at ${candidate.current_company}`}
+                                            </option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    <div className="alert">
+                                        <i className="fa-solid fa-info-circle"></i>
+                                        <span>No existing candidates found. Please add a new candidate.</span>
+                                    </div>
+                                )}
+                            </div>
 
-                    <div className="fieldset">
-                        <label className="label">Email *</label>
-                        <input
-                            type="email"
-                            className="input w-full"
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            required
-                        />
-                    </div>
+                            {/* Notes for existing candidate submission */}
+                            <div className="fieldset">
+                                <label className="label">Submission Notes</label>
+                                <textarea
+                                    className="textarea w-full h-24"
+                                    value={formData.notes}
+                                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                    placeholder="Why is this candidate a great fit for this role?"
+                                />
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            {/* New Candidate Form */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="fieldset">
+                                    <label className="label">Full Name *</label>
+                                    <input
+                                        type="text"
+                                        className="input w-full"
+                                        value={formData.full_name}
+                                        onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                                        required
+                                    />
+                                </div>
 
-                    <div className="fieldset">
-                        <label className="label">LinkedIn URL</label>
-                        <input
-                            type="url"
-                            className="input w-full"
-                            value={formData.linkedin_url}
-                            onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
-                            placeholder="https://linkedin.com/in/..."
-                        />
-                    </div>
+                                <div className="fieldset">
+                                    <label className="label">Email *</label>
+                                    <input
+                                        type="email"
+                                        className="input w-full"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                            </div>
 
-                    <div className="fieldset">
-                        <label className="label">Notes</label>
-                        <textarea
-                            className="textarea w-full h-24"
-                            value={formData.notes}
-                            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                            placeholder="Why is this candidate a great fit?"
-                        />
-                    </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="fieldset">
+                                    <label className="label">Phone</label>
+                                    <input
+                                        type="tel"
+                                        className="input w-full"
+                                        value={formData.phone}
+                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                        placeholder="+1 (555) 123-4567"
+                                    />
+                                </div>
+
+                                <div className="fieldset">
+                                    <label className="label">Location</label>
+                                    <input
+                                        type="text"
+                                        className="input w-full"
+                                        value={formData.location}
+                                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                        placeholder="City, State/Country"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="fieldset">
+                                    <label className="label">Current Title</label>
+                                    <input
+                                        type="text"
+                                        className="input w-full"
+                                        value={formData.current_title}
+                                        onChange={(e) => setFormData({ ...formData, current_title: e.target.value })}
+                                        placeholder="e.g., Senior Software Engineer"
+                                    />
+                                </div>
+
+                                <div className="fieldset">
+                                    <label className="label">Current Company</label>
+                                    <input
+                                        type="text"
+                                        className="input w-full"
+                                        value={formData.current_company}
+                                        onChange={(e) => setFormData({ ...formData, current_company: e.target.value })}
+                                        placeholder="e.g., Acme Corp"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="fieldset">
+                                <label className="label">LinkedIn URL</label>
+                                <input
+                                    type="url"
+                                    className="input w-full"
+                                    value={formData.linkedin_url}
+                                    onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
+                                    placeholder="https://linkedin.com/in/..."
+                                />
+                            </div>
+
+                            <div className="fieldset">
+                                <label className="label">Submission Notes</label>
+                                <textarea
+                                    className="textarea w-full h-24"
+                                    value={formData.notes}
+                                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                    placeholder="Why is this candidate a great fit for this role?"
+                                />
+                            </div>
+                        </>
+                    )}
 
                     <div className="fieldset">
                         <label className="label">
@@ -181,7 +353,7 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                         <button
                             type="submit"
                             className="btn btn-primary"
-                            disabled={submitting}
+                            disabled={submitting || (mode === 'select' && !selectedCandidateId && existingCandidates.length > 0)}
                         >
                             {submitting ? (
                                 <>

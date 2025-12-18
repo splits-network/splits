@@ -150,6 +150,16 @@ export class ApiClient {
         });
     }
 
+    // Candidates
+    async getCandidates(filters?: { search?: string }) {
+        const params = new URLSearchParams();
+        if (filters?.search) {
+            params.append('search', filters.search);
+        }
+        const query = params.toString();
+        return this.request(`/candidates${query ? `?${query}` : ''}`);
+    }
+
     // Applications
     async getApplicationsByJob(jobId: string) {
         return this.request(`/jobs/${jobId}/applications`);
@@ -159,6 +169,10 @@ export class ApiClient {
         job_id: string;
         full_name: string;
         email: string;
+        phone?: string;
+        location?: string;
+        current_title?: string;
+        current_company?: string;
         linkedin_url?: string;
         notes?: string;
     }) {
