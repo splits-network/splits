@@ -23,7 +23,7 @@ interface InvitationPageClientProps {
 
 export default function InvitationPageClient({ token }: InvitationPageClientProps) {
     const router = useRouter();
-    const { getToken, isSignedIn } = useAuth();
+    const { getToken, isSignedIn, isLoaded } = useAuth();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [invitation, setInvitation] = useState<InvitationDetails | null>(null);
@@ -35,16 +35,26 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
     const [showDeclineForm, setShowDeclineForm] = useState(false);
 
     useEffect(() => {
+        // Wait for Clerk to load
+        if (!isLoaded) return;
+        
+        // If not signed in, redirect to sign-in with return URL
+        if (!isSignedIn) {
+            router.push(`/sign-in?redirect_url=${encodeURIComponent(`/invitation/${token}`)}`);
+            return;
+        }
+        
+        // User is authenticated, load invitation data
         loadInvitationData();
-    }, [token]);
+    }, [token, isLoaded, isSignedIn]);
 
     const loadInvitationData = async () => {
         try {
             setLoading(true);
             setError(null);
 
-            // Get auth token if user is signed in
-            const authToken = isSignedIn ? await getToken() : null;
+            // Get auth token (we know user is signed in at this point)
+            const authToken = await getToken();
 
             // Fetch invitation details
             const invitationData = await getInvitationDetails(token, authToken);
@@ -84,12 +94,6 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
     const handleAccept = async () => {
         if (!invitation) return;
 
-        // Require authentication to accept
-        if (!isSignedIn) {
-            setError('You must be signed in to accept this invitation. Please sign in or create an account.');
-            return;
-        }
-
         try {
             setProcessing(true);
             setError(null);
@@ -111,12 +115,6 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
 
     const handleDecline = async () => {
         if (!invitation) return;
-
-        // Require authentication to decline
-        if (!isSignedIn) {
-            setError('You must be signed in to decline this invitation. Please sign in or create an account.');
-            return;
-        }
 
         try {
             setProcessing(true);

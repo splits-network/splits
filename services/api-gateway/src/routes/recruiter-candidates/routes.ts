@@ -163,7 +163,7 @@ export function registerRecruiterCandidateRoutes(app: FastifyInstance, services:
         return reply.send(data);
     });
 
-    // Get invitation details by token (authenticated - user must be signed in to view)
+    // Get invitation details by token (authenticated)
     app.get('/api/network/recruiter-candidates/invitation/:token', {
         schema: {
             description: 'Get invitation details by token (requires authentication)',
