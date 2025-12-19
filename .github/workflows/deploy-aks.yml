@@ -67,6 +67,7 @@ jobs:
                       -t $IMAGE_TAG \
                       --target production \
                       --build-arg NEXT_PUBLIC_API_URL=https://api.splits.network/api \
+                      --build-arg NEXT_PUBLIC_API_GATEWAY_URL=https://api.splits.network \
                       --build-arg NEXT_PUBLIC_APP_URL=https://applicant.network \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }} \
                       .
