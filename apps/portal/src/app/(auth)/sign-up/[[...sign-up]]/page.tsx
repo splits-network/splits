@@ -64,13 +64,23 @@ export default function SignUpPage() {
                 code,
             });
 
-            if (completeSignUp.status === 'complete') {
+            console.log('Verification response:', {
+                status: completeSignUp.status,
+                createdSessionId: completeSignUp.createdSessionId,
+                emailVerification: completeSignUp.verifications?.emailAddress,
+                unverifiedFields: completeSignUp.unverifiedFields,
+                missingFields: completeSignUp.missingFields,
+            });
+
+            // Try to complete sign up regardless of status if we have a session
+            if (completeSignUp.createdSessionId) {
                 await setActive({ session: completeSignUp.createdSessionId });
                 router.push('/dashboard');
             } else {
-                setError('Verification incomplete. Please try again.');
+                setError(`Sign up incomplete. Status: ${completeSignUp.status}. Please check the console for details.`);
             }
         } catch (err: any) {
+            console.error('Verification error:', err);
             setError(err.errors?.[0]?.message || 'Invalid verification code');
         } finally {
             setIsLoading(false);
