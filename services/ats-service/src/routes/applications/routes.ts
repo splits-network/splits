@@ -7,8 +7,15 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
     // Get all applications with optional filters
     app.get(
         '/applications',
-        async (request: FastifyRequest<{ Querystring: { recruiter_id?: string; job_id?: string; stage?: string } }>, reply: FastifyReply) => {
-            const { recruiter_id, job_id, stage } = request.query;
+        async (request: FastifyRequest<{ Querystring: { recruiter_id?: string; job_id?: string; stage?: string; candidate_id?: string } }>, reply: FastifyReply) => {
+            const { recruiter_id, job_id, stage, candidate_id } = request.query;
+            
+            // If candidate_id is provided, use specific method for better performance
+            if (candidate_id) {
+                const applications = await service.getApplicationsByCandidateId(candidate_id);
+                return reply.send({ data: applications });
+            }
+            
             const applications = await service.getApplications({ recruiter_id, job_id, stage });
             return reply.send({ data: applications });
         }

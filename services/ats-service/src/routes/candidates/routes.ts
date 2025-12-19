@@ -5,10 +5,14 @@ export function registerCandidateRoutes(app: FastifyInstance, service: AtsServic
     // Get all candidates with optional filters
     app.get(
         '/candidates',
-        async (request: FastifyRequest<{ Querystring: { search?: string; limit?: string; offset?: string; recruiter_id?: string } }>, reply: FastifyReply) => {
-            const { search, limit, offset, recruiter_id } = request.query;
+        async (request: FastifyRequest<{ Querystring: { search?: string; limit?: string; offset?: string; recruiter_id?: string; email?: string } }>, reply: FastifyReply) => {
+            const { search, limit, offset, recruiter_id, email } = request.query;
+            
+            // If email is provided, use it as the search parameter for exact match
+            const searchParam = email || search;
+            
             const candidates = await service.getCandidates({
-                search,
+                search: searchParam,
                 limit: limit ? parseInt(limit) : undefined,
                 offset: offset ? parseInt(offset) : undefined,
                 recruiter_id,

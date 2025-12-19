@@ -135,3 +135,87 @@ export async function getCandidateDetails(candidateId: string, authToken?: strin
 export async function getUserDetails(userId: string, authToken?: string | null): Promise<UserDetails> {
     return fetchApi<UserDetails>(`/api/identity/users/${userId}`, {}, authToken);
 }
+
+// Dashboard API
+export interface DashboardStats {
+    applications: number;
+    interviews: number;
+    offers: number;
+    active_relationships: number;
+}
+
+export interface RecentApplication {
+    id: string;
+    job_id: string;
+    job_title: string;
+    company: string;
+    status: string;
+    applied_at: string;
+}
+
+export async function getDashboardStats(authToken: string): Promise<DashboardStats> {
+    return fetchApi<DashboardStats>('/api/candidate/dashboard/stats', {}, authToken);
+}
+
+export async function getRecentApplications(authToken: string): Promise<RecentApplication[]> {
+    return fetchApi<RecentApplication[]>('/api/candidate/dashboard/recent-applications', {}, authToken);
+}
+
+// Documents API
+export interface Document {
+    id: string;
+    entity_type: string;
+    entity_id: string;
+    document_type: string;
+    filename: string;
+    storage_path: string;
+    bucket_name: string;
+    content_type: string;
+    file_size: number;
+    uploaded_by_user_id?: string;
+    processing_status: string;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string;
+}
+
+export async function getMyDocuments(authToken: string): Promise<Document[]> {
+    return fetchApi<Document[]>('/api/candidates/me/documents', {}, authToken);
+}
+
+export async function uploadDocument(formData: FormData, authToken: string): Promise<Document> {
+    const url = `${API_BASE_URL}/api/documents/upload`;
+    
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${authToken}`,
+        },
+        body: formData,
+    });
+
+    if (!response.ok) {
+        let errorMessage = 'Failed to upload document';
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch {
+            errorMessage = response.statusText || errorMessage;
+        }
+        throw new ApiError(errorMessage, response.status);
+    }
+
+    const json = await response.json();
+    return json.data || json;
+}
+
+export async function deleteDocument(documentId: string, authToken: string): Promise<void> {
+    await fetchApi<void>(`/api/documents/${documentId}`, {
+        method: 'DELETE',
+    }, authToken);
+}
+
+export async function getDocumentUrl(documentId: string, authToken: string): Promise<string> {
+    const doc = await fetchApi<{ downloadUrl: string }>(`/api/documents/${documentId}`, {}, authToken);
+    return doc.downloadUrl;
+}

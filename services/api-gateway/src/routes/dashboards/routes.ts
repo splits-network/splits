@@ -235,6 +235,194 @@ export function registerDashboardsRoutes(app: FastifyInstance, services: Service
         return reply.send({ data: [] });
     });
 
+    // ========================================================================
+    // Candidate Dashboard
+    // ========================================================================
+
+    app.get('/api/candidate/dashboard/stats', {
+        schema: {
+            description: 'Get candidate dashboard stats',
+            tags: ['dashboards'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const req = request as AuthenticatedRequest;
+        const correlationId = getCorrelationId(request);
+
+        try {
+            // Get candidate profile by email from Clerk
+            const userEmail = req.auth?.email;
+            if (!userEmail) {
+                return reply.send({
+                    data: {
+                        applications: 0,
+                        interviews: 0,
+                        offers: 0,
+                        active_relationships: 0,
+                    }
+                });
+            }
+
+            // Try to find candidate by email
+            let candidateId: string | null = null;
+            try {
+                const candidatesResponse: any = await atsService().get(
+                    `/candidates?email=${encodeURIComponent(userEmail)}`,
+                    undefined,
+                    correlationId
+                );
+                const candidates = candidatesResponse.data || [];
+                if (candidates.length > 0) {
+                    candidateId = candidates[0].id;
+                }
+            } catch (error) {
+                request.log.warn({ error, email: userEmail }, 'Could not find candidate profile');
+            }
+
+            if (!candidateId) {
+                return reply.send({
+                    data: {
+                        applications: 0,
+                        interviews: 0,
+                        offers: 0,
+                        active_relationships: 0,
+                    }
+                });
+            }
+
+            // Get applications for this candidate
+            const applicationsResponse: any = await atsService().get(
+                `/applications?candidate_id=${candidateId}`,
+                undefined,
+                correlationId
+            );
+            const applications = applicationsResponse.data || [];
+
+            // Calculate stats from applications
+            const interviewStages = ['phone_screen', 'technical_interview', 'onsite_interview', 'final_interview'];
+            const offerStages = ['offer_extended'];
+            
+            const interviews = applications.filter((app: any) => 
+                interviewStages.includes(app.stage)
+            ).length;
+            
+            const offers = applications.filter((app: any) => 
+                offerStages.includes(app.stage)
+            ).length;
+
+            // Get active recruiter relationships
+            let activeRelationships = 0;
+            try {
+                const relationshipsResponse: any = await networkService().get(
+                    `/recruiter-candidates/candidate/${candidateId}`,
+                    undefined,
+                    correlationId
+                );
+                const relationships = relationshipsResponse.data || [];
+                activeRelationships = relationships.filter((rel: any) => rel.status === 'active').length;
+            } catch (error) {
+                request.log.warn({ error, candidateId }, 'Could not get recruiter relationships');
+            }
+
+            const stats = {
+                applications: applications.length,
+                interviews,
+                offers,
+                active_relationships: activeRelationships,
+            };
+
+            return reply.send({ data: stats });
+        } catch (error) {
+            request.log.error({ error }, 'Error fetching candidate dashboard stats');
+            return reply.status(500).send({ error: 'Failed to load dashboard stats' });
+        }
+    });
+
+    app.get('/api/candidate/dashboard/recent-applications', {
+        schema: {
+            description: 'Get candidate recent applications',
+            tags: ['dashboards'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const req = request as AuthenticatedRequest;
+        const correlationId = getCorrelationId(request);
+
+        try {
+            // Get candidate profile by email from Clerk
+            const userEmail = req.auth?.email;
+            if (!userEmail) {
+                return reply.send({ data: [] });
+            }
+
+            // Try to find candidate by email
+            let candidateId: string | null = null;
+            try {
+                const candidatesResponse: any = await atsService().get(
+                    `/candidates?email=${encodeURIComponent(userEmail)}`,
+                    undefined,
+                    correlationId
+                );
+                const candidates = candidatesResponse.data || [];
+                if (candidates.length > 0) {
+                    candidateId = candidates[0].id;
+                }
+            } catch (error) {
+                request.log.warn({ error, email: userEmail }, 'Could not find candidate profile');
+            }
+
+            if (!candidateId) {
+                return reply.send({ data: [] });
+            }
+
+            // Get recent applications (limit 5)
+            const applicationsResponse: any = await atsService().get(
+                `/applications?candidate_id=${candidateId}`,
+                undefined,
+                correlationId
+            );
+            const applications = applicationsResponse.data || [];
+
+            // Get job details for each application
+            const recentApps = await Promise.all(
+                applications.slice(0, 5).map(async (app: any) => {
+                    try {
+                        const jobResponse: any = await atsService().get(
+                            `/jobs/${app.job_id}`,
+                            undefined,
+                            correlationId
+                        );
+                        const job = jobResponse.data;
+
+                        return {
+                            id: app.id,
+                            job_id: app.job_id,
+                            job_title: job?.title || 'Unknown Position',
+                            company: job?.company?.name || 'Unknown Company',
+                            status: app.stage,
+                            applied_at: app.created_at,
+                        };
+                    } catch (error) {
+                        request.log.warn({ error, applicationId: app.id }, 'Could not get job details');
+                        return {
+                            id: app.id,
+                            job_id: app.job_id,
+                            job_title: 'Unknown Position',
+                            company: 'Unknown Company',
+                            status: app.stage,
+                            applied_at: app.created_at,
+                        };
+                    }
+                })
+            );
+
+            return reply.send({ data: recentApps });
+        } catch (error) {
+            request.log.error({ error }, 'Error fetching recent applications');
+            return reply.status(500).send({ error: 'Failed to load recent applications' });
+        }
+    });
+
     // Legacy: Admin stats endpoint (aggregates from multiple services)
     app.get('/api/admin/stats', {
         preHandler: requireRoles(['platform_admin']),

@@ -1,33 +1,32 @@
 import { currentUser } from '@clerk/nextjs/server';
+import { auth } from '@clerk/nextjs/server';
 import Link from 'next/link';
+import { getDashboardStats, getRecentApplications, DashboardStats, RecentApplication } from '@/lib/api';
 
 export default async function DashboardPage() {
   const user = await currentUser();
+  const { getToken } = await auth();
+  const token = await getToken();
 
-  // Mock data - will be replaced with API calls
-  const stats = {
-    applications: 12,
-    interviews: 3,
-    offers: 1,
-    savedJobs: 8,
+  // Fetch real data from API
+  let stats: DashboardStats = {
+    applications: 0,
+    interviews: 0,
+    offers: 0,
+    active_relationships: 0,
   };
+  let recentApplications: RecentApplication[] = [];
 
-  const recentApplications = [
-    {
-      id: '1',
-      job_title: 'Senior Software Engineer',
-      company: 'Tech Corp',
-      status: 'Interview Scheduled',
-      applied_at: '2025-12-10',
-    },
-    {
-      id: '2',
-      job_title: 'Product Manager',
-      company: 'Startup Inc',
-      status: 'Under Review',
-      applied_at: '2025-12-08',
-    },
-  ];
+  if (token) {
+    try {
+      [stats, recentApplications] = await Promise.all([
+        getDashboardStats(token),
+        getRecentApplications(token),
+      ]);
+    } catch (error) {
+      console.error('Failed to load dashboard data:', error);
+    }
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -83,10 +82,10 @@ export default async function DashboardPage() {
           <div className="card-body">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-base-content/70 mb-1">Saved Jobs</p>
-                <p className="text-3xl font-bold">{stats.savedJobs}</p>
+                <p className="text-sm text-base-content/70 mb-1">Active Recruiters</p>
+                <p className="text-3xl font-bold">{stats.active_relationships}</p>
               </div>
-              <i className="fa-solid fa-bookmark text-4xl text-info"></i>
+              <i className="fa-solid fa-users text-4xl text-info"></i>
             </div>
           </div>
         </div>
@@ -106,22 +105,32 @@ export default async function DashboardPage() {
               </Link>
             </div>
 
-            <div className="space-y-4">
-              {recentApplications.map((app) => (
-                <div key={app.id} className="p-4 bg-base-200 rounded-lg">
-                  <h3 className="font-semibold mb-1">{app.job_title}</h3>
-                  <p className="text-sm text-base-content/70 mb-2">
-                    {app.company}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="badge badge-primary">{app.status}</span>
-                    <span className="text-xs text-base-content/70">
-                      Applied {app.applied_at}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {recentApplications.length > 0 ? (
+              <div className="space-y-4">
+                {recentApplications.map((app) => (
+                  <Link key={app.id} href={`/applications/${app.id}`}>
+                    <div className="p-4 bg-base-200 rounded-lg hover:bg-base-300 transition-colors cursor-pointer">
+                      <h3 className="font-semibold mb-1">{app.job_title}</h3>
+                      <p className="text-sm text-base-content/70 mb-2">
+                        {app.company}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="badge badge-primary">{app.status}</span>
+                        <span className="text-xs text-base-content/70">
+                          Applied {new Date(app.applied_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-base-content/70">
+                <i className="fa-solid fa-inbox text-4xl mb-2 opacity-30"></i>
+                <p>No applications yet</p>
+                <p className="text-sm mt-1">Start applying to jobs to see them here</p>
+              </div>
+            )}
           </div>
         </div>
 
