@@ -62,7 +62,6 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
 
             // Fetch recruiter details
             const recruiterData = await getRecruiterDetails(invitationData.recruiter_id, authToken);
-            console.log('[DEBUG] Recruiter data:', JSON.stringify(recruiterData, null, 2));
             setRecruiter(recruiterData);
 
             // Fetch recruiter user details

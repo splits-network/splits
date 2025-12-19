@@ -54,7 +54,15 @@ async function fetchApi<T>(
         throw new ApiError(errorMessage, response.status, errorCode);
     }
 
-    return response.json();
+    const json = await response.json();
+    
+    // API Gateway wraps responses in { data: ... }
+    // Unwrap if the response has a data property
+    if (json && typeof json === 'object' && 'data' in json) {
+        return json.data as T;
+    }
+    
+    return json as T;
 }
 
 // Invitation API
