@@ -117,14 +117,14 @@ export async function declineInvitation(
     );
 }
 
-export async function getRecruiterDetails(recruiterId: string): Promise<RecruiterDetails> {
-    return fetchApi<RecruiterDetails>(`/api/network/recruiters/${recruiterId}`);
+export async function getRecruiterDetails(recruiterId: string, authToken?: string | null): Promise<RecruiterDetails> {
+    return fetchApi<RecruiterDetails>(`/api/network/recruiters/${recruiterId}`, {}, authToken);
 }
 
-export async function getCandidateDetails(candidateId: string): Promise<CandidateDetails> {
-    return fetchApi<CandidateDetails>(`/api/ats/candidates/${candidateId}`);
+export async function getCandidateDetails(candidateId: string, authToken?: string | null): Promise<CandidateDetails> {
+    return fetchApi<CandidateDetails>(`/api/ats/candidates/${candidateId}`, {}, authToken);
 }
 
-export async function getUserDetails(userId: string): Promise<UserDetails> {
-    return fetchApi<UserDetails>(`/api/identity/users/${userId}`);
+export async function getUserDetails(userId: string, authToken?: string | null): Promise<UserDetails> {
+    return fetchApi<UserDetails>(`/api/identity/users/${userId}`, {}, authToken);
 }
