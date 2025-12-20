@@ -13,6 +13,10 @@
             "path": "apps/candidate"
         },
         {
+            "name": "🏢 Corporate Site (Next.js)",
+            "path": "apps/corporate"
+        },
+        {
             "name": "🔐 Identity Service",
             "path": "services/identity-service"
         },
