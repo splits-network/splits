@@ -11,7 +11,7 @@ const navItems = [
     { href: '/roles', label: 'Roles', icon: 'fa-briefcase' },
     { href: '/candidates', label: 'Candidates', icon: 'fa-users' },
     { href: '/invitations', label: 'Invitations', icon: 'fa-envelope' },
-    { href: '/proposals', label: 'Proposals', icon: 'fa-handshake', badge: true },
+    // { href: '/proposals', label: 'Proposals', icon: 'fa-handshake', badge: true }, // commented out for future use
     { href: '/placements', label: 'Placements', icon: 'fa-trophy' },
 ];
 
@@ -88,8 +88,8 @@ export function Sidebar() {
                                 key={item.href}
                                 href={item.href}
                                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors mb-1 ${isActive
-                                        ? 'bg-primary text-primary-content font-medium'
-                                        : 'text-base-content/70 hover:bg-base-200 hover:text-base-content'
+                                    ? 'bg-primary text-primary-content font-medium'
+                                    : 'text-base-content/70 hover:bg-base-200 hover:text-base-content'
                                     }`}
                             >
                                 <i className={`fa-solid ${item.icon} w-4 text-center`}></i>
@@ -112,8 +112,8 @@ export function Sidebar() {
                                         key={item.href}
                                         href={item.href}
                                         className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors mb-1 ${isActive
-                                                ? 'bg-primary text-primary-content font-medium'
-                                                : 'text-base-content/70 hover:bg-base-200 hover:text-base-content'
+                                            ? 'bg-primary text-primary-content font-medium'
+                                            : 'text-base-content/70 hover:bg-base-200 hover:text-base-content'
                                             }`}
                                     >
                                         <i className={`fa-solid ${item.icon} w-4 text-center`}></i>
@@ -138,8 +138,8 @@ export function Sidebar() {
                                         key={item.href}
                                         href={item.href}
                                         className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors mb-1 ${isActive
-                                                ? 'bg-primary text-primary-content font-medium'
-                                                : 'text-base-content/70 hover:bg-base-200 hover:text-base-content'
+                                            ? 'bg-primary text-primary-content font-medium'
+                                            : 'text-base-content/70 hover:bg-base-200 hover:text-base-content'
                                             }`}
                                     >
                                         <i className={`fa-solid ${item.icon} w-4 text-center`}></i>
@@ -164,8 +164,8 @@ export function Sidebar() {
                                         key={item.href}
                                         href={item.href}
                                         className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors mb-1 ${isActive
-                                                ? 'bg-primary text-primary-content font-medium'
-                                                : 'text-base-content/70 hover:bg-base-200 hover:text-base-content'
+                                            ? 'bg-primary text-primary-content font-medium'
+                                            : 'text-base-content/70 hover:bg-base-200 hover:text-base-content'
                                             }`}
                                     >
                                         <i className={`fa-solid ${item.icon} w-4 text-center`}></i>
