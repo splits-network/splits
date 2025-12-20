@@ -505,11 +505,16 @@ export class AtsRepository {
         const sortBy = params.sort_by || 'created_at';
         const sortOrder = params.sort_order || 'desc';
 
+        // Split search terms for multi-word matching (e.g., "toot developer" -> ["toot", "developer"])
+        const searchTerms = params.search 
+            ? params.search.trim().split(/\s+/).filter(term => term.length > 0)
+            : null;
+
         // Use database function for maximum performance with full-text search
         const { data, error } = await this.supabase
             .schema('ats')
             .rpc('search_applications_paginated', {
-                search_terms: params.search || null,
+                search_terms: searchTerms,
                 filter_recruiter_id: params.recruiter_id || null,
                 filter_job_id: params.job_id || null,
                 filter_candidate_id: params.candidate_id || null,
