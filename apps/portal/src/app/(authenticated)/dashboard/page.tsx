@@ -1,8 +1,8 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import RecruiterDashboard from './recruiter-dashboard';
-import CompanyDashboard from './company-dashboard';
-import AdminDashboard from './admin-dashboard';
+import RecruiterDashboard from './components/recruiter-dashboard';
+import CompanyDashboard from './components/company-dashboard';
+import AdminDashboard from './components/admin-dashboard';
 
 // API client helper
 async function fetchFromGateway(endpoint: string, token: string) {

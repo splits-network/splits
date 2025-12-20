@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import TeamManagementContent from './team-content';
+import TeamManagementContent from './components/team-content';
 
 async function fetchFromGateway(endpoint: string, token: string) {
     const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';

@@ -15,6 +15,10 @@ const navItems = [
     { href: '/placements', label: 'Placements', icon: 'fa-trophy' },
 ];
 
+const recruiterNavItems = [
+    { href: '/applications', label: 'Applications', icon: 'fa-file-lines' },
+];
+
 const companyNavItems = [
     { href: '/company/settings', label: 'Company Settings', icon: 'fa-building' },
     { href: '/company/team', label: 'Team', icon: 'fa-user-group' },
@@ -29,34 +33,41 @@ export function Sidebar() {
     const { getToken, isLoaded } = useAuth();
     const [isAdmin, setIsAdmin] = useState(false);
     const [isCompanyUser, setIsCompanyUser] = useState(false);
+    const [isRecruiter, setIsRecruiter] = useState(false);
 
     useEffect(() => {
         async function checkUserRoles() {
             if (!isLoaded) return;
-            
+
             try {
                 const token = await getToken();
                 if (!token) return;
-                
+
                 const apiClient = createAuthenticatedClient(token);
                 const profile: any = await apiClient.get('/me');
-                
+
                 const memberships = profile.data?.memberships || [];
-                
+
                 const hasAdminRole = memberships.some(
                     (m: any) => m.role === 'platform_admin'
                 );
-                
+
                 const hasCompanyRole = memberships.some(
                     (m: any) => ['company_admin', 'hiring_manager'].includes(m.role)
                 );
-                
+
+                const hasRecruiterRole = memberships.some(
+                    (m: any) => m.role === 'recruiter'
+                );
+
                 setIsAdmin(hasAdminRole);
                 setIsCompanyUser(hasCompanyRole);
+                setIsRecruiter(hasRecruiterRole);
             } catch (error) {
                 console.error('Failed to check user roles:', error);
                 setIsAdmin(false);
                 setIsCompanyUser(false);
+                setIsRecruiter(false);
             }
         }
 
@@ -76,17 +87,42 @@ export function Sidebar() {
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors mb-1 ${
-                                    isActive
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors mb-1 ${isActive
                                         ? 'bg-primary text-primary-content font-medium'
                                         : 'text-base-content/70 hover:bg-base-200 hover:text-base-content'
-                                }`}
+                                    }`}
                             >
                                 <i className={`fa-solid ${item.icon} w-4 text-center`}></i>
                                 {item.label}
                             </Link>
                         );
                     })}
+
+                    {/* Recruiter Section */}
+                    {isRecruiter && recruiterNavItems.length > 0 && (
+                        <>
+                            <div className="divider my-2"></div>
+                            <div className="px-3 py-1 text-xs font-semibold text-base-content/50 uppercase tracking-wider">
+                                Recruiter
+                            </div>
+                            {recruiterNavItems.map((item) => {
+                                const isActive = pathname === item.href;
+                                return (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors mb-1 ${isActive
+                                                ? 'bg-primary text-primary-content font-medium'
+                                                : 'text-base-content/70 hover:bg-base-200 hover:text-base-content'
+                                            }`}
+                                    >
+                                        <i className={`fa-solid ${item.icon} w-4 text-center`}></i>
+                                        {item.label}
+                                    </Link>
+                                );
+                            })}
+                        </>
+                    )}
 
                     {/* Company Management Section */}
                     {isCompanyUser && (
@@ -101,11 +137,10 @@ export function Sidebar() {
                                     <Link
                                         key={item.href}
                                         href={item.href}
-                                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors mb-1 ${
-                                            isActive
+                                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors mb-1 ${isActive
                                                 ? 'bg-primary text-primary-content font-medium'
                                                 : 'text-base-content/70 hover:bg-base-200 hover:text-base-content'
-                                        }`}
+                                            }`}
                                     >
                                         <i className={`fa-solid ${item.icon} w-4 text-center`}></i>
                                         {item.label}
@@ -128,11 +163,10 @@ export function Sidebar() {
                                     <Link
                                         key={item.href}
                                         href={item.href}
-                                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors mb-1 ${
-                                            isActive
+                                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors mb-1 ${isActive
                                                 ? 'bg-primary text-primary-content font-medium'
                                                 : 'text-base-content/70 hover:bg-base-200 hover:text-base-content'
-                                        }`}
+                                            }`}
                                     >
                                         <i className={`fa-solid ${item.icon} w-4 text-center`}></i>
                                         {item.label}

@@ -1,4 +1,4 @@
-import CandidateDetailClient from './candidate-detail-client';
+import CandidateDetailClient from './components/candidate-detail-client';
 
 interface CandidateDetailPageProps {
     params: Promise<{ id: string }>;

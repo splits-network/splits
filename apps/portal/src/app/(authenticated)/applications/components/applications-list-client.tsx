@@ -10,6 +10,7 @@ interface Application {
     id: string;
     job_id: string;
     candidate_id: string;
+    recruiter_id?: string; // This is the user_id, not recruiter table ID
     stage: string;
     accepted_by_company: boolean;
     accepted_at?: string;
@@ -44,29 +45,33 @@ export default function ApplicationsListClient() {
     const [companyId, setCompanyId] = useState<string | null>(null);
     const [userRole, setUserRole] = useState<string | null>(null);
     const [acceptingId, setAcceptingId] = useState<string | null>(null);
+    const [userId, setUserId] = useState<string | null>(null);
+    const [recruiterId, setRecruiterId] = useState<string | null>(null);
 
     useEffect(() => {
         async function loadApplications() {
             try {
                 setLoading(true);
                 setError(null);
-                
+
                 const token = await getToken();
                 if (!token) {
                     setError('Not authenticated');
                     return;
                 }
-                
+
                 const client = createAuthenticatedClient(token);
-                
+
                 // Get user profile to get company context
                 const profileRes = await client.get('/me');
                 const profile = profileRes.data;
-                
+
                 const membership = profile?.memberships?.[0];
                 const role = membership?.role;
+                const uid = profile?.user_id;
                 setUserRole(role);
-                
+                setUserId(uid);
+
                 // Get company ID for company users
                 if (role === 'company_admin' || role === 'hiring_manager') {
                     // Get company by org ID
@@ -75,15 +80,113 @@ export default function ApplicationsListClient() {
                     if (companies.length > 0) {
                         const cid = companies[0].id;
                         setCompanyId(cid);
-                        
+
                         // Load applications for this company
                         const response = await client.get(`/companies/${cid}/applications`);
-                        setApplications(response.data || []);
+                        const apps = response.data || [];
+
+                        // Enrich applications with candidate and job data
+                        const enrichedApps = await Promise.all(
+                            apps.map(async (app: Application) => {
+                                try {
+                                    // Fetch candidate data
+                                    const candidateRes = await client.get(`/candidates/${app.candidate_id}`);
+                                    // Fetch job data
+                                    const jobRes = await client.get(`/jobs/${app.job_id}`);
+
+                                    return {
+                                        ...app,
+                                        candidate: candidateRes.data,
+                                        job: jobRes.data,
+                                    };
+                                } catch (err) {
+                                    console.error(`Failed to enrich application ${app.id}:`, err);
+                                    return app;
+                                }
+                            })
+                        );
+
+                        setApplications(enrichedApps);
+                    }
+                } else if (role === 'recruiter') {
+                    // Get recruiter profile
+                    const recruiterRes = await client.get('/recruiters/me');
+                    const recruiter = recruiterRes.data;
+                    const rid = recruiter?.id;
+                    const userIdFromProfile = recruiter?.user_id;
+                    setRecruiterId(rid);
+                    setUserId(userIdFromProfile);
+
+                    if (rid && userIdFromProfile) {
+                        // Get all applications
+                        const allAppsRes = await client.get('/applications');
+                        const allApps = allAppsRes.data || [];
+
+                        // Get recruiter's candidate relationships using the /me endpoint (accessible by recruiters)
+                        const relationshipsRes = await client.get('/recruiter-candidates/me');
+                        const relationships = relationshipsRes.data || [];
+                        // Filter to only active relationships
+                        const activeRelationships = relationships.filter((r: any) => r.status === 'active');
+                        const assignedCandidateIds = new Set(activeRelationships.map((r: any) => r.candidate_id));
+
+                        // Filter applications: owned by recruiter (compare user_id) OR for assigned candidates
+                        const filteredApps = allApps.filter((app: Application) => {
+                            // applications.recruiter_id stores user_id, not recruiter table id
+                            const ownsApplication = app.recruiter_id === userIdFromProfile;
+                            const hasRelationship = assignedCandidateIds.has(app.candidate_id);
+                            return ownsApplication || hasRelationship;
+                        });
+
+                        // Enrich applications with candidate and job data
+                        const enrichedApps = await Promise.all(
+                            filteredApps.map(async (app: Application) => {
+                                try {
+                                    // Fetch candidate data
+                                    const candidateRes = await client.get(`/candidates/${app.candidate_id}`);
+                                    // Fetch job data
+                                    const jobRes = await client.get(`/jobs/${app.job_id}`);
+
+                                    return {
+                                        ...app,
+                                        candidate: candidateRes.data,
+                                        job: jobRes.data,
+                                    };
+                                } catch (err) {
+                                    console.error(`Failed to enrich application ${app.id}:`, err);
+                                    return app; // Return original if enrichment fails
+                                }
+                            })
+                        );
+
+                        setApplications(enrichedApps);
                     }
                 } else {
-                    // Recruiters and admins see all applications
+                    // Platform admins see all applications
                     const response = await client.get('/applications');
-                    setApplications(response.data || []);
+                    const apps = response.data || [];
+
+                    // Enrich applications with candidate and job data
+                    const enrichedApps = await Promise.all(
+                        apps.map(async (app: Application) => {
+                            try {
+                                // Fetch candidate data
+                                const candidateRes = await client.get(`/candidates/${app.candidate_id}`);
+                                // Fetch job data
+                                const jobRes = await client.get(`/jobs/${app.job_id}`);
+
+                                return {
+                                    ...app,
+                                    candidate: candidateRes.data,
+                                    job: jobRes.data,
+                                };
+                            } catch (err) {
+                                console.error(`Failed to enrich application ${app.id}:`, err);
+                                return app;
+                            }
+                        })
+                    );
+
+                    setApplications(enrichedApps);
                 }
             } catch (err: any) {
                 console.error('Failed to load applications:', err);
@@ -101,10 +204,10 @@ export default function ApplicationsListClient() {
             setAcceptingId(applicationId);
             const token = await getToken();
             if (!token) return;
-            
+
             const client = createAuthenticatedClient(token);
             await client.post(`/applications/${applicationId}/accept`, {});
-            
+
             // Reload applications to get updated data
             if (companyId) {
                 const response = await client.get(`/companies/${companyId}/applications`);
@@ -140,12 +243,14 @@ export default function ApplicationsListClient() {
 
     const filteredApplications = applications.filter(app => {
         const candidate = app.candidate || { full_name: '', email: '' };
+        const job = app.job || { title: '' };
         const matchesSearch = searchQuery === '' ||
             candidate.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            candidate.email.toLowerCase().includes(searchQuery.toLowerCase());
-        
+            candidate.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            job.title.toLowerCase().includes(searchQuery.toLowerCase());
+
         const matchesStage = stageFilter === '' || app.stage === stageFilter;
-        
+
         return matchesSearch && matchesStage;
     });
 
@@ -170,6 +275,7 @@ export default function ApplicationsListClient() {
     }
 
     const isCompanyUser = userRole === 'company_admin' || userRole === 'hiring_manager';
+    const isRecruiter = userRole === 'recruiter';
 
     return (
         <div className="space-y-6">
@@ -177,9 +283,11 @@ export default function ApplicationsListClient() {
                 <div>
                     <h1 className="text-3xl font-bold">Applications</h1>
                     <p className="text-base-content/70 mt-1">
-                        {isCompanyUser 
+                        {isCompanyUser
                             ? 'Candidate submissions to your jobs'
-                            : 'All candidate applications'}
+                            : isRecruiter
+                                ? 'Applications for your assigned candidates'
+                                : 'All candidate applications'}
                     </p>
                 </div>
             </div>
@@ -192,7 +300,7 @@ export default function ApplicationsListClient() {
                             <label className="label">Search</label>
                             <input
                                 type="text"
-                                placeholder="Search candidates..."
+                                placeholder="Search candidates or jobs..."
                                 className="input w-full"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -215,14 +323,14 @@ export default function ApplicationsListClient() {
                             </select>
                         </div>
                         <div className="join">
-                            <button 
+                            <button
                                 className={`btn join-item ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
                                 onClick={() => setViewMode('grid')}
                                 title="Grid View"
                             >
                                 <i className="fa-solid fa-grip"></i>
                             </button>
-                            <button 
+                            <button
                                 className={`btn join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
                                 onClick={() => setViewMode('table')}
                                 title="Table View"
@@ -238,11 +346,11 @@ export default function ApplicationsListClient() {
             {viewMode === 'grid' && filteredApplications.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {filteredApplications.map((application) => {
-                        const candidate = application.candidate || { 
-                            id: '', 
-                            full_name: 'Unknown', 
-                            email: '', 
-                            _masked: false 
+                        const candidate = application.candidate || {
+                            id: '',
+                            full_name: 'Unknown',
+                            email: '',
+                            _masked: false
                         };
                         const isMasked = candidate._masked;
                         const canAccept = isCompanyUser && !application.accepted_by_company;
@@ -276,6 +384,12 @@ export default function ApplicationsListClient() {
                                                         <span className="italic">{candidate.email}</span>
                                                     )}
                                                 </div>
+                                                {application.job && (
+                                                    <div className="text-sm mt-2 flex items-center gap-2">
+                                                        <i className="fa-solid fa-briefcase text-base-content/40"></i>
+                                                        <span className="font-medium text-base-content">{application.job.title}</span>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                         <span className={`badge ${getStageColor(application.stage)}`}>
@@ -352,6 +466,7 @@ export default function ApplicationsListClient() {
                             <thead>
                                 <tr>
                                     <th>Candidate</th>
+                                    <th>Job</th>
                                     <th>Recruiter</th>
                                     <th>Stage</th>
                                     <th>Status</th>
@@ -361,11 +476,11 @@ export default function ApplicationsListClient() {
                             </thead>
                             <tbody>
                                 {filteredApplications.map((application) => {
-                                    const candidate = application.candidate || { 
-                                        id: '', 
-                                        full_name: 'Unknown', 
-                                        email: '', 
-                                        _masked: false 
+                                    const candidate = application.candidate || {
+                                        id: '',
+                                        full_name: 'Unknown',
+                                        email: '',
+                                        _masked: false
                                     };
                                     const isMasked = candidate._masked;
                                     const canAccept = isCompanyUser && !application.accepted_by_company;
@@ -394,6 +509,15 @@ export default function ApplicationsListClient() {
                                                         </div>
                                                     </div>
                                                 </div>
+                                            </td>
+                                            <td>
+                                                {application.job ? (
+                                                    <div className="text-sm font-medium">
+                                                        {application.job.title}
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-base-content/40">—</span>
+                                                )}
                                             </td>
                                             <td>
                                                 {application.recruiter ? (
@@ -449,7 +573,7 @@ export default function ApplicationsListClient() {
                                                 </div>
                                             </td>
                                         </tr>
-                                                    );
+                                    );
                                 })}
                             </tbody>
                         </table>
@@ -467,7 +591,9 @@ export default function ApplicationsListClient() {
                                 ? 'Try adjusting your filters'
                                 : isCompanyUser
                                     ? 'No candidates have been submitted to your jobs yet'
-                                    : 'No applications to display'}
+                                    : isRecruiter
+                                        ? 'No applications for your assigned candidates yet'
+                                        : 'No applications to display'}
                         </p>
                     </div>
                 </div>

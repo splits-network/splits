@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import InvitationsPageClient from './invitations-client';
+import InvitationsPageClient from './components/invitations-client';
 
 export const metadata: Metadata = {
     title: 'Candidate Invitations | Splits Network',

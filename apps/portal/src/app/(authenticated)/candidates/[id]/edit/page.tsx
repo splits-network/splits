@@ -1,9 +1,9 @@
 import { Suspense } from 'react';
-import EditCandidateClient from './edit-candidate-client';
+import EditCandidateClient from './components/edit-candidate-client';
 
 export default async function EditCandidatePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    
+
     return (
         <div className="container mx-auto px-4 py-8">
             <Suspense fallback={

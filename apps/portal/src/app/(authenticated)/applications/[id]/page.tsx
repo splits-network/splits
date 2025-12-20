@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import ApplicationDetailClient from './application-detail-client';
+import ApplicationDetailClient from './components/application-detail-client';
 
 export default async function ApplicationDetailPage({
     params,
