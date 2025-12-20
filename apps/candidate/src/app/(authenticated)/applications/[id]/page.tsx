@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { formatDate } from '@/lib/utils';
+import WithdrawButton from '@/components/WithdrawButton';
 
 const getStatusColor = (stage: string) => {
     switch (stage) {
@@ -229,8 +230,8 @@ export default async function ApplicationDetailPage({
                                         <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg bg-base-200 hover:bg-base-300 transition-colors">
                                             <div className="flex items-center gap-3 flex-1 min-w-0">
                                                 <i className={`fa-solid ${doc.document_type === 'resume' ? 'fa-file-text' :
-                                                        doc.document_type === 'cover_letter' ? 'fa-file-lines' :
-                                                            'fa-file'
+                                                    doc.document_type === 'cover_letter' ? 'fa-file-lines' :
+                                                        'fa-file'
                                                     } text-primary`}></i>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="font-medium truncate">{doc.filename}</div>
@@ -356,10 +357,10 @@ export default async function ApplicationDetailPage({
 
                             <div className="space-y-2">
                                 {application.stage !== 'withdrawn' && application.stage !== 'rejected' && (
-                                    <button className="btn btn-error btn-outline w-full">
-                                        <i className="fa-solid fa-xmark"></i>
-                                        Withdraw Application
-                                    </button>
+                                    <WithdrawButton
+                                        applicationId={application.id}
+                                        jobTitle={job.title || 'this position'}
+                                    />
                                 )}
 
                                 <Link href="/applications" className="btn btn-outline w-full">
