@@ -27,6 +27,7 @@ export default async function ApplicationDetailPage({
     let questions: any[] = [];
     let recruiter: any = null;
     let relationship: any = null;
+    let auditLogs: any[] = [];
     let error: string | null = null;
 
     try {
@@ -52,6 +53,15 @@ export default async function ApplicationDetailPage({
         console.log('Parsed application:', application);
         console.log('Application recruiter_id:', application.recruiter_id);
         console.log('Recruiter id:', recruiter.id);
+
+        // Get audit log for timeline
+        try {
+            const auditLogResponse: any = await client.get(`/applications/${applicationId}/audit-log`);
+            auditLogs = auditLogResponse.data || [];
+            console.log('Audit logs:', auditLogs);
+        } catch (err) {
+            console.warn('Could not fetch audit log:', err);
+        }
 
         // Check recruiter-candidate relationship status first
         if (candidate && recruiter) {
@@ -115,6 +125,7 @@ export default async function ApplicationDetailPage({
             questions={questions}
             recruiter={recruiter}
             relationship={relationship}
+            auditLogs={auditLogs}
         />
     );
 }

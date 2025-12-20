@@ -189,6 +189,13 @@ export class ApiClient {
         });
     }
 
+    async addApplicationNote(id: string, note: string) {
+        return this.request(`/applications/${id}/notes`, {
+            method: 'PATCH',
+            body: JSON.stringify({ note }),
+        });
+    }
+
     // Placements
     async getPlacements(filters?: { recruiter_id?: string; company_id?: string }) {
         const params = new URLSearchParams();

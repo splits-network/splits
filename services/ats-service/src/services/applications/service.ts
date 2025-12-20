@@ -206,6 +206,55 @@ export class ApplicationService {
     }
 
     /**
+     * Add note to application without changing stage
+     */
+    async addApplicationNote(
+        id: string,
+        note: string,
+        auditContext?: {
+            userId?: string;
+            userRole?: string;
+            companyId?: string;
+        }
+    ): Promise<Application> {
+        const application = await this.getApplicationById(id);
+
+        // Append new note to existing recruiter_notes
+        const existingNotes = application.recruiter_notes || '';
+        const timestamp = new Date().toISOString();
+        const newNoteWithTimestamp = `[${timestamp}] ${note}`;
+        const updatedNotes = existingNotes 
+            ? `${existingNotes}\n\n${newNoteWithTimestamp}`
+            : newNoteWithTimestamp;
+
+        const updated = await this.repository.updateApplication(id, {
+            recruiter_notes: updatedNotes,
+        });
+
+        // Get job to extract company_id for audit log
+        const job = await this.repository.findJobById(application.job_id);
+
+        // Log the note addition
+        await this.repository.createAuditLog({
+            application_id: id,
+            action: 'note_added',
+            performed_by_user_id: auditContext?.userId,
+            performed_by_role: auditContext?.userRole,
+            company_id: auditContext?.companyId || job?.company_id,
+            old_value: { recruiter_notes: existingNotes },
+            new_value: { recruiter_notes: updatedNotes },
+            metadata: {
+                job_id: application.job_id,
+                candidate_id: application.candidate_id,
+                recruiter_id: application.recruiter_id,
+                note: note,
+            },
+        });
+
+        return updated;
+    }
+
+    /**
      * Accept a candidate submission - allows company to see full candidate details
      * Logs the acceptance action for audit trail
      */

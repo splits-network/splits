@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useAuth } from '@clerk/nextjs';
 import StageUpdateModal from './stage-update-modal';
+import AddNoteModal from './add-note-modal';
+import ApplicationTimeline from './application-timeline';
 
 interface ApplicationDetailClientProps {
     application: any;
@@ -16,6 +18,7 @@ interface ApplicationDetailClientProps {
     questions: any[];
     recruiter: any;
     relationship: any;
+    auditLogs: any[];
 }
 
 const STAGE_LABELS: Record<string, string> = {
@@ -47,10 +50,12 @@ export default function ApplicationDetailClient({
     questions,
     recruiter,
     relationship,
+    auditLogs,
 }: ApplicationDetailClientProps) {
     const router = useRouter();
     const { getToken } = useAuth();
     const [showStageModal, setShowStageModal] = useState(false);
+    const [showNoteModal, setShowNoteModal] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const formatDate = (dateString: string) => {
@@ -79,6 +84,27 @@ export default function ApplicationDetailClient({
         } catch (error: any) {
             console.error('Failed to update stage:', error);
             alert(error.message || 'Failed to update application stage');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAddNote = async (note: string) => {
+        setLoading(true);
+        try {
+            const token = await getToken();
+            if (!token) {
+                throw new Error('Not authenticated');
+            }
+
+            const client = createAuthenticatedClient(token);
+            await client.addApplicationNote(application.id, note);
+
+            setShowNoteModal(false);
+            router.refresh();
+        } catch (error: any) {
+            console.error('Failed to add note:', error);
+            alert(error.message || 'Failed to add note');
         } finally {
             setLoading(false);
         }
@@ -152,6 +178,14 @@ export default function ApplicationDetailClient({
                         >
                             <i className="fa-solid fa-arrow-right-arrow-left"></i>
                             Update Stage
+                        </button>
+                        <button
+                            onClick={() => setShowNoteModal(true)}
+                            className="btn btn-outline gap-2"
+                            disabled={loading}
+                        >
+                            <i className="fa-solid fa-note-sticky"></i>
+                            Add Note
                         </button>
                         <Link
                             href={`/candidates/${candidate.id}`}
@@ -478,6 +512,9 @@ export default function ApplicationDetailClient({
                             </div>
                         </div>
                     )}
+
+                    {/* Application Timeline */}
+                    <ApplicationTimeline auditLogs={auditLogs} />
                 </div>
             </div>
 
@@ -487,6 +524,16 @@ export default function ApplicationDetailClient({
                     currentStage={application.stage}
                     onClose={() => setShowStageModal(false)}
                     onUpdate={handleStageUpdate}
+                    loading={loading}
+                />
+            )}
+
+            {/* Add Note Modal */}
+            {showNoteModal && (
+                <AddNoteModal
+                    applicationId={application.id}
+                    onClose={() => setShowNoteModal(false)}
+                    onSave={handleAddNote}
                     loading={loading}
                 />
             )}

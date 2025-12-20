@@ -26,6 +26,9 @@ interface ApplicationTableRowProps {
     onAccept: () => void;
     getStageColor: (stage: string) => string;
     formatDate: (date: string) => string;
+    showCheckbox?: boolean;
+    isSelected?: boolean;
+    onToggleSelect?: () => void;
 }
 
 export function ApplicationTableRow({
@@ -35,12 +38,27 @@ export function ApplicationTableRow({
     onAccept,
     getStageColor,
     formatDate,
+    showCheckbox = false,
+    isSelected = false,
+    onToggleSelect,
 }: ApplicationTableRowProps) {
     const candidate = application.candidate;
     const isMasked = candidate._masked;
 
     return (
         <tr className="hover">
+            {showCheckbox && (
+                <td className="w-12">
+                    <input
+                        type="checkbox"
+                        className="checkbox checkbox-sm"
+                        checked={isSelected}
+                        onChange={onToggleSelect}
+                        onClick={(e) => e.stopPropagation()}
+                        aria-label={`Select application for ${candidate.full_name}`}
+                    />
+                </td>
+            )}
             <td>
                 <div className="flex items-center gap-3">
                     <div className="avatar avatar-placeholder">

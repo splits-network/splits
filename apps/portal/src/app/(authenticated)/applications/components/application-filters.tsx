@@ -24,62 +24,59 @@ export const ApplicationFilters = forwardRef<HTMLInputElement, ApplicationFilter
         onViewModeChange,
     }, ref) {
         return (
-            <div className="card bg-base-100 shadow-sm">
-                <div className="card-body">
-                    <div className="flex flex-wrap gap-4 items-end">
-                        {/* Full-text search across candidates, jobs, and companies */}
-                        <div className="fieldset flex-1">
-                            <label className="label">Search</label>
-                            <input
-                                ref={ref}
-                                type="text"
-                                placeholder="Search candidates, jobs, or companies..."
-                                className="input w-full"
-                                value={searchQuery}
-                                onChange={(e) => onSearchChange(e.target.value)}
-                            />
-                        </div>
-
-                        {/* Filter by application stage */}
-                        <div className="fieldset">
-                            <label className="label">Stage</label>
-                            <select
-                                className="select w-full max-w-xs"
-                                value={stageFilter}
-                                onChange={(e) => onStageFilterChange(e.target.value)}
-                            >
-                                <option value="">All Stages</option>
-                                <option value="submitted">Submitted</option>
-                                <option value="screen">Screen</option>
-                                <option value="interview">Interview</option>
-                                <option value="offer">Offer</option>
-                                <option value="hired">Hired</option>
-                                <option value="rejected">Rejected</option>
-                            </select>
-                        </div>
-
-                        {/* View mode toggle: grid or table */}
-                        <div className="join">
-                            <button
-                                className={`btn join-item ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
-                                onClick={() => onViewModeChange('grid')}
-                                title="Grid View"
-                                aria-label="Grid View"
-                            >
-                                <i className="fa-solid fa-grip"></i>
-                            </button>
-                            <button
-                                className={`btn join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
-                                onClick={() => onViewModeChange('table')}
-                                title="Table View"
-                                aria-label="Table View"
-                            >
-                                <i className="fa-solid fa-table"></i>
-                            </button>
-                        </div>
+            <div className="flex flex-wrap items-center gap-3">
+                {/* Search */}
+                <div className="flex-1 min-w-[250px]">
+                    <div className="relative">
+                        <i className="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50"></i>
+                        <input
+                            ref={ref}
+                            type="text"
+                            placeholder="Search applications..."
+                            className="input w-full pl-10"
+                            value={searchQuery}
+                            onChange={(e) => onSearchChange(e.target.value)}
+                        />
                     </div>
+                </div>
+
+                {/* Stage Filter */}
+                <select
+                    className="select min-w-[180px]"
+                    value={stageFilter}
+                    onChange={(e) => onStageFilterChange(e.target.value)}
+                >
+                    <option value="">All Stages</option>
+                    <option value="draft">Draft</option>
+                    <option value="submitted">Submitted</option>
+                    <option value="screen">Screen</option>
+                    <option value="interview">Interview</option>
+                    <option value="offer">Offer</option>
+                    <option value="hired">Hired</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="withdrawn">Withdrawn</option>
+                </select>
+
+                {/* View Mode Toggle */}
+                <div className="join">
+                    <button
+                        className={`btn btn-sm join-item ${viewMode === 'table' ? 'btn-active' : ''}`}
+                        onClick={() => onViewModeChange('table')}
+                        title="Table View"
+                    >
+                        <i className="fa-solid fa-table"></i>
+                    </button>
+                    <button
+                        className={`btn btn-sm join-item ${viewMode === 'grid' ? 'btn-active' : ''}`}
+                        onClick={() => onViewModeChange('grid')}
+                        title="Card View"
+                    >
+                        <i className="fa-solid fa-grip"></i>
+                    </button>
                 </div>
             </div>
         );
     }
 );
+
+ApplicationFilters.displayName = 'ApplicationFilters';

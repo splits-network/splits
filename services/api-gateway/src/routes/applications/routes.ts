@@ -150,6 +150,20 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
         return reply.send(data);
     });
 
+    // Add note to application (recruiters only)
+    app.patch('/api/applications/:id/notes', {
+        preHandler: requireRoles(['recruiter', 'platform_admin']),
+        schema: {
+            description: 'Add note to application',
+            tags: ['applications'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const { id } = request.params as { id: string };
+        const data = await atsService().patch(`/applications/${id}/notes`, request.body);
+        return reply.send(data);
+    });
+
     // Submit candidate application (candidate self-service)
     app.post('/api/applications/submit', {
         preHandler: requireRoles(['candidate']),

@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import DocumentList from '@/components/document-list';
+import SubmitToJobModal from './submit-to-job-modal';
 
 interface CandidateDetailClientProps {
     candidateId: string;
@@ -12,12 +14,18 @@ interface CandidateDetailClientProps {
 
 export default function CandidateDetailClient({ candidateId }: CandidateDetailClientProps) {
     const { getToken } = useAuth();
+    const router = useRouter();
     const [candidate, setCandidate] = useState<any>(null);
     const [applications, setApplications] = useState<any[]>([]);
     const [relationship, setRelationship] = useState<any>(null);
     const [canEdit, setCanEdit] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Submit to job state
+    const [showSubmitModal, setShowSubmitModal] = useState(false);
+    const [jobs, setJobs] = useState<any[]>([]);
+    const [documents, setDocuments] = useState<any[]>([]);
 
     useEffect(() => {
         async function loadData() {
@@ -78,6 +86,26 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                 );
 
                 setApplications(applicationsWithJobs);
+
+                // Fetch jobs for submit modal
+                try {
+                    const jobsRes = await client.get('/jobs');
+                    if (jobsRes.data?.data) {
+                        setJobs(jobsRes.data.data);
+                    }
+                } catch (err) {
+                    console.error('Failed to load jobs:', err);
+                }
+
+                // Fetch documents for submit modal
+                try {
+                    const docsRes = await client.get(`/candidates/${candidateId}/documents`);
+                    if (docsRes.data) {
+                        setDocuments(docsRes.data);
+                    }
+                } catch (err) {
+                    console.error('Failed to load documents:', err);
+                }
             } catch (err: any) {
                 console.error('Failed to load candidate:', err);
                 setError(err.message || 'Failed to load candidate details');
@@ -88,6 +116,39 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
 
         loadData();
     }, [candidateId, getToken]);
+
+    const handleSubmitToJob = async (jobId: string, notes: string, documentIds: string[]) => {
+        try {
+            const token = await getToken();
+            if (!token) throw new Error('Not authenticated');
+
+            const client = createAuthenticatedClient(token);
+
+            // Create application
+            const response = await client.post('/applications', {
+                candidate_id: candidateId,
+                job_id: jobId,
+                recruiter_notes: notes,
+                document_ids: documentIds,
+            });
+
+            const applicationId = response.data?.data?.id || response.data?.id;
+
+            // Show success message
+            alert('Candidate submitted successfully!');
+
+            // Redirect to the new application detail page
+            if (applicationId) {
+                router.push(`/applications/${applicationId}`);
+            } else {
+                // Refresh the page to show the new application
+                window.location.reload();
+            }
+        } catch (err: any) {
+            console.error('Failed to submit candidate:', err);
+            throw new Error(err.message || 'Failed to submit candidate');
+        }
+    };
 
     const getStageColor = (stage: string) => {
         switch (stage) {
@@ -285,10 +346,19 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                             </div>
                         </div>
                         {canEdit && (
-                            <Link href={`/candidates/${candidateId}/edit`} className="btn btn-primary gap-2">
-                                <i className="fa-solid fa-edit"></i>
-                                Edit
-                            </Link>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setShowSubmitModal(true)}
+                                    className="btn btn-success gap-2"
+                                >
+                                    <i className="fa-solid fa-paper-plane"></i>
+                                    Submit to Job
+                                </button>
+                                <Link href={`/candidates/${candidateId}/edit`} className="btn btn-primary gap-2">
+                                    <i className="fa-solid fa-edit"></i>
+                                    Edit
+                                </Link>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -480,6 +550,18 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                     </div>
                 </div>
             </div>
+
+            {/* Submit to Job Modal */}
+            {showSubmitModal && (
+                <SubmitToJobModal
+                    candidateId={candidateId}
+                    candidateName={candidate.full_name}
+                    jobs={jobs}
+                    documents={documents}
+                    onClose={() => setShowSubmitModal(false)}
+                    onSubmit={handleSubmitToJob}
+                />
+            )}
         </div>
     );
 }

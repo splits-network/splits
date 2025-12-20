@@ -73,6 +73,7 @@ export class AtsService {
     async getApplicationsByCandidateId(candidateId: string) { return this.applications.getApplicationsByCandidateId(candidateId); }
     async submitCandidate(jobId: string, email: string, name: string, recruiterId?: string, options?: any) { return this.applications.submitCandidate(jobId, email, name, recruiterId, options); }
     async updateApplicationStage(id: string, stage: any, notes?: string, auditContext?: any) { return this.applications.updateApplicationStage(id, stage, notes, auditContext); }
+    async addApplicationNote(id: string, note: string, auditContext?: any) { return this.applications.addApplicationNote(id, note, auditContext); }
     async acceptApplication(applicationId: string, auditContext?: any) { return this.applications.acceptApplication(applicationId, auditContext); }
     async getApplicationsForCompany(companyId: string, filters?: any) { return this.applications.getApplicationsForCompany(companyId, filters); }
     async getApplicationAuditLog(applicationId: string) { return this.applications.getApplicationAuditLog(applicationId); }

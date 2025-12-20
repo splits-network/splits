@@ -9,6 +9,7 @@ import { ApplicationCard } from './application-card';
 import { ApplicationTableRow } from './application-table-row';
 import { ApplicationFilters } from './application-filters';
 import { PaginationControls } from './pagination-controls';
+import BulkActionModal from './bulk-action-modal';
 
 interface Application {
     id: string;
@@ -57,6 +58,12 @@ export default function ApplicationsListClient() {
     const searchParams = useSearchParams();
     const searchInputRef = useRef<HTMLInputElement>(null);
 
+    // Helper function to sanitize search query (remove smart search keywords)
+    const sanitizeSearchQuery = (query: string): string => {
+        // Remove smart search keywords like "job:", "company:", "from:", "to:"
+        return query.replace(/^(job|company|from|to):\s*/i, '').trim();
+    };
+
     // Initialize state from URL params
     const [applications, setApplications] = useState<Application[]>([]);
     const [pagination, setPagination] = useState<PaginationInfo>({
@@ -67,15 +74,21 @@ export default function ApplicationsListClient() {
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+    const [searchQuery, setSearchQuery] = useState(sanitizeSearchQuery(searchParams.get('search') || ''));
     const [stageFilter, setStageFilter] = useState(searchParams.get('stage') || '');
     const [viewMode, setViewMode] = useViewMode('applicationsViewMode');
     const [userRole, setUserRole] = useState<string | null>(null);
     const [acceptingId, setAcceptingId] = useState<string | null>(null);
 
+    // Bulk actions state
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [showBulkActionModal, setShowBulkActionModal] = useState(false);
+    const [bulkAction, setBulkAction] = useState<'stage' | 'reject' | null>(null);
+    const [bulkLoading, setBulkLoading] = useState(false);
+
     // Sync state with URL params (e.g., when user clicks back button)
     useEffect(() => {
-        const urlSearch = searchParams.get('search') || '';
+        const urlSearch = sanitizeSearchQuery(searchParams.get('search') || '');
         const urlStage = searchParams.get('stage') || '';
         const urlPage = parseInt(searchParams.get('page') || '1');
 
@@ -160,7 +173,6 @@ export default function ApplicationsListClient() {
                 params.append('stage', stageFilter);
             }
 
-            // Add role-specific filters
             if (role === 'company_admin' || role === 'hiring_manager') {
                 // Get company ID for company users
                 const companiesRes = await client.get(`/companies?org_id=${membership.organization_id}`);
@@ -200,6 +212,72 @@ export default function ApplicationsListClient() {
             alert('Failed to accept application: ' + (err.message || 'Unknown error'));
         } finally {
             setAcceptingId(null);
+        }
+    };
+
+    // Bulk selection handlers
+    const toggleSelection = (id: string) => {
+        const newSelected = new Set(selectedIds);
+        if (newSelected.has(id)) {
+            newSelected.delete(id);
+        } else {
+            newSelected.add(id);
+        }
+        setSelectedIds(newSelected);
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedIds.size === applications.length) {
+            setSelectedIds(new Set());
+        } else {
+            setSelectedIds(new Set(applications.map(app => app.id)));
+        }
+    };
+
+    const handleBulkAction = (action: 'stage' | 'reject') => {
+        setBulkAction(action);
+        setShowBulkActionModal(true);
+    };
+
+    const clearSelections = () => {
+        setSelectedIds(new Set());
+        setShowBulkActionModal(false);
+        setBulkAction(null);
+    };
+
+    const handleBulkConfirm = async (data: { newStage?: string; reason?: string; notes?: string }) => {
+        setBulkLoading(true);
+        try {
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
+            const idsArray = Array.from(selectedIds);
+
+            if (bulkAction === 'stage' && data.newStage) {
+                // Update stage for all selected applications
+                await Promise.all(
+                    idsArray.map(id =>
+                        client.updateApplicationStage(id, data.newStage!, data.notes)
+                    )
+                );
+            } else if (bulkAction === 'reject') {
+                // Reject all selected applications
+                await Promise.all(
+                    idsArray.map(id =>
+                        client.updateApplicationStage(id, 'rejected', data.reason || data.notes)
+                    )
+                );
+            }
+
+            // Reload applications and clear selections
+            await loadApplications();
+            clearSelections();
+        } catch (err: any) {
+            console.error('Bulk action failed:', err);
+            alert('Bulk action failed: ' + (err.message || 'Unknown error'));
+        } finally {
+            setBulkLoading(false);
         }
     };
 
@@ -296,6 +374,41 @@ export default function ApplicationsListClient() {
                 </div>
             )}
 
+            {/* Bulk Action Bar */}
+            {selectedIds.size > 0 && isRecruiter && (
+                <div className="alert shadow-lg">
+                    <div className="flex-1">
+                        <i className="fa-solid fa-check-square text-xl"></i>
+                        <div>
+                            <h3 className="font-bold">{selectedIds.size} application{selectedIds.size !== 1 ? 's' : ''} selected</h3>
+                            <div className="text-xs">Choose an action to apply to all selected applications</div>
+                        </div>
+                    </div>
+                    <div className="flex-none flex gap-2">
+                        <button
+                            onClick={() => handleBulkAction('stage')}
+                            className="btn btn-sm btn-primary gap-2"
+                        >
+                            <i className="fa-solid fa-list-check"></i>
+                            Update Stage
+                        </button>
+                        <button
+                            onClick={() => handleBulkAction('reject')}
+                            className="btn btn-sm btn-error gap-2"
+                        >
+                            <i className="fa-solid fa-ban"></i>
+                            Reject
+                        </button>
+                        <button
+                            onClick={clearSelections}
+                            className="btn btn-sm btn-ghost"
+                        >
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Table View */}
             {viewMode === 'table' && applications.length > 0 && (
                 <div className="card bg-base-100 shadow-sm overflow-hidden">
@@ -303,6 +416,17 @@ export default function ApplicationsListClient() {
                         <table className="table">
                             <thead>
                                 <tr>
+                                    {isRecruiter && (
+                                        <th className="w-12">
+                                            <input
+                                                type="checkbox"
+                                                className="checkbox checkbox-sm"
+                                                checked={selectedIds.size === applications.length && applications.length > 0}
+                                                onChange={toggleSelectAll}
+                                                aria-label="Select all applications"
+                                            />
+                                        </th>
+                                    )}
                                     <th>Candidate</th>
                                     <th>Job</th>
                                     <th>Company</th>
@@ -323,6 +447,9 @@ export default function ApplicationsListClient() {
                                         onAccept={() => handleAcceptApplication(application.id)}
                                         getStageColor={getStageColor}
                                         formatDate={formatDate}
+                                        showCheckbox={isRecruiter}
+                                        isSelected={selectedIds.has(application.id)}
+                                        onToggleSelect={() => toggleSelection(application.id)}
                                     />
                                 ))}
                             </tbody>
@@ -356,6 +483,17 @@ export default function ApplicationsListClient() {
                         </p>
                     </div>
                 </div>
+            )}
+
+            {/* Bulk Action Modal */}
+            {showBulkActionModal && bulkAction && (
+                <BulkActionModal
+                    action={bulkAction}
+                    selectedCount={selectedIds.size}
+                    onClose={clearSelections}
+                    onConfirm={handleBulkConfirm}
+                    loading={bulkLoading}
+                />
             )}
         </div>
     );

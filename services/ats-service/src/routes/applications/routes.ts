@@ -149,6 +149,39 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
         }
     );
 
+    // Add note to application (without changing stage)
+    app.patch(
+        '/applications/:id/notes',
+        async (request: FastifyRequest<{ Params: { id: string }; Body: { note: string } }>, reply: FastifyReply) => {
+            const { note } = request.body;
+
+            if (!note || !note.trim()) {
+                throw new BadRequestError('Note is required');
+            }
+
+            // Extract audit context
+            const auditContext = {
+                userId: (request as any).auth?.userId,
+                userRole: (request as any).auth?.memberships?.[0]?.role,
+                companyId: (request as any).auth?.memberships?.[0]?.organization_id,
+            };
+
+            const application = await service.addApplicationNote(
+                request.params.id,
+                note.trim(),
+                auditContext
+            );
+
+            request.log.info({
+                applicationId: request.params.id,
+                userId: auditContext.userId,
+                userRole: auditContext.userRole,
+            }, 'Note added to application');
+
+            return reply.send({ data: application });
+        }
+    );
+
     // Accept application
     app.post(
         '/applications/:id/accept',
