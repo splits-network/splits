@@ -442,30 +442,23 @@ export class ApplicationService {
         }
 
         // 4. Check if candidate has a recruiter relationship (12-month window)
-        // Query network service to check for active recruiter relationships
+        // Query database directly for active recruiter relationships
         let hasRecruiter = false;
         let recruiterId: string | undefined = undefined;
         
         try {
-            // Call network service to check for active recruiter relationships
-            const { NETWORK_SERVICE_URL = 'http://localhost:3003' } = process.env;
-            const response = await fetch(`${NETWORK_SERVICE_URL}/recruiter-candidates/candidate/${candidateId}`);
+            const recruiterRelationship = await this.repository.findActiveRecruiterForCandidate(candidateId);
             
-            if (response.ok) {
-                const result: any = await response.json();
-                const activeRelationships = result.data?.filter((rel: any) => rel.status === 'active' && rel.consent_given) || [];
-                
-                if (activeRelationships.length > 0) {
-                    // Candidate has at least one active recruiter relationship
-                    hasRecruiter = true;
-                    recruiterId = activeRelationships[0].recruiter_id; // Use the first active relationship
-                }
+            if (recruiterRelationship) {
+                // Candidate has an active recruiter relationship
+                hasRecruiter = true;
+                recruiterId = recruiterRelationship.recruiter_user_id; // Use the user_id (not the recruiter table ID)
             }
         } catch (error) {
-            // If network service is unavailable, fall back to candidate.recruiter_id
-            console.error('Failed to check recruiter relationships from network service:', error);
-            hasRecruiter = !!candidate.recruiter_id;
-            recruiterId = candidate.recruiter_id || undefined;
+            console.error('Failed to check recruiter relationships:', error);
+            // If query fails, default to no recruiter (safer than guessing)
+            hasRecruiter = false;
+            recruiterId = undefined;
         }
 
         // 5. Determine initial stage based on recruiter status

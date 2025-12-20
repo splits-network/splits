@@ -879,6 +879,36 @@ export class AtsRepository {
         return data || [];
     }
 
+    // Recruiter relationship methods (cross-schema query to network schema)
+    async findActiveRecruiterForCandidate(candidateId: string): Promise<{ recruiter_id: string; recruiter_user_id: string } | null> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('recruiter_candidates')
+            .select('recruiter_id, recruiters!inner(id, user_id)')
+            .eq('candidate_id', candidateId)
+            .eq('status', 'active')
+            .eq('consent_given', true)
+            .gte('relationship_end_date', new Date().toISOString())
+            .order('relationship_start_date', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') {
+                // No rows returned - no active recruiter relationship
+                return null;
+            }
+            throw error;
+        }
+
+        if (!data) return null;
+
+        return {
+            recruiter_id: data.recruiter_id,
+            recruiter_user_id: (data.recruiters as any).user_id
+        };
+    }
+
     // Stats methods
     async getAtsStats(): Promise<{
         totalJobs: number;
