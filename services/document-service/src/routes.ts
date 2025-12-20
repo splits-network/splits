@@ -21,34 +21,45 @@ export async function registerRoutes(fastify: FastifyInstance, service: Document
         '/documents/upload',
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const data = await request.file();
-
-                if (!data) {
-                    return reply.status(400).send({ error: 'No file provided' });
-                }
-
-                // Get form fields
+                logger.info({ 
+                    contentType: request.headers['content-type'],
+                    headers: request.headers 
+                }, 'Upload request received');
+                
+                // Parse multipart form data - read file buffer immediately
+                let fileBuffer: Buffer | null = null;
+                let filename: string | null = null;
                 const fields: any = {};
+                
                 for await (const part of request.parts()) {
-                    if (part.type === 'field') {
+                    logger.info({ type: part.type, fieldname: part.type === 'field' ? part.fieldname : 'file' }, 'Part found');
+                    if (part.type === 'file') {
+                        // Read buffer immediately while stream is open
+                        fileBuffer = await part.toBuffer();
+                        filename = part.filename;
+                        logger.info({ filename, size: fileBuffer.length }, 'File buffer read');
+                    } else if (part.type === 'field') {
                         fields[part.fieldname] = (part as any).value;
                     }
+                }
+
+                if (!fileBuffer || !filename) {
+                    logger.error({ fields, hasBuffer: !!fileBuffer, hasFilename: !!filename }, 'No file provided in upload request');
+                    return reply.status(400).send({ error: 'No file provided' });
                 }
 
                 const { entity_type, entity_id, document_type, uploaded_by_user_id } = fields;
 
                 if (!entity_type || !entity_id || !document_type) {
+                    logger.error({ fields }, 'Missing required fields in upload request');
                     return reply.status(400).send({
                         error: 'Missing required fields: entity_type, entity_id, document_type',
                     });
                 }
 
-                // Read file buffer
-                const buffer = await data.toBuffer();
-
                 const document = await service.uploadDocument({
-                    file: buffer,
-                    filename: data.filename,
+                    file: fileBuffer,
+                    filename: filename,
                     entityType: entity_type,
                     entityId: entity_id,
                     documentType: document_type,

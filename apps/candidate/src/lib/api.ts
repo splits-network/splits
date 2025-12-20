@@ -201,7 +201,9 @@ export async function getMyDocuments(authToken: string): Promise<Document[]> {
 }
 
 export async function uploadDocument(formData: FormData, authToken: string): Promise<Document> {
+    console.log('uploadDocument called with API_BASE_URL:', API_BASE_URL);
     const url = `${API_BASE_URL}/api/documents/upload`;
+    console.log('Making request to:', url);
     
     const response = await fetch(url, {
         method: 'POST',
@@ -211,10 +213,13 @@ export async function uploadDocument(formData: FormData, authToken: string): Pro
         body: formData,
     });
 
+    console.log('Response status:', response.status);
+    
     if (!response.ok) {
         let errorMessage = 'Failed to upload document';
         try {
             const errorData = await response.json();
+            console.error('Error response:', errorData);
             errorMessage = errorData.message || errorData.error || errorMessage;
         } catch {
             errorMessage = response.statusText || errorMessage;
@@ -223,6 +228,7 @@ export async function uploadDocument(formData: FormData, authToken: string): Pro
     }
 
     const json = await response.json();
+    console.log('Upload response data:', json);
     return json.data || json;
 }
 
@@ -235,4 +241,73 @@ export async function deleteDocument(documentId: string, authToken: string): Pro
 export async function getDocumentUrl(documentId: string, authToken: string): Promise<string> {
     const doc = await fetchApi<{ downloadUrl: string }>(`/api/documents/${documentId}`, {}, authToken);
     return doc.downloadUrl;
+}
+
+// Candidate Profile API
+export interface CandidateProfile {
+    id: string;
+    full_name: string;
+    email: string;
+    phone?: string;
+    location?: string;
+    current_title?: string;
+    current_company?: string;
+    linkedin_url?: string;
+    github_url?: string;
+    portfolio_url?: string;
+    bio?: string;
+    skills?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export async function getMyCandidateProfile(authToken: string, email: string): Promise<CandidateProfile | null> {
+    const candidates = await getCandidatesByEmail(email, authToken);
+    return candidates.length > 0 ? candidates[0] : null;
+}
+
+export async function getCandidatesByEmail(email: string, authToken: string): Promise<CandidateProfile[]> {
+    return fetchApi<CandidateProfile[]>(`/api/candidates?email=${encodeURIComponent(email)}`, {}, authToken);
+}
+
+export async function getCurrentUser(authToken: string): Promise<{ id: string; email: string; name?: string }> {
+    return fetchApi<{ id: string; email: string; name?: string }>('/api/me', {}, authToken);
+}
+
+// Recruiter Relationships API
+export interface RecruiterRelationship {
+    id: string;
+    recruiter_id: string;
+    recruiter_name: string;
+    recruiter_email: string;
+    recruiter_bio?: string;
+    recruiter_status: string;
+    relationship_start_date: string;
+    relationship_end_date: string;
+    status: 'active' | 'expired' | 'terminated';
+    consent_given: boolean;
+    consent_given_at?: string;
+    created_at: string;
+    days_until_expiry?: number;
+}
+
+export interface MyRecruitersResponse {
+    active: RecruiterRelationship[];
+    expired: RecruiterRelationship[];
+    terminated: RecruiterRelationship[];
+}
+
+export async function getMyRecruiters(authToken: string): Promise<MyRecruitersResponse> {
+    return fetchApi<MyRecruitersResponse>('/api/candidates/me/recruiters', {}, authToken);
+}
+
+export async function getMyProfile(authToken: string, email: string): Promise<CandidateProfile | null> {
+    return getMyCandidateProfile(authToken, email);
+}
+
+export async function updateMyProfile(authToken: string, updates: Partial<CandidateProfile>): Promise<CandidateProfile> {
+    return fetchApi<CandidateProfile>('/api/candidates/me', {
+        method: 'PATCH',
+        body: JSON.stringify(updates),
+    }, authToken);
 }

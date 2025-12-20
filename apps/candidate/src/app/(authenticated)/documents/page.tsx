@@ -3,16 +3,18 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { formatDate } from '@/lib/utils';
-import { getMyDocuments, uploadDocument, deleteDocument, getDocumentUrl, Document as ApiDocument } from '@/lib/api';
+import { getMyDocuments, deleteDocument, getDocumentUrl, Document as ApiDocument, getMyCandidateProfile, getCandidatesByEmail, getCurrentUser } from '@/lib/api';
+import UploadDocumentModal from '@/components/upload-document-modal';
 
 export default function DocumentsPage() {
   const { getToken } = useAuth();
   const [documents, setDocuments] = useState<ApiDocument[]>([]);
-  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<string>('all');
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [candidateId, setCandidateId] = useState<string | null>(null);
 
   useEffect(() => {
     loadDocuments();
@@ -50,72 +52,49 @@ export default function DocumentsPage() {
     return 'fa-file text-base-content';
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    setUploading(true);
-    setError(null);
+  const getCandidateId = async () => {
+    if (candidateId) return candidateId;
 
     try {
       const token = await getToken();
       if (!token) {
-        setError('Please sign in to upload documents');
-        return;
+        console.error('No auth token available');
+        return null;
       }
 
-      // Get user email to find candidate
-      const candidatesResponse = await fetch('/api/candidates?email=' + encodeURIComponent(token), {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      // Get user info to get email
+      const user = await getCurrentUser(token);
+      const userEmail = user.email;
 
-      if (!candidatesResponse.ok) {
-        throw new Error('Failed to find candidate profile');
+      if (!userEmail) {
+        console.error('No email found in user data');
+        return null;
       }
 
-      const candidatesData = await candidatesResponse.json();
-      const candidates = candidatesData.data || [];
+      // Get candidate profile by email
+      const profile = await getMyCandidateProfile(token, userEmail);
       
-      if (candidates.length === 0) {
-        throw new Error('Candidate profile not found. Please contact support.');
+      if (!profile) {
+        console.error('No candidate profile found for email:', userEmail);
+        return null;
       }
 
-      const candidateId = candidates[0].id;
-
-      // Upload each file
-      for (const file of Array.from(files)) {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('entity_type', 'candidate');
-        formData.append('entity_id', candidateId);
-        
-        // Determine document type from file
-        const filename = file.name.toLowerCase();
-        let documentType = 'other';
-        if (filename.includes('resume') || filename.includes('cv')) {
-          documentType = 'resume';
-        } else if (filename.includes('cover')) {
-          documentType = 'cover_letter';
-        } else if (filename.includes('portfolio')) {
-          documentType = 'other';
-        }
-        formData.append('document_type', documentType);
-
-        await uploadDocument(formData, token);
-      }
-
-      // Reload documents
-      await loadDocuments();
-    } catch (err: any) {
-      console.error('Failed to upload documents:', err);
-      setError(err.message || 'Failed to upload documents');
-    } finally {
-      setUploading(false);
-      // Reset file input
-      e.target.value = '';
+      const id = profile.id;
+      setCandidateId(id);
+      return id;
+    } catch (err) {
+      console.error('Failed to get candidate ID:', err);
+      return null;
     }
+  };
+
+  const handleUploadClick = async () => {
+    const id = await getCandidateId();
+    if (!id) {
+      setError('Failed to find candidate profile. Please contact support.');
+      return;
+    }
+    setShowUploadModal(true);
   };
 
   const handleDelete = async (documentId: string) => {
@@ -197,27 +176,13 @@ export default function DocumentsPage() {
             Supported formats: PDF, DOC, DOCX (Max 10MB)
           </p>
           
-          <label className="btn bg-white text-primary hover:bg-gray-100 w-fit">
-            {uploading ? (
-              <>
-                <span className="loading loading-spinner loading-sm"></span>
-                Uploading...
-              </>
-            ) : (
-              <>
-                <i className="fa-solid fa-upload"></i>
-                Choose Files
-              </>
-            )}
-            <input
-              type="file"
-              className="hidden"
-              multiple
-              accept=".pdf,.doc,.docx"
-              onChange={handleFileUpload}
-              disabled={uploading}
-            />
-          </label>
+          <button 
+            className="btn bg-white text-primary hover:bg-gray-100 w-fit"
+            onClick={handleUploadClick}
+          >
+            <i className="fa-solid fa-upload"></i>
+            Upload Documents
+          </button>
         </div>
       </div>
 
@@ -310,17 +275,13 @@ export default function DocumentsPage() {
                 : 'Try changing the filter or uploading new documents'}
             </p>
             {filterType === 'all' && (
-              <label className="btn btn-primary">
+              <button 
+                className="btn btn-primary"
+                onClick={handleUploadClick}
+              >
                 <i className="fa-solid fa-upload"></i>
                 Upload Your First Document
-                <input
-                  type="file"
-                  className="hidden"
-                  multiple
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleFileUpload}
-                />
-              </label>
+              </button>
             )}
           </div>
         </div>
@@ -342,6 +303,19 @@ export default function DocumentsPage() {
           </ul>
         </div>
       </div>
+
+      {/* Upload Modal */}
+      {showUploadModal && candidateId && (
+        <UploadDocumentModal
+          entityType="candidate"
+          entityId={candidateId}
+          onClose={() => setShowUploadModal(false)}
+          onSuccess={() => {
+            setShowUploadModal(false);
+            loadDocuments();
+          }}
+        />
+      )}
     </div>
   );
 }

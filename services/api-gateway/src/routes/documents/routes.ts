@@ -43,12 +43,15 @@ export function registerDocumentsRoutes(app: FastifyInstance, services: ServiceR
             const candidateId = candidates[0].id;
 
             // Get documents for this candidate
-            const data = await documentService().get(
+            const response = await documentService().get<{ documents: any[] }>(
                 `/documents/entity/candidate/${candidateId}`,
                 undefined,
                 correlationId
             );
-            return reply.send(data);
+            
+            // Document service returns { documents: [...] }, we need { data: [...] }
+            const documents = response.documents || [];
+            return reply.send({ data: documents });
         } catch (error: any) {
             request.log.error({ error, email: userEmail }, 'Failed to get candidate documents');
             return reply.status(500).send({ error: 'Failed to load documents' });
@@ -61,12 +64,115 @@ export function registerDocumentsRoutes(app: FastifyInstance, services: ServiceR
             description: 'Upload document',
             tags: ['documents'],
             security: [{ clerkAuth: [] }],
+            consumes: ['multipart/form-data'],
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
-        // Note: Multipart handling will be done by document-service
-        // Gateway just proxies the request
-        const data = await documentService().post('/documents/upload', request.body);
-        return reply.send(data);
+        const correlationId = getCorrelationId(request);
+        
+        try {
+            // Parse multipart form data - iterate once through all parts
+            let fileBuffer: Buffer | null = null;
+            let filename: string | null = null;
+            let mimetype: string | null = null;
+            const fields: Record<string, any> = {};
+            
+            for await (const part of request.parts()) {
+                if (part.type === 'file') {
+                    // Read file into buffer
+                    request.log.info({ filename: part.filename, mimetype: part.mimetype }, 'File part found');
+                    fileBuffer = await part.toBuffer();
+                    filename = part.filename;
+                    mimetype = part.mimetype;
+                } else {
+                    // Store field value
+                    request.log.info({ fieldname: part.fieldname, value: (part as any).value }, 'Field part found');
+                    fields[part.fieldname] = (part as any).value;
+                }
+            }
+            
+            request.log.info({ hasFile: !!fileBuffer, fileSize: fileBuffer?.length, fields }, 'Parsed multipart data');
+            
+            if (!fileBuffer || !filename) {
+                return reply.status(400).send({ error: 'No file uploaded' });
+            }
+
+            // Create FormData to send to document service
+            const FormData = (await import('form-data')).default;
+            const formData = new FormData();
+            
+            // Add file as buffer
+            formData.append('file', fileBuffer, {
+                filename: filename,
+                contentType: mimetype || 'application/octet-stream',
+            });
+
+            // Add other fields to form data
+            Object.entries(fields).forEach(([key, value]) => {
+                formData.append(key, value);
+            });
+
+            // Forward to document service
+            const documentServiceUrl = process.env.DOCUMENT_SERVICE_URL || 'http://localhost:3006';
+            
+            request.log.info('Converting FormData to buffer...');
+            
+            // Use getBuffer() if available, otherwise stream
+            let formDataBuffer: Buffer;
+            if (typeof (formData as any).getBuffer === 'function') {
+                formDataBuffer = (formData as any).getBuffer();
+            } else {
+                // Read stream as Buffer (not string)
+                formDataBuffer = await new Promise<Buffer>((resolve, reject) => {
+                    const chunks: Buffer[] = [];
+                    
+                    formData.on('data', (chunk: Buffer | string) => {
+                        // Ensure chunk is a Buffer
+                        const bufferChunk = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+                        chunks.push(bufferChunk);
+                    });
+                    
+                    formData.on('end', () => {
+                        const buffer = Buffer.concat(chunks);
+                        request.log.info({ totalSize: buffer.length }, 'FormData buffer ready');
+                        resolve(buffer);
+                    });
+                    
+                    formData.on('error', (err) => {
+                        request.log.error({ error: err }, 'FormData error');
+                        reject(err);
+                    });
+                });
+            }
+            
+            const headers = formData.getHeaders();
+            
+            request.log.info({ 
+                contentType: headers['content-type'],
+                contentLength: formDataBuffer.length,
+                hasFile: true 
+            }, 'Forwarding to document service');
+            
+            const response = await fetch(`${documentServiceUrl}/documents/upload`, {
+                method: 'POST',
+                body: formDataBuffer,
+                headers: {
+                    ...headers,
+                    'x-correlation-id': correlationId,
+                },
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                request.log.error({ status: response.status, error: errorText }, 'Document service upload failed');
+                return reply.status(response.status).send({ error: 'Upload failed' });
+            }
+
+            const result = await response.json();
+            return reply.send(result);
+        } catch (error: any) {
+            request.log.error({ error: error.message, correlationId }, 'Failed to upload document');
+            return reply.status(500).send({ error: 'Upload failed' });
+        }
     });
 
     // Get document by ID

@@ -110,5 +110,5 @@ export async function getPreScreenQuestions(jobId: string, token: string) {
 
 // Document API methods
 export async function getMyDocuments(token: string) {
-  return apiClient.get('/documents', token);
+  return apiClient.get('/candidates/me/documents', token);
 }

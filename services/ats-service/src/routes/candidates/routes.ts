@@ -62,20 +62,26 @@ export function registerCandidateRoutes(app: FastifyInstance, service: AtsServic
         '/candidates/:id',
         async (request: FastifyRequest<{ 
             Params: { id: string }; 
+            Querystring: { allow_self_managed?: string };
             Body: { 
                 full_name?: string; 
                 email?: string; 
                 linkedin_url?: string;
+                github_url?: string;
+                portfolio_url?: string;
                 phone?: string;
                 location?: string;
                 current_title?: string;
                 current_company?: string;
+                bio?: string;
+                skills?: string;
             } 
         }>, reply: FastifyReply) => {
             const { id } = request.params;
             const updates = request.body;
+            const allowSelfManaged = (request.query as any).allow_self_managed === 'true';
             
-            const candidate = await service.updateCandidate(id, updates);
+            const candidate = await service.candidates.updateCandidate(id, updates, allowSelfManaged);
             return reply.send({ data: candidate });
         }
     );

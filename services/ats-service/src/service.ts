@@ -60,7 +60,7 @@ export class AtsService {
     async getCandidates(filters?: { search?: string; limit?: number; offset?: number; recruiter_id?: string }) { return this.candidates.getCandidates(filters); }
     async getCandidateById(id: string) { return this.candidates.getCandidateById(id); }
     async findOrCreateCandidate(email: string, fullName: string, linkedinUrl?: string, recruiterId?: string) { return this.candidates.findOrCreateCandidate(email, fullName, linkedinUrl, recruiterId); }
-    async updateCandidate(id: string, updates: { full_name?: string; email?: string; linkedin_url?: string; phone?: string; location?: string; current_title?: string; current_company?: string }) { return this.candidates.updateCandidate(id, updates); }
+    async updateCandidate(id: string, updates: { full_name?: string; email?: string; linkedin_url?: string; github_url?: string; portfolio_url?: string; phone?: string; location?: string; current_title?: string; current_company?: string; bio?: string; skills?: string }) { return this.candidates.updateCandidate(id, updates); }
     async getCandidateForCompany(candidateId: string, companyId: string) { return this.candidates.getCandidateForCompany(candidateId, companyId); }
 
     // Applications

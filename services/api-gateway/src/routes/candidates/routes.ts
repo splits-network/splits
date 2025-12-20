@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ServiceRegistry } from '../../clients';
 import { requireRoles, AuthenticatedRequest } from '../../rbac';
+import { registerMeRecruitersRoute } from './me-recruiters';
 
 /**
  * Candidates Routes
@@ -8,6 +9,8 @@ import { requireRoles, AuthenticatedRequest } from '../../rbac';
  * - Candidate ownership (Phase 2)
  */
 export function registerCandidatesRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    // Register sub-routes
+    registerMeRecruitersRoute(app, services);
     const atsService = () => services.get('ats');
     const networkService = () => services.get('network');
     const getCorrelationId = (request: FastifyRequest) => (request as any).correlationId;
@@ -117,7 +120,56 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         const data = await atsService().get(`/candidates/${id}`);
         return reply.send(data);
     });
+    // Update my own candidate profile (self-service for candidates)
+    app.patch('/api/candidates/me', {
+        schema: {
+            description: 'Update my own candidate profile',
+            tags: ['candidates'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const req = request as AuthenticatedRequest;
+        const correlationId = getCorrelationId(request);
+        
+        if (!req.auth || !req.auth.email) {
+            return reply.status(401).send({ error: 'Unauthorized' });
+        }
+        
+        try {
+            // Find candidate by email from auth context
+            const candidatesResponse: any = await atsService().get(
+                `/candidates?email=${encodeURIComponent(req.auth.email)}`,
+                undefined,
+                correlationId
+            );
+            const candidates = candidatesResponse.data || [];
+            
+            if (candidates.length === 0) {
+                return reply.status(404).send({ 
+                    error: { code: 'CANDIDATE_NOT_FOUND', message: 'Candidate profile not found' } 
+                });
+            }
 
+            const candidate = candidates[0];
+            
+            // Verify this is a self-managed candidate
+            if (!candidate.user_id) {
+                return reply.status(403).send({ 
+                    error: { 
+                        code: 'NOT_SELF_MANAGED', 
+                        message: 'This candidate profile is not self-managed. Please contact your recruiter to update your profile.' 
+                    } 
+                });
+            }
+            
+            // Update candidate profile
+            const data = await atsService().patch(`/candidates/${candidate.id}?allow_self_managed=true`, request.body);
+            return reply.send(data);
+        } catch (error: any) {
+            request.log.error({ error, email: req.auth.email }, 'Failed to update candidate profile');
+            return reply.status(500).send({ error: { message: 'Failed to update profile' } });
+        }
+    });
     // Create a new candidate (recruiters and platform admins only)
     app.post('/api/candidates', {
         preHandler: requireRoles(['recruiter', 'platform_admin']),
@@ -381,7 +433,6 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
 
     // Get my applications (candidate self-service)
     app.get('/api/candidates/me/applications', {
-        preHandler: requireRoles(['candidate']),
         schema: {
             description: 'Get my applications',
             tags: ['candidates'],
@@ -391,16 +442,37 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         const req = request as AuthenticatedRequest;
         const correlationId = getCorrelationId(request);
         
-        // TODO: Get candidate ID from user ID via identity/network service
-        // For now, assume candidate_id query param or derive from auth
-        const candidateId = (request.query as any).candidate_id || req.auth.userId;
+        if (!req.auth || !req.auth.email) {
+            return reply.status(401).send({ error: 'Unauthorized' });
+        }
         
-        const queryString = new URLSearchParams({ 
-            candidate_id: candidateId,
-            ...(request.query as any)
-        }).toString();
-        
-        const data = await atsService().get(`/applications?${queryString}`, undefined, correlationId);
-        return reply.send(data);
+        try {
+            // Find candidate by email from auth context
+            const candidatesResponse: any = await atsService().get(
+                `/candidates?email=${encodeURIComponent(req.auth.email)}`,
+                undefined,
+                correlationId
+            );
+            const candidates = candidatesResponse.data || [];
+            
+            if (candidates.length === 0) {
+                // No candidate record yet, return empty applications
+                return reply.send({ data: [] });
+            }
+
+            const candidateId = candidates[0].id;
+            
+            // Get applications for this candidate
+            const queryString = new URLSearchParams({ 
+                candidate_id: candidateId,
+                ...(request.query as any)
+            }).toString();
+            
+            const data = await atsService().get(`/applications?${queryString}`, undefined, correlationId);
+            return reply.send(data);
+        } catch (error: any) {
+            request.log.error({ error, email: req.auth.email }, 'Failed to get candidate applications');
+            return reply.status(500).send({ error: { message: 'Failed to load applications' } });
+        }
     });
 }

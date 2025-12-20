@@ -51,7 +51,7 @@ export default function PricingPage() {
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <i className="fa-solid fa-check text-success mt-1"></i>
-                                        <span><strong>65% recruiter share</strong> of placement fee</span>
+                                        <span><strong>Upto 40% recruiter share</strong> of placement fee</span>
                                     </li>
                                     <li className="flex items-start gap-2 text-base-content/50">
                                         <i className="fa-solid fa-x mt-1 text-sm"></i>
@@ -77,7 +77,7 @@ export default function PricingPage() {
                             <div className="card-body">
                                 <div className="badge badge-secondary mb-4">MOST POPULAR</div>
                                 <h3 className="card-title text-3xl mb-2">
-                                    $149<span className="text-lg font-normal opacity-80">/month</span>
+                                    $99<span className="text-lg font-normal opacity-80">/month</span>
                                 </h3>
                                 <p className="opacity-90 mb-6">
                                     For established recruiters who want better payouts and priority access
@@ -90,7 +90,7 @@ export default function PricingPage() {
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <i className="fa-solid fa-check text-secondary mt-1"></i>
-                                        <span><strong>75% recruiter share</strong> of placement fee</span>
+                                        <span><strong>Upto 50% recruiter share</strong> of placement fee</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <i className="fa-solid fa-check text-secondary mt-1"></i>
@@ -141,7 +141,7 @@ export default function PricingPage() {
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <i className="fa-solid fa-check text-success mt-1"></i>
-                                        <span><strong>85% recruiter share</strong> of placement fee</span>
+                                        <span><strong>Upto 60% recruiter share</strong> of placement fee</span>
                                     </li>
                                     <li className="flex items-start gap-2">
                                         <i className="fa-solid fa-check text-success mt-1"></i>

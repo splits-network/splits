@@ -19,6 +19,7 @@ export default function ApplicationWizard({ job, questions, documents }: Applica
   const router = useRouter();
   const { getToken } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
+  const [localDocuments, setLocalDocuments] = useState(documents);
   const [formData, setFormData] = useState({
     documents: {
       selected: [] as string[],
@@ -85,11 +86,12 @@ export default function ApplicationWizard({ job, questions, documents }: Applica
       case 1:
         return (
           <StepDocuments
-            documents={documents}
+            documents={localDocuments}
             selected={formData.documents.selected}
             primaryResumeId={formData.documents.primary_resume_id}
             onChange={(docs) => setFormData({ ...formData, documents: docs })}
             onNext={handleNext}
+            onDocumentsUpdated={setLocalDocuments}
           />
         );
       case 2:

@@ -394,10 +394,14 @@ export class AtsRepository {
         full_name?: string; 
         email?: string; 
         linkedin_url?: string;
+        github_url?: string;
+        portfolio_url?: string;
         phone?: string;
         location?: string;
         current_title?: string;
         current_company?: string;
+        bio?: string;
+        skills?: string;
     }): Promise<Candidate> {
         const { data, error } = await this.supabase
             .schema('ats')
@@ -908,7 +912,7 @@ export class AtsRepository {
             .from('job_pre_screen_questions')
             .select('*')
             .eq('job_id', jobId)
-            .order('order_index', { ascending: true });
+            .order('sort_order', { ascending: true });
 
         if (error) throw error;
         return data || [];

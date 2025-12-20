@@ -4,6 +4,7 @@ import { buildServer, errorHandler } from '@splits-network/shared-fastify';
 import rateLimit from '@fastify/rate-limit';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
+import multipart from '@fastify/multipart';
 import Redis from 'ioredis';
 import { randomUUID } from 'crypto';
 import { AuthMiddleware } from './auth';
@@ -129,6 +130,13 @@ async function main() {
         max: 100,
         timeWindow: '1 minute',
         redis,
+    });
+
+    // Register multipart support for file uploads
+    await app.register(multipart, {
+        limits: {
+            fileSize: 10 * 1024 * 1024, // 10MB max file size
+        },
     });
 
     // Add correlation ID and request logging middleware

@@ -9,7 +9,9 @@ Copilot should prioritize **clarity, strong domain boundaries, and minimal magic
 
 We should only be using @latest versions of packages unless there's a specific reason not to.
 
-**Current State:** This project is in early setup phase. The repository structure and planning documents exist, but most implementation is yet to be created. When generating code, follow the patterns defined in `docs/splits-network-architecture.md` and `docs/splits-network-phase1-prd.md`.
+IMPORTANT: DO NOT MAKE ASSUMPTIONS, YOU MUST INVESTIGATE THE CURRENT CODEBASE AND DOCUMENTATION BEFORE SUGGESTING ANYTHING.
+
+**Current State:** This project is in early setup phase. The repository structure and planning documents exist, but most implementation is yet to be created. When generating code, follow the patterns defined in `docs/splits-network-architecture.md` and `docs/splits-network-phase1-prd.md`, and the `docs/guidance/` folder.
 
 ---
 

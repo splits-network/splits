@@ -62,19 +62,24 @@ export class CandidateService {
             full_name?: string; 
             email?: string; 
             linkedin_url?: string;
+            github_url?: string;
+            portfolio_url?: string;
             phone?: string;
             location?: string;
             current_title?: string;
             current_company?: string;
-        }
+            bio?: string;
+            skills?: string;
+        },
+        allowSelfManaged: boolean = false
     ): Promise<Candidate> {
         const candidate = await this.repository.findCandidateById(id);
         if (!candidate) {
             throw new Error(`Candidate ${id} not found`);
         }
 
-        // Only allow updates if candidate is not self-managed
-        if (candidate.user_id) {
+        // Only allow updates if candidate is not self-managed, unless explicitly allowed
+        if (candidate.user_id && !allowSelfManaged) {
             throw new Error('Cannot update self-managed candidate profile');
         }
 

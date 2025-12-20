@@ -98,10 +98,14 @@ export interface Candidate {
     email: string;
     full_name: string;
     linkedin_url?: string;
+    github_url?: string;
+    portfolio_url?: string;
     phone?: string;
     location?: string;
     current_title?: string;
     current_company?: string;
+    bio?: string;
+    skills?: string;
     user_id?: string; // If set, candidate is self-managed (has their own account); if null, recruiter-managed
     recruiter_id?: string; // SOURCER: The recruiter who brought this candidate to the platform (permanent credit for visibility, NOT editing)
     verification_status: CandidateVerificationStatus; // Verification status: unverified (default when recruiter adds), pending, verified, rejected

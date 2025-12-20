@@ -18,6 +18,17 @@ export function requireRoles(allowedRoles: UserRole[]) {
             throw new UnauthorizedError('Authentication required');
         }
 
+        // Special case: 'candidate' role is available to all authenticated users without memberships
+        // Candidates are external users who don't belong to organizations
+        if (allowedRoles.includes('candidate')) {
+            // If user has no memberships, they're a candidate
+            if (!req.auth.memberships || req.auth.memberships.length === 0) {
+                request.log.debug({ userId: req.auth.userId }, 'Access granted: candidate role (no memberships)');
+                return;
+            }
+        }
+
+        // For all other roles, check memberships
         if (!req.auth.memberships || req.auth.memberships.length === 0) {
             throw new ForbiddenError('No organization memberships found. Please contact an administrator.');
         }

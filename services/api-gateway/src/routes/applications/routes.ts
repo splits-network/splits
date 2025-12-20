@@ -116,13 +116,32 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const req = request as AuthenticatedRequest;
         const correlationId = getCorrelationId(request);
+        const atsService = services.get('ats');
         
         request.log.info({ 
             userId: req.auth.userId,
             body: request.body 
         }, 'Candidate submitting application');
 
-        const data = await atsService().post('/applications/submit', request.body, correlationId);
+        // Get candidate ID from email - candidates are external users
+        const candidatesResponse: any = await atsService.get(
+            `/candidates?email=${encodeURIComponent(req.auth.email)}`,
+            undefined,
+            correlationId
+        );
+        const candidates = candidatesResponse.data || [];
+        
+        if (candidates.length === 0) {
+            return reply.status(404).send({ error: 'Candidate profile not found' });
+        }
+
+        const candidateId = candidates[0].id;
+
+        // Forward to ATS service with candidate_id in request
+        const data = await atsService.post('/applications/submit', {
+            ...(request.body as any),
+            candidate_id: candidateId,
+        }, correlationId);
         return reply.status(201).send(data);
     });
 

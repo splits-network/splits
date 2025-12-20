@@ -15,6 +15,7 @@ const isPublicRoute = createRouteMatcher([
   '/resources(.*)',
   '/sign-in(.*)',
   '/sign-up(.*)',
+  '/forgot-password(.*)'
 ]);
 
 export default clerkMiddleware(async (auth, request) => {

@@ -132,20 +132,18 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
     app.post(
         '/applications/submit',
         async (request: FastifyRequest<{ Body: {
+            candidate_id: string;
             job_id: string;
             document_ids: string[];
             primary_resume_id: string;
             pre_screen_answers?: Array<{ question_id: string; answer: any }>;
             notes?: string;
         } }>, reply: FastifyReply) => {
-            const { job_id, document_ids, primary_resume_id, pre_screen_answers, notes } = request.body;
+            const { candidate_id, job_id, document_ids, primary_resume_id, pre_screen_answers, notes } = request.body;
 
-            // Extract candidate ID from authenticated user context
-            // TODO: Get from auth middleware
-            const candidateId = (request as any).auth?.userId;
-
-            if (!candidateId) {
-                throw new BadRequestError('Candidate ID not found in auth context');
+            // Candidate ID should be provided by API Gateway
+            if (!candidate_id) {
+                throw new BadRequestError('Candidate ID is required');
             }
 
             if (!job_id || !document_ids || document_ids.length === 0 || !primary_resume_id) {
@@ -153,7 +151,7 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
             }
 
             const result = await service.submitCandidateApplication({
-                candidateId,
+                candidateId: candidate_id,
                 jobId: job_id,
                 documentIds: document_ids,
                 primaryResumeId: primary_resume_id,
@@ -164,7 +162,7 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
             request.log.info({
                 applicationId: result.application.id,
                 jobId: job_id,
-                candidateId,
+                candidateId: candidate_id,
                 hasRecruiter: result.hasRecruiter,
                 stage: result.application.stage,
             }, 'Candidate submitted application');
