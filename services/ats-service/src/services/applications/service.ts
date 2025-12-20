@@ -142,6 +142,8 @@ export class ApplicationService {
                 candidate_id: candidate.id,
                 recruiter_id: recruiterId,
                 company_id: job.company_id,
+                stage: 'submitted',
+                has_recruiter: !!recruiterId,
                 candidate_was_created: !candidate.created_at || (new Date().getTime() - new Date(candidate.created_at).getTime() < 1000), // New if created within last second
             },
             'ats-service'

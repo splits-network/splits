@@ -161,7 +161,7 @@ export class ApplicationsEventConsumer {
         try {
             const { application_id, job_id, candidate_id, recruiter_id, has_recruiter, stage } = event.payload;
 
-            this.logger.info({ application_id, has_recruiter }, 'Handling candidate application submission');
+            this.logger.info({ application_id, has_recruiter, stage }, 'Handling candidate application submission');
 
             // Fetch job details
             const jobResponse = await this.services.getAtsService().get<any>(`/jobs/${job_id}`);
@@ -171,27 +171,86 @@ export class ApplicationsEventConsumer {
             const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
             const candidate = candidateResponse.data || candidateResponse;
 
-            // Get candidate's user profile for email
-            const candidateUserResponse = await this.services.getIdentityService().get<any>(`/users/by-email/${candidate.email}`);
-            const candidateUser = candidateUserResponse.data || candidateUserResponse;
+            // Get candidate's user profile for email (may not exist if recruiter sourced the candidate)
+            let candidateUser: any = null;
+            try {
+                const candidateUserResponse = await this.services.getIdentityService().get<any>(`/users/by-email/${candidate.email}`);
+                candidateUser = candidateUserResponse.data || candidateUserResponse;
+            } catch (error) {
+                this.logger.warn({ candidate_id, email: candidate.email }, 'Candidate user account not found');
+            }
 
-            // Determine next steps message
-            const nextSteps = has_recruiter
-                ? 'Your application has been sent to your recruiter for review. They will enhance and submit it to the company.'
-                : 'Your application has been submitted directly to the company. They will review and contact you if interested.';
+            // Scenario 1: Recruiter directly submits candidate (has_recruiter && stage === 'submitted')
+            // This is when a recruiter sources and immediately submits a candidate to a company
+            if (has_recruiter && stage === 'submitted') {
+                this.logger.info({ application_id }, 'Recruiter direct submission - notifying company');
 
-            // Send confirmation email to candidate
-            await this.emailService.sendCandidateApplicationSubmitted(candidate.email, {
-                candidateName: candidate.full_name,
-                jobTitle: job.title,
-                companyName: job.company?.name || 'Unknown Company',
-                hasRecruiter: has_recruiter,
-                nextSteps,
-                userId: candidateUser?.id,
-            });
+                // Fetch recruiter details
+                const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
+                const recruiter = recruiterResponse.data || recruiterResponse;
 
-            // If has recruiter, notify recruiter
-            if (has_recruiter && recruiter_id) {
+                const recruiterUserResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
+                const recruiterUser = recruiterUserResponse.data || recruiterUserResponse;
+                const recruiterName = `${recruiterUser.first_name || ''} ${recruiterUser.last_name || ''}`.trim() || recruiterUser.email;
+
+                // Notify company admins
+                const companyResponse = await this.services.getAtsService().get<any>(`/companies/${job.company_id}`);
+                const company = companyResponse.data || companyResponse;
+
+                if (company.identity_organization_id) {
+                    const membershipsResponse = await this.services.getIdentityService().get<any>(
+                        `/organizations/${company.identity_organization_id}/memberships?role=admin`
+                    );
+                    const memberships = membershipsResponse.data || membershipsResponse;
+
+                    // Notify each admin
+                    for (const membership of Array.isArray(memberships) ? memberships : []) {
+                        const userResponse = await this.services.getIdentityService().get<any>(`/users/${membership.user_id}`);
+                        const user = userResponse.data || userResponse;
+
+                        await this.emailService.sendCompanyApplicationReceived(user.email, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            applicationId: application_id,
+                            hasRecruiter: true,
+                            recruiterName: recruiterName,
+                            userId: user.id,
+                        });
+                    }
+                }
+
+                // Also notify the recruiter of successful submission
+                await this.emailService.sendApplicationCreated(recruiterUser.email, {
+                    candidateName: candidate.full_name,
+                    jobTitle: job.title,
+                    companyName: job.company?.name || 'Unknown Company',
+                    userId: recruiter.user_id,
+                });
+
+                return;
+            }
+
+            // Scenario 2: Candidate submits with recruiter (has_recruiter && stage === 'screen')
+            // Application goes to recruiter first for review
+            if (has_recruiter && stage === 'screen') {
+                this.logger.info({ application_id }, 'Candidate application with recruiter - notifying candidate and recruiter');
+
+                // Determine next steps message
+                const nextSteps = 'Your application has been sent to your recruiter for review. They will enhance and submit it to the company.';
+
+                // Send confirmation email to candidate (if they have an account)
+                if (candidateUser) {
+                    await this.emailService.sendCandidateApplicationSubmitted(candidate.email, {
+                        candidateName: candidate.full_name,
+                        jobTitle: job.title,
+                        companyName: job.company?.name || 'Unknown Company',
+                        hasRecruiter: true,
+                        nextSteps,
+                        userId: candidateUser.id,
+                    });
+                }
+
+                // Notify recruiter of pending application
                 const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
                 const recruiter = recruiterResponse.data || recruiterResponse;
 
@@ -205,16 +264,33 @@ export class ApplicationsEventConsumer {
                     applicationId: application_id,
                     userId: recruiter.user_id,
                 });
+
+                return;
             }
 
-            // If submitted directly to company (no recruiter), notify company
+            // Scenario 3: Candidate submits directly to company (no recruiter, stage === 'submitted')
             if (!has_recruiter && stage === 'submitted') {
-                // Get company admin(s) for notification
+                this.logger.info({ application_id }, 'Direct candidate application - notifying candidate and company');
+
+                const nextSteps = 'Your application has been submitted directly to the company. They will review and contact you if interested.';
+
+                // Send confirmation email to candidate (if they have an account)
+                if (candidateUser) {
+                    await this.emailService.sendCandidateApplicationSubmitted(candidate.email, {
+                        candidateName: candidate.full_name,
+                        jobTitle: job.title,
+                        companyName: job.company?.name || 'Unknown Company',
+                        hasRecruiter: false,
+                        nextSteps,
+                        userId: candidateUser.id,
+                    });
+                }
+
+                // Notify company admins
                 const companyResponse = await this.services.getAtsService().get<any>(`/companies/${job.company_id}`);
                 const company = companyResponse.data || companyResponse;
 
                 if (company.identity_organization_id) {
-                    // Get organization admins from identity service
                     const membershipsResponse = await this.services.getIdentityService().get<any>(
                         `/organizations/${company.identity_organization_id}/memberships?role=admin`
                     );
@@ -234,6 +310,8 @@ export class ApplicationsEventConsumer {
                         });
                     }
                 }
+
+                return;
             }
 
             this.logger.info({ application_id }, 'Candidate application submission notifications sent');
