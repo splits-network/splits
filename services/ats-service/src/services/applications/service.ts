@@ -374,7 +374,7 @@ export class ApplicationService {
             const response = await fetch(`${NETWORK_SERVICE_URL}/recruiter-candidates/candidate/${candidateId}`);
             
             if (response.ok) {
-                const result = await response.json();
+                const result: any = await response.json();
                 const activeRelationships = result.data?.filter((rel: any) => rel.status === 'active' && rel.consent_given) || [];
                 
                 if (activeRelationships.length > 0) {
