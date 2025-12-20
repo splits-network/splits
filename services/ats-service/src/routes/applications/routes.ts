@@ -249,18 +249,56 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
         }
     );
 
-    // Get application details with documents and pre-screen answers
+    // Get application details with job, company, documents, and pre-screen answers
     app.get(
         '/applications/:id/full',
         async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
             const application = await service.getApplicationById(request.params.id);
-            const documents = await service.getDocumentsForApplication(request.params.id);
-            const preScreenAnswers = await service.getPreScreenAnswersForApplication(request.params.id);
-            const auditLog = await service.getApplicationAuditLog(request.params.id);
+            
+            // Fetch all related data
+            let documents: any[] = [];
+            let preScreenAnswers: any[] = [];
+            let auditLog: any[] = [];
+            
+            try {
+                documents = await service.getDocumentsForApplication(request.params.id);
+            } catch (err) {
+                // Documents not found - continue without them
+            }
+            
+            try {
+                preScreenAnswers = await service.getPreScreenAnswersForApplication(request.params.id);
+            } catch (err) {
+                // Pre-screen answers not found - continue without them
+            }
+            
+            try {
+                auditLog = await service.getApplicationAuditLog(request.params.id);
+            } catch (err) {
+                // Audit log not found - continue without it
+            }
+
+            // Fetch job and company details
+            let job = null;
+            let company = null;
+
+            if (application.job_id) {
+                try {
+                    job = await service.getJobById(application.job_id);
+                    if (job?.company_id) {
+                        company = await service.getCompanyById(job.company_id);
+                        // Add company to job object for easier access
+                        job = { ...job, company };
+                    }
+                } catch (err) {
+                    // Job or company not found - continue without it
+                }
+            }
 
             return reply.send({
                 data: {
                     ...application,
+                    job,
                     documents,
                     pre_screen_answers: preScreenAnswers,
                     workflow_events: auditLog,

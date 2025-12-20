@@ -80,19 +80,21 @@ export async function registerConsentRoutes(
     fastify.post<{
         Params: { token: string };
         Body: {
+            userId?: string;
             ip_address?: string;
             user_agent?: string;
         };
     }>('/recruiter-candidates/invitation/:token/accept', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { token } = request.params as { token: string };
-            const body = request.body as { ip_address?: string; user_agent?: string } || {};
+            const body = request.body as { userId?: string; ip_address?: string; user_agent?: string } || {};
             
             // Extract IP and user agent from request if not provided in body
             const ipAddress = body.ip_address || request.ip || 'unknown';
             const userAgent = body.user_agent || request.headers['user-agent'] || 'unknown';
             
             const relationship = await service.acceptInvitation(token, {
+                user_id: body.userId,
                 ip_address: ipAddress,
                 user_agent: userAgent,
             });
@@ -108,6 +110,7 @@ export async function registerConsentRoutes(
                 relationship_id: relationship.id,
                 recruiter_id: relationship.recruiter_id,
                 candidate_id: relationship.candidate_id,
+                user_linked: !!body.userId,
             }, 'Candidate accepted invitation');
             
             return reply.send({

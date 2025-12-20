@@ -36,4 +36,25 @@ export class AtsClient {
             return [];
         }
     }
+
+    async linkCandidateToUser(candidateId: string, userId: string): Promise<any> {
+        try {
+            const response = await fetch(`${this.baseUrl}/candidates/${candidateId}/link-user`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId }),
+            });
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`ATS service returned ${response.status}: ${errorText}`);
+            }
+            const result: any = await response.json();
+            return result.data || null;
+        } catch (error: any) {
+            console.error('Error linking candidate to user:', error.message);
+            throw error;
+        }
+    }
 }

@@ -364,9 +364,31 @@ export class ApplicationService {
         }
 
         // 4. Check if candidate has a recruiter relationship (12-month window)
-        // For now, check candidate.recruiter_id or make call to network service
-        const hasRecruiter = !!candidate.recruiter_id;
-        const recruiterId = candidate.recruiter_id || undefined;
+        // Query network service to check for active recruiter relationships
+        let hasRecruiter = false;
+        let recruiterId: string | undefined = undefined;
+        
+        try {
+            // Call network service to check for active recruiter relationships
+            const { NETWORK_SERVICE_URL = 'http://localhost:3003' } = process.env;
+            const response = await fetch(`${NETWORK_SERVICE_URL}/recruiter-candidates/candidate/${candidateId}`);
+            
+            if (response.ok) {
+                const result = await response.json();
+                const activeRelationships = result.data?.filter((rel: any) => rel.status === 'active' && rel.consent_given) || [];
+                
+                if (activeRelationships.length > 0) {
+                    // Candidate has at least one active recruiter relationship
+                    hasRecruiter = true;
+                    recruiterId = activeRelationships[0].recruiter_id; // Use the first active relationship
+                }
+            }
+        } catch (error) {
+            // If network service is unavailable, fall back to candidate.recruiter_id
+            console.error('Failed to check recruiter relationships from network service:', error);
+            hasRecruiter = !!candidate.recruiter_id;
+            recruiterId = candidate.recruiter_id || undefined;
+        }
 
         // 5. Determine initial stage based on recruiter status
         const initialStage: ApplicationStage = hasRecruiter ? 'screen' : 'submitted';

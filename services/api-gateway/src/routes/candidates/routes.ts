@@ -468,8 +468,28 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
                 ...(request.query as any)
             }).toString();
             
-            const data = await atsService().get(`/applications?${queryString}`, undefined, correlationId);
-            return reply.send(data);
+            const applicationsResponse: any = await atsService().get(`/applications?${queryString}`, undefined, correlationId);
+            const applications = applicationsResponse.data || [];
+
+            // Enrich applications with job and company details
+            const enrichedApplications = await Promise.all(
+                applications.map(async (app: any) => {
+                    try {
+                        const jobResponse: any = await atsService().get(`/jobs/${app.job_id}`, undefined, correlationId);
+                        const job = jobResponse.data;
+
+                        return {
+                            ...app,
+                            job: job,
+                        };
+                    } catch (error) {
+                        request.log.warn({ error, job_id: app.job_id }, 'Failed to fetch job details for application');
+                        return app; // Return application without job details if fetch fails
+                    }
+                })
+            );
+
+            return reply.send({ data: enrichedApplications });
         } catch (error: any) {
             request.log.error({ error, email: req.auth.email }, 'Failed to get candidate applications');
             return reply.status(500).send({ error: { message: 'Failed to load applications' } });

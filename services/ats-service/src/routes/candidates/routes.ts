@@ -85,4 +85,26 @@ export function registerCandidateRoutes(app: FastifyInstance, service: AtsServic
             return reply.send({ data: candidate });
         }
     );
+
+    // Link candidate to user (internal endpoint called by network service)
+    app.post(
+        '/candidates/:id/link-user',
+        async (request: FastifyRequest<{ 
+            Params: { id: string }; 
+            Body: { user_id: string } 
+        }>, reply: FastifyReply) => {
+            const { id } = request.params;
+            const { user_id } = request.body;
+            
+            if (!user_id) {
+                return reply.status(400).send({ 
+                    error: 'Missing required fields',
+                    message: 'user_id is required' 
+                });
+            }
+            
+            const candidate = await service.linkCandidateToUser(id, user_id);
+            return reply.send({ data: candidate });
+        }
+    );
 }

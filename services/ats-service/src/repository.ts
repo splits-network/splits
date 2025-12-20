@@ -415,6 +415,28 @@ export class AtsRepository {
         return data;
     }
 
+    /**
+     * Link candidate to user account and verify them
+     * Called when candidate accepts invitation and creates account
+     */
+    async linkCandidateToUser(candidateId: string, userId: string): Promise<Candidate> {
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('candidates')
+            .update({
+                user_id: userId,
+                verification_status: 'verified',
+                verified_at: new Date().toISOString(),
+                verified_by_user_id: userId,
+            })
+            .eq('id', candidateId)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
     // Application methods
     async findApplications(filters?: {
         recruiter_id?: string;
@@ -849,27 +871,52 @@ export class AtsRepository {
         applicationId: string,
         isPrimary: boolean
     ): Promise<void> {
-        // Update document to link it to the application
-        const { error } = await this.supabase
+        // Get the original document to copy storage details
+        const { data: originalDoc, error: fetchError } = await this.supabase
+            .schema('documents')
             .from('documents')
-            .update({
+            .select('*')
+            .eq('id', documentId)
+            .single();
+
+        if (fetchError || !originalDoc) {
+            throw new Error(`Document ${documentId} not found`);
+        }
+
+        // Create new document record linked to application (same storage_path, new entity)
+        const { error: insertError } = await this.supabase
+            .schema('documents')
+            .from('documents')
+            .insert({
                 entity_type: 'application',
                 entity_id: applicationId,
-                is_primary: isPrimary,
-            })
-            .eq('id', documentId);
+                document_type: originalDoc.document_type,
+                filename: originalDoc.filename,
+                storage_path: originalDoc.storage_path,
+                bucket_name: originalDoc.bucket_name,
+                content_type: originalDoc.content_type,
+                file_size: originalDoc.file_size,
+                uploaded_by_user_id: originalDoc.uploaded_by_user_id,
+                processing_status: originalDoc.processing_status,
+                metadata: { 
+                    ...originalDoc.metadata, 
+                    is_primary: isPrimary,
+                    original_document_id: documentId 
+                },
+            });
 
-        if (error) throw error;
+        if (insertError) throw insertError;
     }
 
     async getDocumentsForApplication(applicationId: string): Promise<any[]> {
         const { data, error } = await this.supabase
+            .schema('documents')
             .from('documents')
             .select('*')
             .eq('entity_type', 'application')
             .eq('entity_id', applicationId)
-            .order('is_primary', { ascending: false })
-            .order('uploaded_at', { ascending: false });
+            .is('deleted_at', null)
+            .order('created_at', { ascending: false });
 
         if (error) throw error;
         return data || [];

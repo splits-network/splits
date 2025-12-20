@@ -4,6 +4,7 @@ import { AssignmentService } from './services/assignments/service';
 import { StatsService } from './services/stats/service';
 import { EventPublisher } from './events';
 import { Recruiter, RecruiterStatus, RoleAssignment } from '@splits-network/shared-types';
+import { AtsClient } from './clients';
 
 /**
  * Main Network Service Coordinator
@@ -14,6 +15,7 @@ export class NetworkService {
     public readonly recruiters: RecruiterService;
     public readonly assignments: AssignmentService;
     public readonly stats: StatsService;
+    private atsClient: AtsClient;
 
     constructor(
         private repository: NetworkRepository,
@@ -23,6 +25,7 @@ export class NetworkService {
         this.recruiters = new RecruiterService(repository);
         this.assignments = new AssignmentService(repository);
         this.stats = new StatsService(repository);
+        this.atsClient = new AtsClient();
     }
 
     // ========================================================================
@@ -156,6 +159,7 @@ export class NetworkService {
     }
 
     async acceptInvitation(token: string, metadata: {
+        user_id?: string;
         ip_address: string;
         user_agent: string;
     }) {
@@ -186,6 +190,16 @@ export class NetworkService {
             consent_ip_address: metadata.ip_address,
             consent_user_agent: metadata.user_agent,
         });
+
+        // Link candidate to user account and verify them
+        if (metadata.user_id && relationship.candidate_id) {
+            try {
+                await this.atsClient.linkCandidateToUser(relationship.candidate_id, metadata.user_id);
+            } catch (error: any) {
+                console.error('Failed to link candidate to user:', error.message);
+                // Don't fail the invitation acceptance if linking fails
+            }
+        }
 
         // Emit consent given event for recruiter notification
         if (this.eventPublisher) {

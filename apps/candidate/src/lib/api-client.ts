@@ -91,6 +91,10 @@ export async function getMyApplications(token: string) {
   return apiClient.get('/candidates/me/applications', token);
 }
 
+export async function getApplicationById(applicationId: string, token: string) {
+  return apiClient.get(`/applications/${applicationId}`, token);
+}
+
 export async function getApplicationDetails(applicationId: string, token: string) {
   return apiClient.get(`/applications/${applicationId}/full`, token);
 }

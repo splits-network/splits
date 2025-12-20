@@ -2,168 +2,211 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { formatSalary, formatDate } from '@/lib/utils';
-import { apiClient } from '@/lib/api-client';
+import { apiClient, getMyApplications } from '@/lib/api-client';
+import { getMyRecruiters } from '@/lib/api';
 
 interface Job {
-  id: string;
-  title: string;
-  company?: { name: string; description?: string };
-  location?: string;
-  salary_min?: number;
-  salary_max?: number;
-  employment_type?: string;
-  open_to_relocation?: boolean;
-  posted_at?: string;
-  description?: string;
-  candidate_description?: string;
+    id: string;
+    title: string;
+    company?: { name: string; description?: string };
+    location?: string;
+    salary_min?: number;
+    salary_max?: number;
+    employment_type?: string;
+    open_to_relocation?: boolean;
+    posted_at?: string;
+    description?: string;
+    candidate_description?: string;
 }
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+    params: Promise<{ id: string }>;
 }
 
 export default async function JobDetailPage({ params }: PageProps) {
-  const { id } = await params;
-  const { userId } = await auth();
-  
-  let job: Job | null = null;
-  
-  try {
-    const response = await apiClient.get<{ data: Job }>(`/public/jobs/${id}`);
-    job = response.data;
-  } catch (error) {
-    console.error('Failed to fetch job:', error);
-    notFound();
-  }
+    const { id } = await params;
+    const { userId, getToken } = await auth();
 
-  if (!job) {
-    notFound();
-  }
+    let job: Job | null = null;
+    let hasActiveRecruiter = false;
+    let existingApplication: any = null;
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Back Button */}
-      <Link href="/jobs" className="btn btn-ghost mb-6">
-        <i className="fa-solid fa-arrow-left"></i>
-        Back to Jobs
-      </Link>
+    try {
+        const response = await apiClient.get<{ data: Job }>(`/public/jobs/${id}`);
+        job = response.data;
+    } catch (error) {
+        console.error('Failed to fetch job:', error);
+        notFound();
+    }
 
-      {/* Job Header */}
-      <div className="card bg-base-100 shadow-lg mb-6">
-        <div className="card-body">
-          <h1 className="text-4xl font-bold mb-4">{job.title}</h1>
-          <h2 className="text-2xl font-semibold mb-4">{job.company?.name || 'Company'}</h2>
+    if (!job) {
+        notFound();
+    }
 
-          <div className="flex flex-wrap gap-4 mb-6">
-            {job.location && (
-              <div className="badge badge-lg">
-                <i className="fa-solid fa-location-dot mr-2"></i>
-                {job.location}
-              </div>
-            )}
-            {job.employment_type && (
-              <div className="badge badge-lg">
-                <i className="fa-solid fa-briefcase mr-2"></i>
-                {job.employment_type.replace('_', '-')}
-              </div>
-            )}
-            {job.open_to_relocation && (
-              <div className="badge badge-lg badge-success">
-                <i className="fa-solid fa-house mr-2"></i>
-                Remote
-              </div>
-            )}
-            {job.posted_at && (
-              <div className="badge badge-lg">
-                <i className="fa-solid fa-calendar mr-2"></i>
-                Posted {formatDate(job.posted_at)}
-              </div>
-            )}
-          </div>
+    // Check if user has an active recruiter relationship and existing application
+    if (userId) {
+        try {
+            const token = await getToken();
+            if (token) {
+                const [recruitersResponse, applicationsResponse] = await Promise.all([
+                    getMyRecruiters(token),
+                    getMyApplications(token),
+                ]);
 
-          <div className="divider"></div>
+                hasActiveRecruiter = recruitersResponse.active && recruitersResponse.active.length > 0;
 
-          <div className="flex justify-between items-center">
-            <div>
-              {job.salary_min && job.salary_max && (
-                <>
-                  <p className="text-sm text-base-content/70 mb-1">Salary Range</p>
-                  <p className="text-2xl font-bold text-primary">
-                    {formatSalary(job.salary_min, job.salary_max)}
-                  </p>
-                </>
-              )}
+                // Check for existing application to this job
+                const applications = (applicationsResponse as any).data || applicationsResponse || [];
+                existingApplication = applications.find(
+                    (app: any) => app.job_id === id && !['rejected', 'withdrawn'].includes(app.stage)
+                );
+            }
+        } catch (error) {
+            console.error('Failed to fetch recruiter relationships or applications:', error);
+            // Continue without recruiter/application info
+        }
+    }
+
+    const applyButtonText = hasActiveRecruiter ? 'Send to Recruiter' : 'Apply Now';
+    const applyButtonIcon = hasActiveRecruiter ? 'fa-user-tie' : 'fa-paper-plane';
+
+    return (
+        <div className="container mx-auto px-4 py-8">
+            {/* Back Button */}
+            <Link href="/jobs" className="btn btn-ghost mb-6">
+                <i className="fa-solid fa-arrow-left"></i>
+                Back to Jobs
+            </Link>
+
+            {/* Job Header */}
+            <div className="card bg-base-100 shadow-lg mb-6">
+                <div className="card-body">
+                    <h1 className="text-4xl font-bold mb-4">{job.title}</h1>
+                    <h2 className="text-2xl font-semibold mb-4">{job.company?.name || 'Company'}</h2>
+
+                    <div className="flex flex-wrap gap-4 mb-6">
+                        {job.location && (
+                            <div className="badge badge-lg">
+                                <i className="fa-solid fa-location-dot mr-2"></i>
+                                {job.location}
+                            </div>
+                        )}
+                        {job.employment_type && (
+                            <div className="badge badge-lg">
+                                <i className="fa-solid fa-briefcase mr-2"></i>
+                                {job.employment_type.replace('_', '-')}
+                            </div>
+                        )}
+                        {job.open_to_relocation && (
+                            <div className="badge badge-lg badge-success">
+                                <i className="fa-solid fa-house mr-2"></i>
+                                Remote
+                            </div>
+                        )}
+                        {job.posted_at && (
+                            <div className="badge badge-lg">
+                                <i className="fa-solid fa-calendar mr-2"></i>
+                                Posted {formatDate(job.posted_at)}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="divider"></div>
+
+                    <div className="flex justify-between items-center">
+                        <div>
+                            {job.salary_min && job.salary_max && (
+                                <>
+                                    <p className="text-sm text-base-content/70 mb-1">Salary Range</p>
+                                    <p className="text-2xl font-bold text-primary">
+                                        {formatSalary(job.salary_min, job.salary_max)}
+                                    </p>
+                                </>
+                            )}
+                        </div>
+                        <div className="flex gap-2">
+                            {userId ? (
+                                existingApplication ? (
+                                    <div className="flex gap-2">
+                                        <button className="btn btn-primary btn-lg btn-disabled" disabled>
+                                            <i className="fa-solid fa-check-circle"></i>
+                                            Already Applied
+                                        </button>
+                                        <Link href={`/applications/${existingApplication.id}`} className="btn btn-outline btn-lg">
+                                            <i className="fa-solid fa-arrow-right"></i>
+                                            View Application
+                                        </Link>
+                                    </div>
+                                ) : (
+                                    <Link href={`/jobs/${job.id}/apply`} className="btn btn-primary btn-lg">
+                                        <i className={`fa-solid ${applyButtonIcon}`}></i>
+                                        {applyButtonText}
+                                    </Link>
+                                )
+                            ) : (
+                                <Link href={`/sign-in?redirect=${encodeURIComponent(`/jobs/${job.id}/apply`)}`} className="btn btn-primary btn-lg">
+                                    <i className="fa-solid fa-paper-plane"></i>
+                                    Apply Now
+                                </Link>
+                            )}
+                            <button className="btn btn-outline btn-lg">
+                                <i className="fa-solid fa-bookmark"></i>
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div className="flex gap-2">
-              {userId ? (
-                <Link href={`/jobs/${job.id}/apply`} className="btn btn-primary btn-lg">
-                  <i className="fa-solid fa-paper-plane"></i>
-                  Apply Now
-                </Link>
-              ) : (
-                <Link href={`/sign-in?redirect=${encodeURIComponent(`/jobs/${job.id}/apply`)}`} className="btn btn-primary btn-lg">
-                  <i className="fa-solid fa-paper-plane"></i>
-                  Apply Now
-                </Link>
-              )}
-              <button className="btn btn-outline btn-lg">
-                <i className="fa-solid fa-bookmark"></i>
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* About Company */}
-      {job.company?.description && (
-        <div className="card bg-base-100 shadow-lg mb-6">
-          <div className="card-body">
-            <h3 className="card-title text-xl mb-4">
-              <i className="fa-solid fa-building"></i>
-              About {job.company?.name || 'Company'}
-            </h3>
-            <p className="whitespace-pre-line">{job.company.description}</p>
-          </div>
-        </div>
-      )}
+            {/* About Company */}
+            {job.company?.description && (
+                <div className="card bg-base-100 shadow-lg mb-6">
+                    <div className="card-body">
+                        <h3 className="card-title text-xl mb-4">
+                            <i className="fa-solid fa-building"></i>
+                            About {job.company?.name || 'Company'}
+                        </h3>
+                        <p className="whitespace-pre-line">{job.company.description}</p>
+                    </div>
+                </div>
+            )}
 
-      {/* Job Description */}
-      {(job.candidate_description || job.description) && (
-        <div className="card bg-base-100 shadow-lg mb-6">
-          <div className="card-body">
-            <h3 className="card-title text-xl mb-4">
-              <i className="fa-solid fa-file-lines"></i>
-              Job Description
-            </h3>
-            <p className="whitespace-pre-line">{job.candidate_description || job.description}</p>
-          </div>
-        </div>
-      )}
+            {/* Job Description */}
+            {(job.candidate_description || job.description) && (
+                <div className="card bg-base-100 shadow-lg mb-6">
+                    <div className="card-body">
+                        <h3 className="card-title text-xl mb-4">
+                            <i className="fa-solid fa-file-lines"></i>
+                            Job Description
+                        </h3>
+                        <p className="whitespace-pre-line">{job.candidate_description || job.description}</p>
+                    </div>
+                </div>
+            )}
 
-      {/* Apply CTA */}
-      {!userId && (
-        <div className="card bg-primary text-white shadow-lg">
-          <div className="card-body text-center">
-            <h3 className="text-2xl font-bold mb-4">
-              Ready to Apply?
-            </h3>
-            <p className="mb-6">
-              Create an account to apply with one click and track your application.
-            </p>
-            <div className="flex gap-4 justify-center">
-              <Link href={`/sign-up?redirect=${encodeURIComponent(`/jobs/${job.id}/apply`)}`} className="btn btn-lg bg-white text-primary hover:bg-gray-100">
-                <i className="fa-solid fa-user-plus"></i>
-                Create Account
-              </Link>
-              <Link href={`/sign-in?redirect=${encodeURIComponent(`/jobs/${job.id}/apply`)}`} className="btn btn-lg btn-outline text-white border-white hover:bg-white hover:text-primary">
-                <i className="fa-solid fa-right-to-bracket"></i>
-                Sign In
-              </Link>
-            </div>
-          </div>
+            {/* Apply CTA */}
+            {!userId && (
+                <div className="card bg-primary text-white shadow-lg">
+                    <div className="card-body text-center">
+                        <h3 className="text-2xl font-bold mb-4">
+                            Ready to Apply?
+                        </h3>
+                        <p className="mb-6">
+                            Create an account to apply with one click and track your application.
+                        </p>
+                        <div className="flex gap-4 justify-center">
+                            <Link href={`/sign-up?redirect=${encodeURIComponent(`/jobs/${job.id}/apply`)}`} className="btn btn-lg bg-white text-primary hover:bg-gray-100">
+                                <i className="fa-solid fa-user-plus"></i>
+                                Create Account
+                            </Link>
+                            <Link href={`/sign-in?redirect=${encodeURIComponent(`/jobs/${job.id}/apply`)}`} className="btn btn-lg btn-outline text-white border-white hover:bg-white hover:text-primary">
+                                <i className="fa-solid fa-right-to-bracket"></i>
+                                Sign In
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }
