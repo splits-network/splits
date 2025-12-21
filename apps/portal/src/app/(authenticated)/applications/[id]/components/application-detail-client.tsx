@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createAuthenticatedClient } from '@/lib/api-client';
@@ -63,9 +63,9 @@ export default function ApplicationDetailClient({
     const [token, setToken] = useState<string | null>(null);
 
     // Get token on mount for AI Review Panel
-    useState(() => {
+    useEffect(() => {
         getToken().then(t => setToken(t));
-    });
+    }, [getToken]);
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {

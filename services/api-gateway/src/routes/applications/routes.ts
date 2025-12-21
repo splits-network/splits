@@ -306,5 +306,34 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
         const data = await atsService().post(`/applications/${id}/request-prescreen`, requestBody, correlationId);
         return reply.send(data);
     });
+
+    // Get AI review for application
+    app.get('/api/applications/:id/ai-review', {
+        schema: {
+            description: 'Get AI review for application',
+            tags: ['applications', 'ai-review'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const { id } = request.params as { id: string };
+        const correlationId = getCorrelationId(request);
+        const data = await atsService().get(`/applications/${id}/ai-review`, undefined, correlationId);
+        return reply.send(data);
+    });
+
+    // Trigger AI review for application (POST)
+    app.post('/api/applications/:id/ai-review', {
+        preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager']),
+        schema: {
+            description: 'Trigger AI review for application',
+            tags: ['applications', 'ai-review'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const { id } = request.params as { id: string };
+        const correlationId = getCorrelationId(request);
+        const data = await atsService().post(`/applications/${id}/ai-review`, request.body, correlationId);
+        return reply.send(data);
+    });
 }
 
