@@ -86,9 +86,18 @@ export default function ApplicationsListClient() {
     const [bulkAction, setBulkAction] = useState<'stage' | 'reject' | null>(null);
     const [bulkLoading, setBulkLoading] = useState(false);
 
+    // Ref to prevent circular URL updates
+    const isUpdatingUrl = useRef(false);
+
     // Sync state with URL params (e.g., when user clicks back button)
     // Note: We don't sanitize here during sync, only on initial load
     useEffect(() => {
+        // Don't sync if we just updated the URL ourselves
+        if (isUpdatingUrl.current) {
+            isUpdatingUrl.current = false;
+            return;
+        }
+
         const urlSearch = searchParams.get('search') || '';
         const urlStage = searchParams.get('stage') || '';
         const urlPage = parseInt(searchParams.get('page') || '1');
@@ -98,7 +107,7 @@ export default function ApplicationsListClient() {
         if (urlPage !== pagination.page) {
             setPagination(prev => ({ ...prev, page: urlPage }));
         }
-    }, [searchParams]);
+    }, [searchParams, searchQuery, stageFilter, pagination.page]);
 
     // Update URL when state changes (shallow update to preserve focus)
     useEffect(() => {
@@ -118,18 +127,11 @@ export default function ApplicationsListClient() {
 
         const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
 
+        // Set flag to prevent circular update
+        isUpdatingUrl.current = true;
         // Use window.history.replaceState for a truly shallow update that doesn't trigger re-renders
         window.history.replaceState(null, '', newUrl);
     }, [searchQuery, stageFilter, pagination.page, pathname]);
-
-    // Debounced search effect
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            // Reset to page 1 when search/filter changes
-            setPagination(prev => ({ ...prev, page: 1 }));
-        }, 300);
-        return () => clearTimeout(timer);
-    }, [searchQuery, stageFilter]);
 
     const loadApplications = useCallback(async () => {
         try {
