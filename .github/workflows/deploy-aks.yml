@@ -94,7 +94,6 @@ jobs:
                       -t $IMAGE_TAG \
                       --target production \
                       --build-arg NEXT_PUBLIC_APP_URL=https://employment-networks.com \
-                      --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
                       .
                   else
                     docker build \

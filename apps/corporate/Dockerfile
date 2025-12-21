@@ -20,9 +20,7 @@ CMD ["pnpm", "--filter", "@splits-network/corporate", "dev"]
 # Build stage
 FROM base AS build
 ARG NEXT_PUBLIC_APP_URL
-ARG SENTRY_AUTH_TOKEN
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
-ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
 COPY --from=dependencies /app ./
 COPY apps/corporate ./apps/corporate
 # Build corporate site
