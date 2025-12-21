@@ -10,11 +10,11 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.5",
+    "@sentry/nextjs": "^10.32.1",
+    "@splits-network/shared-types": "workspace:*",
     "next": "^16.1.0",
     "react": "^19.2.1",
-    "react-dom": "^19.2.1",
-      "@sentry/nextjs": "^8.30.0",
-    "@splits-network/shared-types": "workspace:*"
+    "react-dom": "^19.2.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",

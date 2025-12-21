@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.5",
-    "@sentry/nextjs": "^8.30.0",
+    "@sentry/nextjs": "^10.32.1",
     "@splits-network/shared-config": "workspace:*",
     "@splits-network/shared-types": "workspace:*",
     "@supabase/supabase-js": "^2.47.10",
