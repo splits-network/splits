@@ -76,38 +76,38 @@ export class DomainEventConsumer {
 
             // Bind to events we care about
             // Phase 1 events
-            await this.channel.bindQueue(this.queue, this.exchange, 'application_created');
-            await this.channel.bindQueue(this.queue, this.exchange, 'application_accepted');
-            await this.channel.bindQueue(this.queue, this.exchange, 'application_stage_changed');
-            await this.channel.bindQueue(this.queue, this.exchange, 'application_submitted_to_company');
-            await this.channel.bindQueue(this.queue, this.exchange, 'application_withdrawn');
-            await this.channel.bindQueue(this.queue, this.exchange, 'application_prescreen_requested');
-            await this.channel.bindQueue(this.queue, this.exchange, 'placement_created');
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.created');
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.accepted');
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.stage_changed');
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.submitted_to_company');
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.withdrawn');
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.prescreen_requested');
+            await this.channel.bindQueue(this.queue, this.exchange, 'placement.created');
             
             // Phase 2 events - Ownership & Sourcing
-            await this.channel.bindQueue(this.queue, this.exchange, 'candidate_sourced');
-            await this.channel.bindQueue(this.queue, this.exchange, 'candidate_outreach_recorded');
-            await this.channel.bindQueue(this.queue, this.exchange, 'ownership_conflict_detected');
-            await this.channel.bindQueue(this.queue, this.exchange, 'candidate_invited');
-            await this.channel.bindQueue(this.queue, this.exchange, 'candidate_consent_given');
-            await this.channel.bindQueue(this.queue, this.exchange, 'candidate_consent_declined');
+            await this.channel.bindQueue(this.queue, this.exchange, 'candidate.sourced');
+            await this.channel.bindQueue(this.queue, this.exchange, 'candidate.outreach_recorded');
+            await this.channel.bindQueue(this.queue, this.exchange, 'ownership.conflict_detected');
+            await this.channel.bindQueue(this.queue, this.exchange, 'candidate.invited');
+            await this.channel.bindQueue(this.queue, this.exchange, 'candidate.consent_given');
+            await this.channel.bindQueue(this.queue, this.exchange, 'candidate.consent_declined');
             
             // Phase 2 events - Proposals
-            await this.channel.bindQueue(this.queue, this.exchange, 'proposal_created');
-            await this.channel.bindQueue(this.queue, this.exchange, 'proposal_accepted');
-            await this.channel.bindQueue(this.queue, this.exchange, 'proposal_declined');
-            await this.channel.bindQueue(this.queue, this.exchange, 'proposal_timeout');
+            await this.channel.bindQueue(this.queue, this.exchange, 'proposal.created');
+            await this.channel.bindQueue(this.queue, this.exchange, 'proposal.accepted');
+            await this.channel.bindQueue(this.queue, this.exchange, 'proposal.declined');
+            await this.channel.bindQueue(this.queue, this.exchange, 'proposal.timeout');
             
             // Phase 2 events - Placements
-            await this.channel.bindQueue(this.queue, this.exchange, 'placement_activated');
-            await this.channel.bindQueue(this.queue, this.exchange, 'placement_completed');
-            await this.channel.bindQueue(this.queue, this.exchange, 'placement_failed');
-            await this.channel.bindQueue(this.queue, this.exchange, 'replacement_requested');
-            await this.channel.bindQueue(this.queue, this.exchange, 'guarantee_expiring');
+            await this.channel.bindQueue(this.queue, this.exchange, 'placement.activated');
+            await this.channel.bindQueue(this.queue, this.exchange, 'placement.completed');
+            await this.channel.bindQueue(this.queue, this.exchange, 'placement.failed');
+            await this.channel.bindQueue(this.queue, this.exchange, 'replacement.requested');
+            await this.channel.bindQueue(this.queue, this.exchange, 'guarantee.expiring');
             
             // Phase 2 events - Collaboration
-            await this.channel.bindQueue(this.queue, this.exchange, 'collaborator_added');
-            await this.channel.bindQueue(this.queue, this.exchange, 'reputation_updated');
+            await this.channel.bindQueue(this.queue, this.exchange, 'collaborator.added');
+            await this.channel.bindQueue(this.queue, this.exchange, 'reputation.updated');
             
             // Invitation events
             await this.channel.bindQueue(this.queue, this.exchange, 'invitation.created');
