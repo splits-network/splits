@@ -18,12 +18,12 @@ export interface BaseEmailProps {
 function getLogoUrl(source?: EmailSource): string {
     switch (source) {
         case 'candidate':
-            return 'https://applicant.network/logo.svg';
+            return 'https://applicant.network/logo.png';
         case 'corporate':
-            return 'https://employment-networks.com/logo.svg';
+            return 'https://employment-networks.com/logo.png';
         case 'portal':
         default:
-            return 'https://splits.network/logo.svg';
+            return 'https://splits.network/logo.png';
     }
 }
 
@@ -107,7 +107,7 @@ export function baseEmailTemplate({ preheader, content, source }: BaseEmailProps
                 <table cellpadding="0" cellspacing="0" role="presentation" style="width: 100%;">
                   <tr>
                     <td style="text-align: center;">
-                      <h1 style="margin: 0 0 8px; font-size: 32px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">Splits Network</h1>
+                      <img src="${logoUrl}" alt="Splits Network" width="180" height="48" style="height: 48px; width: auto; max-width: 180px; margin: 0 auto 16px; display: block; border: 0; outline: none;" />
                       <p style="margin: 8px 0 0; font-size: 14px; color: #e5e7eb;">
                         ${tagline}
                       </p>
