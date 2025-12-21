@@ -84,6 +84,7 @@ export class ApplicationsEventConsumer {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
                     companyName: job.company?.name || 'the company',
+                    applicationId: application_id,
                     userId: recruiter.user_id,
                 });
 
@@ -135,8 +136,10 @@ export class ApplicationsEventConsumer {
                 await this.emailService.sendApplicationStageChanged(user.email, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
+                    companyName: job.company?.name || 'Unknown Company',
                     oldStage: old_stage || 'Unknown',
                     newStage: new_stage,
+                    applicationId: application_id,
                     userId: recruiter.user_id,
                 });
 

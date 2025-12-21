@@ -40,6 +40,7 @@ export class PlacementsEventConsumer {
                 companyName: job.company?.name || 'Unknown Company',
                 salary: placementData.salary || salary,
                 recruiterShare: placementData.recruiter_share_amount || recruiter_share,
+                placementId: placement_id,
                 userId: recruiter.user_id,
             });
 
@@ -90,6 +91,8 @@ export class PlacementsEventConsumer {
                     jobTitle: job.title,
                     companyName: job.company?.name || 'Unknown Company',
                     guaranteeDays: guarantee_days || 90,
+                    startDate: placement.start_date || new Date().toISOString().split('T')[0],
+                    placementId: placement_id,
                     role: collaborator.role,
                     splitPercentage: collaborator.split_percentage,
                     userId: recruiter.user_id,
@@ -132,8 +135,7 @@ export class PlacementsEventConsumer {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
                     companyName: job.company?.name || 'Unknown Company',
-                    finalPayout: collaborator.amount_earned,
-                    userId: recruiter.user_id,
+                    finalPayout: collaborator.amount_earned,                    placementId: placement_id,                    userId: recruiter.user_id,
                 });
             }
             
@@ -174,6 +176,7 @@ export class PlacementsEventConsumer {
                     jobTitle: job.title,
                     companyName: job.company?.name || 'Unknown Company',
                     failureReason: failure_reason || 'Not specified',
+                    placementId: placement_id,
                     userId: recruiter.user_id,
                 });
             }
@@ -215,6 +218,8 @@ export class PlacementsEventConsumer {
                     jobTitle: job.title,
                     companyName: job.company?.name || 'Unknown Company',
                     daysRemaining: days_until_expiry,
+                    guaranteeEndDate: event.payload.guarantee_end_date || new Date(Date.now() + days_until_expiry * 86400000).toISOString().split('T')[0],
+                    placementId: placement_id,
                     userId: recruiter.user_id,
                 });
             }
