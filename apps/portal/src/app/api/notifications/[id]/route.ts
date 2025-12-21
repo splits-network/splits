@@ -5,7 +5,7 @@ const API_GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://local
 
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const { userId, getToken } = await auth();
@@ -25,8 +25,9 @@ export async function PATCH(
             );
         }
 
+        const { id } = await params;
         const body = await request.json();
-        const url = `${API_GATEWAY_URL}/api/notifications/${params.id}`;
+        const url = `${API_GATEWAY_URL}/api/notifications/${id}`;
 
         const response = await fetch(url, {
             method: 'PATCH',
