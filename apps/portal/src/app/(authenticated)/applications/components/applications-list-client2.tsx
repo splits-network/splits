@@ -274,6 +274,7 @@ export default function ApplicationsListClient() {
 
     const isCompanyUser = userRole === 'company_admin' || userRole === 'hiring_manager';
     const isRecruiter = userRole === 'recruiter';
+    const isPlatformAdmin = userRole === 'platform_admin';
 
     if (loading && applications.length === 0) {
         return (
@@ -340,13 +341,15 @@ export default function ApplicationsListClient() {
                         </div>
                     </div>
                     <div className="flex-none flex gap-2">
-                        <button
-                            onClick={() => handleBulkAction('stage')}
-                            className="btn btn-sm btn-primary gap-2"
-                        >
-                            <i className="fa-solid fa-list-check"></i>
-                            Update Stage
-                        </button>
+                        {isPlatformAdmin && (
+                            <button
+                                onClick={() => handleBulkAction('stage')}
+                                className="btn btn-sm btn-primary gap-2"
+                            >
+                                <i className="fa-solid fa-list-check"></i>
+                                Update Stage
+                            </button>
+                        )}
                         <button
                             onClick={() => handleBulkAction('reject')}
                             className="btn btn-sm btn-error gap-2"
