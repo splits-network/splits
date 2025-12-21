@@ -39,6 +39,19 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
+            - name: Setup Node.js (for Sentry source maps)
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v3
+              with:
+                  version: 8
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
             - name: Login to Azure
               uses: azure/login@v2
               with:
@@ -62,6 +75,7 @@ jobs:
                       --target production \
                       --build-arg NEXT_PUBLIC_API_URL=https://api.splits.network/api \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }} \
+                      --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
                       .
                   elif [ "${{ matrix.service.name }}" = "candidate" ]; then
                     docker build \
@@ -72,6 +86,7 @@ jobs:
                       --build-arg NEXT_PUBLIC_API_GATEWAY_URL=https://api.splits.network \
                       --build-arg NEXT_PUBLIC_APP_URL=https://applicant.network \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }} \
+                      --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
                       .
                   elif [ "${{ matrix.service.name }}" = "corporate" ]; then
                     docker build \
@@ -79,6 +94,7 @@ jobs:
                       -t $IMAGE_TAG \
                       --target production \
                       --build-arg NEXT_PUBLIC_APP_URL=https://employment-networks.com \
+                      --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
                       .
                   else
                     docker build \
@@ -98,6 +114,27 @@ jobs:
                   # Tag and push as latest
                   docker tag $IMAGE_TAG ${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.service.name }}:latest
                   docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.service.name }}:latest
+
+            - name: Create Sentry release
+              if: matrix.service.name == 'portal' || matrix.service.name == 'candidate' || matrix.service.name == 'corporate' || matrix.service.name == 'api-gateway' || matrix.service.name == 'identity-service' || matrix.service.name == 'ats-service' || matrix.service.name == 'network-service' || matrix.service.name == 'billing-service' || matrix.service.name == 'notification-service'
+              env:
+                  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+                  SENTRY_ORG: splitsnetwork
+              run: |
+                  VERSION=$(cat VERSION)
+                  RELEASE="${{ matrix.service.name }}@v${VERSION}"
+
+                  # Install Sentry CLI
+                  curl -sL https://sentry.io/get-cli/ | bash
+
+                  # Create release
+                  sentry-cli releases new $RELEASE --finalize
+
+                  # Associate commits
+                  sentry-cli releases set-commits $RELEASE --auto
+
+                  # Deploy to production
+                  sentry-cli releases deploys $RELEASE new -e production
 
     deploy:
         name: Deploy to AKS

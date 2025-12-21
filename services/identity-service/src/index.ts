@@ -7,6 +7,7 @@ import { IdentityRepository } from './repository';
 import { IdentityService } from './service';
 import { EventPublisher } from './events';
 import { registerRoutes } from './routes';
+import * as Sentry from '@sentry/node';
 
 async function main() {
     const baseConfig = loadBaseConfig('identity-service');
@@ -28,6 +29,24 @@ async function main() {
 
     // Set error handler
     app.setErrorHandler(errorHandler);
+
+    // Initialize Sentry if DSN is provided
+    const sentryDsn = process.env.SENTRY_DSN;
+    if (sentryDsn) {
+        Sentry.init({
+            dsn: sentryDsn,
+            environment: baseConfig.nodeEnv,
+            release: process.env.SENTRY_RELEASE,
+            tracesSampleRate: 0.1,
+        });
+
+        app.addHook('onError', async (request, reply, error) => {
+            Sentry.captureException(error, {
+                tags: { service: baseConfig.serviceName },
+                extra: { path: request.url, method: request.method },
+            });
+        });
+    }
 
     // Register Swagger
     await app.register(swagger, {
@@ -109,6 +128,10 @@ async function main() {
         logger.info(`Identity service listening on port ${baseConfig.port}`);
     } catch (err) {
         logger.error(err);
+        if (process.env.SENTRY_DSN) {
+            Sentry.captureException(err as Error);
+            await Sentry.flush(2000);
+        }
         process.exit(1);
     }
 }

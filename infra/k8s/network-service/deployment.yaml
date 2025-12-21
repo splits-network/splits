@@ -24,6 +24,8 @@ spec:
               value: "production"
             - name: PORT
               value: "3003"
+            - name: SENTRY_DSN
+              value: "https://f0d0e207a81919e1b8ce8e47ca0adb2a@o4510570789732352.ingest.us.sentry.io/4510570905403392"
             - name: SUPABASE_URL
               valueFrom:
                 secretKeyRef:

@@ -5,6 +5,12 @@
             "id": "supabase-access-token",
             "description": "Supabase personal access token",
             "password": true
+        },
+        {
+            "type": "promptString",
+            "id": "sentry-auth-token",
+            "description": "Sentry authentication token",
+            "password": true
         }
     ],
     "servers": {
@@ -20,6 +26,15 @@
             "env": {
                 "SUPABASE_ACCESS_TOKEN": "sbp_793bcb2bcf598fb4a2e4832e27bacabe56972ffc"
             }
+        },
+        "sentry": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "mcp-remote@latest",
+                "https://mcp.sentry.dev/mcp"
+            ],
+            "env": {},
         }
     }
 }

@@ -12,6 +12,7 @@
     "dependencies": {
         "@fastify/swagger": "^9.5.0",
         "@fastify/swagger-ui": "^5.2.3",
+        "@sentry/node": "^8.30.0",
         "@splits-network/shared-config": "workspace:*",
         "@splits-network/shared-fastify": "workspace:*",
         "@splits-network/shared-logging": "workspace:*",

@@ -1,3 +1,5 @@
+import { withSentryConfig } from '@sentry/nextjs';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
@@ -6,4 +8,12 @@ const nextConfig = {
     // No rewrites needed - client-side API calls go directly to the gateway
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+    org: 'splitsnetwork',
+    project: 'candidate',
+    silent: !process.env.CI,
+    widenClientFileUpload: true,
+    hideSourceMaps: true,
+    disableLogger: true,
+    automaticVercelMonitors: true,
+});

@@ -7,7 +7,7 @@ import Link from 'next/link';
 export default async function ApplicationReviewPage({
     params,
 }: {
-    params: { id: string };
+    params: Promise<{ id: string }>;
 }) {
     const { getToken } = await auth();
     const token = await getToken();
@@ -17,7 +17,7 @@ export default async function ApplicationReviewPage({
     }
 
     const client = createAuthenticatedClient(token);
-    const applicationId = params.id;
+    const { id: applicationId } = await params;
 
     let application: any = null;
     let job: any = null;

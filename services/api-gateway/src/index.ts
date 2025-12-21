@@ -15,6 +15,7 @@ import { registerOAuthRoutes } from './routes/oauth-routes';
 import { registerVersionInfo } from './versioning';
 import { registerWebhookRoutes } from './routes/webhook-routes';
 import { WebhookDeliveryService } from './webhooks';
+import * as Sentry from '@sentry/node';
 
 async function main() {
     const baseConfig = loadBaseConfig('api-gateway');
@@ -53,6 +54,24 @@ async function main() {
     });
 
     app.setErrorHandler(errorHandler);
+
+    // Initialize Sentry if DSN is provided
+    const sentryDsn = process.env.SENTRY_DSN;
+    if (sentryDsn) {
+        Sentry.init({
+            dsn: sentryDsn,
+            environment: baseConfig.nodeEnv,
+            release: process.env.SENTRY_RELEASE,
+            tracesSampleRate: 0.1,
+        });
+
+        app.addHook('onError', async (request, reply, error) => {
+            Sentry.captureException(error, {
+                tags: { service: baseConfig.serviceName },
+                extra: { path: request.url, method: request.method },
+            });
+        });
+    }
 
     // Register Swagger
     await app.register(swagger, {
@@ -273,6 +292,10 @@ async function main() {
         logger.info(`API Gateway listening on port ${baseConfig.port}`);
     } catch (err) {
         logger.error(err);
+        if (process.env.SENTRY_DSN) {
+            Sentry.captureException(err as Error);
+            await Sentry.flush(2000);
+        }
         await redis.quit();
         process.exit(1);
     }

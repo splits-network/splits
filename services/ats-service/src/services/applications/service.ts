@@ -454,12 +454,16 @@ export class ApplicationService {
         
         try {
             const recruiterRelationship = await this.repository.findActiveRecruiterForCandidate(candidateId);
+            console.log('[DEBUG] findActiveRecruiterForCandidate result:', JSON.stringify(recruiterRelationship));
             
             if (recruiterRelationship) {
                 // Candidate has an active recruiter relationship
                 hasRecruiter = true;
                 // IMPORTANT: applications.recruiter_id FK constraint now correctly points to network.recruiters.id
                 recruiterId = recruiterRelationship.recruiter_id;
+                console.log('[DEBUG] Set recruiterId to:', recruiterId, 'typeof:', typeof recruiterId);
+            } else {
+                console.log('[DEBUG] No recruiter relationship found for candidateId:', candidateId);
             }
         } catch (error) {
             console.error('Failed to check recruiter relationships:', error);
@@ -471,11 +475,14 @@ export class ApplicationService {
         // 5. Determine initial stage based on recruiter status
         const initialStage: ApplicationStage = hasRecruiter ? 'screen' : 'submitted';
 
+        // Sanitize recruiterId - convert empty string or "0" to undefined for optional field
+        const sanitizedRecruiterId = recruiterId && recruiterId !== '0' ? recruiterId : undefined;
+
         // 6. Create application
         const application = await this.repository.createApplication({
             job_id: jobId,
             candidate_id: candidateId,
-            recruiter_id: recruiterId, // network.recruiters.id
+            recruiter_id: sanitizedRecruiterId, // network.recruiters.id (undefined if no recruiter)
             stage: initialStage,
             notes: notes,
             accepted_by_company: false,
@@ -519,7 +526,7 @@ export class ApplicationService {
                 stage: initialStage,
                 candidate_id: candidateId,
                 job_id: jobId,
-                recruiter_id: recruiterId, // network.recruiters.id
+                recruiter_id: sanitizedRecruiterId, // network.recruiters.id (undefined if no recruiter)
             },
             metadata: {
                 document_count: documentIds.length,
@@ -535,7 +542,7 @@ export class ApplicationService {
                 application_id: application.id,
                 job_id: jobId,
                 candidate_id: candidateId,
-                recruiter_id: recruiterId, // network.recruiters.id
+                recruiter_id: sanitizedRecruiterId, // network.recruiters.id (undefined if no recruiter)
                 company_id: job.company_id,
                 stage: initialStage,
                 has_recruiter: hasRecruiter,

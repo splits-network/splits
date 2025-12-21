@@ -24,6 +24,8 @@ spec:
               value: "production"
             - name: PORT
               value: "3000"
+            - name: SENTRY_DSN
+              value: "https://97c3c1c116302303b44a844fb1ea9d77@o4510570789732352.ingest.us.sentry.io/4510570904944640"
             - name: CORS_ORIGIN
               value: "https://splits.network,https://www.splits.network,https://applicant.network"
             - name: SUPABASE_URL

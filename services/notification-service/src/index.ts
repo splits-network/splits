@@ -10,6 +10,7 @@ import { NotificationRepository } from './repository';
 import { NotificationService } from './service';
 import { DomainEventConsumer } from './domain-consumer';
 import { ServiceRegistry } from './clients';
+import * as Sentry from '@sentry/node';
 
 async function main() {
     const baseConfig = loadBaseConfig('notification-service');
@@ -43,6 +44,24 @@ async function main() {
     });
 
     app.setErrorHandler(errorHandler);
+
+    // Initialize Sentry if DSN is provided
+    const sentryDsn = process.env.SENTRY_DSN;
+    if (sentryDsn) {
+        Sentry.init({
+            dsn: sentryDsn,
+            environment: baseConfig.nodeEnv,
+            release: process.env.SENTRY_RELEASE,
+            tracesSampleRate: 0.1,
+        });
+
+        app.addHook('onError', async (request, reply, error) => {
+            Sentry.captureException(error, {
+                tags: { service: baseConfig.serviceName },
+                extra: { path: request.url, method: request.method },
+            });
+        });
+    }
 
     // Initialize repository and notification service
     const repository = new NotificationRepository(
@@ -124,6 +143,10 @@ async function main() {
         logger.info(`Notification service listening on port ${baseConfig.port}`);
     } catch (err) {
         logger.error(err);
+        if (process.env.SENTRY_DSN) {
+            Sentry.captureException(err as Error);
+            await Sentry.flush(2000);
+        }
         await consumer.close();
         process.exit(1);
     }

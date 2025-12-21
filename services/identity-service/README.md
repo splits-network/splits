@@ -1,3 +1,7 @@
+## Sentry
+
+Set `SENTRY_DSN` for error reporting. Optional `SENTRY_RELEASE`.
+
 # Identity Service
 
 The identity service manages users, organizations, and memberships. It synchronizes user data from Clerk and maintains the internal identity model.

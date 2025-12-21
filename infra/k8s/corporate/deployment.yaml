@@ -24,6 +24,10 @@ spec:
               value: "production"
             - name: PORT
               value: "3102"
+            - name: SENTRY_DSN
+              value: "https://bb5cb39c4d6d136de7f548e1f779f9fc@o4510570789732352.ingest.us.sentry.io/4510570904748032"
+            - name: NEXT_PUBLIC_SENTRY_DSN
+              value: "https://bb5cb39c4d6d136de7f548e1f779f9fc@o4510570789732352.ingest.us.sentry.io/4510570904748032"
             - name: NEXT_PUBLIC_APP_URL
               value: "https://employment-networks.com"
           resources:
