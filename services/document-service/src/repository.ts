@@ -241,7 +241,12 @@ export class DocumentRepository {
             throw new Error(`Database error: ${error.message}`);
         }
 
-        return (data || []) as Document[];
+        // Map database column names to frontend expected names
+        return (data || []).map(doc => ({
+            ...doc,
+            file_name: doc.filename,
+            uploaded_at: doc.created_at
+        })) as Document[];
     }
 }
 

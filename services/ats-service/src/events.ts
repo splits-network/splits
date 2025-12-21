@@ -45,7 +45,9 @@ export class EventPublisher {
             payload,
         };
 
-        const routingKey = eventType.replace('.', '_');
+        // Use the event type as-is for routing key (e.g., "application.created")
+        // RabbitMQ topic exchanges use dots as separators
+        const routingKey = eventType;
         const message = Buffer.from(JSON.stringify(event));
 
         this.channel.publish(this.exchange, routingKey, message, {

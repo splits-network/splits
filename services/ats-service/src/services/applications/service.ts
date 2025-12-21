@@ -408,6 +408,7 @@ export class ApplicationService {
      */
     async submitCandidateApplication(params: {
         candidateId: string;
+        candidateUserId?: string;
         jobId: string;
         documentIds: string[];
         primaryResumeId: string;
@@ -418,7 +419,7 @@ export class ApplicationService {
         hasRecruiter: boolean;
         nextSteps: string;
     }> {
-        const { candidateId, jobId, documentIds, primaryResumeId, preScreenAnswers, notes } = params;
+        const { candidateId, candidateUserId, jobId, documentIds, primaryResumeId, preScreenAnswers, notes } = params;
 
         // 1. Verify job exists
         const job = await this.repository.findJobById(jobId);
@@ -536,20 +537,31 @@ export class ApplicationService {
         });
 
         // 10. Publish event
+        const eventPayload = {
+            application_id: application.id,
+            job_id: jobId,
+            candidate_id: candidateId,
+            candidate_user_id: candidateUserId, // identity.users.id (from Clerk auth)
+            recruiter_id: sanitizedRecruiterId, // network.recruiters.id (undefined if no recruiter)
+            company_id: job.company_id,
+            stage: initialStage,
+            has_recruiter: hasRecruiter,
+            document_ids: documentIds,
+        };
+        
+        console.log('[ATS-SERVICE] 📧 Publishing application.created event to RabbitMQ:', {
+            event_type: 'application.created',
+            payload: eventPayload,
+            exchange: 'splits-network-events',
+        });
+        
         await this.eventPublisher.publish(
             'application.created',
-            {
-                application_id: application.id,
-                job_id: jobId,
-                candidate_id: candidateId,
-                recruiter_id: sanitizedRecruiterId, // network.recruiters.id (undefined if no recruiter)
-                company_id: job.company_id,
-                stage: initialStage,
-                has_recruiter: hasRecruiter,
-                document_ids: documentIds,
-            },
+            eventPayload,
             'ats-service'
         );
+        
+        console.log('[ATS-SERVICE] ✅ Event published successfully');
 
         // 11. Return result with next steps
         const nextSteps = hasRecruiter
@@ -726,6 +738,7 @@ export class ApplicationService {
     async withdrawApplication(
         applicationId: string,
         candidateId: string,
+        candidateUserId?: string,
         reason?: string
     ): Promise<Application> {
         // Get application and verify it exists
@@ -748,6 +761,15 @@ export class ApplicationService {
             throw new Error('Cannot withdraw a rejected application');
         }
 
+        // Get candidate to retrieve user_id (if they have an account)
+        const candidate = await this.repository.findCandidateById(candidateId);
+        if (!candidate) {
+            throw new Error(`Candidate ${candidateId} not found`);
+        }
+
+        // Use candidateUserId if provided, otherwise fall back to candidate.user_id
+        const finalCandidateUserId = candidateUserId || candidate.user_id;
+
         // Update application stage to withdrawn
         const updated = await this.repository.updateApplication(applicationId, {
             stage: 'withdrawn',
@@ -757,7 +779,7 @@ export class ApplicationService {
         await this.repository.createAuditLog({
             application_id: applicationId,
             action: 'withdrawn',
-            performed_by_user_id: candidateId,
+            performed_by_user_id: finalCandidateUserId || candidateId,
             performed_by_role: 'candidate',
             old_value: {
                 stage: application.stage,
@@ -777,6 +799,7 @@ export class ApplicationService {
                 application_id: applicationId,
                 job_id: application.job_id,
                 candidate_id: application.candidate_id,
+                candidate_user_id: finalCandidateUserId, // identity.users.id (from Clerk auth) - can be undefined if recruiter-managed candidate
                 recruiter_id: application.recruiter_id,
                 reason: reason || 'Candidate withdrew application',
                 previous_stage: application.stage,

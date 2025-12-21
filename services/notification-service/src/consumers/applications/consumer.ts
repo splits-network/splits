@@ -119,9 +119,16 @@ export class ApplicationsEventConsumer {
      */
     async handleCandidateApplicationSubmitted(event: DomainEvent): Promise<void> {
         try {
-            const { application_id, job_id, candidate_id, recruiter_id, has_recruiter, stage } = event.payload;
+            const { application_id, job_id, candidate_id, candidate_user_id, recruiter_id, has_recruiter, stage } = event.payload;
 
-            this.logger.info({ application_id, has_recruiter, stage }, 'Handling candidate application submission');
+            console.log('[APPLICATIONS-CONSUMER] 🎯 Starting to handle application.created event:', {
+                application_id,
+                has_recruiter,
+                stage,
+                candidate_user_id,
+                recruiter_id,
+            });
+            this.logger.info({ application_id, has_recruiter, stage, candidate_user_id }, 'Handling candidate application submission');
 
             // Fetch job details
             const jobResponse = await this.services.getAtsService().get<any>(`/jobs/${job_id}`);
@@ -134,10 +141,17 @@ export class ApplicationsEventConsumer {
             // Get candidate's user profile for email (may not exist if recruiter sourced the candidate)
             let candidateUser: any = null;
             try {
-                const candidateUserResponse = await this.services.getIdentityService().get<any>(`/users/by-email/${candidate.email}`);
-                candidateUser = candidateUserResponse.data || candidateUserResponse;
+                // Prefer using candidate_user_id directly (passed from API Gateway via Clerk auth)
+                if (candidate_user_id) {
+                    const candidateUserResponse = await this.services.getIdentityService().get<any>(`/users/${candidate_user_id}`);
+                    candidateUser = candidateUserResponse.data || candidateUserResponse;
+                    this.logger.info({ candidate_user_id }, 'Found candidate user via user ID');
+                } else {
+                    // Fallback: lookup by email (backwards compatibility - will fail until /users/by-email endpoint is added)
+                    this.logger.warn({ candidate_id }, 'No candidate_user_id in event payload, cannot send candidate email');
+                }
             } catch (error) {
-                this.logger.warn({ candidate_id, email: candidate.email }, 'Candidate user account not found');
+                this.logger.warn({ candidate_id, candidate_user_id, email: candidate.email }, 'Candidate user account not found');
             }
 
             // Scenario 1: Recruiter directly submits candidate (has_recruiter && stage === 'submitted')
@@ -194,6 +208,7 @@ export class ApplicationsEventConsumer {
             // Scenario 2: Candidate submits with recruiter (has_recruiter && stage === 'screen')
             // Application goes to recruiter first for review
             if (has_recruiter && stage === 'screen') {
+                console.log('[APPLICATIONS-CONSUMER] 📋 Scenario 2: Candidate with recruiter');
                 this.logger.info({ application_id }, 'Candidate application with recruiter - notifying candidate and recruiter');
 
                 // Determine next steps message
@@ -201,6 +216,7 @@ export class ApplicationsEventConsumer {
 
                 // Send confirmation email to candidate (if they have an account)
                 if (candidateUser) {
+                    console.log('[APPLICATIONS-CONSUMER] 📧 Sending email to candidate:', candidate.email);
                     await this.emailService.sendCandidateApplicationSubmitted(candidate.email, {
                         candidateName: candidate.full_name,
                         jobTitle: job.title,
@@ -210,15 +226,20 @@ export class ApplicationsEventConsumer {
                         applicationId: application_id,
                         userId: candidateUser.id,
                     });
+                    console.log('[APPLICATIONS-CONSUMER] ✅ Candidate email sent successfully');
+                } else {
+                    console.log('[APPLICATIONS-CONSUMER] ⚠️ Skipping candidate email (no user account)');
                 }
 
                 // Notify recruiter of pending application
+                console.log('[APPLICATIONS-CONSUMER] 🔍 Fetching recruiter details...');
                 const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
                 const recruiter = recruiterResponse.data || recruiterResponse;
 
                 const recruiterUserResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
                 const recruiterUser = recruiterUserResponse.data || recruiterUserResponse;
 
+                console.log('[APPLICATIONS-CONSUMER] 📧 Sending email to recruiter:', recruiterUser.email);
                 await this.emailService.sendRecruiterApplicationPending(recruiterUser.email, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
@@ -226,18 +247,22 @@ export class ApplicationsEventConsumer {
                     applicationId: application_id,
                     userId: recruiter.user_id,
                 });
+                console.log('[APPLICATIONS-CONSUMER] ✅ Recruiter email sent successfully');
+                console.log('[APPLICATIONS-CONSUMER] 🎉 Scenario 2 complete - all notifications sent');
 
                 return;
             }
 
             // Scenario 3: Candidate submits directly to company (no recruiter, stage === 'submitted')
             if (!has_recruiter && stage === 'submitted') {
+                console.log('[APPLICATIONS-CONSUMER] 📋 Scenario 3: Direct to company (no recruiter)');
                 this.logger.info({ application_id }, 'Direct candidate application - notifying candidate and company');
 
                 const nextSteps = 'Your application has been submitted directly to the company. They will review and contact you if interested.';
 
                 // Send confirmation email to candidate (if they have an account)
                 if (candidateUser) {
+                    console.log('[APPLICATIONS-CONSUMER] 📧 Sending email to candidate:', candidate.email);
                     await this.emailService.sendCandidateApplicationSubmitted(candidate.email, {
                         candidateName: candidate.full_name,
                         jobTitle: job.title,
@@ -247,23 +272,30 @@ export class ApplicationsEventConsumer {
                         applicationId: application_id,
                         userId: candidateUser.id,
                     });
+                    console.log('[APPLICATIONS-CONSUMER] ✅ Candidate email sent successfully');
+                } else {
+                    console.log('[APPLICATIONS-CONSUMER] ⚠️ Skipping candidate email (no user account)');
                 }
 
                 // Notify company admins
+                console.log('[APPLICATIONS-CONSUMER] 🔍 Fetching company details...');
                 const companyResponse = await this.services.getAtsService().get<any>(`/companies/${job.company_id}`);
                 const company = companyResponse.data || companyResponse;
 
                 if (company.identity_organization_id) {
+                    console.log('[APPLICATIONS-CONSUMER] 🔍 Fetching company admins...');
                     const membershipsResponse = await this.services.getIdentityService().get<any>(
                         `/organizations/${company.identity_organization_id}/memberships?role=admin`
                     );
                     const memberships = membershipsResponse.data || membershipsResponse;
+                    console.log(`[APPLICATIONS-CONSUMER] 👥 Found ${Array.isArray(memberships) ? memberships.length : 0} company admins`);
 
                     // Notify each admin
                     for (const membership of Array.isArray(memberships) ? memberships : []) {
                         const userResponse = await this.services.getIdentityService().get<any>(`/users/${membership.user_id}`);
                         const user = userResponse.data || userResponse;
 
+                        console.log('[APPLICATIONS-CONSUMER] 📧 Sending email to company admin:', user.email);
                         await this.emailService.sendCompanyApplicationReceived(user.email, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
@@ -271,12 +303,18 @@ export class ApplicationsEventConsumer {
                             hasRecruiter: false,
                             userId: user.id,
                         });
+                        console.log('[APPLICATIONS-CONSUMER] ✅ Company admin email sent successfully');
                     }
+                } else {
+                    console.log('[APPLICATIONS-CONSUMER] ⚠️ Company has no identity_organization_id - skipping company admin emails');
                 }
+                
+                console.log('[APPLICATIONS-CONSUMER] 🎉 Scenario 3 complete - all notifications sent');
 
                 return;
             }
 
+            console.log('[APPLICATIONS-CONSUMER] ⚠️ No scenario matched - event details:', { has_recruiter, stage });
             this.logger.info({ application_id }, 'Candidate application submission notifications sent');
         } catch (error) {
             this.logger.error(
@@ -369,8 +407,14 @@ export class ApplicationsEventConsumer {
      */
     async handleApplicationWithdrawn(event: DomainEvent): Promise<void> {
         try {
-            const { application_id, job_id, candidate_id, recruiter_id, reason } = event.payload;
+            const { application_id, job_id, candidate_id, recruiter_id, reason, candidate_user_id } = event.payload;
 
+            console.log('[APPLICATIONS-CONSUMER] 🎯 Handling application.withdrawn event:', {
+                application_id,
+                candidate_id,
+                candidate_user_id,
+                recruiter_id,
+            });
             this.logger.info({ application_id }, 'Handling application withdrawal by candidate');
 
             // Fetch job details
@@ -385,25 +429,48 @@ export class ApplicationsEventConsumer {
             const companyResponse = await this.services.getAtsService().get<any>(`/companies/${job.company_id}`);
             const company = companyResponse.data || companyResponse;
 
-            // Send confirmation email to candidate
-            await this.emailService.sendApplicationWithdrawn(candidate.email, {
-                candidateName: candidate.full_name,
-                jobTitle: job.title,
-                companyName: job.company?.name || company.name || 'Unknown Company',
-                reason,
-                withdrawnBy: 'Candidate',
-                applicationId: application_id,
-                userId: candidate_id, // Use candidate_id directly instead of looking up user
-            });
+            // Get candidate user (if they have an account)
+            let candidateUser = null;
+            try {
+                if (candidate_user_id) {
+                    const candidateUserResponse = await this.services.getIdentityService().get<any>(`/users/${candidate_user_id}`);
+                    candidateUser = candidateUserResponse.data || candidateUserResponse;
+                    console.log('[APPLICATIONS-CONSUMER] ✓ Found candidate user');
+                } else {
+                    console.log('[APPLICATIONS-CONSUMER] ⚠️ No candidate_user_id in event payload');
+                }
+            } catch (error) {
+                console.log('[APPLICATIONS-CONSUMER] ⚠️ Candidate user account not found');
+                this.logger.warn({ candidate_id, candidate_user_id }, 'Candidate user account not found');
+            }
+
+            // Send confirmation email to candidate (only if they have a user account)
+            if (candidateUser) {
+                console.log('[APPLICATIONS-CONSUMER] 📧 Sending withdrawal confirmation to candidate:', candidate.email);
+                await this.emailService.sendApplicationWithdrawn(candidate.email, {
+                    candidateName: candidate.full_name,
+                    jobTitle: job.title,
+                    companyName: job.company?.name || company.name || 'Unknown Company',
+                    reason,
+                    withdrawnBy: 'Candidate',
+                    applicationId: application_id,
+                    userId: candidateUser.id, // Use actual user ID
+                });
+                console.log('[APPLICATIONS-CONSUMER] ✅ Candidate email sent');
+            } else {
+                console.log('[APPLICATIONS-CONSUMER] ⚠️ Skipping candidate email (no user account)');
+            }
 
             // Notify recruiter if exists
             if (recruiter_id) {
+                console.log('[APPLICATIONS-CONSUMER] 🔍 Fetching recruiter details...');
                 const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
                 const recruiter = recruiterResponse.data || recruiterResponse;
 
                 const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
                 const user = userResponse.data || userResponse;
 
+                console.log('[APPLICATIONS-CONSUMER] 📧 Sending withdrawal notification to recruiter:', user.email);
                 await this.emailService.sendApplicationWithdrawn(user.email, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
@@ -413,10 +480,19 @@ export class ApplicationsEventConsumer {
                     applicationId: application_id,
                     userId: recruiter.user_id,
                 });
+                console.log('[APPLICATIONS-CONSUMER] ✅ Recruiter email sent');
+            } else {
+                console.log('[APPLICATIONS-CONSUMER] ⚠️ No recruiter assigned to application');
             }
 
+            console.log('[APPLICATIONS-CONSUMER] 🎉 Withdrawal notifications complete');
             this.logger.info({ application_id }, 'Application withdrawal notifications sent');
         } catch (error) {
+            console.error('[APPLICATIONS-CONSUMER] ❌ Withdrawal handler failed:', {
+                error: error instanceof Error ? error.message : String(error),
+                stack: error instanceof Error ? error.stack : undefined,
+                event_payload: event.payload,
+            });
             this.logger.error(
                 { error, event_payload: event.payload },
                 'Failed to send application withdrawal notifications'

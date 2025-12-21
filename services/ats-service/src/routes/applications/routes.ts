@@ -225,13 +225,14 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
         '/applications/submit',
         async (request: FastifyRequest<{ Body: {
             candidate_id: string;
+            candidate_user_id?: string;
             job_id: string;
             document_ids: string[];
             primary_resume_id: string;
             pre_screen_answers?: Array<{ question_id: string; answer: any }>;
             notes?: string;
         } }>, reply: FastifyReply) => {
-            const { candidate_id, job_id, document_ids, primary_resume_id, pre_screen_answers, notes } = request.body;
+            const { candidate_id, candidate_user_id, job_id, document_ids, primary_resume_id, pre_screen_answers, notes } = request.body;
 
             // Candidate ID should be provided by API Gateway
             if (!candidate_id) {
@@ -244,6 +245,7 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
 
             const result = await service.submitCandidateApplication({
                 candidateId: candidate_id,
+                candidateUserId: candidate_user_id,
                 jobId: job_id,
                 documentIds: document_ids,
                 primaryResumeId: primary_resume_id,
@@ -268,7 +270,7 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
         '/applications/:id/withdraw',
         async (request: FastifyRequest<{
             Params: { id: string };
-            Body: { reason?: string; candidate_id?: string };
+            Body: { reason?: string; candidate_id?: string; candidate_user_id?: string };
         }>, reply: FastifyReply) => {
             // Extract candidate ID from request body (passed by API Gateway)
             const candidateId = request.body.candidate_id || (request as any).auth?.userId;
@@ -280,12 +282,14 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
             const application = await service.withdrawApplication(
                 request.params.id,
                 candidateId,
+                request.body.candidate_user_id,
                 request.body.reason
             );
 
             request.log.info({
                 applicationId: request.params.id,
                 candidateId,
+                candidateUserId: request.body.candidate_user_id,
                 reason: request.body.reason,
             }, 'Application withdrawn by candidate');
 

@@ -290,7 +290,12 @@ export class AtsRepository {
             .order('sort_order', { ascending: true });
 
         if (error) throw error;
-        return data || [];
+        
+        // Map database column 'question' to frontend expected 'question_text'
+        return (data || []).map(q => ({
+            ...q,
+            question_text: q.question
+        }));
     }
 
     async createJobPreScreenQuestion(question: any): Promise<any> {
@@ -1091,7 +1096,12 @@ export class AtsRepository {
             .order('sort_order', { ascending: true });
 
         if (error) throw error;
-        return data || [];
+        
+        // Map database column 'question' to frontend expected 'question_text'
+        return (data || []).map(q => ({
+            ...q,
+            question_text: q.question
+        }));
     }
 }
 

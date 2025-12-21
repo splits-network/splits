@@ -134,10 +134,16 @@ export class DomainEventConsumer {
 
                 try {
                     const event: DomainEvent = JSON.parse(msg.content.toString());
+                    console.log('[NOTIFICATION-SERVICE] 📨 Received event from RabbitMQ:', {
+                        event_type: event.event_type,
+                        payload: event.payload,
+                        timestamp: new Date().toISOString(),
+                    });
                     this.logger.info({ event_type: event.event_type }, 'Processing event');
 
                     await this.handleEvent(event);
-
+                    
+                    console.log('[NOTIFICATION-SERVICE] ✅ Event processed and acknowledged');
                     this.channel!.ack(msg);
                 } catch (error) {
                     this.logger.error({ err: error }, 'Error processing message');

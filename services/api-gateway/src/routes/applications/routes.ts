@@ -196,10 +196,11 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
 
         const candidateId = candidates[0].id;
 
-        // Forward to ATS service with candidate_id in request
+        // Forward to ATS service with candidate_id and candidate_user_id in request
         const data = await atsService.post('/applications/submit', {
             ...(request.body as any),
             candidate_id: candidateId,
+            candidate_user_id: req.auth.userId, // Pass Clerk user ID for notifications
         }, correlationId);
         return reply.status(201).send(data);
     });
@@ -232,10 +233,11 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
 
         const candidateId = candidates[0].id;
 
-        // Forward to ATS service with candidate_id in request body
+        // Forward to ATS service with candidate_id and candidate_user_id in request body
         const data = await atsService.post(`/applications/${id}/withdraw`, {
             ...(request.body as any),
             candidate_id: candidateId,
+            candidate_user_id: req.auth.userId, // Pass Clerk user ID for notifications
         }, correlationId);
         return reply.send(data);
     });

@@ -1,4 +1,29 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+// API client for communicating with the backend gateway
+// Use internal Docker URL for server-side calls, public URL for client-side
+const getApiBaseUrl = () => {
+  // Server-side (inside Docker container or during build)
+  if (typeof window === 'undefined') {
+    // If NEXT_PUBLIC_API_GATEWAY_URL is set, use it (for server-side rendering)
+    if (process.env.NEXT_PUBLIC_API_GATEWAY_URL) {
+      return `${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/api`;
+    }
+    
+    // Running outside Docker (dev mode), use localhost
+    return 'http://localhost:3000/api';
+  }
+  
+  // Client-side (browser)
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
+// Debug: Log the actual base URL being used
+if (typeof window !== 'undefined') {
+  console.log('API_BASE_URL (client):', API_BASE_URL);
+} else {
+  console.log('API_BASE_URL (server):', API_BASE_URL);
+}
 
 interface RequestOptions extends RequestInit {
   token?: string;
