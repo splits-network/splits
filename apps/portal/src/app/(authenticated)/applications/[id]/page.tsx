@@ -79,10 +79,10 @@ export default async function ApplicationDetailPage({
 
         // Verify recruiter has permission to view this application
         // Permission granted if:
-        // 1. Recruiter owns the application (represented candidate) - compare with user_id, OR
+        // 1. Recruiter owns the application (represented candidate), OR
         // 2. Recruiter has active relationship with candidate (can view direct applications too)
-        // Note: applications.recruiter_id references users table (user_id), not network.recruiters.id
-        const ownsApplication = application.recruiter_id === recruiter.user_id;
+        // Note: applications.recruiter_id references network.recruiters.id
+        const ownsApplication = application.recruiter_id === recruiter.id;
         const hasRelationship = relationship && relationship.status === 'active';
 
         if (!ownsApplication && !hasRelationship) {

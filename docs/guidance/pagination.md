@@ -335,7 +335,7 @@ app.get('/api/applications/paginated', {
             correlationId
         );
         if (recruiterResponse.data?.status === 'active') {
-            queryParams.set('recruiter_id', req.auth.userId);
+            queryParams.set('recruiter_id', recruiterResponse.data.id);
         }
     }
 

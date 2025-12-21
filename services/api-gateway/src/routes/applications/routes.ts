@@ -38,8 +38,8 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
                 );
 
                 if (recruiterResponse.data && recruiterResponse.data.status === 'active') {
-                    // Add recruiter_id filter automatically (frontend doesn't need to!)
-                    queryParams.set('recruiter_id', req.auth.userId);
+                    // Add recruiter_id filter automatically (using network.recruiters.id, not user_id)
+                    queryParams.set('recruiter_id', recruiterResponse.data.id);
                 } else {
                     return reply.send({ data: [], pagination: { total: 0, page: 1, limit: 25, total_pages: 0 } });
                 }

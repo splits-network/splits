@@ -432,12 +432,18 @@ export class ApplicationService {
             throw new Error(`Candidate ${candidateId} not found`);
         }
 
-        // 3. Check for existing application
+        // 3. Check for existing active application (exclude rejected and withdrawn)
         const existingApplications = await this.repository.findApplications({
             job_id: jobId,
             candidate_id: candidateId,
         });
-        if (existingApplications.length > 0) {
+        
+        // Filter out rejected and withdrawn applications
+        const activeApplications = existingApplications.filter(
+            app => !['rejected', 'withdrawn'].includes(app.stage)
+        );
+        
+        if (activeApplications.length > 0) {
             throw new Error(`Candidate has already applied to this job`);
         }
 
@@ -452,7 +458,7 @@ export class ApplicationService {
             if (recruiterRelationship) {
                 // Candidate has an active recruiter relationship
                 hasRecruiter = true;
-                // Use recruiter_id from the network.recruiters table (NOT user_id)
+                // IMPORTANT: applications.recruiter_id FK constraint now correctly points to network.recruiters.id
                 recruiterId = recruiterRelationship.recruiter_id;
             }
         } catch (error) {
@@ -469,7 +475,7 @@ export class ApplicationService {
         const application = await this.repository.createApplication({
             job_id: jobId,
             candidate_id: candidateId,
-            recruiter_id: recruiterId,
+            recruiter_id: recruiterId, // network.recruiters.id
             stage: initialStage,
             notes: notes,
             accepted_by_company: false,
@@ -513,7 +519,7 @@ export class ApplicationService {
                 stage: initialStage,
                 candidate_id: candidateId,
                 job_id: jobId,
-                recruiter_id: recruiterId,
+                recruiter_id: recruiterId, // network.recruiters.id
             },
             metadata: {
                 document_count: documentIds.length,
@@ -529,7 +535,7 @@ export class ApplicationService {
                 application_id: application.id,
                 job_id: jobId,
                 candidate_id: candidateId,
-                recruiter_id: recruiterId,
+                recruiter_id: recruiterId, // network.recruiters.id
                 company_id: job.company_id,
                 stage: initialStage,
                 has_recruiter: hasRecruiter,

@@ -11,7 +11,7 @@ We should only be using @latest versions of packages unless there's a specific r
 
 IMPORTANT: DO NOT MAKE ASSUMPTIONS, YOU MUST INVESTIGATE THE CURRENT CODEBASE AND DOCUMENTATION BEFORE SUGGESTING ANYTHING.
 
-**Current State:** This project is in early setup phase. The repository structure and planning documents exist, but most implementation is yet to be created. When generating code, follow the patterns defined in `docs/splits-network-architecture.md` and `docs/splits-network-phase1-prd.md`, and the `docs/guidance/` folder.
+**Current State:** This project is actively under development with functional services and frontends. The core architecture is established and several services are operational. When generating code, follow the existing patterns in the codebase and reference `docs/guidance/` for standards.
 
 ---
 
@@ -23,22 +23,26 @@ The repo is organized by **responsibility**, not by technology.
 / (repo root)
 ├─ apps/                     # User-facing frontends ONLY
 │  ├─ portal/                # Main authenticated app (Next.js 16, App Router)
-│  └─ marketing/             # Public marketing site (optional)
+│  ├─ candidate/             # Candidate-facing portal (Next.js)
+│  └─ corporate/             # Marketing/corporate site (Next.js)
 │
 ├─ services/                 # Backend services / APIs / workers
 │  ├─ api-gateway/           # Public API entrypoint; routes to domain services
 │  ├─ identity-service/      # Users, orgs, memberships (Clerk bridge)
 │  ├─ ats-service/           # Jobs, candidates, applications, placements
 │  ├─ network-service/       # Recruiters, assignments, basic stats
-│  ├─ billing-service/       # Plans, subscriptions, Stripe
-│  └─ notification-service/  # Event-driven email (Resend)
+│  ├─ billing-service/       # Plans, subscriptions, Stripe, payouts
+│  ├─ notification-service/  # Event-driven email (Resend)
+│  ├─ automation-service/    # AI matching, fraud detection, metrics
+│  └─ document-service/      # File storage and processing (Supabase Storage)
 │
 ├─ packages/                 # Shared code, NOT directly deployable
 │  ├─ shared-types/          # Domain types, DTOs
 │  ├─ shared-config/         # Config/env loader
 │  ├─ shared-logging/        # Logging utilities
 │  ├─ shared-fastify/        # Fastify plugins, common middleware
-│  └─ shared-clients/        # Typed HTTP/SDK clients for services
+│  ├─ shared-clients/        # Typed HTTP/SDK clients for services
+│  └─ shared-job-queue/      # Job queue abstraction (RabbitMQ)
 │
 ├─ infra/
 │  └─ k8s/                   # Raw Kubernetes YAML (Deployments, Services, Ingress)
@@ -177,11 +181,13 @@ Do not add ATS-like logic here. Stay focused on recruiters and their access to j
 - Owns Stripe integration and subscription state:
   - `billing.plans`
   - `billing.subscriptions`
+  - `billing.payouts` - recruiter payment tracking
 - Handles Stripe webhooks.
 - Provides subscription status to `api-gateway` for gating recruiter features.
+- Manages payout processing and tracking.
 
 Copilot:  
-All subscription logic (free vs paid recruiter, plan changes, etc.) belongs here.
+All subscription logic (free vs paid recruiter, plan changes, etc.) and payout processing belongs here.
 
 ### 3.6 `services/notification-service`
 
@@ -194,6 +200,35 @@ All subscription logic (free vs paid recruiter, plan changes, etc.) belongs here
 
 Copilot:  
 Do not embed SMTP logic elsewhere. Email sending should flow through notification-service and Resend.
+
+### 3.7 `services/automation-service`
+
+- AI-assisted candidate-job matching with explainable scoring.
+- Fraud detection and anomaly monitoring.
+- Rule-based automation execution with human approval workflows.
+- Marketplace metrics aggregation and health scoring.
+- Handles:
+  - Match generation and review
+  - Fraud signal detection and admin workflows
+  - Automated actions (stage advances, notifications, etc.)
+  - Daily metrics and analytics
+
+Copilot:  
+This service orchestrates intelligent automation and monitoring. Keep it focused on matching, fraud detection, automation rules, and metrics - not core ATS or billing logic.
+
+### 3.8 `services/document-service`
+
+- Universal document storage using Supabase Storage.
+- Handles uploads for:
+  - Candidate resumes and cover letters
+  - Job descriptions and company documents
+  - Contracts and agreements (future)
+- Provides secure pre-signed URLs for uploads/downloads.
+- File type validation and size limits.
+- Multi-entity attachments (candidates, jobs, applications, companies).
+
+Copilot:  
+All file storage operations should go through this service. Do not implement file handling in other services.
 
 ---
 
@@ -346,6 +381,9 @@ When setting up new services or apps:
    - See `docs/guidance/form-controls.md` for form implementation standards.
    - See `docs/guidance/user-roles-and-permissions.md` for comprehensive RBAC, user roles, capabilities, restrictions, API endpoints, and workflows.
    - See `docs/guidance/api-response-format.md` for API response format standards (all endpoints must comply).
+   - See `docs/guidance/pagination.md` for pagination implementation standards.
+   - See `docs/guidance/grid-table-view-switching.md` for implementing grid/table view toggles.
+   - See `docs/guidance/service-architecture-pattern.md` for service layer patterns.
    - Check `.vscode/mcp.json` for configured Supabase MCP server.
 
 ---
