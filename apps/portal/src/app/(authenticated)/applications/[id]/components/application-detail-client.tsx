@@ -61,10 +61,33 @@ export default function ApplicationDetailClient({
     const [showNoteModal, setShowNoteModal] = useState(false);
     const [loading, setLoading] = useState(false);
     const [token, setToken] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<string | null>(null);
 
-    // Get token on mount for AI Review Panel
+    // Check if user is platform admin
+    const isPlatformAdmin = userRole === 'platform_admin';
+
+    // Get token and user role on mount
     useEffect(() => {
-        getToken().then(t => setToken(t));
+        async function initializeAuth() {
+            const authToken = await getToken();
+            setToken(authToken);
+
+            if (authToken) {
+                try {
+                    const client = createAuthenticatedClient(authToken);
+                    const response: any = await client.getCurrentUser();
+                    const profile = response.data;
+
+                    // Get user's role from first membership
+                    if (profile.memberships && profile.memberships.length > 0) {
+                        setUserRole(profile.memberships[0].role);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch user role:', error);
+                }
+            }
+        }
+        initializeAuth();
     }, [getToken]);
 
     const formatDate = (dateString: string) => {
@@ -180,14 +203,16 @@ export default function ApplicationDetailClient({
             <div className="card bg-base-100 shadow-sm mb-6">
                 <div className="card-body">
                     <div className="flex flex-wrap gap-2">
-                        <button
-                            onClick={() => setShowStageModal(true)}
-                            className="btn btn-primary gap-2"
-                            disabled={loading}
-                        >
-                            <i className="fa-solid fa-arrow-right-arrow-left"></i>
-                            Update Stage
-                        </button>
+                        {isPlatformAdmin && (
+                            <button
+                                onClick={() => setShowStageModal(true)}
+                                className="btn btn-primary gap-2"
+                                disabled={loading}
+                            >
+                                <i className="fa-solid fa-arrow-right-arrow-left"></i>
+                                Update Stage
+                            </button>
+                        )}
                         <button
                             onClick={() => setShowNoteModal(true)}
                             className="btn btn-outline gap-2"
@@ -538,7 +563,7 @@ export default function ApplicationDetailClient({
             </div>
 
             {/* Stage Update Modal */}
-            {showStageModal && (
+            {isPlatformAdmin && showStageModal && (
                 <StageUpdateModal
                     currentStage={application.stage}
                     onClose={() => setShowStageModal(false)}
