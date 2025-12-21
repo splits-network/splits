@@ -72,9 +72,11 @@ export function baseEmailTemplate({ preheader, content, source }: BaseEmailProps
     td,th,div,p,a,h1,h2,h3,h4,h5,h6 {font-family: "Segoe UI", sans-serif; mso-line-height-rule: exactly;}
   </style>
   <![endif]-->
-  <title>Splits Networkimg src="${logoUrl}" alt="Splits Network" style="height: 40px; width: auto; margin: 0 auto;" />
-                      <p style="margin: 8px 0 0; font-size: 14px; color: #e5e7eb;">
-                        ${tagline}
+  <title>Splits Network</title>
+  <style>
+    @media (max-width: 600px) {
+      .sm-w-full {
+        width: 100% !important;
       }
       .sm-px-24 {
         padding-left: 24px !important;
