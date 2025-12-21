@@ -94,7 +94,7 @@ export default function ApplicationsListClient() {
     // Sync state with URL params (e.g., when user clicks back button)
     useEffect(() => {
         const currentUrl = window.location.href;
-        
+
         // Skip if we're in the middle of updating
         if (isUpdatingFromUrl.current || lastUrlRef.current === currentUrl) {
             return;
@@ -203,11 +203,11 @@ export default function ApplicationsListClient() {
             // Call paginated endpoint (Gateway applies RBAC filtering automatically)
             const response = await client.get(`/applications/paginated?${params.toString()}`);
             setApplications(response.data || []);
-            
+
             // Only update pagination if it actually changed to avoid triggering re-renders
             if (response.pagination) {
                 setPagination(prev => {
-                    if (prev.total !== response.pagination.total || 
+                    if (prev.total !== response.pagination.total ||
                         prev.total_pages !== response.pagination.total_pages) {
                         return { ...prev, ...response.pagination };
                     }
