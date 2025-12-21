@@ -1,6 +1,11 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
+import {
+    proposalAcceptedEmail,
+    proposalDeclinedEmail,
+    proposalTimeoutEmail,
+} from '../../templates/proposals';
 
 export class ProposalsEmailService {
     constructor(
@@ -73,16 +78,14 @@ export class ProposalsEmailService {
         }
     ): Promise<void> {
         const subject = `Proposal Accepted: ${data.candidateName} for ${data.jobTitle}`;
-        const html = `
-      <h2>✅ Your Proposal Has Been Accepted!</h2>
-      <p>Good news! Your candidate proposal has been accepted by the hiring manager.</p>
-      <ul>
-        <li><strong>Candidate:</strong> ${data.candidateName}</li>
-        <li><strong>Role:</strong> ${data.jobTitle}</li>
-        <li><strong>Company:</strong> ${data.companyName}</li>
-      </ul>
-      <p>You can now proceed with scheduling interviews and moving the candidate through the hiring process.</p>
-    `;
+        const proposalUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/roles`;
+        
+        const html = proposalAcceptedEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            proposalUrl,
+        });
         
         await this.sendEmail(recipientEmail, subject, html, {
             eventType: 'proposal.accepted',
@@ -101,16 +104,14 @@ export class ProposalsEmailService {
         }
     ): Promise<void> {
         const subject = `Proposal Declined: ${data.candidateName}`;
-        const html = `
-      <h2>Proposal Not Accepted</h2>
-      <p>Unfortunately, your candidate proposal was not accepted by the hiring manager.</p>
-      <ul>
-        <li><strong>Candidate:</strong> ${data.candidateName}</li>
-        <li><strong>Role:</strong> ${data.jobTitle}</li>
-        <li><strong>Reason:</strong> ${data.declineReason}</li>
-      </ul>
-      <p>Don't be discouraged! Keep sourcing great candidates and submitting proposals.</p>
-    `;
+        const rolesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/roles`;
+        
+        const html = proposalDeclinedEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            declineReason: data.declineReason,
+            rolesUrl,
+        });
         
         await this.sendEmail(recipientEmail, subject, html, {
             eventType: 'proposal.declined',
@@ -128,15 +129,13 @@ export class ProposalsEmailService {
         }
     ): Promise<void> {
         const subject = `Proposal Expired: ${data.candidateName}`;
-        const html = `
-      <h2>⏰ Proposal Has Timed Out</h2>
-      <p>Your candidate proposal has expired without a response from the hiring manager.</p>
-      <ul>
-        <li><strong>Candidate:</strong> ${data.candidateName}</li>
-        <li><strong>Role:</strong> ${data.jobTitle}</li>
-      </ul>
-      <p>The proposal has been automatically declined due to timeout. You may submit the candidate to other roles.</p>
-    `;
+        const rolesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/roles`;
+        
+        const html = proposalTimeoutEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            rolesUrl,
+        });
         
         await this.sendEmail(recipientEmail, subject, html, {
             eventType: 'proposal.timeout',

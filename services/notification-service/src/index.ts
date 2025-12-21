@@ -78,6 +78,7 @@ async function main() {
             candidateName: candidateName || 'Test Candidate',
             jobTitle: jobTitle || 'Test Role',
             companyName: companyName || 'Test Company',
+            applicationId: 'test-app-123',
         });
         
         return reply.send({ success: true });

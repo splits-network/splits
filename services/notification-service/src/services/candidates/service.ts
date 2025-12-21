@@ -1,6 +1,11 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
+import {
+    candidateSourcedEmail,
+    ownershipConflictEmail,
+    ownershipConflictRejectionEmail,
+} from '../../templates/candidates';
 
 export class CandidatesEmailService {
     constructor(
@@ -73,16 +78,14 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `Candidate Sourced: ${data.candidateName}`;
-        const html = `
-      <h2>✅ Candidate Successfully Sourced</h2>
-      <p>You have successfully claimed sourcing ownership for a candidate.</p>
-      <ul>
-        <li><strong>Candidate:</strong> ${data.candidateName}</li>
-        <li><strong>Source Method:</strong> ${data.sourceMethod}</li>
-        <li><strong>Protection Period:</strong> ${data.protectionPeriod}</li>
-      </ul>
-      <p>You now have exclusive rights to work with this candidate. Other recruiters will be notified if they attempt to source the same candidate.</p>
-    `;
+        const candidatesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/candidates`;
+        
+        const html = candidateSourcedEmail({
+            candidateName: data.candidateName,
+            sourceMethod: data.sourceMethod,
+            protectionPeriod: data.protectionPeriod,
+            candidatesUrl,
+        });
         
         await this.sendEmail(recipientEmail, subject, html, {
             eventType: 'candidate.sourced',
@@ -100,15 +103,13 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `Ownership Conflict Detected: ${data.candidateName}`;
-        const html = `
-      <h2>⚠️ Another Recruiter Attempted to Source Your Candidate</h2>
-      <p>Another recruiter has attempted to claim sourcing ownership for a candidate you already sourced.</p>
-      <ul>
-        <li><strong>Candidate:</strong> ${data.candidateName}</li>
-        <li><strong>Attempting Recruiter:</strong> ${data.attemptingRecruiterName}</li>
-      </ul>
-      <p>Your ownership protection remains in place. The other recruiter has been informed that you have prior claim.</p>
-    `;
+        const candidateUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/candidates`;
+        
+        const html = ownershipConflictEmail({
+            candidateName: data.candidateName,
+            attemptingRecruiterName: data.attemptingRecruiterName,
+            candidateUrl,
+        });
         
         await this.sendEmail(recipientEmail, subject, html, {
             eventType: 'ownership.conflict_detected',
@@ -126,15 +127,13 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `Candidate Already Claimed: ${data.candidateName}`;
-        const html = `
-      <h2>❌ Candidate Already Claimed</h2>
-      <p>The candidate you attempted to source has already been claimed by another recruiter.</p>
-      <ul>
-        <li><strong>Candidate:</strong> ${data.candidateName}</li>
-        <li><strong>Original Sourcer:</strong> ${data.originalSourcerName}</li>
-      </ul>
-      <p>The original sourcer has protection rights to this candidate. You may collaborate with them if they add you to a placement.</p>
-    `;
+        const candidatesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/candidates`;
+        
+        const html = ownershipConflictRejectionEmail({
+            candidateName: data.candidateName,
+            originalSourcerName: data.originalSourcerName,
+            candidatesUrl,
+        });
         
         await this.sendEmail(recipientEmail, subject, html, {
             eventType: 'ownership.conflict_detected',

@@ -37,6 +37,7 @@ export class ApplicationsEventConsumer {
                 candidateName: candidate.full_name,
                 jobTitle: job.title,
                 companyName: job.company?.name || 'Unknown Company',
+                applicationId: application_id,
                 userId: recruiter.user_id,
             });
 
@@ -227,6 +228,7 @@ export class ApplicationsEventConsumer {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
                     companyName: job.company?.name || 'Unknown Company',
+                    applicationId: application_id,
                     userId: recruiter.user_id,
                 });
 
@@ -249,6 +251,7 @@ export class ApplicationsEventConsumer {
                         companyName: job.company?.name || 'Unknown Company',
                         hasRecruiter: true,
                         nextSteps,
+                        applicationId: application_id,
                         userId: candidateUser.id,
                     });
                 }
@@ -285,6 +288,7 @@ export class ApplicationsEventConsumer {
                         companyName: job.company?.name || 'Unknown Company',
                         hasRecruiter: false,
                         nextSteps,
+                        applicationId: application_id,
                         userId: candidateUser.id,
                     });
                 }
@@ -388,6 +392,7 @@ export class ApplicationsEventConsumer {
                 companyName: job.company?.name || 'Unknown Company',
                 hasRecruiter: true,
                 nextSteps: 'Your recruiter has reviewed and submitted your application to the company. They will be in touch if there is interest.',
+                applicationId: application_id,
                 userId: candidateUser?.id,
             });
 
@@ -418,6 +423,10 @@ export class ApplicationsEventConsumer {
             const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
             const candidate = candidateResponse.data || candidateResponse;
 
+            // Fetch company details
+            const companyResponse = await this.services.getAtsService().get<any>(`/companies/${job.company_id}`);
+            const company = companyResponse.data || companyResponse;
+
             // Notify recruiter if exists
             if (recruiter_id) {
                 const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
@@ -429,15 +438,15 @@ export class ApplicationsEventConsumer {
                 await this.emailService.sendApplicationWithdrawn(user.email, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
+                    companyName: job.company?.name || company.name || 'Unknown Company',
                     reason,
+                    withdrawnBy: 'Recruiter',
+                    applicationId: application_id,
                     userId: recruiter.user_id,
                 });
             }
 
             // Notify company admins
-            const companyResponse = await this.services.getAtsService().get<any>(`/companies/${job.company_id}`);
-            const company = companyResponse.data || companyResponse;
-
             if (company.identity_organization_id) {
                 const membershipsResponse = await this.services.getIdentityService().get<any>(
                     `/organizations/${company.identity_organization_id}/memberships?role=admin`
@@ -451,7 +460,10 @@ export class ApplicationsEventConsumer {
                     await this.emailService.sendApplicationWithdrawn(user.email, {
                         candidateName: candidate.full_name,
                         jobTitle: job.title,
+                        companyName: company.name || 'Unknown Company',
                         reason,
+                        withdrawnBy: 'Candidate',
+                        applicationId: application_id,
                         userId: user.id,
                     });
                 }

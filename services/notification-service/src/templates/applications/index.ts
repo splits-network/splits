@@ -209,6 +209,314 @@ ${paragraph(
     });
 }
 
+export interface ApplicationWithdrawnData {
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    reason?: string;
+    withdrawnBy: string;
+    applicationUrl: string;
+    source?: EmailSource;
+}
+
+export function applicationWithdrawnEmail(data: ApplicationWithdrawnData): string {
+    const content = `
+${heading({ level: 1, text: 'Application Withdrawn', icon: '🔙' })}
+
+${alert({
+    type: 'info',
+    message: `The application for ${data.candidateName} has been withdrawn from ${data.companyName}.`,
+})}
+
+${infoCard({
+    title: 'Withdrawal Details',
+    items: [
+        { label: 'Candidate', value: data.candidateName },
+        { label: 'Position', value: data.jobTitle },
+        { label: 'Company', value: data.companyName },
+        { label: 'Withdrawn by', value: data.withdrawnBy },
+        ...(data.reason ? [{ label: 'Reason', value: data.reason }] : []),
+    ],
+})}
+
+${paragraph(
+    'This application has been removed from consideration. The candidate can no longer be considered for this position through this submission.'
+)}
+
+${button({
+    href: data.applicationUrl,
+    text: 'View Application Record →',
+    variant: 'secondary',
+})}
+
+${divider()}
+
+${paragraph(
+    'Looking for other opportunities? Browse available roles in your <a href="https://splits.network/roles" style="color: #233876; text-decoration: underline;">dashboard</a>.'
+)}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `Application withdrawn: ${data.candidateName} for ${data.jobTitle}`,
+        content,
+        source: data.source || 'portal',
+    });
+}
+
+export interface CandidateApplicationSubmittedData {
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    hasRecruiter: boolean;
+    nextSteps: string;
+    applicationUrl: string;
+    source?: EmailSource;
+}
+
+export function candidateApplicationSubmittedEmail(data: CandidateApplicationSubmittedData): string {
+    const content = `
+${heading({ level: 1, text: 'Application Received', icon: '✉️' })}
+
+${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
+
+${paragraph(
+    `Your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> has been successfully received.`
+)}
+
+${alert({
+    type: 'success',
+    title: 'Next Steps',
+    message: data.nextSteps,
+})}
+
+${
+    data.hasRecruiter
+        ? paragraph(
+              'Your recruiter will review your application and make any final enhancements before submitting it to the company.'
+          )
+        : ''
+}
+
+${paragraph('You can track your application status anytime in your portal.')}
+
+${button({
+    href: data.applicationUrl,
+    text: 'Track Application Status →',
+    variant: 'primary',
+})}
+
+${divider()}
+
+${paragraph('<strong>Good luck!</strong> We\'re here to support you throughout the hiring process.')}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `Application received: ${data.jobTitle} at ${data.companyName}`,
+        content,
+        source: data.source || 'candidate',
+    });
+}
+
+export interface CompanyApplicationReceivedData {
+    candidateName: string;
+    jobTitle: string;
+    applicationUrl: string;
+    hasRecruiter: boolean;
+    recruiterName?: string;
+    source?: EmailSource;
+}
+
+export function companyApplicationReceivedEmail(data: CompanyApplicationReceivedData): string {
+    const content = `
+${heading({ level: 1, text: 'New Candidate Application', icon: '👤' })}
+
+${paragraph(`A new candidate has applied for <strong>${data.jobTitle}</strong>.`)}
+
+${infoCard({
+    title: 'Application Details',
+    items: [
+        { label: 'Candidate', value: data.candidateName },
+        { label: 'Position', value: data.jobTitle },
+        ...(data.hasRecruiter && data.recruiterName
+            ? [{ label: 'Recruiter', value: data.recruiterName }]
+            : []),
+    ],
+})}
+
+${
+    data.hasRecruiter && data.recruiterName
+        ? alert({
+              type: 'info',
+              message: `This candidate is represented by recruiter <strong>${data.recruiterName}</strong>.`,
+          })
+        : alert({
+              type: 'info',
+              message: 'This is a direct candidate application.',
+          })
+}
+
+${paragraph('Review the candidate\'s profile and determine if they\'re a good fit for your role.')}
+
+${button({
+    href: data.applicationUrl,
+    text: 'Review Application →',
+    variant: 'primary',
+})}
+
+${divider()}
+
+${paragraph(
+    'Manage all your applications in your <a href="https://splits.network/applications" style="color: #233876; text-decoration: underline;">company portal</a>.'
+)}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `New application: ${data.candidateName} for ${data.jobTitle}`,
+        content,
+        source: data.source || 'portal',
+    });
+}
+
+export interface PreScreenRequestedData {
+    candidateName: string;
+    candidateEmail: string;
+    jobTitle: string;
+    companyName: string;
+    requestedBy: string;
+    message?: string;
+    portalUrl: string;
+    source?: EmailSource;
+}
+
+export function preScreenRequestedEmail(data: PreScreenRequestedData): string {
+    const content = `
+${heading({ level: 1, text: 'Pre-Screen Request', icon: '🔍' })}
+
+${paragraph(
+    `<strong>${data.requestedBy}</strong> from <strong>${data.companyName}</strong> has requested your help reviewing a candidate application.`
+)}
+
+${infoCard({
+    title: 'Candidate Details',
+    items: [
+        { label: 'Candidate', value: data.candidateName },
+        { label: 'Email', value: data.candidateEmail },
+        { label: 'Position', value: data.jobTitle },
+        { label: 'Company', value: data.companyName },
+    ],
+})}
+
+${
+    data.message
+        ? alert({
+              type: 'info',
+              title: `Message from ${data.requestedBy}`,
+              message: data.message,
+          })
+        : ''
+}
+
+${paragraph('<strong>What\'s Expected?</strong>')}
+
+${paragraph(
+    `1. Review the candidate's profile and documents<br>
+2. Add your professional insights and recommendations<br>
+3. Submit the pre-screened application back to the company`
+)}
+
+${button({
+    href: data.portalUrl,
+    text: 'Start Review →',
+    variant: 'primary',
+})}
+
+${divider()}
+
+${paragraph(
+    '<em>This direct application came from a candidate who applied without a recruiter. The company values your expertise in evaluating this candidate.</em>'
+)}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `Pre-screen request: ${data.candidateName} for ${data.jobTitle}`,
+        content,
+        source: data.source || 'portal',
+    });
+}
+
+export interface PreScreenRequestConfirmationData {
+    candidateName: string;
+    jobTitle: string;
+    autoAssign: boolean;
+    portalUrl: string;
+    source?: EmailSource;
+}
+
+export function preScreenRequestConfirmationEmail(data: PreScreenRequestConfirmationData): string {
+    const content = `
+${heading({ level: 1, text: 'Pre-Screen Request Submitted', icon: '✅' })}
+
+${alert({
+    type: 'success',
+    message: 'Your request for candidate pre-screening has been submitted successfully.',
+})}
+
+${infoCard({
+    title: 'Request Details',
+    items: [
+        { label: 'Candidate', value: data.candidateName },
+        { label: 'Position', value: data.jobTitle },
+        {
+            label: 'Assignment',
+            value: data.autoAssign
+                ? 'Auto-assign (system will select a recruiter)'
+                : 'Manually assigned',
+        },
+    ],
+})}
+
+${
+    data.autoAssign
+        ? alert({
+              type: 'info',
+              title: 'Auto-Assignment',
+              message:
+                  'Our system will automatically assign an available recruiter to review this candidate. You\'ll be notified once they submit their review.',
+          })
+        : alert({
+              type: 'info',
+              title: 'Manual Assignment',
+              message:
+                  'The selected recruiter has been notified and will review this candidate. You\'ll receive their insights once the review is complete.',
+          })
+}
+
+${paragraph('<strong>What Happens Next?</strong>')}
+
+${paragraph(
+    `1. Recruiter reviews the candidate's profile<br>
+2. Recruiter adds professional insights and recommendations<br>
+3. You receive the pre-screened application for final review`
+)}
+
+${button({
+    href: data.portalUrl,
+    text: 'Track Application Status →',
+    variant: 'primary',
+})}
+
+${divider()}
+
+${paragraph('Typical review timelines: <strong>2-3 business days</strong>')}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `Pre-screen request confirmed: ${data.candidateName}`,
+        content,
+        source: data.source || 'portal',
+    });
+}
+
 export interface ApplicationSubmittedToCompanyData {
     candidateName: string;
     jobTitle: string;

@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
+import { collaboratorAddedEmail } from '../../templates/candidates';
 
 export class CollaborationEmailService {
     constructor(
@@ -75,18 +76,16 @@ export class CollaborationEmailService {
         }
     ): Promise<void> {
         const subject = `Added to Placement Team: ${data.candidateName}`;
-        const html = `
-      <h2>🤝 You've Been Added as a Collaborator!</h2>
-      <p>You've been added to a placement team and will receive a split of the fee.</p>
-      <ul>
-        <li><strong>Candidate:</strong> ${data.candidateName}</li>
-        <li><strong>Role:</strong> ${data.jobTitle}</li>
-        <li><strong>Company:</strong> ${data.companyName}</li>
-        <li><strong>Your Role:</strong> ${data.role}</li>
-        <li><strong>Your Split:</strong> ${data.splitPercentage}%</li>
-      </ul>
-      <p>Log in to view full placement details and collaborate with the team.</p>
-    `;
+        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/placements`;
+        
+        const html = collaboratorAddedEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            role: data.role,
+            splitPercentage: data.splitPercentage,
+            placementUrl,
+        });
         
         await this.sendEmail(recipientEmail, subject, html, {
             eventType: 'collaborator.added',
