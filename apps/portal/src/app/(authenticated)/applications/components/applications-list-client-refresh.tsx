@@ -59,10 +59,11 @@ export default function ApplicationsListClient() {
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     // Helper function to sanitize search query (remove smart search keywords)
-    const sanitizeSearchQuery = (query: string): string => {
+    // Use useCallback to memoize it so it doesn't change on every render
+    const sanitizeSearchQuery = useCallback((query: string): string => {
         // Remove smart search keywords like "job:", "company:", "from:", "to:"
         return query.replace(/^(job|company|from|to):\s*/i, '').trim();
-    };
+    }, []);
 
     // Initialize state from URL params
     const [applications, setApplications] = useState<Application[]>([]);
@@ -74,7 +75,7 @@ export default function ApplicationsListClient() {
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [searchQuery, setSearchQuery] = useState(sanitizeSearchQuery(searchParams.get('search') || ''));
+    const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
     const [stageFilter, setStageFilter] = useState(searchParams.get('stage') || '');
     const [viewMode, setViewMode] = useViewMode('applicationsViewMode');
     const [userRole, setUserRole] = useState<string | null>(null);
@@ -86,17 +87,21 @@ export default function ApplicationsListClient() {
     const [bulkAction, setBulkAction] = useState<'stage' | 'reject' | null>(null);
     const [bulkLoading, setBulkLoading] = useState(false);
 
-    // Ref to prevent circular URL updates
-    const isUpdatingUrl = useRef(false);
+    // Ref to prevent infinite loops between URL sync and state updates
+    const isUpdatingFromUrl = useRef(false);
+    const lastUrlRef = useRef<string>('');
 
     // Sync state with URL params (e.g., when user clicks back button)
-    // Note: We don't sanitize here during sync, only on initial load
     useEffect(() => {
-        // Don't sync if we just updated the URL ourselves
-        if (isUpdatingUrl.current) {
-            isUpdatingUrl.current = false;
+        const currentUrl = window.location.href;
+        
+        // Skip if we're in the middle of updating
+        if (isUpdatingFromUrl.current || lastUrlRef.current === currentUrl) {
             return;
         }
+
+        isUpdatingFromUrl.current = true;
+        lastUrlRef.current = currentUrl;
 
         const urlSearch = searchParams.get('search') || '';
         const urlStage = searchParams.get('stage') || '';
@@ -107,10 +112,20 @@ export default function ApplicationsListClient() {
         if (urlPage !== pagination.page) {
             setPagination(prev => ({ ...prev, page: urlPage }));
         }
-    }, [searchParams, searchQuery, stageFilter, pagination.page]);
+
+        // Reset flag after state updates have settled
+        setTimeout(() => {
+            isUpdatingFromUrl.current = false;
+        }, 100);
+    }, [searchParams]); // Only depend on searchParams, not the state values
 
     // Update URL when state changes (shallow update to preserve focus)
     useEffect(() => {
+        // Skip URL update if we're syncing from URL
+        if (isUpdatingFromUrl.current) {
+            return;
+        }
+
         const params = new URLSearchParams();
 
         if (searchQuery) {
@@ -126,11 +141,13 @@ export default function ApplicationsListClient() {
         }
 
         const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+        const currentUrl = `${pathname}${window.location.search}`;
 
-        // Set flag to prevent circular update
-        isUpdatingUrl.current = true;
-        // Use window.history.replaceState for a truly shallow update that doesn't trigger re-renders
-        window.history.replaceState(null, '', newUrl);
+        // Only update if URL actually changed
+        if (newUrl !== currentUrl) {
+            lastUrlRef.current = window.location.origin + newUrl;
+            window.history.replaceState(null, '', newUrl);
+        }
     }, [searchQuery, stageFilter, pagination.page, pathname]);
 
     const loadApplications = useCallback(async () => {
@@ -141,6 +158,7 @@ export default function ApplicationsListClient() {
             const token = await getToken();
             if (!token) {
                 setError('Not authenticated');
+                setLoading(false);
                 return;
             }
 
@@ -185,7 +203,17 @@ export default function ApplicationsListClient() {
             // Call paginated endpoint (Gateway applies RBAC filtering automatically)
             const response = await client.get(`/applications/paginated?${params.toString()}`);
             setApplications(response.data || []);
-            setPagination(response.pagination || pagination);
+            
+            // Only update pagination if it actually changed to avoid triggering re-renders
+            if (response.pagination) {
+                setPagination(prev => {
+                    if (prev.total !== response.pagination.total || 
+                        prev.total_pages !== response.pagination.total_pages) {
+                        return { ...prev, ...response.pagination };
+                    }
+                    return prev;
+                });
+            }
 
         } catch (err: any) {
             console.error('Failed to load applications:', err);
@@ -195,12 +223,14 @@ export default function ApplicationsListClient() {
         }
     }, [getToken, searchQuery, stageFilter, pagination.page, pagination.limit, sanitizeSearchQuery]);
 
-    // Load when pagination changes
+    // Load applications when dependencies change
+    // Use a ref to track if initial load has happened
+    const hasLoadedRef = useRef(false);
     useEffect(() => {
-        if (pagination.page > 0) {
-            loadApplications();
-        }
-    }, [pagination.page, loadApplications]);
+        // Always load on mount and when these specific values change
+        loadApplications();
+        hasLoadedRef.current = true;
+    }, [searchQuery, stageFilter, pagination.page]); // Remove loadApplications from deps to prevent infinite loop
 
     const handleAcceptApplication = async (applicationId: string) => {
         try {
