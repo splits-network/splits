@@ -10,50 +10,6 @@ export class ApplicationsEventConsumer {
         private logger: Logger
     ) {}
 
-    async handleApplicationCreated(event: DomainEvent): Promise<void> {
-        try {
-            const { application_id, job_id, candidate_id, recruiter_id } = event.payload;
-
-            this.logger.info({ application_id, job_id, candidate_id }, 'Fetching data for application created notification');
-
-            // Fetch job details
-            const jobResponse = await this.services.getAtsService().get<any>(`/jobs/${job_id}`);
-            const job = jobResponse.data || jobResponse;
-
-            // Fetch candidate details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
-
-            // Fetch recruiter details
-            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
-            const recruiter = recruiterResponse.data || recruiterResponse;
-
-            // Fetch recruiter's user profile to get email
-            const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-            const user = userResponse.data || userResponse;
-
-            // Send email notification
-            await this.emailService.sendApplicationCreated(user.email, {
-                candidateName: candidate.full_name,
-                jobTitle: job.title,
-                companyName: job.company?.name || 'Unknown Company',
-                applicationId: application_id,
-                userId: recruiter.user_id,
-            });
-
-            this.logger.info(
-                { application_id, recipient: user.email },
-                'Application created notification sent successfully'
-            );
-        } catch (error) {
-            this.logger.error(
-                { error, event_payload: event.payload },
-                'Failed to send application created notification'
-            );
-            throw error;
-        }
-    }
-
     async handleApplicationAccepted(event: DomainEvent): Promise<void> {
         try {
             const { application_id, job_id, candidate_id, recruiter_id, company_id, accepted_by_user_id } = event.payload;
@@ -430,28 +386,15 @@ export class ApplicationsEventConsumer {
             const company = companyResponse.data || companyResponse;
 
             // Send confirmation email to candidate
-            try {
-                const candidateUserResponse = await this.services.getIdentityService().get<any>(
-                    `/users?email=${encodeURIComponent(candidate.email)}`
-                );
-                const candidateUsers = candidateUserResponse.data || candidateUserResponse;
-                
-                if (Array.isArray(candidateUsers) && candidateUsers.length > 0) {
-                    const candidateUser = candidateUsers[0];
-                    
-                    await this.emailService.sendApplicationWithdrawn(candidate.email, {
-                        candidateName: candidate.full_name,
-                        jobTitle: job.title,
-                        companyName: job.company?.name || company.name || 'Unknown Company',
-                        reason,
-                        withdrawnBy: 'Candidate',
-                        applicationId: application_id,
-                        userId: candidateUser.id,
-                    });
-                }
-            } catch (error) {
-                this.logger.warn({ candidate_id, error }, 'Failed to send withdrawal notification to candidate');
-            }
+            await this.emailService.sendApplicationWithdrawn(candidate.email, {
+                candidateName: candidate.full_name,
+                jobTitle: job.title,
+                companyName: job.company?.name || company.name || 'Unknown Company',
+                reason,
+                withdrawnBy: 'Candidate',
+                applicationId: application_id,
+                userId: candidate_id, // Use candidate_id directly instead of looking up user
+            });
 
             // Notify recruiter if exists
             if (recruiter_id) {
