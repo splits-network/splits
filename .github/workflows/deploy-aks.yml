@@ -131,8 +131,8 @@ jobs:
                   # Create release
                   sentry-cli releases new $RELEASE --project $PROJECT_SLUG --finalize
 
-                  # Associate commits
-                  sentry-cli releases set-commits $RELEASE --project $PROJECT_SLUG --auto
+                  # Associate commits (--ignore-missing handles first releases or shallow clones)
+                  sentry-cli releases set-commits $RELEASE --project $PROJECT_SLUG --auto --ignore-missing
 
                   # Deploy to production
                   sentry-cli releases deploys $RELEASE --project $PROJECT_SLUG new -e production
