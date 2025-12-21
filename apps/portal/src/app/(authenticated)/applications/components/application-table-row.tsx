@@ -26,9 +26,10 @@ interface ApplicationTableRowProps {
     onAccept: () => void;
     getStageColor: (stage: string) => string;
     formatDate: (date: string) => string;
-    showCheckbox?: boolean;
     isSelected?: boolean;
     onToggleSelect?: () => void;
+    isRecruiter?: boolean;
+    isCompanyUser?: boolean;
 }
 
 export function ApplicationTableRow({
@@ -38,16 +39,17 @@ export function ApplicationTableRow({
     onAccept,
     getStageColor,
     formatDate,
-    showCheckbox = false,
     isSelected = false,
     onToggleSelect,
+    isRecruiter = false,
+    isCompanyUser = false,
 }: ApplicationTableRowProps) {
     const candidate = application.candidate;
     const isMasked = candidate._masked;
 
     return (
         <tr className="hover">
-            {showCheckbox && (
+            {isRecruiter && (
                 <td className="w-12">
                     <input
                         type="checkbox"
@@ -100,59 +102,49 @@ export function ApplicationTableRow({
                     <span className="text-base-content/40">—</span>
                 )}
             </td>
-            <td>
-                {application.recruiter ? (
-                    <div className="text-sm">
-                        {application.recruiter.name}
-                    </div>
-                ) : (
-                    <span className="text-base-content/40">—</span>
-                )}
+            <td><span className={`badge ${getStageColor(application.stage)}`}>
+                {application.stage}
+            </span>
             </td>
-            <td>
-                <span className={`badge ${getStageColor(application.stage)}`}>
-                    {application.stage}
-                </span>
-            </td>
-            <td>
-                {application.accepted_by_company ? (
-                    <span className="badge badge-success gap-2">
-                        <i className="fa-solid fa-check"></i>
-                        Accepted
-                    </span>
-                ) : (
-                    <span className="badge badge-warning gap-2">
-                        <i className="fa-solid fa-clock"></i>
-                        Pending
-                    </span>
-                )}
-            </td>
+            {isRecruiter && (
+                <td>
+                    {application.recruiter ? (
+                        <div className="text-sm">
+                            {application.recruiter.name}
+                        </div>
+                    ) : (
+                        <span className="text-base-content/40">—</span>
+                    )}
+                </td>
+            )}
             <td>
                 <div className="text-sm">{formatDate(application.created_at)}</div>
             </td>
-            <td className="text-right">
-                <div className="flex gap-2 justify-end">
-                    {canAccept && (
-                        <button
-                            onClick={onAccept}
-                            className="btn btn-success btn-sm"
-                            disabled={isAccepting}
+            {isCompanyUser && (
+                <td className="text-right">
+                    <div className="flex gap-2 justify-end">
+                        {canAccept && (
+                            <button
+                                onClick={onAccept}
+                                className="btn btn-success btn-sm"
+                                disabled={isAccepting}
+                            >
+                                {isAccepting ? (
+                                    <span className="loading loading-spinner loading-xs"></span>
+                                ) : (
+                                    <i className="fa-solid fa-check"></i>
+                                )}
+                            </button>
+                        )}
+                        <Link
+                            href={`/applications/${application.id}`}
+                            className="btn btn-primary btn-sm"
                         >
-                            {isAccepting ? (
-                                <span className="loading loading-spinner loading-xs"></span>
-                            ) : (
-                                <i className="fa-solid fa-check"></i>
-                            )}
-                        </button>
-                    )}
-                    <Link
-                        href={`/applications/${application.id}`}
-                        className="btn btn-primary btn-sm"
-                    >
-                        <i className="fa-solid fa-arrow-right"></i>
-                    </Link>
-                </div>
-            </td>
+                            <i className="fa-solid fa-arrow-right"></i>
+                        </Link>
+                    </div>
+                </td>
+            )}
         </tr>
     );
 }

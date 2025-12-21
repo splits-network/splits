@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useViewMode } from '@/hooks/use-view-mode';
-import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { ApplicationCard } from './application-card';
 import { ApplicationTableRow } from './application-table-row';
 import { ApplicationFilters } from './application-filters';
@@ -54,29 +54,20 @@ interface PaginationInfo {
 export default function ApplicationsListClient() {
     const { getToken } = useAuth();
     const router = useRouter();
-    const pathname = usePathname();
     const searchParams = useSearchParams();
-    const searchInputRef = useRef<HTMLInputElement>(null);
 
-    // Helper function to sanitize search query (remove smart search keywords)
-    // Use useCallback to memoize it so it doesn't change on every render
-    const sanitizeSearchQuery = useCallback((query: string): string => {
-        // Remove smart search keywords like "job:", "company:", "from:", "to:"
-        return query.replace(/^(job|company|from|to):\s*/i, '').trim();
-    }, []);
-
-    // Initialize state from URL params
+    // State
     const [applications, setApplications] = useState<Application[]>([]);
     const [pagination, setPagination] = useState<PaginationInfo>({
         total: 0,
-        page: parseInt(searchParams.get('page') || '1'),
+        page: 1,
         limit: 25,
         total_pages: 0,
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-    const [stageFilter, setStageFilter] = useState(searchParams.get('stage') || '');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [stageFilter, setStageFilter] = useState('');
     const [viewMode, setViewMode] = useViewMode('applicationsViewMode');
     const [userRole, setUserRole] = useState<string | null>(null);
     const [acceptingId, setAcceptingId] = useState<string | null>(null);
@@ -87,69 +78,7 @@ export default function ApplicationsListClient() {
     const [bulkAction, setBulkAction] = useState<'stage' | 'reject' | null>(null);
     const [bulkLoading, setBulkLoading] = useState(false);
 
-    // Ref to prevent infinite loops between URL sync and state updates
-    const isUpdatingFromUrl = useRef(false);
-    const lastUrlRef = useRef<string>('');
-
-    // Sync state with URL params (e.g., when user clicks back button)
-    useEffect(() => {
-        const currentUrl = window.location.href;
-
-        // Skip if we're in the middle of updating
-        if (isUpdatingFromUrl.current || lastUrlRef.current === currentUrl) {
-            return;
-        }
-
-        isUpdatingFromUrl.current = true;
-        lastUrlRef.current = currentUrl;
-
-        const urlSearch = searchParams.get('search') || '';
-        const urlStage = searchParams.get('stage') || '';
-        const urlPage = parseInt(searchParams.get('page') || '1');
-
-        if (urlSearch !== searchQuery) setSearchQuery(urlSearch);
-        if (urlStage !== stageFilter) setStageFilter(urlStage);
-        if (urlPage !== pagination.page) {
-            setPagination(prev => ({ ...prev, page: urlPage }));
-        }
-
-        // Reset flag after state updates have settled
-        setTimeout(() => {
-            isUpdatingFromUrl.current = false;
-        }, 100);
-    }, [searchParams]); // Only depend on searchParams, not the state values
-
-    // Update URL when state changes (shallow update to preserve focus)
-    useEffect(() => {
-        // Skip URL update if we're syncing from URL
-        if (isUpdatingFromUrl.current) {
-            return;
-        }
-
-        const params = new URLSearchParams();
-
-        if (searchQuery) {
-            params.set('search', searchQuery);
-        }
-
-        if (stageFilter) {
-            params.set('stage', stageFilter);
-        }
-
-        if (pagination.page > 1) {
-            params.set('page', pagination.page.toString());
-        }
-
-        const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
-        const currentUrl = `${pathname}${window.location.search}`;
-
-        // Only update if URL actually changed
-        if (newUrl !== currentUrl) {
-            lastUrlRef.current = window.location.origin + newUrl;
-            window.history.replaceState(null, '', newUrl);
-        }
-    }, [searchQuery, stageFilter, pagination.page, pathname]);
-
+    // Load applications
     const loadApplications = useCallback(async () => {
         try {
             setLoading(true);
@@ -171,7 +100,7 @@ export default function ApplicationsListClient() {
             const role = membership?.role;
             setUserRole(role);
 
-            // Build query parameters for server-side filtering
+            // Build query parameters
             const params = new URLSearchParams({
                 page: pagination.page.toString(),
                 limit: pagination.limit.toString(),
@@ -180,40 +109,28 @@ export default function ApplicationsListClient() {
             });
 
             if (searchQuery) {
-                // Sanitize search query when sending to API (removes legacy smart search keywords)
-                const cleanedSearch = sanitizeSearchQuery(searchQuery);
-                if (cleanedSearch) {
-                    params.append('search', cleanedSearch);
-                }
+                params.append('search', searchQuery);
             }
             if (stageFilter) {
                 params.append('stage', stageFilter);
             }
 
             if (role === 'company_admin' || role === 'hiring_manager') {
-                // Get company ID for company users
                 const companiesRes = await client.get(`/companies?org_id=${membership.organization_id}`);
                 const companies = companiesRes.data || [];
                 if (companies.length > 0) {
                     params.append('company_id', companies[0].id);
                 }
             }
-            // For recruiters: API Gateway automatically adds recruiter_id filter (no extra call needed!)
 
-            // Call paginated endpoint (Gateway applies RBAC filtering automatically)
             const response = await client.get(`/applications/paginated?${params.toString()}`);
-            setApplications(response.data || []);
 
-            // Only update pagination if it actually changed to avoid triggering re-renders
-            if (response.pagination) {
-                setPagination(prev => {
-                    if (prev.total !== response.pagination.total ||
-                        prev.total_pages !== response.pagination.total_pages) {
-                        return { ...prev, ...response.pagination };
-                    }
-                    return prev;
-                });
-            }
+            // Debug: Check if company data is present
+            console.log('[Applications Debug] First application:', response.data?.[0]);
+            console.log('[Applications Debug] Company in first app:', response.data?.[0]?.company);
+
+            setApplications(response.data || []);
+            setPagination(response.pagination || pagination);
 
         } catch (err: any) {
             console.error('Failed to load applications:', err);
@@ -221,16 +138,32 @@ export default function ApplicationsListClient() {
         } finally {
             setLoading(false);
         }
-    }, [getToken, searchQuery, stageFilter, pagination.page, pagination.limit, sanitizeSearchQuery]);
+    }, [getToken, pagination.page, pagination.limit, searchQuery, stageFilter]);
 
-    // Load applications when dependencies change
-    // Use a ref to track if initial load has happened
-    const hasLoadedRef = useRef(false);
+    // Initial load
     useEffect(() => {
-        // Always load on mount and when these specific values change
         loadApplications();
-        hasLoadedRef.current = true;
-    }, [searchQuery, stageFilter, pagination.page]); // Remove loadApplications from deps to prevent infinite loop
+    }, []);
+
+    // Reload when filters change (debounced for search)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (pagination.page !== 1) {
+                setPagination(prev => ({ ...prev, page: 1 }));
+            } else {
+                loadApplications();
+            }
+        }, searchQuery ? 300 : 0);
+
+        return () => clearTimeout(timer);
+    }, [searchQuery, stageFilter]);
+
+    // Reload when page changes
+    useEffect(() => {
+        if (pagination.page > 0) {
+            loadApplications();
+        }
+    }, [pagination.page]);
 
     const handleAcceptApplication = async (applicationId: string) => {
         try {
@@ -241,7 +174,6 @@ export default function ApplicationsListClient() {
             const client = createAuthenticatedClient(token);
             await client.post(`/applications/${applicationId}/accept`, {});
 
-            // Reload applications
             await loadApplications();
         } catch (err: any) {
             console.error('Failed to accept application:', err);
@@ -291,14 +223,12 @@ export default function ApplicationsListClient() {
             const idsArray = Array.from(selectedIds);
 
             if (bulkAction === 'stage' && data.newStage) {
-                // Update stage for all selected applications
                 await Promise.all(
                     idsArray.map(id =>
                         client.updateApplicationStage(id, data.newStage!, data.notes)
                     )
                 );
             } else if (bulkAction === 'reject') {
-                // Reject all selected applications
                 await Promise.all(
                     idsArray.map(id =>
                         client.updateApplicationStage(id, 'rejected', data.reason || data.notes)
@@ -306,7 +236,6 @@ export default function ApplicationsListClient() {
                 );
             }
 
-            // Reload applications and clear selections
             await loadApplications();
             clearSelections();
         } catch (err: any) {
@@ -351,33 +280,16 @@ export default function ApplicationsListClient() {
         );
     }
 
-    if (error) {
-        return (
-            <div className="alert alert-error">
-                <i className="fa-solid fa-circle-exclamation"></i>
-                <span>{error}</span>
-            </div>
-        );
-    }
-
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold">Applications</h1>
-                    <p className="text-base-content/70 mt-1">
-                        {isCompanyUser
-                            ? 'Candidate submissions to your jobs'
-                            : isRecruiter
-                                ? 'Applications for your assigned candidates'
-                                : 'All candidate applications'}
-                    </p>
+            {error && (
+                <div className="alert alert-error">
+                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <span>{error}</span>
                 </div>
-            </div>
+            )}
 
-            {/* Filters */}
             <ApplicationFilters
-                ref={searchInputRef}
                 searchQuery={searchQuery}
                 stageFilter={stageFilter}
                 viewMode={viewMode}
@@ -386,7 +298,6 @@ export default function ApplicationsListClient() {
                 onViewModeChange={setViewMode}
             />
 
-            {/* Results count */}
             {applications.length > 0 && (
                 <div className="text-sm text-base-content/70">
                     Showing {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} applications
@@ -449,28 +360,26 @@ export default function ApplicationsListClient() {
             {viewMode === 'table' && applications.length > 0 && (
                 <div className="card bg-base-100 shadow-sm overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="table">
+                        <table className="table table-zebra">
                             <thead>
                                 <tr>
                                     {isRecruiter && (
-                                        <th className="w-12">
+                                        <th>
                                             <input
                                                 type="checkbox"
                                                 className="checkbox checkbox-sm"
                                                 checked={selectedIds.size === applications.length && applications.length > 0}
                                                 onChange={toggleSelectAll}
-                                                aria-label="Select all applications"
                                             />
                                         </th>
                                     )}
                                     <th>Candidate</th>
                                     <th>Job</th>
                                     <th>Company</th>
-                                    <th>Recruiter</th>
                                     <th>Stage</th>
-                                    <th>Status</th>
+                                    {isRecruiter && <th>Recruiter</th>}
                                     <th>Submitted</th>
-                                    <th className="text-right">Actions</th>
+                                    {isCompanyUser && <th>Actions</th>}
                                 </tr>
                             </thead>
                             <tbody>
@@ -478,14 +387,15 @@ export default function ApplicationsListClient() {
                                     <ApplicationTableRow
                                         key={application.id}
                                         application={application}
+                                        isSelected={selectedIds.has(application.id)}
+                                        onToggleSelect={() => toggleSelection(application.id)}
                                         canAccept={isCompanyUser && !application.accepted_by_company}
                                         isAccepting={acceptingId === application.id}
                                         onAccept={() => handleAcceptApplication(application.id)}
                                         getStageColor={getStageColor}
                                         formatDate={formatDate}
-                                        showCheckbox={isRecruiter}
-                                        isSelected={selectedIds.has(application.id)}
-                                        onToggleSelect={() => toggleSelection(application.id)}
+                                        isRecruiter={isRecruiter}
+                                        isCompanyUser={isCompanyUser}
                                     />
                                 ))}
                             </tbody>

@@ -536,6 +536,16 @@ export class AtsRepository {
         // Get total from first row (window function COUNT(*) OVER())
         const total = data && data.length > 0 ? data[0].total_count : 0;
 
+        // Debug: Log what's coming from the database
+        if (data && data.length > 0) {
+            console.log('[ATS Repository Debug] First row from DB:', {
+                job_company_id: data[0].job_company_id,
+                company_name: data[0].company_name,
+                candidate_name: data[0].candidate_name,
+                job_title: data[0].job_title,
+            });
+        }
+
         // Map database results to expected nested structure
         const enrichedData = (data || []).map((row: any) => ({
             id: row.id,
@@ -559,13 +569,22 @@ export class AtsRepository {
             job: {
                 id: row.job_id,
                 title: row.job_title,
-                company_id: row.company_id,
+                company_id: row.job_company_id,
             },
-            company: row.company_id ? {
-                id: row.company_id,
+            company: row.job_company_id ? {
+                id: row.job_company_id,
                 name: row.company_name,
             } : null,
         }));
+
+        // Debug: Log what we're returning
+        if (enrichedData.length > 0) {
+            console.log('[ATS Repository Debug] First enriched result:', {
+                id: enrichedData[0].id,
+                job: enrichedData[0].job,
+                company: enrichedData[0].company,
+            });
+        }
 
         const totalPages = Math.ceil(total / limit);
 
