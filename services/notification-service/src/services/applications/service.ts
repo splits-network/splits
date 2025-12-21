@@ -140,7 +140,7 @@ export class ApplicationsEmailService {
         <li><strong>Company:</strong> ${data.companyName}</li>
       </ul>
       <p>Please review the application, add any additional context, and submit it to the company when ready.</p>
-      <p><a href="${process.env.PORTAL_URL || 'https://portal.splits.network'}/applications/${data.applicationId}">Review Application</a></p>
+      <p><a href="${process.env.PORTAL_URL || 'https://splits.network'}/applications/${data.applicationId}">Review Application</a></p>
     `;
 
         await this.sendEmail(recipientEmail, subject, html, {
@@ -173,7 +173,7 @@ export class ApplicationsEmailService {
         <li><strong>Candidate:</strong> ${data.candidateName}</li>
       </ul>
       ${recruiterInfo}
-      <p><a href="${process.env.PORTAL_URL || 'https://portal.splits.network'}/applications/${data.applicationId}">View Application</a></p>
+      <p><a href="${process.env.PORTAL_URL || 'https://splits.network'}/applications/${data.applicationId}">View Application</a></p>
     `;
 
         await this.sendEmail(recipientEmail, subject, html, {

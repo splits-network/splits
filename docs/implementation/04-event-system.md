@@ -418,7 +418,7 @@ export class ApplicationEventConsumer {
         job_location: job.location,
         salary_range: formatSalaryRange(job),
         documents: application.documents,
-        application_url: `https://portal.splits.network/applications/${application_id}`,
+        application_url: `https://splits.network/applications/${application_id}`,
       },
     });
 
