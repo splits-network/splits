@@ -1,6 +1,13 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
+import {
+    placementCreatedEmail,
+    placementActivatedEmail,
+    placementCompletedEmail,
+    placementFailedEmail,
+    guaranteeExpiringEmail,
+} from '../../templates/placements';
 
 export class PlacementsEmailService {
     constructor(
@@ -71,22 +78,21 @@ export class PlacementsEmailService {
             companyName: string;
             salary: number;
             recruiterShare: number;
+            placementId: string;
             userId?: string;
         }
     ): Promise<void> {
         const subject = `Placement Confirmed: ${data.candidateName} - $${data.recruiterShare.toFixed(2)}`;
-        const html = `
-      <h2>🎉 Placement Confirmed!</h2>
-      <p>Congratulations! A candidate you submitted has been hired.</p>
-      <ul>
-        <li><strong>Candidate:</strong> ${data.candidateName}</li>
-        <li><strong>Role:</strong> ${data.jobTitle}</li>
-        <li><strong>Company:</strong> ${data.companyName}</li>
-        <li><strong>Salary:</strong> $${data.salary.toLocaleString()}</li>
-        <li><strong>Your Share:</strong> $${data.recruiterShare.toLocaleString()}</li>
-      </ul>
-      <p>Payment details will be processed according to your payout schedule.</p>
-    `;
+        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/placements/${data.placementId}`;
+        
+        const html = placementCreatedEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            salary: data.salary,
+            recruiterShare: data.recruiterShare,
+            placementUrl,
+        });
 
         await this.sendEmail(recipientEmail, subject, html, {
             eventType: 'placement.created',
@@ -102,25 +108,24 @@ export class PlacementsEmailService {
             jobTitle: string;
             companyName: string;
             guaranteeDays: number;
+            startDate: string;
+            placementId: string;
             role: string;
             splitPercentage: number;
             userId?: string;
         }
     ): Promise<void> {
         const subject = `Placement Activated: ${data.candidateName} Started!`;
-        const html = `
-      <h2>🚀 Placement Has Started!</h2>
-      <p>Great news! Your placed candidate has officially started their new role.</p>
-      <ul>
-        <li><strong>Candidate:</strong> ${data.candidateName}</li>
-        <li><strong>Role:</strong> ${data.jobTitle}</li>
-        <li><strong>Company:</strong> ${data.companyName}</li>
-        <li><strong>Your Role:</strong> ${data.role}</li>
-        <li><strong>Your Split:</strong> ${data.splitPercentage}%</li>
-        <li><strong>Guarantee Period:</strong> ${data.guaranteeDays} days</li>
-      </ul>
-      <p>The ${data.guaranteeDays}-day guarantee period is now active. Your payout will be processed after successful completion.</p>
-    `;
+        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/placements/${data.placementId}`;
+        
+        const html = placementActivatedEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            startDate: data.startDate,
+            guaranteePeriodDays: data.guaranteeDays,
+            placementUrl,
+        });
         
         await this.sendEmail(recipientEmail, subject, html, {
             eventType: 'placement.activated',
@@ -136,21 +141,20 @@ export class PlacementsEmailService {
             jobTitle: string;
             companyName: string;
             finalPayout: number;
+            placementId: string;
             userId?: string;
         }
     ): Promise<void> {
         const subject = `💰 Placement Completed: ${data.candidateName} - $${data.finalPayout.toFixed(2)}`;
-        const html = `
-      <h2>🎉 Placement Successfully Completed!</h2>
-      <p>Congratulations! Your placement has successfully completed the guarantee period.</p>
-      <ul>
-        <li><strong>Candidate:</strong> ${data.candidateName}</li>
-        <li><strong>Role:</strong> ${data.jobTitle}</li>
-        <li><strong>Company:</strong> ${data.companyName}</li>
-        <li><strong>Your Final Payout:</strong> $${data.finalPayout.toLocaleString()}</li>
-      </ul>
-      <p>Your payment will be processed according to your payout schedule. Great work!</p>
-    `;
+        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/placements/${data.placementId}`;
+        
+        const html = placementCompletedEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            recruiterShare: data.finalPayout,
+            placementUrl,
+        });
         
         await this.sendEmail(recipientEmail, subject, html, {
             eventType: 'placement.completed',
@@ -166,21 +170,20 @@ export class PlacementsEmailService {
             jobTitle: string;
             companyName: string;
             failureReason: string;
+            placementId: string;
             userId?: string;
         }
     ): Promise<void> {
         const subject = `Placement Issue: ${data.candidateName}`;
-        const html = `
-      <h2>⚠️ Placement Did Not Complete</h2>
-      <p>Unfortunately, this placement did not successfully complete the guarantee period.</p>
-      <ul>
-        <li><strong>Candidate:</strong> ${data.candidateName}</li>
-        <li><strong>Role:</strong> ${data.jobTitle}</li>
-        <li><strong>Company:</strong> ${data.companyName}</li>
-        <li><strong>Reason:</strong> ${data.failureReason}</li>
-      </ul>
-      <p>The guarantee period was not met. Please log in to review details and next steps.</p>
-    `;
+        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/placements/${data.placementId}`;
+        
+        const html = placementFailedEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            reason: data.failureReason,
+            placementUrl,
+        });
         
         await this.sendEmail(recipientEmail, subject, html, {
             eventType: 'placement.failed',
@@ -196,21 +199,22 @@ export class PlacementsEmailService {
             jobTitle: string;
             companyName: string;
             daysRemaining: number;
+            guaranteeEndDate: string;
+            placementId: string;
             userId?: string;
         }
     ): Promise<void> {
         const subject = `⏳ Guarantee Period Ending Soon: ${data.candidateName}`;
-        const html = `
-      <h2>⏳ Guarantee Period Reminder</h2>
-      <p>The guarantee period for one of your placements is ending soon.</p>
-      <ul>
-        <li><strong>Candidate:</strong> ${data.candidateName}</li>
-        <li><strong>Role:</strong> ${data.jobTitle}</li>
-        <li><strong>Company:</strong> ${data.companyName}</li>
-        <li><strong>Days Remaining:</strong> ${data.daysRemaining}</li>
-      </ul>
-      <p>Please check in with the company and candidate to ensure everything is going well before the guarantee period expires.</p>
-    `;
+        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/placements/${data.placementId}`;
+        
+        const html = guaranteeExpiringEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            daysRemaining: data.daysRemaining,
+            guaranteeEndDate: data.guaranteeEndDate,
+            placementUrl,
+        });
         
         await this.sendEmail(recipientEmail, subject, html, {
             eventType: 'guarantee.expiring',

@@ -1,6 +1,12 @@
 import { Resend } from 'resend';
 import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
+import {
+    applicationCreatedEmail,
+    applicationStageChangedEmail,
+    applicationAcceptedEmail,
+    applicationSubmittedToCompanyEmail,
+} from '../../templates/applications';
 
 export class ApplicationsEmailService {
     constructor(
@@ -132,16 +138,14 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `New Candidate Application to Review: ${data.candidateName}`;
-        const html = `
-      <h2>New Candidate Application</h2>
-      <p>Your candidate <strong>${data.candidateName}</strong> has submitted an application for review.</p>
-      <ul>
-        <li><strong>Position:</strong> ${data.jobTitle}</li>
-        <li><strong>Company:</strong> ${data.companyName}</li>
-      </ul>
-      <p>Please review the application, add any additional context, and submit it to the company when ready.</p>
-      <p><a href="${process.env.PORTAL_URL || 'https://splits.network'}/applications/${data.applicationId}">Review Application</a></p>
-    `;
+        const applicationUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/applications/${data.applicationId}`;
+        
+        const html = applicationCreatedEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            applicationUrl,
+        });
 
         await this.sendEmail(recipientEmail, subject, html, {
             eventType: 'application.recruiter_review_pending',
@@ -212,23 +216,24 @@ export class ApplicationsEmailService {
         data: {
             candidateName: string;
             jobTitle: string;
+            companyName: string;
             oldStage: string;
             newStage: string;
+            applicationId: string;
             userId?: string;
         }
     ): Promise<void> {
         const subject = `Application Update: ${data.candidateName} - ${data.newStage}`;
-        const html = `
-      <h2>Application Stage Changed</h2>
-      <p>An application has moved to a new stage.</p>
-      <ul>
-        <li><strong>Candidate:</strong> ${data.candidateName}</li>
-        <li><strong>Role:</strong> ${data.jobTitle}</li>
-        <li><strong>Previous Stage:</strong> ${data.oldStage}</li>
-        <li><strong>New Stage:</strong> ${data.newStage}</li>
-      </ul>
-      <p>Log in to Splits Network to view details.</p>
-    `;
+        const applicationUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/applications/${data.applicationId}`;
+        
+        const html = applicationStageChangedEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            oldStage: data.oldStage,
+            newStage: data.newStage,
+            applicationUrl,
+        });
 
         await this.sendEmail(recipientEmail, subject, html, {
             eventType: 'application.stage_changed',
@@ -243,32 +248,19 @@ export class ApplicationsEmailService {
             candidateName: string;
             jobTitle: string;
             companyName: string;
+            applicationId: string;
             userId?: string;
         }
     ): Promise<void> {
         const subject = `🎉 Submission Accepted: ${data.candidateName} for ${data.jobTitle}`;
-        const html = `
-      <h2>🎉 Great News! Your Submission Has Been Accepted</h2>
-      <p>${data.companyName} has accepted your candidate submission and can now view full candidate details.</p>
-      <ul>
-        <li><strong>Candidate:</strong> ${data.candidateName}</li>
-        <li><strong>Role:</strong> ${data.jobTitle}</li>
-        <li><strong>Company:</strong> ${data.companyName}</li>
-      </ul>
-      <p>This is a positive signal that the company is interested in moving forward with your candidate. They can now:</p>
-      <ul>
-        <li>View the candidate's full contact information</li>
-        <li>Review complete profile details</li>
-        <li>Begin scheduling interviews</li>
-      </ul>
-      <p><strong>Next Steps:</strong></p>
-      <ul>
-        <li>Keep the candidate warm and informed</li>
-        <li>Be ready to coordinate interview scheduling</li>
-        <li>Monitor the application progress in your dashboard</li>
-      </ul>
-      <p>Log in to Splits Network to track this opportunity.</p>
-    `;
+        const applicationUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/applications/${data.applicationId}`;
+        
+        const html = applicationAcceptedEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            applicationUrl,
+        });
 
         await this.sendEmail(recipientEmail, subject, html, {
             eventType: 'application.accepted',

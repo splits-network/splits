@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Templates Preview - Splits Network</title>
+    <style>
+        body {
+            font-family: -apple-system, 'Segoe UI', sans-serif;
+            background: #f3f4f6;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #111827;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        .preview-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .preview-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #233876;
+            margin-bottom: 16px;
+        }
+        .email-preview {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f9fafb;
+        }
+        .nav {
+            background: #233876;
+            padding: 20px;
+            text-align: center;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 16px;
+            font-weight: 600;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="#application">Application Emails</a>
+        <a href="#placement">Placement Emails</a>
+        <a href="#components">Components</a>
+    </div>
+
+    <div class="container">
+        <h1>Splits Network Email Templates Preview</h1>
+        
+        <h2 id="application" style="color: #233876; margin-top: 60px; margin-bottom: 24px;">Application Emails</h2>
+        <div class="preview-grid">
+            
+            <div class="preview-card">
+                <div class="preview-title">Application Created</div>
+                <div class="email-preview">
+                    <iframe srcdoc='<!-- APPLICATION CREATED EMAIL PREVIEW -->' width="100%" height="600" frameborder="0"></iframe>
+                </div>
+            </div>
+
+            <div class="preview-card">
+                <div class="preview-title">Application Stage Changed</div>
+                <div class="email-preview">
+                    <iframe srcdoc='<!-- APPLICATION STAGE CHANGED PREVIEW -->' width="100%" height="600" frameborder="0"></iframe>
+                </div>
+            </div>
+
+            <div class="preview-card">
+                <div class="preview-title">Application Accepted</div>
+                <div class="email-preview">
+                    <iframe srcdoc='<!-- APPLICATION ACCEPTED PREVIEW -->' width="100%" height="600" frameborder="0"></iframe>
+                </div>
+            </div>
+
+        </div>
+
+        <h2 id="placement" style="color: #233876; margin-top: 60px; margin-bottom: 24px;">Placement Emails</h2>
+        <div class="preview-grid">
+            
+            <div class="preview-card">
+                <div class="preview-title">Placement Created</div>
+                <div class="email-preview">
+                    <iframe srcdoc='<!-- PLACEMENT CREATED PREVIEW -->' width="100%" height="600" frameborder="0"></iframe>
+                </div>
+            </div>
+
+            <div class="preview-card">
+                <div class="preview-title">Placement Completed</div>
+                <div class="email-preview">
+                    <iframe srcdoc='<!-- PLACEMENT COMPLETED PREVIEW -->' width="100%" height="600" frameborder="0"></iframe>
+                </div>
+            </div>
+
+            <div class="preview-card">
+                <div class="preview-title">Guarantee Expiring</div>
+                <div class="email-preview">
+                    <iframe srcdoc='<!-- GUARANTEE EXPIRING PREVIEW -->' width="100%" height="600" frameborder="0"></iframe>
+                </div>
+            </div>
+
+        </div>
+
+        <h2 id="components" style="color: #233876; margin-top: 60px; margin-bottom: 24px;">Email Components</h2>
+        
+        <div class="preview-card">
+            <div class="preview-title">Component Library</div>
+            <ul style="line-height: 2; color: #374151;">
+                <li><strong>Buttons:</strong> Primary, Secondary, Accent variants</li>
+                <li><strong>Info Cards:</strong> Tabular data display with highlighting</li>
+                <li><strong>Alerts:</strong> Info, Success, Warning, Error messages</li>
+                <li><strong>Headings:</strong> H1, H2, H3 with icons</li>
+                <li><strong>Badges:</strong> Status indicators in multiple colors</li>
+                <li><strong>Dividers:</strong> Section separators with optional text</li>
+                <li><strong>Lists:</strong> Formatted bullet and numbered lists</li>
+            </ul>
+        </div>
+
+        <div style="background: white; border-radius: 12px; padding: 32px; margin-top: 40px; text-align: center;">
+            <h3 style="color: #233876; margin-bottom: 16px;">Need Help?</h3>
+            <p style="color: #6b7280; margin-bottom: 24px;">
+                Refer to <code>TEMPLATES.md</code> for usage documentation and examples.
+            </p>
+            <p style="color: #9ca3af; font-size: 14px;">
+                All templates are responsive and tested across major email clients.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

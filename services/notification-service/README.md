@@ -1,22 +1,59 @@
-# Notification Service - Testing Guide
+# Notification Service
 
-The notification service is now fully functional and sends real emails via Resend when events occur.
+The notification service handles all transactional emails for the Splits Network platform using **professional branded HTML templates** that match the portal design.
 
 ## ✅ What's Implemented
 
-1. **HTTP Client for Inter-Service Communication**
-   - Fetches user data from identity-service
-   - Fetches job/candidate/application data from ats-service
-   - Fetches recruiter data from network-service
+### Professional Email Templates
 
-2. **Event Handlers**
-   - `application.created` - Sends email when a candidate is submitted
-   - `application.stage_changed` - Sends email when candidate moves through pipeline
-   - `placement.created` - Sends congratulations email when candidate is hired
+We've implemented a comprehensive template system featuring:
+- **Brand-consistent design** with Splits Network colors (#233876 primary, #0f9d8a secondary)
+- **Responsive HTML** optimized for all major email clients (Gmail, Outlook, Apple Mail)
+- **Rich content** with info cards, alerts, buttons, and formatted data
+- **Reusable components** for consistent UI elements
 
-3. **Email Templates**
-   - Professional HTML emails with all relevant details
-   - Notification logging to database with status tracking
+See [TEMPLATES.md](./TEMPLATES.md) for complete documentation.
+
+### Email Template Categories
+
+1. **Application Emails**
+   - New candidate application notifications
+   - Stage change updates with context
+   - Application accepted/rejected
+   - Pre-screen requests
+
+2. **Placement Emails**
+   - Placement confirmation with fee breakdown
+   - Placement activation (start date)
+   - Placement completion celebration
+   - Guarantee expiring reminders
+
+### Service Communication
+
+- **HTTP Client** for inter-service communication
+  - Fetches user data from identity-service
+  - Fetches job/candidate/application data from ats-service
+  - Fetches recruiter data from network-service
+
+### Event Handlers
+
+- `application.created` - Professional notification when candidate is submitted
+- `application.stage_changed` - Rich stage update with context
+- `application.accepted` - Celebration email with next steps
+- `placement.created` - Congratulations email with fee breakdown
+- `placement.activated` - Start date notification
+- `placement.completed` - Success celebration
+- `guarantee.expiring` - Reminder with countdown
+
+## 🎨 Preview Email Templates
+
+Generate HTML previews of all email templates:
+
+```bash
+pnpm preview:emails
+```
+
+This creates preview files in `email-previews/` directory. Open `email-previews/index.html` to browse all templates.
 
 ## 🧪 Testing Notifications
 
