@@ -107,7 +107,7 @@ export function baseEmailTemplate({ preheader, content, source }: BaseEmailProps
                 <table cellpadding="0" cellspacing="0" role="presentation" style="width: 100%;">
                   <tr>
                     <td style="text-align: center;">
-                      <img src="${logoUrl}" alt="Splits Network" style="height: 48px; width: auto; margin: 0 auto 16px; display: block;" />
+                      <img src="${logoUrl}" alt="Splits Network" width="180" height="48" style="height: 48px; width: auto; max-width: 180px; margin: 0 auto 16px; display: block; border: 0; outline: none;" />
                       <p style="margin: 8px 0 0; font-size: 14px; color: #e5e7eb;">
                         ${tagline}
                       </p>
