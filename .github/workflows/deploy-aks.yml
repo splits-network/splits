@@ -116,6 +116,7 @@ jobs:
 
             - name: Create Sentry release
               if: matrix.service.name == 'portal' || matrix.service.name == 'candidate' || matrix.service.name == 'corporate' || matrix.service.name == 'api-gateway' || matrix.service.name == 'identity-service' || matrix.service.name == 'ats-service' || matrix.service.name == 'network-service' || matrix.service.name == 'billing-service' || matrix.service.name == 'notification-service'
+              continue-on-error: true
               env:
                   SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
                   SENTRY_ORG: splitsnetwork
