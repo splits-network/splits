@@ -654,3 +654,41 @@ export interface AutomationExecution {
     created_at: Date;
     updated_at: Date;
 }
+
+// ============================================================================
+// Notification Types (Email + In-App)
+// ============================================================================
+
+export type NotificationChannel = 'email' | 'in_app' | 'both';
+export type NotificationStatus = 'sent' | 'failed' | 'pending';
+export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
+
+export interface NotificationLog {
+    id: string;
+    event_type: string;
+    recipient_user_id?: string;
+    recipient_email: string;
+    subject: string;
+    template: string;
+    payload?: Record<string, any>;
+    
+    // Channel and delivery
+    channel: NotificationChannel;
+    status: NotificationStatus;
+    sent_at?: Date;
+    error_message?: string;
+    
+    // Email-specific fields
+    resend_message_id?: string;
+    
+    // In-app specific fields
+    read: boolean;
+    read_at?: Date;
+    dismissed: boolean;
+    action_url?: string;
+    action_label?: string;
+    priority: NotificationPriority;
+    category?: string;
+    
+    created_at: Date;
+}

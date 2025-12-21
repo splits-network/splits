@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { useEffect, useState } from 'react';
 import { UserDropdown } from './user-dropdown';
+import NotificationBell from './NotificationBell';
 
 export function Header() {
     const pathname = usePathname();
@@ -39,25 +40,26 @@ export function Header() {
     // Authenticated app pages
     const isAuthenticatedPage = pathname?.startsWith('/dashboard') || pathname?.startsWith('/roles') ||
         pathname?.startsWith('/candidates') || pathname?.startsWith('/placements') ||
-        pathname?.startsWith('/admin') || pathname?.startsWith('/settings') || pathname?.startsWith('/billing');
+        pathname?.startsWith('/admin') || pathname?.startsWith('/settings') || pathname?.startsWith('/billing') ||
+        pathname?.startsWith('/notifications') || pathname?.startsWith('/applications') ||
+        pathname?.startsWith('/proposals') || pathname?.startsWith('/teams') ||
+        pathname?.startsWith('/company') || pathname?.startsWith('/integrations') ||
+        pathname?.startsWith('/invitations');
 
     return (
         <header className="navbar bg-base-100 shadow-lg sticky top-0 z-50">
             {/* Start: Brand + Mobile menu */}
             <div className="navbar-start ps-4">
-                {!isSignedIn && !isAuthenticatedPage && (
-                    <div className="dropdown lg:hidden">
-                        <label tabIndex={0} className="btn btn-ghost">
-                            <i className="fa-solid fa-bars"></i>
-                        </label>
-                        <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-10 p-2 shadow bg-base-100 rounded-box w-52">
-                            <li><a href="#how-it-works">How It Works</a></li>
-                            <li><a href="#features">Features</a></li>
-                            <li><a href="#pricing">Pricing</a></li>
-                        </ul>
-                    </div>
-                )}
-
+                <div className="dropdown lg:hidden">
+                    <label tabIndex={0} className="btn btn-ghost">
+                        <i className="fa-solid fa-bars"></i>
+                    </label>
+                    <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-10 p-2 shadow bg-base-100 rounded-box w-52">
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                    </ul>
+                </div>
                 <Link href="/" className="">
                     <img src="/logo.svg" alt="Applicant Network" className="h-12" />
                 </Link>
@@ -65,18 +67,16 @@ export function Header() {
 
             {/* Center: Desktop marketing links */}
             <div className="navbar-center hidden lg:flex">
-                {!isSignedIn && !isAuthenticatedPage && (
-                    <ul className="menu menu-horizontal px-1">
-                        <li><a href="#how-it-works">How It Works</a></li>
-                        <li><a href="#features">Features</a></li>
-                        <li><a href="#pricing">Pricing</a></li>
-                    </ul>
-                )}
+                <ul className="menu menu-horizontal px-1">
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                </ul>
             </div>
 
             {/* End: Actions + Theme toggle */}
             <div className="navbar-end gap-2 items-center pe-4">
-                <label className="swap swap-rotate cursor-pointer">
+                <label className="swap swap-rotate cursor-pointer btn btn-ghost btn-circle" title="Toggle Theme">
                     <input
                         type="checkbox"
                         checked={isDark}
@@ -89,12 +89,10 @@ export function Header() {
 
                 {isSignedIn ? (
                     <>
-                        {!isAuthenticatedPage && (
-                            <Link href="/dashboard" className="btn btn-ghost">
-                                <i className="fa-solid fa-gauge"></i>
-                                Dashboard
-                            </Link>
-                        )}
+                        <Link href="/dashboard" className="btn btn-ghost btn-circle" title='Dashboard'>
+                            <i className="fa-solid fa-gauge text-xl"></i>
+                        </Link>
+                        <NotificationBell />
                         <UserDropdown />
                     </>
                 ) : (

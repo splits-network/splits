@@ -238,6 +238,7 @@ async function main() {
     services.register('ats', process.env.ATS_SERVICE_URL || 'http://localhost:3002');
     services.register('network', process.env.NETWORK_SERVICE_URL || 'http://localhost:3003');
     services.register('billing', process.env.BILLING_SERVICE_URL || 'http://localhost:3004');
+    services.register('notification', process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3005');
     services.register('document', process.env.DOCUMENT_SERVICE_URL || 'http://localhost:3006');
 
     // Register OAuth routes

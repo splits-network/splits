@@ -15,6 +15,9 @@ export class CandidatesEmailService {
         private logger: Logger
     ) {}
 
+    /**
+     * Send email notification (creates record with channel='email')
+     */
     private async sendEmail(
         to: string,
         subject: string,
@@ -32,7 +35,11 @@ export class CandidatesEmailService {
             subject,
             template: 'custom',
             payload: options.payload,
+            channel: 'email',
             status: 'pending',
+            read: false,
+            dismissed: false,
+            priority: 'normal',
         });
 
         try {
@@ -68,6 +75,88 @@ export class CandidatesEmailService {
         }
     }
 
+    /**
+     * Create in-app notification (creates record with channel='in_app')
+     */
+    private async createInAppNotification(options: {
+        userId: string;
+        email: string;
+        subject: string;
+        eventType: string;
+        actionUrl?: string;
+        actionLabel?: string;
+        priority?: 'low' | 'normal' | 'high' | 'urgent';
+        category?: string;
+        payload?: Record<string, any>;
+    }): Promise<void> {
+        try {
+            await this.repository.createNotificationLog({
+                event_type: options.eventType,
+                recipient_user_id: options.userId,
+                recipient_email: options.email,
+                subject: options.subject,
+                template: 'in_app',
+                payload: options.payload,
+                channel: 'in_app',
+                status: 'sent',
+                read: false,
+                dismissed: false,
+                action_url: options.actionUrl,
+                action_label: options.actionLabel,
+                priority: options.priority || 'normal',
+                category: options.category || 'candidate',
+            });
+
+            this.logger.info(
+                { userId: options.userId, subject: options.subject },
+                'In-app notification created'
+            );
+        } catch (error: any) {
+            this.logger.error({ userId: options.userId, error }, 'Failed to create in-app notification');
+            // Don't throw - we don't want in-app notification failure to break email sending
+        }
+    }
+
+    /**
+     * Send dual notification: email + in-app
+     */
+    private async sendDualNotification(
+        to: string,
+        subject: string,
+        html: string,
+        options: {
+            eventType: string;
+            userId?: string;
+            payload?: Record<string, any>;
+            actionUrl?: string;
+            actionLabel?: string;
+            priority?: 'low' | 'normal' | 'high' | 'urgent';
+            category?: string;
+        }
+    ): Promise<void> {
+        // Send email first (primary channel)
+        await this.sendEmail(to, subject, html, {
+            eventType: options.eventType,
+            userId: options.userId,
+            payload: options.payload,
+        });
+
+        // Create in-app notification (secondary channel)
+        if (options.userId) {
+            await this.createInAppNotification({
+                userId: options.userId,
+                email: to,
+                subject,
+                eventType: options.eventType,
+                actionUrl: options.actionUrl,
+                actionLabel: options.actionLabel,
+                priority: options.priority,
+                category: options.category,
+                payload: options.payload,
+            });
+        }
+    }
+
     async sendCandidateSourced(
         recipientEmail: string,
         data: {
@@ -87,10 +176,14 @@ export class CandidatesEmailService {
             candidatesUrl,
         });
         
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'candidate.sourced',
             userId: data.userId,
             payload: data,
+            actionUrl: '/candidates',
+            actionLabel: 'View Candidates',
+            priority: 'normal',
+            category: 'candidate',
         });
     }
 
@@ -111,10 +204,14 @@ export class CandidatesEmailService {
             candidateUrl,
         });
         
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'ownership.conflict_detected',
             userId: data.userId,
             payload: data,
+            actionUrl: '/candidates',
+            actionLabel: 'View Candidates',
+            priority: 'high',
+            category: 'candidate',
         });
     }
 
@@ -135,10 +232,14 @@ export class CandidatesEmailService {
             candidatesUrl,
         });
         
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'ownership.conflict_detected',
             userId: data.userId,
             payload: data,
+            actionUrl: '/candidates',
+            actionLabel: 'View Candidates',
+            priority: 'normal',
+            category: 'candidate',
         });
     }
 
@@ -324,10 +425,14 @@ export class CandidatesEmailService {
 </html>
         `.trim();
 
-        await this.sendEmail(recruiterEmail, subject, html, {
+        await this.sendDualNotification(recruiterEmail, subject, html, {
             eventType: 'candidate.consent_given',
             userId: data.userId,
             payload: data,
+            actionUrl: '/candidates',
+            actionLabel: 'View Candidate',
+            priority: 'high',
+            category: 'candidate',
         });
     }
 
@@ -416,10 +521,14 @@ export class CandidatesEmailService {
 </html>
         `.trim();
 
-        await this.sendEmail(recruiterEmail, subject, html, {
+        await this.sendDualNotification(recruiterEmail, subject, html, {
             eventType: 'candidate.consent_declined',
             userId: data.userId,
             payload: data,
+            actionUrl: '/candidates',
+            actionLabel: 'View Candidates',
+            priority: 'normal',
+            category: 'candidate',
         });
     }
 }

@@ -21,6 +21,9 @@ export class ApplicationsEmailService {
         private logger: Logger
     ) {}
 
+    /**
+     * Send email notification (creates record with channel='email')
+     */
     private async sendEmail(
         to: string,
         subject: string,
@@ -38,7 +41,11 @@ export class ApplicationsEmailService {
             subject,
             template: 'custom',
             payload: options.payload,
+            channel: 'email',
             status: 'pending',
+            read: false,
+            dismissed: false,
+            priority: 'normal',
         });
 
         try {
@@ -74,6 +81,88 @@ export class ApplicationsEmailService {
         }
     }
 
+    /**
+     * Create in-app notification (creates record with channel='in_app')
+     */
+    private async createInAppNotification(options: {
+        userId: string;
+        email: string;
+        subject: string;
+        eventType: string;
+        actionUrl?: string;
+        actionLabel?: string;
+        priority?: 'low' | 'normal' | 'high' | 'urgent';
+        category?: string;
+        payload?: Record<string, any>;
+    }): Promise<void> {
+        try {
+            await this.repository.createNotificationLog({
+                event_type: options.eventType,
+                recipient_user_id: options.userId,
+                recipient_email: options.email,
+                subject: options.subject,
+                template: 'in_app',
+                payload: options.payload,
+                channel: 'in_app',
+                status: 'sent',
+                read: false,
+                dismissed: false,
+                action_url: options.actionUrl,
+                action_label: options.actionLabel,
+                priority: options.priority || 'normal',
+                category: options.category || 'application',
+            });
+
+            this.logger.info(
+                { userId: options.userId, subject: options.subject },
+                'In-app notification created'
+            );
+        } catch (error: any) {
+            this.logger.error({ userId: options.userId, error }, 'Failed to create in-app notification');
+            // Don't throw - we don't want in-app notification failure to break email sending
+        }
+    }
+
+    /**
+     * Send dual notification: email + in-app
+     */
+    private async sendDualNotification(
+        to: string,
+        subject: string,
+        html: string,
+        options: {
+            eventType: string;
+            userId?: string;
+            payload?: Record<string, any>;
+            actionUrl?: string;
+            actionLabel?: string;
+            priority?: 'low' | 'normal' | 'high' | 'urgent';
+            category?: string;
+        }
+    ): Promise<void> {
+        // Send email first (primary channel)
+        await this.sendEmail(to, subject, html, {
+            eventType: options.eventType,
+            userId: options.userId,
+            payload: options.payload,
+        });
+
+        // Create in-app notification if we have a userId
+        if (options.userId) {
+            await this.createInAppNotification({
+                userId: options.userId,
+                email: to,
+                subject,
+                eventType: options.eventType,
+                actionUrl: options.actionUrl,
+                actionLabel: options.actionLabel,
+                priority: options.priority,
+                category: options.category,
+                payload: options.payload,
+            });
+        }
+    }
+
     async sendApplicationCreated(
         recipientEmail: string,
         data: {
@@ -94,10 +183,14 @@ export class ApplicationsEmailService {
             applicationUrl,
         });
 
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'application.created',
             userId: data.userId,
             payload: data,
+            actionUrl: `/applications/${data.applicationId}`,
+            actionLabel: 'Review Application',
+            priority: 'high',
+            category: 'application',
         });
     }
 
@@ -125,10 +218,14 @@ export class ApplicationsEmailService {
             applicationUrl,
         });
 
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'application.candidate_submitted',
             userId: data.userId,
             payload: data,
+            actionUrl: `/applications/${data.applicationId}`,
+            actionLabel: 'View Application',
+            priority: 'normal',
+            category: 'application',
         });
     }
 
@@ -152,10 +249,14 @@ export class ApplicationsEmailService {
             applicationUrl,
         });
 
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'application.recruiter_review_pending',
             userId: data.userId,
             payload: data,
+            actionUrl: `/applications/${data.applicationId}`,
+            actionLabel: 'Review Application',
+            priority: 'high',
+            category: 'application',
         });
     }
 
@@ -181,10 +282,14 @@ export class ApplicationsEmailService {
             recruiterName: data.recruiterName,
         });
 
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'application.company_received',
             userId: data.userId,
             payload: data,
+            actionUrl: `/applications/${data.applicationId}`,
+            actionLabel: 'Review Candidate',
+            priority: 'high',
+            category: 'application',
         });
     }
 
@@ -212,10 +317,14 @@ export class ApplicationsEmailService {
             applicationUrl,
         });
 
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'application.withdrawn',
             userId: data.userId,
             payload: data,
+            actionUrl: `/applications/${data.applicationId}`,
+            actionLabel: 'View Details',
+            priority: 'normal',
+            category: 'application',
         });
     }
 
@@ -243,10 +352,14 @@ export class ApplicationsEmailService {
             applicationUrl,
         });
 
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'application.stage_changed',
             userId: data.userId,
             payload: data,
+            actionUrl: `/applications/${data.applicationId}`,
+            actionLabel: 'View Application',
+            priority: 'normal',
+            category: 'application',
         });
     }
 
@@ -270,10 +383,14 @@ export class ApplicationsEmailService {
             applicationUrl,
         });
 
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'application.accepted',
             userId: data.userId,
             payload: data,
+            actionUrl: `/applications/${data.applicationId}`,
+            actionLabel: 'View Application',
+            priority: 'high',
+            category: 'application',
         });
     }
 
@@ -302,10 +419,14 @@ export class ApplicationsEmailService {
             portalUrl,
         });
 
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'application.prescreen_requested',
             userId: data.userId,
             payload: data,
+            actionUrl: '/dashboard',
+            actionLabel: 'View Dashboard',
+            priority: 'normal',
+            category: 'application',
         });
     }
 
@@ -328,10 +449,14 @@ export class ApplicationsEmailService {
             portalUrl,
         });
 
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'application.prescreen_request_confirmation',
             userId: data.userId,
             payload: data,
+            actionUrl: '/applications',
+            actionLabel: 'View Applications',
+            priority: 'low',
+            category: 'application',
         });
     }
 
@@ -382,10 +507,14 @@ export class ApplicationsEmailService {
                 : 'We\'ll keep you updated on your application status.'}</p>
         `;
 
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'ai_review.completed_candidate',
             userId: data.userId,
             payload: data,
+            actionUrl: `/applications/${data.applicationId}`,
+            actionLabel: 'View Review',
+            priority: 'high',
+            category: 'application',
         });
     }
 
@@ -439,10 +568,14 @@ export class ApplicationsEmailService {
                 : 'Review the detailed analysis to determine if this candidate is worth pursuing.'}</p>
         `;
 
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'ai_review.completed_recruiter',
             userId: data.userId,
             payload: data,
+            actionUrl: `/applications/${data.applicationId}`,
+            actionLabel: 'Review Application',
+            priority: 'high',
+            category: 'application',
         });
     }
 }

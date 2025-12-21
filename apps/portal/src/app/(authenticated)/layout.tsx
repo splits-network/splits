@@ -1,7 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { Sidebar } from '@/components/sidebar';
-import { Topbar } from '@/components/topbar';
 
 export default async function AuthenticatedLayout({
     children,

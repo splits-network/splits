@@ -10,6 +10,7 @@ import { NotificationRepository } from './repository';
 import { NotificationService } from './service';
 import { DomainEventConsumer } from './domain-consumer';
 import { ServiceRegistry } from './clients';
+import { registerInAppNotificationRoutes } from './in-app-routes';
 import * as Sentry from '@sentry/node';
 
 async function main() {
@@ -87,6 +88,9 @@ async function main() {
     // Initialize domain event consumer
     const consumer = new DomainEventConsumer(rabbitConfig.url, notificationService, services, logger);
     await consumer.connect();
+
+    // Register in-app notification HTTP routes
+    registerInAppNotificationRoutes(app, repository);
 
     // Optional: Add HTTP endpoint for manual notifications
     app.post('/send-test-email', async (request, reply) => {

@@ -17,6 +17,9 @@ export class PlacementsEmailService {
         private logger: Logger
     ) {}
 
+    /**
+     * Send email only (creates channel='email' record)
+     */
     private async sendEmail(
         to: string,
         subject: string,
@@ -35,6 +38,11 @@ export class PlacementsEmailService {
             template: 'custom',
             payload: options.payload,
             status: 'pending',
+            channel: 'email',
+            // Email-only records don't need these in-app fields (but DB requires them with defaults)
+            read: false,
+            dismissed: false,
+            priority: 'normal',
         });
 
         try {
@@ -70,6 +78,78 @@ export class PlacementsEmailService {
         }
     }
 
+    /**
+     * Create in-app notification only (creates channel='in_app' record)
+     */
+    private async createInAppNotification(
+        options: {
+            eventType: string;
+            userId?: string;
+            payload?: Record<string, any>;
+            subject: string;
+            actionUrl?: string;
+            actionLabel?: string;
+            priority?: 'low' | 'normal' | 'high';
+            category?: string;
+        }
+    ): Promise<void> {
+        try {
+            await this.repository.createNotificationLog({
+                event_type: options.eventType,
+                recipient_user_id: options.userId,
+                recipient_email: '',
+                subject: options.subject,
+                template: 'in_app',
+                payload: options.payload,
+                status: 'sent',
+                channel: 'in_app',
+                read: false,
+                dismissed: false,
+                action_url: options.actionUrl,
+                action_label: options.actionLabel,
+                priority: options.priority || 'normal',
+                category: options.category,
+            });
+
+            this.logger.info(
+                { userId: options.userId, eventType: options.eventType },
+                'In-app notification created'
+            );
+        } catch (error: any) {
+            this.logger.error(
+                { userId: options.userId, error },
+                'Failed to create in-app notification (non-fatal)'
+            );
+        }
+    }
+
+    /**
+     * Send both email and in-app notification (creates 2 separate records)
+     */
+    private async sendDualNotification(
+        to: string,
+        subject: string,
+        html: string,
+        options: {
+            eventType: string;
+            userId?: string;
+            payload?: Record<string, any>;
+            actionUrl?: string;
+            actionLabel?: string;
+            priority?: 'low' | 'normal' | 'high';
+            category?: string;
+        }
+    ): Promise<void> {
+        await this.sendEmail(to, subject, html, options);
+
+        if (options.userId) {
+            await this.createInAppNotification({
+                ...options,
+                subject,
+            });
+        }
+    }
+
     async sendPlacementCreated(
         recipientEmail: string,
         data: {
@@ -94,10 +174,14 @@ export class PlacementsEmailService {
             placementUrl,
         });
 
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'placement.created',
             userId: data.userId,
             payload: data,
+            actionUrl: `/placements/${data.placementId}`,
+            actionLabel: 'View Placement',
+            priority: 'high',
+            category: 'placement',
         });
     }
 
@@ -127,10 +211,14 @@ export class PlacementsEmailService {
             placementUrl,
         });
         
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'placement.activated',
             userId: data.userId,
             payload: data,
+            actionUrl: `/placements/${data.placementId}`,
+            actionLabel: 'View Placement',
+            priority: 'high',
+            category: 'placement',
         });
     }
 
@@ -156,10 +244,14 @@ export class PlacementsEmailService {
             placementUrl,
         });
         
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'placement.completed',
             userId: data.userId,
             payload: data,
+            actionUrl: `/placements/${data.placementId}`,
+            actionLabel: 'View Placement',
+            priority: 'high',
+            category: 'placement',
         });
     }
 
@@ -185,10 +277,14 @@ export class PlacementsEmailService {
             placementUrl,
         });
         
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'placement.failed',
             userId: data.userId,
             payload: data,
+            actionUrl: `/placements/${data.placementId}`,
+            actionLabel: 'View Details',
+            priority: 'high',
+            category: 'placement',
         });
     }
 
@@ -216,10 +312,14 @@ export class PlacementsEmailService {
             placementUrl,
         });
         
-        await this.sendEmail(recipientEmail, subject, html, {
+        await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'guarantee.expiring',
             userId: data.userId,
             payload: data,
+            actionUrl: `/placements/${data.placementId}`,
+            actionLabel: 'View Placement',
+            priority: 'normal',
+            category: 'placement',
         });
     }
 }
