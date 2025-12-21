@@ -268,13 +268,13 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
         '/applications/:id/withdraw',
         async (request: FastifyRequest<{
             Params: { id: string };
-            Body: { reason?: string };
+            Body: { reason?: string; candidate_id?: string };
         }>, reply: FastifyReply) => {
-            // Extract candidate ID from auth context
-            const candidateId = (request as any).auth?.userId;
+            // Extract candidate ID from request body (passed by API Gateway)
+            const candidateId = request.body.candidate_id || (request as any).auth?.userId;
 
             if (!candidateId) {
-                throw new BadRequestError('Candidate ID not found in auth context');
+                throw new BadRequestError('Candidate ID not found in request');
             }
 
             const application = await service.withdrawApplication(

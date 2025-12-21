@@ -613,66 +613,6 @@ export class ApplicationService {
     }
 
     /**
-     * Candidate withdraws application
-     */
-    async withdrawApplication(
-        applicationId: string,
-        candidateId: string,
-        reason?: string
-    ): Promise<Application> {
-        const application = await this.getApplicationById(applicationId);
-
-        // Verify candidate owns this application
-        if (application.candidate_id !== candidateId) {
-            throw new Error(`Candidate does not own this application`);
-        }
-
-        // Cannot withdraw if already in offer/hired stage
-        if (['offer', 'hired'].includes(application.stage)) {
-            throw new Error(`Cannot withdraw application in ${application.stage} stage`);
-        }
-
-        // Update to rejected stage
-        const updated = await this.repository.updateApplication(applicationId, {
-            stage: 'rejected',
-            notes: application.notes ? `${application.notes}\n\nWithdrawn by candidate: ${reason || 'No reason provided'}` : `Withdrawn by candidate: ${reason || 'No reason provided'}`,
-        });
-
-        // Get job for audit log
-        const job = await this.repository.findJobById(application.job_id);
-
-        // Create audit log
-        await this.repository.createAuditLog({
-            application_id: applicationId,
-            action: 'withdrawn',
-            performed_by_user_id: candidateId,
-            performed_by_role: 'candidate',
-            company_id: job?.company_id,
-            old_value: { stage: application.stage },
-            new_value: { stage: 'rejected' },
-            metadata: {
-                reason: reason,
-                job_id: application.job_id,
-            },
-        });
-
-        // Publish event
-        await this.eventPublisher.publish(
-            'application.withdrawn',
-            {
-                application_id: applicationId,
-                job_id: application.job_id,
-                candidate_id: candidateId,
-                recruiter_id: application.recruiter_id,
-                reason: reason,
-            },
-            'ats-service'
-        );
-
-        return updated;
-    }
-
-    /**
      * Get pending applications for recruiter review
      */
     async getPendingApplicationsForRecruiter(recruiterId: string): Promise<Application[]> {
@@ -760,6 +700,73 @@ export class ApplicationService {
                 requested_by_user_id: requestedByUserId,
                 message: options.message,
                 auto_assign: !options.recruiter_id,
+            },
+            'ats-service'
+        );
+
+        return updated;
+    }
+
+    /**
+     * Withdraw application (candidate self-service)
+     */
+    async withdrawApplication(
+        applicationId: string,
+        candidateId: string,
+        reason?: string
+    ): Promise<Application> {
+        // Get application and verify it exists
+        const application = await this.repository.findApplicationById(applicationId);
+        if (!application) {
+            throw new Error(`Application ${applicationId} not found`);
+        }
+
+        // Verify the application belongs to this candidate
+        if (application.candidate_id !== candidateId) {
+            throw new Error('You can only withdraw your own applications');
+        }
+
+        // Verify application is not already withdrawn or rejected
+        if (application.stage === 'withdrawn') {
+            throw new Error('Application is already withdrawn');
+        }
+
+        if (application.stage === 'rejected') {
+            throw new Error('Cannot withdraw a rejected application');
+        }
+
+        // Update application stage to withdrawn
+        const updated = await this.repository.updateApplication(applicationId, {
+            stage: 'withdrawn',
+        });
+
+        // Create audit log
+        await this.repository.createAuditLog({
+            application_id: applicationId,
+            action: 'withdrawn',
+            performed_by_user_id: candidateId,
+            performed_by_role: 'candidate',
+            old_value: {
+                stage: application.stage,
+            },
+            new_value: {
+                stage: 'withdrawn',
+            },
+            metadata: {
+                reason: reason || 'Candidate withdrew application',
+            },
+        });
+
+        // Publish event
+        await this.eventPublisher.publish(
+            'application.withdrawn',
+            {
+                application_id: applicationId,
+                job_id: application.job_id,
+                candidate_id: application.candidate_id,
+                recruiter_id: application.recruiter_id,
+                reason: reason || 'Candidate withdrew application',
+                previous_stage: application.stage,
             },
             'ats-service'
         );

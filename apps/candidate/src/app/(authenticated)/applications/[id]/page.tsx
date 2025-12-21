@@ -65,6 +65,7 @@ export default async function ApplicationDetailPage({
 
     // Fetch application data server-side
     let application: any = null;
+    let responseData: any = null;
 
     try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
@@ -84,7 +85,10 @@ export default async function ApplicationDetailPage({
         }
 
         const data = await response.json();
-        application = data.data || data;
+        responseData = data;
+        // The /full endpoint returns { data: { application, job, candidate, ... } }
+        const fullData = data.data || data;
+        application = fullData.application || fullData;
     } catch (err) {
         console.error('Error fetching application:', err);
         notFound();
@@ -94,9 +98,11 @@ export default async function ApplicationDetailPage({
         notFound();
     }
 
-    const job = application.job || {};
+    // Extract nested data from the /full response
+    const fullResponse = responseData?.data;
+    const job = fullResponse?.job || application.job || {};
     const company = job.company || {};
-    const recruiter = application.recruiter;
+    const recruiter = fullResponse?.recruiter || application.recruiter;
 
     return (
         <div className="container mx-auto px-4 py-8">

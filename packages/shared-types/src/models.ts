@@ -128,7 +128,7 @@ export interface MaskedCandidate {
     _masked: true; // Flag to indicate this is masked data
 }
 
-export type ApplicationStage = 'draft' | 'screen' | 'submitted' | 'interview' | 'offer' | 'hired' | 'rejected';
+export type ApplicationStage = 'draft' | 'screen' | 'submitted' | 'interview' | 'offer' | 'hired' | 'rejected' | 'withdrawn';
 
 // Audit log for tracking application actions
 export interface ApplicationAuditLog {
