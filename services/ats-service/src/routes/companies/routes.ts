@@ -43,14 +43,29 @@ export function registerCompanyRoutes(app: FastifyInstance, service: AtsService)
     // Create new company
     app.post(
         '/companies',
-        async (request: FastifyRequest<{ Body: { name: string; identity_organization_id?: string } }>, reply: FastifyReply) => {
-            const { name, identity_organization_id } = request.body;
+        async (request: FastifyRequest<{
+            Body: {
+                name: string;
+                identity_organization_id?: string;
+                website?: string;
+                industry?: string;
+                company_size?: string;
+                headquarters_location?: string;
+                description?: string;
+                logo_url?: string;
+            }
+        }>, reply: FastifyReply) => {
+            const { name, identity_organization_id, website, industry, company_size, headquarters_location, description, logo_url } = request.body;
 
             if (!name) {
                 throw new BadRequestError('Company name is required');
             }
 
-            const company = await service.createCompany(name, identity_organization_id);
+            const company = await service.createCompany(
+                name,
+                identity_organization_id,
+                { website, industry, company_size, headquarters_location, description, logo_url }
+            );
             return reply.status(201).send({ data: company });
         }
     );
@@ -60,15 +75,18 @@ export function registerCompanyRoutes(app: FastifyInstance, service: AtsService)
         '/companies/:id',
         async (request: FastifyRequest<{
             Params: { id: string };
-            Body: { name?: string; identity_organization_id?: string }
-        }>, reply: FastifyReply) => {
-            const { name, identity_organization_id } = request.body;
-
-            if (!name && !identity_organization_id) {
-                throw new BadRequestError('At least one field must be provided');
+            Body: {
+                name?: string;
+                identity_organization_id?: string;
+                website?: string;
+                industry?: string;
+                company_size?: string;
+                headquarters_location?: string;
+                description?: string;
+                logo_url?: string;
             }
-
-            const company = await service.updateCompany(request.params.id, { name, identity_organization_id });
+        }>, reply: FastifyReply) => {
+            const company = await service.updateCompany(request.params.id, request.body);
             return reply.send({ data: company });
         }
     );

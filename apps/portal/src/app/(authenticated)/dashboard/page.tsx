@@ -75,7 +75,7 @@ export default async function DashboardPage() {
                         Your account is being set up. Please complete your profile to get started.
                     </p>
                     <div className="card-actions justify-center mt-4">
-                        <a href="/settings" className="btn btn-primary">
+                        <a href="/profile" className="btn btn-primary">
                             Complete Profile
                         </a>
                     </div>

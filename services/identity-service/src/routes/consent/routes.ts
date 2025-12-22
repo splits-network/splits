@@ -14,12 +14,17 @@ export function registerConsentRoutes(
      * GET /consent
      * Get current user's consent preferences
      */
-    app.get('/consent', async (request, reply) => {
+    app.get<{
+        Querystring: {
+            userId?: string;
+        };
+    }>('/consent', async (request, reply) => {
         try {
-            const userId = (request as any).userId;
+            // userId can come from query params (API Gateway) or request.userId (direct call)
+            const userId = request.query.userId || (request as any).userId;
             
             if (!userId) {
-                return reply.status(401).send({ error: 'Unauthorized' });
+                return reply.status(401).send({ error: 'Unauthorized - userId required' });
             }
 
             const consent = await service.getConsent(userId);
@@ -41,6 +46,7 @@ export function registerConsentRoutes(
      */
     app.post<{
         Body: {
+            userId?: string;
             preferences: {
                 functional: boolean;
                 analytics: boolean;
@@ -49,16 +55,17 @@ export function registerConsentRoutes(
         };
     }>('/consent', async (request, reply) => {
         try {
-            const userId = (request as any).userId;
+            // userId can come from request body (API Gateway) or request.userId (direct call)
+            const userId = request.body.userId || (request as any).userId;
             
             if (!userId) {
-                return reply.status(401).send({ error: 'Unauthorized' });
+                return reply.status(401).send({ error: 'Unauthorized - userId required' });
             }
 
             const { preferences } = request.body;
 
             if (!preferences || typeof preferences !== 'object') {
-                return reply.status(400).send({ error: 'Invalid request body' });
+                return reply.status(400).send({ error: 'Invalid request body - preferences required' });
             }
 
             // Extract IP and user agent for audit trail

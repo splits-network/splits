@@ -36,28 +36,39 @@ export default async function CompanySettingsPage() {
     // Fetch user profile
     const profileResponse: any = await fetchFromGateway('/api/me', token);
     const profile = profileResponse?.data;
+    console.log('[Company Settings] Profile:', JSON.stringify(profile, null, 2));
 
     // Check if user is company admin
     const memberships = profile?.memberships || [];
+    console.log('[Company Settings] Memberships:', JSON.stringify(memberships, null, 2));
     const companyMembership = memberships.find((m: any) =>
         ['company_admin', 'hiring_manager'].includes(m.role)
     );
+    console.log('[Company Settings] Company membership:', JSON.stringify(companyMembership, null, 2));
 
     if (!companyMembership) {
+        console.log('[Company Settings] No company membership found, redirecting to dashboard');
         redirect('/dashboard');
     }
 
     // Fetch company details
     let company = null;
-    if (companyMembership.organization?.id) {
+    console.log('[Company Settings] Organization ID:', companyMembership.organization_id);
+    if (companyMembership.organization_id) {
         try {
+            console.log('[Company Settings] Fetching companies for org:', companyMembership.organization_id);
             // First try to get company by organization ID
             const companiesResponse: any = await fetchFromGateway('/api/companies', token);
+            console.log('[Company Settings] Companies response:', JSON.stringify(companiesResponse, null, 2));
             const companies = companiesResponse?.data || [];
-            company = companies.find((c: any) => c.identity_organization_id === companyMembership.organization.id);
+            console.log('[Company Settings] Found companies:', companies.length);
+            company = companies.find((c: any) => c.identity_organization_id === companyMembership.organization_id);
+            console.log('[Company Settings] Matched company:', company ? company.name : 'NOT FOUND');
         } catch (error) {
-            console.error('Failed to fetch company:', error);
+            console.error('[Company Settings] Failed to fetch company:', error);
         }
+    } else {
+        console.log('[Company Settings] No organization ID on membership');
     }
 
     return (
@@ -71,7 +82,7 @@ export default async function CompanySettingsPage() {
 
             <CompanySettingsForm
                 company={company}
-                organizationId={companyMembership.organization?.id}
+                organizationId={companyMembership.organization_id}
             />
         </div>
     );

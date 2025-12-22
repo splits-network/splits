@@ -6,6 +6,9 @@ export interface UserProfileDTO {
     email: string;
     name: string;
     memberships: MembershipDTO[];
+    onboarding_status?: string;
+    onboarding_step?: number;
+    onboarding_completed_at?: Date;
 }
 
 export interface MembershipDTO {

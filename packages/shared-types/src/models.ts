@@ -4,6 +4,9 @@ export interface User {
     clerk_user_id: string;
     email: string;
     name: string;
+    onboarding_status?: string;
+    onboarding_step?: number;
+    onboarding_completed_at?: Date;
     created_at: Date;
     updated_at: Date;
 }
@@ -11,7 +14,7 @@ export interface User {
 export interface Organization {
     id: string;
     name: string;
-    type: 'company' | 'platform';
+    type: 'company' | 'platform' | 'recruiter';
     created_at: Date;
     updated_at: Date;
 }
@@ -32,6 +35,12 @@ export interface Company {
     id: string;
     identity_organization_id?: string;
     name: string;
+    website?: string;
+    industry?: string;
+    company_size?: string;
+    headquarters_location?: string;
+    description?: string;
+    logo_url?: string;
     created_at: Date;
     updated_at: Date;
 }

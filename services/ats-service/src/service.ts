@@ -36,8 +36,8 @@ export class AtsService {
     async getCompanies() { return this.companies.getCompanies(); }
     async getCompanyById(id: string) { return this.companies.getCompanyById(id); }
     async getCompanyByOrgId(orgId: string) { return this.companies.getCompanyByOrgId(orgId); }
-    async createCompany(name: string, identityOrgId?: string) { return this.companies.createCompany(name, identityOrgId); }
-    async updateCompany(id: string, updates: { name?: string; identity_organization_id?: string }) { return this.companies.updateCompany(id, updates); }
+    async createCompany(name: string, identityOrgId?: string, profileFields?: any) { return this.companies.createCompany(name, identityOrgId, profileFields); }
+    async updateCompany(id: string, updates: any) { return this.companies.updateCompany(id, updates); }
 
     // Jobs
     async getJobs(filters?: { 

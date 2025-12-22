@@ -79,9 +79,25 @@ export function registerIdentityRoutes(app: FastifyInstance, services: ServiceRe
         const req = request as any;
         const { id } = request.params as { id: string };
         const identityService = services.get('identity');
+        const atsService = services.get('ats');
         const correlationId = (request as any).correlationId;
 
-        const result = await identityService.post(`/users/${id}/complete-onboarding`, request.body, correlationId);
+        const result: any = await identityService.post(`/users/${id}/complete-onboarding`, request.body, correlationId);
+        
+        // If company admin role, create company record in ATS service
+        const body = request.body as any;
+        if (body.role === 'company_admin' && body.company && result.data?.organizationId) {
+            try {
+                await atsService.post('/companies', {
+                    name: body.company.name,
+                    identity_organization_id: result.data.organizationId,
+                }, correlationId);
+            } catch (error) {
+                console.error('Failed to create company in ATS service:', error);
+                // Don't fail the whole onboarding if company creation fails
+                // The company admin can create it manually later
+            }
+        }
         
         // Clear user context cache so new membership is immediately available
         // This ensures the user can access role-specific endpoints right away
@@ -142,7 +158,13 @@ export function registerIdentityRoutes(app: FastifyInstance, services: ServiceRe
         const identityService = services.get('identity');
         const correlationId = (request as any).correlationId;
 
-        const consent = await identityService.post('/consent', request.body, correlationId);
+        // Include userId in the request body for identity service
+        const consentRequest = {
+            ...(request.body as object),
+            userId: req.auth.userId,
+        };
+
+        const consent = await identityService.post('/consent', consentRequest, correlationId);
         return reply.status(201).send(consent);
     });
 
