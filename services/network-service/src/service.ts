@@ -57,6 +57,10 @@ export class NetworkService {
         return this.recruiters.updateRecruiterBio(id, bio);
     }
 
+    async updateRecruiter(id: string, updates: Partial<Recruiter>): Promise<Recruiter> {
+        return this.repository.updateRecruiter(id, updates);
+    }
+
     async getRecruiterStats(id: string): Promise<{
         submissions_count: number;
         placements_count: number;
@@ -321,4 +325,74 @@ export class NetworkService {
 
         return updatedRelationship;
     }
+
+    // ========================================================================
+    // Marketplace Methods
+    // ========================================================================
+
+    async getMarketplaceConfig(key: string) {
+        return this.repository.getMarketplaceConfig(key);
+    }
+
+    async searchMarketplaceRecruiters(filters: any) {
+        return this.repository.searchMarketplaceRecruiters(filters);
+    }
+
+    async getMarketplaceRecruiter(recruiterId: string) {
+        return this.repository.getMarketplaceRecruiter(recruiterId);
+    }
+
+    async getRecruiterReputation(recruiterId: string) {
+        return this.repository.getRecruiterReputation(recruiterId);
+    }
+
+    async createMarketplaceConnection(data: {
+        candidate_user_id: string;
+        recruiter_id: string;
+        message?: string;
+    }) {
+        return this.repository.createMarketplaceConnection(data);
+    }
+
+    async findMarketplaceConnection(candidateUserId: string, recruiterId: string) {
+        return this.repository.findMarketplaceConnection(candidateUserId, recruiterId);
+    }
+
+    async getMarketplaceConnectionById(connectionId: string) {
+        return this.repository.getMarketplaceConnectionById(connectionId);
+    }
+
+    async listCandidateConnections(candidateUserId: string) {
+        return this.repository.listCandidateConnections(candidateUserId);
+    }
+
+    async listRecruiterConnections(recruiterId: string) {
+        return this.repository.listRecruiterConnections(recruiterId);
+    }
+
+    async updateMarketplaceConnection(connectionId: string, updates: any) {
+        return this.repository.updateMarketplaceConnection(connectionId, updates);
+    }
+
+    async createMarketplaceMessage(data: {
+        connection_id: string;
+        sender_user_id: string;
+        sender_type: 'candidate' | 'recruiter';
+        message: string;
+    }) {
+        return this.repository.createMarketplaceMessage(data);
+    }
+
+    async listConnectionMessages(connectionId: string) {
+        return this.repository.listConnectionMessages(connectionId);
+    }
+
+    async markConnectionMessagesAsRead(connectionId: string, userIdNotSender: string) {
+        return this.repository.markConnectionMessagesAsRead(connectionId, userIdNotSender);
+    }
+
+    async getUnreadMessageCount(connectionId: string, userIdNotSender: string) {
+        return this.repository.getUnreadMessageCount(connectionId, userIdNotSender);
+    }
 }
+

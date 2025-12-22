@@ -96,14 +96,17 @@ export default function Header() {
                     </label>
                     <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-10 p-2 shadow bg-base-100 rounded-box w-52">
                         <li><Link href="/jobs">Find Jobs</Link></li>
+                        <li><Link href="/marketplace">Find a Recruiter</Link></li>
                         <li><Link href="/how-it-works">How It Works</Link></li>
                         <li><Link href="/resources">Resources</Link></li>
+                        <li><Link href="/companies">Companies</Link></li>
                         {isSignedIn && (
                             <>
                                 <li className="menu-title mt-2">My Account</li>
                                 <li><Link href="/dashboard">Dashboard</Link></li>
                                 <li><Link href="/applications">Applications</Link></li>
                                 <li><Link href="/profile">Profile</Link></li>
+                                <li><Link href="/settings">Settings</Link></li>
                             </>
                         )}
                     </ul>
@@ -250,6 +253,14 @@ export default function Header() {
                                 </div>
                             </ul>
                         </details>
+                    </li>
+
+                    {/* Recruiters/Marketplace Link */}
+                    <li>
+                        <Link href="/marketplace" className="flex items-center gap-2">
+                            <i className="fa-solid fa-users text-primary"></i>
+                            Find a Recruiter
+                        </Link>
                     </li>
 
                     {/* Companies Mega Dropdown */}

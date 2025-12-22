@@ -23,6 +23,7 @@ import { registerDashboardsRoutes } from './routes/dashboards/routes';
 import { registerAdminRoutes } from './routes/admin/routes';
 import { registerNetworkPublicRoutes } from './routes/network/public-routes';
 import { registerNotificationRoutes } from './routes/notifications/routes';
+import { registerMarketplaceRoutes } from './routes/marketplace/routes';
 
 /**
  * User context cache
@@ -115,4 +116,5 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
     registerDashboardsRoutes(app, services);
     registerAdminRoutes(app, services);
     registerNotificationRoutes(app, services);
+    registerMarketplaceRoutes(app, services); // Marketplace routes
 }

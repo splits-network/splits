@@ -124,6 +124,91 @@ export interface AssignRecruiterDTO {
     recruiter_id: string;
 }
 
+// Marketplace DTOs
+export interface UpdateMarketplaceProfileDTO {
+    marketplace_enabled?: boolean;
+    marketplace_visibility?: 'public' | 'limited' | 'hidden';
+    marketplace_industries?: string[];
+    marketplace_specialties?: string[];
+    marketplace_location?: string;
+    marketplace_tagline?: string;
+    marketplace_years_experience?: number;
+    marketplace_profile?: Record<string, any>;
+    show_success_metrics?: boolean;
+    show_contact_info?: boolean;
+}
+
+export interface MarketplaceRecruiterDTO {
+    id: string;
+    user_id: string;
+    name: string;
+    email?: string; // Only if show_contact_info is true
+    phone?: string; // Only if show_contact_info is true
+    marketplace_tagline?: string;
+    marketplace_industries?: string[];
+    marketplace_specialties?: string[];
+    marketplace_location?: string;
+    marketplace_years_experience?: number;
+    marketplace_profile?: Record<string, any>;
+    bio?: string;
+    // Success metrics (only if show_success_metrics is true)
+    total_placements?: number;
+    success_rate?: number;
+    average_time_to_hire?: number;
+    reputation_score?: number;
+    created_at: string;
+}
+
+export interface CreateConnectionRequestDTO {
+    recruiter_id: string;
+    message?: string;
+}
+
+export interface RespondToConnectionDTO {
+    status: 'accepted' | 'declined';
+}
+
+export interface SendMarketplaceMessageDTO {
+    connection_id: string;
+    message: string;
+}
+
+export interface MarketplaceConnectionDTO {
+    id: string;
+    candidate_user_id: string;
+    candidate_name?: string;
+    recruiter_id: string;
+    recruiter_name?: string;
+    status: 'pending' | 'accepted' | 'declined';
+    message?: string;
+    unread_count?: number;
+    created_at: string;
+    updated_at: string;
+    responded_at?: string;
+}
+
+export interface MarketplaceMessageDTO {
+    id: string;
+    connection_id: string;
+    sender_user_id: string;
+    sender_name?: string;
+    sender_type: 'candidate' | 'recruiter';
+    message: string;
+    read_at?: string;
+    created_at: string;
+}
+
+export interface MarketplaceSearchFilters {
+    industries?: string[];
+    specialties?: string[];
+    location?: string;
+    search?: string; // Text search in name, tagline, bio
+    page?: number;
+    limit?: number;
+    sort_by?: 'reputation_score' | 'total_placements' | 'created_at' | 'years_experience';
+    sort_order?: 'asc' | 'desc';
+}
+
 // Billing DTOs
 export interface SubscriptionDTO {
     id: string;

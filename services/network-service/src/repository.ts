@@ -288,6 +288,10 @@ export class NetworkRepository {
         return data;
     }
 
+    async getRecruiterReputation(recruiterId: string): Promise<RecruiterReputation | null> {
+        return this.findRecruiterReputation(recruiterId);
+    }
+
     async createRecruiterReputation(recruiterId: string): Promise<RecruiterReputation> {
         const { data, error } = await this.supabase
             .schema('network')
@@ -527,4 +531,258 @@ export class NetworkRepository {
         }
         return data;
     }
+
+    // ========================================================================
+    // Marketplace Methods
+    // ========================================================================
+
+    // Marketplace config
+    async getMarketplaceConfig(key: string): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('marketplace_config')
+            .select('value')
+            .eq('key', key)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') return null;
+            throw error;
+        }
+        return data?.value;
+    }
+
+    // Marketplace recruiters search
+    async searchMarketplaceRecruiters(filters: {
+        industries?: string[];
+        specialties?: string[];
+        location?: string;
+        search?: string;
+        page?: number;
+        limit?: number;
+        sort_by?: string;
+        sort_order?: 'asc' | 'desc';
+    }): Promise<{ data: any[]; total: number }> {
+        const page = filters.page || 1;
+        const limit = filters.limit || 25;
+        const offset = (page - 1) * limit;
+
+        let query = this.supabase
+            .schema('network')
+            .from('recruiters')
+            .select('*', { count: 'exact' })
+            .eq('marketplace_enabled', true)
+            .eq('marketplace_visibility', 'public')
+            .eq('status', 'active');
+
+        // Apply filters
+        if (filters.industries && filters.industries.length > 0) {
+            query = query.overlaps('marketplace_industries', filters.industries);
+        }
+
+        if (filters.specialties && filters.specialties.length > 0) {
+            query = query.overlaps('marketplace_specialties', filters.specialties);
+        }
+
+        if (filters.location) {
+            query = query.ilike('marketplace_location', `%${filters.location}%`);
+        }
+
+        if (filters.search) {
+            query = query.or(`marketplace_tagline.ilike.%${filters.search}%,bio.ilike.%${filters.search}%`);
+        }
+
+        // Sorting
+        const sortBy = filters.sort_by || 'created_at';
+        const sortOrder = filters.sort_order || 'desc';
+        query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+
+        // Pagination
+        query = query.range(offset, offset + limit - 1);
+
+        const { data, error, count } = await query;
+
+        if (error) throw error;
+
+        return {
+            data: data || [],
+            total: count || 0,
+        };
+    }
+
+    // Get single marketplace recruiter
+    async getMarketplaceRecruiter(recruiterId: string): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('recruiters')
+            .select('*')
+            .eq('id', recruiterId)
+            .eq('marketplace_enabled', true)
+            .eq('marketplace_visibility', 'public')
+            .eq('status', 'active')
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') return null;
+            throw error;
+        }
+        return data;
+    }
+
+    // Marketplace connections
+    async createMarketplaceConnection(data: {
+        candidate_user_id: string;
+        recruiter_id: string;
+        message?: string;
+    }): Promise<any> {
+        const { data: connection, error } = await this.supabase
+            .schema('network')
+            .from('marketplace_connections')
+            .insert(data)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return connection;
+    }
+
+    async findMarketplaceConnection(
+        candidateUserId: string,
+        recruiterId: string
+    ): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('marketplace_connections')
+            .select('*')
+            .eq('candidate_user_id', candidateUserId)
+            .eq('recruiter_id', recruiterId)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') return null;
+            throw error;
+        }
+        return data;
+    }
+
+    async getMarketplaceConnectionById(connectionId: string): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('marketplace_connections')
+            .select('*')
+            .eq('id', connectionId)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') return null;
+            throw error;
+        }
+        return data;
+    }
+
+    async listCandidateConnections(candidateUserId: string): Promise<any[]> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('marketplace_connections')
+            .select('*')
+            .eq('candidate_user_id', candidateUserId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    async listRecruiterConnections(recruiterId: string): Promise<any[]> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('marketplace_connections')
+            .select('*')
+            .eq('recruiter_id', recruiterId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    async updateMarketplaceConnection(
+        connectionId: string,
+        updates: { status?: string; responded_at?: Date }
+    ): Promise<any> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('marketplace_connections')
+            .update(updates)
+            .eq('id', connectionId)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    // Marketplace messages
+    async createMarketplaceMessage(data: {
+        connection_id: string;
+        sender_user_id: string;
+        sender_type: 'candidate' | 'recruiter';
+        message: string;
+    }): Promise<any> {
+        const { data: message, error } = await this.supabase
+            .schema('network')
+            .from('marketplace_messages')
+            .insert(data)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return message;
+    }
+
+    async listConnectionMessages(connectionId: string): Promise<any[]> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('marketplace_messages')
+            .select('*')
+            .eq('connection_id', connectionId)
+            .order('created_at', { ascending: true });
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    async markMessageAsRead(messageId: string): Promise<void> {
+        const { error } = await this.supabase
+            .schema('network')
+            .from('marketplace_messages')
+            .update({ read_at: new Date().toISOString() })
+            .eq('id', messageId);
+
+        if (error) throw error;
+    }
+
+    async markConnectionMessagesAsRead(connectionId: string, userIdNotSender: string): Promise<void> {
+        const { error } = await this.supabase
+            .schema('network')
+            .from('marketplace_messages')
+            .update({ read_at: new Date().toISOString() })
+            .eq('connection_id', connectionId)
+            .neq('sender_user_id', userIdNotSender)
+            .is('read_at', null);
+
+        if (error) throw error;
+    }
+
+    async getUnreadMessageCount(connectionId: string, userIdNotSender: string): Promise<number> {
+        const { count, error } = await this.supabase
+            .schema('network')
+            .from('marketplace_messages')
+            .select('*', { count: 'exact', head: true })
+            .eq('connection_id', connectionId)
+            .neq('sender_user_id', userIdNotSender)
+            .is('read_at', null);
+
+        if (error) throw error;
+        return count || 0;
+    }
 }
+

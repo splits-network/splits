@@ -250,6 +250,8 @@ export interface Placement {
 // Network domain types
 export type RecruiterStatus = 'pending' | 'active' | 'suspended';
 
+export type MarketplaceVisibility = 'public' | 'limited' | 'hidden';
+
 export interface Recruiter {
     id: string;
     user_id: string;
@@ -257,6 +259,17 @@ export interface Recruiter {
     bio?: string;
     created_at: Date;
     updated_at: Date;
+    // Marketplace fields
+    marketplace_enabled?: boolean;
+    marketplace_profile?: Record<string, any>;
+    marketplace_visibility?: MarketplaceVisibility;
+    marketplace_industries?: string[];
+    marketplace_specialties?: string[];
+    marketplace_location?: string;
+    marketplace_tagline?: string;
+    marketplace_years_experience?: number;
+    show_success_metrics?: boolean;
+    show_contact_info?: boolean;
 }
 
 export interface RoleAssignment {
@@ -265,6 +278,41 @@ export interface RoleAssignment {
     recruiter_id: string;
     assigned_at: Date;
     assigned_by?: string;
+}
+
+// Marketplace domain types
+export type MarketplaceConnectionStatus = 'pending' | 'accepted' | 'declined';
+
+export interface MarketplaceConnection {
+    id: string;
+    candidate_user_id: string; // identity.users.id
+    recruiter_id: string; // network.recruiters.id
+    status: MarketplaceConnectionStatus;
+    message?: string;
+    created_at: Date;
+    updated_at: Date;
+    responded_at?: Date;
+}
+
+export type MarketplaceSenderType = 'candidate' | 'recruiter';
+
+export interface MarketplaceMessage {
+    id: string;
+    connection_id: string;
+    sender_user_id: string; // identity.users.id
+    sender_type: MarketplaceSenderType;
+    message: string;
+    read_at?: Date;
+    created_at: Date;
+}
+
+export interface MarketplaceConfig {
+    id: string;
+    key: string;
+    value: any; // JSON value
+    description?: string;
+    created_at: Date;
+    updated_at: Date;
 }
 
 // Billing domain types

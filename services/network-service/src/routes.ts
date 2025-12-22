@@ -9,6 +9,7 @@ import { registerReputationRoutes } from './routes/reputation/routes';
 import { registerStatsRoutes } from './routes/stats/routes';
 import { registerTeamRoutes } from './routes/teams/routes';
 import { registerRecruiterCandidateRoutes } from './routes/recruiter-candidates/routes';
+import { registerMarketplaceRoutes } from './routes/marketplace/routes';
 
 /**
  * Main Route Registry
@@ -34,4 +35,7 @@ export function registerRoutes(
 
     // Register Recruiter-Candidate relationship routes
     registerRecruiterCandidateRoutes(app, service);
+
+    // Register Marketplace routes
+    registerMarketplaceRoutes(app, service);
 }
