@@ -577,19 +577,19 @@ export class NetworkRepository {
 
         // Apply filters
         if (filters.industries && filters.industries.length > 0) {
-            query = query.overlaps('marketplace_industries', filters.industries);
+            query = query.overlaps('industries', filters.industries);
         }
 
         if (filters.specialties && filters.specialties.length > 0) {
-            query = query.overlaps('marketplace_specialties', filters.specialties);
+            query = query.overlaps('specialties', filters.specialties);
         }
 
         if (filters.location) {
-            query = query.ilike('marketplace_location', `%${filters.location}%`);
+            query = query.ilike('location', `%${filters.location}%`);
         }
 
         if (filters.search) {
-            query = query.or(`marketplace_tagline.ilike.%${filters.search}%,bio.ilike.%${filters.search}%`);
+            query = query.or(`tagline.ilike.%${filters.search}%,bio.ilike.%${filters.search}%`);
         }
 
         // Sorting

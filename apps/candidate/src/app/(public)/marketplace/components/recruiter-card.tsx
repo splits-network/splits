@@ -5,11 +5,11 @@ interface MarketplaceRecruiter {
     user_id: string;
     user_name?: string;
     user_email?: string;
-    marketplace_tagline?: string;
-    marketplace_industries?: string[];
-    marketplace_specialties?: string[];
-    marketplace_location?: string;
-    marketplace_years_experience?: number;
+    tagline?: string;
+    industries?: string[];
+    specialties?: string[];
+    location?: string;
+    years_experience?: number;
     marketplace_profile?: Record<string, any>;
     bio?: string;
     contact_available?: boolean;
@@ -44,9 +44,9 @@ export default function RecruiterCard({ recruiter }: RecruiterCardProps) {
                             </span>
                         </div>
                     </div>
-                    {recruiter.marketplace_years_experience && (
+                    {recruiter.years_experience && (
                         <div className="badge badge-outline">
-                            {recruiter.marketplace_years_experience}+ years
+                            {recruiter.years_experience}+ years
                         </div>
                     )}
                 </div>
@@ -55,42 +55,42 @@ export default function RecruiterCard({ recruiter }: RecruiterCardProps) {
                     <h3 className="card-title text-lg">{recruiter.user_name}</h3>
                 )}
 
-                {recruiter.marketplace_tagline && (
-                    <p className="text-sm text-base-content/70">{recruiter.marketplace_tagline}</p>
+                {recruiter.tagline && (
+                    <p className="text-sm text-base-content/70">{recruiter.tagline}</p>
                 )}
 
-                {recruiter.marketplace_location && (
+                {recruiter.location && (
                     <p className="text-sm text-base-content/70 flex items-center gap-1">
                         <i className="fa-solid fa-location-dot"></i>
-                        {recruiter.marketplace_location}
+                        {recruiter.location}
                     </p>
                 )}
 
-                {recruiter.marketplace_industries && recruiter.marketplace_industries.length > 0 && (
+                {recruiter.industries && recruiter.industries.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
-                        {recruiter.marketplace_industries.slice(0, 3).map(industry => (
+                        {recruiter.industries.slice(0, 3).map(industry => (
                             <span key={industry} className="badge badge-sm">
                                 {industry}
                             </span>
                         ))}
-                        {recruiter.marketplace_industries.length > 3 && (
+                        {recruiter.industries.length > 3 && (
                             <span className="badge badge-sm">
-                                +{recruiter.marketplace_industries.length - 3}
+                                +{recruiter.industries.length - 3}
                             </span>
                         )}
                     </div>
                 )}
 
-                {recruiter.marketplace_specialties && recruiter.marketplace_specialties.length > 0 && (
+                {recruiter.specialties && recruiter.specialties.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1">
-                        {recruiter.marketplace_specialties.slice(0, 3).map(specialty => (
+                        {recruiter.specialties.slice(0, 3).map(specialty => (
                             <span key={specialty} className="badge badge-sm badge-outline">
                                 {specialty}
                             </span>
                         ))}
-                        {recruiter.marketplace_specialties.length > 3 && (
+                        {recruiter.specialties.length > 3 && (
                             <span className="badge badge-sm badge-outline">
-                                +{recruiter.marketplace_specialties.length - 3}
+                                +{recruiter.specialties.length - 3}
                             </span>
                         )}
                     </div>

@@ -29,6 +29,42 @@ export function registerIdentityRoutes(app: FastifyInstance, services: ServiceRe
     });
 
     /**
+     * Update current user profile
+     */
+    app.patch('/api/me', {
+        schema: {
+            description: 'Update current user profile',
+            tags: ['identity'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const req = request as any;
+        const identityService = services.get('identity');
+        const correlationId = (request as any).correlationId;
+
+        const updatedProfile = await identityService.patch(`/users/${req.auth.userId}`, request.body, correlationId);
+        return reply.send(updatedProfile);
+    });
+
+    /**
+     * Change user password
+     */
+    app.post('/api/auth/change-password', {
+        schema: {
+            description: 'Change current user password',
+            tags: ['identity', 'auth'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const req = request as any;
+        const identityService = services.get('identity');
+        const correlationId = (request as any).correlationId;
+
+        const result = await identityService.post(`/users/${req.auth.userId}/change-password`, request.body, correlationId);
+        return reply.send(result);
+    });
+
+    /**
      * Get current user's consent preferences
      */
     app.get('/api/consent', {

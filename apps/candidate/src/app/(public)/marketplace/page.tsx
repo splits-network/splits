@@ -10,11 +10,11 @@ interface MarketplaceRecruiter {
     user_id: string;
     user_name?: string;
     user_email?: string;
-    marketplace_tagline?: string;
-    marketplace_industries?: string[];
-    marketplace_specialties?: string[];
-    marketplace_location?: string;
-    marketplace_years_experience?: number;
+    tagline?: string;
+    industries?: string[];
+    specialties?: string[];
+    location?: string;
+    years_experience?: number;
     marketplace_profile?: Record<string, any>;
     bio?: string;
     contact_available?: boolean;

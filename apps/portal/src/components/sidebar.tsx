@@ -17,7 +17,7 @@ const navItems = [
 
 const recruiterNavItems = [
     { href: '/applications', label: 'Applications', icon: 'fa-file-lines' },
-    { href: '/settings', label: 'Settings', icon: 'fa-gear' },
+    { href: '/profile', label: 'Profile', icon: 'fa-user' },
 ];
 
 const companyNavItems = [

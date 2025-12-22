@@ -40,7 +40,7 @@ export function Header() {
     // Authenticated app pages
     const isAuthenticatedPage = pathname?.startsWith('/dashboard') || pathname?.startsWith('/roles') ||
         pathname?.startsWith('/candidates') || pathname?.startsWith('/placements') ||
-        pathname?.startsWith('/admin') || pathname?.startsWith('/settings') || pathname?.startsWith('/billing') ||
+        pathname?.startsWith('/admin') || pathname?.startsWith('/profile') || pathname?.startsWith('/billing') ||
         pathname?.startsWith('/notifications') || pathname?.startsWith('/applications') ||
         pathname?.startsWith('/proposals') || pathname?.startsWith('/teams') ||
         pathname?.startsWith('/company') || pathname?.startsWith('/integrations') ||
@@ -63,9 +63,8 @@ export function Header() {
                                 <li><Link href="/invitations">Invitations</Link></li>
                                 <li><Link href="/placements">Placements</Link></li>
                                 <li><Link href="/applications">Applications</Link></li>
-                                <li className="menu-title mt-2">Settings</li>
-                                <li><Link href="/settings/profile">Profile</Link></li>
-                                <li><Link href="/settings/marketplace">Marketplace</Link></li>
+                                <li className="menu-title mt-2">Account</li>
+                                <li><Link href="/profile">Profile</Link></li>
                                 <li><Link href="/billing">Billing</Link></li>
                             </>
                         ) : (

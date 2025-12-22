@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import { MarketplaceSettings } from '@/components/settings/MarketplaceSettings';
+import { UserProfileSettings } from './components/user-profile-settings';
+import { ProfileSettings } from './components/profile-settings';
+import { MarketplaceSettings } from './components/marketplace-settings';
 
 export default function SettingsPage() {
     const router = useRouter();
@@ -52,30 +54,14 @@ export default function SettingsPage() {
 
     return (
         <div className="max-w-4xl">
-            <h1 className="text-3xl font-bold mb-6">Settings</h1>
+            <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
 
             <div className="space-y-4">
                 {/* Profile & Account Card */}
-                <div className="card bg-base-100 shadow-sm">
-                    <div className="card-body">
-                        <h2 className="card-title">
-                            <i className="fa-solid fa-user"></i>
-                            Profile & Account
-                        </h2>
-                        <p className="text-sm text-base-content/70">
-                            Manage your account settings and preferences
-                        </p>
-                        <div className="card-actions justify-end mt-4">
-                            <button
-                                className="btn btn-sm btn-ghost"
-                                onClick={() => router.push('/user-profile')}
-                            >
-                                Manage in Clerk
-                                <i className="fa-solid fa-arrow-up-right-from-square"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <UserProfileSettings />
+
+                {/* Recruiter Profile (Recruiters Only) */}
+                {isRecruiter && <ProfileSettings />}
 
                 {/* Marketplace Settings (Recruiters Only) */}
                 {isRecruiter && <MarketplaceSettings />}

@@ -257,17 +257,18 @@ export interface Recruiter {
     user_id: string;
     status: RecruiterStatus;
     bio?: string;
+    // Core profile fields (all recruiters)
+    industries?: string[];
+    specialties?: string[];
+    location?: string;
+    tagline?: string;
+    years_experience?: number;
     created_at: Date;
     updated_at: Date;
-    // Marketplace fields
+    // Marketplace-specific fields (opt-in)
     marketplace_enabled?: boolean;
     marketplace_profile?: Record<string, any>;
     marketplace_visibility?: MarketplaceVisibility;
-    marketplace_industries?: string[];
-    marketplace_specialties?: string[];
-    marketplace_location?: string;
-    marketplace_tagline?: string;
-    marketplace_years_experience?: number;
     show_success_metrics?: boolean;
     show_contact_info?: boolean;
 }

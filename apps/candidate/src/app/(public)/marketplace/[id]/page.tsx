@@ -8,17 +8,21 @@ import { apiClient } from '@/lib/api-client';
 interface MarketplaceRecruiter {
     id: string;
     user_id: string;
-    marketplace_tagline?: string;
-    marketplace_industries?: string[];
-    marketplace_specialties?: string[];
-    marketplace_location?: string;
-    marketplace_years_experience?: number;
+    user_name?: string;
+    user_email?: string;
+    tagline?: string;
+    industries?: string[];
+    specialties?: string[];
+    location?: string;
+    years_experience?: number;
     marketplace_profile?: Record<string, any>;
     bio?: string;
     contact_available?: boolean;
     total_placements?: number;
     success_rate?: number;
     reputation_score?: number;
+    status?: string;
+    marketplace_visibility?: string;
     created_at: string;
 }
 
@@ -140,30 +144,44 @@ export default function RecruiterDetailPage() {
             <div className="card bg-base-100 shadow-md mb-6">
                 <div className="card-body">
                     <div className="flex items-start gap-4">
-                        <div className="avatar placeholder">
+                        <div className="avatar avatar-placeholder">
                             <div className="bg-primary text-primary-content rounded-full w-20">
                                 <span className="text-3xl">
-                                    {recruiter.user_id.charAt(0).toUpperCase()}
+                                    {recruiter.user_name ? recruiter.user_name.charAt(0).toUpperCase() : recruiter.user_id.charAt(0).toUpperCase()}
                                 </span>
                             </div>
                         </div>
 
                         <div className="flex-1">
-                            {recruiter.marketplace_tagline && (
-                                <h1 className="text-3xl font-bold mb-2">{recruiter.marketplace_tagline}</h1>
+                            <div className="flex items-center gap-2 mb-2">
+                                {recruiter.user_name && (
+                                    <h1 className="text-3xl font-bold">{recruiter.user_name}</h1>
+                                )}
+                                {recruiter.status === 'active' && (
+                                    <span className="badge badge-success badge-sm">Active</span>
+                                )}
+                            </div>
+                            {recruiter.tagline && (
+                                <p className="text-lg text-base-content/70 mb-2">{recruiter.tagline}</p>
                             )}
 
                             <div className="flex flex-wrap gap-4 text-sm text-base-content/70">
-                                {recruiter.marketplace_location && (
+                                {recruiter.location && (
                                     <span className="flex items-center gap-1">
                                         <i className="fa-solid fa-location-dot"></i>
-                                        {recruiter.marketplace_location}
+                                        {recruiter.location}
                                     </span>
                                 )}
-                                {recruiter.marketplace_years_experience && (
+                                {recruiter.years_experience && (
                                     <span className="flex items-center gap-1">
                                         <i className="fa-solid fa-briefcase"></i>
-                                        {recruiter.marketplace_years_experience}+ years experience
+                                        {recruiter.years_experience} years experience
+                                    </span>
+                                )}
+                                {recruiter.created_at && (
+                                    <span className="flex items-center gap-1">
+                                        <i className="fa-solid fa-calendar"></i>
+                                        Member since {new Date(recruiter.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                                     </span>
                                 )}
                             </div>
@@ -222,15 +240,15 @@ export default function RecruiterDetailPage() {
             )}
 
             {/* Industries & Specialties */}
-            {(recruiter.marketplace_industries && recruiter.marketplace_industries.length > 0) ||
-                (recruiter.marketplace_specialties && recruiter.marketplace_specialties.length > 0) ? (
+            {(recruiter.industries && recruiter.industries.length > 0) ||
+                (recruiter.specialties && recruiter.specialties.length > 0) ? (
                 <div className="card bg-base-100 shadow-md mb-6">
                     <div className="card-body">
-                        {recruiter.marketplace_industries && recruiter.marketplace_industries.length > 0 && (
+                        {recruiter.industries && recruiter.industries.length > 0 && (
                             <div className="mb-4">
                                 <h3 className="font-semibold mb-2">Industries</h3>
                                 <div className="flex flex-wrap gap-2">
-                                    {recruiter.marketplace_industries.map(industry => (
+                                    {recruiter.industries.map(industry => (
                                         <span key={industry} className="badge badge-lg">
                                             {industry}
                                         </span>
@@ -239,11 +257,11 @@ export default function RecruiterDetailPage() {
                             </div>
                         )}
 
-                        {recruiter.marketplace_specialties && recruiter.marketplace_specialties.length > 0 && (
+                        {recruiter.specialties && recruiter.specialties.length > 0 && (
                             <div>
                                 <h3 className="font-semibold mb-2">Specialties</h3>
                                 <div className="flex flex-wrap gap-2">
-                                    {recruiter.marketplace_specialties.map(specialty => (
+                                    {recruiter.specialties.map(specialty => (
                                         <span key={specialty} className="badge badge-lg badge-outline">
                                             {specialty}
                                         </span>

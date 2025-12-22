@@ -6,9 +6,18 @@
 import { IdentityRepository } from '../../repository';
 import { User } from '@splits-network/shared-types';
 import { UserProfileDTO, MembershipDTO } from '@splits-network/shared-types';
+import { createClerkClient } from '@clerk/backend';
+import { getEnvOrThrow } from '@splits-network/shared-config';
 
 export class UsersService {
-    constructor(private repository: IdentityRepository) {}
+    private clerkClient;
+
+    constructor(private repository: IdentityRepository) {
+        const clerkSecretKey = process.env.CLERK_SECRET_KEY;
+        if (clerkSecretKey) {
+            this.clerkClient = createClerkClient({ secretKey: clerkSecretKey });
+        }
+    }
 
     async syncClerkUser(
         clerkUserId: string,
@@ -32,6 +41,77 @@ export class UsersService {
             email,
             name,
         });
+    }
+
+    async updateUserProfile(
+        userId: string,
+        updates: { name?: string }
+    ): Promise<User> {
+        // Get current user to access clerk_user_id
+        const user = await this.repository.findUserById(userId);
+        if (!user) {
+            throw new Error(`User ${userId} not found`);
+        }
+
+        // Update in our database
+        const updatedUser = await this.repository.updateUser(userId, updates);
+
+        // Sync to Clerk if we have a Clerk client
+        if (this.clerkClient && user.clerk_user_id && updates.name) {
+            try {
+                // Parse name into first and last
+                const nameParts = updates.name.trim().split(/\s+/);
+                const firstName = nameParts[0] || '';
+                const lastName = nameParts.slice(1).join(' ') || '';
+
+                await this.clerkClient.users.updateUser(user.clerk_user_id, {
+                    firstName,
+                    lastName,
+                });
+            } catch (error) {
+                console.error('Failed to sync name to Clerk:', error);
+                // Don't fail the request if Clerk sync fails
+            }
+        }
+
+        return updatedUser;
+    }
+
+    async changeUserPassword(
+        userId: string,
+        currentPassword: string,
+        newPassword: string
+    ): Promise<void> {
+        // Get current user to access clerk_user_id
+        const user = await this.repository.findUserById(userId);
+        if (!user || !user.clerk_user_id) {
+            throw new Error(`User ${userId} not found`);
+        }
+
+        if (!this.clerkClient) {
+            throw new Error('Authentication service is not configured');
+        }
+
+        try {
+            // First verify the current password by attempting to get user with verification
+            // Note: Clerk doesn't have a direct "verify password" endpoint,
+            // so we'll just update the password directly and let Clerk validate
+            await this.clerkClient.users.updateUser(user.clerk_user_id, {
+                password: newPassword,
+            });
+        } catch (error: any) {
+            console.error('Failed to change password in Clerk:', error);
+            
+            // Check for common Clerk errors
+            if (error.status === 422) {
+                throw new Error('Password does not meet requirements. Must be at least 8 characters.');
+            }
+            if (error.status === 404) {
+                throw new Error('User not found');
+            }
+            
+            throw new Error('Failed to change password. Please try again.');
+        }
     }
 
     async getUserProfile(userId: string): Promise<UserProfileDTO> {

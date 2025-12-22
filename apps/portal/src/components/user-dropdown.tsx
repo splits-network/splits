@@ -49,8 +49,8 @@ export function UserDropdown() {
                 className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
                 {user.imageUrl ? (
-                    <img 
-                        src={user.imageUrl} 
+                    <img
+                        src={user.imageUrl}
                         alt={userName}
                         className="w-9 h-9 rounded-full object-cover"
                     />
@@ -72,12 +72,12 @@ export function UserDropdown() {
 
                     <div className="py-2">
                         <Link
-                            href="/settings"
+                            href="/profile"
                             onClick={() => setIsOpen(false)}
                             className="flex items-center gap-3 px-4 py-2.5 hover:bg-base-200 transition-colors text-sm text-base-content"
                         >
-                            <i className="fa-solid fa-gear w-4 text-base-content/60"></i>
-                            Settings
+                            <i className="fa-solid fa-user w-4 text-base-content/60"></i>
+                            Profile
                         </Link>
                         <Link
                             href="/billing"

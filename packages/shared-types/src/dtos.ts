@@ -128,11 +128,11 @@ export interface AssignRecruiterDTO {
 export interface UpdateMarketplaceProfileDTO {
     marketplace_enabled?: boolean;
     marketplace_visibility?: 'public' | 'limited' | 'hidden';
-    marketplace_industries?: string[];
-    marketplace_specialties?: string[];
-    marketplace_location?: string;
-    marketplace_tagline?: string;
-    marketplace_years_experience?: number;
+    industries?: string[];
+    specialties?: string[];
+    location?: string;
+    tagline?: string;
+    years_experience?: number;
     marketplace_profile?: Record<string, any>;
     show_success_metrics?: boolean;
     show_contact_info?: boolean;

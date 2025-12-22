@@ -5,11 +5,11 @@ import { NotFoundError, BadRequestError, ForbiddenError } from '@splits-network/
 interface UpdateMarketplaceProfileBody {
     marketplace_enabled?: boolean;
     marketplace_visibility?: 'public' | 'limited' | 'hidden';
-    marketplace_industries?: string[];
-    marketplace_specialties?: string[];
-    marketplace_location?: string;
-    marketplace_tagline?: string;
-    marketplace_years_experience?: number;
+    industries?: string[];
+    specialties?: string[];
+    location?: string;
+    tagline?: string;
+    years_experience?: number;
     marketplace_profile?: Record<string, any>;
     show_success_metrics?: boolean;
     show_contact_info?: boolean;
@@ -77,11 +77,11 @@ export function registerMarketplaceRoutes(app: FastifyInstance, service: Network
                 user_id: recruiter.user_id,
                 user_name: recruiter.user_name,
                 user_email: recruiter.user_email,
-                marketplace_tagline: recruiter.marketplace_tagline,
-                marketplace_industries: recruiter.marketplace_industries,
-                marketplace_specialties: recruiter.marketplace_specialties,
-                marketplace_location: recruiter.marketplace_location,
-                marketplace_years_experience: recruiter.marketplace_years_experience,
+                tagline: recruiter.tagline,
+                industries: recruiter.industries,
+                specialties: recruiter.specialties,
+                location: recruiter.location,
+                years_experience: recruiter.years_experience,
                 marketplace_profile: recruiter.marketplace_profile,
                 bio: recruiter.bio,
                 created_at: recruiter.created_at,
@@ -134,12 +134,14 @@ export function registerMarketplaceRoutes(app: FastifyInstance, service: Network
             user_id: recruiter.user_id,
             user_name: recruiter.user_name,
             user_email: recruiter.user_email,
-            marketplace_tagline: recruiter.marketplace_tagline,
-            marketplace_industries: recruiter.marketplace_industries,
-            marketplace_specialties: recruiter.marketplace_specialties,
-            marketplace_location: recruiter.marketplace_location,
-            marketplace_years_experience: recruiter.marketplace_years_experience,
+            tagline: recruiter.tagline,
+            industries: recruiter.industries,
+            specialties: recruiter.specialties,
+            location: recruiter.location,
+            years_experience: recruiter.years_experience,
             marketplace_profile: recruiter.marketplace_profile,
+            marketplace_visibility: recruiter.marketplace_visibility,
+            status: recruiter.status,
             bio: recruiter.bio,
             created_at: recruiter.created_at,
         };
@@ -202,11 +204,12 @@ export function registerMarketplaceRoutes(app: FastifyInstance, service: Network
             data: {
                 marketplace_enabled: recruiter.marketplace_enabled || false,
                 marketplace_visibility: recruiter.marketplace_visibility || 'public',
-                marketplace_industries: recruiter.marketplace_industries || [],
-                marketplace_specialties: recruiter.marketplace_specialties || [],
-                marketplace_location: recruiter.marketplace_location,
-                marketplace_tagline: recruiter.marketplace_tagline,
-                marketplace_years_experience: recruiter.marketplace_years_experience,
+                industries: recruiter.industries || [],
+                specialties: recruiter.specialties || [],
+                location: recruiter.location,
+                tagline: recruiter.tagline,
+                bio: recruiter.bio,
+                years_experience: recruiter.years_experience,
                 marketplace_profile: recruiter.marketplace_profile || {},
                 show_success_metrics: recruiter.show_success_metrics || false,
                 show_contact_info: recruiter.show_contact_info !== false, // Default true

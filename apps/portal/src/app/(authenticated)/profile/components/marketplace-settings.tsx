@@ -7,39 +7,15 @@ import { createAuthenticatedClient } from '@/lib/api-client';
 interface MarketplaceSettings {
     marketplace_enabled: boolean;
     marketplace_visibility: 'public' | 'limited' | 'hidden';
-    marketplace_industries: string[];
-    marketplace_specialties: string[];
-    marketplace_location: string;
-    marketplace_tagline: string;
-    marketplace_years_experience: number;
-    marketplace_profile: Record<string, any>;
     show_success_metrics: boolean;
     show_contact_info: boolean;
 }
-
-const INDUSTRY_OPTIONS = [
-    'Technology', 'Finance', 'Healthcare', 'Manufacturing', 'Retail',
-    'Education', 'Legal', 'Marketing', 'Sales', 'Operations',
-    'Human Resources', 'Consulting', 'Real Estate', 'Hospitality',
-];
-
-const SPECIALTY_OPTIONS = [
-    'Executive', 'Engineering', 'Product Management', 'Design',
-    'Data Science', 'Marketing', 'Sales', 'Operations', 'Finance',
-    'Legal', 'Human Resources', 'Customer Success', 'Administrative',
-];
 
 export function MarketplaceSettings() {
     const { getToken } = useAuth();
     const [settings, setSettings] = useState<MarketplaceSettings>({
         marketplace_enabled: false,
         marketplace_visibility: 'public',
-        marketplace_industries: [],
-        marketplace_specialties: [],
-        marketplace_location: '',
-        marketplace_tagline: '',
-        marketplace_years_experience: 0,
-        marketplace_profile: {},
         show_success_metrics: false,
         show_contact_info: true,
     });
@@ -98,24 +74,6 @@ export function MarketplaceSettings() {
         } finally {
             setSubmitting(false);
         }
-    };
-
-    const toggleIndustry = (industry: string) => {
-        setSettings(prev => ({
-            ...prev,
-            marketplace_industries: prev.marketplace_industries.includes(industry)
-                ? prev.marketplace_industries.filter(i => i !== industry)
-                : [...prev.marketplace_industries, industry],
-        }));
-    };
-
-    const toggleSpecialty = (specialty: string) => {
-        setSettings(prev => ({
-            ...prev,
-            marketplace_specialties: prev.marketplace_specialties.includes(specialty)
-                ? prev.marketplace_specialties.filter(s => s !== specialty)
-                : [...prev.marketplace_specialties, specialty],
-        }));
     };
 
     if (loading) {
@@ -185,92 +143,7 @@ export function MarketplaceSettings() {
                                     </select>
                                 </div>
 
-                                <div className="fieldset">
-                                    <label className="label">Tagline</label>
-                                    <input
-                                        type="text"
-                                        className="input w-full"
-                                        placeholder="e.g., Specialized in Tech Executive Placements"
-                                        maxLength={255}
-                                        value={settings.marketplace_tagline}
-                                        onChange={(e) => setSettings({ ...settings, marketplace_tagline: e.target.value })}
-                                    />
-                                    <label className="label">
-                                        <span className="label-text-alt">Short description shown in search results</span>
-                                    </label>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="fieldset">
-                                        <label className="label">Location</label>
-                                        <input
-                                            type="text"
-                                            className="input w-full"
-                                            placeholder="e.g., New York, NY"
-                                            value={settings.marketplace_location}
-                                            onChange={(e) => setSettings({ ...settings, marketplace_location: e.target.value })}
-                                        />
-                                    </div>
-
-                                    <div className="fieldset">
-                                        <label className="label">Years of Experience</label>
-                                        <input
-                                            type="number"
-                                            className="input w-full"
-                                            min="0"
-                                            value={settings.marketplace_years_experience}
-                                            onChange={(e) => setSettings({ ...settings, marketplace_years_experience: parseInt(e.target.value) || 0 })}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="divider">Industries & Specialties</div>
-
-                                <div className="space-y-3">
-                                    <div>
-                                        <label className="label">
-                                            <span className="label-text font-medium">Industries</span>
-                                        </label>
-                                        <div className="flex flex-wrap gap-2">
-                                            {INDUSTRY_OPTIONS.map(industry => (
-                                                <button
-                                                    key={industry}
-                                                    type="button"
-                                                    className={`btn btn-xs ${settings.marketplace_industries.includes(industry)
-                                                        ? 'btn-primary'
-                                                        : 'btn-outline'
-                                                        }`}
-                                                    onClick={() => toggleIndustry(industry)}
-                                                >
-                                                    {industry}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className="label">
-                                            <span className="label-text font-medium">Specialties</span>
-                                        </label>
-                                        <div className="flex flex-wrap gap-2">
-                                            {SPECIALTY_OPTIONS.map(specialty => (
-                                                <button
-                                                    key={specialty}
-                                                    type="button"
-                                                    className={`btn btn-xs ${settings.marketplace_specialties.includes(specialty)
-                                                        ? 'btn-primary'
-                                                        : 'btn-outline'
-                                                        }`}
-                                                    onClick={() => toggleSpecialty(specialty)}
-                                                >
-                                                    {specialty}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="divider">Privacy</div>
+                                <div className="divider">Privacy Settings</div>
 
                                 <div className="space-y-2">
                                     <div className="form-control">
