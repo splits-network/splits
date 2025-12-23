@@ -44,6 +44,18 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
                 const { data } = await response.json();
 
+                // Skip onboarding modal for platform_admin users
+                const isPlatformAdmin = data.memberships?.some((m: any) => m.role === 'platform_admin');
+                if (isPlatformAdmin) {
+                    setState(prev => ({
+                        ...prev,
+                        currentStep: data.onboarding_step || 1,
+                        status: 'completed', // Mark as completed so modal never shows
+                        isModalOpen: false,
+                    }));
+                    return;
+                }
+
                 // Show modal if onboarding is pending or in progress
                 const shouldShowModal = data.onboarding_status === 'pending' || data.onboarding_status === 'in_progress';
 
