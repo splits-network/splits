@@ -14,9 +14,23 @@ interface ProfileData {
 }
 
 const INDUSTRY_OPTIONS = [
-    'Technology', 'Finance', 'Healthcare', 'Manufacturing', 'Retail',
-    'Education', 'Legal', 'Marketing', 'Sales', 'Operations',
-    'Human Resources', 'Consulting', 'Real Estate', 'Hospitality',
+    'Technology',
+    'Healthcare',
+    'Finance',
+    'Manufacturing',
+    'Retail',
+    'Education',
+    'Consulting',
+    'Professional Services',
+    'Real Estate',
+    'Recruitment',
+    'Hospitality',
+    'Construction',
+    'Energy',
+    'Telecommunications',
+    'Media & Entertainment',
+    'Transportation',
+    'Other',
 ];
 
 const SPECIALTY_OPTIONS = [

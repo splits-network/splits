@@ -45,8 +45,18 @@ export class NetworkService {
         return this.recruiters.getAllRecruiters();
     }
 
-    async createRecruiter(userId: string, bio?: string): Promise<Recruiter> {
-        return this.recruiters.createRecruiter(userId, bio);
+    async createRecruiter(
+        userId: string,
+        profileData?: {
+            bio?: string;
+            industries?: string[];
+            specialties?: string[];
+            location?: string;
+            tagline?: string;
+            years_experience?: number;
+        }
+    ): Promise<Recruiter> {
+        return this.recruiters.createRecruiter(userId, profileData);
     }
 
     async updateRecruiterStatus(id: string, status: RecruiterStatus): Promise<Recruiter> {

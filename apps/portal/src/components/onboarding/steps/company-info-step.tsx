@@ -86,8 +86,15 @@ export function CompanyInfoStep() {
                             <option value="retail">Retail</option>
                             <option value="education">Education</option>
                             <option value="consulting">Consulting</option>
+                            <option value="professional_services">Professional Services</option>
                             <option value="real_estate">Real Estate</option>
+                            <option value="recruitment">Recruitment</option>
                             <option value="hospitality">Hospitality</option>
+                            <option value="construction">Construction</option>
+                            <option value="energy">Energy</option>
+                            <option value="telecommunications">Telecommunications</option>
+                            <option value="media_entertainment">Media & Entertainment</option>
+                            <option value="transportation">Transportation</option>
                             <option value="other">Other</option>
                         </select>
                     </div>

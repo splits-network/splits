@@ -83,9 +83,10 @@ export function registerIdentityRoutes(app: FastifyInstance, services: ServiceRe
         const correlationId = (request as any).correlationId;
 
         const result: any = await identityService.post(`/users/${id}/complete-onboarding`, request.body, correlationId);
+        const body = request.body as any;
+        const networkService = services.get('network');
         
         // If company admin role, create company record in ATS service
-        const body = request.body as any;
         if (body.role === 'company_admin' && body.company && result.data?.organizationId) {
             try {
                 await atsService.post('/companies', {
@@ -96,6 +97,25 @@ export function registerIdentityRoutes(app: FastifyInstance, services: ServiceRe
                 console.error('Failed to create company in ATS service:', error);
                 // Don't fail the whole onboarding if company creation fails
                 // The company admin can create it manually later
+            }
+        }
+        
+        // If recruiter role, create recruiter profile in network service
+        if (body.role === 'recruiter' && body.profile) {
+            try {
+                await networkService.post('/recruiters', {
+                    user_id: id,
+                    bio: body.profile.bio || '',
+                    industries: body.profile.industries || [],
+                    specialties: body.profile.specialties || [],
+                    location: body.profile.location,
+                    tagline: body.profile.tagline,
+                    years_experience: body.profile.years_experience,
+                }, correlationId);
+            } catch (error) {
+                console.error('Failed to create recruiter profile in network service:', error);
+                // Don't fail the whole onboarding if recruiter creation fails
+                // The recruiter can complete their profile later
             }
         }
         

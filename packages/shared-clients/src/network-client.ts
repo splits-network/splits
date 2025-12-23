@@ -33,6 +33,11 @@ export class NetworkClient extends BaseClient {
     async createRecruiter(data: {
         user_id: string;
         bio?: string;
+        industries?: string[];
+        specialties?: string[];
+        location?: string;
+        tagline?: string;
+        years_experience?: number;
     }): Promise<ApiResponse<Recruiter>> {
         return this.post('/recruiters', data);
     }

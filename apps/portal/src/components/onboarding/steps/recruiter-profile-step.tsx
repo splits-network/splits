@@ -15,6 +15,10 @@ export function RecruiterProfileStep() {
         bio: state.recruiterProfile?.bio || '',
         phone: state.recruiterProfile?.phone || '',
         industries: state.recruiterProfile?.industries?.join(', ') || '',
+        specialties: state.recruiterProfile?.specialties?.join(', ') || '',
+        location: state.recruiterProfile?.location || '',
+        tagline: state.recruiterProfile?.tagline || '',
+        years_experience: state.recruiterProfile?.years_experience?.toString() || '',
         teamInviteCode: state.recruiterProfile?.teamInviteCode || '',
     });
 
@@ -24,11 +28,15 @@ export function RecruiterProfileStep() {
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        // Convert comma-separated industries to array
+        // Convert comma-separated lists to arrays
         const profile = {
             bio: formData.bio,
             phone: formData.phone,
             industries: formData.industries ? formData.industries.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
+            specialties: formData.specialties ? formData.specialties.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
+            location: formData.location,
+            tagline: formData.tagline,
+            years_experience: formData.years_experience ? parseInt(formData.years_experience) : undefined,
             teamInviteCode: formData.teamInviteCode,
         };
         actions.setRecruiterProfile(profile);
@@ -79,7 +87,7 @@ export function RecruiterProfileStep() {
 
                 {/* Industries */}
                 <div className="fieldset">
-                    <label className="label">Industries / Specializations</label>
+                    <label className="label">Industries</label>
                     <input
                         type="text"
                         className="input"
@@ -88,8 +96,70 @@ export function RecruiterProfileStep() {
                         placeholder="e.g., Technology, Healthcare, Finance"
                     />
                     <label className="label">
-                        <span className="label-text-alt">Comma-separated list of your recruiting focus areas</span>
+                        <span className="label-text-alt">Comma-separated list of industries you recruit in</span>
                     </label>
+                </div>
+
+                {/* Specialties */}
+                <div className="fieldset">
+                    <label className="label">Specialties</label>
+                    <input
+                        type="text"
+                        className="input"
+                        value={formData.specialties}
+                        onChange={(e) => handleChange('specialties', e.target.value)}
+                        placeholder="e.g., Software Engineering, Data Science, Product Management"
+                    />
+                    <label className="label">
+                        <span className="label-text-alt">Comma-separated list of roles/specializations you focus on</span>
+                    </label>
+                </div>
+
+                {/* Location */}
+                <div className="fieldset">
+                    <label className="label">Location</label>
+                    <input
+                        type="text"
+                        className="input"
+                        value={formData.location}
+                        onChange={(e) => handleChange('location', e.target.value)}
+                        placeholder="e.g., New York, NY"
+                    />
+                    <label className="label">
+                        <span className="label-text-alt">Your primary work location</span>
+                    </label>
+                </div>
+
+                {/* Tagline and Years Experience - Side by Side */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="fieldset">
+                        <label className="label">Tagline</label>
+                        <input
+                            type="text"
+                            className="input"
+                            value={formData.tagline}
+                            onChange={(e) => handleChange('tagline', e.target.value)}
+                            placeholder="e.g., Tech Recruiting Expert"
+                        />
+                        <label className="label">
+                            <span className="label-text-alt">Brief headline about your expertise</span>
+                        </label>
+                    </div>
+
+                    <div className="fieldset">
+                        <label className="label">Years of Experience</label>
+                        <input
+                            type="number"
+                            className="input"
+                            min="0"
+                            value={formData.years_experience}
+                            onChange={(e) => handleChange('years_experience', e.target.value)}
+                            placeholder="5"
+                        />
+                        <label className="label">
+                            <span className="label-text-alt">Years in recruiting</span>
+                        </label>
+                    </div>
                 </div>
 
                 {/* Team Invite Code (Optional) */}

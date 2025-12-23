@@ -172,6 +172,9 @@ export class UsersService {
     /**
      * Complete onboarding and create associated entities
      * This is called after the user completes the onboarding wizard
+     * 
+     * For recruiters: Only marks onboarding complete (no org/membership needed)
+     * For company_admin: Creates organization and membership
      */
     async completeOnboarding(
         userId: string,
@@ -190,7 +193,7 @@ export class UsersService {
                 size?: string;
             };
         }
-    ): Promise<{ user: User; organizationId: string }> {
+    ): Promise<{ user: User; organizationId?: string }> {
         const user = await this.repository.findUserById(userId);
         if (!user) {
             throw new Error(`User ${userId} not found`);
@@ -202,26 +205,13 @@ export class UsersService {
             onboarding_completed_at: new Date(),
         });
 
-        // Create organization and membership based on role
-        let organizationId: string;
+        // Create organization and membership ONLY for company_admin
+        let organizationId: string | undefined;
         
         if (role === 'recruiter') {
-            // Create personal recruiter organization
-            const org = await this.repository.createOrganization({
-                name: `${user.name}'s Organization`,
-                type: 'recruiter',
-            });
-            organizationId = org.id;
-
-            // Create membership
-            await this.repository.createMembership({
-                user_id: userId,
-                organization_id: org.id,
-                role: 'recruiter',
-            });
-
-            // Note: Recruiter profile creation will be handled by network-service
-            // via API call from API gateway
+            // Recruiters don't need organizations
+            // Recruiter profile will be created by network-service via API gateway
+            organizationId = undefined;
         } else {
             // Create company organization
             if (!data.company?.name) {

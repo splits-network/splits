@@ -29,11 +29,26 @@ export class RecruiterService {
         return await this.repository.findAllRecruiters();
     }
 
-    async createRecruiter(userId: string, bio?: string): Promise<Recruiter> {
+    async createRecruiter(
+        userId: string,
+        profileData?: {
+            bio?: string;
+            industries?: string[];
+            specialties?: string[];
+            location?: string;
+            tagline?: string;
+            years_experience?: number;
+        }
+    ): Promise<Recruiter> {
         return await this.repository.createRecruiter({
             user_id: userId,
             status: 'pending',
-            bio,
+            bio: profileData?.bio,
+            industries: profileData?.industries,
+            specialties: profileData?.specialties,
+            location: profileData?.location,
+            tagline: profileData?.tagline,
+            years_experience: profileData?.years_experience,
         });
     }
 

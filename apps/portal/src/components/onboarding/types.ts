@@ -22,6 +22,9 @@ export interface OnboardingState {
     phone?: string;
     industries?: string[];
     specialties?: string[];
+    location?: string;
+    tagline?: string;
+    years_experience?: number;
     teamInviteCode?: string;
   };
   companyInfo?: {
