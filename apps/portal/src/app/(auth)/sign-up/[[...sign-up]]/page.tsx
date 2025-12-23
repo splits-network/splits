@@ -11,7 +11,7 @@ export default function SignUpPage() {
     const { signOut } = useClerk();
     const router = useRouter();
     const searchParams = useSearchParams();
-    
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [firstName, setFirstName] = useState('');
@@ -55,7 +55,7 @@ export default function SignUpPage() {
 
             // Send email verification code
             await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-            
+
             setPendingVerification(true);
         } catch (err: any) {
             setError(err.errors?.[0]?.message || 'Failed to create account');
@@ -87,7 +87,7 @@ export default function SignUpPage() {
             // Try to complete sign up regardless of status if we have a session
             if (completeSignUp.createdSessionId) {
                 await setActive({ session: completeSignUp.createdSessionId });
-                
+
                 // If user signed up via invitation, redirect to acceptance page
                 if (invitationId) {
                     router.push(`/accept-invitation/${invitationId}`);
@@ -107,13 +107,13 @@ export default function SignUpPage() {
 
     const signUpWithOAuth = (provider: 'oauth_google' | 'oauth_github' | 'oauth_microsoft') => {
         if (!isLoaded) return;
-        
+
         // Build redirect URL with invitation params if present
         const redirectUrl = '/sso-callback';
-        const redirectUrlComplete = invitationId 
+        const redirectUrlComplete = invitationId
             ? `/accept-invitation/${invitationId}`
             : '/dashboard';
-        
+
         signUp.authenticateWithRedirect({
             strategy: provider,
             redirectUrl,
@@ -193,9 +193,9 @@ export default function SignUpPage() {
                             </div>
                         )}
 
-                        <form onSubmit={handleVerification} className="space-y-4">
-                            <div className="fieldset">
-                                <label className="label">Verification Code</label>
+                        <form onSubmit={handleVerification}>
+                            <fieldset className="fieldset mb-4">
+                                <legend className="fieldset-legend">Verification Code</legend>
                                 <input
                                     type="text"
                                     placeholder="123456"
@@ -205,8 +205,9 @@ export default function SignUpPage() {
                                     required
                                     disabled={isLoading}
                                     maxLength={6}
+                                    autoComplete="one-time-code"
                                 />
-                            </div>
+                            </fieldset>
 
                             <button
                                 type="submit"
