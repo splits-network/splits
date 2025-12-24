@@ -71,6 +71,7 @@ async function main() {
                 { name: 'candidates', description: 'Candidate management' },
                 { name: 'applications', description: 'Job applications and pipeline' },
                 { name: 'placements', description: 'Successful hires and placements' },
+                { name: 'proposals', description: 'Unified proposal workflows (Phase 1A)' },
                 { name: 'integrations', description: 'ATS integration management' },
             ],
         },

@@ -84,8 +84,8 @@ export class ServiceClient {
         }
     }
 
-    async get<T>(path: string, params?: Record<string, any>, correlationId?: string): Promise<T> {
-        return this.request<T>('GET', path, undefined, params, correlationId);
+    async get<T>(path: string, params?: Record<string, any>, correlationId?: string, customHeaders?: Record<string, string>): Promise<T> {
+        return this.request<T>('GET', path, undefined, params, correlationId, customHeaders);
     }
 
     async post<T>(path: string, data?: any, correlationId?: string, customHeaders?: Record<string, string>): Promise<T> {

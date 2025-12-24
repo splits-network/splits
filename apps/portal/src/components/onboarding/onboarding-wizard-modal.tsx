@@ -36,10 +36,10 @@ export function OnboardingWizardModal() {
     return (
         <>
             {/* Modal Backdrop - Non-dismissible, blocks all interaction */}
-            <div className="fixed inset-0 bg-black/50 z-[998]" />
+            <div className="fixed inset-0 bg-black/50 z-998" />
 
             {/* Modal Container */}
-            <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 overflow-y-auto">
+            <div className="fixed inset-0 z-999 flex items-center justify-center p-4 overflow-y-auto">
                 <div className="bg-base-100 rounded-box shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
                     {/* Progress Indicator */}
                     <div className="mb-6">

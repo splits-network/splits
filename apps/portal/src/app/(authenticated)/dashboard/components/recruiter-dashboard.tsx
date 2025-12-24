@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ApiClient } from '@/lib/api-client';
-import ProposedJobsList from './proposed-jobs-list';
 
 interface RecruiterStats {
     active_roles: number;
@@ -282,9 +281,9 @@ export default function RecruiterDashboard({ token, profile }: RecruiterDashboar
                                     <i className="fa-solid fa-users"></i>
                                     My Candidates
                                 </Link>
-                                <Link href="/proposed-jobs" className="btn btn-outline w-full justify-start">
-                                    <i className="fa-solid fa-paper-plane"></i>
-                                    Proposed Jobs
+                                <Link href="/proposals" className="btn btn-outline w-full justify-start">
+                                    <i className="fa-solid fa-inbox"></i>
+                                    Proposals
                                 </Link>
                                 <Link href="/placements" className="btn btn-outline w-full justify-start">
                                     <i className="fa-solid fa-trophy"></i>

@@ -8,6 +8,7 @@ import { registerPlacementRoutes } from './routes/placements/routes';
 import { registerStatsRoutes } from './routes/stats/routes';
 import { registerIntegrationRoutes } from './routes/integrations/routes';
 import { aiReviewRoutes } from './routes/ai-review';
+import { proposalRoutes } from './routes/proposals/routes';
 import { registerCandidateOwnershipRoutes } from './routes/candidates/ownership-routes';
 import { registerPlacementLifecycleRoutes } from './routes/placements/lifecycle-routes';
 import { registerPlacementCollaborationRoutes } from './routes/placements/collaboration-routes';
@@ -37,6 +38,9 @@ export function registerRoutes(
     
     // Register AI review routes (Phase 1.5)
     aiReviewRoutes(app, repository, eventPublisher);
+    
+    // Register unified proposals routes (Phase 1A)
+    proposalRoutes(app, repository);
     
     // Register Phase 2 routes
     registerCandidateOwnershipRoutes(app, ownershipService);

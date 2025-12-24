@@ -10,8 +10,8 @@ const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: 'fa-house', roles: ['all'] },
     { href: '/roles', label: 'Roles', icon: 'fa-briefcase', roles: ['all'] },
     { href: '/invitations', label: 'Invitations', icon: 'fa-envelope', roles: ['recruiter'] },
+    { href: '/proposals', label: 'Proposals', icon: 'fa-inbox', roles: ['all'] },
     { href: '/candidates', label: 'Candidates', icon: 'fa-users', roles: ['recruiter', 'platform_admin'] },
-    // { href: '/proposals', label: 'Proposals', icon: 'fa-handshake', badge: true }, // commented out for future use
     { href: '/applications', label: 'Applications', icon: 'fa-file-lines', roles: ['company_admin', 'hiring_manager'] },
     { href: '/placements', label: 'Placements', icon: 'fa-trophy', roles: ['recruiter', 'platform_admin'] },
     { href: '/profile', label: 'Profile', icon: 'fa-user', roles: ['recruiter'] },
