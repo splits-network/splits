@@ -9,6 +9,7 @@ import { requireRoles, AuthenticatedRequest } from '../../rbac';
  */
 export function registerRecruitersRoutes(app: FastifyInstance, services: ServiceRegistry) {
     const networkService = () => services.get('network');
+    const atsService = () => services.get('ats');
 
     // Get current user's recruiter profile
     app.get('/api/recruiters/me', {
@@ -104,6 +105,48 @@ export function registerRecruitersRoutes(app: FastifyInstance, services: Service
         const queryString = new URLSearchParams(request.query as any).toString();
         const path = queryString ? `/recruiters/${id}/proposals?${queryString}` : `/recruiters/${id}/proposals`;
         const data = await networkService().get(path, undefined, correlationId);
+        return reply.send(data);
+    });
+
+    // Get proposed jobs for recruiter dashboard
+    app.get('/api/recruiters/:recruiterId/proposed-jobs', {
+        schema: {
+            description: 'Get proposed jobs for recruiter dashboard',
+            tags: ['recruiters'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const { recruiterId } = request.params as { recruiterId: string };
+        const correlationId = (request as any).correlationId;
+        
+        // If recruiterId looks like a Clerk user ID (starts with "user_"), resolve to internal recruiter ID
+        let actualRecruiterId = recruiterId;
+        if (recruiterId.startsWith('user_')) {
+            try {
+                const recruiterData = await networkService().get(`/recruiters/by-user/${recruiterId}`, undefined, correlationId) as any;
+                actualRecruiterId = recruiterData.data?.id;
+                if (!actualRecruiterId) {
+                    return reply.status(404).send({ 
+                        error: { 
+                            code: 'RECRUITER_NOT_FOUND', 
+                            message: 'Recruiter profile not found' 
+                        } 
+                    });
+                }
+            } catch (error) {
+                request.log.error({ error, userId: recruiterId }, 'Failed to resolve recruiter ID');
+                return reply.status(404).send({ 
+                    error: { 
+                        code: 'RECRUITER_NOT_FOUND', 
+                        message: 'Recruiter profile not found' 
+                    } 
+                });
+            }
+        }
+        
+        const queryString = new URLSearchParams(request.query as any).toString();
+        const path = queryString ? `/recruiters/${actualRecruiterId}/proposed-jobs?${queryString}` : `/recruiters/${actualRecruiterId}/proposed-jobs`;
+        const data = await atsService().get(path, undefined, correlationId);
         return reply.send(data);
     });
 

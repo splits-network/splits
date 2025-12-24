@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser, useAuth } from '@clerk/nextjs';
+import { ApiClient } from '@/lib/api-client';
 import Link from 'next/link';
 
 interface ProposedJob {
@@ -25,6 +26,7 @@ interface ProposedJobsListProps {
 
 export default function ProposedJobsList({ compact = false }: ProposedJobsListProps) {
     const { user, isLoaded, isSignedIn } = useUser();
+    const { getToken } = useAuth();
     const [jobs, setJobs] = useState<ProposedJob[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -38,18 +40,24 @@ export default function ProposedJobsList({ compact = false }: ProposedJobsListPr
                 setLoading(true);
                 setError(null);
 
-                const recruiterId = user.id;
-                const response = await fetch(
-                    `/api/recruiters/${recruiterId}/proposed-jobs`
-                );
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch proposed jobs');
+                // Get Clerk token for API authentication
+                const token = await getToken();
+                if (!token) {
+                    throw new Error('No authentication token available');
                 }
 
-                const data = await response.json();
-                setJobs(data.data?.applications || []);
+                // Create API client with token and call API Gateway directly
+                const apiClient = new ApiClient(undefined, token);
+                const recruiterId = user.id;
+
+                // Call API Gateway directly - it returns { data: ... }
+                const response = await apiClient.get<{ data: ProposedJob[] }>(
+                    `/recruiters/${recruiterId}/proposed-jobs`
+                );
+
+                setJobs(response.data || []);
             } catch (err) {
+                console.error('Error fetching proposed jobs:', err);
                 setError(
                     err instanceof Error ? err.message : 'Failed to load proposed jobs'
                 );
@@ -59,7 +67,7 @@ export default function ProposedJobsList({ compact = false }: ProposedJobsListPr
         };
 
         fetchProposedJobs();
-    }, [isLoaded, isSignedIn, user]);
+    }, [isLoaded, isSignedIn, user, getToken]);
 
     const getDaysRemaining = (expiresAt: string): number => {
         const now = new Date();

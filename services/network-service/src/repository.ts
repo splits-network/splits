@@ -47,10 +47,31 @@ export class NetworkRepository {
     }
 
     async findRecruiterByUserId(userId: string): Promise<Recruiter | null> {
+        // userId might be a Clerk user ID (e.g., "user_xxx") or internal UUID
+        // First, try to resolve it to an internal user UUID if it's a Clerk ID
+        let internalUserId = userId;
+        
+        if (userId.startsWith('user_')) {
+            // This is a Clerk user ID, need to look up the internal UUID
+            const { data: user, error: userError } = await this.supabase
+                .schema('identity')
+                .from('users')
+                .select('id')
+                .eq('clerk_user_id', userId)
+                .single();
+            
+            if (userError) {
+                if (userError.code === 'PGRST116') return null; // User not found
+                throw userError;
+            }
+            
+            internalUserId = user.id;
+        }
+        
         const { data, error } = await this.supabase
             .schema('network').from('recruiters')
             .select('*')
-            .eq('user_id', userId)
+            .eq('user_id', internalUserId)
             .single();
 
         if (error) {
