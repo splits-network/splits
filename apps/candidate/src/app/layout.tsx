@@ -46,7 +46,7 @@ export default function RootLayout({
         throw new Error('Missing NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY environment variable');
     }
     return (
-        <ClerkProvider publishableKey={publishableKey}>
+        <ClerkProvider publishableKey={publishableKey} afterSignOutUrl="/">
             <html lang="en" data-theme="applicant-light">
                 <head>
                     <link
