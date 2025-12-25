@@ -201,41 +201,6 @@ export function registerCandidateRoutes(app: FastifyInstance, service: AtsServic
         }
     );
 
-    // Phase 2: Record outreach to candidate
-    app.post(
-        '/candidates/:id/outreach',
-        async (request: FastifyRequest<{ 
-            Params: { id: string };
-            Body: Record<string, any>;
-        }>, reply: FastifyReply) => {
-            const { id } = request.params;
-            const { clerkUserId, userRole } = getUserContext(request);
-            const correlationId = getCorrelationId(request);
-            
-            try {
-                const result = await candidatesService.recordOutreach({
-                    clerkUserId,
-                    userRole: userRole as 'recruiter',
-                    candidateId: id,
-                    outreachData: request.body,
-                }, correlationId);
-                return reply.send({ data: result });
-            } catch (error: any) {
-                if (error.message.includes('not found')) {
-                    return reply.status(404).send({ 
-                        error: { code: 'NOT_FOUND', message: error.message } 
-                    });
-                }
-                if (error.message.includes('Recruiter profile') || error.message.includes('Forbidden')) {
-                    return reply.status(403).send({ 
-                        error: { code: 'FORBIDDEN', message: error.message } 
-                    });
-                }
-                throw error;
-            }
-        }
-    );
-
     // Self-service candidate update
     app.patch(
         '/candidates/me',
