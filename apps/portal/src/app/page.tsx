@@ -1,14 +1,6 @@
 import Link from 'next/link';
-import { auth } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
 
 export default async function HomePage() {
-    const { userId } = await auth();
-
-    // Redirect authenticated users to dashboard
-    if (userId) {
-        redirect('/dashboard');
-    }
 
     return (
         <>
@@ -24,10 +16,10 @@ export default async function HomePage() {
                 >
                     <source src="/ads.mp4" type="video/mp4" />
                 </video>
-                
+
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-base-100/80"></div>
-                
+
                 {/* Content */}
                 <div className="hero-content text-center max-w-5xl relative z-10 py-20">
                     <div className="space-y-8">
@@ -680,78 +672,78 @@ export default async function HomePage() {
                     </div>
                     <div className="max-w-4xl mx-auto space-y-4">
                         <div className="collapse collapse-plus bg-base-100 shadow-lg">
-                            <input type="radio" name="faq-accordion" defaultChecked /> 
+                            <input type="radio" name="faq-accordion" defaultChecked />
                             <div className="collapse-title text-xl font-medium">
                                 How do splits actually work on Splits Network?
                             </div>
-                            <div className="collapse-content"> 
+                            <div className="collapse-content">
                                 <p className="text-base-content/70">
-                                    When a candidate is hired, the company pays a placement fee (typically 15-25% of salary). 
-                                    The platform takes a small percentage, and the recruiter receives the majority of the fee. 
+                                    When a candidate is hired, the company pays a placement fee (typically 15-25% of salary).
+                                    The platform takes a small percentage, and the recruiter receives the majority of the fee.
                                     All terms are agreed upon upfront and tracked transparently in your dashboard.
                                 </p>
                             </div>
                         </div>
                         <div className="collapse collapse-plus bg-base-100 shadow-lg">
-                            <input type="radio" name="faq-accordion" /> 
+                            <input type="radio" name="faq-accordion" />
                             <div className="collapse-title text-xl font-medium">
                                 Who owns the candidate and relationship?
                             </div>
-                            <div className="collapse-content"> 
+                            <div className="collapse-content">
                                 <p className="text-base-content/70">
-                                    The recruiter who submits the candidate maintains their relationship. Splits Network is the 
-                                    administrative platform that coordinates the placement process, but recruiters own their 
+                                    The recruiter who submits the candidate maintains their relationship. Splits Network is the
+                                    administrative platform that coordinates the placement process, but recruiters own their
                                     candidate relationships and company connections.
                                 </p>
                             </div>
                         </div>
                         <div className="collapse collapse-plus bg-base-100 shadow-lg">
-                            <input type="radio" name="faq-accordion" /> 
+                            <input type="radio" name="faq-accordion" />
                             <div className="collapse-title text-xl font-medium">
                                 How do payouts work today? Is Splits Network handling the money?
                             </div>
-                            <div className="collapse-content"> 
+                            <div className="collapse-content">
                                 <p className="text-base-content/70">
-                                    In Phase 1, Splits Network tracks the placement and splits but doesn't process payments directly. 
-                                    Companies pay recruiters according to their agreements, and the platform provides the tracking and 
+                                    In Phase 1, Splits Network tracks the placement and splits but doesn't process payments directly.
+                                    Companies pay recruiters according to their agreements, and the platform provides the tracking and
                                     documentation. Payment processing features will be added in future phases.
                                 </p>
                             </div>
                         </div>
                         <div className="collapse collapse-plus bg-base-100 shadow-lg">
-                            <input type="radio" name="faq-accordion" /> 
+                            <input type="radio" name="faq-accordion" />
                             <div className="collapse-title text-xl font-medium">
                                 Can I bring my existing companies/recruiters onto the platform?
                             </div>
-                            <div className="collapse-content"> 
+                            <div className="collapse-content">
                                 <p className="text-base-content/70">
-                                    Absolutely! You can invite your existing network to join Splits Network. Companies can post their 
+                                    Absolutely! You can invite your existing network to join Splits Network. Companies can post their
                                     roles, and you can collaborate with recruiters you already know and trust, all within one platform.
                                 </p>
                             </div>
                         </div>
                         <div className="collapse collapse-plus bg-base-100 shadow-lg">
-                            <input type="radio" name="faq-accordion" /> 
+                            <input type="radio" name="faq-accordion" />
                             <div className="collapse-title text-xl font-medium">
                                 What does it cost for recruiters? What does it cost for companies?
                             </div>
-                            <div className="collapse-content"> 
+                            <div className="collapse-content">
                                 <p className="text-base-content/70">
-                                    Recruiters pay a monthly subscription based on their tier (Starter, Pro, Partner). 
-                                    Companies post roles for free and pay only when a hire is made. The platform takes a small 
+                                    Recruiters pay a monthly subscription based on their tier (Starter, Pro, Partner).
+                                    Companies post roles for free and pay only when a hire is made. The platform takes a small
                                     percentage of the placement fee, clearly disclosed upfront.
                                 </p>
                             </div>
                         </div>
                         <div className="collapse collapse-plus bg-base-100 shadow-lg">
-                            <input type="radio" name="faq-accordion" /> 
+                            <input type="radio" name="faq-accordion" />
                             <div className="collapse-title text-xl font-medium">
                                 Do I have to switch away from my current ATS?
                             </div>
-                            <div className="collapse-content"> 
+                            <div className="collapse-content">
                                 <p className="text-base-content/70">
-                                    No. Splits Network works alongside your existing systems. You can use it specifically for 
-                                    split placements and collaborative recruiting while keeping your primary ATS for direct hires 
+                                    No. Splits Network works alongside your existing systems. You can use it specifically for
+                                    split placements and collaborative recruiting while keeping your primary ATS for direct hires
                                     and internal processes.
                                 </p>
                             </div>
