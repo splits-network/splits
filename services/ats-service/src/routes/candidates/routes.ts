@@ -201,41 +201,6 @@ export function registerCandidateRoutes(app: FastifyInstance, service: AtsServic
         }
     );
 
-    // Phase 2: Source candidate (mark as sourced by recruiter)
-    app.post(
-        '/candidates/:id/source',
-        async (request: FastifyRequest<{ 
-            Params: { id: string };
-            Body: Record<string, any>;
-        }>, reply: FastifyReply) => {
-            const { id } = request.params;
-            const { clerkUserId, userRole } = getUserContext(request);
-            const correlationId = getCorrelationId(request);
-            
-            try {
-                const result = await candidatesService.sourceCandidate({
-                    clerkUserId,
-                    userRole: userRole as 'recruiter',
-                    candidateId: id,
-                    sourceData: request.body,
-                }, correlationId);
-                return reply.send({ data: result });
-            } catch (error: any) {
-                if (error.message.includes('not found')) {
-                    return reply.status(404).send({ 
-                        error: { code: 'NOT_FOUND', message: error.message } 
-                    });
-                }
-                if (error.message.includes('Recruiter profile') || error.message.includes('Forbidden')) {
-                    return reply.status(403).send({ 
-                        error: { code: 'FORBIDDEN', message: error.message } 
-                    });
-                }
-                throw error;
-            }
-        }
-    );
-
     // Phase 2: Get candidate sourcer information
     app.get(
         '/candidates/:id/sourcer',
