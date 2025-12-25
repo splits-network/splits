@@ -201,27 +201,6 @@ export function registerCandidateRoutes(app: FastifyInstance, service: AtsServic
         }
     );
 
-    // Phase 2: Get candidate sourcer information
-    app.get(
-        '/candidates/:id/sourcer',
-        async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
-            const { id } = request.params;
-            const correlationId = getCorrelationId(request);
-            
-            try {
-                const sourcer = await candidatesService.getCandidateSourcer(id, correlationId);
-                return reply.send({ data: sourcer });
-            } catch (error: any) {
-                if (error.message.includes('not found')) {
-                    return reply.status(404).send({ 
-                        error: { code: 'NOT_FOUND', message: error.message } 
-                    });
-                }
-                throw error;
-            }
-        }
-    );
-
     // Phase 2: Record outreach to candidate
     app.post(
         '/candidates/:id/outreach',
