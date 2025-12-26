@@ -136,37 +136,35 @@ export default function ProposalsPage() {
 
             {/* Summary Stats */}
             {summary && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="stats shadow">
-                        <div className="stat">
+                        <div className="stat bg-base-100">
                             <div className="stat-title">Requiring Action</div>
                             <div className="stat-value text-primary">{summary.actionable_count}</div>
                             <div className="stat-desc">Items awaiting your response</div>
                         </div>
                     </div>
                     <div className="stats shadow">
-                        <div className="stat">
+                        <div className="stat bg-base-100">
                             <div className="stat-title">Awaiting Response</div>
                             <div className="stat-value">{summary.waiting_count}</div>
                             <div className="stat-desc">Items sent to others</div>
                         </div>
                     </div>
                     <div className="stats shadow">
-                        <div className="stat">
+                        <div className="stat bg-base-100">
                             <div className="stat-title">Urgent</div>
                             <div className="stat-value text-warning">{summary.urgent_count}</div>
                             <div className="stat-desc">Due within 24 hours</div>
                         </div>
                     </div>
-                    {summary.overdue_count > 0 && (
-                        <div className="stats shadow">
-                            <div className="stat">
-                                <div className="stat-title">Overdue</div>
-                                <div className="stat-value text-error">{summary.overdue_count}</div>
-                                <div className="stat-desc">Past deadline</div>
-                            </div>
+                    <div className="stats shadow">
+                        <div className="stat bg-base-100">
+                            <div className="stat-title">Overdue</div>
+                            <div className="stat-value text-error">{summary.overdue_count}</div>
+                            <div className="stat-desc">Past deadline</div>
                         </div>
-                    )}
+                    </div>
                 </div>
             )}
 
