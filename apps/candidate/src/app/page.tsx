@@ -32,7 +32,7 @@ export default async function CandidateHomePage() {
                             Browse thousands of opportunities from top companies. Get matched with specialized recruiters who advocate for you throughout the hiring process.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
-                            <Link href="/jobs" className="btn btn-primary btn-lg gap-2 shadow-lg hover:shadow-xl transition-all">
+                            <Link href="/jobs" className="btn btn-primary btn-lg gap-2 shadow hover:shadow transition-all">
                                 <i className="fa-solid fa-magnifying-glass"></i>
                                 Explore Jobs
                             </Link>
@@ -93,7 +93,7 @@ export default async function CandidateHomePage() {
                         </p>
                     </div>
                     <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                        <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all">
+                        <div className="card bg-base-100 shadow hover:shadow-2xl transition-all">
                             <div className="card-body items-center text-center space-y-4">
                                 <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
                                     <span className="text-3xl font-bold text-primary">1</span>
@@ -105,7 +105,7 @@ export default async function CandidateHomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all">
+                        <div className="card bg-base-100 shadow hover:shadow-2xl transition-all">
                             <div className="card-body items-center text-center space-y-4">
                                 <div className="w-20 h-20 rounded-full bg-secondary/20 flex items-center justify-center">
                                     <span className="text-3xl font-bold text-secondary">2</span>
@@ -117,7 +117,7 @@ export default async function CandidateHomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all">
+                        <div className="card bg-base-100 shadow hover:shadow-2xl transition-all">
                             <div className="card-body items-center text-center space-y-4">
                                 <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center">
                                     <span className="text-3xl font-bold text-accent">3</span>
@@ -143,7 +143,7 @@ export default async function CandidateHomePage() {
                         </p>
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-                        <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-all">
+                        <div className="card bg-base-100 shadow hover:shadow transition-all">
                             <div className="card-body">
                                 <div className="flex items-start gap-4">
                                     <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -158,7 +158,7 @@ export default async function CandidateHomePage() {
                                 </div>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-all">
+                        <div className="card bg-base-100 shadow hover:shadow transition-all">
                             <div className="card-body">
                                 <div className="flex items-start gap-4">
                                     <div className="w-14 h-14 rounded-lg bg-secondary/10 flex items-center justify-center flex-shrink-0">
@@ -173,7 +173,7 @@ export default async function CandidateHomePage() {
                                 </div>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-all">
+                        <div className="card bg-base-100 shadow hover:shadow transition-all">
                             <div className="card-body">
                                 <div className="flex items-start gap-4">
                                     <div className="w-14 h-14 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
@@ -188,7 +188,7 @@ export default async function CandidateHomePage() {
                                 </div>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-all">
+                        <div className="card bg-base-100 shadow hover:shadow transition-all">
                             <div className="card-body">
                                 <div className="flex items-start gap-4">
                                     <div className="w-14 h-14 rounded-lg bg-success/10 flex items-center justify-center flex-shrink-0">
@@ -203,7 +203,7 @@ export default async function CandidateHomePage() {
                                 </div>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-all">
+                        <div className="card bg-base-100 shadow hover:shadow transition-all">
                             <div className="card-body">
                                 <div className="flex items-start gap-4">
                                     <div className="w-14 h-14 rounded-lg bg-warning/10 flex items-center justify-center flex-shrink-0">
@@ -218,7 +218,7 @@ export default async function CandidateHomePage() {
                                 </div>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-all">
+                        <div className="card bg-base-100 shadow hover:shadow transition-all">
                             <div className="card-body">
                                 <div className="flex items-start gap-4">
                                     <div className="w-14 h-14 rounded-lg bg-info/10 flex items-center justify-center flex-shrink-0">
@@ -247,7 +247,7 @@ export default async function CandidateHomePage() {
                         </p>
                     </div>
                     <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                        <div className="card bg-base-100 shadow-xl">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-4 mb-4">
                                     <div className="avatar avatar-placeholder">
@@ -272,7 +272,7 @@ export default async function CandidateHomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-xl">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-4 mb-4">
                                     <div className="avatar avatar-placeholder">
@@ -297,7 +297,7 @@ export default async function CandidateHomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-xl">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-4 mb-4">
                                     <div className="avatar avatar-placeholder">
@@ -337,7 +337,7 @@ export default async function CandidateHomePage() {
                             Join thousands of candidates who are finding better opportunities with expert guidance
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
-                            <Link href="/sign-up" className="btn btn-lg bg-white text-primary hover:bg-gray-100 border-none shadow-xl">
+                            <Link href="/sign-up" className="btn btn-lg bg-white text-primary hover:bg-gray-100 border-none shadow">
                                 <i className="fa-solid fa-user-plus"></i>
                                 Create Free Account
                             </Link>

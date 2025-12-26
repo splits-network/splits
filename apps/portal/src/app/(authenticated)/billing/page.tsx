@@ -60,7 +60,7 @@ export default async function BillingPage() {
 
             <div className="space-y-6">
                 {/* Current Plan Section */}
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title">
                             <i className="fa-solid fa-box"></i>
@@ -109,7 +109,7 @@ export default async function BillingPage() {
                 </div>
 
                 {/* Payment Method Section */}
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title">
                             <i className="fa-solid fa-wallet"></i>
@@ -151,7 +151,7 @@ export default async function BillingPage() {
                 </div>
 
                 {/* Billing History Section */}
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title">
                             <i className="fa-solid fa-receipt"></i>
@@ -220,7 +220,7 @@ export default async function BillingPage() {
                 </div>
 
                 {isRecruiter && (
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title">
                                 <i className="fa-solid fa-money-bill-transfer"></i>
@@ -269,7 +269,7 @@ export default async function BillingPage() {
 
                 {/* Danger Zone - Only for Admins */}
                 {(isCompanyAdmin || profile?.role === 'admin') && (
-                    <div className="card bg-base-100 shadow-sm border-2 border-error">
+                    <div className="card bg-base-100 shadow border-2 border-error">
                         <div className="card-body">
                             <h2 className="card-title text-error">
                                 <i className="fa-solid fa-triangle-exclamation"></i>

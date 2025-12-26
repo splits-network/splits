@@ -28,7 +28,7 @@ export default function FeaturesPage() {
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
                         {/* ATS Foundation */}
-                        <div className="card bg-base-200 shadow-xl hover:shadow-2xl transition-shadow">
+                        <div className="card bg-base-200 shadow hover:shadow-2xl transition-shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center">
@@ -61,7 +61,7 @@ export default function FeaturesPage() {
                         </div>
 
                         {/* Split Placement Engine */}
-                        <div className="card bg-base-200 shadow-xl hover:shadow-2xl transition-shadow">
+                        <div className="card bg-base-200 shadow hover:shadow-2xl transition-shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-secondary/20 flex items-center justify-center">
@@ -94,7 +94,7 @@ export default function FeaturesPage() {
                         </div>
 
                         {/* Recruiter Network */}
-                        <div className="card bg-base-200 shadow-xl hover:shadow-2xl transition-shadow">
+                        <div className="card bg-base-200 shadow hover:shadow-2xl transition-shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-accent/20 flex items-center justify-center">
@@ -127,7 +127,7 @@ export default function FeaturesPage() {
                         </div>
 
                         {/* Subscriptions & Plans */}
-                        <div className="card bg-base-200 shadow-xl hover:shadow-2xl transition-shadow">
+                        <div className="card bg-base-200 shadow hover:shadow-2xl transition-shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center">
@@ -160,7 +160,7 @@ export default function FeaturesPage() {
                         </div>
 
                         {/* Smart Notifications */}
-                        <div className="card bg-base-200 shadow-xl hover:shadow-2xl transition-shadow">
+                        <div className="card bg-base-200 shadow hover:shadow-2xl transition-shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-secondary/20 flex items-center justify-center">
@@ -193,7 +193,7 @@ export default function FeaturesPage() {
                         </div>
 
                         {/* Admin Console */}
-                        <div className="card bg-base-200 shadow-xl hover:shadow-2xl transition-shadow">
+                        <div className="card bg-base-200 shadow hover:shadow-2xl transition-shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-accent/20 flex items-center justify-center">
@@ -241,7 +241,7 @@ export default function FeaturesPage() {
                             </p>
                         </div>
                         <div className="grid md:grid-cols-2 gap-6">
-                            <div className="card bg-base-100 shadow-lg">
+                            <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-3">
                                         <i className="fa-solid fa-briefcase text-primary"></i>
@@ -252,7 +252,7 @@ export default function FeaturesPage() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="card bg-base-100 shadow-lg">
+                            <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-3">
                                         <i className="fa-solid fa-users-between-lines text-primary"></i>
@@ -263,7 +263,7 @@ export default function FeaturesPage() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="card bg-base-100 shadow-lg">
+                            <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-3">
                                         <i className="fa-solid fa-file-invoice-dollar text-primary"></i>
@@ -274,7 +274,7 @@ export default function FeaturesPage() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="card bg-base-100 shadow-lg">
+                            <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-3">
                                         <i className="fa-solid fa-chart-line text-primary"></i>
@@ -303,7 +303,7 @@ export default function FeaturesPage() {
                             </p>
                         </div>
                         <div className="grid md:grid-cols-2 gap-6">
-                            <div className="card bg-base-200 shadow-lg">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-3">
                                         <i className="fa-solid fa-bullhorn text-secondary"></i>
@@ -314,7 +314,7 @@ export default function FeaturesPage() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="card bg-base-200 shadow-lg">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-3">
                                         <i className="fa-solid fa-diagram-project text-secondary"></i>
@@ -325,7 +325,7 @@ export default function FeaturesPage() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="card bg-base-200 shadow-lg">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-3">
                                         <i className="fa-solid fa-handshake text-secondary"></i>
@@ -336,7 +336,7 @@ export default function FeaturesPage() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="card bg-base-200 shadow-lg">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-3">
                                         <i className="fa-solid fa-dollar-sign text-secondary"></i>

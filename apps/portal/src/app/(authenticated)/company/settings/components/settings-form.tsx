@@ -131,7 +131,7 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
                 </div>
             )}
 
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
                         <i className="fa-solid fa-building"></i>
@@ -246,7 +246,7 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
                 </div>
             </div>
 
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
                         <i className="fa-solid fa-cog"></i>

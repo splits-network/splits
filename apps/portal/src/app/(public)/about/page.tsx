@@ -11,7 +11,7 @@ export default function AboutPage() {
                             About Splits Network
                         </h1>
                         <p className="text-xl opacity-90 max-w-3xl mx-auto">
-                            We're building the future of collaborative recruiting—a platform where transparency, 
+                            We're building the future of collaborative recruiting—a platform where transparency,
                             fair splits, and quality placements drive everything we do.
                         </p>
                     </div>
@@ -23,28 +23,28 @@ export default function AboutPage() {
                 <div className="container mx-auto px-4">
                     <div className="max-w-6xl mx-auto">
                         <div className="grid md:grid-cols-2 gap-12 mb-16">
-                            <div className="card bg-primary text-primary-content shadow-xl">
+                            <div className="card bg-primary text-primary-content shadow">
                                 <div className="card-body p-8">
                                     <h2 className="card-title text-3xl mb-4">
                                         <i className="fa-solid fa-bullseye"></i>
                                         Our Mission
                                     </h2>
                                     <p className="text-lg opacity-90">
-                                        To create a transparent, fair marketplace where specialized recruiters and 
-                                        companies collaborate seamlessly on placements—eliminating the chaos of 
+                                        To create a transparent, fair marketplace where specialized recruiters and
+                                        companies collaborate seamlessly on placements—eliminating the chaos of
                                         spreadsheets, email chains, and unclear fee structures.
                                     </p>
                                 </div>
                             </div>
-                            <div className="card bg-secondary text-secondary-content shadow-xl">
+                            <div className="card bg-secondary text-secondary-content shadow">
                                 <div className="card-body p-8">
                                     <h2 className="card-title text-3xl mb-4">
                                         <i className="fa-solid fa-telescope"></i>
                                         Our Vision
                                     </h2>
                                     <p className="text-lg opacity-90">
-                                        A world where every specialized recruiter can build a sustainable business 
-                                        through split placements, and every company has instant access to the 
+                                        A world where every specialized recruiter can build a sustainable business
+                                        through split placements, and every company has instant access to the
                                         perfect recruiting talent for their needs.
                                     </p>
                                 </div>
@@ -55,19 +55,19 @@ export default function AboutPage() {
                         <div className="prose lg:prose-xl mx-auto">
                             <h2 className="text-3xl font-bold text-center mb-8">Our Story</h2>
                             <p className="text-lg text-base-content/80">
-                                Splits Network was born from years of frustration with the split placement process. 
-                                As recruiters ourselves, we experienced firsthand the pain of managing splits across 
+                                Splits Network was born from years of frustration with the split placement process.
+                                As recruiters ourselves, we experienced firsthand the pain of managing splits across
                                 spreadsheets, losing track of candidates, and dealing with unclear fee agreements.
                             </p>
                             <p className="text-lg text-base-content/80">
-                                We saw talented recruiters avoiding split placements entirely—not because they didn't 
-                                want to collaborate, but because the tools didn't exist to make it work smoothly. 
-                                Companies were equally frustrated, struggling to manage multiple external recruiters 
+                                We saw talented recruiters avoiding split placements entirely—not because they didn't
+                                want to collaborate, but because the tools didn't exist to make it work smoothly.
+                                Companies were equally frustrated, struggling to manage multiple external recruiters
                                 without a unified system.
                             </p>
                             <p className="text-lg text-base-content/80">
-                                So we built Splits Network: a platform designed specifically for split placements, 
-                                not retrofitted from general-purpose ATS systems. We built it with transparency, 
+                                So we built Splits Network: a platform designed specifically for split placements,
+                                not retrofitted from general-purpose ATS systems. We built it with transparency,
                                 fairness, and simplicity at its core.
                             </p>
                         </div>
@@ -85,74 +85,74 @@ export default function AboutPage() {
                         </p>
                     </div>
                     <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                        <div className="card bg-base-100 shadow-xl">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body text-center">
                                 <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
                                     <i className="fa-solid fa-eye text-primary text-3xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-2xl mb-3">Transparency</h3>
                                 <p className="text-base-content/70">
-                                    Every fee, every split, every transaction is crystal clear. No hidden percentages, 
+                                    Every fee, every split, every transaction is crystal clear. No hidden percentages,
                                     no mystery math, no surprise deductions.
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-xl">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body text-center">
                                 <div className="w-20 h-20 rounded-full bg-secondary/20 flex items-center justify-center mx-auto mb-4">
                                     <i className="fa-solid fa-scale-balanced text-secondary text-3xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-2xl mb-3">Fairness</h3>
                                 <p className="text-base-content/70">
-                                    Recruiters deserve the lion's share of placement fees. We take only what we need 
+                                    Recruiters deserve the lion's share of placement fees. We take only what we need
                                     to run a sustainable platform.
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-xl">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body text-center">
                                 <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-4">
                                     <i className="fa-solid fa-lightbulb text-accent text-3xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-2xl mb-3">Simplicity</h3>
                                 <p className="text-base-content/70">
-                                    Complex processes should feel simple. We hide the complexity so you can focus 
+                                    Complex processes should feel simple. We hide the complexity so you can focus
                                     on what matters: making great placements.
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-xl">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body text-center">
                                 <div className="w-20 h-20 rounded-full bg-info/20 flex items-center justify-center mx-auto mb-4">
                                     <i className="fa-solid fa-users text-info text-3xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-2xl mb-3">Community</h3>
                                 <p className="text-base-content/70">
-                                    We're building more than a platform—we're creating a network of recruiters 
+                                    We're building more than a platform—we're creating a network of recruiters
                                     who support and collaborate with each other.
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-xl">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body text-center">
                                 <div className="w-20 h-20 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-4">
                                     <i className="fa-solid fa-chart-line text-success text-3xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-2xl mb-3">Growth</h3>
                                 <p className="text-base-content/70">
-                                    Your success is our success. We're invested in helping recruiters build 
+                                    Your success is our success. We're invested in helping recruiters build
                                     sustainable, growing businesses.
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-xl">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body text-center">
                                 <div className="w-20 h-20 rounded-full bg-warning/20 flex items-center justify-center mx-auto mb-4">
                                     <i className="fa-solid fa-rocket text-warning text-3xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-2xl mb-3">Innovation</h3>
                                 <p className="text-base-content/70">
-                                    We're constantly improving, listening to feedback, and building features 
+                                    We're constantly improving, listening to feedback, and building features
                                     that solve real problems.
                                 </p>
                             </div>
@@ -167,38 +167,38 @@ export default function AboutPage() {
                     <div className="max-w-5xl mx-auto">
                         <h2 className="text-4xl font-bold text-center mb-12">Why We're Different</h2>
                         <div className="space-y-6">
-                            <div className="card bg-base-200 shadow-lg">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl">
                                         <i className="fa-solid fa-hammer text-primary"></i>
                                         Built for Splits, Not Adapted
                                     </h3>
                                     <p className="text-base-content/70">
-                                        Most ATS systems treat split placements as an afterthought. We built Splits Network 
+                                        Most ATS systems treat split placements as an afterthought. We built Splits Network
                                         from the ground up with collaborative recruiting as the core use case.
                                     </p>
                                 </div>
                             </div>
-                            <div className="card bg-base-200 shadow-lg">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl">
                                         <i className="fa-solid fa-handshake text-secondary"></i>
                                         Recruiter-First Philosophy
                                     </h3>
                                     <p className="text-base-content/70">
-                                        We're recruiters building for recruiters. Every feature, every workflow, every decision 
+                                        We're recruiters building for recruiters. Every feature, every workflow, every decision
                                         is made with your success in mind.
                                     </p>
                                 </div>
                             </div>
-                            <div className="card bg-base-200 shadow-lg">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl">
                                         <i className="fa-solid fa-code text-accent"></i>
                                         Modern Technology Stack
                                     </h3>
                                     <p className="text-base-content/70">
-                                        We use enterprise-grade, modern technology that's fast, reliable, and scales with your business. 
+                                        We use enterprise-grade, modern technology that's fast, reliable, and scales with your business.
                                         No legacy systems holding you back.
                                     </p>
                                 </div>
@@ -218,7 +218,7 @@ export default function AboutPage() {
                         </p>
                     </div>
                     <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                        <div className="card bg-base-100 text-base-content shadow-xl">
+                        <div className="card bg-base-100 text-base-content shadow">
                             <div className="card-body text-center">
                                 <div className="avatar avatar-placeholder mx-auto mb-4">
                                     <div className="bg-primary text-primary-content rounded-full w-24">
@@ -232,7 +232,7 @@ export default function AboutPage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 text-base-content shadow-xl">
+                        <div className="card bg-base-100 text-base-content shadow">
                             <div className="card-body text-center">
                                 <div className="avatar avatar-placeholder mx-auto mb-4">
                                     <div className="bg-secondary text-secondary-content rounded-full w-24">
@@ -246,7 +246,7 @@ export default function AboutPage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 text-base-content shadow-xl">
+                        <div className="card bg-base-100 text-base-content shadow">
                             <div className="card-body text-center">
                                 <div className="avatar avatar-placeholder mx-auto mb-4">
                                     <div className="bg-accent text-accent-content rounded-full w-24">

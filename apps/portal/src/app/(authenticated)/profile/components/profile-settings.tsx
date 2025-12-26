@@ -134,7 +134,7 @@ export function ProfileSettings() {
 
     if (loading) {
         return (
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body flex items-center justify-center min-h-[200px]">
                     <span className="loading loading-spinner loading-lg"></span>
                 </div>
@@ -143,7 +143,7 @@ export function ProfileSettings() {
     }
 
     return (
-        <div className="card bg-base-100 shadow-sm">
+        <div className="card bg-base-100 shadow">
             <div className="card-body">
                 <h2 className="card-title">
                     <i className="fa-solid fa-user"></i>

@@ -61,7 +61,7 @@ export default function HomePage() {
 
                     <div className="grid md:grid-cols-2 gap-8">
                         {/* Splits Product Card */}
-                        <div className="card bg-base-200 shadow-xl">
+                        <div className="card bg-base-200 shadow">
                             <div className="card-body">
                                 <div className="badge badge-primary badge-lg mb-4">For Recruiters</div>
                                 <h3 className="card-title text-3xl mb-4">
@@ -99,7 +99,7 @@ export default function HomePage() {
                         </div>
 
                         {/* Applicant Product Card */}
-                        <div className="card bg-base-200 shadow-xl">
+                        <div className="card bg-base-200 shadow">
                             <div className="card-body">
                                 <div className="badge badge-secondary badge-lg mb-4">For Candidates</div>
                                 <h3 className="card-title text-3xl mb-4">
@@ -176,7 +176,7 @@ export default function HomePage() {
                         Interested in learning more about our platforms or partnering with us?
                         We'd love to hear from you.
                     </p>
-                    <div className="card bg-base-200 shadow-xl">
+                    <div className="card bg-base-200 shadow">
                         <div className="card-body">
                             <div className="space-y-4">
                                 <div className="flex items-center gap-4 justify-center">

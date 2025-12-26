@@ -69,7 +69,7 @@ export default function AIMatchesPage() {
                         <span className="loading loading-spinner loading-lg"></span>
                     </div>
                 ) : matches.length === 0 ? (
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body text-center text-base-content/60">
                             <i className="fa-solid fa-sparkles text-4xl mb-2"></i>
                             <p>No pending match suggestions</p>
@@ -77,7 +77,7 @@ export default function AIMatchesPage() {
                     </div>
                 ) : (
                     matches.map((match) => (
-                        <div key={match.id} className="card bg-base-100 shadow-sm">
+                        <div key={match.id} className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1">

@@ -74,7 +74,7 @@ export default async function PendingApplicationsPage({
             {applications.length > 0 && (
                 <div className="space-y-4">
                     {applications.map((app: any) => (
-                        <div key={app.id} className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                        <div key={app.id} className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                                     <div className="flex-1">

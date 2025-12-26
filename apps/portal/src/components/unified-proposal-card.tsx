@@ -101,7 +101,7 @@ export default function UnifiedProposalCard({
 
     return (
         <div
-            className={`card bg-base-100 shadow-md hover:shadow-lg transition-shadow ${onClick && !showResponseForm ? 'cursor-pointer' : ''}`}
+            className={`card bg-base-100 shadow hover:shadow transition-shadow ${onClick && !showResponseForm ? 'cursor-pointer' : ''}`}
             onClick={handleCardClick}
         >
             <div className="card-body">

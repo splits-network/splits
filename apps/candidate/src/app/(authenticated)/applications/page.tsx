@@ -117,19 +117,19 @@ export default async function ApplicationsPage({
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body py-4">
                         <div className="stat-value text-3xl text-primary">{applications.length}</div>
                         <div className="stat-title">Total Applications</div>
                     </div>
                 </div>
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body py-4">
                         <div className="stat-value text-3xl text-success">{activeApps.length}</div>
                         <div className="stat-title">Active</div>
                     </div>
                 </div>
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body py-4">
                         <div className="stat-value text-3xl text-info">
                             {applications.filter(a => a.status === 'Interview Scheduled').length}
@@ -137,7 +137,7 @@ export default async function ApplicationsPage({
                         <div className="stat-title">Interviews</div>
                     </div>
                 </div>
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body py-4">
                         <div className="stat-value text-3xl text-warning">
                             {applications.filter(a => a.status === 'Offer Received').length}
@@ -148,7 +148,7 @@ export default async function ApplicationsPage({
             </div>
 
             {/* Filter Tabs */}
-            <div className="tabs tabs-boxed mb-6 bg-base-100 shadow-sm">
+            <div className="tabs tabs-boxed mb-6 bg-base-100 shadow">
                 <a className="tab tab-active">All Applications</a>
                 <a className="tab">Active</a>
                 <a className="tab">Interviews</a>
@@ -161,7 +161,7 @@ export default async function ApplicationsPage({
                     <h2 className="text-2xl font-bold mb-4">Active Applications</h2>
                     <div className="space-y-4">
                         {activeApps.map((app) => (
-                            <div key={app.id} className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                            <div key={app.id} className="card bg-base-100 shadow hover:shadow transition-shadow">
                                 <div className="card-body">
                                     <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                                         <div className="flex-1">
@@ -233,7 +233,7 @@ export default async function ApplicationsPage({
                     <h2 className="text-2xl font-bold mb-4">Archived Applications</h2>
                     <div className="space-y-4">
                         {inactiveApps.map((app) => (
-                            <div key={app.id} className="card bg-base-100 shadow-lg opacity-70">
+                            <div key={app.id} className="card bg-base-100 shadow opacity-70">
                                 <div className="card-body">
                                     <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                                         <div className="flex-1">
@@ -266,7 +266,7 @@ export default async function ApplicationsPage({
 
             {/* Empty State */}
             {applications.length === 0 && (
-                <div className="card bg-base-100 shadow-lg">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body text-center py-16">
                         <i className="fa-solid fa-inbox text-6xl text-base-content/30 mb-4"></i>
                         <h3 className="text-2xl font-bold mb-2">No Applications Yet</h3>

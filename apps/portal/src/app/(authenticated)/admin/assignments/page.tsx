@@ -46,7 +46,7 @@ export default function RoleAssignmentsPage() {
                 throw new Error('No auth token');
             }
             const apiClient = createAuthenticatedClient(token);
-            
+
             const [jobsResponse, recruitersResponse] = await Promise.all([
                 apiClient.get('/jobs?status=active'),
                 apiClient.get('/recruiters'),
@@ -91,7 +91,7 @@ export default function RoleAssignmentsPage() {
                 throw new Error('No auth token');
             }
             const apiClient = createAuthenticatedClient(token);
-            
+
             await apiClient.post('/assignments', {
                 job_id: selectedJob,
                 recruiter_id: selectedRecruiter,
@@ -129,7 +129,7 @@ export default function RoleAssignmentsPage() {
                 throw new Error('No auth token');
             }
             const apiClient = createAuthenticatedClient(token);
-            
+
             await apiClient.delete(`/assignments/${jobId}/${recruiterId}`);
 
             // Update local state
@@ -174,7 +174,7 @@ export default function RoleAssignmentsPage() {
             </div>
 
             {/* Assignment Form */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">Assign Recruiter to Role</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -245,7 +245,7 @@ export default function RoleAssignmentsPage() {
 
             {/* Current Assignments */}
             {selectedJobData && (
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title">
                             Current Assignments for {selectedJobData.title}
@@ -298,7 +298,7 @@ export default function RoleAssignmentsPage() {
             )}
 
             {/* All Jobs Overview */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">All Active Jobs</h2>
                     <div className="overflow-x-auto">

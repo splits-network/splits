@@ -114,7 +114,7 @@ export default function NotificationsPage() {
             </div>
 
             {/* Filters */}
-            <div className="card bg-base-100 shadow-sm mb-4">
+            <div className="card bg-base-100 shadow mb-4">
                 <div className="card-body p-4">
                     <div className="flex flex-wrap gap-4">
                         {/* Read/Unread Filter */}
@@ -163,7 +163,7 @@ export default function NotificationsPage() {
             </div>
 
             {/* Notification List */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body p-0">
                     {loading ? (
                         <div className="flex justify-center items-center py-12">

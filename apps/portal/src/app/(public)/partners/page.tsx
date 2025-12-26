@@ -23,45 +23,45 @@ export default function PartnersPage() {
                     <div className="max-w-5xl mx-auto text-center mb-16">
                         <h2 className="text-4xl font-bold mb-6">Why Partner With Splits Network?</h2>
                         <p className="text-lg text-base-content/70 max-w-3xl mx-auto">
-                            We're building more than a platform—we're creating an ecosystem. Whether you're a 
-                            recruiting firm, technology provider, or industry association, there's a place for you 
+                            We're building more than a platform—we're creating an ecosystem. Whether you're a
+                            recruiting firm, technology provider, or industry association, there's a place for you
                             in our partner network.
                         </p>
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                        <div className="card bg-base-200 shadow-xl">
+                        <div className="card bg-base-200 shadow">
                             <div className="card-body text-center">
                                 <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
                                     <i className="fa-solid fa-users text-primary text-2xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-xl mb-3">Recruiting Firms</h3>
                                 <p className="text-base-content/70 text-sm">
-                                    White-label solutions, team management, and revenue sharing opportunities for 
+                                    White-label solutions, team management, and revenue sharing opportunities for
                                     established recruiting organizations.
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-200 shadow-xl">
+                        <div className="card bg-base-200 shadow">
                             <div className="card-body text-center">
                                 <div className="w-16 h-16 rounded-full bg-secondary/20 flex items-center justify-center mx-auto mb-4">
                                     <i className="fa-solid fa-plug text-secondary text-2xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-xl mb-3">Technology Partners</h3>
                                 <p className="text-base-content/70 text-sm">
-                                    Integrate your tools with our platform through our API, create custom workflows, 
+                                    Integrate your tools with our platform through our API, create custom workflows,
                                     and reach our growing user base.
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-200 shadow-xl">
+                        <div className="card bg-base-200 shadow">
                             <div className="card-body text-center">
                                 <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-4">
                                     <i className="fa-solid fa-handshake text-accent text-2xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-xl mb-3">Associations</h3>
                                 <p className="text-base-content/70 text-sm">
-                                    Special pricing for members, co-branded experiences, and collaboration on 
+                                    Special pricing for members, co-branded experiences, and collaboration on
                                     industry education and best practices.
                                 </p>
                             </div>
@@ -76,7 +76,7 @@ export default function PartnersPage() {
                     <div className="max-w-6xl mx-auto">
                         <h2 className="text-4xl font-bold mb-12 text-center">Partner Benefits</h2>
                         <div className="grid md:grid-cols-2 gap-8">
-                            <div className="card bg-base-100 shadow-lg">
+                            <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
                                         <i className="fa-solid fa-dollar-sign text-success"></i>
@@ -99,7 +99,7 @@ export default function PartnersPage() {
                                 </div>
                             </div>
 
-                            <div className="card bg-base-100 shadow-lg">
+                            <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
                                         <i className="fa-solid fa-code text-info"></i>
@@ -122,7 +122,7 @@ export default function PartnersPage() {
                                 </div>
                             </div>
 
-                            <div className="card bg-base-100 shadow-lg">
+                            <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
                                         <i className="fa-solid fa-bullhorn text-primary"></i>
@@ -145,7 +145,7 @@ export default function PartnersPage() {
                                 </div>
                             </div>
 
-                            <div className="card bg-base-100 shadow-lg">
+                            <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
                                         <i className="fa-solid fa-graduation-cap text-secondary"></i>
@@ -177,17 +177,17 @@ export default function PartnersPage() {
                 <div className="container mx-auto px-4">
                     <div className="max-w-6xl mx-auto">
                         <h2 className="text-4xl font-bold mb-12 text-center">Partnership Opportunities</h2>
-                        
+
                         <div className="space-y-8">
                             {/* Recruiting Firm Partners */}
-                            <div className="card bg-base-200 shadow-xl">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-2xl mb-4">
                                         <i className="fa-solid fa-building text-primary"></i>
                                         Recruiting Firm Partners
                                     </h3>
                                     <p className="text-base-content/70 mb-4">
-                                        Perfect for established recruiting firms who want to offer split placement 
+                                        Perfect for established recruiting firms who want to offer split placement
                                         capabilities to their recruiters while maintaining their brand identity.
                                     </p>
                                     <div className="grid md:grid-cols-3 gap-4">
@@ -214,14 +214,14 @@ export default function PartnersPage() {
                             </div>
 
                             {/* Technology Partners */}
-                            <div className="card bg-base-200 shadow-xl">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-2xl mb-4">
                                         <i className="fa-solid fa-laptop-code text-secondary"></i>
                                         Technology Integration Partners
                                     </h3>
                                     <p className="text-base-content/70 mb-4">
-                                        For software vendors who want to integrate their solutions with Splits Network 
+                                        For software vendors who want to integrate their solutions with Splits Network
                                         and reach our growing user base.
                                     </p>
                                     <div className="grid md:grid-cols-3 gap-4">
@@ -248,14 +248,14 @@ export default function PartnersPage() {
                             </div>
 
                             {/* Association Partners */}
-                            <div className="card bg-base-200 shadow-xl">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-2xl mb-4">
                                         <i className="fa-solid fa-users-gear text-accent"></i>
                                         Industry Association Partners
                                     </h3>
                                     <p className="text-base-content/70 mb-4">
-                                        For recruiting associations who want to provide value-added services to their 
+                                        For recruiting associations who want to provide value-added services to their
                                         members and promote best practices in split placements.
                                     </p>
                                     <div className="grid md:grid-cols-3 gap-4">
@@ -296,7 +296,7 @@ export default function PartnersPage() {
                         <div className="alert alert-info">
                             <i className="fa-solid fa-info-circle"></i>
                             <span>
-                                We're actively building our partner network. Be among our founding partners and help 
+                                We're actively building our partner network. Be among our founding partners and help
                                 shape the future of collaborative recruiting.
                             </span>
                         </div>
@@ -310,7 +310,7 @@ export default function PartnersPage() {
                     <div className="max-w-4xl mx-auto">
                         <h2 className="text-4xl font-bold mb-12 text-center">How to Become a Partner</h2>
                         <div className="space-y-6">
-                            <div className="card bg-base-200 shadow-lg">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <div className="flex items-start gap-4">
                                         <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
@@ -319,14 +319,14 @@ export default function PartnersPage() {
                                         <div>
                                             <h3 className="font-bold text-lg mb-2">Submit Application</h3>
                                             <p className="text-base-content/70">
-                                                Fill out our partner application form and tell us about your organization 
+                                                Fill out our partner application form and tell us about your organization
                                                 and partnership goals.
                                             </p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="card bg-base-200 shadow-lg">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <div className="flex items-start gap-4">
                                         <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center flex-shrink-0">
@@ -341,7 +341,7 @@ export default function PartnersPage() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="card bg-base-200 shadow-lg">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <div className="flex items-start gap-4">
                                         <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
@@ -356,7 +356,7 @@ export default function PartnersPage() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="card bg-success text-success-content shadow-lg">
+                            <div className="card bg-success text-success-content shadow">
                                 <div className="card-body">
                                     <div className="flex items-start gap-4">
                                         <div className="w-12 h-12 rounded-full bg-success-content/20 flex items-center justify-center flex-shrink-0">

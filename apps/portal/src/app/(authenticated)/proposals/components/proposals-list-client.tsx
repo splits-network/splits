@@ -209,7 +209,7 @@ export default function ProposalsListClient() {
 
             {/* Proposals list */}
             {proposals.length === 0 ? (
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body items-center text-center py-12">
                         <i className="fa-solid fa-inbox text-6xl text-base-content/20"></i>
                         <h3 className="text-xl font-semibold mt-4">

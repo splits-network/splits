@@ -121,7 +121,7 @@ export default function AIReviewPanel({ applicationId, token, compact = false }:
 
     if (loading) {
         return (
-            <div className="card bg-base-100 shadow-xl">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h3 className="card-title text-lg">
                         <i className="fa-solid fa-robot"></i>
@@ -146,7 +146,7 @@ export default function AIReviewPanel({ applicationId, token, compact = false }:
 
     if (!aiReview) {
         return (
-            <div className="card bg-base-100 shadow-xl">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h3 className="card-title text-lg">
                         <i className="fa-solid fa-robot"></i>
@@ -163,7 +163,7 @@ export default function AIReviewPanel({ applicationId, token, compact = false }:
 
     if (compact) {
         return (
-            <div className="card bg-base-100 shadow-xl">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h3 className="card-title text-lg">
                         <i className="fa-solid fa-robot"></i>
@@ -226,7 +226,7 @@ export default function AIReviewPanel({ applicationId, token, compact = false }:
     }
 
     return (
-        <div className="card bg-base-100 shadow-xl">
+        <div className="card bg-base-100 shadow">
             <div className="card-body">
                 <h3 className="card-title text-lg mb-4">
                     <i className="fa-solid fa-robot"></i>

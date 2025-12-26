@@ -108,6 +108,7 @@ export function registerIdentityRoutes(app: FastifyInstance, services: ServiceRe
             try {
                 await networkService.post('/recruiters', {
                     user_id: id,
+                    status: 'active',  // Set recruiter as active immediately upon onboarding completion
                     bio: body.profile.bio || '',
                     industries: body.profile.industries || [],
                     specialties: body.profile.specialties || [],

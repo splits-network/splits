@@ -71,10 +71,10 @@ export default function InterviewPrepPage() {
                 {/* Essential Tips */}
                 <div className="mb-16">
                     <h2 className="text-3xl font-bold mb-8">Essential Interview Tips</h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {tips.map((tip, index) => (
-                            <div key={index} className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                            <div key={index} className="card bg-base-100 shadow hover:shadow transition-shadow">
                                 <div className="card-body">
                                     <div className={`w-14 h-14 rounded-full bg-${tip.color}/20 flex items-center justify-center mb-4`}>
                                         <i className={`fa-solid fa-${tip.icon} text-${tip.color} text-2xl`}></i>
@@ -92,8 +92,8 @@ export default function InterviewPrepPage() {
                 {/* Common Questions */}
                 <div className="mb-16">
                     <h2 className="text-3xl font-bold mb-8">Common Interview Questions</h2>
-                    
-                    <div className="card bg-base-100 shadow-lg">
+
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <p className="mb-4 text-base-content/70">
                                 Practice answering these frequently asked questions to feel confident and prepared:
@@ -113,13 +113,13 @@ export default function InterviewPrepPage() {
                 {/* STAR Method */}
                 <div className="mb-16">
                     <h2 className="text-3xl font-bold mb-8">The STAR Method</h2>
-                    
-                    <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow-lg">
+
+                    <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow">
                         <div className="card-body">
                             <p className="text-lg mb-6">
                                 Use the STAR method to structure your answers to behavioral questions:
                             </p>
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="bg-base-100/10 p-4 rounded-lg">
                                     <div className="flex items-center gap-2 mb-2">
@@ -128,7 +128,7 @@ export default function InterviewPrepPage() {
                                     </div>
                                     <p>Describe the context or background</p>
                                 </div>
-                                
+
                                 <div className="bg-base-100/10 p-4 rounded-lg">
                                     <div className="flex items-center gap-2 mb-2">
                                         <i className="fa-solid fa-t text-2xl"></i>
@@ -136,7 +136,7 @@ export default function InterviewPrepPage() {
                                     </div>
                                     <p>Explain your responsibility or goal</p>
                                 </div>
-                                
+
                                 <div className="bg-base-100/10 p-4 rounded-lg">
                                     <div className="flex items-center gap-2 mb-2">
                                         <i className="fa-solid fa-a text-2xl"></i>
@@ -144,7 +144,7 @@ export default function InterviewPrepPage() {
                                     </div>
                                     <p>Detail the steps you took</p>
                                 </div>
-                                
+
                                 <div className="bg-base-100/10 p-4 rounded-lg">
                                     <div className="flex items-center gap-2 mb-2">
                                         <i className="fa-solid fa-r text-2xl"></i>
@@ -159,7 +159,7 @@ export default function InterviewPrepPage() {
 
                 {/* CTA */}
                 <div className="text-center">
-                    <div className="card bg-base-100 shadow-lg max-w-2xl mx-auto">
+                    <div className="card bg-base-100 shadow max-w-2xl mx-auto">
                         <div className="card-body">
                             <h2 className="card-title text-2xl justify-center mb-2">
                                 Ready to put your skills to work?

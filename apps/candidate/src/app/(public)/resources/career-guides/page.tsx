@@ -73,7 +73,7 @@ export default function CareerGuidesPage() {
             <div className="container mx-auto px-4 py-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {guides.map((guide, index) => (
-                        <div key={index} className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                        <div key={index} className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <div className="flex items-start justify-between mb-3">
                                     <i className={`fa-solid fa-${guide.icon} text-3xl text-primary`}></i>

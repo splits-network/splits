@@ -56,7 +56,7 @@ export default function SignInPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
-            <div className="card w-full max-w-md bg-base-100 shadow-xl">
+            <div className="card w-full max-w-md bg-base-100 shadow">
                 <div className="card-body">
                     <div className="text-center mb-6">
                         <i className="fa-solid fa-briefcase text-4xl text-primary mb-2"></i>

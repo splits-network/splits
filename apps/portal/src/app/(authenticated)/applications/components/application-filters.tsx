@@ -28,7 +28,7 @@ export const ApplicationFilters = forwardRef<HTMLInputElement, ApplicationFilter
         onViewModeChange,
     }, ref) {
         return (
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <div className="flex flex-wrap items-center gap-3">
                         {/* Search */}

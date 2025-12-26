@@ -68,7 +68,7 @@ export default function AdminDashboardClient() {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Total Recruiters */}
-                <div className="stat bg-base-100 shadow-sm rounded-lg">
+                <div className="stat bg-base-100 shadow rounded-lg">
                     <div className="stat-figure text-primary">
                         <i className="fa-solid fa-users text-3xl"></i>
                     </div>
@@ -88,7 +88,7 @@ export default function AdminDashboardClient() {
                 </div>
 
                 {/* Active Jobs */}
-                <div className="stat bg-base-100 shadow-sm rounded-lg">
+                <div className="stat bg-base-100 shadow rounded-lg">
                     <div className="stat-figure text-secondary">
                         <i className="fa-solid fa-briefcase text-3xl"></i>
                     </div>
@@ -106,7 +106,7 @@ export default function AdminDashboardClient() {
                 </div>
 
                 {/* Applications */}
-                <div className="stat bg-base-100 shadow-sm rounded-lg">
+                <div className="stat bg-base-100 shadow rounded-lg">
                     <div className="stat-figure text-accent">
                         <i className="fa-solid fa-file-lines text-3xl"></i>
                     </div>
@@ -124,7 +124,7 @@ export default function AdminDashboardClient() {
                 </div>
 
                 {/* Placements */}
-                <div className="stat bg-base-100 shadow-sm rounded-lg">
+                <div className="stat bg-base-100 shadow rounded-lg">
                     <div className="stat-figure text-success">
                         <i className="fa-solid fa-handshake text-3xl"></i>
                     </div>
@@ -147,7 +147,7 @@ export default function AdminDashboardClient() {
                 <h2 className="text-2xl font-bold mb-4">Phase 1 Management</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {/* Recruiter Management */}
-                    <Link href="/admin/recruiters" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                    <Link href="/admin/recruiters" className="card bg-base-100 shadow hover:shadow transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-primary/10 rounded-lg">
@@ -170,7 +170,7 @@ export default function AdminDashboardClient() {
                     </Link>
 
                     {/* Role Assignments */}
-                    <Link href="/admin/assignments" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                    <Link href="/admin/assignments" className="card bg-base-100 shadow hover:shadow transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-secondary/10 rounded-lg">
@@ -187,7 +187,7 @@ export default function AdminDashboardClient() {
                     </Link>
 
                     {/* Placement Audit */}
-                    <Link href="/admin/placements" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                    <Link href="/admin/placements" className="card bg-base-100 shadow hover:shadow transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-success/10 rounded-lg">
@@ -210,7 +210,7 @@ export default function AdminDashboardClient() {
                 <h2 className="text-2xl font-bold mb-4">Phase 2 Management</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Ownership Audit */}
-                    <Link href="/admin/ownership" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                    <Link href="/admin/ownership" className="card bg-base-100 shadow hover:shadow transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-accent/10 rounded-lg">
@@ -227,7 +227,7 @@ export default function AdminDashboardClient() {
                     </Link>
 
                     {/* Reputation Management */}
-                    <Link href="/admin/reputation" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                    <Link href="/admin/reputation" className="card bg-base-100 shadow hover:shadow transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-warning/10 rounded-lg">
@@ -250,7 +250,7 @@ export default function AdminDashboardClient() {
                 <h2 className="text-2xl font-bold mb-4">Phase 3: Automation & Intelligence</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {/* Payout Management */}
-                    <Link href="/admin/payouts" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                    <Link href="/admin/payouts" className="card bg-base-100 shadow hover:shadow transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-success/10 rounded-lg">
@@ -267,7 +267,7 @@ export default function AdminDashboardClient() {
                     </Link>
 
                     {/* Automation Controls */}
-                    <Link href="/admin/automation" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                    <Link href="/admin/automation" className="card bg-base-100 shadow hover:shadow transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-info/10 rounded-lg">
@@ -284,7 +284,7 @@ export default function AdminDashboardClient() {
                     </Link>
 
                     {/* Fraud Management */}
-                    <Link href="/admin/fraud" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                    <Link href="/admin/fraud" className="card bg-base-100 shadow hover:shadow transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-error/10 rounded-lg">
@@ -301,7 +301,7 @@ export default function AdminDashboardClient() {
                     </Link>
 
                     {/* Marketplace Metrics */}
-                    <Link href="/admin/metrics" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                    <Link href="/admin/metrics" className="card bg-base-100 shadow hover:shadow transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-primary/10 rounded-lg">
@@ -318,7 +318,7 @@ export default function AdminDashboardClient() {
                     </Link>
 
                     {/* AI Matches */}
-                    <Link href="/admin/ai-matches" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                    <Link href="/admin/ai-matches" className="card bg-base-100 shadow hover:shadow transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-secondary/10 rounded-lg">
@@ -335,7 +335,7 @@ export default function AdminDashboardClient() {
                     </Link>
 
                     {/* Decision Audit Log */}
-                    <Link href="/admin/decision-log" className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                    <Link href="/admin/decision-log" className="card bg-base-100 shadow hover:shadow transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center gap-4">
                                 <div className="p-3 bg-accent/10 rounded-lg">

@@ -182,7 +182,7 @@ export default function PlacementsPage() {
 
             {/* Earnings Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="stats shadow-sm bg-base-100">
+                <div className="stats shadow bg-base-100">
                     <div className="stat">
                         <div className="stat-figure text-primary">
                             <i className="fa-solid fa-sack-dollar text-3xl"></i>
@@ -195,7 +195,7 @@ export default function PlacementsPage() {
                     </div>
                 </div>
 
-                <div className="stats shadow-sm bg-base-100">
+                <div className="stats shadow bg-base-100">
                     <div className="stat">
                         <div className="stat-figure text-secondary">
                             <i className="fa-solid fa-calendar-days text-3xl"></i>
@@ -208,7 +208,7 @@ export default function PlacementsPage() {
                     </div>
                 </div>
 
-                <div className="stats shadow-sm bg-base-100">
+                <div className="stats shadow bg-base-100">
                     <div className="stat">
                         <div className="stat-figure text-accent">
                             <i className="fa-solid fa-clock text-3xl"></i>
@@ -223,7 +223,7 @@ export default function PlacementsPage() {
             </div>
 
             {/* Filters and View Toggle */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <div className="flex flex-wrap gap-4 items-end">
                         <div className="fieldset flex-1">
@@ -258,7 +258,7 @@ export default function PlacementsPage() {
 
             {/* Empty State */}
             {filteredPlacements.length === 0 && (
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body text-center py-12">
                         <i className="fa-solid fa-trophy text-6xl text-base-content/20"></i>
                         <h3 className="text-xl font-semibold mt-4">
@@ -277,7 +277,7 @@ export default function PlacementsPage() {
             {viewMode === 'grid' && filteredPlacements.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {filteredPlacements.map((placement) => (
-                        <div key={placement.id} className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div key={placement.id} className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="badge badge-success badge-lg">

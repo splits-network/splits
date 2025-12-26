@@ -29,7 +29,7 @@ export function RoleSelectionStep() {
                 {/* Recruiter Card */}
                 <button
                     onClick={() => handleRoleSelect('recruiter')}
-                    className="card card-border hover:border-primary hover:shadow-lg transition-all p-6 text-left"
+                    className="card card-border hover:border-primary hover:shadow transition-all p-6 text-left"
                 >
                     <div className="flex flex-col items-center text-center space-y-4">
                         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
@@ -48,7 +48,7 @@ export function RoleSelectionStep() {
                 {/* Company Admin Card */}
                 <button
                     onClick={() => handleRoleSelect('company_admin')}
-                    className="card card-border hover:border-primary hover:shadow-lg transition-all p-6 text-left"
+                    className="card card-border hover:border-primary hover:shadow transition-all p-6 text-left"
                 >
                     <div className="flex flex-col items-center text-center space-y-4">
                         <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center">

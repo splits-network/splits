@@ -36,7 +36,7 @@ export function MyRecruitersSection() {
 
     if (loading) {
         return (
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title text-lg">
                         <i className="fa-solid fa-user-tie"></i>
@@ -52,7 +52,7 @@ export function MyRecruitersSection() {
 
     if (error) {
         return (
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title text-lg">
                         <i className="fa-solid fa-user-tie"></i>
@@ -70,7 +70,7 @@ export function MyRecruitersSection() {
     const hasHistorical = recruiters && (recruiters.expired.length > 0 || recruiters.terminated.length > 0);
 
     return (
-        <div className="card bg-base-100 shadow-sm">
+        <div className="card bg-base-100 shadow">
             <div className="card-body">
                 <h2 className="card-title text-lg">
                     <i className="fa-solid fa-user-tie"></i>
@@ -118,8 +118,8 @@ export function MyRecruitersSection() {
                                             Expired
                                         </h3>
                                         {recruiters.expired.map((rel) => (
-                                            <RecruiterCard 
-                                                key={rel.id} 
+                                            <RecruiterCard
+                                                key={rel.id}
                                                 relationship={rel}
                                                 showActions={false}
                                             />
@@ -134,8 +134,8 @@ export function MyRecruitersSection() {
                                             Terminated
                                         </h3>
                                         {recruiters.terminated.map((rel) => (
-                                            <RecruiterCard 
-                                                key={rel.id} 
+                                            <RecruiterCard
+                                                key={rel.id}
                                                 relationship={rel}
                                                 showActions={false}
                                             />

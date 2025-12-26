@@ -26,13 +26,13 @@ export default function CareersPage() {
                         </div>
                         <h2 className="text-4xl font-bold mb-6">Careers Page Coming Soon</h2>
                         <p className="text-xl text-base-content/70 mb-8 max-w-2xl mx-auto">
-                            We're building something special at Splits Network, and we'll be looking for talented 
+                            We're building something special at Splits Network, and we'll be looking for talented
                             individuals to join our team. Check back soon for open positions!
                         </p>
                         <div className="alert alert-info max-w-2xl mx-auto mb-8">
                             <i className="fa-solid fa-info-circle"></i>
                             <span>
-                                Want to be notified when we start hiring? Send your resume and areas of interest 
+                                Want to be notified when we start hiring? Send your resume and areas of interest
                                 to careers@splits.network
                             </span>
                         </div>
@@ -46,7 +46,7 @@ export default function CareersPage() {
                     <div className="max-w-6xl mx-auto">
                         <h2 className="text-4xl font-bold mb-12 text-center">Why Splits Network?</h2>
                         <div className="grid md:grid-cols-3 gap-8">
-                            <div className="card bg-base-100 shadow-xl">
+                            <div className="card bg-base-100 shadow">
                                 <div className="card-body text-center">
                                     <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
                                         <i className="fa-solid fa-rocket text-primary text-2xl"></i>
@@ -57,7 +57,7 @@ export default function CareersPage() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="card bg-base-100 shadow-xl">
+                            <div className="card bg-base-100 shadow">
                                 <div className="card-body text-center">
                                     <div className="w-16 h-16 rounded-full bg-secondary/20 flex items-center justify-center mx-auto mb-4">
                                         <i className="fa-solid fa-users text-secondary text-2xl"></i>
@@ -68,7 +68,7 @@ export default function CareersPage() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="card bg-base-100 shadow-xl">
+                            <div className="card bg-base-100 shadow">
                                 <div className="card-body text-center">
                                     <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-4">
                                         <i className="fa-solid fa-chart-line text-accent text-2xl"></i>
@@ -90,7 +90,7 @@ export default function CareersPage() {
                     <div className="max-w-5xl mx-auto">
                         <h2 className="text-4xl font-bold mb-12 text-center">Areas We'll Be Hiring</h2>
                         <div className="grid md:grid-cols-2 gap-6">
-                            <div className="card bg-base-200 shadow-lg">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
                                         <i className="fa-solid fa-code text-primary"></i>
@@ -101,7 +101,7 @@ export default function CareersPage() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="card bg-base-200 shadow-lg">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
                                         <i className="fa-solid fa-palette text-secondary"></i>
@@ -112,7 +112,7 @@ export default function CareersPage() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="card bg-base-200 shadow-lg">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
                                         <i className="fa-solid fa-box text-accent"></i>
@@ -123,7 +123,7 @@ export default function CareersPage() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="card bg-base-200 shadow-lg">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
                                         <i className="fa-solid fa-chart-line text-success"></i>
@@ -134,7 +134,7 @@ export default function CareersPage() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="card bg-base-200 shadow-lg">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
                                         <i className="fa-solid fa-headset text-info"></i>
@@ -145,7 +145,7 @@ export default function CareersPage() {
                                     </p>
                                 </div>
                             </div>
-                            <div className="card bg-base-200 shadow-lg">
+                            <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
                                         <i className="fa-solid fa-briefcase text-warning"></i>
@@ -167,7 +167,7 @@ export default function CareersPage() {
                     <div className="max-w-5xl mx-auto">
                         <h2 className="text-4xl font-bold mb-12 text-center">What We Value</h2>
                         <div className="space-y-6">
-                            <div className="card bg-base-100 text-base-content shadow-lg">
+                            <div className="card bg-base-100 text-base-content shadow">
                                 <div className="card-body">
                                     <div className="flex items-start gap-4">
                                         <i className="fa-solid fa-lightbulb text-primary text-2xl mt-1"></i>
@@ -180,7 +180,7 @@ export default function CareersPage() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="card bg-base-100 text-base-content shadow-lg">
+                            <div className="card bg-base-100 text-base-content shadow">
                                 <div className="card-body">
                                     <div className="flex items-start gap-4">
                                         <i className="fa-solid fa-comments text-secondary text-2xl mt-1"></i>
@@ -193,7 +193,7 @@ export default function CareersPage() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="card bg-base-100 text-base-content shadow-lg">
+                            <div className="card bg-base-100 text-base-content shadow">
                                 <div className="card-body">
                                     <div className="flex items-start gap-4">
                                         <i className="fa-solid fa-user-group text-accent text-2xl mt-1"></i>
@@ -206,7 +206,7 @@ export default function CareersPage() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="card bg-base-100 text-base-content shadow-lg">
+                            <div className="card bg-base-100 text-base-content shadow">
                                 <div className="card-body">
                                     <div className="flex items-start gap-4">
                                         <i className="fa-solid fa-graduation-cap text-success text-2xl mt-1"></i>

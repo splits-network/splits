@@ -332,7 +332,7 @@ export default function ApplicationsListClient() {
 
             {/* Bulk Action Bar */}
             {selectedIds.size > 0 && isRecruiter && (
-                <div className="alert shadow-lg">
+                <div className="alert shadow">
                     <div className="flex-1">
                         <i className="fa-solid fa-check-square text-xl"></i>
                         <div>
@@ -369,7 +369,7 @@ export default function ApplicationsListClient() {
 
             {/* Table View */}
             {viewMode === 'table' && applications.length > 0 && (
-                <div className="card bg-base-100 shadow-sm overflow-hidden">
+                <div className="card bg-base-100 shadow overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="table table-zebra">
                             <thead>
@@ -426,7 +426,7 @@ export default function ApplicationsListClient() {
 
             {/* Empty State */}
             {applications.length === 0 && !loading && (
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body text-center py-12">
                         <i className="fa-solid fa-folder-open text-6xl text-base-content/20 mb-4"></i>
                         <h3 className="text-xl font-semibold">No applications found</h3>

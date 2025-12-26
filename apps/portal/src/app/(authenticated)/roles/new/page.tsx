@@ -159,13 +159,13 @@ export default function NewRolePage() {
             if (formData.salary_min) payload.salary_min = parseInt(formData.salary_min);
             if (formData.salary_max) payload.salary_max = parseInt(formData.salary_max);
             if (formData.job_owner_id) payload.job_owner_id = formData.job_owner_id;
-            
+
             // Add requirements and pre-screen questions
             payload.requirements = requirements;
             payload.pre_screen_questions = preScreenQuestions;
 
             await client.post('/jobs', payload);
-            
+
             alert('Role created successfully!');
             router.push('/roles');
         } catch (error: any) {
@@ -199,7 +199,7 @@ export default function NewRolePage() {
             </div>
 
             {/* Form */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Basic Information */}

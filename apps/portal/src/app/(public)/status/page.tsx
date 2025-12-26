@@ -92,11 +92,10 @@ export default function StatusPage() {
             </div>
 
             {/* Overall Status Card */}
-            <div className={`card shadow-lg mb-6 ${
-                allHealthy ? 'bg-success text-success-content' :
-                someUnhealthy ? 'bg-error text-error-content' :
-                'bg-warning text-warning-content'
-            }`}>
+            <div className={`card shadow mb-6 ${allHealthy ? 'bg-success text-success-content' :
+                    someUnhealthy ? 'bg-error text-error-content' :
+                        'bg-warning text-warning-content'
+                }`}>
                 <div className="card-body">
                     <div className="flex items-center justify-between">
                         <div>
@@ -149,14 +148,13 @@ export default function StatusPage() {
                                     <div>
                                         <h3 className="font-semibold">{service.name}</h3>
                                         <div className="flex items-center gap-3 text-sm text-base-content/70">
-                                            <span className={`badge badge-sm ${
-                                                service.status === 'healthy' ? 'badge-success' :
-                                                service.status === 'unhealthy' ? 'badge-error' :
-                                                'badge-warning'
-                                            }`}>
+                                            <span className={`badge badge-sm ${service.status === 'healthy' ? 'badge-success' :
+                                                    service.status === 'unhealthy' ? 'badge-error' :
+                                                        'badge-warning'
+                                                }`}>
                                                 {service.status === 'healthy' ? 'Operational' :
-                                                 service.status === 'unhealthy' ? 'Down' :
-                                                 'Checking...'}
+                                                    service.status === 'unhealthy' ? 'Down' :
+                                                        'Checking...'}
                                             </span>
                                             {service.responseTime !== undefined && (
                                                 <span>Response: {service.responseTime}ms</span>

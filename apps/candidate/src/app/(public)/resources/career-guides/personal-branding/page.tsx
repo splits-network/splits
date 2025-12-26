@@ -186,7 +186,7 @@ export default function PersonalBrandingGuidePage() {
             <div className="container mx-auto px-4 py-12">
                 <div className="max-w-4xl mx-auto">
                     {/* Introduction */}
-                    <div className="card bg-base-100 shadow-lg mb-12">
+                    <div className="card bg-base-100 shadow mb-12">
                         <div className="card-body prose max-w-none">
                             <p className="text-lg">
                                 In today's digital age, your personal brand is your reputation—it's what people say about you when you're not in the room. A strong personal brand can open doors to new opportunities, help you stand out in a crowded market, and accelerate your career growth.
@@ -200,10 +200,10 @@ export default function PersonalBrandingGuidePage() {
                     {/* The 4 Pillars */}
                     <div className="mb-12">
                         <h2 className="text-3xl font-bold mb-8">The 4 Pillars of Personal Branding</h2>
-                        
+
                         <div className="space-y-8">
                             {pillars.map((pillar, pillarIndex) => (
-                                <div key={pillarIndex} className="card bg-base-100 shadow-lg">
+                                <div key={pillarIndex} className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <div className="flex items-start gap-4 mb-6">
                                             <div className={`w-16 h-16 rounded-full bg-${pillar.color}/20 flex items-center justify-center flex-shrink-0`}>
@@ -242,10 +242,10 @@ export default function PersonalBrandingGuidePage() {
                     {/* Content Ideas */}
                     <div className="mb-12">
                         <h2 className="text-3xl font-bold mb-8">Content Ideas to Get Started</h2>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {contentIdeas.map((idea, index) => (
-                                <div key={index} className="card bg-base-100 shadow-lg">
+                                <div key={index} className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <div className="flex items-center gap-3 mb-3">
                                             <i className={`fa-solid fa-${idea.icon} text-2xl text-primary`}></i>
@@ -259,25 +259,25 @@ export default function PersonalBrandingGuidePage() {
                     </div>
 
                     {/* Example Brand Statement */}
-                    <div className="card bg-base-100 shadow-lg mb-12">
+                    <div className="card bg-base-100 shadow mb-12">
                         <div className="card-body">
                             <h2 className="card-title text-2xl mb-6">
                                 <i className="fa-solid fa-quote-left text-primary"></i>
                                 Example Brand Statement
                             </h2>
-                            
+
                             <div className="bg-primary/10 p-6 rounded-lg border-l-4 border-primary mb-6">
                                 <p className="font-bold mb-2">Before (Generic):</p>
                                 <p className="italic mb-4">"Experienced marketing professional with 10 years in the industry."</p>
-                                
+
                                 <div className="divider"></div>
-                                
+
                                 <p className="font-bold mb-2 text-success">After (Branded):</p>
                                 <p className="italic">
                                     "I help B2B SaaS companies turn complex technical features into compelling stories that drive pipeline. As a product marketing leader, I've launched 15+ products and generated over $50M in new revenue."
                                 </p>
                             </div>
-                            
+
                             <div className="alert alert-info">
                                 <i className="fa-solid fa-lightbulb"></i>
                                 <span>Notice how the "After" version is specific, value-focused, and memorable</span>
@@ -286,13 +286,13 @@ export default function PersonalBrandingGuidePage() {
                     </div>
 
                     {/* 30-Day Action Plan */}
-                    <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow-lg mb-12">
+                    <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow mb-12">
                         <div className="card-body">
                             <h3 className="card-title text-2xl mb-6">
                                 <i className="fa-solid fa-calendar-days"></i>
                                 30-Day Personal Branding Plan
                             </h3>
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <h4 className="font-bold mb-3">Week 1: Foundation</h4>
@@ -336,7 +336,7 @@ export default function PersonalBrandingGuidePage() {
 
                     {/* Dos and Don'ts */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                        <div className="card bg-success/10 border border-success/30 shadow-lg">
+                        <div className="card bg-success/10 border border-success/30 shadow">
                             <div className="card-body">
                                 <h3 className="card-title text-success mb-4">
                                     <i className="fa-solid fa-check-circle"></i>
@@ -360,7 +360,7 @@ export default function PersonalBrandingGuidePage() {
                             </div>
                         </div>
 
-                        <div className="card bg-error/10 border border-error/30 shadow-lg">
+                        <div className="card bg-error/10 border border-error/30 shadow">
                             <div className="card-body">
                                 <h3 className="card-title text-error mb-4">
                                     <i className="fa-solid fa-times-circle"></i>
@@ -386,7 +386,7 @@ export default function PersonalBrandingGuidePage() {
                     </div>
 
                     {/* Related Resources */}
-                    <div className="card bg-base-100 shadow-lg">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h3 className="card-title text-xl mb-4">Continue Building Your Career</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

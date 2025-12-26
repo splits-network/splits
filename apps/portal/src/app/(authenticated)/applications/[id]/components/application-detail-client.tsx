@@ -177,7 +177,7 @@ export default function ApplicationDetailClient({
             )}
 
             {/* Header */}
-            <div className="card bg-base-100 shadow-sm mb-6">
+            <div className="card bg-base-100 shadow mb-6">
                 <div className="card-body">
                     <div className="flex justify-between items-start">
                         <div>
@@ -200,7 +200,7 @@ export default function ApplicationDetailClient({
             </div>
 
             {/* Quick Actions */}
-            <div className="card bg-base-100 shadow-sm mb-6">
+            <div className="card bg-base-100 shadow mb-6">
                 <div className="card-body">
                     <div className="flex flex-wrap gap-2">
                         {isPlatformAdmin && (
@@ -253,7 +253,7 @@ export default function ApplicationDetailClient({
                 {/* Left Column - Main Content */}
                 <div className="lg:col-span-2 space-y-6">
                     {/* Job Details */}
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title">
                                 <i className="fa-solid fa-briefcase"></i>
@@ -299,7 +299,7 @@ export default function ApplicationDetailClient({
                     </div>
 
                     {/* Candidate Information */}
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title">
                                 <i className="fa-solid fa-user"></i>
@@ -351,7 +351,7 @@ export default function ApplicationDetailClient({
                     </div>
 
                     {/* Notes */}
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title">
                                 <i className="fa-solid fa-note-sticky"></i>
@@ -384,7 +384,7 @@ export default function ApplicationDetailClient({
 
                     {/* Pre-Screen Answers */}
                     {preScreenAnswers && preScreenAnswers.length > 0 && (
-                        <div className="card bg-base-100 shadow-sm">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title">
                                     <i className="fa-solid fa-clipboard-question"></i>
@@ -415,7 +415,7 @@ export default function ApplicationDetailClient({
                 {/* Right Column - Sidebar */}
                 <div className="space-y-6">
                     {/* Status Card */}
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title text-lg">Status</h2>
                             <div className="space-y-3">
@@ -455,7 +455,7 @@ export default function ApplicationDetailClient({
 
                     {/* Documents Card */}
                     {documents && documents.length > 0 && (
-                        <div className="card bg-base-100 shadow-sm">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title text-lg">
                                     <i className="fa-solid fa-file"></i>
@@ -481,7 +481,7 @@ export default function ApplicationDetailClient({
                     )}
 
                     {/* Quick Actions Card */}
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title text-lg">Quick Actions</h2>
                             <div className="space-y-2">
@@ -531,7 +531,7 @@ export default function ApplicationDetailClient({
 
                     {/* Relationship Status */}
                     {relationship && (
-                        <div className="card bg-base-100 shadow-sm">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title text-lg">Relationship</h2>
                                 <div className="space-y-2 text-sm">

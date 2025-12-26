@@ -8,7 +8,7 @@ import Link from 'next/link';
 export default function ForgotPasswordPage() {
     const { isLoaded, signIn } = useSignIn();
     const router = useRouter();
-    
+
     const [email, setEmail] = useState('');
     const [code, setCode] = useState('');
     const [password, setPassword] = useState('');
@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
                 strategy: 'reset_password_email_code',
                 identifier: email,
             });
-            
+
             setSuccessfulCreation(true);
         } catch (err: any) {
             setError(err.errors?.[0]?.message || 'Failed to send reset code');
@@ -70,7 +70,7 @@ export default function ForgotPasswordPage() {
     if (complete) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
-                <div className="card w-full max-w-md bg-base-100 shadow-xl">
+                <div className="card w-full max-w-md bg-base-100 shadow">
                     <div className="card-body items-center text-center">
                         <div className="text-success text-6xl mb-4">
                             <i className="fa-solid fa-circle-check"></i>
@@ -91,7 +91,7 @@ export default function ForgotPasswordPage() {
     if (successfulCreation) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
-                <div className="card w-full max-w-md bg-base-100 shadow-xl">
+                <div className="card w-full max-w-md bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title text-2xl font-bold justify-center mb-6">
                             Reset Your Password
@@ -171,7 +171,7 @@ export default function ForgotPasswordPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
-            <div className="card w-full max-w-md bg-base-100 shadow-xl">
+            <div className="card w-full max-w-md bg-base-100 shadow">
                 <div className="card-body">
                     <div className="text-center mb-6">
                         <i className="fa-solid fa-briefcase text-4xl text-primary mb-2"></i>

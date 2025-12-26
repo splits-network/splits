@@ -141,7 +141,7 @@ export default function ActionableProposalsWidget({ compact = true }: Actionable
                     <Link
                         key={proposal.id}
                         href={`/applications/${proposal.id}`}
-                        className={`block card bg-base-100 shadow-sm hover:shadow-md transition-all ${isUrgent ? 'border-2 border-warning' : 'border border-base-300'
+                        className={`block card bg-base-100 shadow hover:shadow transition-all ${isUrgent ? 'border-2 border-warning' : 'border border-base-300'
                             }`}
                     >
                         <div className="card-body p-4">

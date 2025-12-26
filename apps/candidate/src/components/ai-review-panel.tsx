@@ -121,7 +121,7 @@ export default function AIReviewPanel({ applicationId, token }: AIReviewPanelPro
 
     if (loading) {
         return (
-            <div className="card bg-base-100 shadow-xl">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
                         <i className="fa-solid fa-robot"></i>
@@ -146,7 +146,7 @@ export default function AIReviewPanel({ applicationId, token }: AIReviewPanelPro
 
     if (!aiReview) {
         return (
-            <div className="card bg-base-100 shadow-xl">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
                         <i className="fa-solid fa-robot"></i>
@@ -162,7 +162,7 @@ export default function AIReviewPanel({ applicationId, token }: AIReviewPanelPro
     }
 
     return (
-        <div className="card bg-base-100 shadow-xl">
+        <div className="card bg-base-100 shadow">
             <div className="card-body">
                 <h2 className="card-title">
                     <i className="fa-solid fa-robot"></i>

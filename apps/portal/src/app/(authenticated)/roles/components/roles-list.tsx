@@ -73,7 +73,7 @@ export default function RolesList() {
             const client = createAuthenticatedClient(token);
             const response: any = await client.getCurrentUser();
             const profile: UserProfile = response.data;
-            
+
             // Get the first membership role (Phase 1: users have one membership)
             if (profile.memberships && profile.memberships.length > 0) {
                 setUserRole(profile.memberships[0].role);
@@ -106,7 +106,7 @@ export default function RolesList() {
     };
 
     const filteredJobs = jobs.filter(job =>
-        searchQuery === '' || 
+        searchQuery === '' ||
         job.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -121,12 +121,12 @@ export default function RolesList() {
     return (
         <div className="space-y-6">
             {/* Filters and View Toggle */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <div className="flex flex-wrap gap-4 items-end">
                         <div className="fieldset">
                             <label className="label">Status</label>
-                            <select 
+                            <select
                                 className="select w-full max-w-xs"
                                 value={statusFilter}
                                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -149,14 +149,14 @@ export default function RolesList() {
                             />
                         </div>
                         <div className="join">
-                            <button 
+                            <button
                                 className={`btn join-item ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
                                 onClick={() => setViewMode('grid')}
                                 title="Grid View"
                             >
                                 <i className="fa-solid fa-grip"></i>
                             </button>
-                            <button 
+                            <button
                                 className={`btn join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
                                 onClick={() => setViewMode('table')}
                                 title="Table View"
@@ -172,7 +172,7 @@ export default function RolesList() {
             {viewMode === 'grid' && filteredJobs.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {filteredJobs.map((job) => (
-                        <div key={job.id} className={`card card-lg bg-base-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden relative border-2 ${getCardBorder(job.status)}`}>
+                        <div key={job.id} className={`card card-lg bg-base-100 shadow hover:shadow transition-shadow overflow-hidden relative border-2 ${getCardBorder(job.status)}`}>
                             <div className="flex flex-col items-end gap-2 absolute -top-1 -right-1">
                                 <div className={`badge ${getStatusBadge(job.status)}`}>
                                     {job.status}
@@ -218,7 +218,7 @@ export default function RolesList() {
                                     </span>
                                     <div className="flex gap-2">
                                         {canManageRole && (
-                                            <Link 
+                                            <Link
                                                 href={`/roles/${job.id}/edit`}
                                                 className="btn btn-ghost btn-sm gap-2"
                                                 onClick={(e) => e.stopPropagation()}
@@ -241,7 +241,7 @@ export default function RolesList() {
 
             {/* Roles List - Table View */}
             {viewMode === 'table' && filteredJobs.length > 0 && (
-                <div className="card bg-base-100 shadow-sm overflow-hidden">
+                <div className="card bg-base-100 shadow overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="table">
                             <thead>
@@ -295,7 +295,7 @@ export default function RolesList() {
                                         <td>
                                             <div className="flex gap-2 justify-end">
                                                 {canManageRole && (
-                                                    <Link 
+                                                    <Link
                                                         href={`/roles/${job.id}/edit`}
                                                         className="btn btn-ghost btn-sm"
                                                         title="Edit Role"
@@ -303,7 +303,7 @@ export default function RolesList() {
                                                         <i className="fa-solid fa-pen"></i>
                                                     </Link>
                                                 )}
-                                                <Link 
+                                                <Link
                                                     href={`/roles/${job.id}`}
                                                     className="btn btn-primary btn-sm"
                                                     title="View Pipeline"
@@ -322,7 +322,7 @@ export default function RolesList() {
 
             {/* Empty State */}
             {filteredJobs.length === 0 && (
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body text-center py-12">
                         <i className="fa-solid fa-briefcase text-6xl text-base-content/20"></i>
                         <h3 className="text-xl font-semibold mt-4">No Roles Found</h3>

@@ -48,6 +48,7 @@ export class NetworkService {
     async createRecruiter(
         userId: string,
         profileData?: {
+            status?: 'pending' | 'active' | 'suspended';
             bio?: string;
             industries?: string[];
             specialties?: string[];

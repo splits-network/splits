@@ -65,7 +65,7 @@ export default async function HomePage() {
                                 For Recruiters
                             </h3>
                             <div className="space-y-6">
-                                <div className="card bg-base-100 text-base-content shadow-lg">
+                                <div className="card bg-base-100 text-base-content shadow">
                                     <div className="card-body">
                                         <div className="flex items-start gap-4">
                                             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
@@ -80,7 +80,7 @@ export default async function HomePage() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="card bg-base-100 text-base-content shadow-lg">
+                                <div className="card bg-base-100 text-base-content shadow">
                                     <div className="card-body">
                                         <div className="flex items-start gap-4">
                                             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
@@ -95,7 +95,7 @@ export default async function HomePage() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="card bg-base-100 text-base-content shadow-lg">
+                                <div className="card bg-base-100 text-base-content shadow">
                                     <div className="card-body">
                                         <div className="flex items-start gap-4">
                                             <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
@@ -120,7 +120,7 @@ export default async function HomePage() {
                                 For Companies
                             </h3>
                             <div className="space-y-6">
-                                <div className="card bg-base-100 text-base-content shadow-lg">
+                                <div className="card bg-base-100 text-base-content shadow">
                                     <div className="card-body">
                                         <div className="flex items-start gap-4">
                                             <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center flex-shrink-0">
@@ -135,7 +135,7 @@ export default async function HomePage() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="card bg-base-100 text-base-content shadow-lg">
+                                <div className="card bg-base-100 text-base-content shadow">
                                     <div className="card-body">
                                         <div className="flex items-start gap-4">
                                             <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center flex-shrink-0">
@@ -150,7 +150,7 @@ export default async function HomePage() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="card bg-base-100 text-base-content shadow-lg">
+                                <div className="card bg-base-100 text-base-content shadow">
                                     <div className="card-body">
                                         <div className="flex items-start gap-4">
                                             <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center flex-shrink-0">
@@ -181,7 +181,7 @@ export default async function HomePage() {
                         </p>
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-                        <div className="card bg-base-100 shadow-xl">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
                                     <i className="fa-solid fa-handshake text-primary"></i>
@@ -192,7 +192,7 @@ export default async function HomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-xl">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
                                     <i className="fa-solid fa-sitemap text-secondary"></i>
@@ -203,7 +203,7 @@ export default async function HomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-xl">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
                                     <i className="fa-solid fa-chart-line text-accent"></i>
@@ -214,7 +214,7 @@ export default async function HomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-xl">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
                                     <i className="fa-solid fa-file-invoice-dollar text-primary"></i>
@@ -225,7 +225,7 @@ export default async function HomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-xl">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
                                     <i className="fa-solid fa-crown text-secondary"></i>
@@ -236,7 +236,7 @@ export default async function HomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-xl">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
                                     <i className="fa-solid fa-shield-halved text-accent"></i>
@@ -433,7 +433,7 @@ export default async function HomePage() {
                     <div className="max-w-5xl mx-auto">
                         {/* Flow Diagram */}
                         <div className="flex flex-col lg:flex-row items-center justify-center gap-6 mb-12">
-                            <div className="card bg-primary text-primary-content shadow-xl w-full lg:w-auto">
+                            <div className="card bg-primary text-primary-content shadow w-full lg:w-auto">
                                 <div className="card-body items-center text-center">
                                     <i className="fa-solid fa-building text-4xl mb-2"></i>
                                     <h3 className="card-title">Company</h3>
@@ -441,7 +441,7 @@ export default async function HomePage() {
                                 </div>
                             </div>
                             <i className="fa-solid fa-arrow-right text-3xl text-primary rotate-90 lg:rotate-0"></i>
-                            <div className="card bg-secondary text-secondary-content shadow-xl w-full lg:w-auto">
+                            <div className="card bg-secondary text-secondary-content shadow w-full lg:w-auto">
                                 <div className="card-body items-center text-center">
                                     <i className="fa-solid fa-handshake text-4xl mb-2"></i>
                                     <h3 className="card-title">Splits Network</h3>
@@ -449,7 +449,7 @@ export default async function HomePage() {
                                 </div>
                             </div>
                             <i className="fa-solid fa-arrow-right text-3xl text-secondary rotate-90 lg:rotate-0"></i>
-                            <div className="card bg-accent text-accent-content shadow-xl w-full lg:w-auto">
+                            <div className="card bg-accent text-accent-content shadow w-full lg:w-auto">
                                 <div className="card-body items-center text-center">
                                     <i className="fa-solid fa-user-tie text-4xl mb-2"></i>
                                     <h3 className="card-title">Recruiter</h3>
@@ -459,7 +459,7 @@ export default async function HomePage() {
                         </div>
 
                         {/* Example Breakdown */}
-                        <div className="card bg-base-200 shadow-xl">
+                        <div className="card bg-base-200 shadow">
                             <div className="card-body">
                                 <h3 className="card-title justify-center mb-4">Example Placement</h3>
                                 <div className="grid md:grid-cols-3 gap-6">
@@ -496,7 +496,7 @@ export default async function HomePage() {
                         </p>
                     </div>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-                        <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                        <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
                                     <i className="fa-solid fa-sitemap text-primary"></i>
@@ -507,7 +507,7 @@ export default async function HomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                        <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
                                     <i className="fa-solid fa-chart-pie text-secondary"></i>
@@ -518,7 +518,7 @@ export default async function HomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                        <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
                                     <i className="fa-solid fa-users text-accent"></i>
@@ -529,7 +529,7 @@ export default async function HomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                        <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
                                     <i className="fa-solid fa-crown text-primary"></i>
@@ -540,7 +540,7 @@ export default async function HomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                        <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
                                     <i className="fa-solid fa-bell text-secondary"></i>
@@ -551,7 +551,7 @@ export default async function HomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                        <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
                                     <i className="fa-solid fa-shield-halved text-accent"></i>
@@ -576,7 +576,7 @@ export default async function HomePage() {
                         </p>
                     </div>
                     <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                        <div className="card bg-base-100 text-base-content shadow-xl">
+                        <div className="card bg-base-100 text-base-content shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-2 mb-4">
                                     <div className="rating">
@@ -603,7 +603,7 @@ export default async function HomePage() {
                                 </div>
                             </div>
                         </div>
-                        <div className="card bg-base-100 text-base-content shadow-xl">
+                        <div className="card bg-base-100 text-base-content shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-2 mb-4">
                                     <div className="rating">
@@ -630,7 +630,7 @@ export default async function HomePage() {
                                 </div>
                             </div>
                         </div>
-                        <div className="card bg-base-100 text-base-content shadow-xl">
+                        <div className="card bg-base-100 text-base-content shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-2 mb-4">
                                     <div className="rating">
@@ -671,7 +671,7 @@ export default async function HomePage() {
                         </p>
                     </div>
                     <div className="max-w-4xl mx-auto space-y-4">
-                        <div className="collapse collapse-plus bg-base-100 shadow-lg">
+                        <div className="collapse collapse-plus bg-base-100 shadow">
                             <input type="radio" name="faq-accordion" defaultChecked />
                             <div className="collapse-title text-xl font-medium">
                                 How do splits actually work on Splits Network?
@@ -684,7 +684,7 @@ export default async function HomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="collapse collapse-plus bg-base-100 shadow-lg">
+                        <div className="collapse collapse-plus bg-base-100 shadow">
                             <input type="radio" name="faq-accordion" />
                             <div className="collapse-title text-xl font-medium">
                                 Who owns the candidate and relationship?
@@ -697,7 +697,7 @@ export default async function HomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="collapse collapse-plus bg-base-100 shadow-lg">
+                        <div className="collapse collapse-plus bg-base-100 shadow">
                             <input type="radio" name="faq-accordion" />
                             <div className="collapse-title text-xl font-medium">
                                 How do payouts work today? Is Splits Network handling the money?
@@ -710,7 +710,7 @@ export default async function HomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="collapse collapse-plus bg-base-100 shadow-lg">
+                        <div className="collapse collapse-plus bg-base-100 shadow">
                             <input type="radio" name="faq-accordion" />
                             <div className="collapse-title text-xl font-medium">
                                 Can I bring my existing companies/recruiters onto the platform?
@@ -722,7 +722,7 @@ export default async function HomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="collapse collapse-plus bg-base-100 shadow-lg">
+                        <div className="collapse collapse-plus bg-base-100 shadow">
                             <input type="radio" name="faq-accordion" />
                             <div className="collapse-title text-xl font-medium">
                                 What does it cost for recruiters? What does it cost for companies?
@@ -735,7 +735,7 @@ export default async function HomePage() {
                                 </p>
                             </div>
                         </div>
-                        <div className="collapse collapse-plus bg-base-100 shadow-lg">
+                        <div className="collapse collapse-plus bg-base-100 shadow">
                             <input type="radio" name="faq-accordion" />
                             <div className="collapse-title text-xl font-medium">
                                 Do I have to switch away from my current ATS?

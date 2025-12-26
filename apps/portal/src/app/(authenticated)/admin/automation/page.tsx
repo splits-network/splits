@@ -45,7 +45,7 @@ export default function AutomationControlsPage() {
         setLoading(true);
         try {
             const api = new ApiClient();
-            
+
             // Load automation rules
             const rulesResponse = await api.request<{ data: AutomationRule[] }>('/admin/automation/rules');
             setRules(rulesResponse.data || []);
@@ -64,7 +64,7 @@ export default function AutomationControlsPage() {
 
     const toggleRuleStatus = async (ruleId: string, currentStatus: string) => {
         const newStatus = currentStatus === 'active' ? 'paused' : 'active';
-        
+
         try {
             const api = new ApiClient();
             await api.request(`/admin/automation/rules/${ruleId}`, {
@@ -181,7 +181,7 @@ export default function AutomationControlsPage() {
                 <>
                     {/* Automation Rules Tab */}
                     {activeTab === 'rules' && (
-                        <div className="card bg-base-100 shadow-sm">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <div className="overflow-x-auto">
                                     {rules.length === 0 ? (
@@ -273,7 +273,7 @@ export default function AutomationControlsPage() {
 
                     {/* Pending Executions Tab */}
                     {activeTab === 'executions' && (
-                        <div className="card bg-base-100 shadow-sm">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <div className="overflow-x-auto">
                                     {pendingExecutions.length === 0 ? (

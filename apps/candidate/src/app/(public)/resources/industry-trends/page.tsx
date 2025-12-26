@@ -112,20 +112,20 @@ export default function IndustryTrendsPage() {
                 {/* Major Trends */}
                 <div className="mb-16">
                     <h2 className="text-3xl font-bold mb-8">Major Trends Shaping 2025</h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {trends.map((trend, index) => (
-                            <div key={index} className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                            <div key={index} className="card bg-base-100 shadow hover:shadow transition-shadow">
                                 <div className="card-body">
                                     <div className={`w-14 h-14 rounded-full bg-${trend.color}/20 flex items-center justify-center mb-4`}>
                                         <i className={`fa-solid fa-${trend.icon} text-${trend.color} text-2xl`}></i>
                                     </div>
-                                    
+
                                     <h3 className="card-title text-xl mb-2">{trend.title}</h3>
                                     <p className="text-sm text-base-content/70 flex-grow">
                                         {trend.description}
                                     </p>
-                                    
+
                                     <div className="flex gap-2 mt-4 pt-4 border-t border-base-300">
                                         <div className="badge badge-outline">{trend.impact} Impact</div>
                                         <div className="badge badge-success">{trend.growth}</div>
@@ -139,10 +139,10 @@ export default function IndustryTrendsPage() {
                 {/* Hot Sectors */}
                 <div className="mb-16">
                     <h2 className="text-3xl font-bold mb-8">Fastest Growing Sectors</h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {sectors.map((sector, index) => (
-                            <div key={index} className="card bg-base-100 shadow-lg">
+                            <div key={index} className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <div className="flex items-center gap-4 mb-4">
                                         <div className={`w-16 h-16 rounded-full bg-${sector.color}/20 flex items-center justify-center`}>
@@ -153,7 +153,7 @@ export default function IndustryTrendsPage() {
                                             <div className="badge badge-success">{sector.growth} Growth</div>
                                         </div>
                                     </div>
-                                    
+
                                     <div>
                                         <h4 className="font-bold mb-2">Hot Roles:</h4>
                                         <div className="flex flex-wrap gap-2">
@@ -171,8 +171,8 @@ export default function IndustryTrendsPage() {
                 {/* In-Demand Skills */}
                 <div className="mb-16">
                     <h2 className="text-3xl font-bold mb-8">Most In-Demand Skills</h2>
-                    
-                    <div className="card bg-base-100 shadow-lg">
+
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <div className="space-y-6">
                                 {skills.map((skill, index) => (
@@ -185,7 +185,7 @@ export default function IndustryTrendsPage() {
                                             <span className="text-sm text-base-content/60">{skill.demand}% demand</span>
                                         </div>
                                         <div className="w-full bg-base-300 rounded-full h-3">
-                                            <div 
+                                            <div
                                                 className="bg-gradient-to-r from-primary to-secondary h-3 rounded-full transition-all duration-500"
                                                 style={{ width: `${skill.demand}%` }}
                                             ></div>
@@ -199,7 +199,7 @@ export default function IndustryTrendsPage() {
 
                 {/* Insights Card */}
                 <div className="mb-16">
-                    <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow-lg">
+                    <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow">
                         <div className="card-body">
                             <h3 className="card-title text-2xl mb-4">
                                 <i className="fa-solid fa-lightbulb"></i>
@@ -229,7 +229,7 @@ export default function IndustryTrendsPage() {
 
                 {/* CTA */}
                 <div className="text-center">
-                    <div className="card bg-base-100 shadow-lg max-w-2xl mx-auto">
+                    <div className="card bg-base-100 shadow max-w-2xl mx-auto">
                         <div className="card-body">
                             <h2 className="card-title text-2xl justify-center mb-2">
                                 Find opportunities in growing industries

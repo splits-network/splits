@@ -111,7 +111,7 @@ export default function ApplicationTimeline({ auditLogs }: ApplicationTimelinePr
 
     if (auditLogs.length === 0) {
         return (
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body text-center py-8">
                     <i className="fa-solid fa-clock-rotate-left text-4xl text-base-content/20 mb-2"></i>
                     <p className="text-base-content/70">No activity recorded yet</p>
@@ -121,7 +121,7 @@ export default function ApplicationTimeline({ auditLogs }: ApplicationTimelinePr
     }
 
     return (
-        <div className="card bg-base-100 shadow-sm">
+        <div className="card bg-base-100 shadow">
             <div className="card-body">
                 <h2 className="card-title mb-4">
                     <i className="fa-solid fa-clock-rotate-left"></i>

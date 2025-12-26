@@ -103,7 +103,7 @@ export default function ReviewForm({
             )}
 
             {/* Job & Candidate Info */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title text-xl">
                         <i className="fa-solid fa-briefcase text-primary mr-2"></i>
@@ -159,7 +159,7 @@ export default function ReviewForm({
             </div>
 
             {/* Documents */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title text-xl">
                         <i className="fa-solid fa-file-pdf text-error mr-2"></i>
@@ -224,7 +224,7 @@ export default function ReviewForm({
 
             {/* Pre-Screen Answers */}
             {preScreenAnswers.length > 0 && (
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title text-xl">
                             <i className="fa-solid fa-clipboard-question text-info mr-2"></i>
@@ -250,7 +250,7 @@ export default function ReviewForm({
 
             {/* Candidate Notes */}
             {application.notes && (
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title text-xl">
                             <i className="fa-solid fa-note-sticky text-warning mr-2"></i>
@@ -265,7 +265,7 @@ export default function ReviewForm({
             )}
 
             {/* Recruiter Notes */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title text-xl">
                         <i className="fa-solid fa-pen-to-square text-success mr-2"></i>
@@ -291,7 +291,7 @@ export default function ReviewForm({
             </div>
 
             {/* Important Info & Actions */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <div className="alert alert-info">
                         <i className="fa-solid fa-circle-info"></i>

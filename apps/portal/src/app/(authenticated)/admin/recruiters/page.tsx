@@ -51,9 +51,9 @@ export default function RecruiterManagementPage() {
             }
             const apiClient = createAuthenticatedClient(token);
             await apiClient.patch(`/recruiters/${recruiterId}/status`, { status: newStatus });
-            
+
             // Update local state
-            setRecruiters(prev => 
+            setRecruiters(prev =>
                 prev.map(r => r.id === recruiterId ? { ...r, status: newStatus } : r)
             );
         } catch (error) {
@@ -64,7 +64,7 @@ export default function RecruiterManagementPage() {
         }
     }
 
-    const filteredRecruiters = recruiters.filter(r => 
+    const filteredRecruiters = recruiters.filter(r =>
         filter === 'all' || r.status === filter
     );
 
@@ -105,37 +105,37 @@ export default function RecruiterManagementPage() {
                     >
                         All ({recruiters.length})
                     </button>
-                <button
-                    onClick={() => setFilter('pending')}
-                    className={`btn btn-sm ${filter === 'pending' ? 'btn-warning' : 'btn-ghost'}`}
-                >
-                    <i className="fa-solid fa-clock mr-1"></i>
-                    Pending ({pendingCount})
-                </button>
-                <button
-                    onClick={() => setFilter('active')}
-                    className={`btn btn-sm ${filter === 'active' ? 'btn-success' : 'btn-ghost'}`}
-                >
-                    <i className="fa-solid fa-check mr-1"></i>
-                    Active ({activeCount})
-                </button>
-                <button
-                    onClick={() => setFilter('suspended')}
-                    className={`btn btn-sm ${filter === 'suspended' ? 'btn-error' : 'btn-ghost'}`}
-                >
-                    <i className="fa-solid fa-ban mr-1"></i>
-                    Suspended ({suspendedCount})
-                </button>
+                    <button
+                        onClick={() => setFilter('pending')}
+                        className={`btn btn-sm ${filter === 'pending' ? 'btn-warning' : 'btn-ghost'}`}
+                    >
+                        <i className="fa-solid fa-clock mr-1"></i>
+                        Pending ({pendingCount})
+                    </button>
+                    <button
+                        onClick={() => setFilter('active')}
+                        className={`btn btn-sm ${filter === 'active' ? 'btn-success' : 'btn-ghost'}`}
+                    >
+                        <i className="fa-solid fa-check mr-1"></i>
+                        Active ({activeCount})
+                    </button>
+                    <button
+                        onClick={() => setFilter('suspended')}
+                        className={`btn btn-sm ${filter === 'suspended' ? 'btn-error' : 'btn-ghost'}`}
+                    >
+                        <i className="fa-solid fa-ban mr-1"></i>
+                        Suspended ({suspendedCount})
+                    </button>
                 </div>
                 <div className="join">
-                    <button 
+                    <button
                         className={`btn btn-sm join-item ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
                         onClick={() => setViewMode('grid')}
                         title="Grid View"
                     >
                         <i className="fa-solid fa-grip"></i>
                     </button>
-                    <button 
+                    <button
                         className={`btn btn-sm join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
                         onClick={() => setViewMode('table')}
                         title="Table View"
@@ -149,7 +149,7 @@ export default function RecruiterManagementPage() {
             {viewMode === 'grid' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {filteredRecruiters.length === 0 ? (
-                        <div className="col-span-full card bg-base-100 shadow-sm">
+                        <div className="col-span-full card bg-base-100 shadow">
                             <div className="card-body items-center text-center py-12">
                                 <i className="fa-solid fa-users text-6xl text-base-content/20"></i>
                                 <h3 className="text-xl font-semibold mt-4">No recruiters found</h3>
@@ -157,7 +157,7 @@ export default function RecruiterManagementPage() {
                         </div>
                     ) : (
                         filteredRecruiters.map((recruiter) => (
-                            <div key={recruiter.id} className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                            <div key={recruiter.id} className="card bg-base-100 shadow hover:shadow transition-shadow">
                                 <div className="card-body">
                                     <div className="flex justify-between items-start">
                                         <div className="font-mono text-xs text-base-content/60">
@@ -247,118 +247,118 @@ export default function RecruiterManagementPage() {
 
             {/* Recruiters Table View */}
             {viewMode === 'table' && (
-            <div className="card bg-base-100 shadow-sm">
-                <div className="card-body p-0">
-                    <div className="overflow-x-auto">
-                        <table className="table table-zebra">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Status</th>
-                                    <th>Bio</th>
-                                    <th>Joined</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredRecruiters.length === 0 ? (
+                <div className="card bg-base-100 shadow">
+                    <div className="card-body p-0">
+                        <div className="overflow-x-auto">
+                            <table className="table table-zebra">
+                                <thead>
                                     <tr>
-                                        <td colSpan={5} className="text-center py-8 text-base-content/70">
-                                            No recruiters found
-                                        </td>
+                                        <th>ID</th>
+                                        <th>Status</th>
+                                        <th>Bio</th>
+                                        <th>Joined</th>
+                                        <th>Actions</th>
                                     </tr>
-                                ) : (
-                                    filteredRecruiters.map((recruiter) => (
-                                        <tr key={recruiter.id}>
-                                            <td>
-                                                <div className="font-mono text-xs">{recruiter.id.slice(0, 8)}</div>
-                                            </td>
-                                            <td>
-                                                {recruiter.status === 'pending' && (
-                                                    <span className="badge badge-warning gap-1">
-                                                        <i className="fa-solid fa-clock"></i>
-                                                        Pending
-                                                    </span>
-                                                )}
-                                                {recruiter.status === 'active' && (
-                                                    <span className="badge badge-success gap-1">
-                                                        <i className="fa-solid fa-check"></i>
-                                                        Active
-                                                    </span>
-                                                )}
-                                                {recruiter.status === 'suspended' && (
-                                                    <span className="badge badge-error gap-1">
-                                                        <i className="fa-solid fa-ban"></i>
-                                                        Suspended
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td>
-                                                <div className="max-w-xs truncate">
-                                                    {recruiter.bio || <span className="text-base-content/50">No bio</span>}
-                                                </div>
-                                            </td>
-                                            <td>{new Date(recruiter.created_at).toLocaleDateString()}</td>
-                                            <td>
-                                                <div className="flex gap-2">
-                                                    {recruiter.status === 'pending' && (
-                                                        <button
-                                                            onClick={() => updateRecruiterStatus(recruiter.id, 'active')}
-                                                            disabled={updatingId === recruiter.id}
-                                                            className="btn btn-xs btn-success"
-                                                        >
-                                                            {updatingId === recruiter.id ? (
-                                                                <span className="loading loading-spinner loading-xs"></span>
-                                                            ) : (
-                                                                <>
-                                                                    <i className="fa-solid fa-check"></i>
-                                                                    Approve
-                                                                </>
-                                                            )}
-                                                        </button>
-                                                    )}
-                                                    {recruiter.status === 'active' && (
-                                                        <button
-                                                            onClick={() => updateRecruiterStatus(recruiter.id, 'suspended')}
-                                                            disabled={updatingId === recruiter.id}
-                                                            className="btn btn-xs btn-error"
-                                                        >
-                                                            {updatingId === recruiter.id ? (
-                                                                <span className="loading loading-spinner loading-xs"></span>
-                                                            ) : (
-                                                                <>
-                                                                    <i className="fa-solid fa-ban"></i>
-                                                                    Suspend
-                                                                </>
-                                                            )}
-                                                        </button>
-                                                    )}
-                                                    {recruiter.status === 'suspended' && (
-                                                        <button
-                                                            onClick={() => updateRecruiterStatus(recruiter.id, 'active')}
-                                                            disabled={updatingId === recruiter.id}
-                                                            className="btn btn-xs btn-success"
-                                                        >
-                                                            {updatingId === recruiter.id ? (
-                                                                <span className="loading loading-spinner loading-xs"></span>
-                                                            ) : (
-                                                                <>
-                                                                    <i className="fa-solid fa-rotate-left"></i>
-                                                                    Reactivate
-                                                                </>
-                                                            )}
-                                                        </button>
-                                                    )}
-                                                </div>
+                                </thead>
+                                <tbody>
+                                    {filteredRecruiters.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={5} className="text-center py-8 text-base-content/70">
+                                                No recruiters found
                                             </td>
                                         </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                                    ) : (
+                                        filteredRecruiters.map((recruiter) => (
+                                            <tr key={recruiter.id}>
+                                                <td>
+                                                    <div className="font-mono text-xs">{recruiter.id.slice(0, 8)}</div>
+                                                </td>
+                                                <td>
+                                                    {recruiter.status === 'pending' && (
+                                                        <span className="badge badge-warning gap-1">
+                                                            <i className="fa-solid fa-clock"></i>
+                                                            Pending
+                                                        </span>
+                                                    )}
+                                                    {recruiter.status === 'active' && (
+                                                        <span className="badge badge-success gap-1">
+                                                            <i className="fa-solid fa-check"></i>
+                                                            Active
+                                                        </span>
+                                                    )}
+                                                    {recruiter.status === 'suspended' && (
+                                                        <span className="badge badge-error gap-1">
+                                                            <i className="fa-solid fa-ban"></i>
+                                                            Suspended
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    <div className="max-w-xs truncate">
+                                                        {recruiter.bio || <span className="text-base-content/50">No bio</span>}
+                                                    </div>
+                                                </td>
+                                                <td>{new Date(recruiter.created_at).toLocaleDateString()}</td>
+                                                <td>
+                                                    <div className="flex gap-2">
+                                                        {recruiter.status === 'pending' && (
+                                                            <button
+                                                                onClick={() => updateRecruiterStatus(recruiter.id, 'active')}
+                                                                disabled={updatingId === recruiter.id}
+                                                                className="btn btn-xs btn-success"
+                                                            >
+                                                                {updatingId === recruiter.id ? (
+                                                                    <span className="loading loading-spinner loading-xs"></span>
+                                                                ) : (
+                                                                    <>
+                                                                        <i className="fa-solid fa-check"></i>
+                                                                        Approve
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        )}
+                                                        {recruiter.status === 'active' && (
+                                                            <button
+                                                                onClick={() => updateRecruiterStatus(recruiter.id, 'suspended')}
+                                                                disabled={updatingId === recruiter.id}
+                                                                className="btn btn-xs btn-error"
+                                                            >
+                                                                {updatingId === recruiter.id ? (
+                                                                    <span className="loading loading-spinner loading-xs"></span>
+                                                                ) : (
+                                                                    <>
+                                                                        <i className="fa-solid fa-ban"></i>
+                                                                        Suspend
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        )}
+                                                        {recruiter.status === 'suspended' && (
+                                                            <button
+                                                                onClick={() => updateRecruiterStatus(recruiter.id, 'active')}
+                                                                disabled={updatingId === recruiter.id}
+                                                                className="btn btn-xs btn-success"
+                                                            >
+                                                                {updatingId === recruiter.id ? (
+                                                                    <span className="loading loading-spinner loading-xs"></span>
+                                                                ) : (
+                                                                    <>
+                                                                        <i className="fa-solid fa-rotate-left"></i>
+                                                                        Reactivate
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
             )}
         </div>
     );

@@ -137,7 +137,7 @@ export default async function ApplicationDetailPage({
                 {/* Main Content */}
                 <div className="lg:col-span-2 space-y-6">
                     {/* Job Details */}
-                    <div className="card bg-base-100 shadow-lg">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title mb-4">
                                 <i className="fa-solid fa-briefcase"></i>
@@ -210,7 +210,7 @@ export default async function ApplicationDetailPage({
 
                     {/* Application Notes */}
                     {(application.notes || application.recruiter_notes) && (
-                        <div className="card bg-base-100 shadow-lg">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title mb-4">
                                     <i className="fa-solid fa-note-sticky"></i>
@@ -242,7 +242,7 @@ export default async function ApplicationDetailPage({
 
                     {/* Documents */}
                     {application.documents && application.documents.length > 0 && (
-                        <div className="card bg-base-100 shadow-lg">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title mb-4">
                                     <i className="fa-solid fa-file"></i>
@@ -277,7 +277,7 @@ export default async function ApplicationDetailPage({
 
                     {/* Pre-screen Answers */}
                     {application.pre_screen_answers && application.pre_screen_answers.length > 0 && (
-                        <div className="card bg-base-100 shadow-lg">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title mb-4">
                                     <i className="fa-solid fa-clipboard-question"></i>
@@ -300,7 +300,7 @@ export default async function ApplicationDetailPage({
                 {/* Sidebar */}
                 <div className="space-y-6">
                     {/* Application Info */}
-                    <div className="card bg-base-100 shadow-lg">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title mb-4">
                                 <i className="fa-solid fa-info-circle"></i>
@@ -334,7 +334,7 @@ export default async function ApplicationDetailPage({
 
                     {/* Recruiter Info */}
                     {recruiter && (
-                        <div className="card bg-base-100 shadow-lg">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title mb-4">
                                     <i className="fa-solid fa-user-tie"></i>
@@ -372,7 +372,7 @@ export default async function ApplicationDetailPage({
                     )}
 
                     {/* Actions */}
-                    <div className="card bg-base-100 shadow-lg">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title mb-4">
                                 <i className="fa-solid fa-ellipsis"></i>

@@ -185,7 +185,7 @@ export default function ReputationManagementClient() {
             </div>
 
             {/* Recruiters Table */}
-            <div className="card bg-base-100 shadow-xl">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body p-0">
                     <div className="overflow-x-auto">
                         <table className="table">
@@ -307,9 +307,9 @@ export default function ReputationManagementClient() {
                     <div className="stat-value text-success">
                         {recruiters.length > 0
                             ? (
-                                  recruiters.reduce((sum, r) => sum + (r.reputation.reputation_score ?? 0), 0) /
-                                  recruiters.length
-                              ).toFixed(1)
+                                recruiters.reduce((sum, r) => sum + (r.reputation.reputation_score ?? 0), 0) /
+                                recruiters.length
+                            ).toFixed(1)
                             : '-'}
                     </div>
                 </div>

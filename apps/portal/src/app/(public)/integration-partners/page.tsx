@@ -24,7 +24,7 @@ export default function IntegrationsPage() {
                         <i className="fa-solid fa-wrench text-5xl mb-4"></i>
                         <h2 className="text-2xl font-bold mb-3">Integrations Coming in Phase 2</h2>
                         <p className="text-lg opacity-90">
-                            We're building a robust integration ecosystem. In Phase 1, we're focused on delivering 
+                            We're building a robust integration ecosystem. In Phase 1, we're focused on delivering
                             the core split placement platform. Stay tuned for these integrations!
                         </p>
                     </div>
@@ -43,7 +43,7 @@ export default function IntegrationsPage() {
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
                         {/* Email & Communication */}
-                        <div className="card bg-base-200 shadow-xl">
+                        <div className="card bg-base-200 shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center">
@@ -70,7 +70,7 @@ export default function IntegrationsPage() {
                         </div>
 
                         {/* Calendar */}
-                        <div className="card bg-base-200 shadow-xl">
+                        <div className="card bg-base-200 shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-secondary/20 flex items-center justify-center">
@@ -97,7 +97,7 @@ export default function IntegrationsPage() {
                         </div>
 
                         {/* Job Boards */}
-                        <div className="card bg-base-200 shadow-xl">
+                        <div className="card bg-base-200 shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-accent/20 flex items-center justify-center">
@@ -124,7 +124,7 @@ export default function IntegrationsPage() {
                         </div>
 
                         {/* ATS Systems */}
-                        <div className="card bg-base-200 shadow-xl">
+                        <div className="card bg-base-200 shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center">
@@ -151,7 +151,7 @@ export default function IntegrationsPage() {
                         </div>
 
                         {/* Payments */}
-                        <div className="card bg-base-200 shadow-xl">
+                        <div className="card bg-base-200 shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-success/20 flex items-center justify-center">
@@ -179,7 +179,7 @@ export default function IntegrationsPage() {
                         </div>
 
                         {/* Background Checks */}
-                        <div className="card bg-base-200 shadow-xl">
+                        <div className="card bg-base-200 shadow">
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-secondary/20 flex items-center justify-center">
@@ -217,7 +217,7 @@ export default function IntegrationsPage() {
                                 <div className="badge badge-primary mb-4">FOR DEVELOPERS</div>
                                 <h2 className="text-4xl font-bold mb-6">RESTful API Access</h2>
                                 <p className="text-lg text-base-content/70 mb-6">
-                                    Build custom integrations and automate your recruiting workflow with our comprehensive API. 
+                                    Build custom integrations and automate your recruiting workflow with our comprehensive API.
                                     Available on Partner tier plans.
                                 </p>
                                 <ul className="space-y-3 mb-8">
@@ -269,7 +269,7 @@ export default function IntegrationsPage() {
                     <div className="max-w-6xl mx-auto">
                         <div className="grid lg:grid-cols-2 gap-12 items-center">
                             <div className="order-2 lg:order-1">
-                                <div className="card bg-base-200 shadow-xl">
+                                <div className="card bg-base-200 shadow">
                                     <div className="card-body">
                                         <h3 className="card-title text-2xl mb-4">
                                             <i className="fa-solid fa-bolt text-warning"></i>
@@ -311,7 +311,7 @@ export default function IntegrationsPage() {
                                 <div className="badge badge-accent mb-4">AUTOMATION</div>
                                 <h2 className="text-4xl font-bold mb-6">Zapier & Make Integration</h2>
                                 <p className="text-lg text-base-content/70 mb-6">
-                                    Connect Splits Network to 5,000+ apps with no-code automation platforms. 
+                                    Connect Splits Network to 5,000+ apps with no-code automation platforms.
                                     Build custom workflows that fit your unique process.
                                 </p>
                                 <div className="flex flex-wrap gap-3 mb-8">
@@ -386,12 +386,12 @@ export default function IntegrationsPage() {
             <section className="py-20 bg-base-200">
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto">
-                        <div className="card bg-base-100 shadow-xl">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body text-center p-12">
                                 <i className="fa-solid fa-lightbulb text-6xl text-warning mb-6"></i>
                                 <h2 className="text-3xl font-bold mb-4">Don't See What You Need?</h2>
                                 <p className="text-lg text-base-content/70 mb-8">
-                                    We're actively building our integration ecosystem. Let us know which tools are 
+                                    We're actively building our integration ecosystem. Let us know which tools are
                                     most important to your workflow, and we'll prioritize them in our roadmap.
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center">

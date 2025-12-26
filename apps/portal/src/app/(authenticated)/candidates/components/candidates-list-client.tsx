@@ -149,7 +149,7 @@ export default function CandidatesListClient() {
             </div>
 
             {/* Filters and View Toggle */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <div className="flex flex-wrap gap-4 items-end">
                         {/* Scope Filter - Only show for recruiters */}
@@ -200,7 +200,7 @@ export default function CandidatesListClient() {
             {viewMode === 'grid' && filteredCandidates.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {filteredCandidates.map((candidate) => (
-                        <div key={candidate.id} className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                        <div key={candidate.id} className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <div className="flex items-start gap-3">
                                     <div className="avatar avatar-placeholder">
@@ -273,7 +273,7 @@ export default function CandidatesListClient() {
 
             {/* Candidates List - Table View */}
             {viewMode === 'table' && filteredCandidates.length > 0 && (
-                <div className="card bg-base-100 shadow-sm overflow-hidden">
+                <div className="card bg-base-100 shadow overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="table">
                             <thead>
@@ -372,7 +372,7 @@ export default function CandidatesListClient() {
 
             {/* Empty State */}
             {filteredCandidates.length === 0 && (
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body text-center py-12">
                         <i className="fa-solid fa-users text-6xl text-base-content/20"></i>
                         <h3 className="text-xl font-semibold mt-4">No Candidates Found</h3>

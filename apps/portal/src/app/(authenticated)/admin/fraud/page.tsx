@@ -66,7 +66,7 @@ export default function FraudSignalsPage() {
             </div>
 
             {/* Filters */}
-            <div className="card bg-base-100 shadow-sm mb-6">
+            <div className="card bg-base-100 shadow mb-6">
                 <div className="card-body">
                     <div className="flex gap-2">
                         {['active', 'resolved', 'false_positive'].map((status) => (
@@ -89,7 +89,7 @@ export default function FraudSignalsPage() {
                         <span className="loading loading-spinner loading-lg"></span>
                     </div>
                 ) : signals.length === 0 ? (
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body text-center text-base-content/60">
                             <i className="fa-solid fa-shield-halved text-4xl mb-2"></i>
                             <p>No fraud signals found</p>
@@ -97,7 +97,7 @@ export default function FraudSignalsPage() {
                     </div>
                 ) : (
                     signals.map((signal) => (
-                        <div key={signal.id} className="card bg-base-100 shadow-sm">
+                        <div key={signal.id} className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1">

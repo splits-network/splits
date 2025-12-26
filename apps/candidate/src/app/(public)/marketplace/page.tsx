@@ -115,7 +115,7 @@ export default function MarketplacePage() {
             </div>
 
             {/* Search and Filters */}
-            <div className="card bg-base-100 shadow-md mb-6">
+            <div className="card bg-base-100 shadow mb-6">
                 <div className="card-body">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="fieldset">
@@ -162,7 +162,7 @@ export default function MarketplacePage() {
                     <span className="loading loading-spinner loading-lg"></span>
                 </div>
             ) : recruiters.length === 0 ? (
-                <div className="card bg-base-100 shadow-md">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body text-center py-12">
                         <i className="fa-solid fa-users text-5xl text-base-content/20 mb-4"></i>
                         <h3 className="text-xl font-semibold mb-2">No recruiters available yet</h3>

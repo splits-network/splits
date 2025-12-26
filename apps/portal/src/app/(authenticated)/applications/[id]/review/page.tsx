@@ -61,7 +61,7 @@ export default async function ApplicationReviewPage({
     if (error) {
         return (
             <div className="space-y-6">
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <div className="alert alert-error">
                             <i className="fa-solid fa-circle-exclamation"></i>
@@ -90,7 +90,7 @@ export default async function ApplicationReviewPage({
             </div>
 
             {/* Page Header */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h1 className="text-3xl font-bold">
                         <i className="fa-solid fa-clipboard-check text-primary mr-3"></i>

@@ -90,7 +90,7 @@ export default function SuccessStoriesPage() {
             <div className="container mx-auto px-4 py-12">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
                     {stats.map((stat, index) => (
-                        <div key={index} className="card bg-base-100 shadow-lg">
+                        <div key={index} className="card bg-base-100 shadow">
                             <div className="card-body text-center">
                                 <i className={`fa-solid fa-${stat.icon} text-4xl text-primary mb-2`}></i>
                                 <div className="text-3xl font-bold text-primary">{stat.number}</div>
@@ -103,7 +103,7 @@ export default function SuccessStoriesPage() {
                 {/* Stories Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
                     {stories.map((story, index) => (
-                        <div key={index} className="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                        <div key={index} className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <div className="flex items-start gap-4 mb-4">
                                     <div className="text-5xl">{story.image}</div>

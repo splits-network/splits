@@ -118,7 +118,7 @@ export default function NewCandidatePage() {
             )}
 
             {/* Form */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Basic Information */}

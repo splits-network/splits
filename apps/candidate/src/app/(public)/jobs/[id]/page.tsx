@@ -79,7 +79,7 @@ export default async function JobDetailPage({ params }: PageProps) {
             </Link>
 
             {/* Job Header */}
-            <div className="card bg-base-100 shadow-lg mb-6">
+            <div className="card bg-base-100 shadow mb-6">
                 <div className="card-body">
                     <h1 className="text-4xl font-bold mb-4">{job.title}</h1>
                     <h2 className="text-2xl font-semibold mb-4">{job.company?.name || 'Company'}</h2>
@@ -160,7 +160,7 @@ export default async function JobDetailPage({ params }: PageProps) {
 
             {/* About Company */}
             {job.company?.description && (
-                <div className="card bg-base-100 shadow-lg mb-6">
+                <div className="card bg-base-100 shadow mb-6">
                     <div className="card-body">
                         <h3 className="card-title text-xl mb-4">
                             <i className="fa-solid fa-building"></i>
@@ -173,7 +173,7 @@ export default async function JobDetailPage({ params }: PageProps) {
 
             {/* Job Description */}
             {(job.candidate_description || job.description) && (
-                <div className="card bg-base-100 shadow-lg mb-6">
+                <div className="card bg-base-100 shadow mb-6">
                     <div className="card-body">
                         <h3 className="card-title text-xl mb-4">
                             <i className="fa-solid fa-file-lines"></i>
@@ -186,7 +186,7 @@ export default async function JobDetailPage({ params }: PageProps) {
 
             {/* Apply CTA */}
             {!userId && (
-                <div className="card bg-primary text-white shadow-lg">
+                <div className="card bg-primary text-white shadow">
                     <div className="card-body text-center">
                         <h3 className="text-2xl font-bold mb-4">
                             Ready to Apply?

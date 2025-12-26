@@ -60,7 +60,7 @@ export default function PayoutsAdminPage() {
             </div>
 
             {/* Filters */}
-            <div className="card bg-base-100 shadow-sm mb-6">
+            <div className="card bg-base-100 shadow mb-6">
                 <div className="card-body">
                     <div className="flex gap-2">
                         {['all', 'pending', 'processing', 'completed', 'failed'].map((status) => (
@@ -77,7 +77,7 @@ export default function PayoutsAdminPage() {
             </div>
 
             {/* Payouts Table */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     {loading ? (
                         <div className="flex justify-center p-8">

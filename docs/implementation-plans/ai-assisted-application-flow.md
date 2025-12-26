@@ -791,7 +791,7 @@ Next Steps:
   
   {/* Right: AI Insights */}
   <div className="lg:col-span-1">
-    <div className="card bg-base-100 shadow-xl sticky top-4">
+    <div className="card bg-base-100 shadow sticky top-4">
       <div className="card-body">
         <h3 className="card-title">
           <i className="fa-solid fa-robot"></i> AI Analysis

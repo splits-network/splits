@@ -45,7 +45,7 @@ export default function AcceptInvitationClient({ invitation, userId }: Props) {
             try {
                 const token = await getToken();
                 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-                
+
                 const res = await fetch(`${apiBaseUrl}/v1/organizations/${invitation.organization_id}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -73,7 +73,7 @@ export default function AcceptInvitationClient({ invitation, userId }: Props) {
         try {
             const token = await getToken();
             const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-            
+
             const res = await fetch(`${apiBaseUrl}/v1/invitations/${invitation.id}/accept`, {
                 method: 'POST',
                 headers: {
@@ -105,7 +105,7 @@ export default function AcceptInvitationClient({ invitation, userId }: Props) {
     if (loading) {
         return (
             <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-                <div className="card bg-base-100 shadow-xl max-w-md w-full">
+                <div className="card bg-base-100 shadow max-w-md w-full">
                     <div className="card-body text-center">
                         <span className="loading loading-spinner loading-lg"></span>
                         <p className="text-base-content/70 mt-4">Loading invitation details...</p>
@@ -120,7 +120,7 @@ export default function AcceptInvitationClient({ invitation, userId }: Props) {
 
     return (
         <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-            <div className="card bg-base-100 shadow-xl max-w-md w-full">
+            <div className="card bg-base-100 shadow max-w-md w-full">
                 <div className="card-body">
                     <div className="text-center mb-6">
                         <i className="fa-solid fa-envelope-open-text text-5xl text-primary mb-4"></i>

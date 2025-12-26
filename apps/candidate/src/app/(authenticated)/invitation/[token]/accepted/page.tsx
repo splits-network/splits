@@ -9,22 +9,22 @@ export const metadata: Metadata = {
 export default function AcceptedPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
-            <div className="card w-full max-w-2xl bg-base-100 shadow-xl">
+            <div className="card w-full max-w-2xl bg-base-100 shadow">
                 <div className="card-body text-center">
                     <div className="flex justify-center mb-6">
                         <div className="bg-success/20 rounded-full p-6">
                             <i className="fa-solid fa-check-circle text-6xl text-success"></i>
                         </div>
                     </div>
-                    
+
                     <h1 className="text-4xl font-bold mb-4">
                         Invitation Accepted!
                     </h1>
-                    
+
                     <p className="text-xl text-base-content/70 mb-6">
                         You've successfully accepted the invitation and granted your recruiter the right to represent you.
                     </p>
-                    
+
                     <div className="bg-base-200 rounded-lg p-6 mb-6">
                         <h2 className="text-xl font-semibold mb-3">What Happens Next?</h2>
                         <ul className="text-left space-y-3">
@@ -53,7 +53,7 @@ export default function AcceptedPage() {
                             Your recruiter will contact you directly about next steps and potential opportunities.
                         </span>
                     </div>
-                    
+
                     <div className="card-actions justify-center">
                         <Link href="/" className="btn btn-primary btn-lg">
                             <i className="fa-solid fa-home"></i>

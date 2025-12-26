@@ -40,7 +40,7 @@ export function OnboardingWizardModal() {
 
             {/* Modal Container */}
             <div className="fixed inset-0 z-999 flex items-center justify-center p-4 overflow-y-auto">
-                <div className="bg-base-100 rounded-box shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
+                <div className="bg-base-100 rounded-box shadow max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 relative">
                     {/* Progress Indicator */}
                     <div className="mb-6">
                         <div className="flex items-center justify-between mb-2">

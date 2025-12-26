@@ -140,7 +140,7 @@ export default function OpportunitiesListClient() {
                                 href={`/opportunities/${opportunity.id}`}
                                 className="block"
                             >
-                                <div className="card bg-base-100 shadow hover:shadow-lg transition-shadow cursor-pointer border border-base-300">
+                                <div className="card bg-base-100 shadow hover:shadow transition-shadow cursor-pointer border border-base-300">
                                     <div className="card-body">
                                         <div className="flex items-start justify-between gap-4">
                                             <div className="grow">
@@ -172,8 +172,8 @@ export default function OpportunitiesListClient() {
                                                 <div className="mb-3">
                                                     <div
                                                         className={`badge ${isExpiring
-                                                                ? 'badge-warning'
-                                                                : 'badge-info'
+                                                            ? 'badge-warning'
+                                                            : 'badge-info'
                                                             }`}
                                                     >
                                                         {daysRemaining} days left

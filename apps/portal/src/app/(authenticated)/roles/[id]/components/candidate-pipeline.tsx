@@ -60,7 +60,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
             const client = createAuthenticatedClient(token);
             const response: any = await client.getApplicationsByJob(roleId);
             setApplications(response.data || []);
-            
+
             // Get company ID from first application (if any)
             if (response.data && response.data.length > 0) {
                 const jobResponse: any = await client.getJob(roleId);
@@ -94,14 +94,14 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
     const filteredApplications = showNeedsPreScreen
         ? applications.filter(app => !app.recruiter_id && app.stage === 'submitted')
         : selectedStage
-        ? applications.filter(app => app.stage === selectedStage)
-        : applications;
-    
+            ? applications.filter(app => app.stage === selectedStage)
+            : applications;
+
     const needsPreScreenCount = applications.filter(app => !app.recruiter_id && app.stage === 'submitted').length;
 
     if (loading) {
         return (
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <div className="flex justify-center py-12">
                         <span className="loading loading-spinner loading-lg"></span>
@@ -113,7 +113,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
 
     return (
         <>
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">Candidate Pipeline</h2>
 
@@ -276,15 +276,15 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
                                 {showNeedsPreScreen
                                     ? 'No Applications Need Pre-Screen'
                                     : selectedStage
-                                    ? `No candidates in ${stages.find(s => s.key === selectedStage)?.label}`
-                                    : 'No Candidates Yet'}
+                                        ? `No candidates in ${stages.find(s => s.key === selectedStage)?.label}`
+                                        : 'No Candidates Yet'}
                             </h3>
                             <p className="text-base-content/70 mt-2">
                                 {showNeedsPreScreen
                                     ? 'All direct applications have been assigned to recruiters'
                                     : selectedStage
-                                    ? 'Try a different stage'
-                                    : 'Be the first to submit a candidate for this role'}
+                                        ? 'Try a different stage'
+                                        : 'Be the first to submit a candidate for this role'}
                             </p>
                         </div>
                     )}

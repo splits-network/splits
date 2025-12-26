@@ -14,11 +14,11 @@ interface EditCandidateClientProps {
 export default function EditCandidateClient({ candidateId }: EditCandidateClientProps) {
     const router = useRouter();
     const { getToken } = useAuth();
-    
+
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    
+
     const [formData, setFormData] = useState({
         full_name: '',
         email: '',
@@ -39,11 +39,11 @@ export default function EditCandidateClient({ candidateId }: EditCandidateClient
                     setError('Not authenticated');
                     return;
                 }
-                
+
                 const client = createAuthenticatedClient(token);
                 const response = await client.get(`/candidates/${candidateId}`);
                 const candidate = response.data;
-                
+
                 setFormData({
                     full_name: candidate.full_name || '',
                     email: candidate.email || '',
@@ -85,7 +85,7 @@ export default function EditCandidateClient({ candidateId }: EditCandidateClient
             }
 
             const client = createAuthenticatedClient(token);
-            
+
             await client.patch(`/candidates/${candidateId}`, {
                 ...formData,
                 linkedin_url: formData.linkedin_url || undefined,
@@ -145,7 +145,7 @@ export default function EditCandidateClient({ candidateId }: EditCandidateClient
                 </ul>
             </div>
 
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h1 className="card-title text-2xl mb-6">Edit Candidate</h1>
 
@@ -267,22 +267,22 @@ export default function EditCandidateClient({ candidateId }: EditCandidateClient
                     </form>
                 </div>
 
-            {/* Documents */}
-            {!loading && formData.full_name && (
-                <div className="card bg-base-100 shadow-sm">
-                    <div className="card-body">
-                        <h2 className="card-title text-lg mb-4">
-                            <i className="fa-solid fa-file-lines mr-2"></i>
-                            Documents
-                        </h2>
-                        <DocumentList
-                            entityType="candidate"
-                            entityId={candidateId}
-                            showUpload={true}
-                        />
+                {/* Documents */}
+                {!loading && formData.full_name && (
+                    <div className="card bg-base-100 shadow">
+                        <div className="card-body">
+                            <h2 className="card-title text-lg mb-4">
+                                <i className="fa-solid fa-file-lines mr-2"></i>
+                                Documents
+                            </h2>
+                            <DocumentList
+                                entityType="candidate"
+                                entityId={candidateId}
+                                showUpload={true}
+                            />
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
             </div>
         </div>
     );

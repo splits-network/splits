@@ -78,7 +78,7 @@ export function MarketplaceSettings() {
 
     if (loading) {
         return (
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body flex items-center justify-center min-h-[200px]">
                     <span className="loading loading-spinner loading-lg"></span>
                 </div>
@@ -104,7 +104,7 @@ export function MarketplaceSettings() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Enable Marketplace */}
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title">
                             <i className="fa-solid fa-store"></i>

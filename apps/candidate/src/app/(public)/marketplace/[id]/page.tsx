@@ -141,7 +141,7 @@ export default function RecruiterDetailPage() {
             )}
 
             {/* Header */}
-            <div className="card bg-base-100 shadow-md mb-6">
+            <div className="card bg-base-100 shadow mb-6">
                 <div className="card-body">
                     <div className="flex items-start gap-4">
                         <div className="avatar avatar-placeholder">
@@ -208,7 +208,7 @@ export default function RecruiterDetailPage() {
 
             {/* Stats */}
             {recruiter.total_placements !== undefined && (
-                <div className="stats shadow-md w-full mb-6">
+                <div className="stats shadow w-full mb-6">
                     <div className="stat">
                         <div className="stat-title">Total Placements</div>
                         <div className="stat-value">{recruiter.total_placements}</div>
@@ -231,7 +231,7 @@ export default function RecruiterDetailPage() {
 
             {/* Bio */}
             {recruiter.bio && (
-                <div className="card bg-base-100 shadow-md mb-6">
+                <div className="card bg-base-100 shadow mb-6">
                     <div className="card-body">
                         <h2 className="card-title">About</h2>
                         <p className="text-base-content/80 whitespace-pre-wrap">{recruiter.bio}</p>
@@ -242,7 +242,7 @@ export default function RecruiterDetailPage() {
             {/* Industries & Specialties */}
             {(recruiter.industries && recruiter.industries.length > 0) ||
                 (recruiter.specialties && recruiter.specialties.length > 0) ? (
-                <div className="card bg-base-100 shadow-md mb-6">
+                <div className="card bg-base-100 shadow mb-6">
                     <div className="card-body">
                         {recruiter.industries && recruiter.industries.length > 0 && (
                             <div className="mb-4">

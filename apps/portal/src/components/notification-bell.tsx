@@ -126,7 +126,7 @@ export default function NotificationBell() {
 
             {isOpen && (
                 <div
-                    className="dropdown-content z-50 mt-3 w-96 shadow-lg bg-base-100 rounded-box border border-base-300"
+                    className="dropdown-content z-50 mt-3 w-96 shadow bg-base-100 rounded-box border border-base-300"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header */}

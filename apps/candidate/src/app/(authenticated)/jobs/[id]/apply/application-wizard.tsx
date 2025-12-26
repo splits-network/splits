@@ -148,7 +148,7 @@ export default function ApplicationWizard({ job, questions, documents }: Applica
             <StepIndicator steps={steps} currentStep={currentStep} />
 
             {/* Step Content */}
-            <div className="card bg-base-100 shadow-xl">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     {renderStep()}
                 </div>

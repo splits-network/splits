@@ -106,7 +106,7 @@ export default function NetworkingGuidePage() {
             <div className="container mx-auto px-4 py-12">
                 <div className="max-w-4xl mx-auto">
                     {/* Introduction */}
-                    <div className="card bg-base-100 shadow-lg mb-12">
+                    <div className="card bg-base-100 shadow mb-12">
                         <div className="card-body prose max-w-none">
                             <p className="text-lg">
                                 Your professional network is one of your most valuable career assets. Studies show that up to 85% of jobs are filled through networking, and strong professional connections can open doors to opportunities, mentorship, and career growth.
@@ -120,10 +120,10 @@ export default function NetworkingGuidePage() {
                     {/* Networking Strategies */}
                     <div className="mb-12">
                         <h2 className="text-3xl font-bold mb-8">Effective Networking Strategies</h2>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {strategies.map((strategy, index) => (
-                                <div key={index} className="card bg-base-100 shadow-lg">
+                                <div key={index} className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <div className={`w-14 h-14 rounded-full bg-${strategy.color}/20 flex items-center justify-center mb-4`}>
                                             <i className={`fa-solid fa-${strategy.icon} text-${strategy.color} text-2xl`}></i>
@@ -144,7 +144,7 @@ export default function NetworkingGuidePage() {
                     </div>
 
                     {/* Your Elevator Pitch */}
-                    <div className="card bg-base-100 shadow-lg mb-12">
+                    <div className="card bg-base-100 shadow mb-12">
                         <div className="card-body">
                             <h2 className="card-title text-2xl mb-4">
                                 <i className="fa-solid fa-microphone text-primary"></i>
@@ -153,7 +153,7 @@ export default function NetworkingGuidePage() {
                             <p className="mb-4 text-base-content/70">
                                 Have a clear, concise answer to "What do you do?" that sparks interest and conversation:
                             </p>
-                            
+
                             <div className="bg-base-200 p-6 rounded-lg">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                     <div>
@@ -169,9 +169,9 @@ export default function NetworkingGuidePage() {
                                         <p className="text-sm">Impact of your work</p>
                                     </div>
                                 </div>
-                                
+
                                 <div className="divider">Example</div>
-                                
+
                                 <div className="bg-primary/10 p-4 rounded-lg border-l-4 border-primary">
                                     <p className="italic">
                                         "I'm a product manager at a healthcare tech startup. I lead the team building tools that help doctors spend less time on paperwork and more time with patients. We've helped reduce administrative work by 40% at over 200 clinics."
@@ -184,10 +184,10 @@ export default function NetworkingGuidePage() {
                     {/* Networking Best Practices */}
                     <div className="mb-12">
                         <h2 className="text-3xl font-bold mb-8">Networking Best Practices</h2>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {tips.map((tip, index) => (
-                                <div key={index} className="card bg-base-100 shadow-lg">
+                                <div key={index} className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <div className="flex items-start gap-4">
                                             <i className={`fa-solid fa-${tip.icon} text-3xl text-primary`}></i>
@@ -203,7 +203,7 @@ export default function NetworkingGuidePage() {
                     </div>
 
                     {/* Action Plan */}
-                    <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow-lg mb-12">
+                    <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow mb-12">
                         <div className="card-body">
                             <h3 className="card-title text-2xl mb-4">
                                 <i className="fa-solid fa-list-check"></i>
@@ -233,7 +233,7 @@ export default function NetworkingGuidePage() {
                     </div>
 
                     {/* Related Resources */}
-                    <div className="card bg-base-100 shadow-lg">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h3 className="card-title text-xl mb-4">Continue Learning</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -92,7 +92,7 @@ export default function EditRolePage() {
                 splits_fee_percentage: jobData.splits_fee_percentage || 50,
                 job_owner_id: jobData.job_owner_id || '',
             });
-            
+
             // Load requirements
             if (jobData.requirements) {
                 setRequirements(jobData.requirements.map((r: any) => ({
@@ -101,7 +101,7 @@ export default function EditRolePage() {
                     description: r.description
                 })));
             }
-            
+
             // Load pre-screen questions
             if (jobData.pre_screen_questions) {
                 setPreScreenQuestions(jobData.pre_screen_questions.map((q: any) => ({
@@ -151,13 +151,13 @@ export default function EditRolePage() {
             if (formData.salary_min) payload.salary_min = parseInt(formData.salary_min);
             if (formData.salary_max) payload.salary_max = parseInt(formData.salary_max);
             if (formData.job_owner_id) payload.job_owner_id = formData.job_owner_id;
-            
+
             // Add requirements and pre-screen questions
             payload.requirements = requirements;
             payload.pre_screen_questions = preScreenQuestions;
 
             await client.patch(`/jobs/${roleId}`, payload);
-            
+
             alert('Role updated successfully!');
             router.push(`/roles/${roleId}`);
         } catch (error: any) {
@@ -200,7 +200,7 @@ export default function EditRolePage() {
             </div>
 
             {/* Form */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Basic Information */}

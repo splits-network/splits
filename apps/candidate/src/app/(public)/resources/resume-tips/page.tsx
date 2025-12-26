@@ -117,10 +117,10 @@ export default function ResumeTipsPage() {
                 {/* Essential Sections */}
                 <div className="mb-16">
                     <h2 className="text-3xl font-bold mb-8">Essential Resume Sections</h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {sections.map((section, index) => (
-                            <div key={index} className="card bg-base-100 shadow-lg">
+                            <div key={index} className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <div className="flex items-center gap-3 mb-3">
                                         <i className={`fa-solid fa-${section.icon} text-2xl text-primary`}></i>
@@ -136,10 +136,10 @@ export default function ResumeTipsPage() {
                 {/* Detailed Tips */}
                 <div className="mb-16">
                     <h2 className="text-3xl font-bold mb-8">Best Practices</h2>
-                    
+
                     <div className="space-y-8">
                         {tips.map((tip, index) => (
-                            <div key={index} className="card bg-base-100 shadow-lg">
+                            <div key={index} className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <div className="flex items-start gap-4 mb-4">
                                         <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
@@ -191,8 +191,8 @@ export default function ResumeTipsPage() {
                 {/* Quick Checklist */}
                 <div className="mb-16">
                     <h2 className="text-3xl font-bold mb-8">Final Checklist</h2>
-                    
-                    <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow-lg">
+
+                    <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow">
                         <div className="card-body">
                             <h3 className="card-title text-2xl mb-4">Before You Submit</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -218,7 +218,7 @@ export default function ResumeTipsPage() {
 
                 {/* CTA */}
                 <div className="text-center">
-                    <div className="card bg-base-100 shadow-lg max-w-2xl mx-auto">
+                    <div className="card bg-base-100 shadow max-w-2xl mx-auto">
                         <div className="card-body">
                             <h2 className="card-title text-2xl justify-center mb-2">
                                 Resume ready? Start applying!

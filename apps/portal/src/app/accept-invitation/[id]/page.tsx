@@ -8,7 +8,7 @@ interface PageProps {
 
 async function getInvitation(id: string) {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-    
+
     try {
         const res = await fetch(`${apiBaseUrl}/v1/invitations/${id}`, {
             cache: 'no-store',
@@ -28,7 +28,7 @@ async function getInvitation(id: string) {
 
 async function getOrganization(organizationId: string, token: string) {
     const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-    
+
     try {
         const res = await fetch(`${apiBaseUrl}/v1/organizations/${organizationId}`, {
             headers: {
@@ -59,7 +59,7 @@ export default async function AcceptInvitationPage({ params }: PageProps) {
     if (!invitation) {
         return (
             <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-                <div className="card bg-base-100 shadow-xl max-w-md w-full">
+                <div className="card bg-base-100 shadow max-w-md w-full">
                     <div className="card-body text-center">
                         <i className="fa-solid fa-circle-xmark text-5xl text-error mb-4"></i>
                         <h1 className="card-title text-2xl justify-center">Invitation Not Found</h1>
@@ -104,7 +104,7 @@ export default async function AcceptInvitationPage({ params }: PageProps) {
 
         return (
             <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-                <div className="card bg-base-100 shadow-xl max-w-md w-full">
+                <div className="card bg-base-100 shadow max-w-md w-full">
                     <div className="card-body text-center">
                         <i className={`fa-solid ${status.icon} text-5xl ${status.color} mb-4`}></i>
                         <h1 className="card-title text-2xl justify-center">{status.title}</h1>
@@ -125,7 +125,7 @@ export default async function AcceptInvitationPage({ params }: PageProps) {
     if (expiresAt < new Date()) {
         return (
             <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-                <div className="card bg-base-100 shadow-xl max-w-md w-full">
+                <div className="card bg-base-100 shadow max-w-md w-full">
                     <div className="card-body text-center">
                         <i className="fa-solid fa-clock text-5xl text-warning mb-4"></i>
                         <h1 className="card-title text-2xl justify-center">Invitation Expired</h1>
@@ -154,7 +154,7 @@ export default async function AcceptInvitationPage({ params }: PageProps) {
     if (userEmail && userEmail.toLowerCase() !== invitation.email.toLowerCase()) {
         return (
             <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-                <div className="card bg-base-100 shadow-xl max-w-md w-full">
+                <div className="card bg-base-100 shadow max-w-md w-full">
                     <div className="card-body text-center">
                         <i className="fa-solid fa-triangle-exclamation text-5xl text-warning mb-4"></i>
                         <h1 className="card-title text-2xl justify-center">Email Mismatch</h1>

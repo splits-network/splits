@@ -79,7 +79,7 @@ export default function SettingsPage() {
 
                 {/* Company Settings - Future (Company Admins & Hiring Managers) */}
                 {(userRoles.isCompanyAdmin || userRoles.isHiringManager) && (
-                    <div className="card bg-base-100 shadow-sm opacity-60">
+                    <div className="card bg-base-100 shadow opacity-60">
                         <div className="card-body">
                             <h2 className="card-title">
                                 <i className="fa-solid fa-building"></i>
@@ -95,7 +95,7 @@ export default function SettingsPage() {
 
                 {/* Platform Administration (Platform Admins Only) */}
                 {userRoles.isPlatformAdmin && (
-                    <div className="card bg-base-100 shadow-sm opacity-60">
+                    <div className="card bg-base-100 shadow opacity-60">
                         <div className="card-body">
                             <h2 className="card-title">
                                 <i className="fa-solid fa-shield-halved"></i>
@@ -110,7 +110,7 @@ export default function SettingsPage() {
                 )}
 
                 {/* Notifications Card (Future - All users) */}
-                <div className="card bg-base-100 shadow-sm opacity-60">
+                <div className="card bg-base-100 shadow opacity-60">
                     <div className="card-body">
                         <h2 className="card-title">
                             <i className="fa-solid fa-bell"></i>
@@ -125,7 +125,7 @@ export default function SettingsPage() {
 
                 {/* Integrations Card (Future - Available based on role) */}
                 {(userRoles.isRecruiter || userRoles.isCompanyAdmin || userRoles.isPlatformAdmin) && (
-                    <div className="card bg-base-100 shadow-sm opacity-60">
+                    <div className="card bg-base-100 shadow opacity-60">
                         <div className="card-body">
                             <h2 className="card-title">
                                 <i className="fa-solid fa-plug"></i>

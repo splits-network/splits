@@ -63,7 +63,7 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
         setLoading(true);
         try {
             const api = new ApiClient(undefined, token);
-            
+
             // Load platform stats
             const statsResponse = await api.get<{ data: PlatformStats }>('/admin/dashboard/stats');
             setStats(statsResponse.data);
@@ -124,7 +124,7 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
     return (
         <div className="space-y-6">
             {/* Welcome Section */}
-            <div className="card bg-gradient-to-r from-primary to-secondary text-primary-content shadow-xl">
+            <div className="card bg-gradient-to-r from-primary to-secondary text-primary-content shadow">
                 <div className="card-body">
                     <h2 className="card-title text-3xl">
                         Platform Administration
@@ -156,7 +156,7 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
 
             {/* Key Platform Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="stats shadow-sm bg-base-100">
+                <div className="stats shadow bg-base-100">
                     <div className="stat">
                         <div className="stat-figure text-primary">
                             <i className="fa-solid fa-briefcase text-3xl"></i>
@@ -167,7 +167,7 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
                     </div>
                 </div>
 
-                <div className="stats shadow-sm bg-base-100">
+                <div className="stats shadow bg-base-100">
                     <div className="stat">
                         <div className="stat-figure text-secondary">
                             <i className="fa-solid fa-network-wired text-3xl"></i>
@@ -178,7 +178,7 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
                     </div>
                 </div>
 
-                <div className="stats shadow-sm bg-base-100">
+                <div className="stats shadow bg-base-100">
                     <div className="stat">
                         <div className="stat-figure text-accent">
                             <i className="fa-solid fa-users text-3xl"></i>
@@ -189,7 +189,7 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
                     </div>
                 </div>
 
-                <div className="stats shadow-sm bg-base-100">
+                <div className="stats shadow bg-base-100">
                     <div className="stat">
                         <div className="stat-figure text-success">
                             <i className="fa-solid fa-trophy text-3xl"></i>
@@ -203,7 +203,7 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
 
             {/* Revenue & Payouts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h3 className="card-title">
                             <i className="fa-solid fa-chart-line text-success mr-2"></i>
@@ -227,7 +227,7 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
                     </div>
                 </div>
 
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h3 className="card-title">
                             <i className="fa-solid fa-money-bill-transfer text-primary mr-2"></i>
@@ -252,7 +252,7 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
             </div>
 
             {/* Marketplace Health */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h3 className="card-title">
                         <i className="fa-solid fa-heart-pulse text-error mr-2"></i>
@@ -260,13 +260,13 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mt-6">
                         <div className="text-center">
-                            <div className="radial-progress text-primary" style={{"--value": health?.recruiter_satisfaction || 0} as any}>
+                            <div className="radial-progress text-primary" style={{ "--value": health?.recruiter_satisfaction || 0 } as any}>
                                 {health?.recruiter_satisfaction || 0}%
                             </div>
                             <p className="text-sm font-semibold mt-2">Recruiter Satisfaction</p>
                         </div>
                         <div className="text-center">
-                            <div className="radial-progress text-secondary" style={{"--value": health?.company_satisfaction || 0} as any}>
+                            <div className="radial-progress text-secondary" style={{ "--value": health?.company_satisfaction || 0 } as any}>
                                 {health?.company_satisfaction || 0}%
                             </div>
                             <p className="text-sm font-semibold mt-2">Company Satisfaction</p>
@@ -284,7 +284,7 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
                             <p className="text-sm font-semibold mt-2">Avg Time to Placement</p>
                         </div>
                         <div className="text-center">
-                            <div className="radial-progress text-success" style={{"--value": health?.fill_rate_percentage || 0} as any}>
+                            <div className="radial-progress text-success" style={{ "--value": health?.fill_rate_percentage || 0 } as any}>
                                 {health?.fill_rate_percentage || 0}%
                             </div>
                             <p className="text-sm font-semibold mt-2">Fill Rate</p>
@@ -303,7 +303,7 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Recent Platform Activity */}
                 <div className="lg:col-span-2">
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h3 className="card-title">
                                 <i className="fa-solid fa-clock-rotate-left mr-2"></i>
@@ -346,7 +346,7 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
                 {/* Admin Tools */}
                 <div className="space-y-6">
                     {/* Phase 3 Tools */}
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h3 className="card-title text-lg">Phase 3 Tools</h3>
                             <div className="flex flex-col gap-2 mt-4">
@@ -371,7 +371,7 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
                     </div>
 
                     {/* Core Admin Tools */}
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h3 className="card-title text-lg">Platform Management</h3>
                             <div className="flex flex-col gap-2 mt-4">

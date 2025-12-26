@@ -120,7 +120,7 @@ export default function SwitchCareersGuidePage() {
             <div className="container mx-auto px-4 py-12">
                 <div className="max-w-4xl mx-auto">
                     {/* Introduction */}
-                    <div className="card bg-base-100 shadow-lg mb-12">
+                    <div className="card bg-base-100 shadow mb-12">
                         <div className="card-body prose max-w-none">
                             <p className="text-lg">
                                 Changing careers can feel daunting, but with the right approach and preparation, it can be one of the most rewarding decisions you make. Whether you're seeking better work-life balance, higher earning potential, or simply following your passion, a successful career transition requires careful planning and execution.
@@ -134,17 +134,17 @@ export default function SwitchCareersGuidePage() {
                     {/* Steps */}
                     <div className="mb-12">
                         <h2 className="text-3xl font-bold mb-8">The 6-Step Framework</h2>
-                        
+
                         <div className="space-y-6">
                             {steps.map((step, index) => (
-                                <div key={index} className="card bg-base-100 shadow-lg">
+                                <div key={index} className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <div className="flex items-start gap-6">
                                             <div className="text-5xl font-bold text-primary/20">{step.number}</div>
                                             <div className="flex-1">
                                                 <h3 className="text-2xl font-bold mb-3">{step.title}</h3>
                                                 <p className="text-base-content/70 mb-4">{step.description}</p>
-                                                
+
                                                 <div className="bg-base-200 p-4 rounded-lg">
                                                     <h4 className="font-bold mb-2">Key Actions:</h4>
                                                     <ul className="space-y-2">
@@ -167,10 +167,10 @@ export default function SwitchCareersGuidePage() {
                     {/* Common Challenges */}
                     <div className="mb-12">
                         <h2 className="text-3xl font-bold mb-8">Overcoming Common Challenges</h2>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {commonChallenges.map((item, index) => (
-                                <div key={index} className="card bg-base-100 shadow-lg">
+                                <div key={index} className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <h3 className="card-title text-lg text-error">
                                             <i className="fa-solid fa-triangle-exclamation"></i>
@@ -187,7 +187,7 @@ export default function SwitchCareersGuidePage() {
                     </div>
 
                     {/* Key Takeaways */}
-                    <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow-lg mb-12">
+                    <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow mb-12">
                         <div className="card-body">
                             <h3 className="card-title text-2xl mb-4">
                                 <i className="fa-solid fa-lightbulb"></i>
@@ -215,7 +215,7 @@ export default function SwitchCareersGuidePage() {
                     </div>
 
                     {/* Related Resources */}
-                    <div className="card bg-base-100 shadow-lg">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h3 className="card-title text-xl mb-4">Continue Your Journey</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

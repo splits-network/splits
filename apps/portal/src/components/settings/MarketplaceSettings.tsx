@@ -145,7 +145,7 @@ export function MarketplaceSettings() {
 
     if (loading) {
         return (
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <div className="flex items-center justify-center py-8">
                         <span className="loading loading-spinner loading-lg"></span>
@@ -185,7 +185,7 @@ export function MarketplaceSettings() {
             )}
 
             {/* Enable Marketplace */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">Marketplace Participation</h2>
 
@@ -224,7 +224,7 @@ export function MarketplaceSettings() {
             {settings.marketplace_enabled && (
                 <>
                     {/* Profile Information */}
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title">Profile Information</h2>
 
@@ -268,7 +268,7 @@ export function MarketplaceSettings() {
                     </div>
 
                     {/* Industries */}
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title">Industries</h2>
                             <p className="text-sm text-base-content/70 mb-4">
@@ -294,7 +294,7 @@ export function MarketplaceSettings() {
                     </div>
 
                     {/* Specialties */}
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title">Specialties</h2>
                             <p className="text-sm text-base-content/70 mb-4">
@@ -320,7 +320,7 @@ export function MarketplaceSettings() {
                     </div>
 
                     {/* Privacy Settings */}
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title">Privacy Settings</h2>
 

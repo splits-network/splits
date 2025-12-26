@@ -32,6 +32,7 @@ export class RecruiterService {
     async createRecruiter(
         userId: string,
         profileData?: {
+            status?: 'pending' | 'active' | 'suspended';
             bio?: string;
             industries?: string[];
             specialties?: string[];
@@ -42,7 +43,7 @@ export class RecruiterService {
     ): Promise<Recruiter> {
         return await this.repository.createRecruiter({
             user_id: userId,
-            status: 'pending',
+            status: profileData?.status || 'pending',
             bio: profileData?.bio,
             industries: profileData?.industries,
             specialties: profileData?.specialties,

@@ -217,7 +217,7 @@ export default function NegotiatingOffersGuidePage() {
             <div className="container mx-auto px-4 py-12">
                 <div className="max-w-4xl mx-auto">
                     {/* Introduction */}
-                    <div className="card bg-base-100 shadow-lg mb-12">
+                    <div className="card bg-base-100 shadow mb-12">
                         <div className="card-body prose max-w-none">
                             <p className="text-lg">
                                 Negotiating your job offer is one of the highest-leverage activities you can do in your career. A successful negotiation can result in tens of thousands of dollars in additional compensation—and set the baseline for future raises.
@@ -231,7 +231,7 @@ export default function NegotiatingOffersGuidePage() {
                     {/* The Negotiation Process */}
                     <div className="mb-12">
                         <h2 className="text-3xl font-bold mb-8">The Complete Negotiation Process</h2>
-                        
+
                         <div className="space-y-8">
                             {negotiationSteps.map((phase, phaseIndex) => (
                                 <div key={phaseIndex}>
@@ -239,10 +239,10 @@ export default function NegotiatingOffersGuidePage() {
                                         <i className={`fa-solid fa-${phase.icon} text-2xl text-primary`}></i>
                                         <h3 className="text-2xl font-bold">{phase.phase}</h3>
                                     </div>
-                                    
+
                                     <div className="space-y-4">
                                         {phase.steps.map((step, stepIndex) => (
-                                            <div key={stepIndex} className="card bg-base-100 shadow-lg">
+                                            <div key={stepIndex} className="card bg-base-100 shadow">
                                                 <div className="card-body">
                                                     <h4 className="text-xl font-bold mb-2">{step.title}</h4>
                                                     <p className="text-base-content/70 mb-4">{step.description}</p>
@@ -266,21 +266,20 @@ export default function NegotiatingOffersGuidePage() {
                     {/* What You Can Negotiate */}
                     <div className="mb-12">
                         <h2 className="text-3xl font-bold mb-8">What You Can Negotiate</h2>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {whatToNegotiate.map((item, index) => (
-                                <div key={index} className="card bg-base-100 shadow-lg">
+                                <div key={index} className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <div className="flex items-center justify-between mb-3">
                                             <div className="flex items-center gap-3">
                                                 <i className={`fa-solid fa-${item.icon} text-2xl text-primary`}></i>
                                                 <h3 className="card-title text-lg">{item.category}</h3>
                                             </div>
-                                            <span className={`badge ${
-                                                item.negotiable.includes('High') ? 'badge-success' :
-                                                item.negotiable.includes('Medium') ? 'badge-warning' :
-                                                'badge-error'
-                                            }`}>
+                                            <span className={`badge ${item.negotiable.includes('High') ? 'badge-success' :
+                                                    item.negotiable.includes('Medium') ? 'badge-warning' :
+                                                        'badge-error'
+                                                }`}>
                                                 {item.negotiable}
                                             </span>
                                         </div>
@@ -297,10 +296,10 @@ export default function NegotiatingOffersGuidePage() {
                     {/* Negotiation Scripts */}
                     <div className="mb-12">
                         <h2 className="text-3xl font-bold mb-8">What to Say: Sample Scripts</h2>
-                        
+
                         <div className="space-y-6">
                             {scripts.map((script, index) => (
-                                <div key={index} className="card bg-base-100 shadow-lg">
+                                <div key={index} className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <h3 className="card-title text-lg mb-3">
                                             <i className="fa-solid fa-quote-left text-primary"></i>
@@ -316,7 +315,7 @@ export default function NegotiatingOffersGuidePage() {
                     </div>
 
                     {/* Common Mistakes */}
-                    <div className="card bg-error/10 border border-error/30 shadow-lg mb-12">
+                    <div className="card bg-error/10 border border-error/30 shadow mb-12">
                         <div className="card-body">
                             <h2 className="card-title text-2xl mb-4 text-error">
                                 <i className="fa-solid fa-triangle-exclamation"></i>
@@ -343,7 +342,7 @@ export default function NegotiatingOffersGuidePage() {
                     </div>
 
                     {/* Key Takeaways */}
-                    <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow-lg mb-12">
+                    <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow mb-12">
                         <div className="card-body">
                             <h3 className="card-title text-2xl mb-4">
                                 <i className="fa-solid fa-lightbulb"></i>
@@ -371,7 +370,7 @@ export default function NegotiatingOffersGuidePage() {
                     </div>
 
                     {/* Related Resources */}
-                    <div className="card bg-base-100 shadow-lg">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h3 className="card-title text-xl mb-4">Continue Learning</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

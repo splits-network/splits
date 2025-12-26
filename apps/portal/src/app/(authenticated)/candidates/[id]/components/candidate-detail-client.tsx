@@ -272,7 +272,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
             </div>
 
             {/* Candidate Header */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <div className="flex items-start justify-between">
                         <div className="flex items-start gap-4">
@@ -366,7 +366,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
 
             {/* Recruiter Relationship Information */}
             {relationship && (
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title text-lg">Recruiter Relationship</h2>
                         <div className="flex items-center justify-between">
@@ -407,7 +407,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
             )}
 
             {/* Documents */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title text-lg mb-4">
                         <i className="fa-solid fa-file-lines mr-2"></i>
@@ -426,7 +426,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                 <h2 className="text-2xl font-bold mb-4">Applications ({applications.length})</h2>
 
                 {applications.length === 0 ? (
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body items-center text-center py-12">
                             <i className="fa-solid fa-inbox text-6xl text-base-content/20"></i>
                             <h3 className="text-xl font-semibold mt-4">No Applications</h3>
@@ -438,7 +438,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                 ) : (
                     <div className="space-y-4">
                         {applications.map((application) => (
-                            <div key={application.id} className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                            <div key={application.id} className="card bg-base-100 shadow hover:shadow transition-shadow">
                                 <div className="card-body">
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">
@@ -510,7 +510,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
             {/* Activity Timeline (Phase 1 - Simple version) */}
             <div>
                 <h2 className="text-2xl font-bold mb-4">Activity Timeline</h2>
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <div className="space-y-4">
                             {applications

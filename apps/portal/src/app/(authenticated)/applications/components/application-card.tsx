@@ -43,7 +43,7 @@ export function ApplicationCard({
     const isMasked = candidate._masked;
 
     return (
-        <div className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+        <div className="card bg-base-100 shadow hover:shadow transition-shadow">
             <div className="card-body">
                 <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3 flex-1">

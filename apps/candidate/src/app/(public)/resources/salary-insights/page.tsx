@@ -93,10 +93,10 @@ export default function SalaryInsightsPage() {
             {/* Salary Data */}
             <div className="container mx-auto px-4 py-12">
                 <h2 className="text-3xl font-bold mb-8">Average Salaries by Role</h2>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
                     {insights.map((insight, index) => (
-                        <div key={index} className={`card bg-base-100 shadow-lg border-t-4 border-${insight.color}`}>
+                        <div key={index} className={`card bg-base-100 shadow border-t-4 border-${insight.color}`}>
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className={`w-12 h-12 rounded-full bg-${insight.color}/20 flex items-center justify-center`}>
@@ -104,13 +104,13 @@ export default function SalaryInsightsPage() {
                                     </div>
                                     <h3 className="card-title text-lg">{insight.role}</h3>
                                 </div>
-                                
+
                                 <div className="space-y-3">
                                     <div>
                                         <div className="text-sm text-base-content/60 mb-1">Average Salary</div>
                                         <div className="text-3xl font-bold text-success">{insight.avgSalary}</div>
                                     </div>
-                                    
+
                                     <div className="flex justify-between items-center pt-3 border-t border-base-300">
                                         <div>
                                             <div className="text-xs text-base-content/60">Range</div>
@@ -130,10 +130,10 @@ export default function SalaryInsightsPage() {
                 {/* Factors Affecting Salary */}
                 <div className="mb-16">
                     <h2 className="text-3xl font-bold mb-8">What Affects Your Salary?</h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {factors.map((factor, index) => (
-                            <div key={index} className="card bg-base-100 shadow-lg">
+                            <div key={index} className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <div className="flex items-start gap-4">
                                         <i className={`fa-solid fa-${factor.icon} text-3xl text-primary`}></i>

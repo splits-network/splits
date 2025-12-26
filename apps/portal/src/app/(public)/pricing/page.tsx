@@ -22,7 +22,7 @@ export default function PricingPage() {
                 <div className="container mx-auto px-4">
                     <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
                         {/* Starter Plan */}
-                        <div className="card bg-base-200 shadow-xl">
+                        <div className="card bg-base-200 shadow">
                             <div className="card-body">
                                 <div className="badge badge-primary mb-4">STARTER</div>
                                 <h3 className="card-title text-3xl mb-2">
@@ -124,7 +124,7 @@ export default function PricingPage() {
                         </div>
 
                         {/* Partner Plan */}
-                        <div className="card bg-base-200 shadow-xl">
+                        <div className="card bg-base-200 shadow">
                             <div className="card-body">
                                 <div className="badge badge-accent mb-4">PARTNER</div>
                                 <h3 className="card-title text-3xl mb-2">
@@ -189,7 +189,7 @@ export default function PricingPage() {
                         </p>
                     </div>
                     <div className="max-w-4xl mx-auto">
-                        <div className="card bg-base-100 shadow-xl">
+                        <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <div className="grid md:grid-cols-2 gap-8">
                                     <div>
@@ -225,7 +225,7 @@ export default function PricingPage() {
                                         <p className="text-base-content/70 mb-6">
                                             Only pay when you successfully hire a candidate. Set your fee percentage upfront.
                                         </p>
-                                        <div className="card bg-secondary text-secondary-content shadow-lg mb-4">
+                                        <div className="card bg-secondary text-secondary-content shadow mb-4">
                                             <div className="card-body p-6">
                                                 <div className="text-center">
                                                     <div className="text-3xl font-bold mb-2">15-25%</div>
@@ -351,63 +351,63 @@ export default function PricingPage() {
                         <h2 className="text-3xl font-bold mb-4">Pricing FAQs</h2>
                     </div>
                     <div className="max-w-4xl mx-auto space-y-4">
-                        <div className="collapse collapse-plus bg-base-100 shadow-lg">
-                            <input type="radio" name="pricing-faq" defaultChecked /> 
+                        <div className="collapse collapse-plus bg-base-100 shadow">
+                            <input type="radio" name="pricing-faq" defaultChecked />
                             <div className="collapse-title text-xl font-medium">
                                 How does the recruiter share percentage work?
                             </div>
-                            <div className="collapse-content"> 
+                            <div className="collapse-content">
                                 <p className="text-base-content/70">
-                                    When a placement is made, the company pays a placement fee (e.g., 20% of salary). 
-                                    Your recruiter share percentage determines how much of that fee you receive. For example, 
+                                    When a placement is made, the company pays a placement fee (e.g., 20% of salary).
+                                    Your recruiter share percentage determines how much of that fee you receive. For example,
                                     with a 75% share on a $24,000 fee, you receive $18,000. The remaining goes to the platform.
                                 </p>
                             </div>
                         </div>
-                        <div className="collapse collapse-plus bg-base-100 shadow-lg">
-                            <input type="radio" name="pricing-faq" /> 
+                        <div className="collapse collapse-plus bg-base-100 shadow">
+                            <input type="radio" name="pricing-faq" />
                             <div className="collapse-title text-xl font-medium">
                                 Can I switch plans at any time?
                             </div>
-                            <div className="collapse-content"> 
+                            <div className="collapse-content">
                                 <p className="text-base-content/70">
-                                    Yes! You can upgrade or downgrade your plan at any time. Upgrades take effect immediately, 
+                                    Yes! You can upgrade or downgrade your plan at any time. Upgrades take effect immediately,
                                     and you'll be charged a prorated amount. Downgrades take effect at the start of your next billing cycle.
                                 </p>
                             </div>
                         </div>
-                        <div className="collapse collapse-plus bg-base-100 shadow-lg">
-                            <input type="radio" name="pricing-faq" /> 
+                        <div className="collapse collapse-plus bg-base-100 shadow">
+                            <input type="radio" name="pricing-faq" />
                             <div className="collapse-title text-xl font-medium">
                                 Is there a free trial?
                             </div>
-                            <div className="collapse-content"> 
+                            <div className="collapse-content">
                                 <p className="text-base-content/70">
-                                    Pro and Partner plans include a 14-day free trial. You can explore all features risk-free 
+                                    Pro and Partner plans include a 14-day free trial. You can explore all features risk-free
                                     and cancel anytime before the trial ends without being charged.
                                 </p>
                             </div>
                         </div>
-                        <div className="collapse collapse-plus bg-base-100 shadow-lg">
-                            <input type="radio" name="pricing-faq" /> 
+                        <div className="collapse collapse-plus bg-base-100 shadow">
+                            <input type="radio" name="pricing-faq" />
                             <div className="collapse-title text-xl font-medium">
                                 What happens if I don't make any placements?
                             </div>
-                            <div className="collapse-content"> 
+                            <div className="collapse-content">
                                 <p className="text-base-content/70">
-                                    Your monthly subscription gives you access to the platform and roles, regardless of placements. 
+                                    Your monthly subscription gives you access to the platform and roles, regardless of placements.
                                     You only earn when you successfully place candidates, but there's no penalty for quieter months.
                                 </p>
                             </div>
                         </div>
-                        <div className="collapse collapse-plus bg-base-100 shadow-lg">
-                            <input type="radio" name="pricing-faq" /> 
+                        <div className="collapse collapse-plus bg-base-100 shadow">
+                            <input type="radio" name="pricing-faq" />
                             <div className="collapse-title text-xl font-medium">
                                 Are there any additional fees?
                             </div>
-                            <div className="collapse-content"> 
+                            <div className="collapse-content">
                                 <p className="text-base-content/70">
-                                    No hidden fees. The monthly subscription is your only recurring cost. All placement earnings 
+                                    No hidden fees. The monthly subscription is your only recurring cost. All placement earnings
                                     follow the transparent split model shown in your plan—no surprise deductions.
                                 </p>
                             </div>

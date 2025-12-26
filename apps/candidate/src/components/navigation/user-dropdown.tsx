@@ -50,7 +50,7 @@ export default function UserDropdown() {
             </div>
             <ul
                 tabIndex={0}
-                className="menu dropdown-content mt-3 z-1 shadow-lg bg-base-100 rounded-box border border-base-300 space-y-2 overflow-hidden"
+                className="menu dropdown-content mt-3 z-1 shadow bg-base-100 rounded-box border border-base-300 space-y-2 overflow-hidden"
             >
                 {/* User Info Header */}
                 <li className="menu-title px-4 py-3 border-b border-base-300">

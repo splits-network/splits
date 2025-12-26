@@ -83,7 +83,7 @@ Render different layouts based on the `viewMode` state:
 {viewMode === 'grid' && filteredItems.length > 0 && (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {filteredItems.map((item) => (
-            <div key={item.id} className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+            <div key={item.id} className="card bg-base-100 shadow hover:shadow transition-shadow">
                 {/* Card content */}
             </div>
         ))}
@@ -92,7 +92,7 @@ Render different layouts based on the `viewMode` state:
 
 {/* Table View */}
 {viewMode === 'table' && filteredItems.length > 0 && (
-    <div className="card bg-base-100 shadow-sm overflow-hidden">
+    <div className="card bg-base-100 shadow overflow-hidden">
         <div className="overflow-x-auto">
             <table className="table">
                 {/* Table content */}
@@ -111,7 +111,7 @@ Render different layouts based on the `viewMode` state:
 ```tsx
 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
     {items.map((item) => (
-        <div key={item.id} className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+        <div key={item.id} className="card bg-base-100 shadow hover:shadow transition-shadow">
             <div className="card-body">
                 {/* Header section with title and status */}
                 <div className="flex justify-between items-start">
@@ -149,7 +149,7 @@ Render different layouts based on the `viewMode` state:
 ### Key Design Principles
 
 1. **Responsive Grid**: Use `grid-cols-1 md:grid-cols-3` for mobile-first responsive layout
-2. **Visual Feedback**: Apply `hover:shadow-md` and `transition-shadow` for card hover effects
+2. **Visual Feedback**: Apply `hover:shadow` and `transition-shadow` for card hover effects
 3. **Title Links**: Make titles clickable links with `hover:text-primary` for visual feedback
 4. **Metadata with Icons**: Use FontAwesome icons with descriptive text for metadata
 5. **Status Badges**: Position in top-right corner of card
@@ -162,7 +162,7 @@ Render different layouts based on the `viewMode` state:
 ### Layout Structure
 
 ```tsx
-<div className="card bg-base-100 shadow-sm overflow-hidden">
+<div className="card bg-base-100 shadow overflow-hidden">
     <div className="overflow-x-auto">
         <table className="table">
             <thead>
@@ -220,7 +220,7 @@ Render different layouts based on the `viewMode` state:
 The view toggle should be placed alongside other filters in a consistent layout:
 
 ```tsx
-<div className="card bg-base-100 shadow-sm">
+<div className="card bg-base-100 shadow">
     <div className="card-body">
         <div className="flex flex-wrap gap-4 items-end">
             {/* Status Filter */}
@@ -285,7 +285,7 @@ Both grid and table views should share the same empty state:
 ```tsx
 {/* Empty State */}
 {filteredItems.length === 0 && (
-    <div className="card bg-base-100 shadow-sm">
+    <div className="card bg-base-100 shadow">
         <div className="card-body text-center py-12">
             <i className="fa-solid fa-icon-name text-6xl text-base-content/20"></i>
             <h3 className="text-xl font-semibold mt-4">No Items Found</h3>

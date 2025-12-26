@@ -29,11 +29,11 @@ async function getPlacements(token: string): Promise<Placement[]> {
 export default async function PlacementAuditPage() {
     const { getToken } = await auth();
     const token = await getToken();
-    
+
     if (!token) {
         return <div>Unauthorized</div>;
     }
-    
+
     const placements = await getPlacements(token);
 
     const totalValue = placements.reduce((sum, p) => sum + p.salary, 0);
@@ -56,24 +56,24 @@ export default async function PlacementAuditPage() {
 
             {/* Summary Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="stat bg-base-100 shadow-sm rounded-lg">
+                <div className="stat bg-base-100 shadow rounded-lg">
                     <div className="stat-title">Total Placements</div>
                     <div className="stat-value text-primary">{placements.length}</div>
                 </div>
 
-                <div className="stat bg-base-100 shadow-sm rounded-lg">
+                <div className="stat bg-base-100 shadow rounded-lg">
                     <div className="stat-title">Total Value</div>
                     <div className="stat-value text-2xl">${(totalValue / 1000).toFixed(0)}k</div>
                     <div className="stat-desc">Combined salaries</div>
                 </div>
 
-                <div className="stat bg-base-100 shadow-sm rounded-lg">
+                <div className="stat bg-base-100 shadow rounded-lg">
                     <div className="stat-title">Total Fees</div>
                     <div className="stat-value text-2xl text-success">${(totalFees / 1000).toFixed(0)}k</div>
                     <div className="stat-desc">Platform revenue</div>
                 </div>
 
-                <div className="stat bg-base-100 shadow-sm rounded-lg">
+                <div className="stat bg-base-100 shadow rounded-lg">
                     <div className="stat-title">Recruiter Payouts</div>
                     <div className="stat-value text-2xl text-warning">${(totalRecruiterPayout / 1000).toFixed(0)}k</div>
                     <div className="stat-desc">Total owed</div>
@@ -81,7 +81,7 @@ export default async function PlacementAuditPage() {
             </div>
 
             {/* Placements Table */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body p-0">
                     <div className="overflow-x-auto">
                         <table className="table table-zebra">

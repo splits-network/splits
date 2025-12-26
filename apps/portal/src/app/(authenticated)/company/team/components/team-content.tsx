@@ -215,7 +215,7 @@ export default function TeamManagementContent({ organizationId }: TeamManagement
             )}
 
             {/* Invite New Member */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
                         <i className="fa-solid fa-user-plus"></i>
@@ -276,7 +276,7 @@ export default function TeamManagementContent({ organizationId }: TeamManagement
 
             {/* Pending Invitations */}
             {invitations.length > 0 && (
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title">
                             <i className="fa-solid fa-clock"></i>
@@ -333,7 +333,7 @@ export default function TeamManagementContent({ organizationId }: TeamManagement
             )}
 
             {/* Team Members List */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
                         <i className="fa-solid fa-users"></i>
@@ -414,7 +414,7 @@ export default function TeamManagementContent({ organizationId }: TeamManagement
             </div>
 
             {/* Role Descriptions */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
                         <i className="fa-solid fa-circle-info"></i>

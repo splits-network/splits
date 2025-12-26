@@ -90,10 +90,10 @@ export default function ProposalCard({
 
     const handleAccept = async () => {
         if (!onAccept) return;
-        
+
         setResponding(true);
         setError(null);
-        
+
         try {
             await onAccept(proposal.id, responseNotes);
             setShowResponseForm(false);
@@ -106,7 +106,7 @@ export default function ProposalCard({
 
     const handleDecline = async () => {
         if (!onDecline) return;
-        
+
         if (!responseNotes.trim()) {
             setError('Please provide a reason for declining');
             return;
@@ -114,7 +114,7 @@ export default function ProposalCard({
 
         setResponding(true);
         setError(null);
-        
+
         try {
             await onDecline(proposal.id, responseNotes);
             setShowResponseForm(false);
@@ -129,7 +129,7 @@ export default function ProposalCard({
     const dueStatus = isPending ? getDueStatus() : null;
 
     return (
-        <div className={`card bg-base-100 border ${dueStatus?.urgent ? 'border-warning' : 'border-base-300'} shadow-sm`}>
+        <div className={`card bg-base-100 border ${dueStatus?.urgent ? 'border-warning' : 'border-base-300'} shadow`}>
             <div className="card-body">
                 <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
@@ -139,7 +139,7 @@ export default function ProposalCard({
                             </h3>
                             {getStatusBadge(proposal.status)}
                         </div>
-                        
+
                         {proposal.proposal_notes && (
                             <div className="bg-base-200 rounded-lg p-3 mb-3">
                                 <div className="text-xs font-semibold text-base-content/60 mb-1">Proposal Notes</div>

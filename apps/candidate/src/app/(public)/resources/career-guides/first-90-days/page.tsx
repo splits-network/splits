@@ -201,7 +201,7 @@ export default function First90DaysGuidePage() {
             <div className="container mx-auto px-4 py-12">
                 <div className="max-w-4xl mx-auto">
                     {/* Introduction */}
-                    <div className="card bg-base-100 shadow-lg mb-12">
+                    <div className="card bg-base-100 shadow mb-12">
                         <div className="card-body prose max-w-none">
                             <p className="text-lg">
                                 The first 90 days in a new role are critical. This is when you form first impressions, establish your reputation, and lay the foundation for your future success at the company. Get it right, and you'll set yourself up for a long and successful tenure.
@@ -215,10 +215,10 @@ export default function First90DaysGuidePage() {
                     {/* The 90-Day Framework */}
                     <div className="mb-12">
                         <h2 className="text-3xl font-bold mb-8">The 90-Day Framework</h2>
-                        
+
                         <div className="space-y-8">
                             {phases.map((phase, phaseIndex) => (
-                                <div key={phaseIndex} className="card bg-base-100 shadow-lg">
+                                <div key={phaseIndex} className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <div className="flex items-start gap-4 mb-6">
                                             <div className={`w-16 h-16 rounded-full bg-${phase.color}/20 flex items-center justify-center flex-shrink-0`}>
@@ -269,10 +269,10 @@ export default function First90DaysGuidePage() {
                     {/* Building Key Relationships */}
                     <div className="mb-12">
                         <h2 className="text-3xl font-bold mb-8">Building Key Relationships</h2>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {relationshipTips.map((relationship, index) => (
-                                <div key={index} className="card bg-base-100 shadow-lg">
+                                <div key={index} className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <div className="flex items-center gap-3 mb-4">
                                             <i className={`fa-solid fa-${relationship.icon} text-2xl text-primary`}></i>
@@ -293,13 +293,13 @@ export default function First90DaysGuidePage() {
                     </div>
 
                     {/* Questions to Ask */}
-                    <div className="card bg-base-100 shadow-lg mb-12">
+                    <div className="card bg-base-100 shadow mb-12">
                         <div className="card-body">
                             <h2 className="card-title text-2xl mb-6">
                                 <i className="fa-solid fa-circle-question text-primary"></i>
                                 Important Questions to Ask
                             </h2>
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <h4 className="font-bold mb-3">Week 1-2:</h4>
@@ -326,7 +326,7 @@ export default function First90DaysGuidePage() {
                     </div>
 
                     {/* Red Flags to Avoid */}
-                    <div className="card bg-warning/10 border border-warning/30 shadow-lg mb-12">
+                    <div className="card bg-warning/10 border border-warning/30 shadow mb-12">
                         <div className="card-body">
                             <h2 className="card-title text-2xl mb-4 text-warning">
                                 <i className="fa-solid fa-triangle-exclamation"></i>
@@ -353,7 +353,7 @@ export default function First90DaysGuidePage() {
                     </div>
 
                     {/* Key Takeaways */}
-                    <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow-lg mb-12">
+                    <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow mb-12">
                         <div className="card-body">
                             <h3 className="card-title text-2xl mb-4">
                                 <i className="fa-solid fa-lightbulb"></i>
@@ -381,7 +381,7 @@ export default function First90DaysGuidePage() {
                     </div>
 
                     {/* Related Resources */}
-                    <div className="card bg-base-100 shadow-lg">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h3 className="card-title text-xl mb-4">Next Steps</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

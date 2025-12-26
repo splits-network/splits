@@ -67,7 +67,7 @@ export default async function DashboardPage() {
     // Default: Show onboarding or empty state
     return (
         <div className="flex items-center justify-center min-h-screen">
-            <div className="card bg-base-100 shadow-xl max-w-md">
+            <div className="card bg-base-100 shadow max-w-md">
                 <div className="card-body text-center">
                     <i className="fa-solid fa-user-circle text-6xl text-primary mb-4"></i>
                     <h2 className="card-title justify-center">Welcome to Splits Network!</h2>

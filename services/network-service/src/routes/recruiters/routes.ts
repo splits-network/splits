@@ -4,6 +4,7 @@ import { NotFoundError, BadRequestError } from '@splits-network/shared-fastify';
 
 interface CreateRecruiterBody {
     user_id: string;
+    status?: 'pending' | 'active' | 'suspended';
     bio?: string;
     industries?: string[];
     specialties?: string[];
@@ -76,13 +77,14 @@ export function registerRecruiterRoutes(app: FastifyInstance, service: NetworkSe
     app.post(
         '/recruiters',
         async (request: FastifyRequest<{ Body: CreateRecruiterBody }>, reply: FastifyReply) => {
-            const { user_id, bio, industries, specialties, location, tagline, years_experience } = request.body;
+            const { user_id, status, bio, industries, specialties, location, tagline, years_experience } = request.body;
 
             if (!user_id) {
                 throw new BadRequestError('user_id is required');
             }
 
             const recruiter = await service.createRecruiter(user_id, {
+                status,
                 bio,
                 industries,
                 specialties,

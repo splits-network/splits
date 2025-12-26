@@ -46,7 +46,7 @@ export default function DecisionAuditLogPage() {
             const response = await api.request<{ data: DecisionLog[]; total: number }>(
                 `/admin/decision-log?${queryParams.toString()}`
             );
-            
+
             setLogs(response.data || []);
             setTotalPages(Math.ceil((response.total || 0) / limit));
         } catch (error) {
@@ -119,7 +119,7 @@ export default function DecisionAuditLogPage() {
             </div>
 
             {/* Filters */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <div className="flex flex-wrap gap-2">
                         <button
@@ -155,7 +155,7 @@ export default function DecisionAuditLogPage() {
             </div>
 
             {/* Logs Table */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     {loading ? (
                         <div className="flex justify-center py-12">

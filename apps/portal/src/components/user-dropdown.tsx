@@ -66,7 +66,7 @@ export function UserDropdown() {
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-base-100 rounded-lg shadow-xl border border-base-200 overflow-hidden z-[100]">
+                <div className="absolute right-0 mt-2 w-72 bg-base-100 rounded-lg shadow border border-base-200 overflow-hidden z-[100]">
                     <div className="px-4 py-4 border-b border-base-200">
                         <div className="font-semibold text-sm text-base-content">{userName}</div>
                         {userEmail && (

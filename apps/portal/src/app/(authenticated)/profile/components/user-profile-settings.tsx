@@ -155,7 +155,7 @@ export function UserProfileSettings() {
 
     if (loading) {
         return (
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <div className="flex items-center justify-center py-8">
                         <span className="loading loading-spinner loading-lg"></span>
@@ -168,7 +168,7 @@ export function UserProfileSettings() {
     return (
         <>
             {/* Profile Information Card */}
-            <div className="card bg-base-100 shadow-sm">
+            <div className="card bg-base-100 shadow">
                 <form onSubmit={handleSubmit}>
                     <div className="card-body">
                         <h2 className="card-title">
@@ -257,7 +257,7 @@ export function UserProfileSettings() {
             </div>
 
             {/* Security Settings Section */}
-            <div className="card bg-base-100 shadow-sm mt-6">
+            <div className="card bg-base-100 shadow mt-6">
                 <div className="card-body">
                     <h2 className="card-title">
                         <i className="fa-solid fa-shield-halved"></i>

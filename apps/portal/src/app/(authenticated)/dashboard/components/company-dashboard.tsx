@@ -54,7 +54,7 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
         setLoading(true);
         try {
             const api = new ApiClient(undefined, token);
-            
+
             // Load company stats
             const statsResponse = await api.get<{ data: CompanyStats }>('/company/dashboard/stats');
             setStats(statsResponse.data);
@@ -105,7 +105,7 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
     return (
         <div className="space-y-6">
             {/* Welcome Section */}
-            <div className="card bg-gradient-to-r from-primary to-secondary text-primary-content shadow-xl">
+            <div className="card bg-gradient-to-r from-primary to-secondary text-primary-content shadow">
                 <div className="card-body">
                     <h2 className="card-title text-3xl">
                         Hiring Dashboard
@@ -118,7 +118,7 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
 
             {/* Key Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="stats shadow-sm bg-base-100">
+                <div className="stats shadow bg-base-100">
                     <div className="stat">
                         <div className="stat-figure text-primary">
                             <i className="fa-solid fa-briefcase text-3xl"></i>
@@ -129,7 +129,7 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
                     </div>
                 </div>
 
-                <div className="stats shadow-sm bg-base-100">
+                <div className="stats shadow bg-base-100">
                     <div className="stat">
                         <div className="stat-figure text-secondary">
                             <i className="fa-solid fa-users text-3xl"></i>
@@ -140,7 +140,7 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
                     </div>
                 </div>
 
-                <div className="stats shadow-sm bg-base-100">
+                <div className="stats shadow bg-base-100">
                     <div className="stat">
                         <div className="stat-figure text-accent">
                             <i className="fa-solid fa-calendar-check text-3xl"></i>
@@ -151,7 +151,7 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
                     </div>
                 </div>
 
-                <div className="stats shadow-sm bg-base-100">
+                <div className="stats shadow bg-base-100">
                     <div className="stat">
                         <div className="stat-figure text-success">
                             <i className="fa-solid fa-trophy text-3xl"></i>
@@ -165,7 +165,7 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
 
             {/* Performance Metrics */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h3 className="card-title text-lg">
                             <i className="fa-solid fa-clock text-info mr-2"></i>
@@ -183,7 +183,7 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
                     </div>
                 </div>
 
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h3 className="card-title text-lg">
                             <i className="fa-solid fa-network-wired text-primary mr-2"></i>
@@ -201,7 +201,7 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
                     </div>
                 </div>
 
-                <div className="card bg-base-100 shadow-sm">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h3 className="card-title text-lg">
                             <i className="fa-solid fa-chart-line text-success mr-2"></i>
@@ -224,7 +224,7 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Role Breakdown - Larger section */}
                 <div className="lg:col-span-2">
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <div className="flex items-center justify-between">
                                 <h3 className="card-title">
@@ -306,7 +306,7 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
                             <div>
                                 <h4 className="font-bold">Hiring Insights</h4>
                                 <p className="text-sm mt-1">
-                                    Some roles have been open for 60+ days with low candidate flow. 
+                                    Some roles have been open for 60+ days with low candidate flow.
                                     Consider expanding recruiter assignments or adjusting role requirements.
                                 </p>
                             </div>
@@ -317,7 +317,7 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
                 {/* Right Sidebar */}
                 <div className="space-y-6">
                     {/* Quick Actions */}
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h3 className="card-title text-lg">Quick Actions</h3>
                             <div className="flex flex-col gap-2 mt-4">
@@ -342,7 +342,7 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
                     </div>
 
                     {/* Recent Activity */}
-                    <div className="card bg-base-100 shadow-sm">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h3 className="card-title text-lg">
                                 <i className="fa-solid fa-clock-rotate-left mr-2"></i>

@@ -47,7 +47,7 @@ export function Header() {
         pathname?.startsWith('/invitations');
 
     return (
-        <header className="navbar bg-base-100 shadow-lg sticky top-0 z-50">
+        <header className="navbar bg-base-100 shadow sticky top-0 z-50">
             {/* Start: Brand + Mobile menu */}
             <div className="navbar-start ps-4">
                 <div className="dropdown lg:hidden">

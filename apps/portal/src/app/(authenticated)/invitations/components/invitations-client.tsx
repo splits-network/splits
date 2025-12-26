@@ -92,16 +92,16 @@ export default function InvitationsPageClient() {
                 <i className="fa-solid fa-check"></i> Accepted
             </span>;
         }
-        
+
         if (invitation.declined_at) {
             return <span className="badge badge-error gap-2">
                 <i className="fa-solid fa-times"></i> Declined
             </span>;
         }
 
-        const isExpired = invitation.invitation_expires_at && 
+        const isExpired = invitation.invitation_expires_at &&
             new Date(invitation.invitation_expires_at) < new Date();
-        
+
         if (isExpired) {
             return <span className="badge badge-warning gap-2">
                 <i className="fa-solid fa-clock"></i> Expired
@@ -163,7 +163,7 @@ export default function InvitationsPageClient() {
 
     const handleCancelInvitation = async (invitation: InvitationWithCandidate) => {
         const candidateName = invitation.candidate?.full_name || 'this candidate';
-        
+
         if (!confirm(`Are you sure you want to cancel the invitation for ${candidateName}? This action cannot be undone.`)) {
             return;
         }
@@ -245,25 +245,25 @@ export default function InvitationsPageClient() {
 
             {/* Filter Tabs */}
             <div className="tabs tabs-boxed">
-                <button 
+                <button
                     className={`tab ${filter === 'all' ? 'tab-active' : ''}`}
                     onClick={() => setFilter('all')}
                 >
                     All ({stats.total})
                 </button>
-                <button 
+                <button
                     className={`tab ${filter === 'pending' ? 'tab-active' : ''}`}
                     onClick={() => setFilter('pending')}
                 >
                     Pending ({stats.pending})
                 </button>
-                <button 
+                <button
                     className={`tab ${filter === 'accepted' ? 'tab-active' : ''}`}
                     onClick={() => setFilter('accepted')}
                 >
                     Accepted ({stats.accepted})
                 </button>
-                <button 
+                <button
                     className={`tab ${filter === 'declined' ? 'tab-active' : ''}`}
                     onClick={() => setFilter('declined')}
                 >
@@ -281,12 +281,12 @@ export default function InvitationsPageClient() {
 
             {/* Invitations Table */}
             {filteredInvitations.length === 0 ? (
-                <div className="card bg-base-100 shadow-xl">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body text-center py-12">
                         <i className="fa-solid fa-inbox text-6xl text-gray-300 mb-4"></i>
                         <h3 className="text-xl font-semibold">No invitations found</h3>
                         <p className="text-gray-600">
-                            {filter === 'all' 
+                            {filter === 'all'
                                 ? 'Start adding candidates to send invitations'
                                 : `No ${filter} invitations at this time`
                             }
@@ -294,7 +294,7 @@ export default function InvitationsPageClient() {
                     </div>
                 </div>
             ) : (
-                <div className="card bg-base-100 shadow-xl">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body p-0">
                         <div className="overflow-x-auto">
                             <table className="table">

@@ -152,7 +152,7 @@ export default function OwnershipAuditClient() {
             </div>
 
             {/* Ownership Table */}
-            <div className="card bg-base-100 shadow-xl">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body p-0">
                     <div className="overflow-x-auto">
                         <table className="table">

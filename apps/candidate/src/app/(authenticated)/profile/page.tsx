@@ -131,7 +131,7 @@ export default function ProfilePage() {
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Basic Information */}
                 <div className='grid gap-6 grid-cols-1 sm:grid-cols-2'>
-                    <div className="card bg-base-100 shadow-lg">
+                    <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title mb-4">
                                 <i className="fa-solid fa-user"></i>
@@ -193,7 +193,7 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Current Position & Professional Info */}
-                <div className="card bg-base-100 shadow-lg">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title mb-4">
                             <i className="fa-solid fa-briefcase"></i>
@@ -250,7 +250,7 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Professional Links */}
-                <div className="card bg-base-100 shadow-lg">
+                <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title mb-4">
                             <i className="fa-solid fa-link"></i>
