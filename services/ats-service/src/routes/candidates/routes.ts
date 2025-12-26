@@ -18,10 +18,11 @@ function getCorrelationId(request: FastifyRequest): string {
 export function registerCandidateRoutes(app: FastifyInstance, service: AtsService, candidatesService: CandidatesService) {
     // Get all candidates with optional filters
     // Now accepts Clerk user ID from headers and performs entity resolution internally
+    // Supports scope parameter: mine (default) = sourced + relationships, all = entire talent pool
     app.get(
         '/candidates',
-        async (request: FastifyRequest<{ Querystring: { search?: string; limit?: string; offset?: string; email?: string } }>, reply: FastifyReply) => {
-            const { search, limit, offset, email } = request.query;
+        async (request: FastifyRequest<{ Querystring: { search?: string; limit?: string; offset?: string; email?: string; scope?: 'mine' | 'all' } }>, reply: FastifyReply) => {
+            const { search, limit, offset, email, scope } = request.query;
             const { clerkUserId, userRole } = getUserContext(request);
             const correlationId = getCorrelationId(request);
             
@@ -33,6 +34,7 @@ export function registerCandidateRoutes(app: FastifyInstance, service: AtsServic
                     email,
                     limit: limit ? parseInt(limit) : undefined,
                     offset: offset ? parseInt(offset) : undefined,
+                    scope,
                 }, correlationId);
                 return reply.send({ data: candidates });
             } catch (error: any) {

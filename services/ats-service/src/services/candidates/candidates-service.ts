@@ -11,6 +11,7 @@ export interface CandidateFilters {
     email?: string;
     limit?: number;
     offset?: number;
+    scope?: 'mine' | 'all';
 }
 
 export interface CreateCandidateParams {
@@ -63,12 +64,13 @@ export class CandidatesService {
 
     /**
      * Get candidates with proper filtering based on user role
-     * - Recruiters: Candidates they sourced OR have active relationships with
+     * - Recruiters (scope=mine): Candidates they sourced OR have active relationships with
+     * - Recruiters (scope=all): All candidates in the system
      * - Admins: All candidates
      * - Others: Forbidden
      */
     async getCandidates(params: CandidateFilters, correlationId: string) {
-        const { clerkUserId, userRole, search, email, limit, offset } = params;
+        const { clerkUserId, userRole, search, email, limit, offset, scope = 'mine' } = params;
 
         // If email filter is provided, lookup by email directly
         if (email) {
@@ -76,12 +78,12 @@ export class CandidatesService {
             return candidate ? [candidate] : [];
         }
 
-        // Platform admins see all candidates
+        // Platform admins always see all candidates
         if (userRole === 'admin') {
             return this.repository.findAllCandidates({ search, limit, offset });
         }
 
-        // Recruiters see sourced + active relationship candidates
+        // Recruiters can see all candidates or just their own based on scope
         if (userRole === 'recruiter') {
             const { entityId, isInactive } = await this.resolveEntityId(clerkUserId, userRole, correlationId);
             
@@ -91,6 +93,46 @@ export class CandidatesService {
             }
 
             const recruiterId = entityId!;
+
+            // If scope=all, return all candidates but enrich with relationship data
+            if (scope === 'all') {
+                const allCandidates = await this.repository.findAllCandidates({ search, limit, offset });
+                
+                // Get this recruiter's relationships to enrich the full list
+                let relationshipCandidateIds: string[] = [];
+                try {
+                    const response = await fetch(
+                        `${this.networkClient['baseURL']}/recruiter-candidates/recruiter/${recruiterId}`,
+                        {
+                            method: 'GET',
+                            headers: {
+                                'x-correlation-id': correlationId,
+                                'Content-Type': 'application/json',
+                            },
+                            signal: AbortSignal.timeout(5000),
+                        }
+                    );
+
+                    if (response.ok) {
+                        const result = await response.json() as { data: Array<{ candidate_id: string; status: string }> };
+                        relationshipCandidateIds = (result.data || [])
+                            .filter(rel => rel.status === 'active')
+                            .map(rel => rel.candidate_id);
+                    }
+                } catch (error) {
+                    logger.error({ err: error, recruiterId }, 'Failed to fetch recruiter relationships');
+                }
+
+                // Enrich all candidates with relationship metadata
+                const relationshipCandidateIdSet = new Set(relationshipCandidateIds);
+                return allCandidates.map(c => ({
+                    ...c,
+                    is_sourcer: c.recruiter_id === recruiterId,
+                    has_active_relationship: relationshipCandidateIdSet.has(c.id),
+                }));
+            }
+            
+            // scope=mine: Get candidates sourced by this recruiter + active relationships
 
             // Get candidates sourced by this recruiter
             const sourcedCandidates = await this.repository.findAllCandidates({
@@ -104,7 +146,7 @@ export class CandidatesService {
             let relationshipCandidateIds: string[] = [];
             try {
                 const response = await fetch(
-                    `${this.networkClient['baseURL']}/api/recruiter-candidates/recruiter/${recruiterId}`,
+                    `${this.networkClient['baseURL']}/recruiter-candidates/recruiter/${recruiterId}`,
                     {
                         method: 'GET',
                         headers: {
@@ -146,8 +188,26 @@ export class CandidatesService {
                 relationshipCandidates = relationshipCandidates.filter(c => c !== null);
             }
 
+            // Enrich candidates with relationship metadata
+            // Create a set of candidate IDs that have active relationships
+            const relationshipCandidateIdSet = new Set(relationshipCandidateIds);
+
+            // Mark sourced candidates (check if they also have active relationships)
+            const enrichedSourced = sourcedCandidates.map(c => ({
+                ...c,
+                is_sourcer: true,
+                has_active_relationship: relationshipCandidateIdSet.has(c.id),
+            }));
+
+            // Mark relationship candidates
+            const enrichedRelationships = relationshipCandidates.map(c => ({
+                ...c,
+                is_sourcer: false,
+                has_active_relationship: true,
+            }));
+
             // Combine and deduplicate
-            return [...sourcedCandidates, ...relationshipCandidates];
+            return [...enrichedSourced, ...enrichedRelationships];
         }
 
         // Other roles cannot list candidates
@@ -188,7 +248,7 @@ export class CandidatesService {
             // Create recruiter-candidate relationship in Network Service
             try {
                 const response = await fetch(
-                    `${this.networkClient['baseURL']}/api/recruiter-candidates`,
+                    `${this.networkClient['baseURL']}/recruiter-candidates`,
                     {
                         method: 'POST',
                         headers: {
@@ -266,7 +326,7 @@ export class CandidatesService {
             // Check for active relationship
             try {
                 const response = await fetch(
-                    `${this.networkClient['baseURL']}/api/recruiter-candidates/${recruiterId}/${candidateId}`,
+                    `${this.networkClient['baseURL']}/recruiter-candidates/${recruiterId}/${candidateId}`,
                     {
                         method: 'GET',
                         headers: {

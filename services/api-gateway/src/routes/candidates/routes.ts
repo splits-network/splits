@@ -4,11 +4,9 @@ import { requireRoles, AuthenticatedRequest } from '../../rbac';
 import { registerMeRecruitersRoute } from './me-recruiters';
 
 function determineUserRole(auth: any): string {
-    if (auth.sessionClaims?.metadata?.role) {
-        return auth.sessionClaims.metadata.role;
-    }
-    if (auth.orgRole) {
-        return auth.orgRole;
+    // Extract role from first membership (primary organization)
+    if (auth.memberships && auth.memberships.length > 0) {
+        return auth.memberships[0].role;
     }
     return 'candidate';
 }
@@ -41,7 +39,7 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         const path = queryParams.toString() ? `/candidates?${queryParams.toString()}` : '/candidates';
         
         const data = await atsService().get(path, undefined, correlationId, {
-            'x-clerk-user-id': req.auth.userId,
+            'x-clerk-user-id': req.auth.clerkUserId,
             'x-user-role': userRole,
         });
         return reply.send(data);
@@ -70,12 +68,12 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         const req = request as AuthenticatedRequest;
         const correlationId = getCorrelationId(request);
         
-        if (!req.auth || !req.auth.userId) {
+        if (!req.auth || !req.auth.clerkUserId) {
             return reply.status(401).send({ error: 'Unauthorized' });
         }
         
         const data = await atsService().patch('/candidates/me', request.body, correlationId, {
-            'x-clerk-user-id': req.auth.userId,
+            'x-clerk-user-id': req.auth.clerkUserId,
         });
         return reply.send(data);
     });
@@ -93,7 +91,7 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         const userRole = determineUserRole(req.auth);
         
         const data = await atsService().post('/candidates', request.body, correlationId, {
-            'x-clerk-user-id': req.auth.userId,
+            'x-clerk-user-id': req.auth.clerkUserId,
             'x-user-role': userRole,
         });
         return reply.send(data);
@@ -114,7 +112,7 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         const userRole = determineUserRole(req.auth);
         
         const data = await atsService().patch(`/candidates/${id}`, request.body, correlationId, {
-            'x-clerk-user-id': req.auth.userId,
+            'x-clerk-user-id': req.auth.clerkUserId,
             'x-user-role': userRole,
         });
         return reply.send(data);
@@ -168,7 +166,7 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         const userRole = determineUserRole(req.auth);
 
         const data = await atsService().post(`/candidates/${id}/source`, request.body, correlationId, {
-            'x-clerk-user-id': req.auth.userId,
+            'x-clerk-user-id': req.auth.clerkUserId,
             'x-user-role': userRole,
         });
         return reply.send(data);
@@ -203,7 +201,7 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         const userRole = determineUserRole(req.auth);
 
         const data = await atsService().post(`/candidates/${id}/outreach`, request.body, correlationId, {
-            'x-clerk-user-id': req.auth.userId,
+            'x-clerk-user-id': req.auth.clerkUserId,
             'x-user-role': userRole,
         });
         return reply.send(data);
@@ -234,12 +232,12 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         const req = request as AuthenticatedRequest;
         const correlationId = getCorrelationId(request);
         
-        if (!req.auth || !req.auth.userId) {
+        if (!req.auth || !req.auth.clerkUserId) {
             return reply.status(401).send({ error: 'Unauthorized' });
         }
         
         const data = await atsService().get('/candidates/me/applications', undefined, correlationId, {
-            'x-clerk-user-id': req.auth.userId,
+            'x-clerk-user-id': req.auth.clerkUserId,
         });
         return reply.send(data);
     });

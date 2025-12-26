@@ -15,6 +15,8 @@ export default function CandidatesListClient() {
     const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useViewMode('candidatesViewMode');
     const [userRole, setUserRole] = useState<string | null>(null);
+    const [scope, setScope] = useState<'mine' | 'all'>('mine');
+    const [recruiterId, setRecruiterId] = useState<string | null>(null);
 
     useEffect(() => {
         async function loadCandidates() {
@@ -39,10 +41,22 @@ export default function CandidatesListClient() {
                 const role = membership?.role;
                 setUserRole(role);
 
-                // Fetch candidates (API Gateway filters based on role automatically)
-                // - Recruiters see: Candidates they sourced OR have active relationships with
-                // - Admins see: All candidates
-                const response = await client.get('/candidates');
+                // If recruiter, get their recruiter profile ID
+                if (role === 'recruiter') {
+                    try {
+                        const recruiterRes = await client.get(`/recruiters/by-user/${profile.id}`);
+                        if (recruiterRes.data?.id) {
+                            setRecruiterId(recruiterRes.data.id);
+                        }
+                    } catch (err) {
+                        console.warn('Could not load recruiter profile:', err);
+                    }
+                }
+
+                // Fetch candidates with scope parameter
+                // - scope=mine: Candidates sourced OR with active relationships (default)
+                // - scope=all: All candidates in system (talent pool discovery)
+                const response = await client.get(`/candidates?scope=${scope}`);
                 setCandidates(response.data || []);
             } catch (err: any) {
                 console.error('Failed to load candidates:', err);
@@ -53,7 +67,7 @@ export default function CandidatesListClient() {
         }
 
         loadCandidates();
-    }, [getToken]);
+    }, [getToken, scope]);
 
     const formatDate = (date: string) => {
         return new Date(date).toLocaleDateString('en-US', {
@@ -138,6 +152,20 @@ export default function CandidatesListClient() {
             <div className="card bg-base-100 shadow-sm">
                 <div className="card-body">
                     <div className="flex flex-wrap gap-4 items-end">
+                        {/* Scope Filter - Only show for recruiters */}
+                        {userRole === 'recruiter' && (
+                            <div className="fieldset">
+                                <label className="label">Show</label>
+                                <select
+                                    className="select"
+                                    value={scope}
+                                    onChange={(e) => setScope(e.target.value as 'mine' | 'all')}
+                                >
+                                    <option value="mine">My Candidates</option>
+                                    <option value="all">All Candidates</option>
+                                </select>
+                            </div>
+                        )}
                         <div className="fieldset flex-1">
                             <label className="label">Search</label>
                             <input
@@ -186,8 +214,20 @@ export default function CandidatesListClient() {
                                                 <h3 className="card-title text-xl">{candidate.full_name}</h3>
                                             </Link>
                                             {candidate.verification_status && (
-                                                <span className={`badge badge-sm ${getVerificationStatusBadge(candidate.verification_status)} gap-1`}>
+                                                <span className={`badge badge-sm ${getVerificationStatusBadge(candidate.verification_status)} gap-1`} title={`Verification Status: ${candidate.verification_status.charAt(0).toUpperCase() + candidate.verification_status.slice(1)}`}>
                                                     <i className={`fa-solid ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
+                                                </span>
+                                            )}
+                                            {candidate.is_sourcer && (
+                                                <span className="badge badge-sm badge-primary gap-1" title="You sourced this candidate">
+                                                    <i className="fa-solid fa-star"></i>
+                                                    Sourcer
+                                                </span>
+                                            )}
+                                            {candidate.has_active_relationship && (
+                                                <span className="badge badge-sm badge-success gap-1" title="Active relationship">
+                                                    <i className="fa-solid fa-handshake"></i>
+                                                    Active
                                                 </span>
                                             )}
                                         </div>
@@ -241,6 +281,7 @@ export default function CandidatesListClient() {
                                     <th>Candidate</th>
                                     <th>Email</th>
                                     <th>Status</th>
+                                    {userRole === 'recruiter' && <th>Relationship</th>}
                                     <th>LinkedIn</th>
                                     <th>Added</th>
                                     <th className="text-right">Actions</th>
@@ -274,6 +315,24 @@ export default function CandidatesListClient() {
                                                 </span>
                                             )}
                                         </td>
+                                        {userRole === 'recruiter' && (
+                                            <td>
+                                                <div className="flex gap-1">
+                                                    {candidate.is_sourcer && (
+                                                        <span className="badge badge-sm badge-primary gap-1" title="You sourced this candidate">
+                                                            <i className="fa-solid fa-star"></i>
+                                                            Sourcer
+                                                        </span>
+                                                    )}
+                                                    {candidate.has_active_relationship && (
+                                                        <span className="badge badge-sm badge-success gap-1" title="Active relationship">
+                                                            <i className="fa-solid fa-handshake"></i>
+                                                            Active
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        )}
                                         <td>
                                             {candidate.linkedin_url ? (
                                                 <a
