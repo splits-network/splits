@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { ForbiddenError, UnauthorizedError } from '@splits-network/shared-fastify';
 import { AuthContext, UserRole } from './auth';
+import { ServiceRegistry } from './clients';
 
 export interface AuthenticatedRequest extends FastifyRequest {
     auth: AuthContext;
@@ -10,7 +11,7 @@ export interface AuthenticatedRequest extends FastifyRequest {
  * RBAC middleware factory
  * Checks if the authenticated user has at least one of the required roles
  */
-export function requireRoles(allowedRoles: UserRole[]) {
+export function requireRoles(allowedRoles: UserRole[], services?: ServiceRegistry) {
     return async (request: FastifyRequest, reply: FastifyReply) => {
         const req = request as AuthenticatedRequest;
 
@@ -25,6 +26,30 @@ export function requireRoles(allowedRoles: UserRole[]) {
             if (!req.auth.memberships || req.auth.memberships.length === 0) {
                 request.log.debug({ userId: req.auth.userId }, 'Access granted: candidate role (no memberships)');
                 return;
+            }
+        }
+
+        // Special case: 'recruiter' role requires checking network service
+        // Recruiters are independent contractors stored in network.recruiters, not in memberships
+        if (allowedRoles.includes('recruiter') && services) {
+            if (!req.auth.memberships || req.auth.memberships.length === 0) {
+                try {
+                    const correlationId = (request as any).correlationId;
+                    const networkService = services.get('network');
+                    const recruiterResponse: any = await networkService.get(
+                        `/recruiters/by-user/${req.auth.userId}`,
+                        undefined,
+                        correlationId
+                    );
+
+                    if (recruiterResponse?.data && recruiterResponse.data.status === 'active') {
+                        request.log.debug({ userId: req.auth.userId }, 'Access granted: active recruiter');
+                        return;
+                    }
+                } catch (error) {
+                    request.log.debug({ error, userId: req.auth.userId }, 'User is not a recruiter');
+                    // Fall through to membership check
+                }
             }
         }
 
@@ -78,9 +103,30 @@ export function isAdmin(auth: AuthContext): boolean {
 
 /**
  * Check if user is a recruiter
+ * For recruiters without organization memberships, queries network service
  */
-export function isRecruiter(auth: AuthContext): boolean {
-    return hasRole(auth, 'recruiter');
+export async function isRecruiter(auth: AuthContext, services?: ServiceRegistry, correlationId?: string): Promise<boolean> {
+    // Check memberships first
+    if (hasRole(auth, 'recruiter')) {
+        return true;
+    }
+
+    // If no memberships and services provided, check network service
+    if (services && (!auth.memberships || auth.memberships.length === 0)) {
+        try {
+            const networkService = services.get('network');
+            const recruiterResponse: any = await networkService.get(
+                `/recruiters/by-user/${auth.userId}`,
+                undefined,
+                correlationId
+            );
+            return recruiterResponse?.data?.status === 'active';
+        } catch (error) {
+            return false;
+        }
+    }
+
+    return false;
 }
 
 /**

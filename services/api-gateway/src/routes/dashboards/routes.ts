@@ -19,7 +19,7 @@ export function registerDashboardsRoutes(app: FastifyInstance, services: Service
     // ========================================================================
 
     app.get('/api/recruiter/dashboard/stats', {
-        preHandler: requireRoles(['recruiter']),
+        preHandler: requireRoles(['recruiter'], services),
         schema: {
             description: 'Get recruiter dashboard stats',
             tags: ['dashboards'],
@@ -61,7 +61,7 @@ export function registerDashboardsRoutes(app: FastifyInstance, services: Service
     });
 
     app.get('/api/recruiter/dashboard/activity', {
-        preHandler: requireRoles(['recruiter']),
+        preHandler: requireRoles(['recruiter'], services),
         schema: {
             description: 'Get recruiter dashboard activity feed',
             tags: ['dashboards'],

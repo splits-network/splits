@@ -16,6 +16,7 @@ export function registerRolesRoutes(app: FastifyInstance, services: ServiceRegis
      * Get jobs filtered by user role (RBAC enforced)
      */
     app.get('/api/roles', {
+        preHandler: requireRoles(['platform_admin', 'company_admin', 'hiring_manager', 'recruiter'], services),
         schema: {
             description: 'Get jobs filtered by user role',
             tags: ['roles'],
@@ -24,15 +25,13 @@ export function registerRolesRoutes(app: FastifyInstance, services: ServiceRegis
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const req = request as AuthenticatedRequest;
         const atsService = services.get('ats');
-        const networkService = services.get('network');
         const correlationId = (request as any).correlationId;
 
         const isUserAdmin = isAdmin(req.auth);
         const isUserCompany = isCompanyUser(req.auth);
-        const isUserRecruiter = isRecruiter(req.auth);
+        const isUserRecruiter = await isRecruiter(req.auth, services, correlationId);
 
         const queryParams = request.query as any;
-        let jobIds: string[] | undefined;
         let companyIds: string[] | undefined;
 
         // Platform admins see everything - no filtering
@@ -69,30 +68,7 @@ export function registerRolesRoutes(app: FastifyInstance, services: ServiceRegis
             }
         }
         // Recruiters see all active jobs (marketplace model)
-        // They need to discover opportunities to submit candidates
-        else if (isUserRecruiter) {
-            // Verify the user is an active recruiter
-            try {
-                const recruiterResponse: any = await networkService.get(
-                    `/recruiters/by-user/${req.auth.userId}`,
-                    undefined,
-                    correlationId
-                );
-
-                // If recruiter doesn't exist or is not active, deny access
-                if (!recruiterResponse.data || recruiterResponse.data.status !== 'active') {
-                    return reply.status(403).send({ error: 'Active recruiter status required to view roles' });
-                }
-            } catch (error) {
-                request.log.error({ error, userId: req.auth.userId }, 'Failed to verify recruiter status');
-                return reply.status(403).send({ error: 'Failed to verify recruiter status' });
-            }
-
-            // No filtering by jobIds - recruiters see all jobs (will be filtered by status in query)
-        }
-        else {
-            return reply.status(403).send({ error: 'Insufficient permissions to view roles' });
-        }
+        // requireRoles already verified active recruiter status
 
         // Get all jobs from ATS service
         const queryString = new URLSearchParams(queryParams).toString();
@@ -101,11 +77,9 @@ export function registerRolesRoutes(app: FastifyInstance, services: ServiceRegis
 
         let jobs = jobsResponse.data || [];
 
-        // Apply filtering based on role
+        // Apply company filtering for company users
         if (companyIds) {
             jobs = jobs.filter((job: any) => companyIds!.includes(job.company_id));
-        } else if (jobIds) {
-            jobs = jobs.filter((job: any) => jobIds!.includes(job.id));
         }
 
         return reply.send({ data: jobs });
