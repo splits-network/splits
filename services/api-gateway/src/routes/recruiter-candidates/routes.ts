@@ -13,7 +13,7 @@ export function registerRecruiterCandidateRoutes(app: FastifyInstance, services:
 
     // Get all candidates for current recruiter
     app.get('/api/recruiter-candidates/me', {
-        preHandler: requireRoles(['recruiter']),
+        preHandler: requireRoles(['recruiter'], services),
         schema: {
             description: 'Get all candidates for current recruiter',
             tags: ['recruiters'],
@@ -69,7 +69,7 @@ export function registerRecruiterCandidateRoutes(app: FastifyInstance, services:
     // - Platform admins see all relationships
     // - Recruiters only see their own relationship with this candidate
     app.get('/api/recruiter-candidates/candidate/:candidateId', {
-        preHandler: requireRoles(['recruiter', 'platform_admin']),
+        preHandler: requireRoles(['recruiter', 'platform_admin'], services),
         schema: {
             description: 'Get recruiters for a candidate (filtered by role)',
             tags: ['candidates'],
@@ -88,7 +88,7 @@ export function registerRecruiterCandidateRoutes(app: FastifyInstance, services:
         );
         
         // Platform admins see all relationships
-        const userRoles = req.auth.memberships.map(m => m.role);
+        const userRoles = req.auth.memberships?.map(m => m.role) || [];
         if (userRoles.includes('platform_admin')) {
             return reply.send(data);
         }
@@ -121,7 +121,7 @@ export function registerRecruiterCandidateRoutes(app: FastifyInstance, services:
 
     // Renew recruiter-candidate relationship (recruiter or platform admin) - specific action routes before generic :id
     app.post('/api/recruiter-candidates/:id/renew', {
-        preHandler: requireRoles(['recruiter', 'platform_admin']),
+        preHandler: requireRoles(['recruiter', 'platform_admin'], services),
         schema: {
             description: 'Renew a recruiter-candidate relationship for another 12 months',
             tags: ['recruiters'],
@@ -141,7 +141,7 @@ export function registerRecruiterCandidateRoutes(app: FastifyInstance, services:
 
     // Resend invitation to candidate (recruiter or platform admin)
     app.post('/api/recruiter-candidates/:id/resend-invitation', {
-        preHandler: requireRoles(['recruiter', 'platform_admin']),
+        preHandler: requireRoles(['recruiter', 'platform_admin'], services),
         schema: {
             description: 'Resend invitation to candidate with new token and expiry',
             tags: ['recruiters'],
@@ -161,7 +161,7 @@ export function registerRecruiterCandidateRoutes(app: FastifyInstance, services:
 
     // Cancel invitation (recruiter or platform admin)
     app.post('/api/recruiter-candidates/:id/cancel-invitation', {
-        preHandler: requireRoles(['recruiter', 'platform_admin']),
+        preHandler: requireRoles(['recruiter', 'platform_admin'], services),
         schema: {
             description: 'Cancel a pending invitation',
             tags: ['recruiters'],
