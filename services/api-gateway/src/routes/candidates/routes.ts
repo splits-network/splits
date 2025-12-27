@@ -55,7 +55,7 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const req = request as AuthenticatedRequest;
         const correlationId = getCorrelationId(request);
-        const userRole = determineUserRole(req.auth);
+        const userRole = await determineUserRole(req.auth, networkService());
         
         const queryParams = new URLSearchParams(request.query as any);
         const path = queryParams.toString() ? `/candidates?${queryParams.toString()}` : '/candidates';
@@ -111,7 +111,7 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const req = request as AuthenticatedRequest;
         const correlationId = getCorrelationId(request);
-        const userRole = determineUserRole(req.auth);
+        const userRole = await determineUserRole(req.auth, networkService());
         
         const data = await atsService().post('/candidates', request.body, correlationId, {
             'x-clerk-user-id': req.auth.clerkUserId,
@@ -132,7 +132,7 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         const req = request as AuthenticatedRequest;
         const { id } = request.params as { id: string };
         const correlationId = getCorrelationId(request);
-        const userRole = determineUserRole(req.auth);
+        const userRole = await determineUserRole(req.auth, networkService());
         
         const data = await atsService().patch(`/candidates/${id}`, request.body, correlationId, {
             'x-clerk-user-id': req.auth.clerkUserId,
@@ -187,7 +187,7 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         const { id } = request.params as { id: string };
         const req = request as AuthenticatedRequest;
         const correlationId = getCorrelationId(request);
-        const userRole = determineUserRole(req.auth);
+        const userRole = await determineUserRole(req.auth, networkService());
 
         const data = await atsService().post(`/candidates/${id}/source`, request.body, correlationId, {
             'x-clerk-user-id': req.auth.clerkUserId,
@@ -222,7 +222,7 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         const { id } = request.params as { id: string };
         const req = request as AuthenticatedRequest;
         const correlationId = getCorrelationId(request);
-        const userRole = determineUserRole(req.auth);
+        const userRole = await determineUserRole(req.auth, networkService());
 
         const data = await atsService().post(`/candidates/${id}/outreach`, request.body, correlationId, {
             'x-clerk-user-id': req.auth.clerkUserId,

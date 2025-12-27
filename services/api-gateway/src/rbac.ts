@@ -71,14 +71,14 @@ export function requireRoles(allowedRoles: UserRole[], services?: ServiceRegistr
  * Check if user has a specific role
  */
 export function hasRole(auth: AuthContext, role: UserRole): boolean {
-    return auth.memberships.some(m => m.role === role);
+    return auth.memberships?.some(m => m.role === role) || false;
 }
 
 /**
  * Check if user has any of the specified roles
  */
 export function hasAnyRole(auth: AuthContext, roles: UserRole[]): boolean {
-    return auth.memberships.some(m => roles.includes(m.role));
+    return auth.memberships?.some(m => roles.includes(m.role)) || false;
 }
 
 /**
@@ -153,12 +153,12 @@ export async function isRecruiter(auth: AuthContext, services?: ServiceRegistry,
  * Get user's organization IDs
  */
 export function getUserOrganizationIds(auth: AuthContext): string[] {
-    return auth.memberships.map(m => m.organization_id);
+    return auth.memberships?.map(m => m.organization_id) || [];
 }
 
 /**
  * Check if user belongs to a specific organization
  */
 export function belongsToOrganization(auth: AuthContext, organizationId: string): boolean {
-    return auth.memberships.some(m => m.organization_id === organizationId);
+    return auth.memberships?.some(m => m.organization_id === organizationId) || false;
 }
