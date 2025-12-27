@@ -1,13 +1,34 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ServiceRegistry } from '../../clients';
-import { requireRoles, AuthenticatedRequest } from '../../rbac';
+import { requireRoles, AuthenticatedRequest, isPlatformAdmin, isCompanyAdmin, isHiringManager, isRecruiter } from '../../rbac';
 import { registerMeRecruitersRoute } from './me-recruiters';
 
-function determineUserRole(auth: any): string {
-    // Extract role from first membership (primary organization)
-    if (auth.memberships && auth.memberships.length > 0) {
-        return auth.memberships[0].role;
+/**
+ * Determine the primary user role for header passing to backend services
+ * This is for logging/audit purposes - authorization already enforced by requireRoles()
+ */
+async function determineUserRole(auth: any, networkService: any): Promise<string> {
+    const memberships = auth.memberships || [];
+    
+    // Check roles in priority order
+    if (isPlatformAdmin(memberships)) {
+        return 'admin';
     }
+    
+    if (isCompanyAdmin(memberships)) {
+        return 'company_admin';
+    }
+    
+    if (isHiringManager(memberships)) {
+        return 'hiring_manager';
+    }
+    
+    // Check if user is a recruiter (either via membership or network service)
+    if (await isRecruiter(memberships, auth.userId, networkService)) {
+        return 'recruiter';
+    }
+    
+    // Fallback to candidate
     return 'candidate';
 }
 
@@ -25,6 +46,7 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
 
     // List candidates
     app.get('/api/candidates', {
+        preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager', 'platform_admin'], services),
         schema: {
             description: 'List all candidates',
             tags: ['candidates'],
@@ -47,6 +69,7 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
 
     // Get candidate by ID
     app.get('/api/candidates/:id', {
+        preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager', 'platform_admin'], services),
         schema: {
             description: 'Get candidate by ID',
             tags: ['candidates'],
@@ -120,6 +143,7 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
 
     // Get candidate applications
     app.get('/api/candidates/:id/applications', {
+        preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager', 'platform_admin'], services),
         schema: {
             description: 'Get applications for a candidate',
             tags: ['candidates'],

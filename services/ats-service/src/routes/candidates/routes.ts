@@ -38,11 +38,7 @@ export function registerCandidateRoutes(app: FastifyInstance, service: AtsServic
                 }, correlationId);
                 return reply.send({ data: candidates });
             } catch (error: any) {
-                if (error.message.includes('Forbidden')) {
-                    return reply.status(403).send({ 
-                        error: { code: 'FORBIDDEN', message: error.message } 
-                    });
-                }
+                // Gateway handles authorization - all errors here are unexpected
                 throw error;
             }
         }

@@ -210,8 +210,10 @@ export class CandidatesService {
             return [...enrichedSourced, ...enrichedRelationships];
         }
 
-        // Other roles cannot list candidates
-        throw new Error('Forbidden: Only recruiters and admins can list candidates');
+        // If the user reached this point, they were authorized by the API Gateway
+        // Return empty list for other roles (though gateway should have blocked them)
+        logger.warn({ clerkUserId, userRole }, 'Unexpected role in getCandidates - returning empty list');
+        return [];
     }
 
     /**

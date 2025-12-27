@@ -19,64 +19,51 @@ export function requireRoles(allowedRoles: UserRole[], services?: ServiceRegistr
             throw new UnauthorizedError('Authentication required');
         }
 
-        // Special case: 'candidate' role is available to all authenticated users without memberships
-        // Candidates are external users who don't belong to organizations
-        if (allowedRoles.includes('candidate')) {
-            // If user has no memberships, they're a candidate
-            if (!req.auth.memberships || req.auth.memberships.length === 0) {
-                request.log.debug({ userId: req.auth.userId }, 'Access granted: candidate role (no memberships)');
-                return;
-            }
+        // Check memberships first if they exist
+        const userRoles = req.auth.memberships?.map(m => m.role) || [];
+        const hasAllowedRole = allowedRoles.some(role => userRoles.includes(role));
+        
+        if (hasAllowedRole) {
+            request.log.debug({ userId: req.auth.userId, role: userRoles }, 'Access granted via membership');
+            return;
         }
 
         // Special case: 'recruiter' role requires checking network service
-        // Recruiters are independent contractors stored in network.recruiters, not in memberships
+        // Recruiters can be independent contractors (no memberships) or affiliated with companies
         if (allowedRoles.includes('recruiter') && services) {
-            if (!req.auth.memberships || req.auth.memberships.length === 0) {
-                try {
-                    const correlationId = (request as any).correlationId;
-                    const networkService = services.get('network');
-                    const recruiterResponse: any = await networkService.get(
-                        `/recruiters/by-user/${req.auth.userId}`,
-                        undefined,
-                        correlationId
-                    );
+            try {
+                const correlationId = (request as any).correlationId;
+                const networkService = services.get('network');
+                const recruiterResponse: any = await networkService.get(
+                    `/recruiters/by-user/${req.auth.userId}`,
+                    undefined,
+                    correlationId
+                );
 
-                    if (recruiterResponse?.data && recruiterResponse.data.status === 'active') {
-                        request.log.debug({ userId: req.auth.userId }, 'Access granted: active recruiter');
-                        return;
-                    }
-                } catch (error) {
-                    request.log.debug({ error, userId: req.auth.userId }, 'User is not a recruiter');
-                    // Fall through to membership check
+                if (recruiterResponse?.data && recruiterResponse.data.status === 'active') {
+                    request.log.debug({ userId: req.auth.userId }, 'Access granted: active recruiter via network service');
+                    return;
                 }
+            } catch (error) {
+                request.log.debug({ error, userId: req.auth.userId }, 'User is not a recruiter in network service');
             }
         }
 
-        // For all other roles, check memberships
-        if (!req.auth.memberships || req.auth.memberships.length === 0) {
-            throw new ForbiddenError('No organization memberships found. Please contact an administrator.');
-        }
+        // No matching role found
+        // No matching role found
+        request.log.warn({
+            userId: req.auth.userId,
+            userRoles,
+            requiredRoles: allowedRoles,
+            path: request.url,
+        }, 'Access denied: insufficient permissions');
 
-        // Check if user has any of the allowed roles across their memberships
-        const userRoles = req.auth.memberships.map(m => m.role);
-        const hasAllowedRole = allowedRoles.some(role => userRoles.includes(role));
+        const isDevelopment = process.env.NODE_ENV === 'development';
+        const errorMessage = isDevelopment
+            ? `Access denied. Required roles: ${allowedRoles.join(' or ')}. Your roles: ${userRoles.length > 0 ? userRoles.join(', ') : 'none'}`
+            : 'Access denied: insufficient permissions';
 
-        if (!hasAllowedRole) {
-            request.log.warn({
-                userId: req.auth.userId,
-                userRoles,
-                requiredRoles: allowedRoles,
-                path: request.url,
-            }, 'Access denied: insufficient permissions');
-
-            const isDevelopment = process.env.NODE_ENV === 'development';
-            const errorMessage = isDevelopment
-                ? `Access denied. Required roles: ${allowedRoles.join(' or ')}. Your roles: ${userRoles.join(', ')}`
-                : 'Access denied: insufficient permissions';
-
-            throw new ForbiddenError(errorMessage);
-        }
+        throw new ForbiddenError(errorMessage);
     };
 }
 
@@ -95,24 +82,57 @@ export function hasAnyRole(auth: AuthContext, roles: UserRole[]): boolean {
 }
 
 /**
+ * ROLE HELPER FUNCTIONS
+ * Centralized role checking for all portal roles
+ */
+
+/**
  * Check if user is a platform admin
  */
-export function isAdmin(auth: AuthContext): boolean {
+export function isPlatformAdmin(auth: AuthContext): boolean {
     return hasRole(auth, 'platform_admin');
 }
 
 /**
+ * @deprecated Use isPlatformAdmin() instead for clarity
+ */
+export function isAdmin(auth: AuthContext): boolean {
+    return isPlatformAdmin(auth);
+}
+
+/**
+ * Check if user is a company admin
+ */
+export function isCompanyAdmin(auth: AuthContext): boolean {
+    return hasRole(auth, 'company_admin');
+}
+
+/**
+ * Check if user is a hiring manager
+ */
+export function isHiringManager(auth: AuthContext): boolean {
+    return hasRole(auth, 'hiring_manager');
+}
+
+/**
+ * Check if user is a company user (admin or hiring manager)
+ */
+export function isCompanyUser(auth: AuthContext): boolean {
+    return hasAnyRole(auth, ['company_admin', 'hiring_manager']);
+}
+
+/**
  * Check if user is a recruiter
- * For recruiters without organization memberships, queries network service
+ * Checks both memberships and network service (for independent recruiters)
  */
 export async function isRecruiter(auth: AuthContext, services?: ServiceRegistry, correlationId?: string): Promise<boolean> {
-    // Check memberships first
+    // Check memberships first (fast path)
     if (hasRole(auth, 'recruiter')) {
         return true;
     }
 
-    // If no memberships and services provided, check network service
-    if (services && (!auth.memberships || auth.memberships.length === 0)) {
+    // Check network service for independent recruiters or recruiters with other memberships
+    if (services) {
         try {
             const networkService = services.get('network');
             const recruiterResponse: any = await networkService.get(
@@ -127,13 +147,6 @@ export async function isRecruiter(auth: AuthContext, services?: ServiceRegistry,
     }
 
     return false;
-}
-
-/**
- * Check if user is a company user (admin or hiring manager)
- */
-export function isCompanyUser(auth: AuthContext): boolean {
-    return hasAnyRole(auth, ['company_admin', 'hiring_manager']);
 }
 
 /**

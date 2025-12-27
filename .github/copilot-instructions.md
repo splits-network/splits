@@ -316,9 +316,287 @@ Copilot should follow these patterns for all services:
    - Prefer referencing by ID and resolving via service calls.
    - Example: `ats.companies.identity_organization_id` references `identity.organizations.id` logically, not via DB FK.
 
+8. **Authorization & RBAC**
+   - **ALL authorization is enforced at the API Gateway level** using `services/api-gateway/src/rbac.ts`
+   - **Backend services MUST NOT implement their own authorization checks**
+   - Backend services should trust headers from api-gateway:
+     - `x-clerk-user-id`: The authenticated user's ID
+     - `x-user-role`: The user's role (for logging/audit)
+   - Services focus on business logic, gateway handles RBAC
+
 ---
 
-## 6. Events, Redis, and Resend
+## 6. Authorization & RBAC (API Gateway)
+
+All authorization in Splits Network is centralized in `services/api-gateway/src/rbac.ts`. Backend services **MUST NOT** implement authorization - they should trust the API Gateway.
+
+### 6.1 Authorization Architecture
+
+**Single Source of Truth**: API Gateway enforces all RBAC via the `requireRoles()` middleware.
+
+**Flow**:
+1. Request hits API Gateway
+2. Clerk JWT verified, user context loaded (memberships)
+3. `requireRoles()` middleware checks authorization:
+   - Check memberships for company-affiliated roles (fast path)
+   - Check network service for independent recruiters
+   - Deny if no match
+4. If authorized, request proxied to backend service with headers:
+   - `x-clerk-user-id`: User ID
+   - `x-user-role`: Role (for logging)
+5. Backend service processes request without authorization checks
+
+**Backend Service Pattern**:
+```typescript
+// ❌ WRONG - Do not check authorization in backend services
+if (!isRecruiter(userId)) {
+  throw new ForbiddenError('Only recruiters can access this');
+}
+
+// ✅ CORRECT - Trust the gateway, focus on business logic
+// If request made it here, user is authorized
+const candidates = await candidateRepository.list(userId);
+```
+
+### 6.2 requireRoles() Middleware
+
+Use `requireRoles()` as preHandler on all protected endpoints in `api-gateway`.
+
+**Signature**:
+```typescript
+requireRoles(allowedRoles: UserRole[], services?: ServiceRegistry)
+```
+
+**Parameters**:
+- `allowedRoles`: Array of roles that can access this endpoint
+  - `'platform_admin'`: Platform administrators
+  - `'company_admin'`: Company administrators
+  - `'hiring_manager'`: Hiring managers
+  - `'recruiter'`: Recruiters (both affiliated and independent)
+- `services`: **REQUIRED** when allowing recruiters to enable network service check
+
+**Example**:
+```typescript
+import { requireRoles } from '../rbac';
+
+export async function candidatesRoutes(
+  app: FastifyInstance, 
+  services: ServiceRegistry
+) {
+  // Protected endpoint - requires recruiter or admin
+  app.get('/api/candidates', {
+    preHandler: requireRoles(
+      ['recruiter', 'company_admin', 'hiring_manager', 'platform_admin'],
+      services  // ← CRITICAL: Pass services for recruiter check
+    ),
+    schema: { /* ... */ }
+  }, async (request, reply) => {
+    // User is authorized if we reach here
+    const data = await atsService().get('/candidates', /* ... */);
+    return reply.send({ data });
+  });
+}
+```
+
+**Authorization Flow**:
+1. **Memberships check** (fast path): If user has membership with allowed role, grant access
+2. **Network service check** (for recruiters): If `'recruiter'` in allowedRoles AND services provided:
+   - Query `GET /recruiters/by-user/:userId` from network service
+   - If recruiter exists with `status === 'active'`, grant access
+3. **Deny**: If no match, throw `ForbiddenError`
+
+**Critical Rules**:
+- **ALWAYS pass `services` parameter** when allowing recruiters
+- Without services parameter, independent recruiters (no memberships) will be denied
+- Services parameter enables network service check for independent recruiters
+
+### 6.3 Role Helpers
+
+Helper functions in `rbac.ts` check user roles. These are used by frontend components and can be used in route handlers when needed.
+
+**Available Helpers**:
+```typescript
+// Check if user is platform admin
+function isPlatformAdmin(memberships: MembershipRecord[]): boolean
+
+// Check if user is company admin (for specific or any org)
+function isCompanyAdmin(
+  memberships: MembershipRecord[], 
+  orgId?: string
+): boolean
+
+// Check if user is hiring manager (for specific or any org)
+function isHiringManager(
+  memberships: MembershipRecord[], 
+  orgId?: string
+): boolean
+
+// Check if user is company user (admin or hiring manager)
+function isCompanyUser(
+  memberships: MembershipRecord[], 
+  orgId?: string
+): boolean
+
+// Check if user is recruiter (membership or network service)
+async function isRecruiter(
+  memberships: MembershipRecord[], 
+  userId: string,
+  networkService: NetworkServiceClient
+): Promise<boolean>
+```
+
+**Usage Pattern**:
+```typescript
+// In route handler, after requireRoles() has authorized
+const userMemberships = request.auth.memberships || [];
+const userId = request.auth.userId;
+
+// Check specific role for business logic
+if (isCompanyAdmin(userMemberships, orgId)) {
+  // Allow company admin to see all org candidates
+  query.organizationId = orgId;
+} else if (await isRecruiter(userMemberships, userId, services.network)) {
+  // Limit independent recruiter to their assigned candidates
+  query.recruiterId = userId;
+}
+```
+
+**Note**: Role helpers are for **business logic**, not authorization. Authorization is enforced by `requireRoles()` middleware.
+
+### 6.4 Independent Recruiters
+
+Independent recruiters are users without company affiliations (no memberships).
+
+**Storage**: `network.recruiters` table
+**Identification**: `GET /recruiters/by-user/:userId` returns recruiter with `status: 'active'`
+**Authorization**: Network service check in `requireRoles()` grants access
+
+**Why Network Service Check**:
+- Recruiters can exist without company memberships
+- They need access to marketplace jobs and candidates
+- `identity.memberships` won't include them
+- Must query network service to verify recruiter status
+
+**Pattern**:
+```typescript
+// ✅ CORRECT - Services parameter enables network check
+app.get('/api/jobs', {
+  preHandler: requireRoles(['recruiter', 'company_admin'], services),
+}, async (request, reply) => {
+  // Independent recruiters can access this
+});
+
+// ❌ WRONG - No services parameter = independent recruiters denied
+app.get('/api/jobs', {
+  preHandler: requireRoles(['recruiter', 'company_admin']),
+}, async (request, reply) => {
+  // Independent recruiters will get 403 Forbidden
+});
+```
+
+### 6.5 Backend Service Implementation
+
+Backend services (ATS, network, billing, etc.) **MUST NOT** check authorization.
+
+**Correct Pattern**:
+```typescript
+// services/ats-service/src/routes.ts
+export async function candidatesRoutes(app: FastifyInstance) {
+  app.get('/candidates', async (request, reply) => {
+    // Gateway already authorized - trust it
+    const userId = request.headers['x-clerk-user-id'] as string;
+    const userRole = request.headers['x-user-role'] as string;
+    
+    // Business logic only
+    const candidates = await candidateRepository.listForUser(userId);
+    return reply.send({ data: candidates });
+  });
+}
+```
+
+**Incorrect Pattern**:
+```typescript
+// ❌ WRONG - Do not check roles in backend services
+export async function candidatesRoutes(app: FastifyInstance) {
+  app.get('/candidates', async (request, reply) => {
+    const userRole = request.headers['x-user-role'] as string;
+    
+    // This duplicates gateway authorization and will cause bugs
+    if (!['recruiter', 'admin'].includes(userRole)) {
+      return reply.code(403).send({ 
+        error: 'Forbidden: Only recruiters and admins can list candidates' 
+      });
+    }
+    
+    // Business logic...
+  });
+}
+```
+
+**Why No Service-Level Authorization**:
+- Duplicates logic (harder to maintain)
+- Creates inconsistencies (gateway allows, service denies)
+- Violates separation of concerns
+- Makes debugging harder (multiple auth points)
+- Gateway already enforced RBAC before proxying
+
+**Service Responsibility**:
+- Process business logic
+- Access data layer
+- Return results
+- Trust gateway has authorized request
+
+### 6.6 Common Patterns
+
+**Pattern 1: Read Operations** (candidates, jobs, applications)
+```typescript
+app.get('/api/candidates', {
+  preHandler: requireRoles(
+    ['recruiter', 'company_admin', 'hiring_manager', 'platform_admin'],
+    services
+  ),
+}, async (request, reply) => { /* ... */ });
+```
+
+**Pattern 2: Write Operations** (create, update)
+```typescript
+app.post('/api/candidates', {
+  preHandler: requireRoles(['recruiter', 'platform_admin'], services),
+}, async (request, reply) => { /* ... */ });
+```
+
+**Pattern 3: Admin-Only Operations**
+```typescript
+app.delete('/api/users/:id', {
+  preHandler: requireRoles(['platform_admin']),
+  // No services needed - platform_admin always in memberships
+}, async (request, reply) => { /* ... */ });
+```
+
+**Pattern 4: Company-Scoped Operations**
+```typescript
+app.get('/api/companies/:companyId/jobs', {
+  preHandler: requireRoles(
+    ['company_admin', 'hiring_manager', 'platform_admin'],
+    services
+  ),
+}, async (request, reply) => {
+  // Additional business logic check (not authorization)
+  const memberships = request.auth.memberships || [];
+  const companyId = request.params.companyId;
+  
+  if (!isPlatformAdmin(memberships) && 
+      !isCompanyUser(memberships, companyId)) {
+    throw new ForbiddenError('Access denied to this company');
+  }
+  
+  // Proceed with business logic...
+});
+```
+
+---
+
+## 7. Events, Redis, and Resend
 
 ### 6.1 Events (RabbitMQ)
 
