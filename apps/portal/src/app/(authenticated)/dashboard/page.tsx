@@ -53,15 +53,30 @@ export default async function DashboardPage() {
     const memberships = profile.data?.memberships || [];
     const isAdmin = memberships.some((m: any) => m.role === 'platform_admin');
     const isCompanyUser = memberships.some((m: any) => ['company_admin', 'hiring_manager'].includes(m.role));
-    const isRecruiter = memberships.some((m: any) => m.role === 'recruiter');
+
+    // Check if user is a recruiter by looking for recruiter profile in network service
+    // Recruiters don't need organization memberships - they operate independently
+    let isRecruiter = false;
+    let recruiterProfile = null;
+    try {
+        const recruiterResponse = await fetchFromGateway(`/api/recruiters/by-user/${profile.data.id}`, token);
+        if (recruiterResponse.data && recruiterResponse.data.status === 'active') {
+            isRecruiter = true;
+            recruiterProfile = recruiterResponse.data;
+        }
+    } catch (error) {
+        // User is not a recruiter or recruiter profile doesn't exist yet
+        console.log('User is not a recruiter or profile not found');
+    }
 
     // Route to appropriate dashboard
     if (isAdmin) {
         return <AdminDashboard token={token} profile={profile.data} />;
     } else if (isCompanyUser) {
         return <CompanyDashboard token={token} profile={profile.data} />;
-    } else if (isRecruiter) {
-        return <RecruiterDashboard token={token} profile={profile.data} />;
+    } else if (isRecruiter && recruiterProfile) {
+        // Pass recruiter profile data to dashboard
+        return <RecruiterDashboard token={token} profile={{ ...profile.data, recruiter: recruiterProfile }} />;
     }
 
     // Default: Show onboarding or empty state
