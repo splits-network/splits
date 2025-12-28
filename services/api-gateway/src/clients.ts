@@ -29,9 +29,13 @@ export class ServiceClient {
         );
 
         const headers: Record<string, string> = {
-            'Content-Type': 'application/json',
             ...customHeaders,
         };
+
+        // Only set Content-Type when there's a body
+        if (data) {
+            headers['Content-Type'] = 'application/json';
+        }
 
         // Propagate correlation ID to downstream services
         if (correlationId) {
@@ -70,7 +74,19 @@ export class ServiceClient {
                 throw new Error(`Service call failed with status ${response.status}: ${errorBody}`);
             }
 
-            return await response.json() as T;
+            // Handle 204 No Content - return empty object
+            if (response.status === 204) {
+                return {} as T;
+            }
+
+            // Check if response has content before parsing JSON
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return await response.json() as T;
+            }
+
+            // For non-JSON responses, return empty object
+            return {} as T;
         } catch (error: any) {
             this.logger.error(
                 {

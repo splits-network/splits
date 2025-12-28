@@ -24,9 +24,13 @@ async function fetchApi<T>(
     const url = `${API_BASE_URL}${endpoint}`;
     
     const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
         ...options.headers as Record<string, string>,
     };
+    
+    // Only set Content-Type for requests with a body
+    if (options.body) {
+        headers['Content-Type'] = 'application/json';
+    }
     
     // Add auth token if provided
     if (authToken) {
@@ -60,6 +64,18 @@ async function fetchApi<T>(
         }
         
         throw new ApiError(errorMessage, response.status, errorCode);
+    }
+
+    // Handle 204 No Content - return empty object
+    if (response.status === 204) {
+        return {} as T;
+    }
+
+    // Check if response has content before parsing JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+        // For non-JSON responses, return empty object
+        return {} as T;
     }
 
     const json = await response.json();
