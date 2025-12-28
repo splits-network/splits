@@ -63,6 +63,28 @@ export function registerUsersRoutes(
         }
     );
 
+    // Get user by Clerk user ID (for service-to-service calls)
+    app.get(
+        '/users/by-clerk-id/:clerkUserId',
+        async (request: FastifyRequest<{ Params: { clerkUserId: string } }>, reply: FastifyReply) => {
+            try {
+                const user = await service.getUserByClerkId(request.params.clerkUserId);
+                if (!user) {
+                    throw new NotFoundError('User with Clerk ID', request.params.clerkUserId);
+                }
+                return reply.send({ data: user });
+            } catch (error: any) {
+                if (error instanceof NotFoundError) {
+                    throw error;
+                }
+                if (error.message.includes('not found')) {
+                    throw new NotFoundError('User with Clerk ID', request.params.clerkUserId);
+                }
+                throw error;
+            }
+        }
+    );
+
     // Update user profile
     app.patch(
         '/users/:id',

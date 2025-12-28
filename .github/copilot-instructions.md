@@ -444,7 +444,7 @@ export async function candidatesRoutes(
    - Query `GET /recruiters/by-user/:userId` from network service
    - If recruiter exists with `status === 'active'`, grant access
 3. **ATS service check** (for candidates): If `'candidate'` in allowedRoles AND services provided:
-   - Query `GET /candidates?email={email}` from ATS service
+   - Query `GET /candidates?id={id}` from ATS service
    - If candidate profile found, grant access
 4. **Deny**: If no match, throw `ForbiddenError`
 

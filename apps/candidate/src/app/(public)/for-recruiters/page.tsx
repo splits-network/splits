@@ -32,7 +32,7 @@ export default function ForRecruitersPage() {
                         <i className="fa-solid fa-rocket mr-2"></i>
                         Visit Splits Network
                     </a>
-                    <Link href="#how-it-works" className="btn btn-outline btn-lg">
+                    <Link href="/how-it-works" className="btn btn-outline btn-lg">
                         <i className="fa-solid fa-circle-info mr-2"></i>
                         Learn More
                     </Link>

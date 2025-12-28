@@ -69,20 +69,23 @@ export function requireRoles(allowedRoles: UserRole[], services?: ServiceRegistr
                 const correlationId = (request as any).correlationId;
                 const atsService = services.get('ats');
                 const candidateResponse: any = await atsService.get(
-                    `/candidates?email=${encodeURIComponent(req.auth.email)}`,
+                    `/candidates/me`,
                     undefined,
                     correlationId,
-                    { 'x-clerk-user-id': req.auth.clerkUserId } // Forward user ID to ATS service
+                    { 'x-clerk-user-id': req.auth.clerkUserId } // Forward Clerk user ID to ATS service
                 );
 
-                const candidates = candidateResponse?.data || [];
-                if (candidates.length > 0) {
+                // If we get a 200 response with data, candidate profile exists
+                if (candidateResponse?.data) {
                     req.matchedRole = 'candidate';
-                    request.log.debug({ userId: req.auth.userId, email: req.auth.email }, 'Access granted: candidate profile found via ATS service');
+                    request.log.debug({ userId: req.auth.userId, clerkUserId: req.auth.clerkUserId }, 'Access granted: candidate profile found via ATS service');
                     return;
                 }
-            } catch (error) {
-                request.log.debug({ error, userId: req.auth.userId }, 'User does not have a candidate profile in ATS service');
+            } catch (error: any) {
+                // 404 means no candidate profile yet - this is expected for new signups
+                if (error?.statusCode !== 404) {
+                    request.log.debug({ error, userId: req.auth.userId }, 'Error checking candidate profile in ATS service');
+                }
             }
         }
 

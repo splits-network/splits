@@ -18,6 +18,7 @@ function getCorrelationId(request: FastifyRequest): string {
 export function registerCandidateRoutes(app: FastifyInstance, service: AtsService, candidatesService: CandidatesService) {
     // Get my own candidate profile (candidates only)
     // Uses Clerk user ID from headers to look up candidate profile
+    // Auto-creates profile if it doesn't exist (first-time user onboarding)
     app.get(
         '/candidates/me',
         async (request: FastifyRequest, reply: FastifyReply) => {
@@ -26,15 +27,16 @@ export function registerCandidateRoutes(app: FastifyInstance, service: AtsServic
             
             try {
                 // Look up candidate by clerk_user_id
-                const candidate = await candidatesService.getCandidateByClerkUserId(clerkUserId, correlationId);
+                let candidate = await candidatesService.getCandidateByClerkUserId(clerkUserId, correlationId);
                 
                 if (!candidate) {
-                    return reply.status(404).send({ 
-                        error: { 
-                            code: 'CANDIDATE_NOT_FOUND', 
-                            message: 'No candidate profile found for this user' 
-                        } 
-                    });
+                    // Profile doesn't exist - create it automatically for first-time users
+                    // This ensures RBAC checks pass and candidates can access their profile page
+                    request.log.info({ clerkUserId, correlationId }, 'Candidate profile not found - auto-creating for new user');
+                    
+                    candidate = await candidatesService.createCandidateProfileForNewUser(clerkUserId, correlationId);
+                    
+                    request.log.info({ clerkUserId, candidateId: candidate.id, correlationId }, 'Auto-created candidate profile for new user');
                 }
                 
                 return reply.send({ data: candidate });

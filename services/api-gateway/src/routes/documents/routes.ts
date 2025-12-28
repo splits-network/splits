@@ -260,15 +260,16 @@ export function registerDocumentsRoutes(app: FastifyInstance, services: ServiceR
                     return reply.status(403).send({ error: 'Permission denied' });
                 }
 
-                // Find candidate by email
-                const candidatesResponse: any = await atsService().get(
-                    `/candidates?email=${encodeURIComponent(userEmail)}`,
+                // Find candidate by Clerk user ID
+                const candidateResponse: any = await atsService().get(
+                    `/candidates/me`,
                     undefined,
-                    correlationId
+                    correlationId,
+                    { 'x-clerk-user-id': req.auth.clerkUserId }
                 );
-                const candidates = candidatesResponse.data || [];
+                const candidate = candidateResponse.data;
                 
-                if (candidates.length === 0 || candidates[0].id !== document.entity_id) {
+                if (!candidate || candidate.id !== document.entity_id) {
                     return reply.status(403).send({ error: 'Permission denied' });
                 }
             } catch (error: any) {

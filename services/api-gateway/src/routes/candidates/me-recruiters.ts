@@ -24,23 +24,23 @@ export function registerMeRecruitersRoute(app: FastifyInstance, services: Servic
         const correlationId = getCorrelationId(request);
 
         try {
-            // Get candidate profile for current user using email
+            // Get candidate profile for current user using Clerk user ID
             const candidateResponse: any = await atsService().get(
-                `/candidates?email=${encodeURIComponent(req.auth.email)}`,
+                `/candidates/me`,
                 undefined,
                 correlationId,
-                { 'x-clerk-user-id': req.auth.clerkUserId } // Forward user ID to ATS service
+                { 'x-clerk-user-id': req.auth.clerkUserId } // Forward Clerk user ID to ATS service
             );
 
-            const candidates = candidateResponse.data || [];
+            const candidate = candidateResponse.data;
             
-            if (candidates.length === 0) {
+            if (!candidate) {
                 return reply.status(404).send({
                     error: { code: 'CANDIDATE_NOT_FOUND', message: 'Candidate profile not found' }
                 });
             }
 
-            const candidateId = candidates[0].id;
+            const candidateId = candidate.id;
 
             // Get all recruiter relationships for this candidate
             const relationshipsResponse: any = await networkService().get(

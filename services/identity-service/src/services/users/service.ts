@@ -149,6 +149,14 @@ export class UsersService {
     }
 
     /**
+     * Get user by Clerk user ID
+     * Used by other services to resolve Clerk ID to user profile
+     */
+    async getUserByClerkId(clerkUserId: string): Promise<User | null> {
+        return await this.repository.findUserByClerkUserId(clerkUserId);
+    }
+
+    /**
      * Update onboarding progress for a user
      */
     async updateOnboardingProgress(

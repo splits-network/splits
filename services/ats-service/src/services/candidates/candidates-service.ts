@@ -226,6 +226,42 @@ export class CandidatesService {
     }
 
     /**
+     * Create candidate profile for a new user (auto-creation on first access)
+     * Fetches user details from identity.users and creates minimal candidate profile
+     */
+    async createCandidateProfileForNewUser(clerkUserId: string, correlationId: string) {
+        logger.info({ clerkUserId, correlationId }, 'Creating candidate profile for new user');
+        
+        // Fetch user details directly from identity.users table
+        const userProfile = await this.repository.findUserByClerkUserId(clerkUserId);
+        
+        if (!userProfile) {
+            throw new Error('Cannot create candidate profile: user not found in identity service');
+        }
+        
+        // Extract required fields
+        const email = userProfile.email;
+        const full_name = userProfile.name || email.split('@')[0];
+        
+        if (!email) {
+            throw new Error('Cannot create candidate profile without email');
+        }
+        
+        // Create new self-managed candidate profile
+        // Link to identity.users via user_id (the internal UUID, not Clerk ID)
+        const candidate = await this.repository.createCandidate({
+            email,
+            full_name,
+            user_id: userProfile.id, // Link to identity.users.id (internal UUID)
+            verification_status: 'unverified',
+        });
+        
+        logger.info({ candidateId: candidate.id, clerkUserId, email, correlationId }, 'Created candidate profile for new user');
+        
+        return candidate;
+    }
+
+    /**
      * Create a candidate
      * - Recruiters: Create + establish relationship in Network Service
      * - Admins: Create only (no relationship)
@@ -372,16 +408,48 @@ export class CandidatesService {
 
     /**
      * Self-service update for candidates
+     * If candidate profile doesn't exist, creates it automatically (upsert pattern)
      */
     async selfUpdateCandidate(params: SelfUpdateCandidateParams, correlationId: string) {
         const { userId, updates } = params;
 
-        // Find candidate by user_id (Clerk user ID)
-        const candidates = await this.repository.findAllCandidates({ limit: 1000 });
-        const candidate = candidates.find(c => c.user_id === userId);
+        // Find candidate by user_id (Clerk user ID via clerk_user_id column)
+        let candidate = await this.repository.findCandidateByClerkUserId(userId);
         
         if (!candidate) {
-            throw new Error('Candidate profile not found');
+            // Profile doesn't exist yet - create it automatically
+            // This happens when a candidate signs up but hasn't visited their profile page yet
+            logger.info({ userId, correlationId }, 'Candidate profile not found - creating new profile');
+            
+            // Fetch user details directly from identity.users table
+            const userProfile = await this.repository.findUserByClerkUserId(userId);
+            
+            if (!userProfile) {
+                throw new Error('Cannot create candidate profile: user not found in identity service');
+            }
+            
+            // Extract required fields from identity.users and updates
+            const email = (updates.email as string) || userProfile.email;
+            const full_name = (updates.full_name as string) || userProfile.name || email.split('@')[0];
+            
+            if (!email) {
+                throw new Error('Cannot create candidate profile without email');
+            }
+            
+            // Create new self-managed candidate profile
+            // Link to identity.users via user_id (the internal UUID, not Clerk ID)
+            candidate = await this.repository.createCandidate({
+                email,
+                full_name,
+                user_id: userProfile.id, // Link to identity.users.id (internal UUID)
+                verification_status: 'unverified',
+                // Apply any other updates provided
+                ...updates,
+            });
+            
+            logger.info({ candidateId: candidate.id, userId, email, correlationId }, 'Created new candidate profile');
+            
+            return candidate;
         }
 
         // Verify this is a self-managed candidate (should always be true if user_id matches)
@@ -389,7 +457,7 @@ export class CandidatesService {
             throw new Error('This candidate profile is not self-managed. Please contact your recruiter to update your profile.');
         }
 
-        // Update with self-managed flag
+        // Update existing profile
         return this.repository.updateCandidate(candidate.id, updates);
     }
 

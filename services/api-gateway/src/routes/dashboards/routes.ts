@@ -247,20 +247,21 @@ export function registerDashboardsRoutes(app: FastifyInstance, services: Service
                 });
             }
 
-            // Try to find candidate by email
+            // Get candidate profile by Clerk user ID
             let candidateId: string | null = null;
             try {
-                const candidatesResponse: any = await atsService().get(
-                    `/candidates?email=${encodeURIComponent(userEmail)}`,
+                const candidateResponse: any = await atsService().get(
+                    `/candidates/me`,
                     undefined,
-                    correlationId
+                    correlationId,
+                    { 'x-clerk-user-id': req.auth.clerkUserId }
                 );
-                const candidates = candidatesResponse.data || [];
-                if (candidates.length > 0) {
-                    candidateId = candidates[0].id;
+                const candidate = candidateResponse.data;
+                if (candidate) {
+                    candidateId = candidate.id;
                 }
             } catch (error) {
-                request.log.warn({ error, email: userEmail }, 'Could not find candidate profile');
+                request.log.warn({ error, clerkUserId: req.auth.clerkUserId }, 'Could not find candidate profile');
             }
 
             if (!candidateId) {
@@ -333,26 +334,27 @@ export function registerDashboardsRoutes(app: FastifyInstance, services: Service
         const correlationId = getCorrelationId(request);
 
         try {
-            // Get candidate profile by email from Clerk
-            const userEmail = req.auth?.email;
-            if (!userEmail) {
+            // Get candidate profile by Clerk user ID
+            const clerkUserId = req.auth?.clerkUserId;
+            if (!clerkUserId) {
                 return reply.send({ data: [] });
             }
 
-            // Try to find candidate by email
+            // Get candidate profile
             let candidateId: string | null = null;
             try {
-                const candidatesResponse: any = await atsService().get(
-                    `/candidates?email=${encodeURIComponent(userEmail)}`,
+                const candidateResponse: any = await atsService().get(
+                    `/candidates/me`,
                     undefined,
-                    correlationId
+                    correlationId,
+                    { 'x-clerk-user-id': clerkUserId }
                 );
-                const candidates = candidatesResponse.data || [];
-                if (candidates.length > 0) {
-                    candidateId = candidates[0].id;
+                const candidate = candidateResponse.data;
+                if (candidate) {
+                    candidateId = candidate.id;
                 }
             } catch (error) {
-                request.log.warn({ error, email: userEmail }, 'Could not find candidate profile');
+                request.log.warn({ error, clerkUserId }, 'Could not find candidate profile');
             }
 
             if (!candidateId) {
@@ -418,26 +420,27 @@ export function registerDashboardsRoutes(app: FastifyInstance, services: Service
         const correlationId = getCorrelationId(request);
 
         try {
-            // Get candidate profile by email from Clerk
-            const userEmail = req.auth?.email;
-            if (!userEmail) {
+            // Get candidate profile by Clerk user ID
+            const clerkUserId = req.auth?.clerkUserId;
+            if (!clerkUserId) {
                 return reply.send({ data: [] });
             }
 
-            // Try to find candidate by email
+            // Get candidate profile
             let candidateId: string | null = null;
             try {
-                const candidatesResponse: any = await atsService().get(
-                    `/candidates?email=${encodeURIComponent(userEmail)}`,
+                const candidateResponse: any = await atsService().get(
+                    `/candidates/me`,
                     undefined,
-                    correlationId
+                    correlationId,
+                    { 'x-clerk-user-id': clerkUserId }
                 );
-                const candidates = candidatesResponse.data || [];
-                if (candidates.length > 0) {
-                    candidateId = candidates[0].id;
+                const candidate = candidateResponse.data;
+                if (candidate) {
+                    candidateId = candidate.id;
                 }
             } catch (error) {
-                request.log.warn({ error, email: userEmail }, 'Could not find candidate profile');
+                request.log.warn({ error, clerkUserId }, 'Could not find candidate profile');
             }
 
             if (!candidateId) {
