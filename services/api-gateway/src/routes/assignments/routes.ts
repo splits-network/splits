@@ -27,7 +27,7 @@ export function registerAssignmentsRoutes(app: FastifyInstance, services: Servic
         const body = await convertClerkIdsInBody(
             request.body,
             ['recruiter_id'],
-            identityService,
+            identityService(),
             correlationId
         );
         
