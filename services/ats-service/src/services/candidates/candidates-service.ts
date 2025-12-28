@@ -396,14 +396,20 @@ export class CandidatesService {
     /**
      * Get candidate applications (self-service)
      */
-    async getSelfApplications(userId: string, correlationId: string) {
-        // Find candidate by user_id (Clerk user ID)
-        const candidates = await this.repository.findAllCandidates({ limit: 1000 });
-        const candidate = candidates.find(c => c.user_id === userId);
+    async getSelfApplications(clerkUserId: string, correlationId: string) {
+        // Step 1: Resolve Clerk user ID to internal user UUID
+        // The candidates table uses user_id (UUID) as FK to identity.users.id
+        // We need to query identity.users first to get the internal UUID
+        logger.info({ clerkUserId, correlationId }, 'Looking up candidate by Clerk user ID');
+        
+        const candidate = await this.repository.findCandidateByClerkUserId(clerkUserId);
         
         if (!candidate) {
+            logger.info({ clerkUserId }, 'No candidate profile found for Clerk user');
             return []; // No candidate record yet
         }
+        
+        logger.info({ clerkUserId, candidateId: candidate.id }, 'Found candidate profile');
 
         const candidateId = candidate.id;
 
