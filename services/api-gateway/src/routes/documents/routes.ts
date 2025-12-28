@@ -54,14 +54,14 @@ export function registerDocumentsRoutes(app: FastifyInstance, services: ServiceR
             const candidateId = candidateResponse.data.id;
 
             // Get documents for this candidate
-            const response = await documentService().get<{ documents: any[] }>(
+            const response = await documentService().get<{ data: any[] }>(
                 `/documents/entity/candidate/${candidateId}`,
                 undefined,
                 correlationId
             );
             
-            // Document service returns { documents: [...] }, we need { data: [...] }
-            const documents = response.documents || [];
+            // Document service now returns { data: [...] } per API response format standard
+            const documents = response.data || [];
             return reply.send({ data: documents });
         } catch (error: any) {
             request.log.error({ error, clerkUserId }, 'Failed to get candidate documents');
