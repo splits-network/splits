@@ -685,6 +685,25 @@ export class AtsRepository {
         return data || [];
     }
 
+    /**
+     * Find applications with enriched job data for a candidate
+     * Eliminates N+1 query problem by using JOIN
+     */
+    async findApplicationsWithJobsByCandidateId(candidateId: string): Promise<any[]> {
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('applications')
+            .select(`
+                *,
+                job:jobs(*)
+            `)
+            .eq('candidate_id', candidateId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+    }
+
     async findApplicationsByRecruiterId(recruiterId: string): Promise<Application[]> {
         const { data, error } = await this.supabase
             .schema('ats')

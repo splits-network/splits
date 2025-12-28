@@ -188,6 +188,21 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         return reply.send(data);
     });
 
+    // Get candidate applications with enriched job data (optimized - eliminates N+1 query)
+    app.get('/api/candidates/:id/applications-with-jobs', {
+        preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager', 'platform_admin'], services),
+        schema: {
+            description: 'Get applications for a candidate with enriched job details',
+            tags: ['candidates'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const { id } = request.params as { id: string };
+        const correlationId = getCorrelationId(request);
+        const data = await atsService().get(`/candidates/${id}/applications-with-jobs`, undefined, correlationId);
+        return reply.send(data);
+    });
+
     // List candidate sourcers (platform admins only)
     app.get('/api/candidates/sourcers', {
         preHandler: requireRoles(['platform_admin']),

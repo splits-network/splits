@@ -15,20 +15,31 @@ interface CandidateDetailClientProps {
 export default function CandidateDetailClient({ candidateId }: CandidateDetailClientProps) {
     const { getToken } = useAuth();
     const router = useRouter();
+
+    // Candidate data (loads first - fast)
     const [candidate, setCandidate] = useState<any>(null);
-    const [applications, setApplications] = useState<any[]>([]);
-    const [relationship, setRelationship] = useState<any>(null);
     const [canEdit, setCanEdit] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Submit to job state
+    // Applications (loads async with its own state)
+    const [applications, setApplications] = useState<any[]>([]);
+    const [applicationsLoading, setApplicationsLoading] = useState(false);
+    const [applicationsError, setApplicationsError] = useState<string | null>(null);
+
+    // Relationship (loads async with its own state)
+    const [relationship, setRelationship] = useState<any>(null);
+    const [relationshipLoading, setRelationshipLoading] = useState(false);
+
+    // Submit to job modal (lazy loaded)
     const [showSubmitModal, setShowSubmitModal] = useState(false);
     const [jobs, setJobs] = useState<any[]>([]);
     const [documents, setDocuments] = useState<any[]>([]);
+    const [modalDataLoading, setModalDataLoading] = useState(false);
 
+    // Load candidate data first (fast)
     useEffect(() => {
-        async function loadData() {
+        async function loadCandidate() {
             try {
                 setLoading(true);
                 setError(null);
@@ -41,71 +52,13 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
 
                 const client = createAuthenticatedClient(token);
 
-                // Fetch candidate details
+                // Fetch candidate details only
                 const candidateResponse = await client.get(`/candidates/${candidateId}`);
                 setCandidate(candidateResponse.data);
 
-                // Check if user can edit this candidate (recruiter with active relationship or admin)
-                // Try to fetch the candidate's recruiter relationship
-                try {
-                    // If this succeeds, the user has an active relationship or is an admin
-                    const relationshipCheck = await client.get(`/candidates/${candidateId}`);
-                    setCanEdit(true);
+                // Assume can edit if we can view (RBAC handled by backend)
+                setCanEdit(true);
 
-                    // Try to get detailed relationship info
-                    try {
-                        const relationshipResponse = await client.get(`/recruiter-candidates/candidate/${candidateId}`);
-                        if (relationshipResponse.data && relationshipResponse.data.length > 0) {
-                            // Get the most recent active relationship
-                            const activeRelationship = relationshipResponse.data.find((r: any) => r.status === 'active');
-                            setRelationship(activeRelationship || relationshipResponse.data[0]);
-                        }
-                    } catch (err) {
-                        // No relationship info available (might be admin or self-managed candidate)
-                        console.log('No relationship info:', err);
-                    }
-                } catch (err) {
-                    // User cannot edit this candidate
-                    setCanEdit(false);
-                }
-
-                // Fetch applications
-                const applicationsResponse = await client.get(`/candidates/${candidateId}/applications`);
-                const apps = applicationsResponse.data || [];
-
-                // Fetch job details for each application
-                const applicationsWithJobs = await Promise.all(
-                    apps.map(async (app: any) => {
-                        try {
-                            const jobResponse = await client.get(`/jobs/${app.job_id}`);
-                            return { ...app, job: jobResponse.data };
-                        } catch {
-                            return { ...app, job: null };
-                        }
-                    })
-                );
-
-                setApplications(applicationsWithJobs);
-
-                // Fetch jobs for submit modal
-                try {
-                    const jobsRes = await client.get('/jobs');
-                    if (jobsRes.data?.data) {
-                        setJobs(jobsRes.data.data);
-                    }
-                } catch (err) {
-                    console.error('Failed to load jobs:', err);
-                }
-
-                // Fetch documents for submit modal
-                try {
-                    const docsRes = await client.get(`/documents/entity/candidate/${candidateId}`);
-                    if (docsRes.data) {
-                        setDocuments(docsRes.data);
-                    }
-                } catch (err) {
-                    console.error('Failed to load documents:', err);
-                }
             } catch (err: any) {
                 console.error('Failed to load candidate:', err);
                 setError(err.message || 'Failed to load candidate details');
@@ -114,8 +67,108 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
             }
         }
 
-        loadData();
+        loadCandidate();
     }, [candidateId, getToken]);
+
+    // Load applications in parallel (after candidate loads)
+    useEffect(() => {
+        async function loadApplications() {
+            if (!candidate) return; // Wait for candidate first
+
+            try {
+                setApplicationsLoading(true);
+                setApplicationsError(null);
+
+                const token = await getToken();
+                if (!token) return;
+
+                const client = createAuthenticatedClient(token);
+
+                // Fetch applications with enriched job data (single query - no N+1!)
+                const applicationsResponse = await client.get(`/candidates/${candidateId}/applications-with-jobs`);
+                const apps = applicationsResponse.data || [];
+
+                setApplications(apps);
+            } catch (err: any) {
+                console.error('Failed to load applications:', err);
+                setApplicationsError('Failed to load applications');
+            } finally {
+                setApplicationsLoading(false);
+            }
+        }
+
+        loadApplications();
+    }, [candidate, candidateId, getToken]);
+
+    // Load relationship info in parallel
+    useEffect(() => {
+        async function loadRelationship() {
+            if (!candidate) return; // Wait for candidate first
+
+            try {
+                setRelationshipLoading(true);
+
+                const token = await getToken();
+                if (!token) return;
+
+                const client = createAuthenticatedClient(token);
+
+                // Try to get detailed relationship info
+                try {
+                    const relationshipResponse = await client.get(`/recruiter-candidates/candidate/${candidateId}`);
+                    if (relationshipResponse.data && relationshipResponse.data.length > 0) {
+                        // Get the most recent active relationship
+                        const activeRelationship = relationshipResponse.data.find((r: any) => r.status === 'active');
+                        setRelationship(activeRelationship || relationshipResponse.data[0]);
+                    }
+                } catch (err) {
+                    // No relationship info available (might be admin or self-managed candidate)
+                    console.log('No relationship info:', err);
+                }
+            } catch (err: any) {
+                console.error('Failed to load relationship:', err);
+            } finally {
+                setRelationshipLoading(false);
+            }
+        }
+
+        loadRelationship();
+    }, [candidate, candidateId, getToken]);
+
+    // Lazy load modal data only when modal opens
+    useEffect(() => {
+        async function loadModalData() {
+            if (!showSubmitModal || jobs.length > 0) return; // Only load once when modal opens
+
+            try {
+                setModalDataLoading(true);
+
+                const token = await getToken();
+                if (!token) return;
+
+                const client = createAuthenticatedClient(token);
+
+                // Load jobs and documents in parallel
+                const [jobsRes, docsRes] = await Promise.all([
+                    client.get('/jobs').catch(() => ({ data: { data: [] } })),
+                    client.get(`/documents/entity/candidate/${candidateId}`).catch(() => ({ data: [] }))
+                ]);
+
+                if (jobsRes.data?.data) {
+                    setJobs(jobsRes.data.data);
+                }
+                if (docsRes.data) {
+                    setDocuments(docsRes.data);
+                }
+            } catch (err) {
+                console.error('Failed to load modal data:', err);
+            } finally {
+                setModalDataLoading(false);
+            }
+        }
+
+        loadModalData();
+    }, [showSubmitModal, candidateId, getToken, jobs.length]);
 
     const handleSubmitToJob = async (jobId: string, notes: string, documentIds: string[]) => {
         try {
@@ -425,7 +478,19 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
             <div>
                 <h2 className="text-2xl font-bold mb-4">Applications ({applications.length})</h2>
 
-                {applications.length === 0 ? (
+                {applicationsLoading ? (
+                    <div className="card bg-base-100 shadow">
+                        <div className="card-body items-center text-center py-12">
+                            <span className="loading loading-spinner loading-lg"></span>
+                            <p className="mt-4 text-base-content/70">Loading applications...</p>
+                        </div>
+                    </div>
+                ) : applicationsError ? (
+                    <div className="alert alert-error">
+                        <i className="fa-solid fa-circle-exclamation"></i>
+                        <span>{applicationsError}</span>
+                    </div>
+                ) : applications.length === 0 ? (
                     <div className="card bg-base-100 shadow">
                         <div className="card-body items-center text-center py-12">
                             <i className="fa-solid fa-inbox text-6xl text-base-content/20"></i>
@@ -512,55 +577,73 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                 <h2 className="text-2xl font-bold mb-4">Activity Timeline</h2>
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
-                        <div className="space-y-4">
-                            {applications
-                                .slice()
-                                .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-                                .map((app) => (
-                                    <div key={app.id} className="flex gap-4">
-                                        <div className="flex flex-col items-center">
-                                            <div className={`w-3 h-3 rounded-full ${getStageColor(app.stage).replace('badge-', 'bg-')}`}></div>
-                                            <div className="w-px h-full bg-base-300"></div>
+                        {applicationsLoading ? (
+                            <div className="text-center py-8">
+                                <span className="loading loading-spinner loading-md"></span>
+                                <p className="mt-2 text-sm text-base-content/70">Loading timeline...</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {applications
+                                    .slice()
+                                    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+                                    .map((app) => (
+                                        <div key={app.id} className="flex gap-4">
+                                            <div className="flex flex-col items-center">
+                                                <div className={`w-3 h-3 rounded-full ${getStageColor(app.stage).replace('badge-', 'bg-')}`}></div>
+                                                <div className="w-px h-full bg-base-300"></div>
+                                            </div>
+                                            <div className="flex-1 pb-4">
+                                                <div className="font-semibold">
+                                                    Stage updated to {app.stage}
+                                                </div>
+                                                <div className="text-sm text-base-content/70">
+                                                    {app.job?.title || 'Unknown Role'}
+                                                </div>
+                                                <div className="text-xs text-base-content/60 mt-1">
+                                                    {formatDate(app.updated_at)}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="flex-1 pb-4">
-                                            <div className="font-semibold">
-                                                Stage updated to {app.stage}
-                                            </div>
-                                            <div className="text-sm text-base-content/70">
-                                                {app.job?.title || 'Unknown Role'}
-                                            </div>
-                                            <div className="text-xs text-base-content/60 mt-1">
-                                                {formatDate(app.updated_at)}
-                                            </div>
-                                        </div>
+                                    ))}
+                                <div className="flex gap-4">
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-3 h-3 rounded-full bg-base-300"></div>
                                     </div>
-                                ))}
-                            <div className="flex gap-4">
-                                <div className="flex flex-col items-center">
-                                    <div className="w-3 h-3 rounded-full bg-base-300"></div>
-                                </div>
-                                <div className="flex-1">
-                                    <div className="font-semibold">Candidate added</div>
-                                    <div className="text-xs text-base-content/60 mt-1">
-                                        {formatDate(candidate.created_at)}
+                                    <div className="flex-1">
+                                        <div className="font-semibold">Candidate added</div>
+                                        <div className="text-xs text-base-content/60 mt-1">
+                                            {formatDate(candidate.created_at)}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </div>
 
             {/* Submit to Job Modal */}
             {showSubmitModal && (
-                <SubmitToJobModal
-                    candidateId={candidateId}
-                    candidateName={candidate.full_name}
-                    jobs={jobs}
-                    documents={documents}
-                    onClose={() => setShowSubmitModal(false)}
-                    onSubmit={handleSubmitToJob}
-                />
+                modalDataLoading ? (
+                    <div className="modal modal-open">
+                        <div className="modal-box">
+                            <div className="text-center py-8">
+                                <span className="loading loading-spinner loading-lg"></span>
+                                <p className="mt-4 text-base-content/70">Loading jobs and documents...</p>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <SubmitToJobModal
+                        candidateId={candidateId}
+                        candidateName={candidate.full_name}
+                        jobs={jobs}
+                        documents={documents}
+                        onClose={() => setShowSubmitModal(false)}
+                        onSubmit={handleSubmitToJob}
+                    />
+                )
             )}
         </div>
     );

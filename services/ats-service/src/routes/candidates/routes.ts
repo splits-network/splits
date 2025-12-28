@@ -92,6 +92,16 @@ export function registerCandidateRoutes(app: FastifyInstance, service: AtsServic
         }
     );
 
+    // Get applications for a candidate with enriched job data (eliminates N+1 query)
+    app.get(
+        '/candidates/:id/applications-with-jobs',
+        async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+            const repository = (service as any).repository;
+            const applications = await repository.findApplicationsWithJobsByCandidateId(request.params.id);
+            return reply.send({ data: applications });
+        }
+    );
+
     // Create a new candidate
     // Now accepts Clerk user ID from headers for recruiters
     app.post(
