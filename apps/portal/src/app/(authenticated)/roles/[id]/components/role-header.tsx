@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import SubmitCandidateModal from './submit-candidate-modal';
+import SubmitCandidateWizard from './submit-candidate-wizard';
 
 interface Job {
     id: string;
@@ -373,9 +373,11 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                 </div>
             </div>
 
-            {showSubmitModal && (
-                <SubmitCandidateModal
+            {showSubmitModal && job && (
+                <SubmitCandidateWizard
                     roleId={job.id}
+                    roleTitle={job.title}
+                    companyName={job.company_id}
                     onClose={() => setShowSubmitModal(false)}
                 />
             )}
