@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ServiceRegistry } from '../../clients';
 import { requireRoles, AuthenticatedRequest, isPlatformAdmin, isCompanyAdmin, isHiringManager, isRecruiter } from '../../rbac';
 import { registerMeRecruitersRoute } from './me-recruiters';
+import { convertClerkIdsInBody } from '../../clerk-id-converter';
 
 /**
  * Determine the primary user role for header passing to backend services
@@ -145,8 +146,17 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         const req = request as AuthenticatedRequest;
         const correlationId = getCorrelationId(request);
         const userRole = determineUserRole(req);
+        const identityService = services.get('identity');
         
-        const data = await atsService().post('/candidates', request.body, correlationId, {
+        // Convert Clerk IDs to UUIDs
+        const body = await convertClerkIdsInBody(
+            request.body,
+            ['user_id', 'recruiter_id', 'verified_by_user_id'],
+            identityService,
+            correlationId
+        );
+        
+        const data = await atsService().post('/candidates', body, correlationId, {
             'x-clerk-user-id': req.auth.clerkUserId,
             'x-user-role': userRole,
         });
@@ -166,8 +176,17 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         const { id } = request.params as { id: string };
         const correlationId = getCorrelationId(request);
         const userRole = determineUserRole(req);
+        const identityService = services.get('identity');
         
-        const data = await atsService().patch(`/candidates/${id}`, request.body, correlationId, {
+        // Convert Clerk IDs to UUIDs
+        const body = await convertClerkIdsInBody(
+            request.body,
+            ['user_id', 'recruiter_id', 'verified_by_user_id'],
+            identityService,
+            correlationId
+        );
+        
+        const data = await atsService().patch(`/candidates/${id}`, body, correlationId, {
             'x-clerk-user-id': req.auth.clerkUserId,
             'x-user-role': userRole,
         });

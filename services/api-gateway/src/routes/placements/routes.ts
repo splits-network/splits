@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ServiceRegistry } from '../../clients';
 import { requireRoles } from '../../rbac';
+import { convertClerkIdsInBody } from '../../clerk-id-converter';
 
 /**
  * Placements Routes
@@ -48,7 +49,18 @@ export function registerPlacementsRoutes(app: FastifyInstance, services: Service
             security: [{ clerkAuth: [] }],
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
-        const data = await atsService().post('/placements', request.body);
+        const correlationId = getCorrelationId(request);
+        const identityService = services.get('identity');
+        
+        // Convert Clerk IDs to UUIDs
+        const body = await convertClerkIdsInBody(
+            request.body,
+            ['recruiter_id'],
+            identityService,
+            correlationId
+        );
+        
+        const data = await atsService().post('/placements', body, correlationId);
         return reply.send(data);
     });
 

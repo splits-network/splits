@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ServiceRegistry } from '../../clients';
 import { requireRoles, AuthenticatedRequest, isRecruiter } from '../../rbac';
+import { convertClerkIdsInBody } from '../../clerk-id-converter';
 
 /**
  * Applications Routes (API Gateway)
@@ -97,10 +98,19 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const req = request as AuthenticatedRequest;
         const correlationId = getCorrelationId(request);
+        const identityService = services.get('identity');
+
+        // Convert Clerk IDs to UUIDs
+        const body = await convertClerkIdsInBody(
+            request.body,
+            ['recruiter_id'],
+            identityService,
+            correlationId
+        );
 
         // Simple proxy - pass user context to backend
         const userRole = determineUserRole(req.auth);
-        const data = await atsService().post('/applications', request.body, correlationId, {
+        const data = await atsService().post('/applications', body, correlationId, {
             'x-clerk-user-id': req.auth.clerkUserId,
             'x-user-role': userRole,
         });

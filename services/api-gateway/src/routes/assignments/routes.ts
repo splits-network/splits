@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ServiceRegistry } from '../../clients';
 import { requireRoles } from '../../rbac';
+import { convertClerkIdsInBody } from '../../clerk-id-converter';
 
 /**
  * Assignments Routes
@@ -8,6 +9,8 @@ import { requireRoles } from '../../rbac';
  */
 export function registerAssignmentsRoutes(app: FastifyInstance, services: ServiceRegistry) {
     const networkService = () => services.get('network');
+    const identityService = () => services.get('identity');
+    const getCorrelationId = (request: FastifyRequest) => (request as any).correlationId;
 
     // Create assignment (platform admins only)
     app.post('/api/assignments', {
@@ -18,7 +21,17 @@ export function registerAssignmentsRoutes(app: FastifyInstance, services: Servic
             security: [{ clerkAuth: [] }],
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
-        const data = await networkService().post('/assignments', request.body);
+        const correlationId = getCorrelationId(request);
+        
+        // Convert Clerk IDs to UUIDs
+        const body = await convertClerkIdsInBody(
+            request.body,
+            ['recruiter_id'],
+            identityService,
+            correlationId
+        );
+        
+        const data = await networkService().post('/assignments', body);
         return reply.send(data);
     });
 

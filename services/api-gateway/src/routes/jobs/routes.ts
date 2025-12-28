@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ServiceRegistry } from '../../clients';
 import { requireRoles, AuthenticatedRequest } from '../../rbac';
+import { convertClerkIdsInBody } from '../../clerk-id-converter';
 
 /**
  * Jobs Routes (API Gateway)
@@ -52,7 +53,17 @@ export function registerJobsRoutes(app: FastifyInstance, services: ServiceRegist
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const correlationId = getCorrelationId(request);
-        const data = await atsService().post('/jobs', request.body, correlationId);
+        const identityService = services.get('identity');
+        
+        // Convert Clerk IDs to UUIDs
+        const body = await convertClerkIdsInBody(
+            request.body,
+            ['job_owner_id'],
+            identityService,
+            correlationId
+        );
+        
+        const data = await atsService().post('/jobs', body, correlationId);
         return reply.send(data);
     });
 
@@ -66,7 +77,18 @@ export function registerJobsRoutes(app: FastifyInstance, services: ServiceRegist
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const { id } = request.params as { id: string };
-        const data = await atsService().patch(`/jobs/${id}`, request.body);
+        const correlationId = getCorrelationId(request);
+        const identityService = services.get('identity');
+        
+        // Convert Clerk IDs to UUIDs
+        const body = await convertClerkIdsInBody(
+            request.body,
+            ['job_owner_id'],
+            identityService,
+            correlationId
+        );
+        
+        const data = await atsService().patch(`/jobs/${id}`, body, correlationId);
         return reply.send(data);
     });
 
