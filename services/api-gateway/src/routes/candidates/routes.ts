@@ -133,6 +133,28 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         });
         return reply.send(data);
     });
+
+    // Get my applications (candidate self-service)
+    app.get('/api/candidates/me/applications', {
+        schema: {
+            description: 'Get my applications',
+            tags: ['candidates'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const req = request as AuthenticatedRequest;
+        const correlationId = getCorrelationId(request);
+        
+        if (!req.auth || !req.auth.clerkUserId) {
+            return reply.status(401).send({ error: 'Unauthorized' });
+        }
+        
+        const data = await atsService().get('/candidates/me/applications', undefined, correlationId, {
+            'x-clerk-user-id': req.auth.clerkUserId,
+        });
+        return reply.send(data);
+    });
+
     // Create a new candidate (recruiters and platform admins only)
     app.post('/api/candidates', {
         preHandler: requireRoles(['recruiter', 'platform_admin']),
