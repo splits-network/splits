@@ -13,6 +13,9 @@ interface ScreenFormProps {
     job: any;
     candidate: any;
     documents: any[];
+    jobLoading?: boolean;
+    candidateLoading?: boolean;
+    documentsLoading?: boolean;
 }
 
 export default function ScreenForm({
@@ -20,6 +23,9 @@ export default function ScreenForm({
     job,
     candidate,
     documents,
+    jobLoading = false,
+    candidateLoading = false,
+    documentsLoading = false,
 }: ScreenFormProps) {
     const router = useRouter();
     const { getToken } = useAuth();
@@ -196,67 +202,92 @@ export default function ScreenForm({
                     </h2>
                     <div className="divider my-2"></div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Job Section */}
                         <div>
                             <div className="text-sm font-semibold text-base-content/60 uppercase mb-2">Position</div>
-                            <button
-                                onClick={() => setShowJobModal(true)}
-                                className="text-left hover:bg-base-200/50 p-3 rounded-lg transition-colors w-full"
-                            >
-                                <p className="text-2xl font-bold text-primary mb-1 hover:underline">{job.title}</p>
-                                <p className="text-base-content/70 mb-2">{job.company?.name}</p>
-                                {job.location && (
-                                    <p className="text-sm text-base-content/60">
-                                        <i className="fa-solid fa-location-dot mr-1"></i> {job.location}
-                                    </p>
-                                )}
-                                {job.salary_min && job.salary_max && (
-                                    <p className="text-sm text-base-content/60 mt-1">
-                                        <i className="fa-solid fa-dollar-sign mr-1"></i>
-                                        ${job.salary_min.toLocaleString()} - ${job.salary_max.toLocaleString()}
-                                    </p>
-                                )}
-                                <div className="text-xs text-primary mt-2 flex items-center gap-1">
-                                    <i className="fa-solid fa-eye"></i>
-                                    <span>Click to view full details</span>
+                            {jobLoading ? (
+                                <div className="flex items-center justify-center p-8">
+                                    <span className="loading loading-spinner loading-md"></span>
                                 </div>
-                            </button>
+                            ) : job?.title ? (
+                                <button
+                                    onClick={() => setShowJobModal(true)}
+                                    className="text-left hover:bg-base-200/50 p-3 rounded-lg transition-colors w-full"
+                                >
+                                    <p className="text-2xl font-bold text-primary mb-1 hover:underline">{job.title}</p>
+                                    <p className="text-base-content/70 mb-2">{job.company?.name}</p>
+                                    {job.location && (
+                                        <p className="text-sm text-base-content/60">
+                                            <i className="fa-solid fa-location-dot mr-1"></i> {job.location}
+                                        </p>
+                                    )}
+                                    {job.salary_min && job.salary_max && (
+                                        <p className="text-sm text-base-content/60 mt-1">
+                                            <i className="fa-solid fa-dollar-sign mr-1"></i>
+                                            ${job.salary_min.toLocaleString()} - ${job.salary_max.toLocaleString()}
+                                        </p>
+                                    )}
+                                    <div className="text-xs text-primary mt-2 flex items-center gap-1">
+                                        <i className="fa-solid fa-eye"></i>
+                                        <span>Click to view full details</span>
+                                    </div>
+                                </button>
+                            ) : (
+                                <div className="p-4 bg-base-200/50 rounded-lg text-center text-base-content/60">
+                                    <i className="fa-solid fa-briefcase text-2xl mb-2"></i>
+                                    <p>Job information unavailable</p>
+                                </div>
+                            )}
                         </div>
+
+                        {/* Candidate Section */}
                         <div>
                             <div className="text-sm font-semibold text-base-content/60 uppercase mb-2">Candidate</div>
-                            <button
-                                onClick={() => setShowCandidateModal(true)}
-                                className="text-left hover:bg-base-200/50 p-3 rounded-lg transition-colors w-full"
-                            >
-                                <p className="text-2xl font-bold mb-1 hover:underline">{candidate.full_name}</p>
-                                <p className="text-base-content/70 mb-2">{candidate.email}</p>
-                                {candidate.phone && (
-                                    <p className="text-sm text-base-content/60 mb-1">
-                                        <i className="fa-solid fa-phone mr-1"></i> {candidate.phone}
-                                    </p>
-                                )}
-                                {candidate.current_title && (
-                                    <p className="text-sm text-base-content/60 mb-1">
-                                        <i className="fa-solid fa-briefcase mr-1"></i> {candidate.current_title}
-                                        {candidate.current_company && ` at ${candidate.current_company}`}
-                                    </p>
-                                )}
-                                {candidate.linkedin_url && (
-                                    <div className="text-sm text-primary inline-flex items-center gap-1 mt-1">
-                                        <i className="fa-brands fa-linkedin"></i> LinkedIn Profile
-                                    </div>
-                                )}
-                                <div className="text-xs text-primary mt-2 flex items-center gap-1">
-                                    <i className="fa-solid fa-eye"></i>
-                                    <span>Click to view full profile</span>
+                            {candidateLoading ? (
+                                <div className="flex items-center justify-center p-8">
+                                    <span className="loading loading-spinner loading-md"></span>
                                 </div>
-                            </button>
+                            ) : candidate?.full_name ? (
+                                <button
+                                    onClick={() => setShowCandidateModal(true)}
+                                    className="text-left hover:bg-base-200/50 p-3 rounded-lg transition-colors w-full"
+                                >
+                                    <p className="text-2xl font-bold mb-1 hover:underline">{candidate.full_name}</p>
+                                    <p className="text-base-content/70 mb-2">{candidate.email}</p>
+                                    {candidate.phone && (
+                                        <p className="text-sm text-base-content/60 mb-1">
+                                            <i className="fa-solid fa-phone mr-1"></i> {candidate.phone}
+                                        </p>
+                                    )}
+                                    {candidate.current_title && (
+                                        <p className="text-sm text-base-content/60 mb-1">
+                                            <i className="fa-solid fa-briefcase mr-1"></i> {candidate.current_title}
+                                            {candidate.current_company && ` at ${candidate.current_company}`}
+                                        </p>
+                                    )}
+                                    {candidate.linkedin_url && (
+                                        <div className="text-sm text-primary inline-flex items-center gap-1 mt-1">
+                                            <i className="fa-brands fa-linkedin"></i> LinkedIn Profile
+                                        </div>
+                                    )}
+                                    <div className="text-xs text-primary mt-2 flex items-center gap-1">
+                                        <i className="fa-solid fa-eye"></i>
+                                        <span>Click to view full profile</span>
+                                    </div>
+                                </button>
+                            ) : (
+                                <div className="p-4 bg-base-200/50 rounded-lg text-center text-base-content/60">
+                                    <i className="fa-solid fa-user text-2xl mb-2"></i>
+                                    <p>Candidate information unavailable</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Documents */}
-            {documentsList.length > 0 && (
+            {(documentsLoading || documentsList.length > 0) && (
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title text-xl">
@@ -264,52 +295,64 @@ export default function ScreenForm({
                             Candidate Documents
                         </h2>
                         <div className="divider my-2"></div>
-                        <div className="space-y-3">
-                            {documentsList.map((doc: any) => (
-                                <div key={doc.id} className="flex items-center justify-between p-4 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors">
-                                    <div className="flex items-center gap-4 flex-1 min-w-0">
-                                        <i className="fa-solid fa-file-pdf text-3xl text-error flex-shrink-0"></i>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="font-medium truncate">{doc.file_name}</div>
-                                            <div className="text-sm text-base-content/60 flex items-center gap-2 flex-wrap">
-                                                <span className="capitalize">{doc.document_type}</span>
-                                                {doc.file_size && (
-                                                    <>
-                                                        <span>•</span>
-                                                        <span>{(doc.file_size / 1024).toFixed(1)} KB</span>
-                                                    </>
-                                                )}
-                                                {doc.is_primary && (
-                                                    <span className="badge badge-primary badge-sm ml-2">
-                                                        <i className="fa-solid fa-star mr-1"></i>
-                                                        Primary Resume
-                                                    </span>
-                                                )}
+                        {documentsLoading ? (
+                            <div className="flex items-center justify-center p-8">
+                                <span className="loading loading-spinner loading-md"></span>
+                                <span className="ml-3 text-base-content/60">Loading documents...</span>
+                            </div>
+                        ) : documentsList.length > 0 ? (
+                            <div className="space-y-3">
+                                {documentsList.map((doc: any) => (
+                                    <div key={doc.id} className="flex items-center justify-between p-4 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors">
+                                        <div className="flex items-center gap-4 flex-1 min-w-0">
+                                            <i className="fa-solid fa-file-pdf text-3xl text-error flex-shrink-0"></i>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-medium truncate">{doc.file_name}</div>
+                                                <div className="text-sm text-base-content/60 flex items-center gap-2 flex-wrap">
+                                                    <span className="capitalize">{doc.document_type}</span>
+                                                    {doc.file_size && (
+                                                        <>
+                                                            <span>•</span>
+                                                            <span>{(doc.file_size / 1024).toFixed(1)} KB</span>
+                                                        </>
+                                                    )}
+                                                    {doc.is_primary && (
+                                                        <span className="badge badge-primary badge-sm ml-2">
+                                                            <i className="fa-solid fa-star mr-1"></i>
+                                                            Primary Resume
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
+                                        <div className="flex gap-2 flex-shrink-0">
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedDocument(doc);
+                                                    setShowDocumentModal(true);
+                                                }}
+                                                className="btn btn-sm btn-ghost"
+                                                title="View document"
+                                            >
+                                                <i className="fa-solid fa-eye"></i>
+                                            </button>
+                                            <button
+                                                onClick={() => handleDownloadDocument(doc)}
+                                                className="btn btn-sm btn-ghost flex-shrink-0"
+                                                title="Download document"
+                                            >
+                                                <i className="fa-solid fa-download"></i>
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="flex gap-2 flex-shrink-0">
-                                        <button
-                                            onClick={() => {
-                                                setSelectedDocument(doc);
-                                                setShowDocumentModal(true);
-                                            }}
-                                            className="btn btn-sm btn-ghost"
-                                            title="View document"
-                                        >
-                                            <i className="fa-solid fa-eye"></i>
-                                        </button>
-                                        <button
-                                            onClick={() => handleDownloadDocument(doc)}
-                                            className="btn btn-sm btn-ghost flex-shrink-0"
-                                            title="Download document"
-                                        >
-                                            <i className="fa-solid fa-download"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="p-4 bg-base-200/50 rounded-lg text-center text-base-content/60">
+                                <i className="fa-solid fa-file text-2xl mb-2"></i>
+                                <p>No documents available</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
