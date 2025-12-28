@@ -24,17 +24,6 @@ export default function ProposalScreenClient({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Debug: Log proposal structure
-    useEffect(() => {
-        console.log('🔍 Initial proposal data:', {
-            proposal,
-            hasJobId: !!proposal?.job_id,
-            hasCandidateId: !!proposal?.candidate?.id,
-            candidateData: proposal?.candidate,
-            allKeys: proposal ? Object.keys(proposal) : []
-        });
-    }, [proposal]);
-
     // Secondary data (loaded async)
     const [job, setJob] = useState<any>(null);
     const [jobLoading, setJobLoading] = useState(true);
@@ -109,13 +98,11 @@ export default function ProposalScreenClient({
         if (proposal) loadCandidate();
     }, [proposal, getToken]);
 
-    // Load candidate documents
+    // Load application documents (not candidate documents)
     useEffect(() => {
         async function loadDocuments() {
-            // Use the loaded candidate ID or fall back to proposal candidate ID
-            const candidateId = candidate?.id || proposal?.candidate?.id;
-
-            if (!candidateId) {
+            // Use the proposal/application ID to get application-specific documents
+            if (!proposal?.id) {
                 setDocumentsLoading(false);
                 return;
             }
@@ -125,18 +112,19 @@ export default function ProposalScreenClient({
                 if (!token) throw new Error('Not authenticated');
 
                 const client = createAuthenticatedClient(token);
-                const response: any = await client.getDocumentsByEntity('candidate', candidate.id);
+                // Get documents for this specific application, not the candidate's general documents
+                const response: any = await client.getDocumentsByEntity('application', proposal.id);
                 const docsData = response.data || response || [];
                 setDocuments(Array.isArray(docsData) ? docsData : []);
                 setDocumentsLoading(false);
             } catch (err: any) {
-                console.warn('Could not load candidate documents:', err);
+                console.warn('Could not load application documents:', err);
                 setDocumentsLoading(false);
             }
         }
 
-        if (candidate) loadDocuments();
-    }, [candidate, getToken]);
+        if (proposal) loadDocuments();
+    }, [proposal, getToken]);
 
     // Check proposal status validity
     useEffect(() => {

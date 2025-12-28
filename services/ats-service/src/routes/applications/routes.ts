@@ -125,8 +125,12 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
         async (request: FastifyRequest<{
             Body: {
                 job_id: string;
-                cover_letter?: string;
-                resume_url?: string;
+                document_ids: string[];
+                primary_resume_id: string;
+                pre_screen_answers?: Array<{ question_id: string; answer: any }>;
+                notes?: string;
+                cover_letter?: string;  // legacy field for backward compat
+                resume_url?: string;     // legacy field for backward compat
             };
         }>, reply: FastifyReply) => {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
@@ -138,13 +142,21 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
                 });
             }
 
-            const { job_id, cover_letter, resume_url } = request.body;
+            const { 
+                job_id, 
+                document_ids, 
+                primary_resume_id, 
+                pre_screen_answers, 
+                notes,
+                cover_letter,   // legacy
+                resume_url      // legacy
+            } = request.body;
             
             if (!job_id) {
                 throw new BadRequestError('job_id is required');
             }
 
-            // Look up candidate by user_id using the repository directly
+            // Look up candidate by user_id
             const allCandidates = await service.getCandidates({ limit: 1000 });
             const candidate = allCandidates.find((c: any) => c.user_id === clerkUserId);
             
@@ -166,23 +178,26 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
                 });
             }
 
-            // Use submitCandidate which will create candidate record if needed
-            const application = await service.submitCandidate(
-                job_id,
-                candidate.email,
-                candidate.full_name,
-                undefined, // Self-submitted, no recruiter yet
-                { cover_letter, resume_url }
-            );
+            // Use new submitCandidateApplication method that handles document linking
+            const result = await service.submitCandidateApplication({
+                candidateId: candidate.id,
+                candidateUserId: clerkUserId,
+                jobId: job_id,
+                documentIds: document_ids || [],
+                primaryResumeId: primary_resume_id || '',
+                preScreenAnswers: pre_screen_answers,
+                notes: notes || cover_letter, // Support legacy cover_letter field
+            });
 
             request.log.info({
-                applicationId: application.id,
+                applicationId: result.application.id,
                 candidateId: candidate.id,
                 jobId: job_id,
                 clerkUserId,
+                documentsLinked: document_ids?.length || 0,
             }, 'Candidate submitted application');
 
-            return reply.status(201).send({ data: application });
+            return reply.status(201).send({ data: result });
         }
     );
 

@@ -287,75 +287,73 @@ export default function ScreenForm({
             </div>
 
             {/* Documents */}
-            {(documentsLoading || documentsList.length > 0) && (
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body">
-                        <h2 className="card-title text-xl">
-                            <i className="fa-solid fa-file-pdf text-error mr-2"></i>
-                            Candidate Documents
-                        </h2>
-                        <div className="divider my-2"></div>
-                        {documentsLoading ? (
-                            <div className="flex items-center justify-center p-8">
-                                <span className="loading loading-spinner loading-md"></span>
-                                <span className="ml-3 text-base-content/60">Loading documents...</span>
-                            </div>
-                        ) : documentsList.length > 0 ? (
-                            <div className="space-y-3">
-                                {documentsList.map((doc: any) => (
-                                    <div key={doc.id} className="flex items-center justify-between p-4 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors">
-                                        <div className="flex items-center gap-4 flex-1 min-w-0">
-                                            <i className="fa-solid fa-file-pdf text-3xl text-error flex-shrink-0"></i>
-                                            <div className="flex-1 min-w-0">
-                                                <div className="font-medium truncate">{doc.file_name}</div>
-                                                <div className="text-sm text-base-content/60 flex items-center gap-2 flex-wrap">
-                                                    <span className="capitalize">{doc.document_type}</span>
-                                                    {doc.file_size && (
-                                                        <>
-                                                            <span>•</span>
-                                                            <span>{(doc.file_size / 1024).toFixed(1)} KB</span>
-                                                        </>
-                                                    )}
-                                                    {doc.is_primary && (
-                                                        <span className="badge badge-primary badge-sm ml-2">
-                                                            <i className="fa-solid fa-star mr-1"></i>
-                                                            Primary Resume
-                                                        </span>
-                                                    )}
-                                                </div>
+            <div className="card bg-base-100 shadow">
+                <div className="card-body">
+                    <h2 className="card-title text-xl">
+                        <i className="fa-solid fa-file-pdf text-error mr-2"></i>
+                        Application Documents
+                    </h2>
+                    <div className="divider my-2"></div>
+                    {documentsLoading ? (
+                        <div className="flex items-center justify-center p-8">
+                            <span className="loading loading-spinner loading-md"></span>
+                            <span className="ml-3 text-base-content/60">Loading documents...</span>
+                        </div>
+                    ) : documentsList.length > 0 ? (
+                        <div className="space-y-3">
+                            {documentsList.map((doc: any) => (
+                                <div key={doc.id} className="flex items-center justify-between p-4 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors">
+                                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                                        <i className="fa-solid fa-file-pdf text-3xl text-error flex-shrink-0"></i>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="font-medium truncate">{doc.file_name}</div>
+                                            <div className="text-sm text-base-content/60 flex items-center gap-2 flex-wrap">
+                                                <span className="capitalize">{doc.document_type}</span>
+                                                {doc.file_size && (
+                                                    <>
+                                                        <span>•</span>
+                                                        <span>{(doc.file_size / 1024).toFixed(1)} KB</span>
+                                                    </>
+                                                )}
+                                                {doc.is_primary && (
+                                                    <span className="badge badge-primary badge-sm ml-2">
+                                                        <i className="fa-solid fa-star mr-1"></i>
+                                                        Primary Resume
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
-                                        <div className="flex gap-2 flex-shrink-0">
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedDocument(doc);
-                                                    setShowDocumentModal(true);
-                                                }}
-                                                className="btn btn-sm btn-ghost"
-                                                title="View document"
-                                            >
-                                                <i className="fa-solid fa-eye"></i>
-                                            </button>
-                                            <button
-                                                onClick={() => handleDownloadDocument(doc)}
-                                                className="btn btn-sm btn-ghost flex-shrink-0"
-                                                title="Download document"
-                                            >
-                                                <i className="fa-solid fa-download"></i>
-                                            </button>
-                                        </div>
                                     </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="p-4 bg-base-200/50 rounded-lg text-center text-base-content/60">
-                                <i className="fa-solid fa-file text-2xl mb-2"></i>
-                                <p>No documents available</p>
-                            </div>
-                        )}
-                    </div>
+                                    <div className="flex gap-2 flex-shrink-0">
+                                        <button
+                                            onClick={() => {
+                                                setSelectedDocument(doc);
+                                                setShowDocumentModal(true);
+                                            }}
+                                            className="btn btn-sm btn-ghost"
+                                            title="View document"
+                                        >
+                                            <i className="fa-solid fa-eye"></i>
+                                        </button>
+                                        <button
+                                            onClick={() => handleDownloadDocument(doc)}
+                                            className="btn btn-sm btn-ghost flex-shrink-0"
+                                            title="Download document"
+                                        >
+                                            <i className="fa-solid fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12">
+                            <i className="fa-solid fa-inbox text-5xl text-base-content/20 mb-4"></i>
+                            <p className="text-base-content/60 text-lg">No documents were attached to this application.</p>
+                        </div>
+                    )}
                 </div>
-            )}
+            </div>
 
             {/* Response Notes */}
             <div className="card bg-base-100 shadow">
