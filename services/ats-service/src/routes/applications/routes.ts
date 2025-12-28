@@ -657,29 +657,47 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
         async (request: FastifyRequest<{
             Body: {
                 recruiter_id?: string;
-                recruiter_user_id?: string;
                 candidate_id: string;
                 job_id: string;
                 pitch?: string;
             };
         }>, reply: FastifyReply) => {
+            const { clerkUserId, userRole } = getUserContext(request);
             const { candidate_id, job_id, pitch } = request.body;
+            const correlationId = (request as any).correlationId;
             
-            // Extract recruiter from auth context or request body
-            const recruiterId = request.body.recruiter_id || (request as any).auth?.userId;
-            const recruiterUserId = request.body.recruiter_user_id || (request as any).auth?.userId;
-
-            if (!recruiterId || !recruiterUserId) {
-                throw new BadRequestError('Recruiter ID not found in auth context');
-            }
-
             if (!candidate_id || !job_id) {
                 throw new BadRequestError('Missing required fields: candidate_id, job_id');
+            }
+            
+            // Verify user is a recruiter
+            if (userRole !== 'recruiter') {
+                return reply.status(403).send({
+                    error: { code: 'FORBIDDEN', message: 'Only recruiters can propose jobs to candidates' }
+                });
+            }
+            
+            // Resolve recruiter ID from Clerk user ID using ApplicationService
+            const recruiterId = await service.applications.resolveEntityId(clerkUserId, 'recruiter', correlationId);
+            
+            if (!recruiterId) {
+                return reply.status(404).send({
+                    error: { code: 'NOT_FOUND', message: 'Recruiter profile not found or inactive' }
+                });
+            }
+            
+            // Resolve identity.users.id for audit log (single query at route level)
+            const identityUser = await repository.findUserByClerkUserId(clerkUserId);
+            if (!identityUser) {
+                return reply.status(404).send({
+                    error: { code: 'NOT_FOUND', message: 'User identity not found' }
+                });
             }
 
             const application = await service.recruiterProposeJob({
                 recruiterId,
-                recruiterUserId,
+                identityUserId: identityUser.id,
+                clerkUserId,
                 candidateId: candidate_id,
                 jobId: job_id,
                 pitch,
