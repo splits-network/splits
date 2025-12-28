@@ -62,6 +62,26 @@ export class ServiceClient {
 
             if (!response.ok) {
                 const errorBody = await response.text().catch(() => 'Unable to read error body');
+                
+                // For client errors (4xx), pass through the status code
+                if (response.status >= 400 && response.status < 500) {
+                    this.logger.warn(
+                        {
+                            service: this.serviceName,
+                            status: response.status,
+                            correlationId,
+                            error: errorBody,
+                        },
+                        'Service returned client error'
+                    );
+                    // Create an error object with the status code attached
+                    const error: any = new Error(`Service returned ${response.status}: ${errorBody}`);
+                    error.statusCode = response.status;
+                    error.body = errorBody;
+                    throw error;
+                }
+                
+                // For server errors (5xx), log and throw
                 this.logger.error(
                     {
                         service: this.serviceName,

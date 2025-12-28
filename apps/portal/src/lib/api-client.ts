@@ -71,8 +71,21 @@ export class ApiClient {
     }
 
     // Generic HTTP methods for admin operations
-    async get<T = any>(endpoint: string): Promise<T> {
-        return this.request<T>(endpoint, { method: 'GET' });
+    async get<T = any>(endpoint: string, options?: { params?: Record<string, any> }): Promise<T> {
+        let url = endpoint;
+        if (options?.params) {
+            const params = new URLSearchParams();
+            Object.entries(options.params).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    params.append(key, String(value));
+                }
+            });
+            const query = params.toString();
+            if (query) {
+                url = `${endpoint}?${query}`;
+            }
+        }
+        return this.request<T>(url, { method: 'GET' });
     }
 
     async post<T = any>(endpoint: string, data?: any): Promise<T> {

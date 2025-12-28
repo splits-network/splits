@@ -6,7 +6,7 @@ import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import DocumentList from '@/components/document-list';
-import SubmitToJobModal from './submit-to-job-modal';
+import SubmitToJobWizard from './submit-to-job-wizard';
 
 interface CandidateDetailClientProps {
     candidateId: string;
@@ -31,11 +31,8 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
     const [relationship, setRelationship] = useState<any>(null);
     const [relationshipLoading, setRelationshipLoading] = useState(false);
 
-    // Submit to job modal (lazy loaded)
-    const [showSubmitModal, setShowSubmitModal] = useState(false);
-    const [jobs, setJobs] = useState<any[]>([]);
-    const [documents, setDocuments] = useState<any[]>([]);
-    const [modalDataLoading, setModalDataLoading] = useState(false);
+    // Submit to job wizard
+    const [showSubmitWizard, setShowSubmitWizard] = useState(false);
 
     // Load candidate data first (fast)
     useEffect(() => {
@@ -135,40 +132,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
         loadRelationship();
     }, [candidate, candidateId, getToken]);
 
-    // Lazy load modal data only when modal opens
-    useEffect(() => {
-        async function loadModalData() {
-            if (!showSubmitModal || jobs.length > 0) return; // Only load once when modal opens
 
-            try {
-                setModalDataLoading(true);
-
-                const token = await getToken();
-                if (!token) return;
-
-                const client = createAuthenticatedClient(token);
-
-                // Load jobs and documents in parallel
-                const [jobsRes, docsRes] = await Promise.all([
-                    client.get('/jobs').catch(() => ({ data: { data: [] } })),
-                    client.get(`/documents/entity/candidate/${candidateId}`).catch(() => ({ data: [] }))
-                ]);
-
-                if (jobsRes.data?.data) {
-                    setJobs(jobsRes.data.data);
-                }
-                if (docsRes.data) {
-                    setDocuments(docsRes.data);
-                }
-            } catch (err) {
-                console.error('Failed to load modal data:', err);
-            } finally {
-                setModalDataLoading(false);
-            }
-        }
-
-        loadModalData();
-    }, [showSubmitModal, candidateId, getToken, jobs.length]);
 
     const handleSubmitToJob = async (jobId: string, notes: string, documentIds: string[]) => {
         try {
@@ -177,18 +141,19 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
 
             const client = createAuthenticatedClient(token);
 
-            // Create application
-            const response = await client.post('/applications', {
+            // Propose job to candidate (creates application in recruiter_proposed stage)
+            // Candidate will receive notification and must approve before application proceeds
+            const response = await client.post('/applications/propose-to-candidate', {
                 candidate_id: candidateId,
                 job_id: jobId,
-                recruiter_notes: notes,
+                pitch: notes,  // Renamed from recruiter_notes to pitch
                 document_ids: documentIds,
             });
 
             const applicationId = response.data?.data?.id || response.data?.id;
 
             // Show success message
-            alert('Candidate submitted successfully!');
+            alert(`Job opportunity sent to ${candidate?.full_name || 'candidate'}! They'll receive an email notification and can review and approve the opportunity.`);
 
             // Redirect to the new application detail page
             if (applicationId) {
@@ -198,8 +163,8 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                 window.location.reload();
             }
         } catch (err: any) {
-            console.error('Failed to submit candidate:', err);
-            throw new Error(err.message || 'Failed to submit candidate');
+            console.error('Failed to propose job to candidate:', err);
+            throw new Error(err.message || 'Failed to send job opportunity to candidate');
         }
     };
 
@@ -401,11 +366,11 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                         {canEdit && (
                             <div className="flex gap-2">
                                 <button
-                                    onClick={() => setShowSubmitModal(true)}
+                                    onClick={() => setShowSubmitWizard(true)}
                                     className="btn btn-success gap-2"
                                 >
                                     <i className="fa-solid fa-paper-plane"></i>
-                                    Submit to Job
+                                    Send Job Opportunity
                                 </button>
                                 <Link href={`/candidates/${candidateId}/edit`} className="btn btn-primary gap-2">
                                     <i className="fa-solid fa-edit"></i>
@@ -623,27 +588,14 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                 </div>
             </div>
 
-            {/* Submit to Job Modal */}
-            {showSubmitModal && (
-                modalDataLoading ? (
-                    <div className="modal modal-open">
-                        <div className="modal-box">
-                            <div className="text-center py-8">
-                                <span className="loading loading-spinner loading-lg"></span>
-                                <p className="mt-4 text-base-content/70">Loading jobs and documents...</p>
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <SubmitToJobModal
-                        candidateId={candidateId}
-                        candidateName={candidate.full_name}
-                        jobs={jobs}
-                        documents={documents}
-                        onClose={() => setShowSubmitModal(false)}
-                        onSubmit={handleSubmitToJob}
-                    />
-                )
+            {/* Submit to Job Wizard */}
+            {showSubmitWizard && (
+                <SubmitToJobWizard
+                    candidateId={candidateId}
+                    candidateName={candidate.full_name}
+                    onClose={() => setShowSubmitWizard(false)}
+                    onSubmit={handleSubmitToJob}
+                />
             )}
         </div>
     );

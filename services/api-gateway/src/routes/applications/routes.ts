@@ -231,6 +231,47 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
         return reply.send(data);
     });
 
+    // Recruiter proposes job to candidate (creates application in recruiter_proposed stage)
+    app.post('/api/applications/propose-to-candidate', {
+        preHandler: requireRoles(['recruiter'], services),
+        schema: {
+            description: 'Recruiter proposes job opportunity to candidate (requires candidate approval)',
+            tags: ['applications', 'recruiters'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const req = request as AuthenticatedRequest;
+        const correlationId = getCorrelationId(request);
+        const userRole = determineUserRole(req.auth);
+        
+        // Pass Clerk user ID and role to backend for resolution
+        const headers = {
+            'x-clerk-user-id': req.auth.clerkUserId,
+            'x-user-role': userRole,
+        };
+        
+        try {
+            const data = await atsService().post('/applications/propose-to-candidate', request.body, correlationId, headers);
+            return reply.send(data);
+        } catch (error: any) {
+            // If backend returned client error (4xx), pass it through with proper status
+            if (error.statusCode && error.statusCode >= 400 && error.statusCode < 500) {
+                try {
+                    const errorData = JSON.parse(error.body);
+                    return reply.code(error.statusCode).send(errorData);
+                } catch {
+                    return reply.code(error.statusCode).send({ 
+                        error: { 
+                            message: error.message 
+                        } 
+                    });
+                }
+            }
+            // For other errors, let default error handler deal with it
+            throw error;
+        }
+    });
+
     // Recruiter submits application to company
     app.post('/api/applications/:id/recruiter-submit', {
         preHandler: requireRoles(['recruiter']),
@@ -295,6 +336,52 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
         const { id } = request.params as { id: string };
         const correlationId = getCorrelationId(request);
         const data = await atsService().post(`/applications/${id}/ai-review`, request.body, correlationId);
+        return reply.send(data);
+    });
+
+    // Candidate approves recruiter-proposed opportunity
+    app.post('/api/applications/:id/candidate-approve', {
+        preHandler: requireRoles(['candidate'], services),
+        schema: {
+            description: 'Candidate approves recruiter-proposed job opportunity',
+            tags: ['applications', 'candidate'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const req = request as AuthenticatedRequest;
+        const { id } = request.params as { id: string };
+        const correlationId = getCorrelationId(request);
+        
+        // Pass Clerk user ID to backend for candidate lookup
+        const headers = {
+            'x-clerk-user-id': req.auth.clerkUserId,
+            'x-user-role': 'candidate',
+        };
+
+        const data = await atsService().post(`/applications/${id}/candidate-approve`, request.body, correlationId, headers);
+        return reply.send(data);
+    });
+
+    // Candidate declines recruiter-proposed opportunity
+    app.post('/api/applications/:id/candidate-decline', {
+        preHandler: requireRoles(['candidate'], services),
+        schema: {
+            description: 'Candidate declines recruiter-proposed job opportunity',
+            tags: ['applications', 'candidate'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const req = request as AuthenticatedRequest;
+        const { id } = request.params as { id: string };
+        const correlationId = getCorrelationId(request);
+        
+        // Pass Clerk user ID to backend for candidate lookup
+        const headers = {
+            'x-clerk-user-id': req.auth.clerkUserId,
+            'x-user-role': 'candidate',
+        };
+
+        const data = await atsService().post(`/applications/${id}/candidate-decline`, request.body, correlationId, headers);
         return reply.send(data);
     });
 }

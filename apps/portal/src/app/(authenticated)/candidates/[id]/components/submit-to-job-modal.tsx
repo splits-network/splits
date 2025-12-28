@@ -127,8 +127,8 @@ export default function SubmitToJobModal({
                                             onChange={() => toggleDocument(doc.id)}
                                         />
                                         <i className={`fa-solid ${doc.file_type === 'application/pdf' ? 'fa-file-pdf text-error' :
-                                                doc.file_type.startsWith('image/') ? 'fa-file-image text-info' :
-                                                    'fa-file text-base-content/70'
+                                            doc.file_type?.startsWith('image/') ? 'fa-file-image text-info' :
+                                                'fa-file text-base-content/70'
                                             }`}></i>
                                         <span className="text-sm">{doc.filename}</span>
                                     </label>

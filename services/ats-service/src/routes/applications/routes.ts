@@ -201,6 +201,63 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
         }
     );
 
+    // Recruiter proposes job to candidate (creates application in recruiter_proposed stage)
+    app.post(
+        '/applications/propose-to-candidate',
+        async (request: FastifyRequest<{ Body: { candidate_id: string; job_id: string; pitch?: string; document_ids?: string[] } }>, reply: FastifyReply) => {
+            const { clerkUserId, userRole } = getUserContext(request);
+            const { candidate_id, job_id, pitch, document_ids } = request.body;
+            const correlationId = (request as any).correlationId;
+            
+            if (!candidate_id || !job_id) {
+                throw new BadRequestError('candidate_id and job_id are required');
+            }
+            
+            // Verify user is a recruiter
+            if (userRole !== 'recruiter') {
+                return reply.status(403).send({
+                    error: { code: 'FORBIDDEN', message: 'Only recruiters can propose jobs to candidates' }
+                });
+            }
+            
+            // Resolve recruiter ID from Clerk user ID using ApplicationService
+            const recruiterId = await service.applications.resolveEntityId(clerkUserId, 'recruiter', correlationId);
+            
+            if (!recruiterId) {
+                return reply.status(404).send({
+                    error: { code: 'NOT_FOUND', message: 'Recruiter profile not found or inactive' }
+                });
+            }
+            
+            // Resolve identity.users.id for audit log (single query at route level)
+            const identityUser = await repository.findUserByClerkUserId(clerkUserId);
+            if (!identityUser) {
+                return reply.status(404).send({
+                    error: { code: 'NOT_FOUND', message: 'User identity not found' }
+                });
+            }
+            
+            // Call service method to create application in recruiter_proposed stage
+            const application = await service.recruiterProposeJob({
+                recruiterId: recruiterId,
+                identityUserId: identityUser.id,
+                clerkUserId: clerkUserId,
+                candidateId: candidate_id,
+                jobId: job_id,
+                pitch: pitch || '',
+            });
+            
+            request.log.info({
+                applicationId: application.id,
+                recruiterId: recruiterId,
+                candidateId: candidate_id,
+                jobId: job_id,
+            }, 'Recruiter proposed job to candidate');
+            
+            return reply.status(201).send({ data: application });
+        }
+    );
+
     // Create new application (submit candidate)
     app.post(
         '/applications',
@@ -649,22 +706,30 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
                 candidate_user_id?: string;
             };
         }>, reply: FastifyReply) => {
-            const candidateId = request.body.candidate_id;
-            const candidateUserId = request.body.candidate_user_id || (request as any).auth?.userId;
+            // Get Clerk user ID from header (passed by API Gateway)
+            const clerkUserId = request.headers['x-clerk-user-id'] as string;
 
-            if (!candidateId || !candidateUserId) {
-                throw new BadRequestError('Candidate ID not found in request context');
+            if (!clerkUserId) {
+                throw new BadRequestError('User authentication required');
+            }
+
+            // Look up candidate by Clerk user ID
+            const candidate = await repository.findCandidateByClerkUserId(clerkUserId);
+            if (!candidate) {
+                return reply.status(404).send({ 
+                    error: { code: 'CANDIDATE_NOT_FOUND', message: 'Candidate profile not found' } 
+                });
             }
 
             const application = await service.candidateApproveOpportunity({
                 applicationId: request.params.id,
-                candidateId,
-                candidateUserId,
+                candidateId: candidate.id,
+                candidateUserId: clerkUserId,
             });
 
             request.log.info({
                 applicationId: request.params.id,
-                candidateId,
+                candidateId: candidate.id,
                 action: 'approved_opportunity',
             }, 'Candidate approved job opportunity');
 
@@ -684,25 +749,34 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
                 notes?: string;
             };
         }>, reply: FastifyReply) => {
-            const candidateId = request.body.candidate_id;
-            const candidateUserId = request.body.candidate_user_id || (request as any).auth?.userId;
-            const { reason, notes } = request.body;
+            // Get Clerk user ID from header (passed by API Gateway)
+            const clerkUserId = request.headers['x-clerk-user-id'] as string;
 
-            if (!candidateId || !candidateUserId) {
-                throw new BadRequestError('Candidate ID not found in request context');
+            if (!clerkUserId) {
+                throw new BadRequestError('User authentication required');
             }
+
+            // Look up candidate by Clerk user ID
+            const candidate = await repository.findCandidateByClerkUserId(clerkUserId);
+            if (!candidate) {
+                return reply.status(404).send({ 
+                    error: { code: 'CANDIDATE_NOT_FOUND', message: 'Candidate profile not found' } 
+                });
+            }
+
+            const { reason, notes } = request.body;
 
             const application = await service.candidateDeclineOpportunity({
                 applicationId: request.params.id,
-                candidateId,
-                candidateUserId,
+                candidateId: candidate.id,
+                candidateUserId: clerkUserId,
                 reason,
                 notes,
             });
 
             request.log.info({
                 applicationId: request.params.id,
-                candidateId,
+                candidateId: candidate.id,
                 action: 'declined_opportunity',
                 reason,
             }, 'Candidate declined job opportunity');

@@ -1,5 +1,6 @@
 import { AtsRepository } from '../../repository';
 import { EventPublisher } from '../../events';
+import { ConflictError } from '@splits-network/shared-fastify';
 import { Application, Candidate, MaskedCandidate, ApplicationStage } from '@splits-network/shared-types';
 import { CandidateService } from '../candidates/service';
 import { getNetworkClient } from '../../clients/network-client';
@@ -1074,12 +1075,13 @@ export class ApplicationService {
      */
     async recruiterProposeJob(params: {
         recruiterId: string;
-        recruiterUserId: string;
+        identityUserId: string; // identity.users.id UUID for audit log
+        clerkUserId: string; // Clerk user ID for event publishing
         candidateId: string;
         jobId: string;
         pitch?: string; // Optional note from recruiter
     }): Promise<Application> {
-        const { recruiterId, recruiterUserId, candidateId, jobId, pitch } = params;
+        const { recruiterId, identityUserId, clerkUserId, candidateId, jobId, pitch } = params;
 
         // 1. Verify job exists
         const job = await this.repository.findJobById(jobId);
@@ -1104,12 +1106,28 @@ export class ApplicationService {
             candidate_id: candidateId,
         });
 
+        console.log('[DEBUG recruiterProposeJob] Duplicate check:', {
+            candidateId,
+            jobId,
+            existingApplications: existingApplications.map(app => ({
+                id: app.id,
+                stage: app.stage,
+                recruiter_id: app.recruiter_id,
+                created_at: app.created_at
+            }))
+        });
+
         const activeApplications = existingApplications.filter(
             app => !['rejected', 'withdrawn'].includes(app.stage)
         );
 
+        console.log('[DEBUG recruiterProposeJob] Active applications:', {
+            count: activeApplications.length,
+            apps: activeApplications.map(app => ({ id: app.id, stage: app.stage }))
+        });
+
         if (activeApplications.length > 0) {
-            throw new Error(`Candidate already has an active application for this job`);
+            throw new ConflictError('Candidate already has an active application for this job');
         }
 
         // 5. Create application in recruiter_proposed stage
@@ -1123,11 +1141,11 @@ export class ApplicationService {
             ai_reviewed: false,
         });
 
-        // 6. Create audit log entry
+        // 6. Create audit log entry (identityUserId already resolved at route level)
         await this.repository.createAuditLog({
             application_id: application.id,
             action: 'recruiter_proposed_job',
-            performed_by_user_id: recruiterUserId,
+            performed_by_user_id: identityUserId, // identity.users.id UUID
             performed_by_role: 'recruiter',
             new_value: {
                 stage: 'recruiter_proposed',
@@ -1146,7 +1164,7 @@ export class ApplicationService {
             {
                 application_id: application.id,
                 recruiter_id: recruiterId,
-                recruiter_user_id: recruiterUserId,
+                recruiter_user_id: clerkUserId,
                 candidate_id: candidateId,
                 candidate_email: candidate.email,
                 candidate_name: candidate.full_name,
