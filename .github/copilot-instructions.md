@@ -268,9 +268,74 @@ When Copilot generates React/Next.js code:
      - `(authenticated)/dashboard`, `(authenticated)/roles`, `(authenticated)/roles/[id]`, `(authenticated)/candidates`, `(authenticated)/placements`, `(authenticated)/admin`, etc.
    - NEVER create duplicate route groups like `(dashboard)` - always use `(authenticated)` for protected pages.
 
-2. **Data Fetching**
+2. **Data Fetching & Performance** ⚠️ **CRITICAL FOR PAGE SPEED**
    - Use fetch / Axios to call **`api-gateway`**, not individual services.
    - Handle auth via Clerk (session, tokens) and send bearer token to gateway.
+   
+   **Progressive Loading Pattern** (REQUIRED for all detail/list pages):
+   - **Load critical data first**: Fetch primary entity (candidate, job, application) immediately to show page structure (~100-200ms).
+   - **Async load secondary data**: Use multiple independent `useEffect` hooks to load related data in parallel (applications, relationships, stats).
+   - **Individual loading states**: Each section should have its own loading state and spinner. Never block entire page while loading secondary data.
+   - **Lazy load modal/drawer data**: Only fetch data when user opens a modal or drawer. Don't load data "just in case".
+   - **Error boundaries per section**: Errors in one section shouldn't break the entire page. Show error state for that section only.
+   
+   **Backend Query Optimization**:
+   - **Use enriched endpoints with SQL JOINs**: Create endpoints that return related data in a single query (e.g., `/candidates/:id/applications-with-jobs`) to eliminate N+1 query problems.
+   - **Never rely on sequential API calls**: If you need job data for 10 applications, the backend should JOIN and return enriched data, not force 10 separate API calls.
+   - **Prefer server-side enrichment**: Backend services should use Supabase `.select('*, related_table(*)')` syntax to fetch related data in one query.
+   
+   **Example** (Canonical Pattern from [apps/portal/src/app/(authenticated)/candidates/[id]/components/candidate-detail-client.tsx](../../apps/portal/src/app/(authenticated)/candidates/[id]/components/candidate-detail-client.tsx)):
+   ```tsx
+   // ✅ CORRECT - Progressive loading with independent states
+   const [candidate, setCandidate] = useState(null);
+   const [loading, setLoading] = useState(true);
+   const [applications, setApplications] = useState([]);
+   const [applicationsLoading, setApplicationsLoading] = useState(true);
+   const [relationship, setRelationship] = useState(null);
+   const [relationshipLoading, setRelationshipLoading] = useState(true);
+   
+   // Load primary data immediately
+   useEffect(() => {
+     async function loadCandidate() {
+       const res = await client.get(`/api/candidates/${id}`);
+       setCandidate(res.data.data);
+       setLoading(false);
+     }
+     loadCandidate();
+   }, [id]);
+   
+   // Load secondary data in parallel
+   useEffect(() => {
+     async function loadApplications() {
+       // Uses enriched endpoint - returns applications WITH job data in single query
+       const res = await client.get(`/api/candidates/${id}/applications-with-jobs`);
+       setApplications(res.data.data);
+       setApplicationsLoading(false);
+     }
+     if (candidate) loadApplications();
+   }, [candidate]);
+   
+   useEffect(() => {
+     async function loadRelationship() {
+       const res = await client.get(`/api/candidates/${id}/recruiters`);
+       setRelationship(res.data.data);
+       setRelationshipLoading(false);
+     }
+     if (candidate) loadRelationship();
+   }, [candidate]);
+   ```
+   
+   **Performance Impact**:
+   - Time to first content: 100-200ms (vs 3-5s with monolithic loading)
+   - Time to full page: 500ms-1s (vs 5-10s with sequential calls)
+   - Network requests: 4-5 requests (vs 15-20+ with N+1 queries)
+   
+   **Anti-patterns to AVOID**:
+   - ❌ Loading all data in one monolithic `useEffect` that blocks page render
+   - ❌ Sequential API calls where each waits for the previous to complete
+   - ❌ N+1 query patterns (1 query for list + N queries for details)
+   - ❌ Loading modal data upfront when user might never open the modal
+   - ❌ Single loading state for entire page causing blank screen until all data loads
 
 3. **UI & Styling**
    - Use TailwindCSS utility classes and **DaisyUI** components (e.g. `btn`, `card`, `badge`, `alert`).
