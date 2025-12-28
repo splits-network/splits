@@ -60,7 +60,7 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
 
             const client = createAuthenticatedClient(token);
             const response: any = await client.getDocument(doc.id);
-            
+
             // Open signed URL in new tab
             if (response.data?.signed_url) {
                 window.open(response.data.signed_url, '_blank');
@@ -96,6 +96,7 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
     };
 
     const getFileIcon = (mimeType: string) => {
+        if (!mimeType) return 'fa-file text-base-content/60';
         if (mimeType.includes('pdf')) return 'fa-file-pdf text-error';
         if (mimeType.includes('word')) return 'fa-file-word text-primary';
         if (mimeType.includes('text')) return 'fa-file-lines text-info';
@@ -117,8 +118,8 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
                     <i className="fa-solid fa-folder-open text-3xl mb-2"></i>
                     <p className="text-sm">No documents uploaded</p>
                     {showUpload && (
-                        <button 
-                            className="btn btn-sm btn-ghost mt-2" 
+                        <button
+                            className="btn btn-sm btn-ghost mt-2"
                             onClick={() => {
                                 if (onUpload) onUpload();
                                 setShowUploadModal(true);
@@ -148,8 +149,8 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
         <>
             <div className="space-y-2">
                 {showUpload && (
-                    <button 
-                        className="btn btn-sm btn-ghost w-full mb-2" 
+                    <button
+                        className="btn btn-sm btn-ghost w-full mb-2"
                         onClick={() => {
                             if (onUpload) onUpload();
                             setShowUploadModal(true);

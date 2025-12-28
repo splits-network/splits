@@ -98,7 +98,7 @@ export async function registerRoutes(fastify: FastifyInstance, service: Document
                     return reply.status(404).send({ error: 'Document not found' });
                 }
 
-                return reply.send(document);
+                return reply.send({ data: document });
             } catch (error: any) {
                 logger.error({ error: error.message }, 'Get document error');
                 return reply.status(500).send({
@@ -146,7 +146,7 @@ export async function registerRoutes(fastify: FastifyInstance, service: Document
                     offset: offset ? parseInt(offset, 10) : undefined,
                 });
 
-                return reply.send(result);
+                return reply.send({ data: result });
             } catch (error: any) {
                 logger.error({ error: error.message }, 'List documents error');
                 return reply.status(500).send({
@@ -201,7 +201,7 @@ export async function registerRoutes(fastify: FastifyInstance, service: Document
                     entityId
                 );
 
-                return reply.send({ documents });
+                return reply.send({ data: documents });
             } catch (error: any) {
                 logger.error({
                     error: error.message,
@@ -245,7 +245,7 @@ export async function registerRoutes(fastify: FastifyInstance, service: Document
                     metadata
                 );
 
-                return reply.send(document);
+                return reply.send({ data: document });
             } catch (error: any) {
                 logger.error({ error: error.message }, 'Update status error');
                 return reply.status(500).send({

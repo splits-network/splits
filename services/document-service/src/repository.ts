@@ -244,6 +244,8 @@ export class DocumentRepository {
         // Map database column names to frontend expected names
         return (data || []).map(doc => ({
             ...doc,
+            original_filename: doc.filename,
+            mime_type: doc.content_type,
             file_name: doc.filename,
             uploaded_at: doc.created_at
         })) as Document[];

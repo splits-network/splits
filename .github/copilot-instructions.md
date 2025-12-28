@@ -102,6 +102,31 @@ Copilot should assume and suggest the following stack:
     - Each service owns its schema and migrations.
     - Supabase project-ref: `einhgkqmxbkgdohwfayv`.
     - Use Supabase MCP tools for database operations when available.
+  - **Database Schema Pattern for Clerk User IDs**:
+    - `identity.users` table contains `clerk_user_id` (text) column - the source of truth for Clerk IDs
+    - Other tables (e.g., `ats.candidates`, `network.recruiters`) have `user_id` (UUID) which is a foreign key to `identity.users.id`
+    - **CRITICAL**: To query by Clerk user ID in tables without a direct `clerk_user_id` column:
+      1. First query `identity.users` to get the internal UUID: `SELECT id FROM identity.users WHERE clerk_user_id = $1`
+      2. Then use that UUID to query the target table: `SELECT * FROM ats.candidates WHERE user_id = $uuid`
+    - **DO NOT** try to query `clerk_user_id` directly on tables that don't have this column
+    - Example (correct pattern):
+      ```typescript
+      // Step 1: Resolve Clerk ID to internal UUID
+      const { data: userData } = await supabase
+        .schema('identity')
+        .from('users')
+        .select('id')
+        .eq('clerk_user_id', clerkUserId)
+        .single();
+      
+      // Step 2: Query target table with internal UUID
+      const { data: candidate } = await supabase
+        .schema('ats')
+        .from('candidates')
+        .select('*')
+        .eq('user_id', userData.id)
+        .single();
+      ```
   - Kubernetes with raw YAML manifests (no Helm).
   - Redis for caching and rate limiting.
   - RabbitMQ for domain events.
