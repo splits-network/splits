@@ -77,7 +77,7 @@ export default function SettingsPage() {
     }
 
     return (
-        <div className="max-w-4xl">
+        <div className="p-6">
             <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
 
             <div className="space-y-4">

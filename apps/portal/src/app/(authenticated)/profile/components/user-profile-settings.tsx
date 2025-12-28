@@ -166,7 +166,7 @@ export function UserProfileSettings() {
     }
 
     return (
-        <>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             {/* Profile Information Card */}
             <div className="card bg-base-100 shadow">
                 <form onSubmit={handleSubmit}>
@@ -257,7 +257,7 @@ export function UserProfileSettings() {
             </div>
 
             {/* Security Settings Section */}
-            <div className="card bg-base-100 shadow mt-6">
+            <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
                         <i className="fa-solid fa-shield-halved"></i>
@@ -411,6 +411,6 @@ export function UserProfileSettings() {
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 }
