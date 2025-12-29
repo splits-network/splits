@@ -217,6 +217,7 @@ export interface Application {
     stage: ApplicationStage;
     notes?: string;
     recruiter_notes?: string;  // NEW: Recruiter's notes/pitch added during review
+    candidate_notes?: string;
     accepted_by_company: boolean;
     accepted_at?: Date;
     ai_reviewed: boolean;  // Whether AI review has been completed

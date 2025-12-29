@@ -63,7 +63,8 @@ export class ServiceClient {
             if (!response.ok) {
                 const errorBody = await response.text().catch(() => 'Unable to read error body');
                 
-                // For client errors (4xx), pass through the status code
+                // For client errors (4xx), log and attach error info to the error object
+                // Gateway will handle passing these through to the client
                 if (response.status >= 400 && response.status < 500) {
                     this.logger.warn(
                         {
@@ -74,10 +75,16 @@ export class ServiceClient {
                         },
                         'Service returned client error'
                     );
-                    // Create an error object with the status code attached
+                    // Create an error object with the status code and body attached
                     const error: any = new Error(`Service returned ${response.status}: ${errorBody}`);
                     error.statusCode = response.status;
                     error.body = errorBody;
+                    // Try to parse error body as JSON for structured errors
+                    try {
+                        error.jsonBody = JSON.parse(errorBody);
+                    } catch {
+                        // If not JSON, keep as text in body
+                    }
                     throw error;
                 }
                 

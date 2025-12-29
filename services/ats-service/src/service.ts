@@ -81,6 +81,7 @@ export class AtsService {
     
     // New candidate application workflow methods
     async submitCandidateApplication(params: any) { return this.applications.submitCandidateApplication(params); }
+    async completeCandidateApplication(params: any) { return this.applications.completeCandidateApplication(params); }
     async recruiterSubmitApplication(applicationId: string, recruiterId: string, options?: any) { return this.applications.recruiterSubmitApplication(applicationId, recruiterId, options); }
     async withdrawApplication(applicationId: string, candidateId: string, candidateUserId?: string, reason?: string) { return this.applications.withdrawApplication(applicationId, candidateId, candidateUserId, reason); }
     async getPendingApplicationsForRecruiter(recruiterId: string) { return this.applications.getPendingApplicationsForRecruiter(recruiterId); }

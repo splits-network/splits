@@ -166,7 +166,10 @@ export function ProposalResponseWizard({
 
                     {currentStep === 2 && (
                         <AnswerQuestionsStep
-                            questions={preScreenQuestions}
+                            questions={preScreenQuestions.map(q => ({
+                                ...q,
+                                is_required: q.required
+                            }))}
                             answers={wizardData.preScreenAnswers}
                             onUpdate={(answers: { [questionId: string]: string }) => updateWizardData({ preScreenAnswers: answers })}
                             onNext={handleNext}

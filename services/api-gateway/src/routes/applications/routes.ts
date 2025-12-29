@@ -14,6 +14,32 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
     const getCorrelationId = (request: FastifyRequest) => (request as any).correlationId;
 
     /**
+     * Proxy helper that catches ServiceClient errors and passes through status codes
+     */
+    async function proxyToService<T>(
+        serviceCall: Promise<T>,
+        reply: FastifyReply
+    ): Promise<T | void> {
+        try {
+            return await serviceCall;
+        } catch (error: any) {
+            // If error has statusCode (from ServiceClient), pass it through
+            if (error.statusCode && error.statusCode >= 400 && error.statusCode < 500) {
+                // Try to parse the error body as JSON
+                const errorResponse = error.jsonBody || { 
+                    error: { 
+                        code: 'SERVICE_ERROR', 
+                        message: error.message 
+                    } 
+                };
+                return reply.status(error.statusCode).send(errorResponse);
+            }
+            // For other errors, re-throw to let Fastify's error handler deal with it
+            throw error;
+        }
+    }
+
+    /**
      * Determine user's primary role from Clerk memberships
      */
     function determineUserRole(auth: any): 'candidate' | 'recruiter' | 'company' | 'admin' {
@@ -83,8 +109,13 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const { id } = request.params as { id: string };
-        const data = await atsService().get(`/applications/${id}`);
-        return reply.send(data);
+        const data = await proxyToService(
+            atsService().get(`/applications/${id}`),
+            reply
+        );
+        if (data !== undefined) {
+            return reply.send(data);
+        }
     });
 
     // Submit application (recruiters only)
@@ -320,8 +351,13 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const { id } = request.params as { id: string };
         const correlationId = getCorrelationId(request);
-        const data = await atsService().get(`/applications/${id}/ai-review`, undefined, correlationId);
-        return reply.send(data);
+        const data = await proxyToService(
+            atsService().get(`/applications/${id}/ai-review`, undefined, correlationId),
+            reply
+        );
+        if (data !== undefined) {
+            return reply.send(data);
+        }
     });
 
     // Trigger AI review for application (POST)

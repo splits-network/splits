@@ -1504,7 +1504,6 @@ export class ApplicationService {
         const updated = await this.repository.updateApplication(applicationId, {
             stage: 'ai_review',
             notes: notes || undefined,
-            primary_resume_id: primaryResumeId,
         });
 
         // 8. Create audit log entry
