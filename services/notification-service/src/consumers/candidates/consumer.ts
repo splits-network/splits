@@ -120,20 +120,19 @@ export class CandidatesEventConsumer {
             const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
             const candidate = candidateResponse.data || candidateResponse;
 
-            // Fetch recruiter details
+            // Fetch recruiter details with user information (network-service now JOINs with identity.users)
             const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
             const recruiter = recruiterResponse.data || recruiterResponse;
 
-            // Fetch recruiter's user profile to get name and email
-            const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-            const recruiterUser = userResponse.data || userResponse;
+            // Extract user info from enriched recruiter response
+            const recruiterUser = recruiter.user || {};
 
             // Send invitation email to candidate
             await this.emailService.sendCandidateInvitation(candidate.email, {
                 candidate_name: candidate.full_name,
                 candidate_email: candidate.email,
-                recruiter_name: recruiterUser.name,
-                recruiter_email: recruiterUser.email,
+                recruiter_name: recruiterUser.name || 'A recruiter',
+                recruiter_email: recruiterUser.email || 'no-reply@splits.network',
                 recruiter_bio: recruiter.bio || 'A professional recruiter',
                 invitation_token: invitation_token,
                 invitation_expires_at: invitation_expires_at,
@@ -142,7 +141,8 @@ export class CandidatesEventConsumer {
 
             this.logger.info({ 
                 candidate_email: candidate.email, 
-                recruiter_id
+                recruiter_id,
+                recruiter_email: recruiterUser.email
             }, 'Candidate invitation email sent successfully');
 
         } catch (error) {
@@ -161,13 +161,12 @@ export class CandidatesEventConsumer {
             const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
             const candidate = candidateResponse.data || candidateResponse;
 
-            // Fetch recruiter details
+            // Fetch recruiter details with user information (network-service now JOINs with identity.users)
             const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
             const recruiter = recruiterResponse.data || recruiterResponse;
 
-            // Fetch recruiter's user profile to get email
-            const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-            const recruiterUser = userResponse.data || userResponse;
+            // Extract user info from enriched recruiter response
+            const recruiterUser = recruiter.user || {};
 
             // Send "You've been added to a recruiter's network" email to CANDIDATE
             await this.emailService.sendCandidateAddedToNetwork(candidate.email, {

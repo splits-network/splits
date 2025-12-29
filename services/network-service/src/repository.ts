@@ -35,7 +35,15 @@ export class NetworkRepository {
     async findRecruiterById(id: string): Promise<Recruiter | null> {
         const { data, error } = await this.supabase
             .schema('network').from('recruiters')
-            .select('*')
+            .select(`
+                *,
+                user:user_id (
+                    id,
+                    clerk_user_id,
+                    email,
+                    name
+                )
+            `)
             .eq('id', id)
             .single();
 
