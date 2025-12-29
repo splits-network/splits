@@ -128,6 +128,62 @@ export class NetworkServiceClient {
             throw error;
         }
     }
+
+    /**
+     * Create a resource via POST request
+     */
+    async post<T = any>(path: string, body: any, correlationId?: string): Promise<T> {
+        try {
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/json',
+            };
+            if (correlationId) {
+                headers['x-correlation-id'] = correlationId;
+            }
+
+            const url = `${this.baseURL}${path}`;
+            
+            logger.debug({
+                url,
+                body,
+                correlationId,
+            }, 'Network service POST request');
+
+            const response = await fetch(
+                url,
+                {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(body),
+                    signal: AbortSignal.timeout(5000),
+                }
+            );
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+            }
+
+            const result = await response.json() as T;
+            
+            logger.debug({
+                url,
+                correlationId,
+                statusCode: response.status,
+            }, 'Network service POST response');
+
+            return result;
+        } catch (error: any) {
+            logger.error({
+                err: error,
+                url: `${this.baseURL}${path}`,
+                body,
+                correlationId,
+            }, 'Network service POST request failed');
+            
+            throw error;
+        }
+    }
 }
 
 /**

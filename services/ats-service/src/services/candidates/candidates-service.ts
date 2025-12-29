@@ -297,33 +297,26 @@ export class CandidatesService {
 
             // Create recruiter-candidate relationship in Network Service
             try {
-                const response = await fetch(
-                    `${this.networkClient['baseURL']}/recruiter-candidates`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'x-correlation-id': correlationId,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            recruiter_id: recruiterId,
-                            candidate_id: candidate.id,
-                        }),
-                        signal: AbortSignal.timeout(5000),
-                    }
+                logger.info(
+                    { recruiterId, candidateId: candidate.id, correlationId },
+                    'Creating recruiter-candidate relationship'
                 );
 
-                if (!response.ok) {
-                    logger.warn(
-                        { recruiterId, candidateId: candidate.id, status: response.status },
-                        'Failed to create recruiter-candidate relationship'
-                    );
-                }
+                const response = await this.networkClient.post('/recruiter-candidates', {
+                    recruiter_id: recruiterId,
+                    candidate_id: candidate.id,
+                }, correlationId);
+
+                logger.info(
+                    { recruiterId, candidateId: candidate.id, relationshipId: response.data?.id },
+                    'Recruiter-candidate relationship created successfully'
+                );
             } catch (error) {
                 logger.error(
-                    { err: error, recruiterId, candidateId: candidate.id },
-                    'Error creating recruiter-candidate relationship'
+                    { err: error, recruiterId, candidateId: candidate.id, correlationId },
+                    'Failed to create recruiter-candidate relationship'
                 );
+                // Don't throw - candidate was already created, relationship can be fixed manually
             }
 
             // Note: candidate.sourced event will be published when candidate accepts invitation
