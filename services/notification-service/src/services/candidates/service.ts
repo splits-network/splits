@@ -29,6 +29,26 @@ export class CandidatesEmailService {
             payload?: Record<string, any>;
         }
     ): Promise<void> {
+        // Validate email address
+        if (!to || !to.includes('@')) {
+            const error = new Error(`Invalid recipient email address: ${to}`);
+            this.logger.error({ 
+                email: to, 
+                subject,
+                event_type: options.eventType,
+                error: error.message 
+            }, 'Cannot send email - invalid recipient address');
+            throw error;
+        }
+
+        this.logger.debug({ 
+            to, 
+            subject, 
+            event_type: options.eventType,
+            has_html: !!html,
+            html_length: html?.length
+        }, 'Creating notification log and sending email');
+
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
             recipient_user_id: options.userId,
@@ -43,6 +63,8 @@ export class CandidatesEmailService {
             priority: 'normal',
         });
 
+        this.logger.debug({ log_id: log.id, to }, 'Notification log created, sending via Resend');
+
         try {
             const { data, error } = await this.resend.emails.send({
                 from: this.fromEmail,
@@ -52,6 +74,12 @@ export class CandidatesEmailService {
             });
 
             if (error) {
+                this.logger.error({ 
+                    to, 
+                    subject,
+                    resend_error: error,
+                    error_message: JSON.stringify(error)
+                }, 'Resend API returned error');
                 throw error;
             }
 
@@ -61,11 +89,18 @@ export class CandidatesEmailService {
             });
 
             this.logger.info(
-                { email: to, subject, message_id: data?.id },
-                'Email sent successfully'
+                { email: to, subject, message_id: data?.id, log_id: log.id },
+                'Email sent successfully via Resend'
             );
         } catch (error: any) {
-            this.logger.error({ email: to, error }, 'Failed to send email');
+            this.logger.error({ 
+                email: to, 
+                subject,
+                event_type: options.eventType,
+                error_message: error?.message || 'Unknown error',
+                error_details: JSON.stringify(error),
+                log_id: log.id
+            }, 'Failed to send email');
 
             await this.repository.updateNotificationLog(log.id, {
                 status: 'failed',

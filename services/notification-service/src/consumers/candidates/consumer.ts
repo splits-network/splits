@@ -117,22 +117,58 @@ export class CandidatesEventConsumer {
             this.logger.info({ relationship_id, recruiter_id, candidate_id }, 'Handling candidate invited notification');
 
             // Fetch candidate details
+            this.logger.debug({ candidate_id }, 'Fetching candidate details from ATS service');
             const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
             const candidate = candidateResponse.data || candidateResponse;
+            
+            this.logger.debug({ 
+                candidate_id, 
+                has_email: !!candidate.email,
+                has_full_name: !!candidate.full_name,
+                candidate_keys: Object.keys(candidate)
+            }, 'Candidate details fetched');
+
+            // Validate candidate email
+            if (!candidate.email) {
+                throw new Error(`Candidate ${candidate_id} has no email address`);
+            }
+            
+            if (!candidate.full_name) {
+                throw new Error(`Candidate ${candidate_id} has no full_name`);
+            }
 
             // Fetch recruiter details with user information (network-service now JOINs with identity.users)
+            this.logger.debug({ recruiter_id }, 'Fetching recruiter details from network service');
             const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
             const recruiter = recruiterResponse.data || recruiterResponse;
+            
+            this.logger.debug({
+                recruiter_id,
+                has_user: !!recruiter.user,
+                has_bio: !!recruiter.bio,
+                recruiter_keys: Object.keys(recruiter)
+            }, 'Recruiter details fetched');
 
             // Extract user info from enriched recruiter response
             const recruiterUser = recruiter.user || {};
+            
+            // Validate recruiter email
+            if (!recruiterUser.email) {
+                throw new Error(`Recruiter ${recruiter_id} user has no email address`);
+            }
+
+            this.logger.info({ 
+                candidate_email: candidate.email,
+                recruiter_email: recruiterUser.email,
+                invitation_token
+            }, 'Sending candidate invitation email');
 
             // Send invitation email to candidate
             await this.emailService.sendCandidateInvitation(candidate.email, {
                 candidate_name: candidate.full_name,
                 candidate_email: candidate.email,
                 recruiter_name: recruiterUser.name || 'A recruiter',
-                recruiter_email: recruiterUser.email || 'no-reply@splits.network',
+                recruiter_email: recruiterUser.email,
                 recruiter_bio: recruiter.bio || 'A professional recruiter',
                 invitation_token: invitation_token,
                 invitation_expires_at: invitation_expires_at,
@@ -146,7 +182,13 @@ export class CandidatesEventConsumer {
             }, 'Candidate invitation email sent successfully');
 
         } catch (error) {
-            this.logger.error({ err: error, event }, 'Failed to handle candidate invited event');
+            this.logger.error({ 
+                err: error, 
+                event_type: event.event_type,
+                payload: event.payload,
+                error_message: error instanceof Error ? error.message : 'Unknown error',
+                error_stack: error instanceof Error ? error.stack : undefined
+            }, 'Failed to handle candidate invited event');
             throw error;
         }
     }
