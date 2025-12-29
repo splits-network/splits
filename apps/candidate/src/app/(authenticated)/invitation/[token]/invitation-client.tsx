@@ -39,8 +39,10 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
         if (!isLoaded) return;
 
         // If not signed in, redirect to sign-in with return URL
+        // Use redirect (shorter param name) for better URL readability
         if (!isSignedIn) {
-            router.push(`/sign-in?redirect_url=${encodeURIComponent(`/invitation/${token}`)}`);
+            const redirectUrl = `/invitation/${token}`;
+            router.push(`/sign-in?redirect=${encodeURIComponent(redirectUrl)}`);
             return;
         }
 

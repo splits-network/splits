@@ -19,7 +19,7 @@ export default function SignUpPage() {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    // Get redirect parameter
+    // Get redirect parameter (from invitation or other flow)
     const redirect = searchParams.get('redirect');
 
     const handleSubmit = async (e: FormEvent) => {
@@ -272,7 +272,10 @@ export default function SignUpPage() {
 
                     <p className="text-center text-sm mt-4">
                         Already have an account?{' '}
-                        <Link href="/sign-in" className="link link-primary">
+                        <Link 
+                            href={redirect ? `/sign-in?redirect=${encodeURIComponent(redirect)}` : '/sign-in'} 
+                            className="link link-primary"
+                        >
                             Sign in
                         </Link>
                     </p>

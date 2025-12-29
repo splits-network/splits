@@ -153,7 +153,10 @@ export default function SignInPage() {
 
                     <p className="text-center text-sm mt-4">
                         Don't have an account?{' '}
-                        <Link href="/sign-up" className="link link-primary">
+                        <Link 
+                            href={redirect ? `/sign-up?redirect=${encodeURIComponent(redirect)}` : '/sign-up'} 
+                            className="link link-primary"
+                        >
                             Create free account
                         </Link>
                     </p>
