@@ -3,6 +3,7 @@ import { Logger } from '@splits-network/shared-logging';
 import { NotificationRepository } from '../../repository';
 import {
     candidateSourcedEmail,
+    candidateAddedToNetworkEmail,
     ownershipConflictEmail,
     ownershipConflictRejectionEmail,
 } from '../../templates/candidates';
@@ -182,6 +183,64 @@ export class CandidatesEmailService {
             payload: data,
             actionUrl: '/candidates',
             actionLabel: 'View Candidates',
+            priority: 'normal',
+            category: 'candidate',
+        });
+    }
+
+    async sendRecruiterSourcingConfirmation(
+        recipientEmail: string,
+        data: {
+            candidateName: string;
+            sourceMethod: string;
+            protectionPeriod: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `Candidate Sourced: ${data.candidateName}`;
+        const candidatesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/candidates`;
+        
+        const html = candidateSourcedEmail({
+            candidateName: data.candidateName,
+            sourceMethod: data.sourceMethod,
+            protectionPeriod: data.protectionPeriod,
+            candidatesUrl,
+        });
+        
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'candidate.sourced_confirmation',
+            userId: data.userId,
+            payload: data,
+            actionUrl: '/candidates',
+            actionLabel: 'View Candidates',
+            priority: 'normal',
+            category: 'candidate',
+        });
+    }
+
+    async sendCandidateAddedToNetwork(
+        recipientEmail: string,
+        data: {
+            candidateName: string;
+            recruiterName?: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = "You've Been Added to a Recruiter's Network";
+        const portalUrl = `${process.env.CANDIDATE_PORTAL_URL || 'https://candidate.splits.network'}/profile`;
+        
+        const html = candidateAddedToNetworkEmail({
+            candidateName: data.candidateName,
+            recruiterName: data.recruiterName,
+            portalUrl,
+        });
+        
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'candidate.added_to_network',
+            userId: data.userId,
+            payload: data,
+            actionUrl: '/profile',
+            actionLabel: 'View Profile',
             priority: 'normal',
             category: 'candidate',
         });

@@ -12,31 +12,53 @@ export class CandidatesEventConsumer {
 
     async handleCandidateSourced(event: DomainEvent): Promise<void> {
         try {
-            const { candidate_id, sourcer_recruiter_id, source_method } = event.payload;
+            const { candidate_id, candidate_email, candidate_name, sourcer_recruiter_id, source_method } = event.payload;
             
             this.logger.info({ candidate_id, sourcer_recruiter_id }, 'Handling candidate sourced notification');
             
-            // Fetch candidate details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            // Fetch candidate details if not in payload
+            let candidateEmail = candidate_email;
+            let candidateName = candidate_name;
+            let candidateUserId: string | undefined;
             
-            // Fetch sourcer recruiter details
+            if (!candidateEmail || !candidateName) {
+                const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
+                const candidate = candidateResponse.data || candidateResponse;
+                candidateEmail = candidateEmail || candidate.email;
+                candidateName = candidateName || candidate.full_name;
+                candidateUserId = candidate.user_id; // ✅ Use candidate.user_id for notification log
+            }
+            
+            if (!candidateEmail) {
+                throw new Error(`Candidate ${candidate_id} has no email address`);
+            }
+            
+            // Fetch recruiter details
             const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${sourcer_recruiter_id}`);
             const recruiter = recruiterResponse.data || recruiterResponse;
             
-            // Fetch user profile to get email
-            const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-            const user = userResponse.data || userResponse;
+            // Fetch recruiter's user profile to get email
+            const recruiterUserResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
+            const recruiterUser = recruiterUserResponse.data || recruiterUserResponse;
             
-            // Send confirmation email
-            await this.emailService.sendCandidateSourced(user.email, {
-                candidateName: candidate.full_name,
-                sourceMethod: source_method,
-                protectionPeriod: '365 days',
-                userId: recruiter.user_id,
+            // Send email to the CANDIDATE: "You've been added to a recruiter's network"
+            await this.emailService.sendCandidateAddedToNetwork(candidateEmail, {
+                candidateName: candidateName,
+                recruiterName: recruiterUser.name || recruiterUser.email,
+                userId: candidateUserId, // ✅ Use candidate.user_id (identity.users.id), not candidate_id
             });
             
-            this.logger.info({ candidate_id, recipient: user.email }, 'Candidate sourced notification sent');
+            this.logger.info({ candidate_id, recipient: candidateEmail }, 'Candidate sourced notification sent to candidate');
+            
+            // Send confirmation email to the RECRUITER: "You successfully sourced this candidate"
+            await this.emailService.sendRecruiterSourcingConfirmation(recruiterUser.email, {
+                candidateName: candidateName,
+                sourceMethod: source_method || 'direct',
+                protectionPeriod: '365 days',
+                userId: recruiter.user_id, // ✅ Use recruiter.user_id (identity.users.id)
+            });
+            
+            this.logger.info({ candidate_id, sourcer_recruiter_id, recipient: recruiterUser.email }, 'Candidate sourced confirmation sent to recruiter');
         } catch (error) {
             this.logger.error({ error, event_payload: event.payload }, 'Failed to send candidate sourced notification');
             throw error;

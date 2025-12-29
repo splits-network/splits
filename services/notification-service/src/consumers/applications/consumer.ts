@@ -2,11 +2,13 @@ import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
 import { ApplicationsEmailService } from '../../services/applications/service';
 import { ServiceRegistry } from '../../clients';
+import { EmailLookupHelper } from '../../helpers/email-lookup';
 
 export class ApplicationsEventConsumer {
     constructor(
         private emailService: ApplicationsEmailService,
         private services: ServiceRegistry,
+        private emailLookup: EmailLookupHelper,
         private logger: Logger
     ) {}
 
@@ -16,7 +18,7 @@ export class ApplicationsEventConsumer {
 
             this.logger.info(
                 { application_id, job_id, recruiter_id },
-                'Fetching data for application accepted notification'
+                'Processing application accepted notification'
             );
 
             // Fetch job details
@@ -28,16 +30,23 @@ export class ApplicationsEventConsumer {
             const candidate = candidateResponse.data || candidateResponse;
 
             if (recruiter_id) {
-                // Fetch recruiter details
+                // Get recruiter email using helper
+                const recruiterEmail = await this.emailLookup.getRecruiterEmail(recruiter_id);
+
+                if (!recruiterEmail) {
+                    this.logger.warn(
+                        { application_id, recruiter_id },
+                        'Cannot send application accepted email - recruiter has no email address'
+                    );
+                    return;
+                }
+
+                // Fetch recruiter to get user_id for tracking
                 const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
                 const recruiter = recruiterResponse.data || recruiterResponse;
 
-                // Fetch recruiter's user profile to get email
-                const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-                const user = userResponse.data || userResponse;
-
                 // Send email notification to recruiter
-                await this.emailService.sendApplicationAccepted(user.email, {
+                await this.emailService.sendApplicationAccepted(recruiterEmail, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
                     companyName: job.company?.name || 'the company',
@@ -46,7 +55,7 @@ export class ApplicationsEventConsumer {
                 });
 
                 this.logger.info(
-                    { application_id, recipient: user.email },
+                    { application_id, recipient: recruiterEmail },
                     'Application accepted notification sent to recruiter'
                 );
             }
@@ -65,7 +74,7 @@ export class ApplicationsEventConsumer {
 
             this.logger.info(
                 { application_id, old_stage, new_stage },
-                'Fetching data for stage changed notification'
+                'Processing stage changed notification'
             );
 
             // Fetch application to get recruiter ID
@@ -81,16 +90,23 @@ export class ApplicationsEventConsumer {
             const candidate = candidateResponse.data || candidateResponse;
 
             if (application.recruiter_id) {
-                // Fetch recruiter details
+                // Get recruiter email using helper
+                const recruiterEmail = await this.emailLookup.getRecruiterEmail(application.recruiter_id);
+
+                if (!recruiterEmail) {
+                    this.logger.warn(
+                        { application_id, recruiter_id: application.recruiter_id },
+                        'Cannot send stage changed email - recruiter has no email address'
+                    );
+                    return;
+                }
+
+                // Fetch recruiter to get user_id for tracking
                 const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${application.recruiter_id}`);
                 const recruiter = recruiterResponse.data || recruiterResponse;
 
-                // Fetch recruiter's user profile
-                const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-                const user = userResponse.data || userResponse;
-
                 // Send email notification
-                await this.emailService.sendApplicationStageChanged(user.email, {
+                await this.emailService.sendApplicationStageChanged(recruiterEmail, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
                     companyName: job.company?.name || 'Unknown Company',
@@ -101,7 +117,7 @@ export class ApplicationsEventConsumer {
                 });
 
                 this.logger.info(
-                    { application_id, recipient: user.email },
+                    { application_id, recipient: recruiterEmail },
                     'Application stage changed notification sent'
                 );
             }
@@ -138,63 +154,50 @@ export class ApplicationsEventConsumer {
             const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
             const candidate = candidateResponse.data || candidateResponse;
 
-            // Get candidate's user profile for email (may not exist if recruiter sourced the candidate)
-            let candidateUser: any = null;
-            try {
-                // Prefer using candidate_user_id directly (passed from API Gateway via Clerk auth)
-                if (candidate_user_id) {
-                    const candidateUserResponse = await this.services.getIdentityService().get<any>(`/users/${candidate_user_id}`);
-                    candidateUser = candidateUserResponse.data || candidateUserResponse;
-                    this.logger.info({ candidate_user_id }, 'Found candidate user via user ID');
-                } else {
-                    // Fallback: lookup by email (backwards compatibility - will fail until /users/by-email endpoint is added)
-                    this.logger.warn({ candidate_id }, 'No candidate_user_id in event payload, cannot send candidate email');
-                }
-            } catch (error) {
-                this.logger.warn({ candidate_id, candidate_user_id, email: candidate.email }, 'Candidate user account not found');
-            }
+            // Get candidate email using helper
+            const candidateEmail = await this.emailLookup.getCandidateEmail(candidate_id);
+            const candidateUserId = candidate_user_id || null; // For tracking purposes
 
             // Scenario 1: Recruiter directly submits candidate (has_recruiter && stage === 'submitted')
             // This is when a recruiter sources and immediately submits a candidate to a company
             if (has_recruiter && stage === 'submitted') {
                 this.logger.info({ application_id }, 'Recruiter direct submission - notifying company');
 
-                // Fetch recruiter details
+                // Get recruiter email and details
+                const recruiterEmail = await this.emailLookup.getRecruiterEmail(recruiter_id);
+                if (!recruiterEmail) {
+                    this.logger.warn({ recruiter_id }, 'Cannot send recruiter notification - no email address');
+                    return;
+                }
+
+                // Fetch recruiter to get user_id and name for email template
                 const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
                 const recruiter = recruiterResponse.data || recruiterResponse;
+                
+                const recruiterName = await this.emailLookup.getUserName(recruiter.user_id);
 
-                const recruiterUserResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-                const recruiterUser = recruiterUserResponse.data || recruiterUserResponse;
-                const recruiterName = `${recruiterUser.first_name || ''} ${recruiterUser.last_name || ''}`.trim() || recruiterUser.email;
-
-                // Notify company admins
+                // Get company admin emails
                 const companyResponse = await this.services.getAtsService().get<any>(`/companies/${job.company_id}`);
                 const company = companyResponse.data || companyResponse;
 
                 if (company.identity_organization_id) {
-                    const membershipsResponse = await this.services.getIdentityService().get<any>(
-                        `/organizations/${company.identity_organization_id}/memberships?role=admin`
-                    );
-                    const memberships = membershipsResponse.data || membershipsResponse;
+                    const adminEmails = await this.emailLookup.getCompanyAdminEmails(company.identity_organization_id);
 
                     // Notify each admin
-                    for (const membership of Array.isArray(memberships) ? memberships : []) {
-                        const userResponse = await this.services.getIdentityService().get<any>(`/users/${membership.user_id}`);
-                        const user = userResponse.data || userResponse;
-
-                        await this.emailService.sendCompanyApplicationReceived(user.email, {
+                    for (const adminEmail of adminEmails) {
+                        await this.emailService.sendCompanyApplicationReceived(adminEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
                             applicationId: application_id,
                             hasRecruiter: true,
-                            recruiterName: recruiterName,
-                            userId: user.id,
+                            recruiterName: recruiterName || recruiterEmail,
+                            userId: undefined, // Admin user ID not needed for tracking
                         });
                     }
                 }
 
                 // Also notify the recruiter of successful submission
-                await this.emailService.sendApplicationCreated(recruiterUser.email, {
+                await this.emailService.sendApplicationCreated(recruiterEmail, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
                     companyName: job.company?.name || 'Unknown Company',
@@ -214,33 +217,38 @@ export class ApplicationsEventConsumer {
                 // Determine next steps message
                 const nextSteps = 'Your application has been sent to your recruiter for review. They will enhance and submit it to the company.';
 
-                // Send confirmation email to candidate (if they have an account)
-                if (candidateUser) {
-                    console.log('[APPLICATIONS-CONSUMER] 📧 Sending email to candidate:', candidate.email);
-                    await this.emailService.sendCandidateApplicationSubmitted(candidate.email, {
+                // Send confirmation email to candidate (if they have an email)
+                if (candidateEmail) {
+                    console.log('[APPLICATIONS-CONSUMER] 📧 Sending email to candidate:', candidateEmail);
+                    await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
                         candidateName: candidate.full_name,
                         jobTitle: job.title,
                         companyName: job.company?.name || 'Unknown Company',
                         hasRecruiter: true,
                         nextSteps,
                         applicationId: application_id,
-                        userId: candidateUser.id,
+                        userId: candidateUserId,
                     });
                     console.log('[APPLICATIONS-CONSUMER] ✅ Candidate email sent successfully');
                 } else {
-                    console.log('[APPLICATIONS-CONSUMER] ⚠️ Skipping candidate email (no user account)');
+                    console.log('[APPLICATIONS-CONSUMER] ⚠️ Skipping candidate email (no email address found)');
                 }
 
                 // Notify recruiter of pending application
-                console.log('[APPLICATIONS-CONSUMER] 🔍 Fetching recruiter details...');
+                console.log('[APPLICATIONS-CONSUMER] 🔍 Getting recruiter email...');
+                const recruiterEmail = await this.emailLookup.getRecruiterEmail(recruiter_id);
+                
+                if (!recruiterEmail) {
+                    this.logger.warn({ recruiter_id }, 'Cannot send recruiter notification - no email address');
+                    return;
+                }
+
+                // Fetch recruiter to get user_id for tracking
                 const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
                 const recruiter = recruiterResponse.data || recruiterResponse;
 
-                const recruiterUserResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-                const recruiterUser = recruiterUserResponse.data || recruiterUserResponse;
-
-                console.log('[APPLICATIONS-CONSUMER] 📧 Sending email to recruiter:', recruiterUser.email);
-                await this.emailService.sendRecruiterApplicationPending(recruiterUser.email, {
+                console.log('[APPLICATIONS-CONSUMER] 📧 Sending email to recruiter:', recruiterEmail);
+                await this.emailService.sendRecruiterApplicationPending(recruiterEmail, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
                     companyName: job.company?.name || 'Unknown Company',
@@ -260,21 +268,21 @@ export class ApplicationsEventConsumer {
 
                 const nextSteps = 'Your application has been submitted directly to the company. They will review and contact you if interested.';
 
-                // Send confirmation email to candidate (if they have an account)
-                if (candidateUser) {
-                    console.log('[APPLICATIONS-CONSUMER] 📧 Sending email to candidate:', candidate.email);
-                    await this.emailService.sendCandidateApplicationSubmitted(candidate.email, {
+                // Send confirmation email to candidate (if they have an email)
+                if (candidateEmail) {
+                    console.log('[APPLICATIONS-CONSUMER] 📧 Sending email to candidate:', candidateEmail);
+                    await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
                         candidateName: candidate.full_name,
                         jobTitle: job.title,
                         companyName: job.company?.name || 'Unknown Company',
                         hasRecruiter: false,
                         nextSteps,
                         applicationId: application_id,
-                        userId: candidateUser.id,
+                        userId: candidateUserId,
                     });
                     console.log('[APPLICATIONS-CONSUMER] ✅ Candidate email sent successfully');
                 } else {
-                    console.log('[APPLICATIONS-CONSUMER] ⚠️ Skipping candidate email (no user account)');
+                    console.log('[APPLICATIONS-CONSUMER] ⚠️ Skipping candidate email (no email address found)');
                 }
 
                 // Notify company admins
@@ -283,25 +291,19 @@ export class ApplicationsEventConsumer {
                 const company = companyResponse.data || companyResponse;
 
                 if (company.identity_organization_id) {
-                    console.log('[APPLICATIONS-CONSUMER] 🔍 Fetching company admins...');
-                    const membershipsResponse = await this.services.getIdentityService().get<any>(
-                        `/organizations/${company.identity_organization_id}/memberships?role=admin`
-                    );
-                    const memberships = membershipsResponse.data || membershipsResponse;
-                    console.log(`[APPLICATIONS-CONSUMER] 👥 Found ${Array.isArray(memberships) ? memberships.length : 0} company admins`);
+                    console.log('[APPLICATIONS-CONSUMER] 🔍 Getting company admin emails...');
+                    const adminEmails = await this.emailLookup.getCompanyAdminEmails(company.identity_organization_id);
+                    console.log(`[APPLICATIONS-CONSUMER] 👥 Found ${adminEmails.length} company admin emails`);
 
                     // Notify each admin
-                    for (const membership of Array.isArray(memberships) ? memberships : []) {
-                        const userResponse = await this.services.getIdentityService().get<any>(`/users/${membership.user_id}`);
-                        const user = userResponse.data || userResponse;
-
-                        console.log('[APPLICATIONS-CONSUMER] 📧 Sending email to company admin:', user.email);
-                        await this.emailService.sendCompanyApplicationReceived(user.email, {
+                    for (const adminEmail of adminEmails) {
+                        console.log('[APPLICATIONS-CONSUMER] 📧 Sending email to company admin:', adminEmail);
+                        await this.emailService.sendCompanyApplicationReceived(adminEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
                             applicationId: application_id,
                             hasRecruiter: false,
-                            userId: user.id,
+                            userId: undefined, // Admin user ID not needed for tracking
                         });
                         console.log('[APPLICATIONS-CONSUMER] ✅ Company admin email sent successfully');
                     }
@@ -349,71 +351,57 @@ export class ApplicationsEventConsumer {
             const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
             const candidate = candidateResponse.data || candidateResponse;
 
-            // Fetch recruiter details
+            // Get recruiter email and details
+            const recruiterEmail = await this.emailLookup.getRecruiterEmail(recruiter_id);
+            if (!recruiterEmail) {
+                this.logger.warn({ recruiter_id }, 'Cannot notify recruiter - no email address');
+                return;
+            }
+
+            // Fetch recruiter to get user_id and name
             const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
             const recruiter = recruiterResponse.data || recruiterResponse;
-
-            const recruiterUserResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-            const recruiterUser = recruiterUserResponse.data || recruiterUserResponse;
-            const recruiterName = `${recruiterUser.first_name || ''} ${recruiterUser.last_name || ''}`.trim();
+            const recruiterName = await this.emailLookup.getUserName(recruiter.user_id);
 
             // Get company admins
             const companyResponse = await this.services.getAtsService().get<any>(`/companies/${company_id || job.company_id}`);
             const company = companyResponse.data || companyResponse;
 
             if (company.identity_organization_id) {
-                const membershipsResponse = await this.services.getIdentityService().get<any>(
-                    `/organizations/${company.identity_organization_id}/memberships?role=admin`
-                );
-                const memberships = membershipsResponse.data || membershipsResponse;
+                const adminEmails = await this.emailLookup.getCompanyAdminEmails(company.identity_organization_id);
 
                 // Notify each admin
-                for (const membership of Array.isArray(memberships) ? memberships : []) {
-                    const userResponse = await this.services.getIdentityService().get<any>(`/users/${membership.user_id}`);
-                    const user = userResponse.data || userResponse;
-
-                    await this.emailService.sendCompanyApplicationReceived(user.email, {
+                for (const adminEmail of adminEmails) {
+                    await this.emailService.sendCompanyApplicationReceived(adminEmail, {
                         candidateName: candidate.full_name,
                         jobTitle: job.title,
                         applicationId: application_id,
                         hasRecruiter: true,
-                        recruiterName: recruiterName,
-                        userId: user.id,
+                        recruiterName: recruiterName || recruiterEmail,
+                        userId: undefined, // Admin user ID not needed for tracking
                     });
                 }
             }
 
-            // Send confirmation to candidate (only if they have a user account)
-            if (candidate_user_id) {
-                console.log('[NOTIFICATION-SERVICE] 📧 Fetching candidate user for email:', { candidate_user_id });
+            // Send confirmation to candidate (only if they have an email)
+            const candidateEmail = await this.emailLookup.getCandidateEmail(candidate_id);
+            
+            if (candidateEmail) {
+                console.log('[NOTIFICATION-SERVICE] 📧 Sending email to candidate:', candidateEmail);
                 
-                try {
-                    const candidateUserResponse = await this.services.getIdentityService().get<any>(`/users/${candidate_user_id}`);
-                    const candidateUser = candidateUserResponse.data || candidateUserResponse;
+                await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
+                    candidateName: candidate.full_name,
+                    jobTitle: job.title,
+                    companyName: job.company?.name || 'Unknown Company',
+                    hasRecruiter: true,
+                    nextSteps: 'Your recruiter has reviewed and submitted your application to the company. They will be in touch if there is interest.',
+                    applicationId: application_id,
+                    userId: candidate_user_id || undefined,
+                });
 
-                    if (candidateUser) {
-                        console.log('[NOTIFICATION-SERVICE] ✅ Candidate user found, sending email');
-                        
-                        await this.emailService.sendCandidateApplicationSubmitted(candidate.email, {
-                            candidateName: candidate.full_name,
-                            jobTitle: job.title,
-                            companyName: job.company?.name || 'Unknown Company',
-                            hasRecruiter: true,
-                            nextSteps: 'Your recruiter has reviewed and submitted your application to the company. They will be in touch if there is interest.',
-                            applicationId: application_id,
-                            userId: candidateUser.id,
-                        });
-
-                        console.log('[NOTIFICATION-SERVICE] ✅ Candidate email sent successfully');
-                    } else {
-                        console.log('[NOTIFICATION-SERVICE] ⚠️ Candidate user lookup returned null/undefined');
-                    }
-                } catch (error) {
-                    console.log('[NOTIFICATION-SERVICE] ⚠️ Failed to fetch candidate user or send email:', error);
-                    this.logger.warn({ candidate_user_id, error }, 'Failed to send candidate email for recruiter submission');
-                }
+                console.log('[NOTIFICATION-SERVICE] ✅ Candidate email sent successfully');
             } else {
-                console.log('[NOTIFICATION-SERVICE] ℹ️ No candidate_user_id - candidate is recruiter-managed (no email sent)');
+                console.log('[NOTIFICATION-SERVICE] ℹ️ No candidate email found - candidate is recruiter-managed (no email sent)');
             }
 
             this.logger.info({ application_id }, 'Recruiter submission to company notifications sent');
@@ -455,58 +443,50 @@ export class ApplicationsEventConsumer {
             const companyResponse = await this.services.getAtsService().get<any>(`/companies/${job.company_id}`);
             const company = companyResponse.data || companyResponse;
 
-            // Get candidate user (if they have an account)
-            let candidateUser = null;
-            try {
-                if (candidate_user_id) {
-                    const candidateUserResponse = await this.services.getIdentityService().get<any>(`/users/${candidate_user_id}`);
-                    candidateUser = candidateUserResponse.data || candidateUserResponse;
-                    console.log('[APPLICATIONS-CONSUMER] ✓ Found candidate user');
-                } else {
-                    console.log('[APPLICATIONS-CONSUMER] ⚠️ No candidate_user_id in event payload');
-                }
-            } catch (error) {
-                console.log('[APPLICATIONS-CONSUMER] ⚠️ Candidate user account not found');
-                this.logger.warn({ candidate_id, candidate_user_id }, 'Candidate user account not found');
-            }
+            // Get candidate email
+            const candidateEmail = await this.emailLookup.getCandidateEmail(candidate_id);
 
-            // Send confirmation email to candidate (only if they have a user account)
-            if (candidateUser) {
-                console.log('[APPLICATIONS-CONSUMER] 📧 Sending withdrawal confirmation to candidate:', candidate.email);
-                await this.emailService.sendApplicationWithdrawn(candidate.email, {
+            // Send confirmation email to candidate (only if they have an email)
+            if (candidateEmail) {
+                console.log('[APPLICATIONS-CONSUMER] 📧 Sending withdrawal confirmation to candidate:', candidateEmail);
+                await this.emailService.sendApplicationWithdrawn(candidateEmail, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
                     companyName: job.company?.name || company.name || 'Unknown Company',
                     reason,
                     withdrawnBy: 'Candidate',
                     applicationId: application_id,
-                    userId: candidateUser.id, // Use actual user ID
+                    userId: candidate_user_id || null,
                 });
                 console.log('[APPLICATIONS-CONSUMER] ✅ Candidate email sent');
             } else {
-                console.log('[APPLICATIONS-CONSUMER] ⚠️ Skipping candidate email (no user account)');
+                console.log('[APPLICATIONS-CONSUMER] ⚠️ Skipping candidate email (no email address found)');
             }
 
             // Notify recruiter if exists
             if (recruiter_id) {
-                console.log('[APPLICATIONS-CONSUMER] 🔍 Fetching recruiter details...');
-                const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
-                const recruiter = recruiterResponse.data || recruiterResponse;
+                console.log('[APPLICATIONS-CONSUMER] 🔍 Getting recruiter email...');
+                const recruiterEmail = await this.emailLookup.getRecruiterEmail(recruiter_id);
 
-                const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-                const user = userResponse.data || userResponse;
+                if (recruiterEmail) {
+                    // Fetch recruiter to get user_id for tracking
+                    const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
+                    const recruiter = recruiterResponse.data || recruiterResponse;
 
-                console.log('[APPLICATIONS-CONSUMER] 📧 Sending withdrawal notification to recruiter:', user.email);
-                await this.emailService.sendApplicationWithdrawn(user.email, {
-                    candidateName: candidate.full_name,
-                    jobTitle: job.title,
-                    companyName: job.company?.name || company.name || 'Unknown Company',
-                    reason,
-                    withdrawnBy: 'Candidate',
-                    applicationId: application_id,
-                    userId: recruiter.user_id,
-                });
-                console.log('[APPLICATIONS-CONSUMER] ✅ Recruiter email sent');
+                    console.log('[APPLICATIONS-CONSUMER] 📧 Sending withdrawal notification to recruiter:', recruiterEmail);
+                    await this.emailService.sendApplicationWithdrawn(recruiterEmail, {
+                        candidateName: candidate.full_name,
+                        jobTitle: job.title,
+                        companyName: job.company?.name || company.name || 'Unknown Company',
+                        reason,
+                        withdrawnBy: 'Candidate',
+                        applicationId: application_id,
+                        userId: recruiter.user_id,
+                    });
+                    console.log('[APPLICATIONS-CONSUMER] ✅ Recruiter email sent');
+                } else {
+                    console.log('[APPLICATIONS-CONSUMER] ⚠️ Cannot notify recruiter - no email address');
+                }
             } else {
                 console.log('[APPLICATIONS-CONSUMER] ⚠️ No recruiter assigned to application');
             }
@@ -554,29 +534,38 @@ export class ApplicationsEventConsumer {
             const companyResponse = await this.services.getAtsService().get<any>(`/companies/${company_id}`);
             const company = companyResponse.data || companyResponse;
 
-            // Fetch requesting user details
-            const requestingUserResponse = await this.services.getIdentityService().get<any>(`/users/${requested_by_user_id}`);
-            const requestingUser = requestingUserResponse.data || requestingUserResponse;
+            // Get requesting user email and name
+            const requestingUserEmail = await this.emailLookup.getEmailByUserId(requested_by_user_id);
+            const requestingUserName = await this.emailLookup.getUserName(requested_by_user_id);
+            
+            if (!requestingUserEmail) {
+                this.logger.warn({ requested_by_user_id }, 'Cannot send confirmation - requesting user has no email');
+                return;
+            }
 
             // Send notification to recruiter (if specified)
             if (recruiter_id && !auto_assign) {
-                const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
-                const recruiter = recruiterResponse.data || recruiterResponse;
+                const recruiterEmail = await this.emailLookup.getRecruiterEmail(recruiter_id);
+                
+                if (recruiterEmail) {
+                    // Fetch recruiter to get user_id for tracking
+                    const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
+                    const recruiter = recruiterResponse.data || recruiterResponse;
 
-                const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-                const user = userResponse.data || userResponse;
+                    await this.emailService.sendPreScreenRequested(recruiterEmail, {
+                        candidateName: candidate.full_name,
+                        candidateEmail: candidate.email,
+                        jobTitle: job.title,
+                        companyName: company.name,
+                        requestedBy: requestingUserName || requestingUserEmail,
+                        message: message || '',
+                        userId: recruiter.user_id,
+                    });
 
-                await this.emailService.sendPreScreenRequested(user.email, {
-                    candidateName: candidate.full_name,
-                    candidateEmail: candidate.email,
-                    jobTitle: job.title,
-                    companyName: company.name,
-                    requestedBy: requestingUser.full_name || requestingUser.email,
-                    message: message || '',
-                    userId: recruiter.user_id,
-                });
-
-                this.logger.info({ recruiter_id, recipient: user.email }, 'Pre-screen request notification sent to recruiter');
+                    this.logger.info({ recruiter_id, recipient: recruiterEmail }, 'Pre-screen request notification sent to recruiter');
+                } else {
+                    this.logger.warn({ recruiter_id }, 'Cannot notify recruiter - no email address');
+                }
             }
 
             // If auto-assign, we don't send notification yet - wait for actual assignment
@@ -585,7 +574,7 @@ export class ApplicationsEventConsumer {
             }
 
             // Send confirmation to requesting user
-            await this.emailService.sendPreScreenRequestConfirmation(requestingUser.email, {
+            await this.emailService.sendPreScreenRequestConfirmation(requestingUserEmail, {
                 candidateName: candidate.full_name,
                 jobTitle: job.title,
                 autoAssign: auto_assign,
@@ -631,7 +620,7 @@ export class ApplicationsEventConsumer {
 
             this.logger.info(
                 { application_id, fit_score, recommendation },
-                'Fetching data for AI review completed notification'
+                'Processing AI review completed notification'
             );
 
             // Fetch application details
@@ -650,55 +639,62 @@ export class ApplicationsEventConsumer {
             const reviewResponse = await this.services.getAtsService().get<any>(`/applications/${application_id}/ai-review`);
             const aiReview = reviewResponse.data || reviewResponse;
 
-            // Send email to candidate if they have an account
-            if (candidate.user_id) {
-                const userResponse = await this.services.getIdentityService().get<any>(`/users/${candidate.user_id}`);
-                const user = userResponse.data || userResponse;
-
-                await this.emailService.sendAIReviewCompletedToCandidate(user.email, {
+            // Send email to candidate if they have an email
+            const candidateEmail = await this.emailLookup.getCandidateEmail(application.candidate_id);
+            
+            if (candidateEmail) {
+                await this.emailService.sendAIReviewCompletedToCandidate(candidateEmail, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
                     fitScore: fit_score,
                     recommendation,
                     strengths: aiReview.strengths || [],
                     concerns: aiReview.concerns || [],
-                    userId: candidate.user_id,
+                    userId: candidate.user_id || null,
                     applicationId: application_id,
                 });
 
                 this.logger.info(
-                    { application_id, recipient: user.email },
+                    { application_id, recipient: candidateEmail },
                     'AI review completed notification sent to candidate'
                 );
             }
 
             // Send email to recruiter if application has one
             if (application.recruiter_id) {
-                const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${application.recruiter_id}`);
-                const recruiter = recruiterResponse.data || recruiterResponse;
+                const recruiterEmail = await this.emailLookup.getRecruiterEmail(application.recruiter_id);
+                
+                if (recruiterEmail) {
+                    // Fetch recruiter to get user_id and name
+                    const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${application.recruiter_id}`);
+                    const recruiter = recruiterResponse.data || recruiterResponse;
+                    const recruiterName = await this.emailLookup.getUserName(recruiter.user_id);
 
-                const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-                const user = userResponse.data || userResponse;
+                    await this.emailService.sendAIReviewCompletedToRecruiter(recruiterEmail, {
+                        recruiterName: recruiterName || 'Recruiter',
+                        candidateName: candidate.full_name,
+                        jobTitle: job.title,
+                        fitScore: fit_score,
+                        recommendation,
+                        overallSummary: aiReview.overall_summary,
+                        strengths: aiReview.strengths || [],
+                        concerns: aiReview.concerns || [],
+                        matchedSkills: aiReview.matched_skills || [],
+                        missingSkills: aiReview.missing_skills || [],
+                        userId: recruiter.user_id,
+                        applicationId: application_id,
+                    });
 
-                await this.emailService.sendAIReviewCompletedToRecruiter(user.email, {
-                    recruiterName: recruiter.name,
-                    candidateName: candidate.full_name,
-                    jobTitle: job.title,
-                    fitScore: fit_score,
-                    recommendation,
-                    overallSummary: aiReview.overall_summary,
-                    strengths: aiReview.strengths || [],
-                    concerns: aiReview.concerns || [],
-                    matchedSkills: aiReview.matched_skills || [],
-                    missingSkills: aiReview.missing_skills || [],
-                    userId: recruiter.user_id,
-                    applicationId: application_id,
-                });
-
-                this.logger.info(
-                    { application_id, recipient: user.email },
-                    'AI review completed notification sent to recruiter'
-                );
+                    this.logger.info(
+                        { application_id, recipient: recruiterEmail },
+                        'AI review completed notification sent to recruiter'
+                    );
+                } else {
+                    this.logger.warn(
+                        { recruiter_id: application.recruiter_id },
+                        'Cannot notify recruiter - no email address'
+                    );
+                }
             }
 
             this.logger.info({ application_id }, 'AI review completed notifications sent');

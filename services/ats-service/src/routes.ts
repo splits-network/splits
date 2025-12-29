@@ -29,7 +29,7 @@ export function registerRoutes(
     eventPublisher: EventPublisher
 ) {
     // Create CandidatesService instance
-    const candidatesService = new CandidatesService(repository);
+    const candidatesService = new CandidatesService(repository, eventPublisher);
     
     // Register all domain-specific routes
     registerCompanyRoutes(app, service);

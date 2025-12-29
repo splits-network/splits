@@ -1,4 +1,5 @@
 import { AtsRepository } from '../../repository';
+import { EventPublisher } from '../../events';
 import { getNetworkClient } from '../../clients/network-client';
 import { createLogger } from '@splits-network/shared-logging';
 
@@ -36,7 +37,10 @@ export interface SelfUpdateCandidateParams {
 }
 
 export class CandidatesService {
-    constructor(private repository: AtsRepository) {}
+    constructor(
+        private repository: AtsRepository,
+        private eventPublisher: EventPublisher
+    ) {}
     
     private networkClient = getNetworkClient();
 
@@ -320,6 +324,27 @@ export class CandidatesService {
                 logger.error(
                     { err: error, recruiterId, candidateId: candidate.id },
                     'Error creating recruiter-candidate relationship'
+                );
+            }
+
+            // Publish candidate.sourced event for notification
+            try {
+                await this.eventPublisher.publish(
+                    'candidate.sourced',
+                    {
+                        candidate_id: candidate.id,
+                        candidate_email: candidate.email,
+                        candidate_name: candidate.full_name,
+                        sourcer_recruiter_id: recruiterId,
+                        source_method: 'web_ui',
+                    },
+                    'ats-service'
+                );
+                logger.info({ candidateId: candidate.id, recruiterId }, 'Published candidate.sourced event');
+            } catch (error) {
+                logger.error(
+                    { err: error, candidateId: candidate.id, recruiterId },
+                    'Failed to publish candidate.sourced event'
                 );
             }
 

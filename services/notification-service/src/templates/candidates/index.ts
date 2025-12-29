@@ -153,6 +153,55 @@ ${paragraph(
     });
 }
 
+export interface CandidateAddedToNetworkData {
+    candidateName: string;
+    recruiterName?: string;
+    portalUrl: string;
+    source?: EmailSource;
+}
+
+export function candidateAddedToNetworkEmail(data: CandidateAddedToNetworkData): string {
+    const content = `
+${heading({ level: 1, text: "You've Been Added to a Recruiter's Network", icon: '👋' })}
+
+${alert({
+    type: 'info',
+    message: 'A recruiter has added you to their professional network on Splits.',
+})}
+
+${infoCard({
+    title: 'What This Means',
+    items: [
+        { label: 'Network Protection', value: 'This recruiter has exclusive rights to represent you' },
+        { label: 'Duration', value: '365 days from today' },
+        { label: 'Your Benefits', value: 'Priority access to job opportunities' },
+    ],
+})}
+
+${paragraph(
+    'This recruiter will be your primary contact for job opportunities and career guidance. They are committed to helping you find the right position.'
+)}
+
+${button({
+    href: data.portalUrl,
+    text: 'View Your Profile →',
+    variant: 'primary',
+})}
+
+${divider()}
+
+${paragraph(
+    '<strong>Questions?</strong> If you did not expect this or have concerns, please contact us at support@splits.network'
+)}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: "You've been added to a recruiter's network",
+        content,
+        source: data.source || 'candidate',
+    });
+}
+
 export interface CollaboratorAddedData {
     candidateName: string;
     jobTitle: string;

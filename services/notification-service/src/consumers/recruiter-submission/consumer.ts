@@ -67,7 +67,7 @@ export class RecruiterSubmissionEventConsumer {
                 recruiterPitch: recruiter_pitch,
                 opportunityUrl,
                 expiresAt: formattedExpiryDate,
-                userId: candidate_id,
+                userId: candidate.user_id, // ✅ Use candidate.user_id (identity.users.id), not candidate_id
                 applicationId: application_id,
             });
 
@@ -241,7 +241,7 @@ export class RecruiterSubmissionEventConsumer {
                 jobTitle: job.title,
                 companyName: job.company?.name || 'the company',
                 exploreUrl,
-                userId: candidate_id,
+                userId: candidate.user_id, // ✅ Use candidate.user_id (identity.users.id), not candidate_id
                 applicationId: application_id,
             });
 

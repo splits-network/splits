@@ -10,6 +10,7 @@ import { CandidatesEventConsumer } from './consumers/candidates/consumer';
 import { CollaborationEventConsumer } from './consumers/collaboration/consumer';
 import { InvitationsConsumer } from './consumers/invitations/consumer';
 import { RecruiterSubmissionEventConsumer } from './consumers/recruiter-submission/consumer';
+import { EmailLookupHelper } from './helpers/email-lookup';
 
 export class DomainEventConsumer {
     private connection: Connection | null = null;
@@ -33,9 +34,13 @@ export class DomainEventConsumer {
     ) {
         const portalUrl = process.env.PORTAL_URL || 'http://localhost:3001';
         
+        // Create email lookup helper for resolving user IDs to email addresses
+        const emailLookup = new EmailLookupHelper(services, logger);
+        
         this.applicationsConsumer = new ApplicationsEventConsumer(
             notificationService.applications,
             services,
+            emailLookup,
             logger
         );
         this.placementsConsumer = new PlacementsEventConsumer(

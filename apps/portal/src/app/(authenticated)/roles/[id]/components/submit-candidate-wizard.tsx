@@ -208,22 +208,21 @@ export default function SubmitCandidateWizard({
 
             // Step 1: Create or use existing candidate
             if (mode === 'select' && selectedCandidate.id !== 'new') {
-                // Use existing candidate
+                // Use existing candidate - call propose-to-candidate endpoint
                 candidateId = selectedCandidate.id;
 
-                const applicationResponse: any = await client.post('/applications', {
+                const proposeResponse: any = await client.post('/applications/propose-to-candidate', {
                     job_id: roleId,
                     candidate_id: candidateId,
-                    full_name: selectedCandidate.full_name,
-                    email: selectedCandidate.email,
+                    pitch: pitch.trim(),
                 });
 
                 applicationId =
-                    applicationResponse.data?.id ||
-                    applicationResponse.data?.application?.id ||
-                    applicationResponse.id;
+                    proposeResponse.data?.id ||
+                    proposeResponse.data?.application?.id ||
+                    proposeResponse.id;
             } else {
-                // Create new candidate
+                // Create new candidate first
                 const createResponse: any = await client.submitCandidate({
                     job_id: roleId,
                     ...formData,
@@ -232,23 +231,19 @@ export default function SubmitCandidateWizard({
                 candidateId =
                     createResponse.data?.candidate?.id ||
                     createResponse.candidate?.id;
-                applicationId =
-                    createResponse.data?.application?.id ||
-                    createResponse.data?.id ||
-                    createResponse.application?.id;
 
-                if (!applicationId && candidateId) {
-                    const applicationResponse: any = await client.post('/applications', {
+                // If candidate was created, propose the job to them
+                if (candidateId) {
+                    const proposeResponse: any = await client.post('/applications/propose-to-candidate', {
                         job_id: roleId,
                         candidate_id: candidateId,
-                        stage: 'recruiter_proposed',
-                        recruiter_pitch: pitch.trim(),
+                        pitch: pitch.trim(),
                     });
 
                     applicationId =
-                        applicationResponse.data?.id ||
-                        applicationResponse.data?.application?.id ||
-                        applicationResponse.id;
+                        proposeResponse.data?.id ||
+                        proposeResponse.data?.application?.id ||
+                        proposeResponse.id;
                 }
             }
 
@@ -256,13 +251,7 @@ export default function SubmitCandidateWizard({
                 throw new Error('Could not create application for this proposal');
             }
 
-            // Step 2: Set application to recruiter_proposed stage with pitch
-            await client.patch(`/applications/${applicationId}/stage`, {
-                stage: 'recruiter_proposed',
-                notes: pitch.trim(),
-            });
-
-            // Step 3: Upload resume if provided
+            // Upload resume if provided
             if (resumeFile && candidateId) {
                 const uploadFormData = new FormData();
                 uploadFormData.append('file', resumeFile);
@@ -279,7 +268,17 @@ export default function SubmitCandidateWizard({
             window.location.reload();
         } catch (err: any) {
             console.error('Failed to submit candidate:', err);
-            setError(err.message || 'Failed to send opportunity to candidate');
+            
+            // Handle specific error cases
+            let errorMessage = err.message || 'Failed to send opportunity to candidate';
+            
+            if (errorMessage.includes('already has an active application')) {
+                errorMessage = `${selectedCandidate.full_name} already has an active application for this role. Please check the role's applications list.`;
+            } else if (errorMessage.includes('HTTP 409')) {
+                errorMessage = `${selectedCandidate.full_name} already has an active application for this role. You cannot submit the same candidate twice.`;
+            }
+            
+            setError(errorMessage);
             setSubmitting(false);
         }
     };
