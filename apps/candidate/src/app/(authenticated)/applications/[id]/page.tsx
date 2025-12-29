@@ -4,6 +4,7 @@ import { auth } from '@clerk/nextjs/server';
 import { formatDate } from '@/lib/utils';
 import WithdrawButton from '@/components/withdraw-button';
 import AIReviewPanel from '@/components/ai-review-panel';
+import { ApplicationDetailClient } from './components/application-detail-client';
 
 const getStatusColor = (stage: string) => {
     switch (stage) {
@@ -133,8 +134,10 @@ export default async function ApplicationDetailPage({
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Main Content */}
+            {/* Proposal Alert - Shows when recruiter has proposed this job */}
+            <ApplicationDetailClient application={application} job={job} token={token || ''} />
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">{/* Main Content */}
                 <div className="lg:col-span-2 space-y-6">
                     {/* Job Details */}
                     <div className="card bg-base-100 shadow">
@@ -384,6 +387,7 @@ export default async function ApplicationDetailPage({
                                     <WithdrawButton
                                         applicationId={application.id}
                                         jobTitle={job.title || 'this position'}
+                                        isJobClosed={['closed', 'filled', 'cancelled'].includes(job.status)}
                                     />
                                 )}
 

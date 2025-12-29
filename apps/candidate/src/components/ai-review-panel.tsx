@@ -89,8 +89,8 @@ export default function AIReviewPanel({ applicationId, token }: AIReviewPanelPro
     useEffect(() => {
         async function fetchAIReview() {
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
-                const response = await fetch(`${apiUrl}/applications/${applicationId}/ai-review`, {
+                const apiUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
+                const response = await fetch(`${apiUrl}/api/applications/${applicationId}/ai-review`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
@@ -99,18 +99,26 @@ export default function AIReviewPanel({ applicationId, token }: AIReviewPanelPro
 
                 if (!response.ok) {
                     if (response.status === 404) {
-                        // No AI review yet
+                        // No AI review yet - this is expected for recently submitted applications
                         setAIReview(null);
+                        setError(null);
+                        setLoading(false);
                         return;
                     }
-                    throw new Error('Failed to fetch AI review');
+                    // For other errors (500, 403, etc), log but don't throw
+                    console.error(`Failed to fetch AI review: ${response.status} ${response.statusText}`);
+                    setError('Unable to load AI review at this time');
+                    setLoading(false);
+                    return;
                 }
 
                 const data = await response.json();
                 setAIReview(data.data);
+                setError(null);
             } catch (err) {
+                // Network errors or JSON parsing errors
                 console.error('Error fetching AI review:', err);
-                setError(err instanceof Error ? err.message : 'Failed to load AI review');
+                setError('Unable to connect to AI review service');
             } finally {
                 setLoading(false);
             }
@@ -137,9 +145,21 @@ export default function AIReviewPanel({ applicationId, token }: AIReviewPanelPro
 
     if (error) {
         return (
-            <div className="alert alert-error">
-                <i className="fa-solid fa-circle-exclamation"></i>
-                <span>{error}</span>
+            <div className="card bg-base-100 shadow">
+                <div className="card-body">
+                    <h2 className="card-title">
+                        <i className="fa-solid fa-robot"></i>
+                        AI Analysis
+                    </h2>
+                    <div className="alert alert-warning">
+                        <i className="fa-solid fa-triangle-exclamation"></i>
+                        <div>
+                            <div className="font-semibold">Unable to Load AI Review</div>
+                            <div className="text-sm mt-1">{error}</div>
+                            <div className="text-sm mt-2">Please try refreshing the page or check back later.</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }

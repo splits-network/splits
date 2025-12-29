@@ -34,7 +34,7 @@ export function registerRoutes(
     // Register all domain-specific routes
     registerCompanyRoutes(app, service);
     registerJobRoutes(app, service);
-    registerApplicationRoutes(app, service, repository);
+    registerApplicationRoutes(app, service, repository, eventPublisher);
     registerCandidateRoutes(app, service, candidatesService);
     registerPlacementRoutes(app, service);
     registerStatsRoutes(app, service);

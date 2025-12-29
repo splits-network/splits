@@ -3,6 +3,8 @@ import { AtsService } from '../../service';
 import { AtsRepository } from '../../repository';
 import { BadRequestError } from '@splits-network/shared-fastify';
 import { SubmitCandidateDTO, UpdateApplicationStageDTO } from '@splits-network/shared-types';
+import { AIReviewService } from '../../services/ai-review/service';
+import { EventPublisher } from '../../events';
 
 /**
  * Applications Routes
@@ -28,7 +30,7 @@ function getUserContext(request: FastifyRequest): { clerkUserId: string; userRol
     };
 }
 
-export function registerApplicationRoutes(app: FastifyInstance, service: AtsService, repository: AtsRepository) {
+export function registerApplicationRoutes(app: FastifyInstance, service: AtsService, repository: AtsRepository, eventPublisher: EventPublisher) {
     // Get paginated applications with optional filters and search
     app.get(
         '/applications/paginated',
@@ -830,6 +832,270 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
             }
 
             return reply.send({ data: proposedJobs });
+        }
+    );
+
+    // Alias routes for document spec compliance
+    // Accept proposal (alias for candidate-approve)
+    app.post(
+        '/applications/:id/accept-proposal',
+        async (request: FastifyRequest<{ 
+            Params: { id: string };
+            Body: {
+                document_ids?: string[];
+                primary_resume_id?: string;
+                pre_screen_answers?: Array<{ question_id: string; answer: string }>;
+                additional_notes?: string;
+            };
+        }>, reply: FastifyReply) => {
+            const clerkUserId = request.headers['x-clerk-user-id'] as string;
+            if (!clerkUserId) {
+                throw new BadRequestError('User authentication required');
+            }
+
+            const candidate = await repository.findCandidateByClerkUserId(clerkUserId);
+            if (!candidate) {
+                return reply.status(404).send({ 
+                    error: { code: 'CANDIDATE_NOT_FOUND', message: 'Candidate profile not found' } 
+                });
+            }
+
+            // Look up identity.users.id for audit log
+            const identityUser = await repository.findUserByClerkUserId(clerkUserId);
+            if (!identityUser) {
+                return reply.status(404).send({
+                    error: { code: 'USER_NOT_FOUND', message: 'User identity not found' }
+                });
+            }
+
+            // 1. Approve the opportunity (changes stage to ai_review)
+            const application = await service.candidateApproveOpportunity({
+                applicationId: request.params.id,
+                candidateId: candidate.id,
+                candidateUserId: identityUser.id, // Use UUID not Clerk ID
+            });
+
+            // 2. Link documents if provided
+            if (request.body.document_ids && request.body.document_ids.length > 0) {
+                for (const docId of request.body.document_ids) {
+                    await repository.linkDocumentToApplication(
+                        docId,
+                        request.params.id,
+                        docId === request.body.primary_resume_id
+                    );
+                }
+            }
+
+            // 3. Save pre-screen answers if provided
+            if (request.body.pre_screen_answers && request.body.pre_screen_answers.length > 0) {
+                for (const answer of request.body.pre_screen_answers) {
+                    await repository.savePreScreenAnswer({
+                        application_id: request.params.id,
+                        question_id: answer.question_id,
+                        answer: answer.answer,
+                    });
+                }
+            }
+
+            // 4. Update additional notes if provided
+            if (request.body.additional_notes) {
+                await repository.updateApplication(request.params.id, {
+                    candidate_notes: request.body.additional_notes,
+                });
+            }
+
+            // Get pre-screen questions for response
+            const job = await repository.findJobById(application.job_id);
+            if (!job) {
+                throw new Error('Job not found');
+            }
+
+            const preScreenQuestions = await repository.getPreScreenQuestionsForJob(job.id);
+
+            request.log.info({
+                applicationId: request.params.id,
+                candidateId: candidate.id,
+                action: 'accepted_proposal',
+                documents_linked: request.body.document_ids?.length || 0,
+                pre_screen_answers: request.body.pre_screen_answers?.length || 0,
+            }, 'Candidate accepted recruiter proposal and submitted application');
+
+            // 5. Trigger AI review in background (fire and forget)
+            // This will analyze candidate-job fit and auto-transition to next stage
+            const aiReviewService = new AIReviewService(repository, eventPublisher);
+            
+            // Build requirements for AI review
+            const requirements = job.requirements || [];
+            const mandatorySkills = requirements
+                .filter(r => r.requirement_type === 'mandatory')
+                .map(r => r.description);
+            const preferredSkills = requirements
+                .filter(r => r.requirement_type === 'preferred')
+                .map(r => r.description);
+            
+            const resumeContent = [
+                candidate.full_name,
+                candidate.email,
+                candidate.current_title ? `Current: ${candidate.current_title}` : '',
+                candidate.current_company ? `at ${candidate.current_company}` : '',
+                candidate.location ? `Location: ${candidate.location}` : '',
+                candidate.bio || '',
+                candidate.skills ? `Skills: ${candidate.skills}` : '',
+            ].filter(Boolean).join('\n');
+            
+            // Trigger AI review (fire and forget)
+            aiReviewService.reviewApplication({
+                application_id: request.params.id,
+                resume_text: resumeContent,
+                job_description: job.recruiter_description || job.description || '',
+                job_title: job.title,
+                required_skills: mandatorySkills,
+                preferred_skills: preferredSkills,
+                candidate_location: candidate.location,
+                job_location: job.location,
+                auto_transition: true, // Auto-transition to next stage after review
+            }).then(review => {
+                request.log.info({ 
+                    applicationId: request.params.id,
+                    fitScore: review.fit_score,
+                    recommendation: review.recommendation
+                }, 'AI review completed for accepted proposal');
+            }).catch(err => {
+                request.log.error({ 
+                    error: err, 
+                    applicationId: request.params.id 
+                }, 'AI review failed for accepted proposal');
+            });
+
+            return reply.send({
+                data: {
+                    application,
+                    next_steps: {
+                        stage: 'ai_review',
+                        pre_screen_questions: preScreenQuestions,
+                        requires_documents: true,
+                    },
+                },
+            });
+        }
+    );
+
+    // Decline proposal (alias for candidate-decline)
+    app.post(
+        '/applications/:id/decline-proposal',
+        async (request: FastifyRequest<{
+            Params: { id: string };
+            Body: {
+                reason: string;
+                details?: string;
+            };
+        }>, reply: FastifyReply) => {
+            const clerkUserId = request.headers['x-clerk-user-id'] as string;
+            if (!clerkUserId) {
+                throw new BadRequestError('User authentication required');
+            }
+
+            const { reason, details } = request.body;
+            if (!reason) {
+                throw new BadRequestError('Decline reason is required');
+            }
+
+            const candidate = await repository.findCandidateByClerkUserId(clerkUserId);
+            if (!candidate) {
+                return reply.status(404).send({ 
+                    error: { code: 'CANDIDATE_NOT_FOUND', message: 'Candidate profile not found' } 
+                });
+            }
+
+            // Look up identity.users.id for audit log
+            const identityUser = await repository.findUserByClerkUserId(clerkUserId);
+            if (!identityUser) {
+                return reply.status(404).send({
+                    error: { code: 'USER_NOT_FOUND', message: 'User identity not found' }
+                });
+            }
+
+            const application = await service.candidateDeclineOpportunity({
+                applicationId: request.params.id,
+                candidateId: candidate.id,
+                candidateUserId: identityUser.id, // Use UUID not Clerk ID
+                reason,
+                notes: details,
+            });
+
+            request.log.info({
+                applicationId: request.params.id,
+                candidateId: candidate.id,
+                action: 'declined_proposal',
+                reason,
+            }, 'Candidate declined recruiter proposal');
+
+            return reply.send({ 
+                data: {
+                    application,
+                    message: 'Proposal declined successfully',
+                },
+            });
+        }
+    );
+
+    // Complete candidate application
+    app.patch(
+        '/applications/:id/complete',
+        async (request: FastifyRequest<{
+            Params: { id: string };
+            Body: {
+                document_ids: string[];
+                primary_resume_id: string;
+                pre_screen_answers?: Array<{ question_id: string; answer: any }>;
+                notes?: string;
+            };
+        }>, reply: FastifyReply) => {
+            // Get Clerk user ID from header (passed by API Gateway)
+            const clerkUserId = request.headers['x-clerk-user-id'] as string;
+
+            if (!clerkUserId) {
+                throw new BadRequestError('User authentication required');
+            }
+
+            // Validate required fields
+            const { document_ids, primary_resume_id, pre_screen_answers, notes } = request.body;
+
+            if (!document_ids || document_ids.length === 0) {
+                throw new BadRequestError('At least one document is required');
+            }
+
+            if (!primary_resume_id) {
+                throw new BadRequestError('Primary resume is required');
+            }
+
+            // Look up candidate by Clerk user ID
+            const candidate = await repository.findCandidateByClerkUserId(clerkUserId);
+            if (!candidate) {
+                return reply.status(404).send({ 
+                    error: { code: 'CANDIDATE_NOT_FOUND', message: 'Candidate profile not found' } 
+                });
+            }
+
+            const result = await service.completeCandidateApplication({
+                applicationId: request.params.id,
+                candidateId: candidate.id,
+                candidateUserId: clerkUserId,
+                documentIds: document_ids,
+                primaryResumeId: primary_resume_id,
+                preScreenAnswers: pre_screen_answers,
+                notes,
+            });
+
+            request.log.info({
+                applicationId: request.params.id,
+                candidateId: candidate.id,
+                action: 'completed_application',
+                documentCount: document_ids.length,
+                answersCount: pre_screen_answers?.length || 0,
+            }, 'Candidate completed application');
+
+            return reply.send({ data: result });
         }
     );
 }

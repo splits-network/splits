@@ -7,14 +7,29 @@ import { useAuth } from '@clerk/nextjs';
 interface WithdrawButtonProps {
     applicationId: string;
     jobTitle: string;
+    isJobClosed?: boolean;
 }
 
-export default function WithdrawButton({ applicationId, jobTitle }: WithdrawButtonProps) {
+export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = false }: WithdrawButtonProps) {
     const [isWithdrawing, setIsWithdrawing] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
     const { getToken } = useAuth();
+
+    // Prevent withdrawal if job is closed
+    if (isJobClosed) {
+        return (
+            <button
+                className="btn btn-error btn-outline w-full"
+                disabled
+                title="Cannot withdraw - position is no longer available"
+            >
+                <i className="fa-solid fa-xmark"></i>
+                Withdraw Application
+            </button>
+        );
+    }
 
     const handleWithdraw = async () => {
         setIsWithdrawing(true);

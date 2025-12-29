@@ -1152,16 +1152,45 @@ export class AtsRepository {
         }));
     }
 
+    // Document update method
+    async updateDocument(documentId: string, updates: {
+        entity_id?: string;
+        entity_type?: string;
+        metadata?: any;
+    }): Promise<any> {
+        const { data, error } = await this.supabase
+            .schema('documents')
+            .from('documents')
+            .update(updates)
+            .eq('id', documentId)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
     // Pre-screen answer methods
+    async savePreScreenAnswer(answer: {
+        application_id: string;
+        question_id: string;
+        answer: any;
+    }): Promise<any> {
+        return this.createPreScreenAnswer(answer);
+    }
+
     async createPreScreenAnswer(answer: {
         application_id: string;
         question_id: string;
         answer: any;
     }): Promise<any> {
+        // Use UPSERT to handle resubmissions - update answer if it exists
         const { data, error } = await this.supabase
             .schema('ats')
             .from('job_pre_screen_answers')
-            .insert(answer)
+            .upsert(answer, {
+                onConflict: 'application_id,question_id',
+            })
             .select()
             .single();
 

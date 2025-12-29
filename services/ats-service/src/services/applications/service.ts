@@ -1216,9 +1216,9 @@ export class ApplicationService {
             throw new Error('This job is no longer accepting applications');
         }
 
-        // 5. Update application stage to draft
+        // 5. Update application stage directly to ai_review (skip draft for proposals)
         const updated = await this.repository.updateApplication(applicationId, {
-            stage: 'draft',
+            stage: 'ai_review',
         });
 
         // 6. Create audit log entry
@@ -1231,7 +1231,7 @@ export class ApplicationService {
                 stage: 'recruiter_proposed',
             },
             new_value: {
-                stage: 'draft',
+                stage: 'ai_review',
             },
         });
 
@@ -1426,5 +1426,121 @@ export class ApplicationService {
         );
 
         return enriched;
+    }
+
+    /**
+     * Complete candidate application after accepting opportunity
+     * Moves from 'draft' to 'ai_review' stage
+     * Links documents, saves pre-screen answers, triggers AI review
+     */
+    async completeCandidateApplication(params: {
+        applicationId: string;
+        candidateId: string;
+        candidateUserId: string;
+        documentIds: string[];
+        primaryResumeId: string;
+        preScreenAnswers?: Array<{ question_id: string; answer: any }>;
+        notes?: string;
+    }): Promise<{
+        application: Application;
+        ai_review_initiated: boolean;
+    }> {
+        const {
+            applicationId,
+            candidateId,
+            candidateUserId,
+            documentIds,
+            primaryResumeId,
+            preScreenAnswers,
+            notes,
+        } = params;
+
+        // 1. Get application
+        const application = await this.repository.findApplicationById(applicationId);
+        if (!application) {
+            throw new Error(`Application ${applicationId} not found`);
+        }
+
+        // 2. Verify application is in draft stage
+        if (application.stage !== 'draft') {
+            throw new Error(`Application must be in draft stage (current: ${application.stage})`);
+        }
+
+        // 3. Verify user is the candidate for this application
+        if (application.candidate_id !== candidateId) {
+            throw new Error('You can only complete your own applications');
+        }
+
+        // 4. Verify at least one document (primary resume) is provided
+        if (!documentIds.length || !primaryResumeId) {
+            throw new Error('Primary resume is required');
+        }
+
+        if (!documentIds.includes(primaryResumeId)) {
+            throw new Error('Primary resume must be in document list');
+        }
+
+        // 5. Link documents to application
+        // Update the documents table to link them to this application
+        for (const docId of documentIds) {
+            await this.repository.updateDocument(docId, {
+                entity_id: applicationId,
+                entity_type: 'application',
+            });
+        }
+
+        // 6. Save pre-screen answers if provided
+        if (preScreenAnswers && preScreenAnswers.length > 0) {
+            for (const answer of preScreenAnswers) {
+                await this.repository.savePreScreenAnswer({
+                    application_id: applicationId,
+                    question_id: answer.question_id,
+                    answer: answer.answer,
+                });
+            }
+        }
+
+        // 7. Update application with notes and move to ai_review stage
+        const updated = await this.repository.updateApplication(applicationId, {
+            stage: 'ai_review',
+            notes: notes || undefined,
+            primary_resume_id: primaryResumeId,
+        });
+
+        // 8. Create audit log entry
+        await this.repository.createAuditLog({
+            application_id: applicationId,
+            action: 'submitted_to_recruiter',
+            performed_by_user_id: candidateUserId,
+            performed_by_role: 'candidate',
+            old_value: {
+                stage: 'draft',
+            },
+            new_value: {
+                stage: 'ai_review',
+                documents: documentIds.length,
+                pre_screen_answers: preScreenAnswers?.length || 0,
+            },
+        });
+
+        // 9. Publish event to trigger AI review
+        await this.eventPublisher.publish(
+            'application.submitted_for_ai_review',
+            {
+                application_id: applicationId,
+                candidate_id: candidateId,
+                recruiter_id: application.recruiter_id,
+                job_id: application.job_id,
+                document_ids: documentIds,
+                primary_resume_id: primaryResumeId,
+                submitted_at: new Date().toISOString(),
+            },
+            'ats-service'
+        );
+
+        return {
+            application: updated,
+            ai_review_initiated: true,
+        };
     }
 }

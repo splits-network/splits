@@ -384,5 +384,71 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
         const data = await atsService().post(`/applications/${id}/candidate-decline`, request.body, correlationId, headers);
         return reply.send(data);
     });
+
+    // Accept proposal (alias endpoint matching spec)
+    app.post('/api/applications/:id/accept-proposal', {
+        preHandler: requireRoles(['candidate'], services),
+        schema: {
+            description: 'Candidate accepts recruiter-proposed job opportunity',
+            tags: ['applications', 'candidate'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const req = request as AuthenticatedRequest;
+        const { id } = request.params as { id: string };
+        const correlationId = getCorrelationId(request);
+        
+        const headers = {
+            'x-clerk-user-id': req.auth.clerkUserId,
+            'x-user-role': 'candidate',
+        };
+
+        const data = await atsService().post(`/applications/${id}/accept-proposal`, request.body, correlationId, headers);
+        return reply.send(data);
+    });
+
+    // Decline proposal (alias endpoint matching spec)
+    app.post('/api/applications/:id/decline-proposal', {
+        preHandler: requireRoles(['candidate'], services),
+        schema: {
+            description: 'Candidate declines recruiter-proposed job opportunity',
+            tags: ['applications', 'candidate'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const req = request as AuthenticatedRequest;
+        const { id } = request.params as { id: string };
+        const correlationId = getCorrelationId(request);
+        
+        const headers = {
+            'x-clerk-user-id': req.auth.clerkUserId,
+            'x-user-role': 'candidate',
+        };
+
+        const data = await atsService().post(`/applications/${id}/decline-proposal`, request.body, correlationId, headers);
+        return reply.send(data);
+    });
+
+    // Complete application
+    app.patch('/api/applications/:id/complete', {
+        preHandler: requireRoles(['candidate'], services),
+        schema: {
+            description: 'Complete candidate application with documents and answers',
+            tags: ['applications', 'candidate'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const req = request as AuthenticatedRequest;
+        const { id } = request.params as { id: string };
+        const correlationId = getCorrelationId(request);
+        
+        const headers = {
+            'x-clerk-user-id': req.auth.clerkUserId,
+            'x-user-role': 'candidate',
+        };
+
+        const data = await atsService().patch(`/applications/${id}/complete`, request.body, correlationId, headers);
+        return reply.send(data);
+    });
 }
 
