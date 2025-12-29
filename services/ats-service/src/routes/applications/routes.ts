@@ -469,7 +469,7 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
             const application = await service.withdrawApplication(
                 request.params.id,
                 candidate.id,
-                clerkUserId,
+                candidate.user_id,  // Pass internal UUID instead of Clerk ID
                 request.body.reason
             );
 

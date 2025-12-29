@@ -193,7 +193,7 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
 
     // Submit candidate application (candidate self-service)
     app.post('/api/applications/submit', {
-        preHandler: requireRoles(['candidate']),
+        preHandler: requireRoles(['candidate'], services),
         schema: {
             description: 'Submit candidate application',
             tags: ['applications'],
@@ -217,7 +217,7 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
 
     // Withdraw application (candidates only)
     app.post('/api/applications/:id/withdraw', {
-        preHandler: requireRoles(['candidate']),
+        preHandler: requireRoles(['candidate'], services),
         schema: {
             description: 'Withdraw application',
             tags: ['applications'],
