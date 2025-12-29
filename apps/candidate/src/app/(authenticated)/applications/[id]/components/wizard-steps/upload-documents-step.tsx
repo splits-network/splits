@@ -60,7 +60,7 @@ export function UploadDocumentsStep({
                 return;
             }
 
-            const response = await getMyDocuments(token);
+            const response = await getMyDocuments(token) as { data: any[] };
             setExistingDocs(response.data || []);
         } catch (err) {
             console.error('Failed to load existing documents:', err);
