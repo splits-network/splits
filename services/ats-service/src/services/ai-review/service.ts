@@ -90,9 +90,10 @@ export class AIReviewService {
                 analyzed_at: new Date(),
             });
 
-            // Mark application as AI reviewed
+            // Mark application as AI reviewed and transition to screen stage
             await this.repository.updateApplication(input.application_id, {
-                ai_reviewed: true
+                ai_reviewed: true,
+                stage: 'screen', // Transition from ai_review to screen for recruiter review
             });
 
             // Publish completed event
