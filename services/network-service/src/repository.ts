@@ -33,25 +33,70 @@ export class NetworkRepository {
 
     // Recruiter methods
     async findRecruiterById(id: string): Promise<Recruiter | null> {
-        const { data, error } = await this.supabase
-            .schema('network').from('recruiters')
-            .select(`
-                *,
-                user:user_id (
-                    id,
-                    clerk_user_id,
-                    email,
-                    name
-                )
-            `)
-            .eq('id', id)
-            .single();
+        console.log('[NETWORK-REPO] 🔍 findRecruiterById called with id:', id);
+        
+        try {
+            // Fetch recruiter from network schema
+            const { data: recruiter, error: recruiterError } = await this.supabase
+                .schema('network')
+                .from('recruiters')
+                .select('*')
+                .eq('id', id)
+                .single();
 
-        if (error) {
-            if (error.code === 'PGRST116') return null;
-            throw error;
+            if (recruiterError) {
+                console.error('[NETWORK-REPO] ❌ Supabase query error (recruiter):', {
+                    code: recruiterError.code,
+                    message: recruiterError.message,
+                    details: recruiterError.details,
+                    hint: recruiterError.hint,
+                    recruiterId: id
+                });
+                if (recruiterError.code === 'PGRST116') {
+                    console.log('[NETWORK-REPO] Recruiter not found (PGRST116)');
+                    return null;
+                }
+                throw recruiterError;
+            }
+
+            if (!recruiter) {
+                console.log('[NETWORK-REPO] Recruiter not found (null data)');
+                return null;
+            }
+
+            // Fetch associated user from identity schema if user_id exists
+            if (recruiter.user_id) {
+                const { data: user, error: userError } = await this.supabase
+                    .schema('identity')
+                    .from('users')
+                    .select('id, clerk_user_id, email, name')
+                    .eq('id', recruiter.user_id)
+                    .single();
+
+                if (userError) {
+                    console.error('[NETWORK-REPO] ⚠️ Could not fetch user:', {
+                        code: userError.code,
+                        message: userError.message,
+                        userId: recruiter.user_id
+                    });
+                    // Continue without user data
+                } else if (user) {
+                    // Attach user data to recruiter
+                    (recruiter as any).user = user;
+                }
+            }
+            
+            console.log('[NETWORK-REPO] ✅ Recruiter found:', {
+                id: recruiter.id,
+                hasUser: !!(recruiter as any).user,
+                userEmail: (recruiter as any).user?.email
+            });
+            
+            return recruiter;
+        } catch (err) {
+            console.error('[NETWORK-REPO] ❌ Unexpected error in findRecruiterById:', err);
+            throw err;
         }
-        return data;
     }
 
     async findRecruiterByClerkUserId(clerkUserId: string): Promise<Recruiter | null> {

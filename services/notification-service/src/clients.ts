@@ -7,8 +7,7 @@ export class ServiceClient {
     constructor(
         private baseUrl: string,
         private serviceName: string,
-        private logger: Logger,
-        private serviceAuthKey?: string
+        private logger: Logger
     ) {}
 
     async get<T>(path: string): Promise<T> {
@@ -19,11 +18,6 @@ export class ServiceClient {
             const headers: Record<string, string> = {
                 'Content-Type': 'application/json',
             };
-            
-            // Add service authentication for inter-service calls
-            if (this.serviceAuthKey) {
-                headers['x-service-auth'] = this.serviceAuthKey;
-            }
             
             const response = await fetch(url, {
                 method: 'GET',
@@ -60,12 +54,11 @@ export class ServiceRegistry {
         identityUrl: string,
         atsUrl: string,
         networkUrl: string,
-        logger: Logger,
-        serviceAuthKey?: string
+        logger: Logger
     ) {
-        this.identityService = new ServiceClient(identityUrl, 'identity-service', logger, serviceAuthKey);
-        this.atsService = new ServiceClient(atsUrl, 'ats-service', logger, serviceAuthKey);
-        this.networkService = new ServiceClient(networkUrl, 'network-service', logger, serviceAuthKey);
+        this.identityService = new ServiceClient(identityUrl, 'identity-service', logger);
+        this.atsService = new ServiceClient(atsUrl, 'ats-service', logger);
+        this.networkService = new ServiceClient(networkUrl, 'network-service', logger);
     }
 
     getIdentityService() {

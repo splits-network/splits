@@ -77,18 +77,11 @@ async function main() {
         logger
     );
 
-    // Initialize service registry for inter-service calls
-    const serviceAuthKey = process.env.SERVICE_AUTH_KEY;
-    if (!serviceAuthKey) {
-        logger.warn('SERVICE_AUTH_KEY not set - inter-service calls may fail');
-    }
-    
     const services = new ServiceRegistry(
         identityServiceUrl,
         atsServiceUrl,
         networkServiceUrl,
-        logger,
-        serviceAuthKey
+        logger
     );
 
     // Initialize domain event consumer

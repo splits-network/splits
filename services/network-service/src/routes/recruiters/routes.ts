@@ -62,9 +62,18 @@ export function registerRecruiterRoutes(app: FastifyInstance, service: NetworkSe
         '/recruiters/:id',
         async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
             try {
+                request.log.debug({ recruiterId: request.params.id }, 'Fetching recruiter by ID');
                 const recruiter = await service.getRecruiterById(request.params.id);
+                request.log.debug({ recruiterId: request.params.id, hasUser: !!(recruiter as any).user }, 'Recruiter fetched successfully');
                 return reply.send({ data: recruiter });
             } catch (error: any) {
+                request.log.error({
+                    err: error,
+                    recruiterId: request.params.id,
+                    errorMessage: error.message,
+                    errorCode: error.code,
+                    errorStack: error.stack
+                }, 'Failed to fetch recruiter by ID');
                 if (error.message.includes('not found')) {
                     throw new NotFoundError('Recruiter', request.params.id);
                 }
