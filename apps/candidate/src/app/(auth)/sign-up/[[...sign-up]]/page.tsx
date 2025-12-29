@@ -272,8 +272,8 @@ export default function SignUpPage() {
 
                     <p className="text-center text-sm mt-4">
                         Already have an account?{' '}
-                        <Link 
-                            href={redirect ? `/sign-in?redirect=${encodeURIComponent(redirect)}` : '/sign-in'} 
+                        <Link
+                            href={redirect ? `/sign-in?redirect=${encodeURIComponent(redirect)}` : '/sign-in'}
                             className="link link-primary"
                         >
                             Sign in
