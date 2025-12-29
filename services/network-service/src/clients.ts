@@ -57,4 +57,40 @@ export class AtsClient {
             throw error;
         }
     }
+
+    async get(path: string): Promise<any> {
+        try {
+            const response = await fetch(`${this.baseUrl}${path}`);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`ATS service returned ${response.status}: ${errorText}`);
+            }
+            const result: any = await response.json();
+            return result;
+        } catch (error: any) {
+            console.error('Error calling ATS service GET:', error.message);
+            throw error;
+        }
+    }
+
+    async patch(path: string, body: any): Promise<any> {
+        try {
+            const response = await fetch(`${this.baseUrl}${path}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(body),
+            });
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`ATS service returned ${response.status}: ${errorText}`);
+            }
+            const result: any = await response.json();
+            return result;
+        } catch (error: any) {
+            console.error('Error calling ATS service PATCH:', error.message);
+            throw error;
+        }
+    }
 }

@@ -169,7 +169,19 @@ export class CandidatesEventConsumer {
             const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
             const recruiterUser = userResponse.data || userResponse;
 
-            // Send acceptance notification to recruiter
+            // Send "You've been added to a recruiter's network" email to CANDIDATE
+            await this.emailService.sendCandidateAddedToNetwork(candidate.email, {
+                candidateName: candidate.full_name,
+                recruiterName: recruiterUser.name || recruiterUser.email,
+                userId: candidate.user_id, // Use candidate.user_id (identity.users.id)
+            });
+
+            this.logger.info({ 
+                candidate_email: candidate.email, 
+                recruiter_id 
+            }, 'Candidate added to network email sent to candidate');
+
+            // Send acceptance notification to RECRUITER
             await this.emailService.sendConsentGivenToRecruiter(recruiterUser.email, {
                 recruiter_name: recruiterUser.name,
                 candidate_name: candidate.full_name,

@@ -216,7 +216,34 @@ export class NetworkService {
             }
         }
 
-        // Emit consent given event for recruiter notification
+        // Set recruiter as sourcer if candidate doesn't have one yet
+        // This ensures recruiters only get credit when candidates actively accept
+        try {
+            const candidateResponse = await this.atsClient.get(`/candidates/${relationship.candidate_id}`);
+            const candidate = candidateResponse.data || candidateResponse;
+            
+            if (!candidate.recruiter_id) {
+                await this.atsClient.patch(`/candidates/${relationship.candidate_id}`, {
+                    recruiter_id: relationship.recruiter_id,
+                });
+                
+                // Publish candidate.sourced event now that consent is given
+                if (this.eventPublisher) {
+                    await this.eventPublisher.publish('candidate.sourced', {
+                        candidate_id: relationship.candidate_id,
+                        candidate_email: candidate.email,
+                        candidate_name: candidate.full_name,
+                        sourcer_recruiter_id: relationship.recruiter_id,
+                        source_method: 'invitation_accepted',
+                    }, 'network-service');
+                }
+            }
+        } catch (error: any) {
+            console.error('Failed to set recruiter as sourcer:', error.message);
+            // Don't fail the invitation acceptance if sourcer update fails
+        }
+
+        // Emit consent given event for notifications
         if (this.eventPublisher) {
             await this.eventPublisher.publish('candidate.consent_given', {
                 relationship_id: updatedRelationship.id,

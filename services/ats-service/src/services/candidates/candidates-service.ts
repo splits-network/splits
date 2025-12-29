@@ -287,12 +287,11 @@ export class CandidatesService {
 
             const recruiterId = entityId!;
 
-            // Create candidate with recruiter_id
+            // Create candidate WITHOUT recruiter_id - will be set when candidate accepts invitation
             const candidate = await this.repository.createCandidate({
                 email,
                 full_name,
                 linkedin_url,
-                recruiter_id: recruiterId,
                 verification_status: 'unverified',
             });
 
@@ -327,26 +326,8 @@ export class CandidatesService {
                 );
             }
 
-            // Publish candidate.sourced event for notification
-            try {
-                await this.eventPublisher.publish(
-                    'candidate.sourced',
-                    {
-                        candidate_id: candidate.id,
-                        candidate_email: candidate.email,
-                        candidate_name: candidate.full_name,
-                        sourcer_recruiter_id: recruiterId,
-                        source_method: 'web_ui',
-                    },
-                    'ats-service'
-                );
-                logger.info({ candidateId: candidate.id, recruiterId }, 'Published candidate.sourced event');
-            } catch (error) {
-                logger.error(
-                    { err: error, candidateId: candidate.id, recruiterId },
-                    'Failed to publish candidate.sourced event'
-                );
-            }
+            // Note: candidate.sourced event will be published when candidate accepts invitation
+            // This ensures recruiters can't claim candidates without their consent
 
             return candidate;
         }
