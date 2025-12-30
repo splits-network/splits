@@ -12,7 +12,8 @@ export class RecruiterSubmissionEventConsumer {
     constructor(
         private emailService: RecruiterSubmissionEmailService,
         private services: ServiceRegistry,
-        private logger: Logger
+        private logger: Logger,
+        private portalUrl: string
     ) {}
 
     /**
@@ -45,8 +46,7 @@ export class RecruiterSubmissionEventConsumer {
             const recruiterUser = recruiterUserResponse.data || recruiterUserResponse;
 
             // Build opportunity URL
-            const portalUrl = process.env.PORTAL_URL || 'http://localhost:3001';
-            const opportunityUrl = `${portalUrl}/opportunities/${application_id}`;
+            const opportunityUrl = `${this.portalUrl}/opportunities/${application_id}`;
 
             // Calculate expiry date (7 days from now)
             const expiryDate = new Date();
@@ -114,8 +114,7 @@ export class RecruiterSubmissionEventConsumer {
             const recruiterUser = recruiterUserResponse.data || recruiterUserResponse;
 
             // Build application URL
-            const portalUrl = process.env.PORTAL_URL || 'http://localhost:3001';
-            const applicationUrl = `${portalUrl}/applications/${application_id}`;
+            const applicationUrl = `${this.portalUrl}/applications/${application_id}`;
 
             // Send notification to recruiter
             await this.emailService.sendCandidateApprovedNotification(recruiterUser.email, {
@@ -172,8 +171,7 @@ export class RecruiterSubmissionEventConsumer {
             const recruiterUser = recruiterUserResponse.data || recruiterUserResponse;
 
             // Build roles browser URL
-            const portalUrl = process.env.PORTAL_URL || 'http://localhost:3001';
-            const rolesUrl = `${portalUrl}/roles`;
+            const rolesUrl = `${this.portalUrl}/roles`;
 
             // Send notification to recruiter
             await this.emailService.sendCandidateDeclinedNotification(recruiterUser.email, {
@@ -231,8 +229,7 @@ export class RecruiterSubmissionEventConsumer {
             const recruiterUser = recruiterUserResponse.data || recruiterUserResponse;
 
             // Build explore URL
-            const portalUrl = process.env.PORTAL_URL || 'http://localhost:3001';
-            const exploreUrl = `${portalUrl}/opportunities`;
+            const exploreUrl = `${this.portalUrl}/opportunities`;
 
             // Send notification to candidate
             await this.emailService.sendOpportunityExpiredNotification(candidate.email, {

@@ -4,7 +4,7 @@
 
 ### Candidate Routes
 
-#### `/opportunities`
+#### `/applications`
 **Candidate Opportunities List**
 - View all pending opportunities
 - Countdown timer for each (7-day expiration)
@@ -12,15 +12,15 @@
 - Quick "View Details" action
 - **Component**: `opportunities-list-client.tsx`
 
-#### `/opportunities/[id]`
-**Opportunity Detail & Action Page**
+#### `/applications/[id]`
+**Application Detail & Action Page**
 - Full job description
 - Recruiter pitch in highlighted box
 - Accept button (primary green action)
 - Decline button (secondary action)
 - Large countdown timer
 - Decline modal with optional reason field
-- **Component**: `opportunity-detail-client.tsx`
+- **Component**: `application-detail-client.tsx`
 
 ---
 
@@ -170,13 +170,13 @@ interface ProposedJob {
 
 ### Candidate Accepts Opportunity
 ```
-1. Visit /opportunities
+1. Visit /applications
 2. Browse list of opportunities
 3. Click "View Details" on card
 4. Review full job description & recruiter pitch
 5. Click "Accept Opportunity" button
 6. Confirmation message
-7. Redirect to /opportunities
+7. Redirect to /applications
 8. Email sent to recruiter
 ```
 
@@ -188,7 +188,7 @@ interface ProposedJob {
 4. Enter optional decline reason
 5. Click "Confirm Decline"
 6. Confirmation message
-7. Redirect to /opportunities
+7. Redirect to /applications
 8. Email sent to recruiter with reason
 ```
 
@@ -316,8 +316,8 @@ interface ProposedJob {
 - [ ] Verify database migrations applied
 - [ ] Check RabbitMQ is running (for events)
 - [ ] Confirm Resend API key configured
-- [ ] Load `/opportunities` as candidate user
-- [ ] Load `/proposed-jobs` as recruiter user
+- [ ] Load `/applications` as candidate user (candidate portal)
+- [ ] Load `/proposed-jobs` as recruiter user (portal)
 - [ ] Test accept/decline flow
 - [ ] Test propose job flow
 - [ ] Verify emails sent to Resend

@@ -113,7 +113,7 @@ apps/portal/src/app/(authenticated)/
 3. Check [Completion Summary](phase3-completion-summary.md) for testing
 
 **Key Files to Know**:
-- `apps/portal/src/app/(authenticated)/opportunities/` (candidate UI)
+- `apps/candidate/src/app/(authenticated)/applications/` (candidate UI)
 - `apps/portal/src/app/(authenticated)/proposed-jobs/` (recruiter UI)
 - `apps/portal/src/app/(authenticated)/dashboard/components/` (dashboard updates)
 
@@ -214,7 +214,7 @@ apps/portal/src/app/(authenticated)/
 #### Modify candidate UI
 → Phase 3: [phase3-frontend-components.md](phase3-frontend-components.md)
 - Section: "Candidate-Facing Components"
-- File: `apps/portal/src/app/(authenticated)/opportunities/`
+- File: `apps/candidate/src/app/(authenticated)/applications/`
 
 #### Add recruiter feature
 → Phase 3: [phase3-quick-reference.md](phase3-quick-reference.md)

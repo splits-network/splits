@@ -139,14 +139,14 @@ RabbitMQ: recruiter.job_proposed
     ↓ (consume event)
 Notification Service (send email)
     ↓ (Resend API)
-Candidate (Email with link to portal)
+Candidate (Email with link to candidate portal)
     ↓ (click link)
-/opportunities/[id] (Portal)
+/applications/[id] (Candidate Portal)
 ```
 
 ### Approval Flow
 ```
-Candidate (Portal)
+Candidate (Candidate Portal)
     ↓ (click Accept)
 POST /api/applications/{id}/approve-opportunity
     ↓ (API Gateway)
@@ -156,12 +156,12 @@ RabbitMQ: application.approved
     ↓ (consume event)
 Notification Service (send confirmation email)
     ↓ (Resend API)
-Recruiter (Email notification)
+Recruiter (Email/in-app notification)
 ```
 
 ### Decline Flow
 ```
-Candidate (Portal)
+Candidate (Candidate Portal)
     ↓ (click Decline)
 Modal form opens
     ↓ (optional decline reason)
@@ -173,7 +173,7 @@ RabbitMQ: application.declined
     ↓ (consume event)
 Notification Service (send decline email)
     ↓ (Resend API)
-Recruiter (Email with reason if provided)
+Recruiter (Email/in-app with reason if provided)
 ```
 
 ---
@@ -294,7 +294,7 @@ Recruiter (Email with reason if provided)
 1. ATS Service: `services/ats-service/src/service.ts`
 2. API Endpoints: `services/ats-service/src/routes.ts`
 3. Event Consumers: `services/notification-service/src/domain-consumer.ts`
-4. Candidate UI: `apps/portal/src/app/(authenticated)/opportunities/`
+4. Candidate UI: `apps/candidate/src/app/(authenticated)/applications/`
 5. Recruiter UI: `apps/portal/src/app/(authenticated)/dashboard/`
 
 ### Common Tasks
