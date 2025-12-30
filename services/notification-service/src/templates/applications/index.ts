@@ -568,3 +568,189 @@ ${paragraph('Typical review timelines: <strong>3-7 business days</strong>')}
         source: data.source || 'portal',
     });
 }
+
+export interface AIReviewCompletedCandidateData {
+    candidateName: string;
+    jobTitle: string;
+    fitScore: number;
+    recommendation: string;
+    strengths: string[];
+    concerns: string[];
+    applicationUrl: string;
+    source?: EmailSource;
+}
+
+export function aiReviewCompletedCandidateEmail(data: AIReviewCompletedCandidateData): string {
+    const recommendationLabels: Record<string, string> = {
+        strong_fit: 'Strong Fit',
+        good_fit: 'Good Fit',
+        possible_fit: 'Possible Fit',
+        weak_fit: 'Needs Development',
+    };
+
+    const recommendationLabel = recommendationLabels[data.recommendation] || data.recommendation.replace('_', ' ').toUpperCase();
+    
+    const isGoodMatch = data.recommendation === 'strong_fit' || data.recommendation === 'good_fit';
+    const alertType = isGoodMatch ? 'success' : 'info';
+
+    const content = `
+${heading({ level: 1, text: 'Your Application Has Been Reviewed', icon: '🤖' })}
+
+${paragraph(
+    `Hi <strong>${data.candidateName}</strong>, good news! Your application for <strong>${data.jobTitle}</strong> has been reviewed by our AI system.`
+)}
+
+${infoCard({
+    title: 'AI Review Results',
+    items: [
+        { label: 'Position', value: data.jobTitle },
+        { label: 'Match Score', value: `${data.fitScore}/100`, highlight: true },
+        { label: 'Assessment', value: recommendationLabel, highlight: true },
+    ],
+})}
+
+${data.strengths.length > 0 ? `
+${heading({ level: 3, text: 'Your Strengths', icon: '💪' })}
+<ul style="margin: 8px 0 20px; padding-left: 24px; color: #374151; line-height: 1.6;">
+${data.strengths.map(s => `  <li style="margin-bottom: 6px;">${s}</li>`).join('\n')}
+</ul>
+` : ''}
+
+${data.concerns.length > 0 ? `
+${heading({ level: 3, text: 'Areas to Address', icon: '📋' })}
+<ul style="margin: 8px 0 20px; padding-left: 24px; color: #374151; line-height: 1.6;">
+${data.concerns.map(c => `  <li style="margin-bottom: 6px;">${c}</li>`).join('\n')}
+</ul>
+` : ''}
+
+${alert({
+    type: alertType,
+    title: 'Next Steps',
+    message: isGoodMatch 
+        ? 'Your application shows strong potential! A recruiter will be in touch soon to discuss the next steps in the process.' 
+        : 'We\'ll keep you updated on your application status. Continue building your skills in the areas identified above.',
+})}
+
+${button({
+    href: data.applicationUrl,
+    text: 'View Full Analysis →',
+    variant: 'primary',
+})}
+
+${divider()}
+
+${paragraph(
+    'Questions about your review? Visit our <a href="https://splits.network/help" style="color: #233876; text-decoration: underline;">Help Center</a> to learn more about our AI review process.'
+)}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `AI review complete: ${data.fitScore}/100 match for ${data.jobTitle}`,
+        content,
+        source: data.source || 'portal',
+    });
+}
+
+export interface AIReviewCompletedRecruiterData {
+    recruiterName: string;
+    candidateName: string;
+    jobTitle: string;
+    fitScore: number;
+    recommendation: string;
+    overallSummary: string;
+    strengths: string[];
+    concerns: string[];
+    matchedSkills: string[];
+    missingSkills: string[];
+    applicationUrl: string;
+    source?: EmailSource;
+}
+
+export function aiReviewCompletedRecruiterEmail(data: AIReviewCompletedRecruiterData): string {
+    const recommendationLabels: Record<string, string> = {
+        strong_fit: 'Strong Fit',
+        good_fit: 'Good Fit',
+        possible_fit: 'Possible Fit',
+        weak_fit: 'Weak Fit',
+    };
+
+    const recommendationLabel = recommendationLabels[data.recommendation] || data.recommendation.replace('_', ' ').toUpperCase();
+    
+    const isStrongCandidate = data.recommendation === 'strong_fit' || data.recommendation === 'good_fit';
+    const alertType = isStrongCandidate ? 'success' : 'info';
+
+    const content = `
+${heading({ level: 1, text: 'AI Review Complete', icon: '🎯' })}
+
+${paragraph(
+    `Hi <strong>${data.recruiterName}</strong>, the AI review for <strong>${data.candidateName}</strong>'s application to <strong>${data.jobTitle}</strong> is now complete.`
+)}
+
+${infoCard({
+    title: 'Review Summary',
+    items: [
+        { label: 'Candidate', value: data.candidateName },
+        { label: 'Position', value: data.jobTitle },
+        { label: 'Match Score', value: `${data.fitScore}/100`, highlight: true },
+        { label: 'Recommendation', value: recommendationLabel, highlight: true },
+    ],
+})}
+
+${heading({ level: 3, text: 'AI Assessment', icon: '📊' })}
+${paragraph(data.overallSummary)}
+
+${data.matchedSkills.length > 0 ? `
+${heading({ level: 3, text: 'Matched Skills', icon: '✅' })}
+<ul style="margin: 8px 0 20px; padding-left: 24px; color: #374151; line-height: 1.6;">
+${data.matchedSkills.map(s => `  <li style="margin-bottom: 6px;"><strong>${s}</strong></li>`).join('\n')}
+</ul>
+` : ''}
+
+${data.strengths.length > 0 ? `
+${heading({ level: 3, text: 'Key Strengths', icon: '💪' })}
+<ul style="margin: 8px 0 20px; padding-left: 24px; color: #374151; line-height: 1.6;">
+${data.strengths.map(s => `  <li style="margin-bottom: 6px;">${s}</li>`).join('\n')}
+</ul>
+` : ''}
+
+${data.missingSkills.length > 0 ? `
+${heading({ level: 3, text: 'Missing Skills', icon: '⚠️' })}
+<ul style="margin: 8px 0 20px; padding-left: 24px; color: #6b7280; line-height: 1.6;">
+${data.missingSkills.map(s => `  <li style="margin-bottom: 6px;">${s}</li>`).join('\n')}
+</ul>
+` : ''}
+
+${data.concerns.length > 0 ? `
+${heading({ level: 3, text: 'Concerns', icon: '📋' })}
+<ul style="margin: 8px 0 20px; padding-left: 24px; color: #6b7280; line-height: 1.6;">
+${data.concerns.map(c => `  <li style="margin-bottom: 6px;">${c}</li>`).join('\n')}
+</ul>
+` : ''}
+
+${alert({
+    type: alertType,
+    title: 'Recommended Action',
+    message: isStrongCandidate 
+        ? 'This candidate shows strong potential for the role. Consider scheduling a phone screen to discuss their qualifications further.' 
+        : 'Review the detailed analysis carefully to determine if this candidate is worth pursuing. Consider their growth potential and transferable skills.',
+})}
+
+${button({
+    href: data.applicationUrl,
+    text: 'View Full AI Analysis →',
+    variant: 'primary',
+})}
+
+${divider()}
+
+${paragraph(
+    'Need help interpreting the AI review? Check out our <a href="https://splits.network/help/ai-reviews" style="color: #233876; text-decoration: underline;">AI Review Guide</a>.'
+)}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `AI review: ${data.candidateName} - ${data.fitScore}/100 match for ${data.jobTitle}`,
+        content,
+        source: data.source || 'portal',
+    });
+}

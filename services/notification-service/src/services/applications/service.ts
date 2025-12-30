@@ -11,6 +11,8 @@ import {
     companyApplicationReceivedEmail,
     preScreenRequestedEmail,
     preScreenRequestConfirmationEmail,
+    aiReviewCompletedCandidateEmail,
+    aiReviewCompletedRecruiterEmail,
 } from '../../templates/applications';
 
 export class ApplicationsEmailService {
@@ -478,34 +480,15 @@ export class ApplicationsEmailService {
         const subject = `Your application for ${data.jobTitle} has been reviewed`;
         const portalUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/applications/${data.applicationId}`;
         
-        // TODO: Replace with proper template
-        const html = `
-            <h2>Hi ${data.candidateName},</h2>
-            <p>Good news! Your application for <strong>${data.jobTitle}</strong> has been reviewed by our AI system.</p>
-            
-            <h3>Match Score: ${data.fitScore}/100</h3>
-            <p><strong>Recommendation:</strong> ${data.recommendation.replace('_', ' ').toUpperCase()}</p>
-            
-            ${data.strengths.length > 0 ? `
-            <h4>Strengths:</h4>
-            <ul>
-                ${data.strengths.map(s => `<li>${s}</li>`).join('')}
-            </ul>
-            ` : ''}
-            
-            ${data.concerns.length > 0 ? `
-            <h4>Areas to address:</h4>
-            <ul>
-                ${data.concerns.map(c => `<li>${c}</li>`).join('')}
-            </ul>
-            ` : ''}
-            
-            <p><a href="${portalUrl}">View full details in your dashboard</a></p>
-            
-            <p>Next steps: ${data.recommendation === 'strong_fit' || data.recommendation === 'good_fit' 
-                ? 'A recruiter will be in touch soon to discuss your application.' 
-                : 'We\'ll keep you updated on your application status.'}</p>
-        `;
+        const html = aiReviewCompletedCandidateEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            fitScore: data.fitScore,
+            recommendation: data.recommendation,
+            strengths: data.strengths,
+            concerns: data.concerns,
+            applicationUrl: portalUrl,
+        });
 
         await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'ai_review.completed_candidate',
@@ -538,35 +521,19 @@ export class ApplicationsEmailService {
         const subject = `AI Review Complete: ${data.candidateName} for ${data.jobTitle}`;
         const portalUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/applications/${data.applicationId}`;
         
-        // TODO: Replace with proper template
-        const html = `
-            <h2>Hi ${data.recruiterName},</h2>
-            <p>AI review completed for <strong>${data.candidateName}</strong>'s application to <strong>${data.jobTitle}</strong>.</p>
-            
-            <h3>Match Score: ${data.fitScore}/100</h3>
-            <p><strong>Recommendation:</strong> ${data.recommendation.replace('_', ' ').toUpperCase()}</p>
-            
-            <h4>Summary:</h4>
-            <p>${data.overallSummary}</p>
-            
-            <h4>Matched Skills:</h4>
-            <ul>
-                ${data.matchedSkills.map(s => `<li>${s}</li>`).join('')}
-            </ul>
-            
-            ${data.missingSkills.length > 0 ? `
-            <h4>Missing Skills:</h4>
-            <ul>
-                ${data.missingSkills.map(s => `<li>${s}</li>`).join('')}
-            </ul>
-            ` : ''}
-            
-            <p><a href="${portalUrl}">View full AI analysis in portal</a></p>
-            
-            <p>${data.recommendation === 'strong_fit' || data.recommendation === 'good_fit' 
-                ? 'This looks like a strong candidate - consider scheduling a phone screen.' 
-                : 'Review the detailed analysis to determine if this candidate is worth pursuing.'}</p>
-        `;
+        const html = aiReviewCompletedRecruiterEmail({
+            recruiterName: data.recruiterName,
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            fitScore: data.fitScore,
+            recommendation: data.recommendation,
+            overallSummary: data.overallSummary,
+            strengths: data.strengths,
+            concerns: data.concerns,
+            matchedSkills: data.matchedSkills,
+            missingSkills: data.missingSkills,
+            applicationUrl: portalUrl,
+        });
 
         await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'ai_review.completed_recruiter',
