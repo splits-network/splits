@@ -44,6 +44,8 @@ spec:
               value: "10"
             - name: ALLOWED_MIME_TYPES
               value: "application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,application/rtf"
+            - name: RABBITMQ_URL
+              value: "amqp://splits:splits_production@rabbitmq:5672"
           livenessProbe:
             httpGet:
               path: /health
