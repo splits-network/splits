@@ -48,7 +48,7 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
         if (memberships.some((m: any) => m.role === 'platform_admin')) {
             return 'admin';
         }
-        if (memberships.some((m: any) => m.role === 'company_admin')) {
+        if (memberships.some((m: any) => m.role === 'company_admin' || m.role === 'hiring_manager')) {
             return 'company';
         }
         if (memberships.some((m: any) => m.role === 'recruiter')) {

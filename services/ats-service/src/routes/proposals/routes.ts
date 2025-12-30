@@ -21,15 +21,16 @@ export async function proposalRoutes(fastify: FastifyInstance, repository: AtsRe
     /**
      * Extract Clerk user context from headers set by API Gateway
      */
-    function getUserContext(request: any): { clerkUserId: string; userRole: UserRole } | null {
+    function getUserContext(request: any): { clerkUserId: string; userRole: UserRole; organizationId?: string } | null {
         const clerkUserId = request.headers['x-clerk-user-id'];
         const userRole = request.headers['x-user-role'] as UserRole;
+        const organizationId = request.headers['x-organization-id'];
         
         if (!clerkUserId || !userRole) {
             return null;
         }
         
-        return { clerkUserId, userRole };
+        return { clerkUserId, userRole, organizationId };
     }
 
     /**
@@ -44,7 +45,7 @@ export async function proposalRoutes(fastify: FastifyInstance, repository: AtsRe
             });
         }
 
-        const { clerkUserId, userRole } = userContext;
+        const { clerkUserId, userRole, organizationId } = userContext;
         const correlationId = (request as any).correlationId;
         const query = request.query as any;
 
@@ -59,7 +60,7 @@ export async function proposalRoutes(fastify: FastifyInstance, repository: AtsRe
             urgent_only: query.urgent_only === 'true'
         };
 
-        const result = await proposalService.getProposalsForUser(clerkUserId, userRole, filters, correlationId);
+        const result = await proposalService.getProposalsForUser(clerkUserId, userRole, filters, correlationId, organizationId);
         return reply.send({ data: result });
     });
 
@@ -75,9 +76,9 @@ export async function proposalRoutes(fastify: FastifyInstance, repository: AtsRe
             });
         }
 
-        const { clerkUserId, userRole } = userContext;
+        const { clerkUserId, userRole, organizationId } = userContext;
         const correlationId = (request as any).correlationId;
-        const proposals = await proposalService.getActionableProposals(clerkUserId, userRole, correlationId);
+        const proposals = await proposalService.getActionableProposals(clerkUserId, userRole, correlationId, organizationId);
         return reply.send({ data: proposals });
     });
 
@@ -93,9 +94,9 @@ export async function proposalRoutes(fastify: FastifyInstance, repository: AtsRe
             });
         }
 
-        const { clerkUserId, userRole } = userContext;
+        const { clerkUserId, userRole, organizationId } = userContext;
         const correlationId = (request as any).correlationId;
-        const proposals = await proposalService.getPendingProposals(clerkUserId, userRole, correlationId);
+        const proposals = await proposalService.getPendingProposals(clerkUserId, userRole, correlationId, organizationId);
         return reply.send({ data: proposals });
     });
 
@@ -177,13 +178,13 @@ export async function proposalRoutes(fastify: FastifyInstance, repository: AtsRe
             });
         }
 
-        const { clerkUserId, userRole } = userContext;
+        const { clerkUserId, userRole, organizationId } = userContext;
         const correlationId = (request as any).correlationId;
         // Get first page to calculate summary
         const result = await proposalService.getProposalsForUser(clerkUserId, userRole, {
             page: 1,
             limit: 100  // Get more items for accurate summary
-        }, correlationId);
+        }, correlationId, organizationId);
 
         return reply.send({ data: result.summary });
     });

@@ -37,12 +37,14 @@ export class ProposalService {
      * @param clerkUserId - The Clerk user ID from authentication
      * @param userRole - The user's role (recruiter, candidate, company, admin)
      * @param correlationId - Optional correlation ID for tracing
+     * @param organizationId - Organization ID for company users (from x-organization-id header)
      * @returns The entity ID to use for queries, or null if user is inactive
      */
     async resolveEntityId(
         clerkUserId: string,
         userRole: UserRole,
-        correlationId?: string
+        correlationId?: string,
+        organizationId?: string
     ): Promise<string | null> {
         // For recruiters, resolve to recruiter_id via Network Service
         if (userRole === 'recruiter') {
@@ -54,9 +56,25 @@ export class ProposalService {
             return recruiter.id;
         }
 
-        // For candidates and companies, Clerk userId maps directly to entity ID
-        // (This assumes candidate_id and company_id in applications table match Clerk user IDs)
-        // TODO: If companies need similar resolution, add company service client here
+        // For company users, resolve organization_id → company_id via repository
+        if (userRole === 'company') {
+            if (!organizationId) {
+                // Organization ID is required for company users
+                throw new Error('Organization ID is required for company users');
+            }
+            
+            // Look up company by organization_id
+            const company = await this.repository.findCompanyByOrgId(organizationId);
+            if (!company) {
+                // No company found for this organization
+                return null;
+            }
+            
+            return company.id;
+        }
+
+        // For candidates and admins, Clerk userId maps directly to entity ID
+        // (This assumes candidate_id in applications table matches Clerk user IDs)
         return clerkUserId;
     }
 
@@ -67,18 +85,20 @@ export class ProposalService {
      * @param userRole - The user's role
      * @param filters - Optional filters
      * @param correlationId - Optional correlation ID for tracing
+     * @param organizationId - Organization ID for company users
      */
     async getProposalsForUser(
         clerkUserId: string,
         userRole: UserRole,
         filters?: ProposalFilters,
-        correlationId?: string
+        correlationId?: string,
+        organizationId?: string
     ): Promise<ProposalsResponse> {
         const page = filters?.page || 1;
         const limit = filters?.limit || 25;
 
         // Resolve Clerk user ID to entity ID
-        const entityId = await this.resolveEntityId(clerkUserId, userRole, correlationId);
+        const entityId = await this.resolveEntityId(clerkUserId, userRole, correlationId, organizationId);
         if (!entityId) {
             // User is inactive or not authorized - return empty results
             return {
@@ -194,16 +214,18 @@ export class ProposalService {
      * @param clerkUserId - The Clerk user ID from authentication
      * @param userRole - The user's role
      * @param correlationId - Optional correlation ID for tracing
+     * @param organizationId - Organization ID for company users
      */
     async getActionableProposals(
         clerkUserId: string,
         userRole: UserRole,
-        correlationId?: string
+        correlationId?: string,
+        organizationId?: string
     ): Promise<UnifiedProposal[]> {
         const response = await this.getProposalsForUser(clerkUserId, userRole, {
             state: 'actionable',
             sort_by: 'urgency'
-        }, correlationId);
+        }, correlationId, organizationId);
         return response.data;
     }
 
@@ -213,15 +235,17 @@ export class ProposalService {
      * @param clerkUserId - The Clerk user ID from authentication
      * @param userRole - The user's role
      * @param correlationId - Optional correlation ID for tracing
+     * @param organizationId - Organization ID for company users
      */
     async getPendingProposals(
         clerkUserId: string,
         userRole: UserRole,
-        correlationId?: string
+        correlationId?: string,
+        organizationId?: string
     ): Promise<UnifiedProposal[]> {
         const response = await this.getProposalsForUser(clerkUserId, userRole, {
             state: 'waiting'
-        }, correlationId);
+        }, correlationId, organizationId);
         return response.data;
     }
 

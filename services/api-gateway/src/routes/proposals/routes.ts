@@ -28,7 +28,7 @@ export function registerProposalsRoutes(app: FastifyInstance, services: ServiceR
         if (memberships.some((m: any) => m.role === 'platform_admin')) {
             return 'admin';
         }
-        if (memberships.some((m: any) => m.role === 'company_admin')) {
+        if (memberships.some((m: any) => m.role === 'company_admin' || m.role === 'hiring_manager')) {
             return 'company';
         }
         
@@ -48,6 +48,25 @@ export function registerProposalsRoutes(app: FastifyInstance, services: ServiceR
         }
         
         return 'candidate';
+    }
+
+    /**
+     * Build headers for ATS service requests
+     * Includes Clerk user ID, role, and organization_id for company users
+     */
+    function buildHeaders(auth: any, userRole: string): Record<string, string> {
+        const headers: Record<string, string> = {
+            'x-clerk-user-id': auth.clerkUserId,
+            'x-user-role': userRole,
+        };
+
+        // For company users, pass organization_id from first membership
+        // ATS service needs this to resolve Clerk user ID → organization_id → company_id
+        if (userRole === 'company' && auth.memberships && auth.memberships.length > 0) {
+            headers['x-organization-id'] = auth.memberships[0].organization_id;
+        }
+
+        return headers;
     }
 
     /**
@@ -71,11 +90,8 @@ export function registerProposalsRoutes(app: FastifyInstance, services: ServiceR
         const queryString = new URLSearchParams(request.query as any).toString();
         const path = `/api/proposals?${queryString}`;
 
-        // Pass Clerk user ID (NOT internal userId) to ATS service
-        const headers = {
-            'x-clerk-user-id': req.auth.clerkUserId,
-            'x-user-role': userRole,
-        };
+        // Build headers including organization_id for company users
+        const headers = buildHeaders(req.auth, userRole);
 
         const data = await atsService().get(path, undefined, correlationId, headers);
         return reply.send(data);
@@ -96,11 +112,7 @@ export function registerProposalsRoutes(app: FastifyInstance, services: ServiceR
         const correlationId = getCorrelationId(request);
 
         const userRole = await determineUserRole(req.auth, correlationId);
-        
-        const headers = {
-            'x-clerk-user-id': req.auth.clerkUserId,
-            'x-user-role': userRole,
-        };
+        const headers = buildHeaders(req.auth, userRole);
         
         const data = await atsService().get('/api/proposals/actionable', undefined, correlationId, headers);
         return reply.send(data);
@@ -121,11 +133,7 @@ export function registerProposalsRoutes(app: FastifyInstance, services: ServiceR
         const correlationId = getCorrelationId(request);
 
         const userRole = await determineUserRole(req.auth, correlationId);
-        
-        const headers = {
-            'x-clerk-user-id': req.auth.clerkUserId,
-            'x-user-role': userRole,
-        };
+        const headers = buildHeaders(req.auth, userRole);
         
         const data = await atsService().get('/api/proposals/pending', undefined, correlationId, headers);
         return reply.send(data);
@@ -146,11 +154,7 @@ export function registerProposalsRoutes(app: FastifyInstance, services: ServiceR
         const correlationId = getCorrelationId(request);
 
         const userRole = await determineUserRole(req.auth, correlationId);
-        
-        const headers = {
-            'x-clerk-user-id': req.auth.clerkUserId,
-            'x-user-role': userRole,
-        };
+        const headers = buildHeaders(req.auth, userRole);
         
         const data = await atsService().get('/api/proposals/summary', undefined, correlationId, headers);
         return reply.send(data);
@@ -172,11 +176,7 @@ export function registerProposalsRoutes(app: FastifyInstance, services: ServiceR
         const correlationId = getCorrelationId(request);
 
         const userRole = await determineUserRole(req.auth, correlationId);
-        
-        const headers = {
-            'x-clerk-user-id': req.auth.clerkUserId,
-            'x-user-role': userRole,
-        };
+        const headers = buildHeaders(req.auth, userRole);
         
         const data = await atsService().get(`/api/proposals/${id}`, undefined, correlationId, headers);
         return reply.send(data);
