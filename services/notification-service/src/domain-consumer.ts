@@ -72,7 +72,8 @@ export class DomainEventConsumer {
         this.recruiterSubmissionConsumer = new RecruiterSubmissionEventConsumer(
             notificationService.recruiterSubmission,
             services,
-            logger
+            logger,
+            portalUrl
         );
     }
 
