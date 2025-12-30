@@ -38,11 +38,12 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
         // Wait for Clerk to load
         if (!isLoaded) return;
 
-        // If not signed in, redirect to sign-in with return URL
-        // Use redirect (shorter param name) for better URL readability
+        // If not signed in, redirect to sign-up (not sign-in) since invited candidates are typically new
+        // Use redirect param to return user to invitation page after authentication
         if (!isSignedIn) {
             const redirectUrl = `/invitation/${token}`;
-            router.push(`/sign-in?redirect=${encodeURIComponent(redirectUrl)}`);
+            // Use replace instead of push to avoid back-button issues
+            router.replace(`/sign-up?redirect=${encodeURIComponent(redirectUrl)}`);
             return;
         }
 

@@ -21,6 +21,7 @@ export default function SignUpPage() {
 
     // Get redirect parameter (from invitation or other flow)
     const redirect = searchParams.get('redirect');
+    const isFromInvitation = redirect?.includes('/invitation/');
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -155,10 +156,21 @@ export default function SignUpPage() {
                     <div className="text-center mb-6">
                         <i className="fa-solid fa-briefcase text-4xl text-primary mb-2"></i>
                         <h2 className="card-title text-2xl font-bold justify-center">
-                            Start Your Job Search
+                            {isFromInvitation ? 'Complete Your Invitation' : 'Start Your Job Search'}
                         </h2>
-                        <p className="text-sm text-base-content/70">Create your free account in seconds</p>
+                        <p className="text-sm text-base-content/70">
+                            {isFromInvitation
+                                ? 'Create your account to review your recruiter invitation'
+                                : 'Create your free account in seconds'}
+                        </p>
                     </div>
+
+                    {isFromInvitation && (
+                        <div className="alert alert-info mb-4">
+                            <i className="fa-solid fa-envelope"></i>
+                            <span>You've been invited by a recruiter. Sign up to continue.</span>
+                        </div>
+                    )}
 
                     {error && (
                         <div className="alert alert-error mb-4">

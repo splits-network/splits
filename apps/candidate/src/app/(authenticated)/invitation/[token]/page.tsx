@@ -1,4 +1,6 @@
 import { Metadata } from 'next';
+import { auth } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
 import InvitationPageClient from './invitation-client';
 
 export const metadata: Metadata = {
@@ -12,6 +14,14 @@ interface PageProps {
 
 export default async function InvitationPage({ params }: PageProps) {
     const { token } = await params;
-    
+
+    // Server-side auth check - redirect immediately if not authenticated
+    // This prevents page flash and ensures redirect happens before client hydration
+    const { userId } = await auth();
+    if (!userId) {
+        const redirectUrl = `/invitation/${token}`;
+        redirect(`/sign-up?redirect=${encodeURIComponent(redirectUrl)}`);
+    }
+
     return <InvitationPageClient token={token} />;
 }
