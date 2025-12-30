@@ -2,7 +2,7 @@ import Link from 'next/link';
 import JobsListClient from './components/jobs-list';
 
 interface JobsPageProps {
-    searchParams?: { [key: string]: string | string[] | undefined };
+    searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 const getParam = (value: string | string[] | undefined) => {
@@ -12,11 +12,12 @@ const getParam = (value: string | string[] | undefined) => {
     return value ?? '';
 };
 
-export default function JobsPage({ searchParams }: JobsPageProps) {
-    const initialSearch = getParam(searchParams?.q);
-    const initialLocation = getParam(searchParams?.location);
-    const initialType = getParam(searchParams?.employment_type);
-    const initialPageParam = getParam(searchParams?.page);
+export default async function JobsPage({ searchParams }: JobsPageProps) {
+    const resolvedParams = searchParams ? await searchParams : undefined;
+    const initialSearch = getParam(resolvedParams?.q);
+    const initialLocation = getParam(resolvedParams?.location);
+    const initialType = getParam(resolvedParams?.employment_type);
+    const initialPageParam = getParam(resolvedParams?.page);
     const initialPage = initialPageParam ? parseInt(initialPageParam, 10) || 1 : 1;
 
     return (
