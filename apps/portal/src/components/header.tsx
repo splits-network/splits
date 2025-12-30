@@ -13,13 +13,10 @@ export function Header() {
     const [isDark, setIsDark] = useState(false);
 
     useEffect(() => {
-        // Initialize theme from localStorage on mount
+        // Sync state with pre-rendered theme from localStorage
         try {
-            const saved = localStorage.getItem('theme');
-            if (saved) {
-                document.documentElement.setAttribute('data-theme', saved);
-                setIsDark(saved === 'splits-dark');
-            }
+            const saved = localStorage.getItem('theme') || 'splits-light';
+            setIsDark(saved === 'splits-dark');
         } catch { }
     }, []);
 

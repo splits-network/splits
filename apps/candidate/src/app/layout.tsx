@@ -47,8 +47,22 @@ export default function RootLayout({
     }
     return (
         <ClerkProvider publishableKey={publishableKey} afterSignOutUrl="/">
-            <html lang="en" data-theme="applicant-light">
+            <html lang="en">
                 <head>
+                    <script
+                        dangerouslySetInnerHTML={{
+                            __html: `
+                                (function() {
+                                    try {
+                                        var theme = localStorage.getItem('theme') || 'applicant-light';
+                                        document.documentElement.setAttribute('data-theme', theme);
+                                    } catch (e) {
+                                        document.documentElement.setAttribute('data-theme', 'applicant-light');
+                                    }
+                                })();
+                            `,
+                        }}
+                    />
                     <script src="https://kit.fontawesome.com/728c8ddec8.js" crossOrigin="anonymous"></script>
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-200">

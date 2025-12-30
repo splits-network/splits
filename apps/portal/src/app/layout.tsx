@@ -48,8 +48,22 @@ export default async function RootLayout({
 
     return (
         <ClerkProvider publishableKey={publishableKey}>
-            <html lang="en" data-theme="splits-light">
+            <html lang="en">
                 <head>
+                    <script
+                        dangerouslySetInnerHTML={{
+                            __html: `
+                                (function() {
+                                    try {
+                                        var theme = localStorage.getItem('theme') || 'splits-light';
+                                        document.documentElement.setAttribute('data-theme', theme);
+                                    } catch (e) {
+                                        document.documentElement.setAttribute('data-theme', 'splits-light');
+                                    }
+                                })();
+                            `,
+                        }}
+                    />
                     <script src="https://kit.fontawesome.com/728c8ddec8.js" crossOrigin="anonymous"></script>
                 </head>
                 <body className="flex flex-col min-h-screen">

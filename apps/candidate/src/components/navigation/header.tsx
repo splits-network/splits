@@ -12,13 +12,10 @@ export default function Header() {
     const menuRef = useRef<HTMLUListElement>(null);
 
     useEffect(() => {
-        // Initialize theme from localStorage on mount
+        // Sync state with pre-rendered theme from localStorage
         try {
-            const saved = localStorage.getItem('theme');
-            if (saved) {
-                document.documentElement.setAttribute('data-theme', saved);
-                setIsDark(saved === 'applicant-dark');
-            }
+            const saved = localStorage.getItem('theme') || 'applicant-light';
+            setIsDark(saved === 'applicant-dark');
         } catch { }
     }, []);
 
