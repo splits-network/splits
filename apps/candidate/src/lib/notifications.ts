@@ -74,9 +74,13 @@ export async function fetchUnreadCount(): Promise<number> {
  * Mark a notification as read
  */
 export async function markAsRead(notificationId: string): Promise<void> {
-    const response = await fetch(`/api/notifications/${notificationId}/read`, {
+    const response = await fetch(`/api/notifications/${notificationId}`, {
         method: 'PATCH',
         credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ read: true }),
     });
 
     if (!response.ok) {
@@ -89,7 +93,7 @@ export async function markAsRead(notificationId: string): Promise<void> {
  */
 export async function markAllAsRead(): Promise<void> {
     const response = await fetch('/api/notifications/mark-all-read', {
-        method: 'PATCH',
+        method: 'POST',
         credentials: 'include',
     });
 
@@ -102,8 +106,8 @@ export async function markAllAsRead(): Promise<void> {
  * Dismiss a notification (hide from UI)
  */
 export async function dismissNotification(notificationId: string): Promise<void> {
-    const response = await fetch(`/api/notifications/${notificationId}/dismiss`, {
-        method: 'PATCH',
+    const response = await fetch(`/api/notifications/${notificationId}`, {
+        method: 'DELETE',
         credentials: 'include',
     });
 

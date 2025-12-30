@@ -2,14 +2,25 @@ import { buildPaginationResponse } from '../shared/helpers';
 import { EventPublisher } from '../shared/events';
 import { NotificationTemplateRepository } from './repository';
 import { EmailTemplate, TemplateCreateInput, TemplateFilters, TemplateUpdate } from './types';
+import type { AccessContext } from '../shared/access';
 
 export class TemplateServiceV2 {
     constructor(
         private repository: NotificationTemplateRepository,
+        private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
         private eventPublisher?: EventPublisher
     ) {}
 
-    async listTemplates(filters: TemplateFilters) {
+    private async requirePlatformAdmin(clerkUserId: string): Promise<AccessContext> {
+        const access = await this.resolveAccessContext(clerkUserId);
+        if (!access.isPlatformAdmin) {
+            throw new Error('Platform admin permissions required');
+        }
+        return access;
+    }
+
+    async listTemplates(clerkUserId: string, filters: TemplateFilters) {
+        await this.requirePlatformAdmin(clerkUserId);
         const result = await this.repository.findTemplates(filters);
         return {
             data: result.data,
@@ -21,7 +32,8 @@ export class TemplateServiceV2 {
         };
     }
 
-    async getTemplate(id: string): Promise<EmailTemplate> {
+    async getTemplate(clerkUserId: string, id: string): Promise<EmailTemplate> {
+        await this.requirePlatformAdmin(clerkUserId);
         const template = await this.repository.findTemplate(id);
         if (!template) {
             throw new Error('Template not found');
@@ -29,7 +41,8 @@ export class TemplateServiceV2 {
         return template;
     }
 
-    async createTemplate(input: TemplateCreateInput) {
+    async createTemplate(clerkUserId: string, input: TemplateCreateInput) {
+        await this.requirePlatformAdmin(clerkUserId);
         const template = await this.repository.createTemplate(input);
 
         if (this.eventPublisher) {
@@ -42,8 +55,9 @@ export class TemplateServiceV2 {
         return template;
     }
 
-    async updateTemplate(id: string, updates: TemplateUpdate) {
-        await this.getTemplate(id);
+    async updateTemplate(clerkUserId: string, id: string, updates: TemplateUpdate) {
+        await this.requirePlatformAdmin(clerkUserId);
+        await this.getTemplate(clerkUserId, id);
         const template = await this.repository.updateTemplate(id, updates);
 
         if (this.eventPublisher) {
@@ -56,8 +70,9 @@ export class TemplateServiceV2 {
         return template;
     }
 
-    async archiveTemplate(id: string) {
-        await this.getTemplate(id);
+    async archiveTemplate(clerkUserId: string, id: string) {
+        await this.requirePlatformAdmin(clerkUserId);
+        await this.getTemplate(clerkUserId, id);
         await this.repository.archiveTemplate(id);
 
         if (this.eventPublisher) {

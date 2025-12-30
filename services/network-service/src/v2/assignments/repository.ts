@@ -5,6 +5,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { AssignmentFilters, AssignmentUpdate, RepositoryListResponse } from './types';
+import { resolveAccessContext } from '../shared/access';
 
 export class AssignmentRepository {
     private supabase: SupabaseClient;
@@ -21,14 +22,8 @@ export class AssignmentRepository {
         const limit = filters.limit || 25;
         const offset = (page - 1) * limit;
 
-        // Get user's organization IDs (for role-based scoping)
-        const { data: memberships } = await this.supabase
-            .schema('identity')
-            .from('memberships')
-            .select('organization_id')
-            .eq('user_id', clerkUserId);
-
-        const organizationIds = memberships?.map((m) => m.organization_id) || [];
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+        const organizationIds = accessContext.organizationIds;
 
         // Build query with enriched data
         let query = this.supabase
@@ -44,9 +39,12 @@ export class AssignmentRepository {
                 )
             `, { count: 'exact' });
 
-        // Apply organization filter
-        if (organizationIds.length > 0) {
-            // This will filter via the nested job.company relationship
+        if (accessContext.recruiterId) {
+            query = query.eq('recruiter_id', accessContext.recruiterId);
+        } else if (!accessContext.isPlatformAdmin) {
+            if (organizationIds.length === 0) {
+                return { data: [], total: 0 };
+            }
             query = query.in('job.company.identity_organization_id', organizationIds);
         }
 

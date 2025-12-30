@@ -8,18 +8,30 @@ import { EventPublisherV2 } from '../shared/events';
 import { OrganizationUpdate } from './types';
 import { OrganizationRepository } from './repository';
 import { v4 as uuidv4 } from 'uuid';
+import type { AccessContext } from '../shared/access';
 
 export class OrganizationServiceV2 {
     constructor(
         private repository: OrganizationRepository,
         private eventPublisher: EventPublisherV2,
-        private logger: Logger
+        private logger: Logger,
+        private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>
     ) {}
+
+    private async requirePlatformAdmin(clerkUserId: string): Promise<AccessContext> {
+        const access = await this.resolveAccessContext(clerkUserId);
+        if (!access.isPlatformAdmin) {
+            this.logger.warn({ clerkUserId }, 'OrganizationService - unauthorized access attempt');
+            throw new Error('Platform admin permissions required');
+        }
+        return access;
+    }
 
     /**
      * Find all organizations with pagination and filters
      */
-    async findOrganizations(filters: any) {
+    async findOrganizations(clerkUserId: string, filters: any) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ filters }, 'OrganizationService.findOrganizations');
         const result = await this.repository.findOrganizations(filters);
         return result;
@@ -28,7 +40,8 @@ export class OrganizationServiceV2 {
     /**
      * Find organization by ID
      */
-    async findOrganizationById(id: string) {
+    async findOrganizationById(clerkUserId: string, id: string) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id }, 'OrganizationService.findOrganizationById');
         const org = await this.repository.findOrganizationById(id);
         if (!org) {
@@ -40,7 +53,8 @@ export class OrganizationServiceV2 {
     /**
      * Create a new organization
      */
-    async createOrganization(orgData: any) {
+    async createOrganization(clerkUserId: string, orgData: any) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ name: orgData.name }, 'OrganizationService.createOrganization');
 
         if (!orgData.name) {
@@ -75,10 +89,11 @@ export class OrganizationServiceV2 {
     /**
      * Update organization
      */
-    async updateOrganization(id: string, updates: OrganizationUpdate) {
+    async updateOrganization(clerkUserId: string, id: string, updates: OrganizationUpdate) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id, updates }, 'OrganizationService.updateOrganization');
 
-        await this.findOrganizationById(id);
+        await this.findOrganizationById(clerkUserId, id);
 
         const updateData: any = {
             ...updates,
@@ -99,10 +114,11 @@ export class OrganizationServiceV2 {
     /**
      * Delete organization (soft delete)
      */
-    async deleteOrganization(id: string) {
+    async deleteOrganization(clerkUserId: string, id: string) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id }, 'OrganizationService.deleteOrganization');
 
-        await this.findOrganizationById(id);
+        await this.findOrganizationById(clerkUserId, id);
         await this.repository.deleteOrganization(id);
 
         await this.eventPublisher.publish('organization.deleted', {

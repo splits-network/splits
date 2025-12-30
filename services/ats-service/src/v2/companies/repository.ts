@@ -4,6 +4,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { CompanyFilters, CompanyUpdate } from './types';
+import { resolveAccessContext } from '../shared/access';
 
 export interface RepositoryListResponse<T> {
     data: T[];
@@ -25,14 +26,12 @@ export class CompanyRepository {
         const limit = filters.limit || 25;
         const offset = (page - 1) * limit;
 
-        // Get user's organization IDs
-        const { data: memberships } = await this.supabase
-            .schema('identity')
-            .from('memberships')
-            .select('organization_id')
-            .eq('user_id', clerkUserId);
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+        const organizationIds = accessContext.organizationIds;
 
-        const organizationIds = memberships?.map((m) => m.organization_id) || [];
+        if (!accessContext.isPlatformAdmin && organizationIds.length === 0) {
+            return { data: [], total: 0 };
+        }
 
         // Build query
         let query = this.supabase
@@ -41,7 +40,7 @@ export class CompanyRepository {
             .select('*', { count: 'exact' });
 
         // Apply organization filter
-        if (organizationIds.length > 0) {
+        if (!accessContext.isPlatformAdmin && organizationIds.length > 0) {
             query = query.in('identity_organization_id', organizationIds);
         }
 

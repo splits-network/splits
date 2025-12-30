@@ -6,6 +6,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { JobFilters, JobUpdate } from './types';
+import { resolveAccessContext } from '../shared/access';
 
 export interface RepositoryListResponse<T> {
     data: T[];
@@ -24,34 +25,38 @@ export class JobRepository {
      * Resolves organization from user's memberships, then filters jobs
      */
     async findJobs(
-        clerkUserId: string,
+        clerkUserId: string | undefined,
         filters: JobFilters = {}
     ): Promise<RepositoryListResponse<any>> {
         const page = filters.page || 1;
         const limit = filters.limit || 25;
         const offset = (page - 1) * limit;
 
-        // Step 1: Get user's organization ID from identity.memberships
-        const { data: memberships } = await this.supabase
-            .schema('identity')
-            .from('memberships')
-            .select('organization_id')
-            .eq('user_id', clerkUserId);
-
-        const organizationIds = memberships?.map((m) => m.organization_id) || [];
-
-        // Step 2: Build query with role-based scoping
         let query = this.supabase
             .schema('ats')
             .from('jobs')
-            .select(`
+            .select(
+                `
                 *,
                 company:companies!inner(id, name, identity_organization_id)
-            `, { count: 'exact' });
+            `,
+                { count: 'exact' }
+            );
 
-        // Apply organization filter if user has memberships
-        if (organizationIds.length > 0) {
-            query = query.in('company.identity_organization_id', organizationIds);
+        if (clerkUserId) {
+            const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+
+            if (accessContext.isPlatformAdmin) {
+                // full access
+            } else if (accessContext.organizationIds.length > 0) {
+                query = query.in('company.identity_organization_id', accessContext.organizationIds);
+            } else if (accessContext.candidateId) {
+                query = query.eq('status', 'active');
+            } else {
+                return { data: [], total: 0 };
+            }
+        } else {
+            query = query.eq('status', 'active');
         }
 
         // Apply filters
@@ -90,16 +95,23 @@ export class JobRepository {
         };
     }
 
-    async findJob(id: string): Promise<any | null> {
-        const { data, error } = await this.supabase
+    async findJob(id: string, clerkUserId?: string): Promise<any | null> {
+        let query = this.supabase
             .schema('ats')
             .from('jobs')
-            .select(`
+            .select(
+                `
                 *,
                 company:companies(id, name, description, website)
-            `)
-            .eq('id', id)
-            .single();
+            `
+            )
+            .eq('id', id);
+
+        if (!clerkUserId) {
+            query = query.eq('status', 'active');
+        }
+
+        const { data, error } = await query.single();
 
         if (error) {
             if (error.code === 'PGRST116') return null;

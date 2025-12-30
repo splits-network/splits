@@ -2,14 +2,25 @@ import { buildPaginationResponse } from '../shared/helpers';
 import { MatchFilters, MatchUpdate } from './types';
 import { CandidateMatchRepository, CreateMatchInput } from './repository';
 import { EventPublisher } from '../shared/events';
+import type { AccessContext } from '../shared/access';
 
 export class CandidateMatchServiceV2 {
     constructor(
         private repository: CandidateMatchRepository,
+        private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
         private eventPublisher?: EventPublisher
     ) {}
 
-    async listMatches(filters: MatchFilters) {
+    private async requirePlatformAdmin(clerkUserId: string): Promise<AccessContext> {
+        const access = await this.resolveAccessContext(clerkUserId);
+        if (!access.isPlatformAdmin) {
+            throw new Error('Platform admin permissions required');
+        }
+        return access;
+    }
+
+    async listMatches(clerkUserId: string, filters: MatchFilters) {
+        await this.requirePlatformAdmin(clerkUserId);
         const result = await this.repository.findMatches(filters);
         return {
             data: result.data,
@@ -21,7 +32,8 @@ export class CandidateMatchServiceV2 {
         };
     }
 
-    async getMatch(id: string) {
+    async getMatch(clerkUserId: string, id: string) {
+        await this.requirePlatformAdmin(clerkUserId);
         const match = await this.repository.findMatch(id);
         if (!match) {
             throw new Error('Match not found');
@@ -29,7 +41,8 @@ export class CandidateMatchServiceV2 {
         return match;
     }
 
-    async createMatch(input: CreateMatchInput) {
+    async createMatch(clerkUserId: string, input: CreateMatchInput) {
+        await this.requirePlatformAdmin(clerkUserId);
         const match = await this.repository.createMatch(input);
         if (this.eventPublisher) {
             await this.eventPublisher.publish('automation.matches.created', {
@@ -41,8 +54,9 @@ export class CandidateMatchServiceV2 {
         return match;
     }
 
-    async updateMatch(id: string, updates: MatchUpdate) {
-        await this.getMatch(id);
+    async updateMatch(clerkUserId: string, id: string, updates: MatchUpdate) {
+        await this.requirePlatformAdmin(clerkUserId);
+        await this.getMatch(clerkUserId, id);
         const match = await this.repository.updateMatch(id, updates);
         if (this.eventPublisher) {
             await this.eventPublisher.publish('automation.matches.updated', {
@@ -53,8 +67,9 @@ export class CandidateMatchServiceV2 {
         return match;
     }
 
-    async deleteMatch(id: string) {
-        await this.getMatch(id);
+    async deleteMatch(clerkUserId: string, id: string) {
+        await this.requirePlatformAdmin(clerkUserId);
+        await this.getMatch(clerkUserId, id);
         await this.repository.deleteMatch(id);
         if (this.eventPublisher) {
             await this.eventPublisher.publish('automation.matches.deleted', {

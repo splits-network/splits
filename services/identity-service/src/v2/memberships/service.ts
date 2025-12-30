@@ -8,18 +8,30 @@ import { EventPublisherV2 } from '../shared/events';
 import { MembershipUpdate } from './types';
 import { MembershipRepository } from './repository';
 import { v4 as uuidv4 } from 'uuid';
+import type { AccessContext } from '../shared/access';
 
 export class MembershipServiceV2 {
     constructor(
         private repository: MembershipRepository,
         private eventPublisher: EventPublisherV2,
-        private logger: Logger
+        private logger: Logger,
+        private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>
     ) {}
+
+    private async requirePlatformAdmin(clerkUserId: string): Promise<AccessContext> {
+        const access = await this.resolveAccessContext(clerkUserId);
+        if (!access.isPlatformAdmin) {
+            this.logger.warn({ clerkUserId }, 'MembershipService - unauthorized access attempt');
+            throw new Error('Platform admin permissions required');
+        }
+        return access;
+    }
 
     /**
      * Find all memberships with pagination and filters
      */
-    async findMemberships(filters: any) {
+    async findMemberships(clerkUserId: string, filters: any) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ filters }, 'MembershipService.findMemberships');
         const result = await this.repository.findMemberships(filters);
         return result;
@@ -28,7 +40,8 @@ export class MembershipServiceV2 {
     /**
      * Find membership by ID
      */
-    async findMembershipById(id: string) {
+    async findMembershipById(clerkUserId: string, id: string) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id }, 'MembershipService.findMembershipById');
         const membership = await this.repository.findMembershipById(id);
         if (!membership) {
@@ -40,7 +53,8 @@ export class MembershipServiceV2 {
     /**
      * Create a new membership
      */
-    async createMembership(membershipData: any) {
+    async createMembership(clerkUserId: string, membershipData: any) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info(
             {
                 organization_id: membershipData.organization_id,
@@ -85,10 +99,11 @@ export class MembershipServiceV2 {
     /**
      * Update membership
      */
-    async updateMembership(id: string, updates: MembershipUpdate) {
+    async updateMembership(clerkUserId: string, id: string, updates: MembershipUpdate) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id, updates }, 'MembershipService.updateMembership');
 
-        await this.findMembershipById(id);
+        await this.findMembershipById(clerkUserId, id);
 
         const updateData: any = {
             ...updates,
@@ -109,10 +124,11 @@ export class MembershipServiceV2 {
     /**
      * Delete membership (soft delete)
      */
-    async deleteMembership(id: string) {
+    async deleteMembership(clerkUserId: string, id: string) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id }, 'MembershipService.deleteMembership');
 
-        await this.findMembershipById(id);
+        await this.findMembershipById(clerkUserId, id);
         await this.repository.deleteMembership(id);
 
         await this.eventPublisher.publish('membership.deleted', {

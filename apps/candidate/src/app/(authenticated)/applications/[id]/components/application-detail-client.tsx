@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ProposalAlert } from './proposal-alert';
 import { DeclineModal } from './decline-modal';
 import { ProposalResponseWizard, type WizardData } from './proposal-response-wizard';
+import { uploadDocument } from '@/lib/api';
 
 interface ApplicationDetailClientProps {
     application: any;
@@ -93,6 +94,10 @@ export function ApplicationDetailClient({ application, job, token }: Application
     const handleCompleteApplication = async (wizardData: WizardData) => {
         try {
             setError(null);
+            const candidateId = application.candidate_id;
+            if (!candidateId) {
+                throw new Error('Missing candidate profile for this application');
+            }
 
             // Step 1: Upload new documents (if any)
             const newDocumentIds: string[] = [];
@@ -100,24 +105,11 @@ export function ApplicationDetailClient({ application, job, token }: Application
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('document_type', file.name.toLowerCase().includes('resume') ? 'resume' : 'other');
+                formData.append('entity_type', 'candidate');
+                formData.append('entity_id', candidateId);
 
-                const uploadResponse = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/api/documents/upload`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                        body: formData,
-                    }
-                );
-
-                if (!uploadResponse.ok) {
-                    throw new Error(`Failed to upload ${file.name}`);
-                }
-
-                const uploadResult = await uploadResponse.json();
-                newDocumentIds.push(uploadResult.data.id);
+                const uploaded = await uploadDocument(formData, token);
+                newDocumentIds.push(uploaded.id);
             }
 
             // Combine existing and newly uploaded document IDs

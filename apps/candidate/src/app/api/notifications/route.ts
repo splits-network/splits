@@ -22,10 +22,19 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // Forward query params
+        // Forward query params, translating camelCase to snake_case for V2
         const searchParams = request.nextUrl.searchParams;
-        const queryString = searchParams.toString();
-        const url = `${API_GATEWAY_URL}/api/notifications${queryString ? `?${queryString}` : ''}`;
+        const forwarded = new URLSearchParams();
+        searchParams.forEach((value, key) => {
+            if (key === 'unreadOnly') {
+                forwarded.set('unread_only', value);
+            } else {
+                forwarded.set(key, value);
+            }
+        });
+
+        const queryString = forwarded.toString();
+        const url = `${API_GATEWAY_URL}/api/v2/notifications${queryString ? `?${queryString}` : ''}`;
 
         const response = await fetch(url, {
             method: 'GET',
@@ -41,7 +50,8 @@ export async function GET(request: NextRequest) {
             return NextResponse.json(data, { status: response.status });
         }
 
-        return NextResponse.json(data);
+        // V2 returns { data, pagination }; keep existing response shape for clients
+        return NextResponse.json({ data: data.data || data });
     } catch (error) {
         console.error('Error proxying notifications request:', error);
         return NextResponse.json(

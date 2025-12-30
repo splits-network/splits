@@ -6,12 +6,17 @@ import { EventPublisherV2 } from '../shared/events';
 import { RecruiterCandidateRepository } from './repository';
 import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
 import { RecruiterCandidateFilters, RecruiterCandidateUpdate } from './types';
+import { AtsClient } from '../../clients';
 
 export class RecruiterCandidateServiceV2 {
+    private atsClient: AtsClient;
+
     constructor(
         private repository: RecruiterCandidateRepository,
         private eventPublisher: EventPublisherV2
-    ) {}
+    ) {
+        this.atsClient = new AtsClient();
+    }
 
     async getRecruiterCandidates(
         clerkUserId: string,
@@ -99,8 +104,149 @@ export class RecruiterCandidateServiceV2 {
         await this.repository.deleteRecruiterCandidate(id);
 
         // Publish event
-        await this.eventPublisher.publish('recruiter_candidate.deleted', {
+            await this.eventPublisher.publish('recruiter_candidate.deleted', {
                 relationshipId: id,
             });
+    }
+
+    async getInvitationByToken(token: string) {
+        const relationship = await this.repository.findByInvitationToken(token);
+        if (!relationship) {
+            throw { statusCode: 404, message: 'Invitation not found' };
+        }
+
+        if (relationship.invitation_expires_at && new Date(relationship.invitation_expires_at) < new Date()) {
+            throw { statusCode: 410, message: 'This invitation has expired. Please contact your recruiter for a new invitation.' };
+        }
+
+        if (relationship.consent_given) {
+            throw { statusCode: 409, message: 'This invitation has already been accepted.' };
+        }
+
+        if (relationship.declined_at) {
+            throw { statusCode: 409, message: 'This invitation has already been declined.' };
+        }
+
+        return {
+            relationship_id: relationship.id,
+            recruiter_id: relationship.recruiter_id,
+            candidate_id: relationship.candidate_id,
+            invited_at: relationship.invited_at,
+            expires_at: relationship.invitation_expires_at,
+            status: 'pending',
+        };
+    }
+
+    async acceptInvitationByToken(
+        token: string,
+        metadata: { userId?: string; ip_address?: string; user_agent?: string }
+    ) {
+        const relationship = await this.repository.findByInvitationToken(token);
+        if (!relationship) {
+            throw { statusCode: 404, message: 'Invitation not found' };
+        }
+
+        if (relationship.invitation_expires_at && new Date(relationship.invitation_expires_at) < new Date()) {
+            throw { statusCode: 410, message: 'Invitation has expired' };
+        }
+
+        if (relationship.consent_given) {
+            throw { statusCode: 409, message: 'Invitation has already been accepted' };
+        }
+
+        if (relationship.declined_at) {
+            throw { statusCode: 409, message: 'Invitation has already been declined' };
+        }
+
+        const updatedRelationship = await this.repository.updateRecruiterCandidate(relationship.id, {
+            consent_given: true,
+            consent_given_at: new Date().toISOString(),
+            consent_ip_address: metadata.ip_address || null,
+            consent_user_agent: metadata.user_agent || null,
+        });
+
+        if (metadata.userId && relationship.candidate_id) {
+            try {
+                await this.atsClient.linkCandidateToUser(relationship.candidate_id, metadata.userId);
+            } catch (error) {
+                console.error('Failed to link candidate to user:', (error as Error).message);
+            }
+        }
+
+        if (relationship.candidate_id && relationship.recruiter_id) {
+            try {
+                const candidateResponse: any = await this.atsClient.get(`/candidates/${relationship.candidate_id}`);
+                const candidate = candidateResponse.data || candidateResponse;
+                if (!candidate.recruiter_id) {
+                    await this.atsClient.patch(`/candidates/${relationship.candidate_id}`, {
+                        recruiter_id: relationship.recruiter_id,
+                    });
+                    await this.eventPublisher.publish('candidate.sourced', {
+                        candidate_id: relationship.candidate_id,
+                        candidate_email: candidate.email,
+                        candidate_name: candidate.full_name,
+                        sourcer_recruiter_id: relationship.recruiter_id,
+                        source_method: 'invitation_accepted',
+                    });
+                }
+            } catch (error) {
+                console.error('Failed to update candidate sourcer:', (error as Error).message);
+            }
+        }
+
+        await this.eventPublisher.publish('candidate.consent_given', {
+            relationship_id: updatedRelationship.id,
+            recruiter_id: updatedRelationship.recruiter_id,
+            candidate_id: updatedRelationship.candidate_id,
+            consent_given_at: updatedRelationship.consent_given_at,
+        });
+
+        return {
+            success: true,
+            message: 'Invitation accepted successfully',
+            relationship_id: updatedRelationship.id,
+            consent_given_at: updatedRelationship.consent_given_at,
+        };
+    }
+
+    async declineInvitationByToken(
+        token: string,
+        metadata: { reason?: string; ip_address?: string; user_agent?: string }
+    ) {
+        const relationship = await this.repository.findByInvitationToken(token);
+        if (!relationship) {
+            throw { statusCode: 404, message: 'Invitation not found' };
+        }
+
+        if (relationship.consent_given) {
+            throw { statusCode: 409, message: 'Invitation has already been accepted' };
+        }
+
+        if (relationship.declined_at) {
+            throw { statusCode: 409, message: 'Invitation has already been declined' };
+        }
+
+        const updatedRelationship = await this.repository.updateRecruiterCandidate(relationship.id, {
+            consent_given: false,
+            declined_at: new Date().toISOString(),
+            declined_reason: metadata.reason || null,
+            consent_ip_address: metadata.ip_address || null,
+            consent_user_agent: metadata.user_agent || null,
+        });
+
+        await this.eventPublisher.publish('candidate.consent_declined', {
+            relationship_id: updatedRelationship.id,
+            recruiter_id: updatedRelationship.recruiter_id,
+            candidate_id: updatedRelationship.candidate_id,
+            declined_at: updatedRelationship.declined_at,
+            declined_reason: updatedRelationship.declined_reason,
+        });
+
+        return {
+            success: true,
+            message: 'Invitation declined',
+            relationship_id: updatedRelationship.id,
+            declined_at: updatedRelationship.declined_at,
+        };
     }
 }

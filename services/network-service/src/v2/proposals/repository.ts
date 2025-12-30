@@ -5,6 +5,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ProposalFilters, ProposalUpdate, RepositoryListResponse } from './types';
+import { resolveAccessContext } from '../shared/access';
 
 export class ProposalRepository {
     private supabase: SupabaseClient;
@@ -21,14 +22,8 @@ export class ProposalRepository {
         const limit = filters.limit || 25;
         const offset = (page - 1) * limit;
 
-        // Get user's organization IDs
-        const { data: memberships } = await this.supabase
-            .schema('identity')
-            .from('memberships')
-            .select('organization_id')
-            .eq('user_id', clerkUserId);
-
-        const organizationIds = memberships?.map((m) => m.organization_id) || [];
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+        const organizationIds = accessContext.organizationIds;
 
         // Build query with enriched data
         let query = this.supabase
@@ -42,11 +37,15 @@ export class ProposalRepository {
                     title,
                     company:ats.companies!inner(id, name, identity_organization_id)
                 ),
-                candidate:ats.candidates(id, first_name, last_name, email)
+                candidate:ats.candidates(id, full_name, email)
             `, { count: 'exact' });
 
-        // Apply organization filter
-        if (organizationIds.length > 0) {
+        if (accessContext.recruiterId) {
+            query = query.eq('recruiter_id', accessContext.recruiterId);
+        } else if (!accessContext.isPlatformAdmin) {
+            if (organizationIds.length === 0) {
+                return { data: [], total: 0 };
+            }
             query = query.in('job.company.identity_organization_id', organizationIds);
         }
 
@@ -97,7 +96,7 @@ export class ProposalRepository {
                     title,
                     company:ats.companies(id, name)
                 ),
-                candidate:ats.candidates(id, first_name, last_name, email, phone)
+                candidate:ats.candidates(id, full_name, email, phone)
             `)
             .eq('id', id)
             .single();

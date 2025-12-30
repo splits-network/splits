@@ -15,6 +15,7 @@ import { registerCompanyRoutes } from './companies/routes';
 import { registerCandidateRoutes } from './candidates/routes';
 import { registerApplicationRoutes } from './applications/routes';
 import { registerPlacementRoutes } from './placements/routes';
+import { registerAIReviewRoutes } from './ai-review/routes';
 
 interface RegisterConfig {
     supabaseUrl: string;
@@ -43,4 +44,9 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     registerCandidateRoutes(app, { candidateService });
     registerApplicationRoutes(app, { applicationService });
     registerPlacementRoutes(app, { placementService });
+    registerAIReviewRoutes(app, {
+        supabaseUrl: config.supabaseUrl,
+        supabaseKey: config.supabaseKey,
+        eventPublisher: config.eventPublisher,
+    });
 }

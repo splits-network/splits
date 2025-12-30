@@ -69,14 +69,15 @@ export function requireRoles(allowedRoles: UserRole[], services?: ServiceRegistr
                 const correlationId = (request as any).correlationId;
                 const atsService = services.get('ats');
                 const candidateResponse: any = await atsService.get(
-                    `/candidates/me`,
-                    undefined,
+                    `/v2/candidates`,
+                    { limit: 1 },
                     correlationId,
                     { 'x-clerk-user-id': req.auth.clerkUserId } // Forward Clerk user ID to ATS service
                 );
 
                 // If we get a 200 response with data, candidate profile exists
-                if (candidateResponse?.data) {
+                const candidates = candidateResponse?.data;
+                if (Array.isArray(candidates) && candidates.length > 0) {
                     req.matchedRole = 'candidate';
                     request.log.debug({ userId: req.auth.userId, clerkUserId: req.auth.clerkUserId }, 'Access granted: candidate profile found via ATS service');
                     return;

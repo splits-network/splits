@@ -72,7 +72,9 @@ export default function ApplicationWizardModal({
 
                 const jobData = (jobResponse as any).data;
                 const questionsData = (questionsResponse as any).data || [];
-                const documentsData = (documentsResponse as any).data || [];
+                const documentsData = Array.isArray(documentsResponse)
+                    ? documentsResponse
+                    : ((documentsResponse as any).data || []);
 
                 setJob(jobData);
                 setQuestions(questionsData);

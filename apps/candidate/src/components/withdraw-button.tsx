@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
+import { withdrawApplication } from '@/lib/api-client';
 
 interface WithdrawButtonProps {
     applicationId: string;
@@ -42,23 +43,7 @@ export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = 
                 throw new Error('Not authenticated');
             }
 
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
-            const response = await fetch(`${apiUrl}/applications/${applicationId}/withdraw`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    reason: 'Candidate withdrew application',
-                }),
-            });
-
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error?.message || 'Failed to withdraw application');
-            }
+            await withdrawApplication(applicationId, 'Candidate withdrew application', token);
 
             // Success - redirect to applications list with success message
             router.push('/applications?withdrawn=true');

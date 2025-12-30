@@ -22,7 +22,7 @@ export async function GET() {
             );
         }
 
-        const url = `${API_GATEWAY_URL}/api/notifications/unread-count`;
+        const url = `${API_GATEWAY_URL}/api/v2/notifications/unread-count`;
 
         const response = await fetch(url, {
             method: 'GET',

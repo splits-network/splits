@@ -15,7 +15,12 @@ This document provides complete guidance for implementing the V2 architecture - 
 1. **Standardized 5-Route Pattern** - Every resource has exactly 5 routes
 2. **Single-Method Services** - One update method with smart validation
 3. **Direct Supabase Queries** - No service-to-service calls, no SQL functions
-4. **Role-Based Scoping** - Backend determines data access via database JOINs
+4. **Role-Based Scoping** - Backend determines data access via database JOINs  
+   - Always start from `identity.users` using the Clerk user ID passed from API Gateway  
+   - Join `identity.memberships` for company roles (company_admin, hiring_manager, platform_admin)  
+   - Join `network.recruiters` for recruiter identities  
+   - Join `ats.candidates` for candidate identities  
+   - Apply filters based on the roles discovered so `/api/v2/*` returns only records the caller owns (candidates see their own applications, recruiters see their placements, company users see org data, platform admins see everything)
 5. **Incremental Migration** - v2/ folder approach, route-by-route rollout
 
 **Why V2**:
@@ -684,6 +689,12 @@ export class JobServiceV2 {
 ## Routes Layer - V2
 
 **File**: `services/[service-name]/src/v2/routes.ts`
+
+### Endpoint Naming Rules
+
+- **No `/me` endpoints.** V2 services expose the canonical REST collection (`/v2/candidates`) and rely on `resolveAccessContext` in the repository/service layers to scope the data. If a caller needs “my data”, they still hit `/v2/<resource>` with whatever filters they need and the backend enforces access based on their Clerk user → identity → membership resolution.
+- **Exactly the five standard routes** (list, get by id, create, patch, delete). Any specialized behavior (stats, status transitions, etc.) lives under `/v2/<resource>/<domain>/...` but still avoids “current user” shortcuts.
+- **Gateway/frontends never special-case `/me`.** To check the current user’s record, request `/api/v2/<resource>` (optionally with `limit=1`) and let the backend handle filtering.
 
 ### Pattern: Single File, All Routes
 

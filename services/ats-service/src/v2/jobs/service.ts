@@ -18,7 +18,7 @@ export class JobServiceV2 {
      * Get jobs with role-based scoping and pagination
      */
     async getJobs(
-        clerkUserId: string,
+        clerkUserId: string | undefined,
         filters: JobFilters
     ): Promise<{
         data: any[];
@@ -43,8 +43,8 @@ export class JobServiceV2 {
     /**
      * Get single job by ID
      */
-    async getJob(id: string): Promise<any> {
-        const job = await this.repository.findJob(id);
+    async getJob(id: string, clerkUserId?: string): Promise<any> {
+        const job = await this.repository.findJob(id, clerkUserId);
         if (!job) {
             throw new Error(`Job ${id} not found`);
         }
@@ -94,7 +94,7 @@ export class JobServiceV2 {
         userRole?: string
     ): Promise<any> {
         // 1. Get current job state
-        const currentJob = await this.repository.findJob(id);
+        const currentJob = await this.repository.findJob(id, clerkUserId);
         if (!currentJob) {
             throw new Error(`Job ${id} not found`);
         }
@@ -164,7 +164,7 @@ export class JobServiceV2 {
      * Delete job (soft delete)
      */
     async deleteJob(id: string, clerkUserId?: string): Promise<void> {
-        const job = await this.repository.findJob(id);
+        const job = await this.repository.findJob(id, clerkUserId);
         if (!job) {
             throw new Error(`Job ${id} not found`);
         }

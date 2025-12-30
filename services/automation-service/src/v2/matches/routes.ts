@@ -1,9 +1,11 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import { createClient } from '@supabase/supabase-js';
 import { CandidateMatchServiceV2 } from './service';
 import { CandidateMatchRepository, CreateMatchInput } from './repository';
 import { MatchFilters, MatchUpdate } from './types';
 import { requireUserContext, validatePaginationParams } from '../shared/helpers';
 import { EventPublisher } from '../shared/events';
+import { resolveAccessContext } from '../shared/access';
 
 interface RegisterMatchRoutesConfig {
     supabaseUrl: string;
@@ -16,11 +18,13 @@ export async function registerMatchRoutes(
     config: RegisterMatchRoutesConfig
 ) {
     const repository = new CandidateMatchRepository(config.supabaseUrl, config.supabaseKey);
-    const service = new CandidateMatchServiceV2(repository, config.eventPublisher);
+    const accessClient = createClient(config.supabaseUrl, config.supabaseKey);
+    const accessResolver = (clerkUserId: string) => resolveAccessContext(accessClient, clerkUserId);
+    const service = new CandidateMatchServiceV2(repository, accessResolver, config.eventPublisher);
 
     app.get('/v2/matches', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const query = request.query as Record<string, any>;
             const pagination = validatePaginationParams(query);
             const filters: MatchFilters = {
@@ -31,7 +35,7 @@ export async function registerMatchRoutes(
                 page: pagination.page,
                 limit: pagination.limit,
             };
-            const result = await service.listMatches(filters);
+            const result = await service.listMatches(clerkUserId, filters);
             return reply.send(result);
         } catch (error: any) {
             return reply.code(400).send({ error: { message: error.message || 'Failed to fetch matches' } });
@@ -40,9 +44,9 @@ export async function registerMatchRoutes(
 
     app.get('/v2/matches/:id', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
-            const match = await service.getMatch(id);
+            const match = await service.getMatch(clerkUserId, id);
             return reply.send({ data: match });
         } catch (error: any) {
             return reply.code(404).send({ error: { message: error.message || 'Match not found' } });
@@ -51,14 +55,14 @@ export async function registerMatchRoutes(
 
     app.post('/v2/matches', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const body = request.body as CreateMatchInput;
             if (!body?.candidate_id || !body.job_id || typeof body.match_score === 'undefined' || !body.match_reason) {
                 return reply.code(400).send({
                     error: { message: 'candidate_id, job_id, match_score, and match_reason are required' },
                 });
             }
-            const match = await service.createMatch(body);
+            const match = await service.createMatch(clerkUserId, body);
             return reply.code(201).send({ data: match });
         } catch (error: any) {
             return reply.code(400).send({ error: { message: error.message || 'Failed to create match' } });
@@ -67,10 +71,10 @@ export async function registerMatchRoutes(
 
     app.patch('/v2/matches/:id', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
             const updates = request.body as MatchUpdate;
-            const match = await service.updateMatch(id, updates);
+            const match = await service.updateMatch(clerkUserId, id, updates);
             return reply.send({ data: match });
         } catch (error: any) {
             return reply.code(400).send({ error: { message: error.message || 'Failed to update match' } });
@@ -79,9 +83,9 @@ export async function registerMatchRoutes(
 
     app.delete('/v2/matches/:id', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
-            await service.deleteMatch(id);
+            await service.deleteMatch(clerkUserId, id);
             return reply.code(204).send();
         } catch (error: any) {
             return reply.code(400).send({ error: { message: error.message || 'Failed to delete match' } });

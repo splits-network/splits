@@ -12,13 +12,13 @@ export function registerSubscriptionRoutes(
 ) {
     app.get('/v2/subscriptions', async (request, reply) => {
         try {
-            const context = requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const pagination = validatePaginationParams(request.query as Record<string, any>);
             const filters = {
                 ...(request.query as Record<string, any>),
                 ...pagination,
             };
-            const result = await config.subscriptionService.getSubscriptions(filters, context);
+            const result = await config.subscriptionService.getSubscriptions(filters, clerkUserId);
             return reply.send({ data: result.data, pagination: result.pagination });
         } catch (error: any) {
             return reply.code(400).send({ error: { message: error.message } });
@@ -27,9 +27,9 @@ export function registerSubscriptionRoutes(
 
     app.get('/v2/subscriptions/:id', async (request, reply) => {
         try {
-            const context = requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
-            const subscription = await config.subscriptionService.getSubscription(id, context);
+            const subscription = await config.subscriptionService.getSubscription(id, clerkUserId);
             return reply.send({ data: subscription });
         } catch (error: any) {
             return reply.code(404).send({ error: { message: error.message } });
@@ -38,10 +38,10 @@ export function registerSubscriptionRoutes(
 
     app.post('/v2/subscriptions', async (request, reply) => {
         try {
-            const context = requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const subscription = await config.subscriptionService.createSubscription(
                 request.body as any,
-                context
+                clerkUserId
             );
             return reply.code(201).send({ data: subscription });
         } catch (error: any) {
@@ -51,12 +51,12 @@ export function registerSubscriptionRoutes(
 
     app.patch('/v2/subscriptions/:id', async (request, reply) => {
         try {
-            const context = requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
             const subscription = await config.subscriptionService.updateSubscription(
                 id,
                 request.body as any,
-                context
+                clerkUserId
             );
             return reply.send({ data: subscription });
         } catch (error: any) {
@@ -66,9 +66,9 @@ export function registerSubscriptionRoutes(
 
     app.delete('/v2/subscriptions/:id', async (request, reply) => {
         try {
-            const context = requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
-            const subscription = await config.subscriptionService.cancelSubscription(id, context);
+            const subscription = await config.subscriptionService.cancelSubscription(id, clerkUserId);
             return reply.send({ data: subscription });
         } catch (error: any) {
             return reply.code(400).send({ error: { message: error.message } });

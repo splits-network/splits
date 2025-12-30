@@ -1,0 +1,19 @@
+{
+    "name": "@splits-network/shared-access-context",
+    "version": "0.1.0",
+    "private": true,
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "build": "tsc -b",
+        "clean": "rm -rf dist *.tsbuildinfo",
+        "dev": "tsc -b --watch"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "^2.86.2"
+    },
+    "devDependencies": {
+        "@types/node": "^24.10.1",
+        "typescript": "^5.9.3"
+    }
+}

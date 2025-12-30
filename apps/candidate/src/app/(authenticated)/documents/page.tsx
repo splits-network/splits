@@ -40,16 +40,27 @@ export default function DocumentsPage() {
         }
     };
 
-    const formatFileSize = (bytes: number): string => {
-        if (bytes < 1024) return bytes + ' B';
-        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    const formatFileSize = (bytes?: number): string => {
+        if (typeof bytes !== 'number' || Number.isNaN(bytes)) return '-';
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
     };
 
-    const getFileIcon = (name: string): string => {
-        if (name.endsWith('.pdf')) return 'fa-file-pdf text-error';
-        if (name.endsWith('.doc') || name.endsWith('.docx')) return 'fa-file-word text-info';
+    const formatUploadedAt = (value?: string | Date): string => {
+        return value ? formatDate(value) : '-';
+    };
+
+    const getFileIcon = (name?: string): string => {
+        if (!name) return 'fa-file text-base-content';
+        const lower = name.toLowerCase();
+        if (lower.endsWith('.pdf')) return 'fa-file-pdf text-error';
+        if (lower.endsWith('.doc') || lower.endsWith('.docx')) return 'fa-file-word text-info';
         return 'fa-file text-base-content';
+    };
+
+    const getDocumentTypeLabel = (type?: string | null): string => {
+        return type ? type.replace(/_/g, ' ') : 'unspecified';
     };
 
     const getCandidateId = async () => {
@@ -62,19 +73,14 @@ export default function DocumentsPage() {
                 return null;
             }
 
-            // Get user info to get email
             const user = await getCurrentUser(token);
-            const userEmail = user.email;
-
-            if (!userEmail) {
-                console.error('No email found in user data');
-                return null;
+            if (user.candidate_id) {
+                setCandidateId(user.candidate_id);
+                return user.candidate_id;
             }
 
-            // Get candidate profile
             const profile = await getMyCandidateProfile(token);
-
-            if (!profile) {
+            if (!profile?.id) {
                 console.error('No candidate profile found');
                 return null;
             }
@@ -218,19 +224,19 @@ export default function DocumentsPage() {
                                     <div className="flex items-center gap-4 flex-1">
                                         <div className="avatar avatar-placeholder">
                                             <div className="bg-base-200 text-base-content rounded-lg w-16 h-16">
-                                                <i className={`fa-solid ${getFileIcon(doc.filename)} text-3xl`}></i>
+                                                <i className={`fa-solid ${getFileIcon(doc.file_name)} text-3xl`}></i>
                                             </div>
                                         </div>
 
                                         <div className="flex-1">
-                                            <h3 className="text-xl font-semibold mb-1">{doc.filename}</h3>
+                                            <h3 className="text-xl font-semibold mb-1">{doc.file_name}</h3>
                                             <div className="flex flex-wrap gap-3 text-sm text-base-content/70">
-                                                <span className="badge badge-sm capitalize">{doc.document_type.replace('_', ' ')}</span>
+                                                <span className="badge badge-sm capitalize">{getDocumentTypeLabel(doc.document_type)}</span>
                                                 <span>
                                                     <i className="fa-solid fa-file-arrow-down"></i> {formatFileSize(doc.file_size)}
                                                 </span>
                                                 <span>
-                                                    <i className="fa-solid fa-calendar"></i> Uploaded {formatDate(doc.created_at)}
+                                                    <i className="fa-solid fa-calendar"></i> Uploaded {formatUploadedAt(doc.created_at)}
                                                 </span>
                                             </div>
                                         </div>

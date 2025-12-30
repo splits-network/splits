@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Document, DocumentFilters, DocumentUpdate, ProcessingStatus } from './types';
+import { resolveAccessContext, AccessContext } from '../shared/access';
 
 export interface CreateDocumentRecord {
     entity_type: string;
@@ -15,6 +16,25 @@ export interface CreateDocumentRecord {
     processing_status?: ProcessingStatus;
 }
 
+type DocumentRow = {
+    id: string;
+    entity_type: string;
+    entity_id: string;
+    document_type: string;
+    filename: string;
+    storage_path: string;
+    file_size: number;
+    content_type: string;
+    bucket_name: string;
+    uploaded_by_user_id?: string | null;
+    status?: string;
+    processing_status?: ProcessingStatus;
+    metadata?: Record<string, any> | null;
+    created_at: string;
+    updated_at: string;
+    deleted_at?: string | null;
+};
+
 export class DocumentRepositoryV2 {
     private supabase: SupabaseClient;
 
@@ -22,10 +42,10 @@ export class DocumentRepositoryV2 {
         this.supabase = createClient(supabaseUrl, supabaseKey);
     }
 
-    private mapRow(row: any): Document {
+    private mapRow(row: DocumentRow): Document {
         return {
             id: row.id,
-            entity_type: row.entity_type,
+            entity_type: row.entity_type as Document['entity_type'],
             entity_id: row.entity_id,
             document_type: row.document_type,
             file_name: row.filename,
@@ -42,13 +62,18 @@ export class DocumentRepositoryV2 {
         };
     }
 
-    async findDocuments(filters: DocumentFilters = {}): Promise<{
+    async findDocuments(
+        clerkUserId: string,
+        filters: DocumentFilters = {}
+    ): Promise<{
         data: Document[];
         total: number;
     }> {
         const page = filters.page ?? 1;
         const limit = filters.limit ?? 25;
         const offset = (page - 1) * limit;
+
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
 
         let query = this.supabase
             .schema('documents')
@@ -70,11 +95,18 @@ export class DocumentRepositoryV2 {
         if (filters.document_type) {
             query = query.eq('document_type', filters.document_type);
         }
-        if (filters.uploaded_by) {
-            query = query.eq('uploaded_by_user_id', filters.uploaded_by);
-        }
         if (filters.search) {
             query = query.ilike('filename', `%${filters.search}%`);
+        }
+
+        if (!accessContext.isPlatformAdmin) {
+            if (accessContext.candidateId) {
+                query = query.eq('entity_type', 'candidate').eq('entity_id', accessContext.candidateId);
+            } else if (accessContext.organizationIds.length > 0) {
+                query = query.eq('entity_type', 'company').in('entity_id', accessContext.organizationIds);
+            } else {
+                return { data: [], total: 0 };
+            }
         }
 
         const { data, error, count } = await query
@@ -85,13 +117,20 @@ export class DocumentRepositoryV2 {
             throw error;
         }
 
+        const rows = data || [];
+        const filteredRows = accessContext.isPlatformAdmin
+            ? rows
+            : rows.filter((row) => this.canAccessDocument(row, accessContext));
+
         return {
-            data: (data || []).map((doc) => this.mapRow(doc)),
-            total: count || 0,
+            data: filteredRows.map((doc) => this.mapRow(doc)),
+            total: count || filteredRows.length,
         };
     }
 
-    async findDocument(id: string): Promise<Document | null> {
+    async findDocument(id: string, clerkUserId: string): Promise<Document | null> {
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+
         const { data, error } = await this.supabase
             .schema('documents')
             .from('documents')
@@ -106,10 +145,24 @@ export class DocumentRepositoryV2 {
             throw error;
         }
 
-        return data ? this.mapRow(data) : null;
+        if (!data || !this.canAccessDocument(data as DocumentRow, accessContext)) {
+            return null;
+        }
+
+        return this.mapRow(data as DocumentRow);
     }
 
-    async createDocument(input: CreateDocumentRecord): Promise<Document> {
+    async createDocument(clerkUserId: string, input: CreateDocumentRecord): Promise<Document> {
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+
+        if (!accessContext.identityUserId) {
+            throw new Error('Unable to resolve identity user for document upload');
+        }
+
+        if (!this.canModifyEntity(input.entity_type, input.entity_id, accessContext)) {
+            throw new Error('Not authorized to upload document for this entity');
+        }
+
         const { data, error } = await this.supabase
             .schema('documents')
             .from('documents')
@@ -122,7 +175,7 @@ export class DocumentRepositoryV2 {
                 bucket_name: input.storage_bucket,
                 content_type: input.mime_type,
                 file_size: input.file_size,
-                uploaded_by_user_id: input.uploaded_by,
+                uploaded_by_user_id: accessContext.identityUserId,
                 metadata: input.metadata || {},
                 processing_status: input.processing_status || 'pending',
             })
@@ -133,10 +186,16 @@ export class DocumentRepositoryV2 {
             throw error;
         }
 
-        return this.mapRow(data);
+        return this.mapRow(data as DocumentRow);
     }
 
-    async updateDocument(id: string, updates: DocumentUpdate): Promise<Document> {
+    async updateDocument(id: string, clerkUserId: string, updates: DocumentUpdate): Promise<Document> {
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+        const existing = await this.findDocument(id, clerkUserId);
+        if (!existing) {
+            throw new Error('Document not found or access denied');
+        }
+
         const updateData: Record<string, any> = { updated_at: new Date().toISOString() };
 
         if (typeof updates.document_type !== 'undefined') {
@@ -164,10 +223,16 @@ export class DocumentRepositoryV2 {
             throw error;
         }
 
-        return this.mapRow(data);
+        return this.mapRow(data as DocumentRow);
     }
 
-    async softDeleteDocument(id: string): Promise<void> {
+    async softDeleteDocument(id: string, clerkUserId: string): Promise<void> {
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+        const existing = await this.findDocument(id, clerkUserId);
+        if (!existing) {
+            throw new Error('Document not found or access denied');
+        }
+
         const { error } = await this.supabase
             .schema('documents')
             .from('documents')
@@ -180,5 +245,41 @@ export class DocumentRepositoryV2 {
         if (error) {
             throw error;
         }
+    }
+
+    private canAccessDocument(row: DocumentRow, context: AccessContext): boolean {
+        if (context.isPlatformAdmin) {
+            return true;
+        }
+
+        if (context.candidateId && row.entity_type === 'candidate' && row.entity_id === context.candidateId) {
+            return true;
+        }
+
+        if (
+            context.organizationIds.length > 0 &&
+            row.entity_type === 'company' &&
+            context.organizationIds.includes(row.entity_id)
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private canModifyEntity(entityType: string, entityId: string, context: AccessContext): boolean {
+        if (context.isPlatformAdmin) {
+            return true;
+        }
+
+        if (context.candidateId && entityType === 'candidate' && entityId === context.candidateId) {
+            return true;
+        }
+
+        if (context.organizationIds.length > 0 && entityType === 'company') {
+            return context.organizationIds.includes(entityId);
+        }
+
+        return false;
     }
 }

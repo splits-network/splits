@@ -1,9 +1,11 @@
 import { FastifyInstance } from 'fastify';
+import { createClient } from '@supabase/supabase-js';
 import { TemplateServiceV2 } from './service';
 import { NotificationTemplateRepository } from './repository';
 import { TemplateCreateInput, TemplateUpdate } from './types';
 import { requireUserContext, validatePaginationParams } from '../shared/helpers';
 import { EventPublisher } from '../shared/events';
+import { resolveAccessContext } from '../shared/access';
 
 interface RegisterTemplateRoutesConfig {
     supabaseUrl: string;
@@ -19,17 +21,20 @@ export async function registerTemplateRoutes(
         config.supabaseUrl,
         config.supabaseKey
     );
+    const accessClient = createClient(config.supabaseUrl, config.supabaseKey);
+    const accessResolver = (clerkUserId: string) => resolveAccessContext(accessClient, clerkUserId);
     const templateService = new TemplateServiceV2(
         templateRepository,
+        accessResolver,
         config.eventPublisher
     );
 
     app.get('/v2/templates', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const query = request.query as Record<string, any>;
             const pagination = validatePaginationParams(query);
-            const result = await templateService.listTemplates({
+            const result = await templateService.listTemplates(clerkUserId, {
                 event_type: query.event_type,
                 status: query.status,
                 search: query.search,
@@ -46,9 +51,9 @@ export async function registerTemplateRoutes(
 
     app.get('/v2/templates/:id', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
-            const template = await templateService.getTemplate(id);
+            const template = await templateService.getTemplate(clerkUserId, id);
             return reply.send({ data: template });
         } catch (error: any) {
             return reply.code(404).send({
@@ -59,7 +64,7 @@ export async function registerTemplateRoutes(
 
     app.post('/v2/templates', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const body = request.body as TemplateCreateInput;
 
             if (!body?.event_type || !body.subject || !body.template_html) {
@@ -68,7 +73,7 @@ export async function registerTemplateRoutes(
                 });
             }
 
-            const template = await templateService.createTemplate(body);
+            const template = await templateService.createTemplate(clerkUserId, body);
             return reply.code(201).send({ data: template });
         } catch (error: any) {
             return reply.code(400).send({
@@ -79,10 +84,10 @@ export async function registerTemplateRoutes(
 
     app.patch('/v2/templates/:id', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
             const updates = request.body as TemplateUpdate;
-            const template = await templateService.updateTemplate(id, updates);
+            const template = await templateService.updateTemplate(clerkUserId, id, updates);
             return reply.send({ data: template });
         } catch (error: any) {
             return reply.code(400).send({
@@ -93,9 +98,9 @@ export async function registerTemplateRoutes(
 
     app.delete('/v2/templates/:id', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
-            await templateService.archiveTemplate(id);
+            await templateService.archiveTemplate(clerkUserId, id);
             return reply.code(204).send();
         } catch (error: any) {
             return reply.code(400).send({

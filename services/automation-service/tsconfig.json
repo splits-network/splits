@@ -26,6 +26,9 @@
         },
         {
             "path": "../../packages/shared-job-queue"
+        },
+        {
+            "path": "../../packages/shared-access-context"
         }
     ]
 }

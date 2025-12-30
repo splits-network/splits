@@ -10,31 +10,22 @@ import { FastifyRequest } from 'fastify';
 // ============================================
 
 export interface UserContext {
-    userId: string;
     clerkUserId: string;
-    role: string;
-    organizationId?: string;
 }
 
 /**
- * Extract user context from request headers
- * Set by API Gateway after auth verification
+ * Extract user context from request headers (Clerk only).
+ * Role resolution happens via Supabase joins in the repository layer.
  */
 export function requireUserContext(request: FastifyRequest): UserContext {
-    const userId = request.headers['x-user-id'] as string;
     const clerkUserId = request.headers['x-clerk-user-id'] as string;
-    const role = request.headers['x-user-role'] as string;
-    const organizationId = request.headers['x-organization-id'] as string | undefined;
 
-    if (!userId || !clerkUserId) {
-        throw new Error('Missing user context headers');
+    if (!clerkUserId) {
+        throw new Error('Missing x-clerk-user-id header');
     }
 
     return {
-        userId,
         clerkUserId,
-        role,
-        organizationId,
     };
 }
 

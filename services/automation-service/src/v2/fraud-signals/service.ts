@@ -2,14 +2,25 @@ import { buildPaginationResponse } from '../shared/helpers';
 import { FraudSignalFilters, FraudSignalUpdate } from './types';
 import { CreateFraudSignalInput, FraudSignalRepository } from './repository';
 import { EventPublisher } from '../shared/events';
+import type { AccessContext } from '../shared/access';
 
 export class FraudSignalServiceV2 {
     constructor(
         private repository: FraudSignalRepository,
+        private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
         private eventPublisher?: EventPublisher
     ) {}
 
-    async listSignals(filters: FraudSignalFilters) {
+    private async requirePlatformAdmin(clerkUserId: string): Promise<AccessContext> {
+        const access = await this.resolveAccessContext(clerkUserId);
+        if (!access.isPlatformAdmin) {
+            throw new Error('Platform admin permissions required');
+        }
+        return access;
+    }
+
+    async listSignals(clerkUserId: string, filters: FraudSignalFilters) {
+        await this.requirePlatformAdmin(clerkUserId);
         const result = await this.repository.findSignals(filters);
         return {
             data: result.data,
@@ -21,7 +32,8 @@ export class FraudSignalServiceV2 {
         };
     }
 
-    async getSignal(id: string) {
+    async getSignal(clerkUserId: string, id: string) {
+        await this.requirePlatformAdmin(clerkUserId);
         const signal = await this.repository.findSignal(id);
         if (!signal) {
             throw new Error('Fraud signal not found');
@@ -29,7 +41,8 @@ export class FraudSignalServiceV2 {
         return signal;
     }
 
-    async createSignal(input: CreateFraudSignalInput) {
+    async createSignal(clerkUserId: string, input: CreateFraudSignalInput) {
+        await this.requirePlatformAdmin(clerkUserId);
         const signal = await this.repository.createSignal(input);
         if (this.eventPublisher) {
             await this.eventPublisher.publish('automation.fraud.created', {
@@ -42,8 +55,9 @@ export class FraudSignalServiceV2 {
         return signal;
     }
 
-    async updateSignal(id: string, updates: FraudSignalUpdate) {
-        await this.getSignal(id);
+    async updateSignal(clerkUserId: string, id: string, updates: FraudSignalUpdate) {
+        await this.requirePlatformAdmin(clerkUserId);
+        await this.getSignal(clerkUserId, id);
         const signal = await this.repository.updateSignal(id, updates);
         if (this.eventPublisher) {
             await this.eventPublisher.publish('automation.fraud.updated', {
@@ -54,8 +68,9 @@ export class FraudSignalServiceV2 {
         return signal;
     }
 
-    async deleteSignal(id: string) {
-        await this.getSignal(id);
+    async deleteSignal(clerkUserId: string, id: string) {
+        await this.requirePlatformAdmin(clerkUserId);
+        await this.getSignal(clerkUserId, id);
         await this.repository.deleteSignal(id);
         if (this.eventPublisher) {
             await this.eventPublisher.publish('automation.fraud.deleted', {

@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 const API_GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
 
-export async function PATCH() {
+export async function POST() {
     try {
         const { userId, getToken } = await auth();
 
@@ -22,24 +22,23 @@ export async function PATCH() {
             );
         }
 
-        const url = `${API_GATEWAY_URL}/api/notifications/mark-all-read`;
+        const url = `${API_GATEWAY_URL}/api/v2/notifications/mark-all-read`;
 
         const response = await fetch(url, {
-            method: 'PATCH',
+            method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ userId }),
+            body: JSON.stringify({}),
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
+            const data = await response.json();
             return NextResponse.json(data, { status: response.status });
         }
 
-        return NextResponse.json(data);
+        return NextResponse.json({ data: { success: true } });
     } catch (error) {
         console.error('Error marking all as read:', error);
         return NextResponse.json(

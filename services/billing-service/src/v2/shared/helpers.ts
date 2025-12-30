@@ -4,16 +4,14 @@
  */
 
 import { FastifyRequest } from 'fastify';
+import type { AccessContext } from './access';
 
 // ============================================
 // USER CONTEXT
 // ============================================
 
 export interface UserContext {
-    userId: string;
     clerkUserId: string;
-    role: string;
-    organizationId?: string;
 }
 
 const BILLING_ADMIN_ROLES = ['platform_admin', 'billing_admin'];
@@ -23,30 +21,23 @@ const BILLING_ADMIN_ROLES = ['platform_admin', 'billing_admin'];
  * Set by API Gateway after auth verification
  */
 export function requireUserContext(request: FastifyRequest): UserContext {
-    const userId = request.headers['x-user-id'] as string;
     const clerkUserId = request.headers['x-clerk-user-id'] as string;
-    const role = request.headers['x-user-role'] as string;
-    const organizationId = request.headers['x-organization-id'] as string | undefined;
 
-    if (!userId || !clerkUserId) {
-        throw new Error('Missing user context headers');
+    if (!clerkUserId) {
+        throw new Error('Missing x-clerk-user-id header');
     }
 
     return {
-        userId,
         clerkUserId,
-        role,
-        organizationId,
     };
 }
 
-export function isBillingAdmin(role?: string): boolean {
-    if (!role) return false;
-    return BILLING_ADMIN_ROLES.includes(role);
+export function isBillingAdmin(access: AccessContext): boolean {
+    return access.isPlatformAdmin || access.roles.some((role) => BILLING_ADMIN_ROLES.includes(role));
 }
 
-export function requireBillingAdmin(context: UserContext): void {
-    if (!isBillingAdmin(context.role)) {
+export function requireBillingAdmin(access: AccessContext): void {
+    if (!isBillingAdmin(access)) {
         throw new Error('Insufficient permissions for billing admin operation');
     }
 }

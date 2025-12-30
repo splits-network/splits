@@ -18,7 +18,6 @@ const ALLOWED_MIME_TYPES = [
 interface CreateDocumentPayload extends DocumentCreateInput {
     file: Buffer;
     originalFileName: string;
-    uploadedBy?: string;
 }
 
 export class DocumentServiceV2 {
@@ -76,8 +75,8 @@ export class DocumentServiceV2 {
         return `${entityType}/${entityId}/${timestamp}-${slug}-${sanitized}`;
     }
 
-    async listDocuments(filters: DocumentFilters) {
-        const result = await this.repository.findDocuments(filters);
+    async listDocuments(clerkUserId: string, filters: DocumentFilters) {
+        const result = await this.repository.findDocuments(clerkUserId, filters);
         return {
             data: result.data,
             pagination: buildPaginationResponse(
@@ -88,8 +87,8 @@ export class DocumentServiceV2 {
         };
     }
 
-    async getDocument(id: string) {
-        const document = await this.repository.findDocument(id);
+    async getDocument(id: string, clerkUserId: string) {
+        const document = await this.repository.findDocument(id, clerkUserId);
         if (!document) {
             throw new Error('Document not found');
         }
@@ -106,7 +105,7 @@ export class DocumentServiceV2 {
         };
     }
 
-    async createDocument(payload: CreateDocumentPayload) {
+    async createDocument(clerkUserId: string, payload: CreateDocumentPayload) {
         const mimeType = await this.validateFile(payload.file, payload.originalFileName);
         const storageBucket = this.storage.getBucketName(payload.entity_type);
         const storagePath = this.generateStoragePath(
@@ -122,7 +121,7 @@ export class DocumentServiceV2 {
             mimeType
         );
 
-        const document = await this.repository.createDocument({
+        const document = await this.repository.createDocument(clerkUserId, {
             entity_type: payload.entity_type,
             entity_id: payload.entity_id,
             document_type: payload.document_type,
@@ -131,7 +130,6 @@ export class DocumentServiceV2 {
             file_size: payload.file.length,
             mime_type: mimeType,
             storage_bucket: storageBucket,
-            uploaded_by: payload.uploadedBy,
             metadata: payload.metadata,
             processing_status: 'pending',
         });
@@ -145,16 +143,11 @@ export class DocumentServiceV2 {
             });
         }
 
-        return this.getDocument(document.id);
+        return this.getDocument(document.id, clerkUserId);
     }
 
-    async updateDocument(id: string, updates: DocumentUpdate) {
-        const existing = await this.repository.findDocument(id);
-        if (!existing) {
-            throw new Error('Document not found');
-        }
-
-        const updated = await this.repository.updateDocument(id, updates);
+    async updateDocument(id: string, updates: DocumentUpdate, clerkUserId: string) {
+        const updated = await this.repository.updateDocument(id, clerkUserId, updates);
 
         if (this.eventPublisher) {
             await this.eventPublisher.publish('documents.updated', {
@@ -166,14 +159,14 @@ export class DocumentServiceV2 {
         return updated;
     }
 
-    async deleteDocument(id: string) {
-        const existing = await this.repository.findDocument(id);
+    async deleteDocument(id: string, clerkUserId: string) {
+        const existing = await this.repository.findDocument(id, clerkUserId);
         if (!existing) {
             throw new Error('Document not found');
         }
 
         await this.storage.deleteFile(existing.storage_bucket, existing.file_path);
-        await this.repository.softDeleteDocument(id);
+        await this.repository.softDeleteDocument(id, clerkUserId);
 
         if (this.eventPublisher) {
             await this.eventPublisher.publish('documents.deleted', {

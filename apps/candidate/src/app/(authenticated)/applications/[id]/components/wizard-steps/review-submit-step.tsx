@@ -42,8 +42,8 @@ export function ReviewSubmitStep({
                 return;
             }
 
-            const response = await getMyDocuments(token) as { data: any[] };
-            setExistingDocs(response.data || []);
+            const docs = await getMyDocuments(token);
+            setExistingDocs(docs);
         } catch (err) {
             console.error('Failed to load existing documents:', err);
         } finally {
@@ -99,7 +99,7 @@ export function ReviewSubmitStep({
                                         <div className="font-medium">
                                             {'name' in primaryDocument
                                                 ? primaryDocument.name
-                                                : primaryDocument.filename}
+                                                : primaryDocument.file_name}
                                         </div>
                                         <div className="text-sm text-base-content/60">
                                             Primary Resume
@@ -119,7 +119,7 @@ export function ReviewSubmitStep({
                                     >
                                         <i className="fa-solid fa-file text-base-content/60"></i>
                                         <div className="flex-1">
-                                            <div className="font-medium">{doc.filename}</div>
+                                            <div className="font-medium">{doc.file_name}</div>
                                             <div className="text-sm text-base-content/60">
                                                 {doc.document_type} • {(doc.file_size / 1024).toFixed(1)} KB
                                                 {' • Existing'}

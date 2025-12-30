@@ -1,5 +1,7 @@
 // API client for communicating with the backend gateway
 // Use internal Docker URL for server-side calls, public URL for client-side
+import { normalizeDocuments } from './document-utils';
+
 const getApiBaseUrl = () => {
   // Server-side (inside Docker container or during build)
   if (typeof window === 'undefined') {
@@ -88,6 +90,18 @@ class ApiClient {
     });
   }
 
+  async patch<T>(
+    endpoint: string,
+    data: unknown,
+    token?: string
+  ): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+      token,
+    });
+  }
+
   async delete<T>(endpoint: string, token?: string): Promise<T> {
     return this.request<T>(endpoint, { method: 'DELETE', token });
   }
@@ -107,24 +121,27 @@ export async function submitApplication(data: {
 }
 
 export async function getMyApplications(token: string) {
-  return apiClient.get('/candidates/me/applications', token);
+  return apiClient.get('/v2/applications', token);
 }
 
 export async function getApplicationById(applicationId: string, token: string) {
-  return apiClient.get(`/applications/${applicationId}`, token);
+  return apiClient.get(`/v2/applications/${applicationId}`, token);
 }
 
 export async function getApplicationDetails(applicationId: string, token: string) {
-  return apiClient.get(`/applications/${applicationId}/full`, token);
+  return apiClient.get(`/v2/applications/${applicationId}`, token);
 }
 
 export async function withdrawApplication(applicationId: string, reason: string | undefined, token: string) {
-  return apiClient.post(`/applications/${applicationId}/withdraw`, { reason }, token);
+  return apiClient.patch(`/v2/applications/${applicationId}`, {
+    stage: 'withdrawn',
+    notes: reason || 'Candidate withdrew application',
+  }, token);
 }
 
 // Job API methods
 export async function getJob(jobId: string, token: string) {
-  return apiClient.get(`/jobs/${jobId}`, token);
+  return apiClient.get(`/v2/jobs/${jobId}`, token);
 }
 
 export async function getPreScreenQuestions(jobId: string, token: string) {
@@ -133,5 +150,7 @@ export async function getPreScreenQuestions(jobId: string, token: string) {
 
 // Document API methods
 export async function getMyDocuments(token: string) {
-  return apiClient.get('/candidates/me/documents', token);
+  const response = await apiClient.get('/v2/documents', token);
+  const docs = (response as any).data || response;
+  return normalizeDocuments(docs);
 }

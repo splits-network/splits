@@ -1,10 +1,10 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { ServiceRegistry } from '../../clients';
-import { requireRoles } from '../../rbac';
+import { requireRoles, AuthenticatedRequest } from '../../rbac';
 import { buildAuthHeaders } from '../../helpers/auth-headers';
 import { UserRole } from '../../auth';
 
-type ServiceName = 'ats' | 'network' | 'billing';
+type ServiceName = 'ats' | 'network' | 'billing' | 'notification' | 'identity';
 
 interface ResourceRoles {
     list?: UserRole[];
@@ -45,6 +45,19 @@ const ATS_MANAGE_ROLES: UserRole[] = ['company_admin', 'hiring_manager', 'platfo
 const ATS_DELETE_ROLES: UserRole[] = ['company_admin', 'platform_admin'];
 const ATS_CANDIDATE_MANAGE_ROLES: UserRole[] = ['recruiter', 'company_admin', 'platform_admin'];
 const ATS_PLACEMENT_ROLES: UserRole[] = ['recruiter', 'company_admin', 'platform_admin'];
+const AUTHENTICATED_ROLES: UserRole[] = [
+    'candidate',
+    'recruiter',
+    'company_admin',
+    'hiring_manager',
+    'platform_admin',
+];
+const ATS_AI_TRIGGER_ROLES: UserRole[] = [
+    'recruiter',
+    'company_admin',
+    'hiring_manager',
+    'platform_admin',
+];
 
 const NETWORK_VIEW_ROLES: UserRole[] = [
     'recruiter',
@@ -92,10 +105,10 @@ const RESOURCES: ResourceDefinition[] = [
         basePath: '/candidates',
         tag: 'candidates',
         roles: {
-            list: ATS_CANDIDATE_VIEW_ROLES,
-            get: ATS_CANDIDATE_VIEW_ROLES,
+            list: [...ATS_CANDIDATE_VIEW_ROLES, 'candidate'],
+            get: [...ATS_CANDIDATE_VIEW_ROLES, 'candidate'],
             create: ATS_CANDIDATE_MANAGE_ROLES,
-            update: ATS_CANDIDATE_MANAGE_ROLES,
+            update: [...ATS_CANDIDATE_MANAGE_ROLES, 'candidate'],
             delete: ['platform_admin'],
         },
     },
@@ -158,8 +171,8 @@ const RESOURCES: ResourceDefinition[] = [
         basePath: '/recruiter-candidates',
         tag: 'recruiter-candidates',
         roles: {
-            list: ['recruiter', 'company_admin', 'platform_admin'],
-            get: ['recruiter', 'company_admin', 'platform_admin'],
+            list: ['candidate', 'recruiter', 'company_admin', 'platform_admin'],
+            get: ['candidate', 'recruiter', 'company_admin', 'platform_admin'],
             create: ['recruiter', 'platform_admin'],
             update: ['recruiter', 'platform_admin'],
             delete: NETWORK_ADMIN_ROLES,
@@ -231,12 +244,382 @@ const RESOURCES: ResourceDefinition[] = [
             delete: BILLING_VIEW_ROLES,
         },
     },
+    // Notification
+    {
+        name: 'notifications',
+        service: 'notification',
+        basePath: '/notifications',
+        tag: 'notifications',
+        roles: {
+            list: AUTHENTICATED_ROLES,
+            get: AUTHENTICATED_ROLES,
+            create: ['platform_admin'],
+            update: AUTHENTICATED_ROLES,
+            delete: AUTHENTICATED_ROLES,
+        },
+    },
 ];
 
 export function registerV2GatewayRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const atsService = () => services.get('ats');
+    const networkService = () => services.get('network');
+    const identityService = () => services.get('identity');
+    const getCorrelationId = (request: FastifyRequest) => (request as any).correlationId;
+    const candidateRoles: UserRole[] = ['candidate', 'platform_admin'];
+
     RESOURCES.forEach(resource => {
         registerResourceRoutes(app, services, resource);
     });
+
+    app.get(
+        '/api/v2/candidate-dashboard/stats',
+        {
+            preHandler: requireRoles(candidateRoles, services),
+            schema: {
+                description: 'Get candidate dashboard stats',
+                tags: ['candidate-dashboard'],
+                security: [{ clerkAuth: [] }],
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const data = await atsService().get(
+                '/v2/candidate-dashboard/stats',
+                undefined,
+                correlationId,
+                authHeaders
+            );
+            return reply.send(data);
+        }
+    );
+
+    app.get(
+        '/api/v2/candidate-dashboard/recent-applications',
+        {
+            preHandler: requireRoles(candidateRoles, services),
+            schema: {
+                description: 'Get candidate recent applications',
+                tags: ['candidate-dashboard'],
+                security: [{ clerkAuth: [] }],
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const queryString = new URLSearchParams(request.query as Record<string, any>).toString();
+            const path = queryString
+                ? `/v2/candidate-dashboard/recent-applications?${queryString}`
+                : '/v2/candidate-dashboard/recent-applications';
+            const data = await atsService().get(path, undefined, correlationId, authHeaders);
+            return reply.send(data);
+        }
+    );
+
+    app.get(
+        '/api/v2/users/me',
+        {
+            schema: {
+                description: 'Get current user profile and access context',
+                tags: ['users'],
+                security: [{ clerkAuth: [] }],
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const data = await identityService().get(
+                '/api/v2/users/me',
+                undefined,
+                correlationId,
+                authHeaders
+            );
+            return reply.send(data);
+        }
+    );
+
+    app.get(
+        '/api/v2/consent',
+        {
+            schema: {
+                description: 'Get current user consent preferences',
+                tags: ['consent'],
+                security: [{ clerkAuth: [] }],
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const data = await identityService().get(
+                '/api/v2/consent',
+                undefined,
+                correlationId,
+                authHeaders
+            );
+            return reply.send(data);
+        }
+    );
+
+    app.post(
+        '/api/v2/consent',
+        {
+            schema: {
+                description: 'Save user consent preferences',
+                tags: ['consent'],
+                security: [{ clerkAuth: [] }],
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const data = await identityService().post(
+                '/api/v2/consent',
+                request.body,
+                correlationId,
+                authHeaders
+            );
+            return reply.status(201).send(data);
+        }
+    );
+
+    app.delete(
+        '/api/v2/consent',
+        {
+            schema: {
+                description: 'Delete user consent preferences',
+                tags: ['consent'],
+                security: [{ clerkAuth: [] }],
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            await identityService().delete('/api/v2/consent', correlationId, authHeaders);
+            return reply.status(204).send();
+        }
+    );
+
+    app.get(
+        '/api/v2/recruiter-candidates/invitations/:token',
+        {
+            schema: {
+                description: 'Fetch recruiter-candidate invitation by token',
+                tags: ['recruiter-candidates'],
+                security: [{ clerkAuth: [] }],
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const req = request as AuthenticatedRequest;
+            if (!req.auth) {
+                return reply.status(401).send({ error: { message: 'Authentication required' } });
+            }
+
+            const { token } = request.params as { token: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await networkService().get(
+                    `/v2/recruiter-candidates/invitations/${token}`,
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, token, correlationId }, 'Failed to fetch invitation');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to fetch invitation' });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/recruiter-candidates/invitations/:token/accept',
+        {
+            schema: {
+                description: 'Accept recruiter invitation via token',
+                tags: ['recruiter-candidates'],
+                security: [{ clerkAuth: [] }],
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const req = request as AuthenticatedRequest;
+            if (!req.auth) {
+                return reply.status(401).send({ error: { message: 'Authentication required' } });
+            }
+
+            const { token } = request.params as { token: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const forwardedIp =
+                (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || request.ip;
+            const userAgent = request.headers['user-agent'] as string | undefined;
+            const body = (request.body as Record<string, any>) || {};
+
+            try {
+                const data = await networkService().post(
+                    `/v2/recruiter-candidates/invitations/${token}/accept`,
+                    {
+                        userId: req.auth.userId,
+                        ip_address: forwardedIp,
+                        user_agent: userAgent,
+                        ...body,
+                    },
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, token, correlationId }, 'Failed to accept invitation');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to accept invitation' });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/recruiter-candidates/invitations/:token/decline',
+        {
+            schema: {
+                description: 'Decline recruiter invitation via token',
+                tags: ['recruiter-candidates'],
+                security: [{ clerkAuth: [] }],
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const req = request as AuthenticatedRequest;
+            if (!req.auth) {
+                return reply.status(401).send({ error: { message: 'Authentication required' } });
+            }
+
+            const { token } = request.params as { token: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const forwardedIp =
+                (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || request.ip;
+            const userAgent = request.headers['user-agent'] as string | undefined;
+            const body = (request.body as Record<string, any>) || {};
+
+            try {
+                const data = await networkService().post(
+                    `/v2/recruiter-candidates/invitations/${token}/decline`,
+                    {
+                        userId: req.auth.userId,
+                        ip_address: forwardedIp,
+                        user_agent: userAgent,
+                        ...body,
+                    },
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, token, correlationId }, 'Failed to decline invitation');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to decline invitation' });
+            }
+        }
+    );
+
+    app.get(
+        '/api/v2/applications/:id/ai-review',
+        {
+            preHandler: requireRoles(ATS_VIEW_ROLES, services),
+            schema: {
+                description: 'Get AI review for application (V2)',
+                tags: ['applications', 'ai-review'],
+                security: [{ clerkAuth: [] }],
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await atsService().get(
+                    `/v2/applications/${id}/ai-review`,
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to fetch AI review');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to fetch AI review' });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/applications/:id/ai-review',
+        {
+            preHandler: requireRoles(ATS_AI_TRIGGER_ROLES, services),
+            schema: {
+                description: 'Trigger AI review for application (V2)',
+                tags: ['applications', 'ai-review'],
+                security: [{ clerkAuth: [] }],
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await atsService().post(
+                    `/v2/applications/${id}/ai-review`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to trigger AI review');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to trigger AI review' });
+            }
+        }
+    );
+
+    app.get(
+        '/api/v2/jobs/:jobId/ai-review-stats',
+        {
+            preHandler: requireRoles(ATS_AI_TRIGGER_ROLES, services),
+            schema: {
+                description: 'Get AI review metrics for a job (V2)',
+                tags: ['applications', 'ai-review'],
+                security: [{ clerkAuth: [] }],
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { jobId } = request.params as { jobId: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await atsService().get(
+                    `/v2/jobs/${jobId}/ai-review-stats`,
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, jobId, correlationId }, 'Failed to fetch AI review stats');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to fetch AI review stats' });
+            }
+        }
+    );
 }
 
 function registerResourceRoutes(

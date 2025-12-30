@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { getMyDocuments, deleteDocument, getDocumentUrl, Document as ApiDocument } from '@/lib/api';
+import { getMyDocuments, deleteDocument, getDocumentUrl } from '@/lib/api';
+import type { Document as ApiDocument } from '@/lib/document-utils';
 import UploadDocumentModal from './upload-document-modal';
 
 interface DocumentListProps {
@@ -81,16 +82,19 @@ export default function DocumentList({
         }
     };
 
-    const formatFileSize = (bytes: number) => {
-        if (bytes < 1024) return bytes + ' B';
-        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    const formatFileSize = (bytes?: number) => {
+        if (typeof bytes !== 'number' || Number.isNaN(bytes)) return '-';
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
     };
 
-    const getFileIcon = (filename: string) => {
-        if (filename.endsWith('.pdf')) return 'fa-file-pdf text-error';
-        if (filename.endsWith('.doc') || filename.endsWith('.docx')) return 'fa-file-word text-primary';
-        if (filename.endsWith('.txt')) return 'fa-file-lines text-info';
+    const getFileIcon = (fileName?: string) => {
+        if (!fileName) return 'fa-file text-base-content/60';
+        const lower = fileName.toLowerCase();
+        if (lower.endsWith('.pdf')) return 'fa-file-pdf text-error';
+        if (lower.endsWith('.doc') || lower.endsWith('.docx')) return 'fa-file-word text-primary';
+        if (lower.endsWith('.txt')) return 'fa-file-lines text-info';
         return 'fa-file text-base-content/60';
     };
 
@@ -158,9 +162,9 @@ export default function DocumentList({
                     <div key={doc.id} className="card bg-base-200">
                         <div className="card-body p-4">
                             <div className="flex items-center gap-4">
-                                <i className={`fa-solid ${getFileIcon(doc.filename)} text-2xl`}></i>
+                                <i className={`fa-solid ${getFileIcon(doc.file_name)} text-2xl`}></i>
                                 <div className="flex-1">
-                                    <div className="font-medium">{doc.filename}</div>
+                                    <div className="font-medium">{doc.file_name}</div>
                                     <div className="text-sm text-base-content/60">
                                         {doc.document_type}
                                         {doc.file_size && ` • ${formatFileSize(doc.file_size)}`}

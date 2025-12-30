@@ -1,11 +1,13 @@
 import { EventPublisher } from '../shared/events';
-import { buildPaginationResponse, UserContext, requireBillingAdmin } from '../shared/helpers';
+import { buildPaginationResponse, requireBillingAdmin } from '../shared/helpers';
+import type { AccessContext } from '../shared/access';
 import { PlanRepository } from './repository';
 import { Plan, PlanCreateInput, PlanListFilters, PlanUpdateInput } from './types';
 
 export class PlanServiceV2 {
     constructor(
         private repository: PlanRepository,
+        private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
         private eventPublisher?: EventPublisher
     ) {}
 
@@ -31,8 +33,9 @@ export class PlanServiceV2 {
         return plan;
     }
 
-    async createPlan(payload: PlanCreateInput, context: UserContext): Promise<Plan> {
-        requireBillingAdmin(context);
+    async createPlan(payload: PlanCreateInput, clerkUserId: string): Promise<Plan> {
+        const access = await this.resolveAccessContext(clerkUserId);
+        requireBillingAdmin(access);
 
         if (!payload.name) {
             throw new Error('Plan name is required');
@@ -53,8 +56,9 @@ export class PlanServiceV2 {
         return plan;
     }
 
-    async updatePlan(id: string, updates: PlanUpdateInput, context: UserContext): Promise<Plan> {
-        requireBillingAdmin(context);
+    async updatePlan(id: string, updates: PlanUpdateInput, clerkUserId: string): Promise<Plan> {
+        const access = await this.resolveAccessContext(clerkUserId);
+        requireBillingAdmin(access);
         await this.getPlan(id);
 
         const plan = await this.repository.updatePlan(id, updates);
@@ -66,8 +70,9 @@ export class PlanServiceV2 {
         return plan;
     }
 
-    async deletePlan(id: string, context: UserContext): Promise<void> {
-        requireBillingAdmin(context);
+    async deletePlan(id: string, clerkUserId: string): Promise<void> {
+        const access = await this.resolveAccessContext(clerkUserId);
+        requireBillingAdmin(access);
         await this.getPlan(id);
         const archived = await this.repository.archivePlan(id);
         await this.publishEvent('billing.plan.archived', {

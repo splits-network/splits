@@ -3,14 +3,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { getMyDocuments } from '@/lib/api-client';
-
-interface ExistingDocument {
-    id: string;
-    filename: string;
-    document_type: string;
-    file_size: number;
-    created_at: string;
-}
+import type { Document } from '@/lib/document-utils';
 
 interface UploadDocumentsStepProps {
     documents: File[];
@@ -45,7 +38,7 @@ export function UploadDocumentsStep({
     const { getToken } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [error, setError] = useState<string | null>(null);
-    const [existingDocs, setExistingDocs] = useState<ExistingDocument[]>([]);
+    const [existingDocs, setExistingDocs] = useState<Document[]>([]);
     const [loadingDocs, setLoadingDocs] = useState(true);
 
     useEffect(() => {
@@ -60,8 +53,8 @@ export function UploadDocumentsStep({
                 return;
             }
 
-            const response = await getMyDocuments(token) as { data: any[] };
-            setExistingDocs(response.data || []);
+            const docs = await getMyDocuments(token);
+            setExistingDocs(docs);
         } catch (err) {
             console.error('Failed to load existing documents:', err);
         } finally {
@@ -214,7 +207,7 @@ export function UploadDocumentsStep({
                                         />
                                         <i className="fa-solid fa-file text-primary"></i>
                                         <div className="flex-1 min-w-0">
-                                            <div className="font-medium truncate">{doc.filename}</div>
+                                            <div className="font-medium truncate">{doc.file_name}</div>
                                             <div className="text-sm text-base-content/60">
                                                 {doc.document_type} • {(doc.file_size / 1024).toFixed(1)} KB
                                             </div>

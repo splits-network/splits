@@ -67,4 +67,38 @@ export function registerCandidateRoutes(
             return reply.code(400).send({ error: { message: error.message } });
         }
     });
+
+    app.get('/v2/candidate-dashboard/stats', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const stats = await config.candidateService.getCandidateDashboardStats(clerkUserId);
+            return reply.send({ data: stats });
+        } catch (error: any) {
+            return reply
+                .code(400)
+                .send({ error: { message: error.message || 'Failed to load dashboard stats' } });
+        }
+    });
+
+    app.get(
+        '/v2/candidate-dashboard/recent-applications',
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { clerkUserId } = requireUserContext(request);
+                const { limit } = request.query as { limit?: string };
+                const parsedLimit = limit ? parseInt(limit, 10) : undefined;
+                const normalizedLimit =
+                    parsedLimit && Number.isFinite(parsedLimit) ? Math.max(1, Math.min(parsedLimit, 25)) : 5;
+                const applications = await config.candidateService.getCandidateRecentApplications(
+                    clerkUserId,
+                    normalizedLimit
+                );
+                return reply.send({ data: applications });
+            } catch (error: any) {
+                return reply
+                    .code(400)
+                    .send({ error: { message: error.message || 'Failed to load recent applications' } });
+            }
+        }
+    );
 }

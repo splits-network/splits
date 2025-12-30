@@ -27,10 +27,9 @@ export function registerJobsPublicRoutes(app: FastifyInstance, services: Service
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const correlationId = getCorrelationId(request);
-        // Force status=active for public listing
         const params = new URLSearchParams(request.query as any);
-        params.set('status', 'active');
-        const path = `/jobs?${params.toString()}`;
+        const queryString = params.toString();
+        const path = queryString ? `/v2/jobs?${queryString}` : '/v2/jobs';
         const data = await atsService().get(path, undefined, correlationId);
         return reply.send(data);
     });
@@ -44,7 +43,7 @@ export function registerJobsPublicRoutes(app: FastifyInstance, services: Service
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const { id } = request.params as { id: string };
         const correlationId = getCorrelationId(request);
-        const data = await atsService().get(`/jobs/${id}`, undefined, correlationId);
+        const data = await atsService().get(`/v2/jobs/${id}`, undefined, correlationId);
         return reply.send(data);
     });
 }

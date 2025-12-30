@@ -7,61 +7,15 @@ import { useAuth } from '@clerk/nextjs';
 import { redirect } from 'next/navigation';
 import { getMyApplications } from '@/lib/api-client';
 import { useViewMode } from '@/hooks/useViewMode';
-
-const getStatusColor = (stage: string) => {
-    switch (stage) {
-        case 'draft':
-            return 'badge-ghost';
-        case 'ai_review':
-            return 'badge-warning';
-        case 'screen':
-        case 'submitted':
-            return 'badge-info';
-        case 'recruiter_proposed':
-            return 'badge-secondary';
-        case 'interviewing':
-            return 'badge-primary';
-        case 'offer':
-            return 'badge-success';
-        case 'rejected':
-        case 'withdrawn':
-            return 'badge-error';
-        default:
-            return 'badge-ghost';
-    }
-};
-
-const formatStage = (stage: string) => {
-    switch (stage) {
-        case 'draft':
-            return 'Draft';
-        case 'ai_review':
-            return 'AI Review';
-        case 'screen':
-            return 'Recruiter Review';
-        case 'recruiter_proposed':
-            return 'Recruiter Proposed';
-        case 'submitted':
-            return 'Submitted';
-        case 'interviewing':
-            return 'Interviewing';
-        case 'offer':
-            return 'Offer';
-        case 'rejected':
-            return 'Rejected';
-        case 'withdrawn':
-            return 'Withdrawn';
-        default:
-            return stage;
-    }
-};
+import ApplicationCard from './components/application-card';
+import { getStatusColor, formatStage } from '@/lib/application-utils';
 
 export default function ApplicationsPage({
     searchParams,
 }: {
     searchParams: Promise<{ success?: string }>;
 }) {
-    const { userId, getToken } = useAuth();
+    const { userId, getToken, isLoaded, isSignedIn } = useAuth();
     const [viewMode, setViewMode] = useViewMode('applicationsViewMode');
     const [applications, setApplications] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -72,7 +26,10 @@ export default function ApplicationsPage({
 
     useEffect(() => {
         async function loadApplications() {
-            if (!userId) {
+            // Wait for Clerk to load before checking authentication
+            if (!isLoaded) return;
+
+            if (!isSignedIn || !userId) {
                 redirect('/sign-in');
                 return;
             }
@@ -96,7 +53,7 @@ export default function ApplicationsPage({
         }
 
         loadApplications();
-    }, [userId, getToken]);
+    }, [userId, getToken, isLoaded, isSignedIn]);
 
     useEffect(() => {
         async function checkSuccess() {
@@ -106,7 +63,19 @@ export default function ApplicationsPage({
         checkSuccess();
     }, [searchParams]);
 
-    if (!userId) {
+    // Show loading state while Clerk is initializing
+    if (!isLoaded) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <div className="flex justify-center items-center h-64">
+                    <span className="loading loading-spinner loading-lg"></span>
+                </div>
+            </div>
+        );
+    }
+
+    // Redirect only after Clerk has loaded and we know the user is not signed in
+    if (!isSignedIn) {
         redirect('/sign-in');
     }
 
@@ -282,59 +251,11 @@ export default function ApplicationsPage({
                     <h2 className="text-2xl font-bold mb-4">Active Applications</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {activeApps.map((app) => (
-                            <div key={app.id} className="card bg-base-100 shadow hover:shadow transition-shadow">
-                                <div className="card-body">
-                                    <div className="flex justify-between items-start">
-                                        <div className="flex-1">
-                                            <Link
-                                                href={`/jobs/${app.job_id}`}
-                                                className="card-title text-xl hover:text-primary mb-1"
-                                            >
-                                                {app.job?.title || 'Unknown Position'}
-                                            </Link>
-                                            <p className="text-base font-semibold mb-2">{app.job?.company?.name || 'Unknown Company'}</p>
-                                        </div>
-                                        <span className={`badge ${getStatusColor(app.stage)}`}>
-                                            {formatStage(app.stage)}
-                                        </span>
-                                    </div>
-                                    <div className="flex flex-wrap gap-3 text-sm text-base-content/70 mb-3">
-                                        {app.job?.location && (
-                                            <span>
-                                                <i className="fa-solid fa-location-dot"></i> {app.job.location}
-                                            </span>
-                                        )}
-                                        <span>
-                                            <i className="fa-solid fa-calendar"></i> Applied {formatDate(app.created_at)}
-                                        </span>
-                                    </div>
-                                    {app.recruiter && (
-                                        <div className="text-sm text-base-content/60 mb-2">
-                                            <i className="fa-solid fa-user"></i> {app.recruiter.first_name} {app.recruiter.last_name}
-                                        </div>
-                                    )}
-                                    {app.recruiter_notes && (
-                                        <div className="alert alert-info text-sm py-2">
-                                            <i className="fa-solid fa-circle-info"></i>
-                                            <span>{app.recruiter_notes}</span>
-                                        </div>
-                                    )}
-                                    <div className="card-actions justify-between items-center mt-4">
-                                        <span className="text-sm text-base-content/60">
-                                            Updated {formatDate(app.updated_at)}
-                                        </span>
-                                        <div className="flex gap-2">
-                                            <Link
-                                                href={`/applications/${app.id}`}
-                                                className="btn btn-sm btn-primary"
-                                            >
-                                                <i className="fa-solid fa-eye"></i>
-                                                View
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <ApplicationCard
+                                key={app.id}
+                                application={app}
+                                isActive={true}
+                            />
                         ))}
                     </div>
                 </div>
@@ -427,32 +348,11 @@ export default function ApplicationsPage({
                     <h2 className="text-2xl font-bold mb-4">Archived Applications</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {inactiveApps.map((app) => (
-                            <div key={app.id} className="card bg-base-100 shadow opacity-70">
-                                <div className="card-body">
-                                    <div className="flex justify-between items-start">
-                                        <div className="flex-1">
-                                            <h3 className="card-title text-xl">{app.job?.title || 'Unknown Position'}</h3>
-                                            <p className="font-semibold mb-2">{app.job?.company?.name || 'Unknown Company'}</p>
-                                        </div>
-                                        <span className={`badge ${getStatusColor(app.stage)}`}>
-                                            {formatStage(app.stage)}
-                                        </span>
-                                    </div>
-                                    <div className="flex flex-wrap gap-3 text-sm text-base-content/70 mb-3">
-                                        {app.job?.location && (
-                                            <span>
-                                                <i className="fa-solid fa-location-dot"></i> {app.job.location}
-                                            </span>
-                                        )}
-                                        <span>
-                                            <i className="fa-solid fa-calendar"></i> Applied {formatDate(app.created_at)}
-                                        </span>
-                                    </div>
-                                    {app.recruiter_notes && (
-                                        <p className="text-sm text-base-content/70 mt-2">{app.recruiter_notes}</p>
-                                    )}
-                                </div>
-                            </div>
+                            <ApplicationCard
+                                key={app.id}
+                                application={app}
+                                isActive={false}
+                            />
                         ))}
                     </div>
                 </div>

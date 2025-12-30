@@ -4,7 +4,7 @@
  */
 
 import { CandidateRepository } from './repository';
-import { CandidateFilters, CandidateUpdate } from './types';
+import { CandidateFilters, CandidateUpdate, CandidateDashboardStats, RecentCandidateApplication } from './types';
 import { EventPublisher } from '../shared/events';
 import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
 
@@ -87,6 +87,21 @@ export class CandidateServiceV2 {
             throw new Error(`Candidate ${id} not found`);
         }
 
+        if (clerkUserId) {
+            const accessContext = await this.repository.getAccessContext(clerkUserId);
+            const canManage =
+                accessContext.isPlatformAdmin ||
+                accessContext.recruiterId !== null ||
+                accessContext.roles.some(role =>
+                    ['company_admin', 'hiring_manager', 'platform_admin'].includes(role)
+                );
+            const isOwnProfile = accessContext.candidateId === id;
+
+            if (!canManage && !isOwnProfile) {
+                throw new Error('You do not have permission to update this candidate');
+            }
+        }
+
         // Validation
         if (updates.email) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -131,5 +146,29 @@ export class CandidateServiceV2 {
                 deletedBy: clerkUserId,
             });
         }
+    }
+
+    async getCandidateDashboardStats(clerkUserId: string): Promise<CandidateDashboardStats> {
+        const accessContext = await this.repository.getAccessContext(clerkUserId);
+        if (!accessContext.candidateId) {
+            return {
+                applications: 0,
+                interviews: 0,
+                offers: 0,
+                active_relationships: 0,
+            };
+        }
+        return this.repository.getCandidateDashboardStats(accessContext.candidateId);
+    }
+
+    async getCandidateRecentApplications(
+        clerkUserId: string,
+        limit = 5
+    ): Promise<RecentCandidateApplication[]> {
+        const accessContext = await this.repository.getAccessContext(clerkUserId);
+        if (!accessContext.candidateId) {
+            return [];
+        }
+        return this.repository.getRecentCandidateApplications(accessContext.candidateId, limit);
     }
 }

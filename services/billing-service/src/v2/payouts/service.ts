@@ -1,26 +1,25 @@
 import { EventPublisher } from '../shared/events';
-import {
-    buildPaginationResponse,
-    UserContext,
-    requireBillingAdmin,
-} from '../shared/helpers';
+import { buildPaginationResponse, requireBillingAdmin } from '../shared/helpers';
+import type { AccessContext } from '../shared/access';
 import { PayoutRepository } from './repository';
 import { PayoutCreateInput, PayoutListFilters, PayoutUpdateInput } from './types';
 
 export class PayoutServiceV2 {
     constructor(
         private repository: PayoutRepository,
+        private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
         private eventPublisher?: EventPublisher
     ) {}
 
     async getPayouts(
         filters: PayoutListFilters = {},
-        context: UserContext
+        clerkUserId: string
     ): Promise<{
         data: any[];
         pagination: ReturnType<typeof buildPaginationResponse>;
     }> {
-        requireBillingAdmin(context);
+        const access = await this.resolveAccessContext(clerkUserId);
+        requireBillingAdmin(access);
         const page = filters.page ?? 1;
         const limit = filters.limit ?? 25;
         const { data, total } = await this.repository.listPayouts(filters);
@@ -30,8 +29,9 @@ export class PayoutServiceV2 {
         };
     }
 
-    async getPayout(id: string, context: UserContext): Promise<any> {
-        requireBillingAdmin(context);
+    async getPayout(id: string, clerkUserId: string): Promise<any> {
+        const access = await this.resolveAccessContext(clerkUserId);
+        requireBillingAdmin(access);
         const payout = await this.repository.findPayout(id);
         if (!payout) {
             throw new Error(`Payout ${id} not found`);
@@ -39,8 +39,9 @@ export class PayoutServiceV2 {
         return payout;
     }
 
-    async createPayout(payload: PayoutCreateInput, context: UserContext): Promise<any> {
-        requireBillingAdmin(context);
+    async createPayout(payload: PayoutCreateInput, clerkUserId: string): Promise<any> {
+        const access = await this.resolveAccessContext(clerkUserId);
+        requireBillingAdmin(access);
         if (!payload.recruiter_id) {
             throw new Error('recruiter_id is required');
         }
@@ -57,9 +58,10 @@ export class PayoutServiceV2 {
         return payout;
     }
 
-    async updatePayout(id: string, updates: PayoutUpdateInput, context: UserContext): Promise<any> {
-        requireBillingAdmin(context);
-        await this.getPayout(id, context);
+    async updatePayout(id: string, updates: PayoutUpdateInput, clerkUserId: string): Promise<any> {
+        const access = await this.resolveAccessContext(clerkUserId);
+        requireBillingAdmin(access);
+        await this.getPayout(id, clerkUserId);
         const updated = await this.repository.updatePayout(id, updates);
         await this.publishEvent('billing.payout.updated', {
             id: updated.id,
@@ -68,9 +70,10 @@ export class PayoutServiceV2 {
         return updated;
     }
 
-    async deletePayout(id: string, context: UserContext): Promise<void> {
-        requireBillingAdmin(context);
-        await this.getPayout(id, context);
+    async deletePayout(id: string, clerkUserId: string): Promise<void> {
+        const access = await this.resolveAccessContext(clerkUserId);
+        requireBillingAdmin(access);
+        await this.getPayout(id, clerkUserId);
         await this.repository.updatePayout(id, {
             status: 'failed',
         } as PayoutUpdateInput);

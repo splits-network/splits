@@ -1,9 +1,11 @@
 import { FastifyInstance } from 'fastify';
+import { createClient } from '@supabase/supabase-js';
 import { FraudSignalServiceV2 } from './service';
 import { FraudSignalRepository, CreateFraudSignalInput } from './repository';
 import { FraudSignalFilters, FraudSignalUpdate } from './types';
 import { requireUserContext, validatePaginationParams } from '../shared/helpers';
 import { EventPublisher } from '../shared/events';
+import { resolveAccessContext } from '../shared/access';
 
 interface RegisterFraudRoutesConfig {
     supabaseUrl: string;
@@ -16,11 +18,13 @@ export async function registerFraudRoutes(
     config: RegisterFraudRoutesConfig
 ) {
     const repository = new FraudSignalRepository(config.supabaseUrl, config.supabaseKey);
-    const service = new FraudSignalServiceV2(repository, config.eventPublisher);
+    const accessClient = createClient(config.supabaseUrl, config.supabaseKey);
+    const accessResolver = (clerkUserId: string) => resolveAccessContext(accessClient, clerkUserId);
+    const service = new FraudSignalServiceV2(repository, accessResolver, config.eventPublisher);
 
     app.get('/v2/fraud-signals', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const query = request.query as Record<string, any>;
             const pagination = validatePaginationParams(query);
             const filters: FraudSignalFilters = {
@@ -32,7 +36,7 @@ export async function registerFraudRoutes(
                 page: pagination.page,
                 limit: pagination.limit,
             };
-            const result = await service.listSignals(filters);
+            const result = await service.listSignals(clerkUserId, filters);
             return reply.send(result);
         } catch (error: any) {
             return reply.code(400).send({ error: { message: error.message || 'Failed to fetch fraud signals' } });
@@ -41,9 +45,9 @@ export async function registerFraudRoutes(
 
     app.get('/v2/fraud-signals/:id', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
-            const signal = await service.getSignal(id);
+            const signal = await service.getSignal(clerkUserId, id);
             return reply.send({ data: signal });
         } catch (error: any) {
             return reply.code(404).send({ error: { message: error.message || 'Fraud signal not found' } });
@@ -52,7 +56,7 @@ export async function registerFraudRoutes(
 
     app.post('/v2/fraud-signals', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const body = request.body as CreateFraudSignalInput;
             if (
                 !body?.event_id ||
@@ -67,7 +71,7 @@ export async function registerFraudRoutes(
                     error: { message: 'event_id, event_type, entity info, signal_type, severity, and details are required' },
                 });
             }
-            const signal = await service.createSignal(body);
+            const signal = await service.createSignal(clerkUserId, body);
             return reply.code(201).send({ data: signal });
         } catch (error: any) {
             return reply.code(400).send({ error: { message: error.message || 'Failed to create fraud signal' } });
@@ -76,10 +80,10 @@ export async function registerFraudRoutes(
 
     app.patch('/v2/fraud-signals/:id', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
             const updates = request.body as FraudSignalUpdate;
-            const signal = await service.updateSignal(id, updates);
+            const signal = await service.updateSignal(clerkUserId, id, updates);
             return reply.send({ data: signal });
         } catch (error: any) {
             return reply.code(400).send({ error: { message: error.message || 'Failed to update fraud signal' } });
@@ -88,9 +92,9 @@ export async function registerFraudRoutes(
 
     app.delete('/v2/fraud-signals/:id', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
-            await service.deleteSignal(id);
+            await service.deleteSignal(clerkUserId, id);
             return reply.code(204).send();
         } catch (error: any) {
             return reply.code(400).send({ error: { message: error.message || 'Failed to delete fraud signal' } });

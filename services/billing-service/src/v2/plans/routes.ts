@@ -33,8 +33,8 @@ export function registerPlanRoutes(app: FastifyInstance, config: RegisterPlanRou
 
     app.post('/v2/plans', async (request, reply) => {
         try {
-            const context = requireUserContext(request);
-            const plan = await config.planService.createPlan(request.body as any, context);
+            const { clerkUserId } = requireUserContext(request);
+            const plan = await config.planService.createPlan(request.body as any, clerkUserId);
             return reply.code(201).send({ data: plan });
         } catch (error: any) {
             return reply.code(400).send({ error: { message: error.message } });
@@ -43,9 +43,9 @@ export function registerPlanRoutes(app: FastifyInstance, config: RegisterPlanRou
 
     app.patch('/v2/plans/:id', async (request, reply) => {
         try {
-            const context = requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
-            const plan = await config.planService.updatePlan(id, request.body as any, context);
+            const plan = await config.planService.updatePlan(id, request.body as any, clerkUserId);
             return reply.send({ data: plan });
         } catch (error: any) {
             return reply.code(400).send({ error: { message: error.message } });
@@ -54,9 +54,9 @@ export function registerPlanRoutes(app: FastifyInstance, config: RegisterPlanRou
 
     app.delete('/v2/plans/:id', async (request, reply) => {
         try {
-            const context = requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
-            await config.planService.deletePlan(id, context);
+            await config.planService.deletePlan(id, clerkUserId);
             return reply.code(204).send();
         } catch (error: any) {
             return reply.code(400).send({ error: { message: error.message } });

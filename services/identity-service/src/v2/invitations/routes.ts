@@ -19,10 +19,10 @@ export function registerInvitationRoutes(
 
     app.get('/api/v2/invitations', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
-            const context = requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const paginationParams = validatePaginationParams(request.query as any);
 
-            const result = await invitationService.findInvitations({
+            const result = await invitationService.findInvitations(clerkUserId, {
                 ...paginationParams,
                 organization_id: (request.query as any).organization_id,
                 status: (request.query as any).status,
@@ -45,10 +45,10 @@ export function registerInvitationRoutes(
 
     app.get('/api/v2/invitations/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
 
-            const invite = await invitationService.findInvitationById(id);
+            const invite = await invitationService.findInvitationById(clerkUserId, id);
             reply.send({ data: invite });
         } catch (error) {
             logError('GET /api/v2/invitations/:id failed', error);
@@ -58,9 +58,10 @@ export function registerInvitationRoutes(
 
     app.post('/api/v2/invitations', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
+            const { clerkUserId } = requireUserContext(request);
             const body = request.body as any;
 
-            const invite = await invitationService.createInvitation(body);
+            const invite = await invitationService.createInvitation(clerkUserId, body);
             reply.code(201).send({ data: invite });
         } catch (error) {
             logError('POST /api/v2/invitations failed', error);
@@ -70,10 +71,11 @@ export function registerInvitationRoutes(
 
     app.patch('/api/v2/invitations/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
             const body = request.body as any;
 
-            const invite = await invitationService.updateInvitation(id, body);
+            const invite = await invitationService.updateInvitation(clerkUserId, id, body);
             reply.send({ data: invite });
         } catch (error) {
             logError('PATCH /api/v2/invitations/:id failed', error);
@@ -83,9 +85,10 @@ export function registerInvitationRoutes(
 
     app.delete('/api/v2/invitations/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
 
-            await invitationService.deleteInvitation(id);
+            await invitationService.deleteInvitation(clerkUserId, id);
             reply.code(204).send();
         } catch (error) {
             logError('DELETE /api/v2/invitations/:id failed', error);

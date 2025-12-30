@@ -5,6 +5,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { RecruiterCandidateFilters, RecruiterCandidateUpdate, RepositoryListResponse } from './types';
+import { resolveAccessContext } from '../shared/access';
 
 export class RecruiterCandidateRepository {
     private supabase: SupabaseClient;
@@ -21,30 +22,39 @@ export class RecruiterCandidateRepository {
         const limit = filters.limit || 25;
         const offset = (page - 1) * limit;
 
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+        const scopedFilters: RecruiterCandidateFilters = { ...filters };
+        if (!accessContext.isPlatformAdmin) {
+            if (accessContext.recruiterId) {
+                scopedFilters.recruiter_id = accessContext.recruiterId;
+            } else if (accessContext.candidateId) {
+                scopedFilters.candidate_id = accessContext.candidateId;
+            } else {
+                return { data: [], total: 0 };
+            }
+        }
+
         // Build query with enriched data
         let query = this.supabase
             .schema('network')
             .from('recruiter_candidates')
-            .select(`
-                *,
-                recruiter:recruiters(id, name, email),
-                candidate:ats.candidates(id, first_name, last_name, email)
-            `, { count: 'exact' });
+            .select('*', { count: 'exact' });
+
+        if (scopedFilters.recruiter_id) {
+            query = query.eq('recruiter_id', scopedFilters.recruiter_id);
+        }
+        if (scopedFilters.candidate_id) {
+            query = query.eq('candidate_id', scopedFilters.candidate_id);
+        }
 
         // Apply filters
-        if (filters.recruiter_id) {
-            query = query.eq('recruiter_id', filters.recruiter_id);
-        }
-        if (filters.candidate_id) {
-            query = query.eq('candidate_id', filters.candidate_id);
-        }
-        if (filters.status) {
-            query = query.eq('status', filters.status);
+        if (scopedFilters.status) {
+            query = query.eq('status', scopedFilters.status);
         }
 
         // Apply sorting
-        const sortBy = filters.sort_by || 'created_at';
-        const sortOrder = filters.sort_order?.toLowerCase() === 'asc' ? true : false;
+        const sortBy = scopedFilters.sort_by || 'created_at';
+        const sortOrder = scopedFilters.sort_order?.toLowerCase() === 'asc' ? true : false;
         query = query.order(sortBy, { ascending: sortOrder });
 
         // Apply pagination
@@ -54,8 +64,11 @@ export class RecruiterCandidateRepository {
 
         if (error) throw error;
 
+        const relationships = data || [];
+        await this.enrichRecruiterDetails(relationships);
+
         return {
-            data: data || [],
+            data: relationships,
             total: count || 0,
         };
     }
@@ -64,11 +77,7 @@ export class RecruiterCandidateRepository {
         const { data, error } = await this.supabase
             .schema('network')
             .from('recruiter_candidates')
-            .select(`
-                *,
-                recruiter:recruiters(id, name, email),
-                candidate:ats.candidates(id, first_name, last_name, email, phone)
-            `)
+            .select('*')
             .eq('id', id)
             .single();
 
@@ -76,6 +85,11 @@ export class RecruiterCandidateRepository {
             if (error.code === 'PGRST116') return null;
             throw error;
         }
+        if (!data) {
+            return null;
+        }
+
+        await this.enrichRecruiterDetails([data]);
         return data;
     }
 
@@ -113,5 +127,90 @@ export class RecruiterCandidateRepository {
             .eq('id', id);
 
         if (error) throw error;
+    }
+
+    async findByInvitationToken(token: string): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('recruiter_candidates')
+            .select('*')
+            .eq('invitation_token', token)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data;
+    }
+
+    private async enrichRecruiterDetails(records: any[]): Promise<void> {
+        if (!records.length) {
+            return;
+        }
+
+        const recruiterIds = Array.from(
+            new Set(
+                records
+                    .map((rel) => rel.recruiter_id)
+                    .filter((id): id is string => Boolean(id))
+            )
+        );
+
+        if (!recruiterIds.length) {
+            return;
+        }
+
+        const { data: recruiters } = await this.supabase
+            .schema('network')
+            .from('recruiters')
+            .select('id, user_id, bio, status')
+            .in('id', recruiterIds);
+
+        if (!recruiters || recruiters.length === 0) {
+            return;
+        }
+
+        const recruiterMap = new Map<string, (typeof recruiters)[number]>();
+        const userIds = new Set<string>();
+        recruiters.forEach((recruiter) => {
+            recruiterMap.set(recruiter.id, recruiter);
+            if (recruiter.user_id) {
+                userIds.add(recruiter.user_id);
+            }
+        });
+
+        const userMap = new Map<string, { id: string; name?: string; email?: string }>();
+        if (userIds.size > 0) {
+            const { data: users } = await this.supabase
+                .schema('identity')
+                .from('users')
+                .select('id, name, email')
+                .in('id', Array.from(userIds));
+
+            users?.forEach((user) => userMap.set(user.id, user));
+        }
+
+        records.forEach((rel) => {
+            const recruiter = recruiterMap.get(rel.recruiter_id);
+            if (!recruiter) {
+                return;
+            }
+
+            const recruiterUser = recruiter.user_id ? userMap.get(recruiter.user_id) : undefined;
+
+            if (!rel.recruiter_name && recruiterUser?.name) {
+                rel.recruiter_name = recruiterUser.name;
+            }
+
+            if (!rel.recruiter_email && recruiterUser?.email) {
+                rel.recruiter_email = recruiterUser.email;
+            }
+
+            if (!rel.recruiter_bio && recruiter.bio) {
+                rel.recruiter_bio = recruiter.bio;
+            }
+
+            if (!rel.recruiter_status && recruiter.status) {
+                rel.recruiter_status = recruiter.status;
+            }
+        });
     }
 }

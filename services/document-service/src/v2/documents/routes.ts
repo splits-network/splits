@@ -31,11 +31,11 @@ export async function registerDocumentRoutes(
 
     app.get('/v2/documents', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const query = request.query as Record<string, any>;
             const pagination = validatePaginationParams(query);
 
-            const result = await service.listDocuments({
+            const result = await service.listDocuments(clerkUserId, {
                 entity_type: query.entity_type,
                 entity_id: query.entity_id,
                 document_type: query.document_type,
@@ -56,9 +56,9 @@ export async function registerDocumentRoutes(
 
     app.get('/v2/documents/:id', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
-            const document = await service.getDocument(id);
+            const document = await service.getDocument(id, clerkUserId);
             return reply.send({ data: document });
         } catch (error: any) {
             return reply.code(404).send({
@@ -69,7 +69,7 @@ export async function registerDocumentRoutes(
 
     app.post('/v2/documents', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
-            const context = requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
 
             if (!request.isMultipart || !request.isMultipart()) {
                 return reply.code(400).send({
@@ -115,14 +115,13 @@ export async function registerDocumentRoutes(
                 }
             }
 
-            const document = await service.createDocument({
+            const document = await service.createDocument(clerkUserId, {
                 file: fileBuffer,
                 originalFileName: fileName,
                 entity_type,
                 entity_id,
                 document_type,
                 metadata: parsedMetadata,
-                uploadedBy: context.userId,
             });
 
             return reply.code(201).send({ data: document });
@@ -135,10 +134,10 @@ export async function registerDocumentRoutes(
 
     app.patch('/v2/documents/:id', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
             const body = request.body as DocumentUpdate;
-            const document = await service.updateDocument(id, body);
+            const document = await service.updateDocument(id, body, clerkUserId);
             return reply.send({ data: document });
         } catch (error: any) {
             return reply.code(400).send({
@@ -149,9 +148,9 @@ export async function registerDocumentRoutes(
 
     app.delete('/v2/documents/:id', async (request, reply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
-            await service.deleteDocument(id);
+            await service.deleteDocument(id, clerkUserId);
             return reply.code(204).send();
         } catch (error: any) {
             return reply.code(400).send({

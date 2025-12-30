@@ -64,28 +64,54 @@ async function resolveUserContext(services: ServiceRegistry, auth: AuthContext, 
     // Cache miss - fetch from identity service
     const identityService = services.get('identity');
 
-    // Sync the Clerk user (idempotent - creates if missing, updates if changed)
-    const syncResponse: any = await identityService.post('/sync-clerk-user', {
-        clerk_user_id: auth.clerkUserId,
-        email: auth.email,
-        name: auth.name,
-    }, correlationId);
+    try {
+        // First try to get existing user by Clerk ID (most common case)
+        const userResponse: any = await identityService.get(`/users/by-clerk-id/${auth.clerkUserId}`, undefined, correlationId);
+        
+        // User exists - get full profile with memberships
+        const profileResponse: any = await identityService.get(`/users/${userResponse.data.id}`, undefined, correlationId);
 
-    const userId = syncResponse.data.id;
+        // Update auth context with user ID and memberships
+        auth.userId = userResponse.data.id;
+        auth.memberships = profileResponse.data.memberships || [];
 
-    // Get full user profile with memberships
-    const profileResponse: any = await identityService.get(`/users/${userId}`, undefined, correlationId);
+        // Store in cache
+        userContextCache.set(auth.clerkUserId, {
+            userId: auth.userId,
+            memberships: auth.memberships,
+            expiresAt: Date.now() + CACHE_TTL,
+        });
+        
+    } catch (error: any) {
+        // If user doesn't exist (404), then sync from Clerk (new user signup)
+        if (error?.statusCode === 404) {
+            // Sync the Clerk user (creates new user record)
+            const syncResponse: any = await identityService.post('/sync-clerk-user', {
+                clerk_user_id: auth.clerkUserId,
+                email: auth.email,
+                name: auth.name,
+            }, correlationId);
 
-    // Update auth context with user ID and memberships
-    auth.userId = userId;
-    auth.memberships = profileResponse.data.memberships || [];
+            const userId = syncResponse.data.id;
 
-    // Store in cache
-    userContextCache.set(auth.clerkUserId, {
-        userId: auth.userId,
-        memberships: auth.memberships,
-        expiresAt: Date.now() + CACHE_TTL,
-    });
+            // Get full user profile with memberships (will be empty for new users)
+            const profileResponse: any = await identityService.get(`/users/${userId}`, undefined, correlationId);
+
+            // Update auth context with user ID and memberships
+            auth.userId = userId;
+            auth.memberships = profileResponse.data.memberships || [];
+
+            // Store in cache
+            userContextCache.set(auth.clerkUserId, {
+                userId: auth.userId,
+                memberships: auth.memberships,
+                expiresAt: Date.now() + CACHE_TTL,
+            });
+        } else {
+            // Other error - rethrow
+            throw error;
+        }
+    }
 }
 
 /**

@@ -23,9 +23,12 @@ interface Job {
 
 interface JobsResponse {
     data: Job[];
-    total: number;
-    limit?: number;
-    offset: number;
+    pagination?: {
+        total: number;
+        page: number;
+        limit: number;
+        total_pages: number;
+    };
 }
 
 interface JobStats {
@@ -85,6 +88,7 @@ export default function JobsListClient({
     const [currentPage, setCurrentPage] = useState(initialPage);
     const [jobs, setJobs] = useState<Job[]>([]);
     const [total, setTotal] = useState(0);
+    const [pageSize, setPageSize] = useState(JOBS_PER_PAGE);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [stats, setStats] = useState<JobStats | null>(null);
@@ -136,10 +140,18 @@ export default function JobsListClient({
 
             const response = await apiClient.get<JobsResponse>(`/public/jobs?${params.toString()}`);
             const fetchedJobs = response.data || [];
+            const pagination = response.pagination;
+            const totalCount = pagination?.total ?? fetchedJobs.length;
+            const limitFromResponse = pagination?.limit ?? JOBS_PER_PAGE;
+            const activePage = pagination?.page ?? currentPage;
 
             setJobs(fetchedJobs);
-            setTotal(response.total || fetchedJobs.length);
-            setStats(buildStats(fetchedJobs, response.total || fetchedJobs.length));
+            setTotal(totalCount);
+            setPageSize(limitFromResponse);
+            setStats(buildStats(fetchedJobs, totalCount));
+            if (activePage !== currentPage) {
+                setCurrentPage(activePage);
+            }
             setError(null);
         } catch (err) {
             console.error('Failed to fetch jobs:', err);
@@ -166,7 +178,7 @@ export default function JobsListClient({
         setCurrentPage(1);
     };
 
-    const totalPages = Math.ceil(total / JOBS_PER_PAGE);
+    const totalPages = pageSize > 0 ? Math.ceil(total / pageSize) : 0;
     const hasActiveFilters = Boolean(searchQuery || locationQuery || typeFilter);
     const listIsLoading = loading;
 
@@ -321,7 +333,7 @@ export default function JobsListClient({
                     'Loading jobs...'
                 ) : total > 0 ? (
                     <>
-                        Showing {((currentPage - 1) * JOBS_PER_PAGE) + 1}-{Math.min(currentPage * JOBS_PER_PAGE, total)} of {total} {total === 1 ? 'job' : 'jobs'}
+                        Showing {total > 0 ? ((currentPage - 1) * pageSize) + 1 : 0}-{Math.min(currentPage * pageSize, total)} of {total} {total === 1 ? 'job' : 'jobs'}
                         {hasActiveFilters && ' (filtered)'}
                     </>
                 ) : (

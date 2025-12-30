@@ -165,6 +165,19 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  packages/shared-access-context:
+    dependencies:
+      '@supabase/supabase-js':
+        specifier: ^2.86.2
+        version: 2.86.2
+    devDependencies:
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.10.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   packages/shared-clients:
     dependencies:
       '@splits-network/shared-types':
@@ -344,6 +357,9 @@ importers:
       '@sentry/node':
         specifier: ^10.32.1
         version: 10.32.1
+      '@splits-network/shared-access-context':
+        specifier: workspace:*
+        version: link:../../packages/shared-access-context
       '@splits-network/shared-config':
         specifier: workspace:*
         version: link:../../packages/shared-config
@@ -387,6 +403,9 @@ importers:
       '@fastify/swagger-ui':
         specifier: ^5.2.3
         version: 5.2.3
+      '@splits-network/shared-access-context':
+        specifier: workspace:*
+        version: link:../../packages/shared-access-context
       '@splits-network/shared-config':
         specifier: workspace:*
         version: link:../../packages/shared-config
@@ -436,6 +455,9 @@ importers:
       '@sentry/node':
         specifier: ^10.32.1
         version: 10.32.1
+      '@splits-network/shared-access-context':
+        specifier: workspace:*
+        version: link:../../packages/shared-access-context
       '@splits-network/shared-config':
         specifier: workspace:*
         version: link:../../packages/shared-config
@@ -479,6 +501,9 @@ importers:
       '@fastify/multipart':
         specifier: ^9.0.1
         version: 9.3.0
+      '@splits-network/shared-access-context':
+        specifier: workspace:*
+        version: link:../../packages/shared-access-context
       '@splits-network/shared-config':
         specifier: workspace:*
         version: link:../../packages/shared-config
@@ -537,6 +562,9 @@ importers:
       '@sentry/node':
         specifier: ^10.32.1
         version: 10.32.1
+      '@splits-network/shared-access-context':
+        specifier: workspace:*
+        version: link:../../packages/shared-access-context
       '@splits-network/shared-config':
         specifier: workspace:*
         version: link:../../packages/shared-config
@@ -589,6 +617,9 @@ importers:
       '@sentry/node':
         specifier: ^10.32.1
         version: 10.32.1
+      '@splits-network/shared-access-context':
+        specifier: workspace:*
+        version: link:../../packages/shared-access-context
       '@splits-network/shared-config':
         specifier: workspace:*
         version: link:../../packages/shared-config
@@ -629,6 +660,9 @@ importers:
       '@sentry/node':
         specifier: ^10.32.1
         version: 10.32.1
+      '@splits-network/shared-access-context':
+        specifier: workspace:*
+        version: link:../../packages/shared-access-context
       '@splits-network/shared-config':
         specifier: workspace:*
         version: link:../../packages/shared-config

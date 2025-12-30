@@ -63,19 +63,14 @@ export default function StepDocuments({
                 return null;
             }
 
-            // Get user info to get email
             const user = await getCurrentUser(token);
-            const userEmail = user.email;
-
-            if (!userEmail) {
-                console.error('No email found in user data');
-                return null;
+            if (user.candidate_id) {
+                setCandidateId(user.candidate_id);
+                return user.candidate_id;
             }
 
-            // Get candidate profile
             const profile = await getMyCandidateProfile(token);
-
-            if (!profile) {
+            if (!profile?.id) {
                 console.error('No candidate profile found');
                 return null;
             }
@@ -244,7 +239,7 @@ export default function StepDocuments({
                                                 <div className="font-medium">{doc.file_name}</div>
                                                 <div className="text-sm text-base-content/60">
                                                     {doc.file_size && `${(doc.file_size / 1024).toFixed(1)} KB`}
-                                                    {doc.uploaded_at && ` • Uploaded ${new Date(doc.uploaded_at).toLocaleDateString()}`}
+                                                    {doc.created_at && ` • Uploaded ${new Date(doc.created_at).toLocaleDateString()}`}
                                                 </div>
                                             </div>
                                             {selected.includes(doc.id) && (

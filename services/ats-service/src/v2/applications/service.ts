@@ -35,8 +35,8 @@ export class ApplicationServiceV2 {
         };
     }
 
-    async getApplication(id: string): Promise<any> {
-        const application = await this.repository.findApplication(id);
+    async getApplication(id: string, clerkUserId?: string): Promise<any> {
+        const application = await this.repository.findApplication(id, clerkUserId);
         if (!application) {
             throw new Error(`Application ${id} not found`);
         }
@@ -80,7 +80,7 @@ export class ApplicationServiceV2 {
         clerkUserId?: string,
         userRole?: string
     ): Promise<any> {
-        const currentApplication = await this.repository.findApplication(id);
+        const currentApplication = await this.repository.findApplication(id, clerkUserId);
         if (!currentApplication) {
             throw new Error(`Application ${id} not found`);
         }
@@ -124,7 +124,7 @@ export class ApplicationServiceV2 {
     }
 
     async deleteApplication(id: string, clerkUserId?: string): Promise<void> {
-        const application = await this.repository.findApplication(id);
+        const application = await this.repository.findApplication(id, clerkUserId);
         if (!application) {
             throw new Error(`Application ${id} not found`);
         }

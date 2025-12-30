@@ -8,18 +8,30 @@ import { EventPublisherV2 } from '../shared/events';
 import { UserUpdate } from './types';
 import { UserRepository } from './repository';
 import { v4 as uuidv4 } from 'uuid';
+import type { AccessContext } from '../shared/access';
 
 export class UserServiceV2 {
     constructor(
         private repository: UserRepository,
         private eventPublisher: EventPublisherV2,
-        private logger: Logger
+        private logger: Logger,
+        private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>
     ) {}
+
+    private async requirePlatformAdmin(clerkUserId: string): Promise<AccessContext> {
+        const access = await this.resolveAccessContext(clerkUserId);
+        if (!access.isPlatformAdmin) {
+            this.logger.warn({ clerkUserId }, 'UserService - unauthorized access attempt');
+            throw new Error('Platform admin permissions required');
+        }
+        return access;
+    }
 
     /**
      * Find all users with pagination and filters
      */
-    async findUsers(filters: any) {
+    async findUsers(clerkUserId: string, filters: any) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ filters }, 'UserService.findUsers');
         const result = await this.repository.findUsers(filters);
         return result;
@@ -28,7 +40,8 @@ export class UserServiceV2 {
     /**
      * Find user by ID
      */
-    async findUserById(id: string) {
+    async findUserById(clerkUserId: string, id: string) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id }, 'UserService.findUserById');
         const user = await this.repository.findUserById(id);
         if (!user) {
@@ -40,7 +53,8 @@ export class UserServiceV2 {
     /**
      * Create a new user
      */
-    async createUser(userData: any) {
+    async createUser(clerkUserId: string, userData: any) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ email: userData.email }, 'UserService.createUser');
 
         if (!userData.email) {
@@ -75,10 +89,11 @@ export class UserServiceV2 {
     /**
      * Update user
      */
-    async updateUser(id: string, updates: UserUpdate) {
+    async updateUser(clerkUserId: string, id: string, updates: UserUpdate) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id, updates }, 'UserService.updateUser');
 
-        const user = await this.findUserById(id);
+        const user = await this.findUserById(clerkUserId, id);
 
         const updateData: any = {
             ...updates,
@@ -99,10 +114,11 @@ export class UserServiceV2 {
     /**
      * Delete user (soft delete)
      */
-    async deleteUser(id: string) {
+    async deleteUser(clerkUserId: string, id: string) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id }, 'UserService.deleteUser');
 
-        await this.findUserById(id);
+        await this.findUserById(clerkUserId, id);
         await this.repository.deleteUser(id);
 
         await this.eventPublisher.publish('user.deleted', {
@@ -110,5 +126,28 @@ export class UserServiceV2 {
         });
 
         this.logger.info({ id }, 'UserService.deleteUser - user deleted');
+    }
+
+    async getCurrentUser(clerkUserId: string) {
+        const access = await this.resolveAccessContext(clerkUserId);
+        if (!access.identityUserId) {
+            this.logger.warn({ clerkUserId }, 'UserService.getCurrentUser - no identity user');
+            throw new Error('User not found');
+        }
+
+        const user = await this.repository.findUserById(access.identityUserId);
+
+        return {
+            id: user.id,
+            email: user.email,
+            full_name: user.full_name,
+            avatar_url: user.avatar_url,
+            clerk_user_id: user.clerk_user_id,
+            roles: access.roles,
+            organization_ids: access.organizationIds,
+            candidate_id: access.candidateId,
+            recruiter_id: access.recruiterId,
+            is_platform_admin: access.isPlatformAdmin,
+        };
     }
 }

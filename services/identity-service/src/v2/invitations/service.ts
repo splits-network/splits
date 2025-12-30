@@ -8,18 +8,30 @@ import { EventPublisherV2 } from '../shared/events';
 import { InvitationUpdate } from './types';
 import { InvitationRepository } from './repository';
 import { v4 as uuidv4 } from 'uuid';
+import type { AccessContext } from '../shared/access';
 
 export class InvitationServiceV2 {
     constructor(
         private repository: InvitationRepository,
         private eventPublisher: EventPublisherV2,
-        private logger: Logger
+        private logger: Logger,
+        private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>
     ) {}
+
+    private async requirePlatformAdmin(clerkUserId: string): Promise<AccessContext> {
+        const access = await this.resolveAccessContext(clerkUserId);
+        if (!access.isPlatformAdmin) {
+            this.logger.warn({ clerkUserId }, 'InvitationService - unauthorized access attempt');
+            throw new Error('Platform admin permissions required');
+        }
+        return access;
+    }
 
     /**
      * Find all invitations with pagination and filters
      */
-    async findInvitations(filters: any) {
+    async findInvitations(clerkUserId: string, filters: any) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ filters }, 'InvitationService.findInvitations');
         const result = await this.repository.findInvitations(filters);
         return result;
@@ -28,7 +40,8 @@ export class InvitationServiceV2 {
     /**
      * Find invitation by ID
      */
-    async findInvitationById(id: string) {
+    async findInvitationById(clerkUserId: string, id: string) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id }, 'InvitationService.findInvitationById');
         const invitation = await this.repository.findInvitationById(id);
         if (!invitation) {
@@ -40,7 +53,8 @@ export class InvitationServiceV2 {
     /**
      * Create a new invitation
      */
-    async createInvitation(invitationData: any) {
+    async createInvitation(clerkUserId: string, invitationData: any) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info(
             {
                 email: invitationData.email,
@@ -88,10 +102,11 @@ export class InvitationServiceV2 {
     /**
      * Update invitation
      */
-    async updateInvitation(id: string, updates: InvitationUpdate) {
+    async updateInvitation(clerkUserId: string, id: string, updates: InvitationUpdate) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id, updates }, 'InvitationService.updateInvitation');
 
-        await this.findInvitationById(id);
+        await this.findInvitationById(clerkUserId, id);
 
         const updateData: any = {
             ...updates,
@@ -112,10 +127,11 @@ export class InvitationServiceV2 {
     /**
      * Delete invitation (soft delete)
      */
-    async deleteInvitation(id: string) {
+    async deleteInvitation(clerkUserId: string, id: string) {
+        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id }, 'InvitationService.deleteInvitation');
 
-        await this.findInvitationById(id);
+        await this.findInvitationById(clerkUserId, id);
         await this.repository.deleteInvitation(id);
 
         await this.eventPublisher.publish('invitation.deleted', {

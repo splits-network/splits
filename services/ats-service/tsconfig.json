@@ -27,6 +27,9 @@
         },
         {
             "path": "../../packages/shared-types"
+        },
+        {
+            "path": "../../packages/shared-access-context"
         }
     ]
 }

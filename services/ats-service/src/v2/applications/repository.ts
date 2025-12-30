@@ -4,6 +4,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ApplicationFilters, ApplicationUpdate } from './types';
+import { resolveAccessContext } from '../shared/access';
 
 export interface RepositoryListResponse<T> {
     data: T[];
@@ -25,14 +26,7 @@ export class ApplicationRepository {
         const limit = filters.limit || 25;
         const offset = (page - 1) * limit;
 
-        // Get user's organization IDs
-        const { data: memberships } = await this.supabase
-            .schema('identity')
-            .from('memberships')
-            .select('organization_id')
-            .eq('user_id', clerkUserId);
-
-        const organizationIds = memberships?.map((m) => m.organization_id) || [];
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
 
         // Build query with enriched data
         let query = this.supabase
@@ -40,7 +34,7 @@ export class ApplicationRepository {
             .from('applications')
             .select(`
                 *,
-                candidate:candidates(id, first_name, last_name, email, phone),
+                candidate:candidates(id, full_name, email, phone),
                 job:jobs!inner(
                     id, 
                     title, 
@@ -48,10 +42,19 @@ export class ApplicationRepository {
                     company:companies!inner(id, name, identity_organization_id)
                 )
             `, { count: 'exact' });
-
-        // Apply organization filter
-        if (organizationIds.length > 0) {
-            query = query.in('job.company.identity_organization_id', organizationIds);
+        if (accessContext.candidateId) {
+            query = query.eq('candidate_id', accessContext.candidateId);
+        } else if (accessContext.recruiterId) {
+            query = query.eq('recruiter_id', accessContext.recruiterId);
+        } else if (!accessContext.isPlatformAdmin) {
+            if (accessContext.organizationIds.length > 0) {
+                query = query.in('job.company.identity_organization_id', accessContext.organizationIds);
+            } else {
+                return {
+                    data: [],
+                    total: 0,
+                };
+            }
         }
 
         // Apply filters
@@ -81,7 +84,9 @@ export class ApplicationRepository {
 
         const { data, error, count } = await query;
 
-        if (error) throw error;
+        if (error) {
+            throw error;
+        }
 
         return {
             data: data || [],
@@ -89,13 +94,13 @@ export class ApplicationRepository {
         };
     }
 
-    async findApplication(id: string): Promise<any | null> {
+    async findApplication(id: string, clerkUserId?: string): Promise<any | null> {
         const { data, error } = await this.supabase
             .schema('ats')
             .from('applications')
             .select(`
                 *,
-                candidate:candidates(id, first_name, last_name, email, phone, location),
+                candidate:candidates(id, full_name, email, phone, location),
                 job:jobs(
                     id, 
                     title, 
@@ -111,7 +116,35 @@ export class ApplicationRepository {
             if (error.code === 'PGRST116') return null;
             throw error;
         }
-        return data;
+
+        if (!data || !clerkUserId) {
+            return data;
+        }
+
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+
+        if (accessContext.isPlatformAdmin) {
+            return data;
+        }
+
+        if (accessContext.candidateId && data.candidate_id === accessContext.candidateId) {
+            return data;
+        }
+
+        if (accessContext.recruiterId && data.recruiter_id === accessContext.recruiterId) {
+            return data;
+        }
+
+        const companyOrgId = data.job?.company?.identity_organization_id;
+        if (
+            companyOrgId &&
+            accessContext.organizationIds.length > 0 &&
+            accessContext.organizationIds.includes(companyOrgId)
+        ) {
+            return data;
+        }
+
+        return null;
     }
 
     async createApplication(application: any): Promise<any> {

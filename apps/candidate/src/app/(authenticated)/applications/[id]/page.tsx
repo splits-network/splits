@@ -68,14 +68,14 @@ export default async function ApplicationDetailPage({
 
     // Await params in Next.js 15+
     const { id } = await params;
-
     // Fetch application data server-side
     let application: any = null;
-    let responseData: any = null;
+    let job: any = {};
+    let recruiter: any = null;
 
     try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
-        const response = await fetch(`${apiUrl}/applications/${id}/full`, {
+        const response = await fetch(`${apiUrl}/v2/applications/${id}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
@@ -90,11 +90,11 @@ export default async function ApplicationDetailPage({
             throw new Error(`Failed to fetch application: ${response.status}`);
         }
 
-        const data = await response.json();
-        responseData = data;
-        // The /full endpoint returns { data: { application, job, candidate, ... } }
-        const fullData = data.data || data;
-        application = fullData.application || fullData;
+        const payload = await response.json();
+        const data = payload.data || payload;
+        application = data;
+        job = data.job || {};
+        recruiter = (data as any).recruiter || null;
     } catch (err) {
         console.error('Error fetching application:', err);
         notFound();
@@ -104,11 +104,7 @@ export default async function ApplicationDetailPage({
         notFound();
     }
 
-    // Extract nested data from the /full response
-    const fullResponse = responseData?.data;
-    const job = fullResponse?.job || application.job || {};
     const company = job.company || {};
-    const recruiter = fullResponse?.recruiter || application.recruiter;
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -349,7 +345,7 @@ export default async function ApplicationDetailPage({
                                                         'fa-file'
                                                     } text-primary`}></i>
                                                 <div className="flex-1 min-w-0">
-                                                    <div className="font-medium truncate">{doc.filename}</div>
+                                                    <div className="font-medium truncate">{doc.file_name}</div>
                                                     <div className="text-sm text-base-content/60">
                                                         {doc.document_type.replace('_', ' ').toUpperCase()}
                                                         {doc.file_size && ` • ${(doc.file_size / 1024).toFixed(1)} KB`}

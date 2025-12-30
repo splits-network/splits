@@ -19,10 +19,10 @@ export function registerOrganizationRoutes(
 
     app.get('/api/v2/organizations', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const paginationParams = validatePaginationParams(request.query as any);
 
-            const result = await organizationService.findOrganizations({
+            const result = await organizationService.findOrganizations(clerkUserId, {
                 ...paginationParams,
                 search: (request.query as any).search,
                 status: (request.query as any).status,
@@ -44,10 +44,10 @@ export function registerOrganizationRoutes(
 
     app.get('/api/v2/organizations/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
 
-            const org = await organizationService.findOrganizationById(id);
+            const org = await organizationService.findOrganizationById(clerkUserId, id);
             reply.send({ data: org });
         } catch (error) {
             logError('GET /api/v2/organizations/:id failed', error);
@@ -57,10 +57,10 @@ export function registerOrganizationRoutes(
 
     app.post('/api/v2/organizations', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const body = request.body as any;
 
-            const org = await organizationService.createOrganization(body);
+            const org = await organizationService.createOrganization(clerkUserId, body);
             reply.code(201).send({ data: org });
         } catch (error) {
             logError('POST /api/v2/organizations failed', error);
@@ -70,11 +70,11 @@ export function registerOrganizationRoutes(
 
     app.patch('/api/v2/organizations/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
             const body = request.body as any;
 
-            const org = await organizationService.updateOrganization(id, body);
+            const org = await organizationService.updateOrganization(clerkUserId, id, body);
             reply.send({ data: org });
         } catch (error) {
             logError('PATCH /api/v2/organizations/:id failed', error);
@@ -84,10 +84,10 @@ export function registerOrganizationRoutes(
 
     app.delete('/api/v2/organizations/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
 
-            await organizationService.deleteOrganization(id);
+            await organizationService.deleteOrganization(clerkUserId, id);
             reply.code(204).send();
         } catch (error) {
             logError('DELETE /api/v2/organizations/:id failed', error);

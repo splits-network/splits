@@ -19,10 +19,10 @@ export function registerMembershipRoutes(
 
     app.get('/api/v2/memberships', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
-            const context = requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const paginationParams = validatePaginationParams(request.query as any);
 
-            const result = await membershipService.findMemberships({
+            const result = await membershipService.findMemberships(clerkUserId, {
                 ...paginationParams,
                 user_id: (request.query as any).user_id,
                 organization_id: (request.query as any).organization_id,
@@ -45,10 +45,10 @@ export function registerMembershipRoutes(
 
     app.get('/api/v2/memberships/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
-            requireUserContext(request);
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
 
-            const membership = await membershipService.findMembershipById(id);
+            const membership = await membershipService.findMembershipById(clerkUserId, id);
             reply.send({ data: membership });
         } catch (error) {
             logError('GET /api/v2/memberships/:id failed', error);
@@ -58,9 +58,10 @@ export function registerMembershipRoutes(
 
     app.post('/api/v2/memberships', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
+            const { clerkUserId } = requireUserContext(request);
             const body = request.body as any;
 
-            const membership = await membershipService.createMembership(body);
+            const membership = await membershipService.createMembership(clerkUserId, body);
             reply.code(201).send({ data: membership });
         } catch (error) {
             logError('POST /api/v2/memberships failed', error);
@@ -70,10 +71,11 @@ export function registerMembershipRoutes(
 
     app.patch('/api/v2/memberships/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
             const body = request.body as any;
 
-            const membership = await membershipService.updateMembership(id, body);
+            const membership = await membershipService.updateMembership(clerkUserId, id, body);
             reply.send({ data: membership });
         } catch (error) {
             logError('PATCH /api/v2/memberships/:id failed', error);
@@ -83,9 +85,10 @@ export function registerMembershipRoutes(
 
     app.delete('/api/v2/memberships/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
 
-            await membershipService.deleteMembership(id);
+            await membershipService.deleteMembership(clerkUserId, id);
             reply.code(204).send();
         } catch (error) {
             logError('DELETE /api/v2/memberships/:id failed', error);

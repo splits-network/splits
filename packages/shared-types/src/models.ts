@@ -68,6 +68,7 @@ export interface Job {
     show_salary_range: boolean;
     splits_fee_percentage: number; // Default 50%
     job_owner_id?: string; // Splits Network or recruiting partner GUID
+    recruiter_id?: string;
     status: JobStatus;
     created_at: Date;
     updated_at: Date;

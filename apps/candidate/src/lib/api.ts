@@ -3,6 +3,8 @@
  * Communicates with backend services via API Gateway
  */
 
+import { normalizeDocument, normalizeDocuments, type Document } from './document-utils';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
 
 export class ApiError extends Error {
@@ -119,12 +121,12 @@ export interface UserDetails {
 }
 
 export async function getInvitationDetails(token: string, authToken?: string | null): Promise<InvitationDetails> {
-    return fetchApi<InvitationDetails>(`/api/network/recruiter-candidates/invitation/${token}`, {}, authToken);
+    return fetchApi<InvitationDetails>(`/api/v2/recruiter-candidates/invitations/${token}`, {}, authToken);
 }
 
 export async function acceptInvitation(token: string, authToken?: string | null): Promise<{ success: boolean; message: string }> {
     return fetchApi<{ success: boolean; message: string }>(
-        `/api/network/recruiter-candidates/invitation/${token}/accept`,
+        `/api/v2/recruiter-candidates/invitations/${token}/accept`,
         {
             method: 'POST',
             body: JSON.stringify({}),
@@ -139,7 +141,7 @@ export async function declineInvitation(
     authToken?: string | null
 ): Promise<{ success: boolean; message: string }> {
     return fetchApi<{ success: boolean; message: string }>(
-        `/api/network/recruiter-candidates/invitation/${token}/decline`,
+        `/api/v2/recruiter-candidates/invitations/${token}/decline`,
         {
             method: 'POST',
             body: JSON.stringify({ reason }),
@@ -149,15 +151,15 @@ export async function declineInvitation(
 }
 
 export async function getRecruiterDetails(recruiterId: string, authToken?: string | null): Promise<RecruiterDetails> {
-    return fetchApi<RecruiterDetails>(`/api/network/recruiters/${recruiterId}`, {}, authToken);
+    return fetchApi<RecruiterDetails>(`/api/v2/recruiters/${recruiterId}`, {}, authToken);
 }
 
 export async function getCandidateDetails(candidateId: string, authToken?: string | null): Promise<CandidateDetails> {
-    return fetchApi<CandidateDetails>(`/api/ats/candidates/${candidateId}`, {}, authToken);
+    return fetchApi<CandidateDetails>(`/api/v2/candidates/${candidateId}`, {}, authToken);
 }
 
 export async function getUserDetails(userId: string, authToken?: string | null): Promise<UserDetails> {
-    return fetchApi<UserDetails>(`/api/identity/users/${userId}`, {}, authToken);
+    return fetchApi<UserDetails>(`/api/v2/users/${userId}`, {}, authToken);
 }
 
 // Dashboard API
@@ -191,44 +193,27 @@ export interface Application {
 }
 
 export async function getDashboardStats(authToken: string): Promise<DashboardStats> {
-    return fetchApi<DashboardStats>('/api/candidate/dashboard/stats', {}, authToken);
+    return fetchApi<DashboardStats>('/api/v2/candidate-dashboard/stats', {}, authToken);
 }
 
 export async function getRecentApplications(authToken: string): Promise<RecentApplication[]> {
-    return fetchApi<RecentApplication[]>('/api/candidate/dashboard/recent-applications', {}, authToken);
+    return fetchApi<RecentApplication[]>('/api/v2/candidate-dashboard/recent-applications', {}, authToken);
 }
 
 export async function getApplications(authToken: string): Promise<Application[]> {
-    return fetchApi<Application[]>('/api/candidate/applications', {}, authToken);
+    return fetchApi<Application[]>('/api/v2/applications', {}, authToken);
 }
+
+export type { Document } from './document-utils';
 
 // Documents API
-export interface Document {
-    id: string;
-    entity_type: string;
-    entity_id: string;
-    document_type: string;
-    filename: string;
-    storage_path: string;
-    bucket_name: string;
-    content_type: string;
-    file_size: number;
-    uploaded_by_user_id?: string;
-    processing_status: string;
-    created_at: string;
-    updated_at: string;
-    deleted_at?: string;
-}
-
 export async function getMyDocuments(authToken: string): Promise<Document[]> {
-    return fetchApi<Document[]>('/api/candidates/me/documents', {}, authToken);
+    const docs = await fetchApi<any[]>('/api/v2/documents', {}, authToken);
+    return normalizeDocuments(docs);
 }
 
 export async function uploadDocument(formData: FormData, authToken: string): Promise<Document> {
-    console.log('uploadDocument called with API_BASE_URL:', API_BASE_URL);
-    const url = `${API_BASE_URL}/api/documents/upload`;
-    console.log('Making request to:', url);
-    
+    const url = `${API_BASE_URL}/api/v2/documents`;
     const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -237,13 +222,10 @@ export async function uploadDocument(formData: FormData, authToken: string): Pro
         body: formData,
     });
 
-    console.log('Response status:', response.status);
-    
     if (!response.ok) {
         let errorMessage = 'Failed to upload document';
         try {
             const errorData = await response.json();
-            console.error('Error response:', errorData);
             errorMessage = errorData.message || errorData.error || errorMessage;
         } catch {
             errorMessage = response.statusText || errorMessage;
@@ -252,19 +234,20 @@ export async function uploadDocument(formData: FormData, authToken: string): Pro
     }
 
     const json = await response.json();
-    console.log('Upload response data:', json);
-    return json.data || json;
+    const payload = json.data || json;
+    return normalizeDocument(payload);
 }
 
 export async function deleteDocument(documentId: string, authToken: string): Promise<void> {
-    await fetchApi<void>(`/api/documents/${documentId}`, {
+    await fetchApi<void>(`/api/v2/documents/${documentId}`, {
         method: 'DELETE',
     }, authToken);
 }
 
 export async function getDocumentUrl(documentId: string, authToken: string): Promise<string> {
-    const doc = await fetchApi<{ downloadUrl: string }>(`/api/documents/${documentId}`, {}, authToken);
-    return doc.downloadUrl;
+    const doc = await fetchApi<any>(`/api/v2/documents/${documentId}`, {}, authToken);
+    const normalized = normalizeDocument(doc);
+    return normalized.download_url || '';
 }
 
 // Candidate Profile API
@@ -287,18 +270,38 @@ export interface CandidateProfile {
 
 export async function getMyCandidateProfile(authToken: string): Promise<CandidateProfile | null> {
     try {
-        return await fetchApi<CandidateProfile>('/api/candidates/me', {}, authToken);
+        const candidates = await fetchApi<CandidateProfile[]>(
+            '/api/v2/candidates?limit=1',
+            {},
+            authToken
+        );
+        if (!candidates || candidates.length === 0) {
+            return null;
+        }
+        return candidates[0];
     } catch (error: any) {
-        // Return null if candidate profile doesn't exist yet
-        if (error.response?.status === 404) {
+        if (error instanceof ApiError && error.status === 404) {
             return null;
         }
         throw error;
     }
 }
 
-export async function getCurrentUser(authToken: string): Promise<{ id: string; email: string; name?: string }> {
-    return fetchApi<{ id: string; email: string; name?: string }>('/api/me', {}, authToken);
+export interface CurrentUserProfile {
+    id: string;
+    email: string;
+    full_name?: string | null;
+    avatar_url?: string | null;
+    clerk_user_id?: string;
+    roles?: string[];
+    organization_ids?: string[];
+    candidate_id?: string | null;
+    recruiter_id?: string | null;
+    is_platform_admin?: boolean;
+}
+
+export async function getCurrentUser(authToken: string): Promise<CurrentUserProfile> {
+    return fetchApi<CurrentUserProfile>('/api/v2/users/me', {}, authToken);
 }
 
 // Recruiter Relationships API
@@ -325,7 +328,83 @@ export interface MyRecruitersResponse {
 }
 
 export async function getMyRecruiters(authToken: string): Promise<MyRecruitersResponse> {
-    return fetchApi<MyRecruitersResponse>('/api/candidates/me/recruiters', {}, authToken);
+    const response = await fetchApi<{ data?: any[] } | any[]>(
+        '/api/v2/recruiter-candidates?limit=250',
+        {},
+        authToken
+    );
+
+    const relationships = Array.isArray(response) ? response : response?.data || [];
+
+    const mapped: RecruiterRelationship[] = relationships.map((rel: any) => {
+        const recruiter = rel.recruiter || {};
+        const startDate =
+            rel.relationship_start_date ||
+            rel.relationship_start ||
+            rel.created_at ||
+            new Date().toISOString();
+        const endDate =
+            rel.relationship_end_date ||
+            rel.relationship_end ||
+            rel.relationship_expires_at ||
+            startDate;
+
+        const daysUntilExpiry =
+            rel.status === 'active' && endDate
+                ? Math.max(
+                      0,
+                      Math.ceil(
+                          (new Date(endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                      )
+                  )
+                : undefined;
+
+        return {
+            id: rel.id,
+            recruiter_id: rel.recruiter_id,
+            recruiter_name: recruiter.name || rel.recruiter_name || 'Unknown Recruiter',
+            recruiter_email: recruiter.email || rel.recruiter_email || '',
+            recruiter_bio: recruiter.bio || rel.recruiter_bio || '',
+            recruiter_status: recruiter.status || rel.recruiter_status || '',
+            relationship_start_date: startDate,
+            relationship_end_date: endDate,
+            status: rel.status || 'active',
+            consent_given: Boolean(rel.consent_given),
+            consent_given_at: rel.consent_given_at || undefined,
+            created_at: rel.created_at || startDate,
+            days_until_expiry: daysUntilExpiry,
+        };
+    });
+
+    const grouped: MyRecruitersResponse = {
+        active: [],
+        expired: [],
+        terminated: [],
+    };
+
+    for (const relationship of mapped) {
+        if (relationship.status === 'active') {
+            grouped.active.push(relationship);
+        } else if (relationship.status === 'expired') {
+            grouped.expired.push(relationship);
+        } else {
+            grouped.terminated.push(relationship);
+        }
+    }
+
+    grouped.active.sort((a, b) => {
+        const daysA = typeof a.days_until_expiry === 'number' ? a.days_until_expiry : Infinity;
+        const daysB = typeof b.days_until_expiry === 'number' ? b.days_until_expiry : Infinity;
+        return daysA - daysB;
+    });
+
+    const sortByStartDateDesc = (a: RecruiterRelationship, b: RecruiterRelationship) =>
+        new Date(b.relationship_start_date).getTime() - new Date(a.relationship_start_date).getTime();
+
+    grouped.expired.sort(sortByStartDateDesc);
+    grouped.terminated.sort(sortByStartDateDesc);
+
+    return grouped;
 }
 
 export async function getMyProfile(authToken: string): Promise<CandidateProfile | null> {
@@ -333,7 +412,12 @@ export async function getMyProfile(authToken: string): Promise<CandidateProfile 
 }
 
 export async function updateMyProfile(authToken: string, updates: Partial<CandidateProfile>): Promise<CandidateProfile> {
-    return fetchApi<CandidateProfile>('/api/candidates/me', {
+    const profile = await getMyCandidateProfile(authToken);
+    if (!profile) {
+        throw new ApiError('Candidate profile not found', 404);
+    }
+
+    return fetchApi<CandidateProfile>(`/api/v2/candidates/${profile.id}`, {
         method: 'PATCH',
         body: JSON.stringify(updates),
     }, authToken);

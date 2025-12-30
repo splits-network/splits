@@ -221,4 +221,37 @@ export class NotificationRepositoryV2 {
             throw error;
         }
     }
+
+    async markAllAsRead(recipientUserId: string): Promise<void> {
+        const { error } = await this.supabase
+            .schema('notifications')
+            .from('notification_log')
+            .update({
+                read: true,
+                read_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            })
+            .eq('recipient_user_id', recipientUserId)
+            .eq('read', false);
+
+        if (error) {
+            throw error;
+        }
+    }
+
+    async countUnread(recipientUserId: string): Promise<number> {
+        const { count, error } = await this.supabase
+            .schema('notifications')
+            .from('notification_log')
+            .select('id', { count: 'exact', head: true })
+            .eq('recipient_user_id', recipientUserId)
+            .eq('read', false)
+            .eq('dismissed', false);
+
+        if (error) {
+            throw error;
+        }
+
+        return count || 0;
+    }
 }

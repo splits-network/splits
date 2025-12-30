@@ -24,8 +24,9 @@ export function registerApplicationRoutes(
 
     app.get('/v2/applications/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
+            const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as any;
-            const application = await config.applicationService.getApplication(id);
+            const application = await config.applicationService.getApplication(id, clerkUserId);
             return reply.send({ data: application });
         } catch (error: any) {
             return reply.code(404).send({ error: { message: error.message } });
