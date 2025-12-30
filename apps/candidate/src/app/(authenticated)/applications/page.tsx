@@ -1,8 +1,12 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
-import { auth } from '@clerk/nextjs/server';
+import { useAuth } from '@clerk/nextjs';
 import { redirect } from 'next/navigation';
 import { getMyApplications } from '@/lib/api-client';
+import { useViewMode } from '@/hooks/useViewMode';
 
 const getStatusColor = (stage: string) => {
     switch (stage) {
@@ -13,6 +17,8 @@ const getStatusColor = (stage: string) => {
         case 'screen':
         case 'submitted':
             return 'badge-info';
+        case 'recruiter_proposed':
+            return 'badge-secondary';
         case 'interviewing':
             return 'badge-primary';
         case 'offer':
@@ -33,6 +39,8 @@ const formatStage = (stage: string) => {
             return 'AI Review';
         case 'screen':
             return 'Recruiter Review';
+        case 'recruiter_proposed':
+            return 'Recruiter Proposed';
         case 'submitted':
             return 'Submitted';
         case 'interviewing':
@@ -48,47 +56,91 @@ const formatStage = (stage: string) => {
     }
 };
 
-export default async function ApplicationsPage({
+export default function ApplicationsPage({
     searchParams,
 }: {
     searchParams: Promise<{ success?: string }>;
 }) {
-    const { userId, getToken } = await auth();
+    const { userId, getToken } = useAuth();
+    const [viewMode, setViewMode] = useViewMode('applicationsViewMode');
+    const [applications, setApplications] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
+
+    useEffect(() => {
+        async function loadApplications() {
+            if (!userId) {
+                redirect('/sign-in');
+                return;
+            }
+
+            const token = await getToken();
+            if (!token) {
+                redirect('/sign-in');
+                return;
+            }
+
+            try {
+                const data = await getMyApplications(token);
+                setApplications((data as any).data || data || []);
+            } catch (err) {
+                console.error('Error fetching applications:', err);
+                setError('Failed to load applications');
+                setApplications([]);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        loadApplications();
+    }, [userId, getToken]);
+
+    useEffect(() => {
+        async function checkSuccess() {
+            const params = await searchParams;
+            setShowSuccess(params.success === 'true');
+        }
+        checkSuccess();
+    }, [searchParams]);
 
     if (!userId) {
         redirect('/sign-in');
     }
 
-    // Get authentication token
-    const token = await getToken();
-    if (!token) {
-        redirect('/sign-in');
-    }
+    // Filter applications based on search and status
+    const filteredApplications = applications.filter(app => {
+        // Search filter
+        const searchLower = searchQuery.toLowerCase();
+        const matchesSearch = !searchQuery ||
+            app.job?.title?.toLowerCase().includes(searchLower) ||
+            app.job?.company?.name?.toLowerCase().includes(searchLower) ||
+            app.job?.location?.toLowerCase().includes(searchLower);
 
-    // Fetch real applications data
-    let applications: any[] = [];
-    let error = null;
+        // Status filter
+        const matchesStatus = statusFilter === 'all' || app.stage === statusFilter;
 
-    try {
-        const data = await getMyApplications(token);
-        // API returns { data: [...] } wrapper
-        applications = (data as any).data || data || [];
-    } catch (err) {
-        console.error('Error fetching applications:', err);
-        error = 'Failed to load applications';
-        applications = [];
-    }
+        return matchesSearch && matchesStatus;
+    });
 
-    // Await searchParams in Next.js 16
-    const params = await searchParams;
-    const showSuccess = params.success === 'true';
-
-    const activeApps = applications.filter(app =>
+    const activeApps = filteredApplications.filter(app =>
         !['rejected', 'withdrawn'].includes(app.stage)
     );
-    const inactiveApps = applications.filter(app =>
+    const inactiveApps = filteredApplications.filter(app =>
         ['rejected', 'withdrawn'].includes(app.stage)
     );
+
+    if (loading) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <div className="flex justify-center items-center min-h-[400px]">
+                    <span className="loading loading-spinner loading-lg"></span>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -116,107 +168,164 @@ export default async function ApplicationsPage({
             )}
 
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body py-4">
-                        <div className="stat-value text-3xl text-primary">{applications.length}</div>
-                        <div className="stat-title">Total Applications</div>
-                    </div>
-                </div>
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body py-4">
-                        <div className="stat-value text-3xl text-success">{activeApps.length}</div>
-                        <div className="stat-title">Active</div>
-                    </div>
-                </div>
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body py-4">
-                        <div className="stat-value text-3xl text-info">
-                            {applications.filter(a => a.status === 'Interview Scheduled').length}
+            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6'>
+                <div className="stats bg-base-100 shadow">
+                    <div className="stat">
+                        <div className="stat-figure text-primary">
+                            <i className="fa-solid fa-file-lines text-4xl"></i>
                         </div>
-                        <div className="stat-title">Interviews</div>
+                        <div className="stat-title">Total Applications</div>
+                        <div className="stat-value text-primary">{applications.length}</div>
+                        <div className="stat-desc">All time submissions</div>
                     </div>
                 </div>
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body py-4">
-                        <div className="stat-value text-3xl text-warning">
-                            {applications.filter(a => a.status === 'Offer Received').length}
+                <div className="stats bg-base-100 shadow">
+                    <div className="stat">
+                        <div className="stat-figure text-success">
+                            <i className="fa-solid fa-circle-check text-4xl"></i>
+                        </div>
+                        <div className="stat-title">Active</div>
+                        <div className="stat-value text-success">{activeApps.length}</div>
+                        <div className="stat-desc">Currently in progress</div>
+                    </div>
+                </div>
+                <div className="stats bg-base-100 shadow">
+                    <div className="stat">
+                        <div className="stat-figure text-info">
+                            <i className="fa-solid fa-comments text-4xl"></i>
+                        </div>
+                        <div className="stat-title">Interviewing</div>
+                        <div className="stat-value text-info">
+                            {applications.filter(a => a.stage === 'interviewing').length}
+                        </div>
+                        <div className="stat-desc">Interview stage</div>
+                    </div>
+                </div>
+                <div className="stats bg-base-100 shadow">
+                    <div className="stat">
+                        <div className="stat-figure text-warning">
+                            <i className="fa-solid fa-trophy text-4xl"></i>
                         </div>
                         <div className="stat-title">Offers</div>
+                        <div className="stat-value text-warning">
+                            {applications.filter(a => a.stage === 'offer').length}
+                        </div>
+                        <div className="stat-desc">Received offers</div>
                     </div>
                 </div>
             </div>
 
-            {/* Filter Tabs */}
-            <div className="tabs tabs-boxed mb-6 bg-base-100 shadow">
-                <a className="tab tab-active">All Applications</a>
-                <a className="tab">Active</a>
-                <a className="tab">Interviews</a>
-                <a className="tab">Archived</a>
+            {/* Filters and View Toggle */}
+            <div className="card bg-base-100 shadow mb-6">
+                <div className="card-body">
+                    <div className="flex flex-wrap gap-4 items-end">
+                        {/* Status Filter */}
+                        <div className="fieldset">
+                            <label className="label">Status</label>
+                            <select
+                                className="select w-full max-w-xs"
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                            >
+                                <option value="all">All Statuses</option>
+                                <option value="draft">Draft</option>
+                                <option value="ai_review">AI Review</option>
+                                <option value="screen">Recruiter Review</option>
+                                <option value="submitted">Submitted</option>
+                                <option value="interviewing">Interviewing</option>
+                                <option value="offer">Offer</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="withdrawn">Withdrawn</option>
+                            </select>
+                        </div>
+
+                        {/* Search Input */}
+                        <div className="fieldset flex-1">
+                            <label className="label">Search</label>
+                            <input
+                                type="text"
+                                className="input w-full"
+                                placeholder="Search by position, company, or location..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+
+                        {/* View Toggle */}
+                        <div className="join">
+                            <button
+                                className={`btn join-item ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
+                                onClick={() => setViewMode('grid')}
+                                title="Grid View"
+                            >
+                                <i className="fa-solid fa-grip"></i>
+                            </button>
+                            <button
+                                className={`btn join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
+                                onClick={() => setViewMode('table')}
+                                title="Table View"
+                            >
+                                <i className="fa-solid fa-table"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            {/* Active Applications */}
-            {activeApps.length > 0 && (
+            {/* Grid View - Active Applications */}
+            {viewMode === 'grid' && activeApps.length > 0 && (
                 <div className="mb-8">
                     <h2 className="text-2xl font-bold mb-4">Active Applications</h2>
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {activeApps.map((app) => (
                             <div key={app.id} className="card bg-base-100 shadow hover:shadow transition-shadow">
                                 <div className="card-body">
-                                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                                    <div className="flex justify-between items-start">
                                         <div className="flex-1">
                                             <Link
                                                 href={`/jobs/${app.job_id}`}
-                                                className="card-title text-2xl hover:text-primary"
+                                                className="card-title text-xl hover:text-primary mb-1"
                                             >
                                                 {app.job?.title || 'Unknown Position'}
                                             </Link>
-                                            <p className="text-lg font-semibold mb-2">{app.job?.company?.name || 'Unknown Company'}</p>
-                                            <div className="flex flex-wrap gap-3 text-sm text-base-content/70 mb-4">
-                                                {app.job?.location && (
-                                                    <span>
-                                                        <i className="fa-solid fa-location-dot"></i> {app.job.location}
-                                                    </span>
-                                                )}
-                                                <span>
-                                                    <i className="fa-solid fa-calendar"></i> Applied {formatDate(app.created_at)}
-                                                </span>
-                                                <span>
-                                                    <i className="fa-solid fa-clock"></i> Updated {formatDate(app.updated_at)}
-                                                </span>
-                                            </div>
-                                            <div className="mb-3">
-                                                <span className={`badge badge-lg ${getStatusColor(app.stage)}`}>
-                                                    {formatStage(app.stage)}
-                                                </span>
-                                            </div>
-                                            {app.recruiter && (
-                                                <div className="text-sm text-base-content/60 mb-2">
-                                                    <i className="fa-solid fa-user"></i> Represented by{' '}
-                                                    {app.recruiter.first_name} {app.recruiter.last_name}
-                                                </div>
-                                            )}
-                                            {app.recruiter_notes && (
-                                                <div className="alert alert-info">
-                                                    <i className="fa-solid fa-circle-info"></i>
-                                                    <span>{app.recruiter_notes}</span>
-                                                </div>
-                                            )}
+                                            <p className="text-base font-semibold mb-2">{app.job?.company?.name || 'Unknown Company'}</p>
                                         </div>
-                                        <div className="flex flex-col gap-2">
+                                        <span className={`badge ${getStatusColor(app.stage)}`}>
+                                            {formatStage(app.stage)}
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-3 text-sm text-base-content/70 mb-3">
+                                        {app.job?.location && (
+                                            <span>
+                                                <i className="fa-solid fa-location-dot"></i> {app.job.location}
+                                            </span>
+                                        )}
+                                        <span>
+                                            <i className="fa-solid fa-calendar"></i> Applied {formatDate(app.created_at)}
+                                        </span>
+                                    </div>
+                                    {app.recruiter && (
+                                        <div className="text-sm text-base-content/60 mb-2">
+                                            <i className="fa-solid fa-user"></i> {app.recruiter.first_name} {app.recruiter.last_name}
+                                        </div>
+                                    )}
+                                    {app.recruiter_notes && (
+                                        <div className="alert alert-info text-sm py-2">
+                                            <i className="fa-solid fa-circle-info"></i>
+                                            <span>{app.recruiter_notes}</span>
+                                        </div>
+                                    )}
+                                    <div className="card-actions justify-between items-center mt-4">
+                                        <span className="text-sm text-base-content/60">
+                                            Updated {formatDate(app.updated_at)}
+                                        </span>
+                                        <div className="flex gap-2">
                                             <Link
                                                 href={`/applications/${app.id}`}
                                                 className="btn btn-sm btn-primary"
                                             >
                                                 <i className="fa-solid fa-eye"></i>
-                                                View Details
-                                            </Link>
-                                            <Link
-                                                href={`/jobs/${app.job_id}`}
-                                                className="btn btn-sm btn-outline"
-                                            >
-                                                <i className="fa-solid fa-briefcase"></i>
-                                                View Job
+                                                View
                                             </Link>
                                         </div>
                                     </div>
@@ -227,56 +336,192 @@ export default async function ApplicationsPage({
                 </div>
             )}
 
-            {/* Inactive Applications */}
-            {inactiveApps.length > 0 && (
-                <div>
-                    <h2 className="text-2xl font-bold mb-4">Archived Applications</h2>
-                    <div className="space-y-4">
-                        {inactiveApps.map((app) => (
-                            <div key={app.id} className="card bg-base-100 shadow opacity-70">
-                                <div className="card-body">
-                                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                                        <div className="flex-1">
-                                            <h3 className="card-title text-xl">{app.job?.title || 'Unknown Position'}</h3>
-                                            <p className="font-semibold mb-2">{app.job?.company?.name || 'Unknown Company'}</p>
-                                            <div className="flex flex-wrap gap-3 text-sm text-base-content/70 mb-3">
+            {/* Table View - Active Applications */}
+            {viewMode === 'table' && activeApps.length > 0 && (
+                <div className="mb-8">
+                    <h2 className="text-2xl font-bold mb-4">Active Applications</h2>
+                    <div className="card bg-base-100 shadow overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>Position</th>
+                                        <th>Company</th>
+                                        <th>Location</th>
+                                        <th>Status</th>
+                                        <th>Recruiter</th>
+                                        <th>Applied</th>
+                                        <th className="text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {activeApps.map((app) => (
+                                        <tr key={app.id} className="hover">
+                                            <td>
+                                                <Link
+                                                    href={`/jobs/${app.job_id}`}
+                                                    className="font-semibold hover:text-primary"
+                                                >
+                                                    {app.job?.title || 'Unknown Position'}
+                                                </Link>
+                                            </td>
+                                            <td>{app.job?.company?.name || 'Unknown Company'}</td>
+                                            <td>
                                                 {app.job?.location && (
-                                                    <span>
+                                                    <span className="text-sm">
                                                         <i className="fa-solid fa-location-dot"></i> {app.job.location}
                                                     </span>
                                                 )}
-                                                <span>
-                                                    <i className="fa-solid fa-calendar"></i> Applied {formatDate(app.created_at)}
+                                            </td>
+                                            <td>
+                                                <span className={`badge badge-sm ${getStatusColor(app.stage)}`}>
+                                                    {formatStage(app.stage)}
                                                 </span>
-                                            </div>
-                                            <span className={`badge ${getStatusColor(app.stage)}`}>
-                                                {formatStage(app.stage)}
-                                            </span>
-                                            {app.recruiter_notes && (
-                                                <p className="text-sm text-base-content/70 mt-2">{app.recruiter_notes}</p>
-                                            )}
+                                            </td>
+                                            <td>
+                                                {app.recruiter ? (
+                                                    <span className="text-sm">
+                                                        {app.recruiter.first_name} {app.recruiter.last_name}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-sm text-base-content/50">-</span>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <span className="text-sm">{formatDate(app.created_at)}</span>
+                                            </td>
+                                            <td>
+                                                <div className="flex gap-2 justify-end">
+                                                    <Link
+                                                        href={`/applications/${app.id}`}
+                                                        className="btn btn-sm btn-ghost"
+                                                        title="View Details"
+                                                    >
+                                                        <i className="fa-solid fa-eye"></i>
+                                                    </Link>
+                                                    <Link
+                                                        href={`/jobs/${app.job_id}`}
+                                                        className="btn btn-sm btn-ghost"
+                                                        title="View Job"
+                                                    >
+                                                        <i className="fa-solid fa-briefcase"></i>
+                                                    </Link>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Grid View - Inactive Applications */}
+            {viewMode === 'grid' && inactiveApps.length > 0 && (
+                <div>
+                    <h2 className="text-2xl font-bold mb-4">Archived Applications</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {inactiveApps.map((app) => (
+                            <div key={app.id} className="card bg-base-100 shadow opacity-70">
+                                <div className="card-body">
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex-1">
+                                            <h3 className="card-title text-xl">{app.job?.title || 'Unknown Position'}</h3>
+                                            <p className="font-semibold mb-2">{app.job?.company?.name || 'Unknown Company'}</p>
                                         </div>
+                                        <span className={`badge ${getStatusColor(app.stage)}`}>
+                                            {formatStage(app.stage)}
+                                        </span>
                                     </div>
+                                    <div className="flex flex-wrap gap-3 text-sm text-base-content/70 mb-3">
+                                        {app.job?.location && (
+                                            <span>
+                                                <i className="fa-solid fa-location-dot"></i> {app.job.location}
+                                            </span>
+                                        )}
+                                        <span>
+                                            <i className="fa-solid fa-calendar"></i> Applied {formatDate(app.created_at)}
+                                        </span>
+                                    </div>
+                                    {app.recruiter_notes && (
+                                        <p className="text-sm text-base-content/70 mt-2">{app.recruiter_notes}</p>
+                                    )}
                                 </div>
                             </div>
                         ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Table View - Inactive Applications */}
+            {viewMode === 'table' && inactiveApps.length > 0 && (
+                <div>
+                    <h2 className="text-2xl font-bold mb-4">Archived Applications</h2>
+                    <div className="card bg-base-100 shadow overflow-hidden opacity-70">
+                        <div className="overflow-x-auto">
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th>Position</th>
+                                        <th>Company</th>
+                                        <th>Location</th>
+                                        <th>Status</th>
+                                        <th>Applied</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {inactiveApps.map((app) => (
+                                        <tr key={app.id} className="hover">
+                                            <td>
+                                                <span className="font-semibold">
+                                                    {app.job?.title || 'Unknown Position'}
+                                                </span>
+                                            </td>
+                                            <td>{app.job?.company?.name || 'Unknown Company'}</td>
+                                            <td>
+                                                {app.job?.location && (
+                                                    <span className="text-sm">
+                                                        <i className="fa-solid fa-location-dot"></i> {app.job.location}
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <span className={`badge badge-sm ${getStatusColor(app.stage)}`}>
+                                                    {formatStage(app.stage)}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span className="text-sm">{formatDate(app.created_at)}</span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             )}
 
             {/* Empty State */}
-            {applications.length === 0 && (
+            {filteredApplications.length === 0 && (
                 <div className="card bg-base-100 shadow">
-                    <div className="card-body text-center py-16">
-                        <i className="fa-solid fa-inbox text-6xl text-base-content/30 mb-4"></i>
-                        <h3 className="text-2xl font-bold mb-2">No Applications Yet</h3>
+                    <div className="card-body text-center py-12">
+                        <i className="fa-solid fa-inbox text-6xl text-base-content/20 mb-4"></i>
+                        <h3 className="text-2xl font-bold mb-2">
+                            {applications.length === 0 ? 'No Applications Yet' : 'No Applications Found'}
+                        </h3>
                         <p className="text-base-content/70 mb-6">
-                            Start applying to jobs to track your applications here
+                            {applications.length === 0
+                                ? 'Start applying to jobs to track your applications here'
+                                : 'Try adjusting your search or filters'}
                         </p>
-                        <Link href="/jobs" className="btn btn-primary">
-                            <i className="fa-solid fa-search"></i>
-                            Browse Jobs
-                        </Link>
+                        {applications.length === 0 && (
+                            <Link href="/jobs" className="btn btn-primary">
+                                <i className="fa-solid fa-search"></i>
+                                Browse Jobs
+                            </Link>
+                        )}
                     </div>
                 </div>
             )}
