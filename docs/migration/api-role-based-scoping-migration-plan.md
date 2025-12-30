@@ -11,6 +11,8 @@
 
 This plan provides detailed, step-by-step instructions for migrating from frontend role-based API calls to backend-determined data scoping. The migration will be done incrementally, one resource at a time, to minimize risk and allow for testing at each stage.
 
+**Important**: Some endpoints (like `/api/jobs`, `/api/recruiters`) must handle **both** unauthenticated (public) and authenticated (role-scoped) access. These endpoints use conditional logic based on authentication state, **NOT** separate `/api/public/*` routes.
+
 ---
 
 ## Pre-Migration Setup
@@ -599,75 +601,177 @@ Same testing pattern as proposals:
 ---
 
 ### Step 1.3: Migrate Jobs (ATS Service)
-**Duration**: 1 day  
-**Dependencies**: Step 1.2 complete
+**Duration**: 1.5 days  
+**Dependencies**: Step 1.2 complete  
+**⚠️ SPECIAL**: Jobs must handle **both** public (unauthenticated) and authenticated (role-scoped) access
 
 #### Task 1.3.1: Update JobService Methods
 
-1. Add `getJobsForUser()`:
+1. Add `getJobs()` with optional auth parameters:
    ```typescript
-   async getJobsForUser(
-     clerkUserId: string,
-     userRole: string,
+   async getJobs(
      filters: JobFilters,
-     correlationId: string,
-     organizationId?: string
+     clerkUserId?: string,
+     userRole?: string,
+     organizationId?: string,
+     correlationId?: string
    ): Promise<{ data: Job[]; pagination: PaginationMeta }> {
-     const entity = await this.resolveEntityId(clerkUserId, userRole, organizationId);
+     // No auth - return public jobs only
+     if (!clerkUserId || !userRole) {
+       return this.repository.findActiveJobs(filters);
+     }
      
-     switch (entity.type) {
+     // Authenticated - apply role-based scoping
+     const entityId = await this.resolveEntityId(clerkUserId, userRole, organizationId);
+     
+     switch (userRole) {
        case 'recruiter':
-         // Recruiters see all open jobs (marketplace)
-         return this.repository.findOpenJobs(filters);
-       case 'company':
-         if (entity.id === '*') {
-           return this.repository.findAll(filters);
-         }
-         // Company users see only their company's jobs
-         return this.repository.findByCompany(entity.id, filters);
+         // Marketplace jobs (may include inactive if recruiter has proposals)
+         return this.repository.findMarketplaceJobs(entityId, filters);
+       case 'company_admin':
+       case 'hiring_manager':
+         // Company's jobs (all statuses)
+         return this.repository.findByCompany(entityId, filters);
+       case 'platform_admin':
+         // All jobs
+         return this.repository.findAll(filters);
        default:
-         throw new Error(`Unsupported entity type: ${entity.type}`);
+         throw new ForbiddenError('Invalid role');
      }
    }
    ```
 
-2. Add `getJobByIdForUser()` with access verification
+2. Add `getJobById()` with optional auth and data sanitization:
+   ```typescript
+   async getJobById(
+     jobId: string,
+     clerkUserId?: string,
+     userRole?: string,
+     organizationId?: string
+   ): Promise<Job> {
+     const job = await this.repository.findById(jobId);
+     
+     if (!job) {
+       throw new NotFoundError('Job not found');
+     }
+     
+     // No auth - return public data only
+     if (!clerkUserId || !userRole) {
+       if (job.status !== 'active') {
+         throw new NotFoundError('Job not found');
+       }
+       return this.sanitizePublicJob(job);
+     }
+     
+     // Authenticated - verify access and return full data
+     await this.verifyJobAccess(job, clerkUserId, userRole, organizationId);
+     return job;
+   }
+   
+   private sanitizePublicJob(job: Job): Job {
+     // Return only public fields
+     return {
+       id: job.id,
+       title: job.title,
+       description: job.description,
+       location: job.location,
+       salary_min: job.salary_min,
+       salary_max: job.salary_max,
+       company_id: job.company_id,
+       company_name: job.company_name,
+       status: job.status,
+       created_at: job.created_at,
+       // Omit internal fields
+     };
+   }
+   ```
 
 **Verification**:
-- [ ] Service methods implemented
-- [ ] Recruiter marketplace access implemented
-- [ ] Company scoping implemented
+- [ ] Service methods implemented with optional auth
+- [ ] Public access returns active jobs only
+- [ ] Authenticated access applies role-based scoping
+- [ ] Data sanitization for public access implemented
 
 ---
 
 #### Task 1.3.2: Update Job Routes
 
-Same pattern as applications - update routes to use `getUserContext()` and call service methods.
+Update routes to extract auth context if present:
+
+```typescript
+app.get('/jobs', async (request, reply) => {
+  const userContext = getUserContext(request);
+  const filters = request.query as JobFilters;
+  
+  const result = await jobService.getJobs(
+    filters,
+    userContext?.clerkUserId,
+    userContext?.userRole,
+    userContext?.organizationId,
+    userContext?.correlationId
+  );
+  
+  return reply.send({ data: result });
+});
+```
 
 **Verification**:
-- [ ] Routes updated
-- [ ] Old query params removed
+- [ ] Routes handle both authenticated and unauthenticated requests
+- [ ] No errors when auth headers missing
 
 ---
 
 #### Task 1.3.3: Update API Gateway Job Routes
 
-Same pattern as applications/proposals.
+Gateway must check authentication state and route accordingly:
+
+```typescript
+app.get('/api/jobs', async (request, reply) => {
+  const isAuthenticated = !!request.auth?.clerkUserId;
+  
+  if (!isAuthenticated) {
+    // Public access - no auth headers
+    const response = await atsService.get('/jobs', {
+      params: request.query
+    });
+    return reply.send(response.data);
+  }
+  
+  // Authenticated access - pass auth context
+  const headers = buildAuthHeaders(request);
+  const response = await atsService.get('/jobs', {
+    headers,
+    params: request.query
+  });
+  return reply.send(response.data);
+});
+```
+
+**⚠️ CRITICAL**: Do NOT use `requireRoles()` on public endpoints like `GET /api/jobs`!
 
 **Verification**:
-- [ ] Gateway simplified
-- [ ] RBAC enforced
+- [ ] Gateway handles both authenticated and unauthenticated requests
+- [ ] No requireRoles() middleware on public endpoints
+- [ ] Candidate portal can access jobs without auth
 
 ---
 
 #### Task 1.3.4: Test Jobs Migration
 
-Same testing pattern as previous resources.
+Test **both** access patterns:
 
-**Verification**:
-- [ ] All roles tested
-- [ ] Marketplace access works for recruiters
-- [ ] Company scoping works
+**Public Access**:
+- [ ] Unauthenticated GET /api/jobs returns active jobs
+- [ ] Unauthenticated GET /api/jobs/:id returns public job data
+- [ ] Inactive jobs not visible to public
+- [ ] Internal fields (notes, etc.) not included in public response
+
+**Authenticated Access**:
+- [ ] Recruiter sees marketplace jobs
+- [ ] Company admin sees company's jobs (all statuses)
+- [ ] Hiring manager sees company's jobs
+- [ ] Platform admin sees all jobs
+- [ ] Authenticated users get full job data
 
 ---
 

@@ -19,6 +19,44 @@ Current architecture has **mixed responsibility** for authorization logic:
 
 ---
 
+## Important: Public + Authenticated Endpoints
+
+This migration applies to **ALL endpoints**, but some handle both public and authenticated access.
+
+### Endpoint Access Patterns
+
+#### Pattern 1: Authenticated-Only Endpoints
+
+These endpoints require authentication and apply role-based data scoping:
+
+- `GET /api/proposals` - User's proposals only (no public access)
+- `GET /api/applications` - User's applications only (no public access)
+- `GET /api/candidates` - Candidates user has access to (no public access)
+- `POST /api/jobs` - Create job (company users only)
+- `PUT /api/jobs/:id` - Update job (company users only)
+
+#### Pattern 2: Public + Authenticated Endpoints
+
+These endpoints support **both** unauthenticated and authenticated access with different data:
+
+- `GET /api/jobs` - Returns different data based on authentication:
+  - **Unauthenticated**: Only active/open jobs (public marketplace)
+  - **Recruiter**: Marketplace recruiters (may include additional data)
+  - **Company Admin/Hiring Manager**: Their company's jobs (for management)
+  - **Platform Admin**: All jobs
+  
+- `GET /api/jobs/:id` - Returns different data based on authentication:
+  - **Unauthenticated**: Public job details only
+  - **Authenticated**: May include additional private data if user has access
+  
+- `GET /api/recruiters` - Returns different data based on authentication:
+  - **Unauthenticated**: Public recruiter directory
+  - **Authenticated**: May include additional contact info
+
+**Key principle**: Single endpoint with conditional logic based on authentication state and role, NOT separate `/api/public/*` and `/api/private/*` endpoints.
+
+---
+
 ## Solution Overview
 
 **Backend-Determined Scoping**: Single endpoint per resource, backend filters based on authenticated user's role.
@@ -37,15 +75,23 @@ if (userRole === 'recruiter') {
 }
 ```
 
-### New Pattern (Simplified):
+### New Pattern (Simplified with Public Access):
 ```typescript
-// Frontend is role-agnostic:
-const proposals = await client.get('/api/proposals');
+// Frontend is role-agnostic AND handles unauthenticated:
 
-// Backend determines scope based on auth context:
-// - Recruiter: return proposals assigned to recruiter
-// - Company Admin/Hiring Manager: return proposals for company
-// - Platform Admin: return all proposals (or org-scoped)
+// Unauthenticated (candidate portal):
+const jobs = await fetch('/api/jobs').then(r => r.json());
+// Returns: active/open jobs only
+
+// Authenticated (portal):
+const client = await createAuthenticatedClient();
+const jobs = await client.get('/api/jobs');
+// Returns: role-based scoped jobs
+//   - Recruiter: marketplace jobs
+//   - Company Admin: company's jobs
+//   - Platform Admin: all jobs
+
+// Backend determines scope based on presence and type of authentication
 ```
 
 ---
@@ -68,23 +114,37 @@ app.get('/api/proposals', async (request, reply) => {
 });
 ```
 
-**AFTER** (Single route, pass auth context):
+**AFTER** (Single route, handles both public and authenticated):
 ```typescript
-// Single route, backend determines scope
-app.get('/api/proposals', {
-  preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager', 'platform_admin'], services),
-}, async (request, reply) => {
-  // Gateway only enforces RBAC and passes context
-  const headers = buildAuthHeaders(request);
+// Single route handles both unauthenticated and authenticated access
+app.get('/api/jobs', async (request, reply) => {
+  // Check if authenticated
+  const isAuthenticated = !!request.auth?.clerkUserId;
   
-  const response = await atsService.get('/proposals', {
+  if (!isAuthenticated) {
+    // Public access - return only active jobs
+    const response = await atsService.get('/jobs/public', {
+      params: request.query
+    });
+    return reply.send(response.data);
+  }
+  
+  // Authenticated access - role-based scoping
+  const headers = buildAuthHeaders(request);
+  const response = await atsService.get('/jobs', {
     headers,
-    params: request.query // pagination, filters, etc.
+    params: request.query
   });
   
   return reply.send(response.data);
 });
 ```
+
+**Key Changes**:
+- Gateway checks authentication state first
+- Unauthenticated: route to public endpoint (active jobs only)
+- Authenticated: pass auth context, backend applies role-based scoping
+- Single route handles both cases, no separate `/api/public/jobs`
 
 **Key Changes**:
 - Gateway enforces authorization (RBAC), not filtering logic
@@ -518,17 +578,175 @@ async function loadApplication(id: string) {
 
 ### 3. Jobs
 
-**Current Endpoints**:
+**Access Patterns**:
 ```
-GET /api/jobs?company_id=X             // Company view
-GET /api/jobs (recruiter access all)   // Recruiter view
+GET /api/jobs                          // Handles BOTH public and authenticated
+                                       // - Unauthenticated: active jobs only
+                                       // - Recruiter: marketplace jobs
+                                       // - Company: their jobs
+                                       // - Admin: all jobs
+
+GET /api/jobs/:id                      // Handles BOTH public and authenticated
+                                       // - Unauthenticated: public job details
+                                       // - Authenticated: may include private data if authorized
+
+POST /api/jobs                         // Authenticated only (company users)
+PUT /api/jobs/:id                      // Authenticated only (company users)
+DELETE /api/jobs/:id                   // Authenticated only (company users)
 ```
 
-**New Endpoint**:
+**Backend Changes**:
+```typescript
+// services/ats-service/src/services/jobs/service.ts
+
+async getJobs(
+  filters: JobFilters,
+  clerkUserId?: string,
+  userRole?: UserRole,
+  organizationId?: string,
+  correlationId?: string
+): Promise<{ data: Job[]; pagination: PaginationMeta }> {
+  // No auth - return public jobs only
+  if (!clerkUserId || !userRole) {
+    return this.repository.findActiveJobs(filters);
+  }
+  
+  // Authenticated - apply role-based scoping
+  const entityId = await this.resolveEntityId(clerkUserId, userRole, organizationId);
+  
+  switch (userRole) {
+    case 'recruiter':
+      // Marketplace jobs (may include inactive if recruiter has proposals)
+      return this.repository.findMarketplaceJobs(entityId, filters);
+    
+    case 'company_admin':
+    case 'hiring_manager':
+      // Company's jobs (all statuses)
+      return this.repository.findByCompany(entityId, filters);
+    
+    case 'platform_admin':
+      // All jobs
+      return this.repository.findAll(filters);
+    
+    default:
+      throw new ForbiddenError('Invalid role');
+  }
+}
+
+async getJobById(
+  jobId: string,
+  clerkUserId?: string,
+  userRole?: UserRole,
+  organizationId?: string
+): Promise<Job> {
+  const job = await this.repository.findById(jobId);
+  
+  if (!job) {
+    throw new NotFoundError('Job not found');
+  }
+  
+  // No auth - return public data only
+  if (!clerkUserId || !userRole) {
+    if (job.status !== 'active') {
+      throw new NotFoundError('Job not found');
+    }
+    return this.sanitizePublicJob(job);
+  }
+  
+  // Authenticated - verify access and return full data
+  await this.verifyJobAccess(job, clerkUserId, userRole, organizationId);
+  return job;
+}
+
+private sanitizePublicJob(job: Job): Job {
+  // Return only public fields
+  return {
+    id: job.id,
+    title: job.title,
+    description: job.description,
+    location: job.location,
+    salary_min: job.salary_min,
+    salary_max: job.salary_max,
+    company_id: job.company_id,
+    company_name: job.company_name,
+    status: job.status,
+    created_at: job.created_at,
+    // Omit internal fields like internal_notes, created_by, etc.
+  };
+}
 ```
-GET /api/jobs                          // Returns scoped to user role
-GET /api/jobs/:id                      // Returns if user has access
+
+**API Gateway Changes**:
+```typescript
+// services/api-gateway/src/routes/jobs.ts
+
+app.get('/api/jobs', async (request, reply) => {
+  const isAuthenticated = !!request.auth?.clerkUserId;
+  
+  if (!isAuthenticated) {
+    // Public access
+    const response = await atsService.get('/jobs/public', {
+      params: request.query
+    });
+    return reply.send(response.data);
+  }
+  
+  // Authenticated access
+  const headers = buildAuthHeaders(request);
+  const response = await atsService.get('/jobs', {
+    headers,
+    params: request.query
+  });
+  return reply.send(response.data);
+});
+
+app.get('/api/jobs/:id', async (request, reply) => {
+  const { id } = request.params as { id: string };
+  const isAuthenticated = !!request.auth?.clerkUserId;
+  
+  if (!isAuthenticated) {
+    // Public access
+    const response = await atsService.get(`/jobs/${id}/public`);
+    return reply.send(response.data);
+  }
+  
+  // Authenticated access
+  const headers = buildAuthHeaders(request);
+  const response = await atsService.get(`/jobs/${id}`, { headers });
+  return reply.send(response.data);
+});
 ```
+
+**Frontend Changes**:
+```typescript
+// apps/candidate/src/app/jobs/page.tsx (Unauthenticated)
+async function loadPublicJobs() {
+  const res = await fetch('/api/jobs');  // No auth
+  const data = await res.json();
+  return data.data;
+}
+
+// apps/portal/src/app/(authenticated)/roles/page.tsx (Authenticated)
+async function loadJobs() {
+  const client = await createAuthenticatedClient();
+  const res = await client.get('/api/jobs');  // Auth applied, role-based data
+  return res.data.data;
+}
+```
+
+---
+
+### 4. Candidates
+
+**Authenticated Endpoints Only** (No Public Access):
+```
+GET /api/candidates                    // Returns scoped to user role
+GET /api/candidates/:id                // Returns if user has access
+POST /api/candidates                   // Create candidate profile
+PUT /api/candidates/:id                // Update candidate
+```
+
+**Note**: Candidate data is never public - only accessible to authenticated users with proper permissions.
 
 **Backend Changes**:
 ```typescript
@@ -823,7 +1041,153 @@ describe('Proposals Page', () => {
 
 ---
 
+## Public Endpoint Examples
+
+### Example 1: Public Job Search (No Auth)
+
+**API Gateway**:
+```typescript
+// No authentication middleware
+app.get('/api/jobs', async (request, reply) => {
+  // No auth headers needed - public access
+  const response = await services.ats.get('/jobs/public', {
+    params: request.query,
+  });
+  return reply.send(response.data);
+});
+
+app.get('/api/jobs/:id', async (request, reply) => {
+  // Public job detail
+  const response = await services.ats.get(`/jobs/public/${request.params.id}`);
+  return reply.send(response.data);
+});
+```
+
+**ATS Service**:
+```typescript
+// Public route - no auth context needed
+app.get('/jobs/public', async (request, reply) => {
+  const filters = {
+    page: Number(request.query.page) || 1,
+    limit: Number(request.query.limit) || 25,
+    search: request.query.search as string | undefined,
+    location: request.query.location as string | undefined,
+  };
+  
+  const result = await jobService.getPublicJobs(filters);
+  return reply.send({ data: result.data, pagination: result.pagination });
+});
+```
+
+### Example 2: Authenticated Job Management
+
+**API Gateway**:
+```typescript
+// Requires authentication
+app.get('/api/jobs/my-jobs', {
+  preHandler: requireRoles(
+    ['company_admin', 'hiring_manager', 'platform_admin'],
+    services
+  ),
+}, async (request, reply) => {
+  const headers = buildAuthHeaders(request);
+  const response = await services.ats.get('/jobs/for-user', {
+    headers,
+    params: request.query,
+  });
+  return reply.send(response.data);
+});
+---
+
+## Public + Authenticated Endpoint Pattern
+
+Some endpoints need to handle **both** unauthenticated (public) and authenticated (role-scoped) access.
+
+### Pattern: Conditional Data Based on Auth State
+
+```typescript
+// services/api-gateway/src/routes/jobs.ts
+
+app.get('/api/jobs', async (request, reply) => {
+  const isAuthenticated = !!request.auth?.clerkUserId;
+  
+  if (!isAuthenticated) {
+    // Public: return active jobs only
+    const response = await atsService.get('/jobs/public', {
+      params: request.query
+    });
+    return reply.send(response.data);
+  }
+  
+  // Authenticated: apply role-based scoping
+  const headers = buildAuthHeaders(request);
+  const response = await atsService.get('/jobs', {
+    headers,
+    params: request.query
+  });
+  return reply.send(response.data);
+});
+```
+
+### Backend Implementation
+
+```typescript
+// services/ats-service/src/services/jobs/service.ts
+
+async getJobs(
+  filters: JobFilters,
+  clerkUserId?: string,
+  userRole?: UserRole,
+  organizationId?: string
+): Promise<{ data: Job[]; pagination: PaginationMeta }> {
+  // No auth context - public access
+  if (!clerkUserId || !userRole) {
+    return this.repository.findActiveJobs(filters);
+  }
+  
+  // Authenticated - role-based scoping
+  switch (userRole) {
+    case 'recruiter':
+      return this.repository.findMarketplaceJobs(filters);
+    case 'company_admin':
+    case 'hiring_manager':
+      const company = await this.getCompanyByOrg(organizationId);
+      return this.repository.findByCompany(company.id, filters);
+    case 'platform_admin':
+      return this.repository.findAll(filters);
+  }
+}
+```
+
+### Frontend Usage
+
+```typescript
+// Unauthenticated (candidate portal)
+const jobs = await fetch('/api/jobs').then(r => r.json());
+// Returns: active jobs only
+
+// Authenticated (portal)
+const client = await createAuthenticatedClient();
+const jobs = await client.get('/api/jobs');
+// Returns: role-based scoped jobs
+```
+
+---
+
 ## Common Pitfalls
+
+### ❌ Pitfall 0: Creating Separate Public/Private Endpoints
+```typescript
+// WRONG - Don't create separate /api/public/* routes
+app.get('/api/public/jobs', ...);  // NO!
+app.get('/api/private/jobs', ...); // NO!
+
+// CORRECT - Single endpoint handles both
+app.get('/api/jobs', async (request, reply) => {
+  const isAuth = !!request.auth?.clerkUserId;
+  // Route to different backend logic based on auth
+});
+```
 
 ### ❌ Pitfall 1: Forgetting organizationId for Company Users
 ```typescript
