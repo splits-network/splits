@@ -20,7 +20,7 @@ export class OrganizationServiceV2 {
      * Find all organizations with pagination and filters
      */
     async findOrganizations(filters: any) {
-        this.logger.info('OrganizationService.findOrganizations', { filters });
+        this.logger.info({ filters }, 'OrganizationService.findOrganizations');
         const result = await this.repository.findOrganizations(filters);
         return result;
     }
@@ -29,7 +29,7 @@ export class OrganizationServiceV2 {
      * Find organization by ID
      */
     async findOrganizationById(id: string) {
-        this.logger.info('OrganizationService.findOrganizationById', { id });
+        this.logger.info({ id }, 'OrganizationService.findOrganizationById');
         const org = await this.repository.findOrganizationById(id);
         if (!org) {
             throw new Error(`Organization not found: ${id}`);
@@ -41,7 +41,7 @@ export class OrganizationServiceV2 {
      * Create a new organization
      */
     async createOrganization(orgData: any) {
-        this.logger.info('OrganizationService.createOrganization', { name: orgData.name });
+        this.logger.info({ name: orgData.name }, 'OrganizationService.createOrganization');
 
         if (!orgData.name) {
             throw new Error('Organization name is required');
@@ -68,7 +68,7 @@ export class OrganizationServiceV2 {
             slug: org.slug,
         });
 
-        this.logger.info('OrganizationService.createOrganization - org created', { id: org.id });
+        this.logger.info({ id: org.id }, 'OrganizationService.createOrganization - org created');
         return org;
     }
 
@@ -76,7 +76,7 @@ export class OrganizationServiceV2 {
      * Update organization
      */
     async updateOrganization(id: string, updates: OrganizationUpdate) {
-        this.logger.info('OrganizationService.updateOrganization', { id, updates });
+        this.logger.info({ id, updates }, 'OrganizationService.updateOrganization');
 
         await this.findOrganizationById(id);
 
@@ -92,7 +92,7 @@ export class OrganizationServiceV2 {
             changes: updateData,
         });
 
-        this.logger.info('OrganizationService.updateOrganization - org updated', { id });
+        this.logger.info({ id }, 'OrganizationService.updateOrganization - org updated');
         return updated;
     }
 
@@ -100,7 +100,7 @@ export class OrganizationServiceV2 {
      * Delete organization (soft delete)
      */
     async deleteOrganization(id: string) {
-        this.logger.info('OrganizationService.deleteOrganization', { id });
+        this.logger.info({ id }, 'OrganizationService.deleteOrganization');
 
         await this.findOrganizationById(id);
         await this.repository.deleteOrganization(id);
@@ -109,6 +109,6 @@ export class OrganizationServiceV2 {
             organization_id: id,
         });
 
-        this.logger.info('OrganizationService.deleteOrganization - org deleted', { id });
+        this.logger.info({ id }, 'OrganizationService.deleteOrganization - org deleted');
     }
 }

@@ -167,7 +167,7 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
 
     // Get all applications with optional filters (legacy endpoint)
     app.get(
-        '/applications',
+        '/applications/legacy',
         async (request: FastifyRequest<{ Querystring: { recruiter_id?: string; job_id?: string; stage?: string; candidate_id?: string } }>, reply: FastifyReply) => {
             const { recruiter_id, job_id, stage, candidate_id } = request.query;
             

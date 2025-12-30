@@ -7,6 +7,8 @@ import { IdentityRepository } from './repository';
 import { IdentityService } from './service';
 import { EventPublisher } from './events';
 import { registerRoutes } from './routes';
+import { registerV2Routes } from './v2/routes';
+import { EventPublisherV2 } from './v2/shared/events';
 import * as Sentry from '@sentry/node';
 
 async function main() {
@@ -98,8 +100,22 @@ async function main() {
 
     const service = new IdentityService(repository, eventPublisher);
 
+    const eventPublisherV2 = new EventPublisherV2(rabbitMqUrl, logger);
+    try {
+        await eventPublisherV2.connect();
+    } catch (error) {
+        logger.warn({ error }, 'Failed to connect V2 event publisher - V2 events disabled');
+    }
+
     // Register routes
     registerRoutes(app, service);
+
+    await registerV2Routes(app, {
+        supabaseUrl: dbConfig.supabaseUrl,
+        supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        eventPublisher: eventPublisherV2,
+        logger,
+    });
 
     // Health check endpoint
     app.get('/health', async (request, reply) => {

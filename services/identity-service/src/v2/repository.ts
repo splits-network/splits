@@ -9,7 +9,7 @@ import {
     OrganizationFilters,
     MembershipFilters,
     InvitationFilters,
-} from '../types';
+} from './types';
 
 export class RepositoryV2 {
     private supabase: SupabaseClient;

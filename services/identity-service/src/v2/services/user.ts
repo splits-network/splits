@@ -20,7 +20,7 @@ export class UserServiceV2 {
      * Find all users with pagination and filters
      */
     async findUsers(filters: any) {
-        this.logger.info('UserService.findUsers', { filters });
+        this.logger.info({ filters }, 'UserService.findUsers');
         const result = await this.repository.findUsers(filters);
         return result;
     }
@@ -29,7 +29,7 @@ export class UserServiceV2 {
      * Find user by ID
      */
     async findUserById(id: string) {
-        this.logger.info('UserService.findUserById', { id });
+        this.logger.info({ id }, 'UserService.findUserById');
         const user = await this.repository.findUserById(id);
         if (!user) {
             throw new Error(`User not found: ${id}`);
@@ -41,7 +41,7 @@ export class UserServiceV2 {
      * Create a new user
      */
     async createUser(userData: any) {
-        this.logger.info('UserService.createUser', { email: userData.email });
+        this.logger.info({ email: userData.email }, 'UserService.createUser');
 
         if (!userData.email) {
             throw new Error('Email is required');
@@ -68,7 +68,7 @@ export class UserServiceV2 {
             clerk_user_id: user.clerk_user_id,
         });
 
-        this.logger.info('UserService.createUser - user created', { id: user.id });
+        this.logger.info({ id: user.id }, 'UserService.createUser - user created');
         return user;
     }
 
@@ -76,7 +76,7 @@ export class UserServiceV2 {
      * Update user
      */
     async updateUser(id: string, updates: UserUpdate) {
-        this.logger.info('UserService.updateUser', { id, updates });
+        this.logger.info({ id, updates }, 'UserService.updateUser');
 
         const user = await this.findUserById(id);
 
@@ -92,7 +92,7 @@ export class UserServiceV2 {
             changes: updateData,
         });
 
-        this.logger.info('UserService.updateUser - user updated', { id });
+        this.logger.info({ id }, 'UserService.updateUser - user updated');
         return updated;
     }
 
@@ -100,7 +100,7 @@ export class UserServiceV2 {
      * Delete user (soft delete)
      */
     async deleteUser(id: string) {
-        this.logger.info('UserService.deleteUser', { id });
+        this.logger.info({ id }, 'UserService.deleteUser');
 
         await this.findUserById(id);
         await this.repository.deleteUser(id);
@@ -109,6 +109,6 @@ export class UserServiceV2 {
             user_id: id,
         });
 
-        this.logger.info('UserService.deleteUser - user deleted', { id });
+        this.logger.info({ id }, 'UserService.deleteUser - user deleted');
     }
 }

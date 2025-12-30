@@ -20,7 +20,7 @@ export class MembershipServiceV2 {
      * Find all memberships with pagination and filters
      */
     async findMemberships(filters: any) {
-        this.logger.info('MembershipService.findMemberships', { filters });
+        this.logger.info({ filters }, 'MembershipService.findMemberships');
         const result = await this.repository.findMemberships(filters);
         return result;
     }
@@ -29,7 +29,7 @@ export class MembershipServiceV2 {
      * Find membership by ID
      */
     async findMembershipById(id: string) {
-        this.logger.info('MembershipService.findMembershipById', { id });
+        this.logger.info({ id }, 'MembershipService.findMembershipById');
         const membership = await this.repository.findMembershipById(id);
         if (!membership) {
             throw new Error(`Membership not found: ${id}`);
@@ -41,10 +41,13 @@ export class MembershipServiceV2 {
      * Create a new membership
      */
     async createMembership(membershipData: any) {
-        this.logger.info('MembershipService.createMembership', {
-            organization_id: membershipData.organization_id,
-            user_id: membershipData.user_id,
-        });
+        this.logger.info(
+            {
+                organization_id: membershipData.organization_id,
+                user_id: membershipData.user_id,
+            },
+            'MembershipService.createMembership'
+        );
 
         if (!membershipData.organization_id) {
             throw new Error('Organization ID is required');
@@ -75,9 +78,7 @@ export class MembershipServiceV2 {
             role: membership.role,
         });
 
-        this.logger.info('MembershipService.createMembership - membership created', {
-            id: membership.id,
-        });
+        this.logger.info({ id: membership.id }, 'MembershipService.createMembership - membership created');
         return membership;
     }
 
@@ -85,7 +86,7 @@ export class MembershipServiceV2 {
      * Update membership
      */
     async updateMembership(id: string, updates: MembershipUpdate) {
-        this.logger.info('MembershipService.updateMembership', { id, updates });
+        this.logger.info({ id, updates }, 'MembershipService.updateMembership');
 
         await this.findMembershipById(id);
 
@@ -101,7 +102,7 @@ export class MembershipServiceV2 {
             changes: updateData,
         });
 
-        this.logger.info('MembershipService.updateMembership - membership updated', { id });
+        this.logger.info({ id }, 'MembershipService.updateMembership - membership updated');
         return updated;
     }
 
@@ -109,7 +110,7 @@ export class MembershipServiceV2 {
      * Delete membership (soft delete)
      */
     async deleteMembership(id: string) {
-        this.logger.info('MembershipService.deleteMembership', { id });
+        this.logger.info({ id }, 'MembershipService.deleteMembership');
 
         await this.findMembershipById(id);
         await this.repository.deleteMembership(id);
@@ -118,6 +119,6 @@ export class MembershipServiceV2 {
             membership_id: id,
         });
 
-        this.logger.info('MembershipService.deleteMembership - membership deleted', { id });
+        this.logger.info({ id }, 'MembershipService.deleteMembership - membership deleted');
     }
 }

@@ -10,6 +10,7 @@ import { randomUUID } from 'crypto';
 import { AuthMiddleware } from './auth';
 import { ServiceRegistry } from './clients';
 import { registerRoutes } from './routes';
+import { registerV2GatewayRoutes } from './routes/v2/routes';
 import { OAuthTokenManager } from './oauth';
 import { registerOAuthRoutes } from './routes/oauth-routes';
 import { registerVersionInfo } from './versioning';
@@ -252,6 +253,9 @@ async function main() {
 
     // Register routes
     registerRoutes(app, services);
+
+    // Register V2 proxy routes
+    registerV2GatewayRoutes(app, services);
 
     // Health check endpoint (no auth required)
     app.get('/health', async (request, reply) => {

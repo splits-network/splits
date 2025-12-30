@@ -20,7 +20,7 @@ export class InvitationServiceV2 {
      * Find all invitations with pagination and filters
      */
     async findInvitations(filters: any) {
-        this.logger.info('InvitationService.findInvitations', { filters });
+        this.logger.info({ filters }, 'InvitationService.findInvitations');
         const result = await this.repository.findInvitations(filters);
         return result;
     }
@@ -29,7 +29,7 @@ export class InvitationServiceV2 {
      * Find invitation by ID
      */
     async findInvitationById(id: string) {
-        this.logger.info('InvitationService.findInvitationById', { id });
+        this.logger.info({ id }, 'InvitationService.findInvitationById');
         const invitation = await this.repository.findInvitationById(id);
         if (!invitation) {
             throw new Error(`Invitation not found: ${id}`);
@@ -41,10 +41,13 @@ export class InvitationServiceV2 {
      * Create a new invitation
      */
     async createInvitation(invitationData: any) {
-        this.logger.info('InvitationService.createInvitation', {
-            email: invitationData.email,
-            organization_id: invitationData.organization_id,
-        });
+        this.logger.info(
+            {
+                email: invitationData.email,
+                organization_id: invitationData.organization_id,
+            },
+            'InvitationService.createInvitation'
+        );
 
         if (!invitationData.email) {
             throw new Error('Email is required');
@@ -78,9 +81,7 @@ export class InvitationServiceV2 {
             role: invitation.role,
         });
 
-        this.logger.info('InvitationService.createInvitation - invitation created', {
-            id: invitation.id,
-        });
+        this.logger.info({ id: invitation.id }, 'InvitationService.createInvitation - invitation created');
         return invitation;
     }
 
@@ -88,7 +89,7 @@ export class InvitationServiceV2 {
      * Update invitation
      */
     async updateInvitation(id: string, updates: InvitationUpdate) {
-        this.logger.info('InvitationService.updateInvitation', { id, updates });
+        this.logger.info({ id, updates }, 'InvitationService.updateInvitation');
 
         await this.findInvitationById(id);
 
@@ -104,7 +105,7 @@ export class InvitationServiceV2 {
             changes: updateData,
         });
 
-        this.logger.info('InvitationService.updateInvitation - invitation updated', { id });
+        this.logger.info({ id }, 'InvitationService.updateInvitation - invitation updated');
         return updated;
     }
 
@@ -112,7 +113,7 @@ export class InvitationServiceV2 {
      * Delete invitation (soft delete)
      */
     async deleteInvitation(id: string) {
-        this.logger.info('InvitationService.deleteInvitation', { id });
+        this.logger.info({ id }, 'InvitationService.deleteInvitation');
 
         await this.findInvitationById(id);
         await this.repository.deleteInvitation(id);
@@ -121,6 +122,6 @@ export class InvitationServiceV2 {
             invitation_id: id,
         });
 
-        this.logger.info('InvitationService.deleteInvitation - invitation deleted', { id });
+        this.logger.info({ id }, 'InvitationService.deleteInvitation - invitation deleted');
     }
 }

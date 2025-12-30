@@ -17,18 +17,24 @@ import {
     buildPaginationResponse,
 } from './shared/helpers';
 
+interface IdentityV2Config {
+    supabaseUrl: string;
+    supabaseKey: string;
+    eventPublisher: EventPublisherV2;
+    logger: Logger;
+}
+
 export async function registerV2Routes(
     app: FastifyInstance,
-    supabaseUrl: string,
-    supabaseKey: string,
-    eventPublisher: EventPublisherV2,
-    logger: Logger
+    config: IdentityV2Config
 ) {
+    const { supabaseUrl, supabaseKey, eventPublisher, logger } = config;
     const repository = new RepositoryV2(supabaseUrl, supabaseKey);
     const userService = new UserServiceV2(repository, eventPublisher, logger);
     const orgService = new OrganizationServiceV2(repository, eventPublisher, logger);
     const membershipService = new MembershipServiceV2(repository, eventPublisher, logger);
     const invitationService = new InvitationServiceV2(repository, eventPublisher, logger);
+    const logError = (message: string, error: unknown) => logger.error({ err: error }, message);
 
     // ============================================
     // USERS - 5-ROUTE PATTERN
@@ -37,7 +43,7 @@ export async function registerV2Routes(
     // LIST users
     app.get('/api/v2/users', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
-            const userContext = requireUserContext(request);
+            requireUserContext(request);
             const paginationParams = validatePaginationParams(request.query as any);
 
             const result = await userService.findUsers({
@@ -46,16 +52,16 @@ export async function registerV2Routes(
                 status: (request.query as any).status,
             });
 
-            reply.send({
-                data: result.data,
-                pagination: buildPaginationResponse(
+            reply.send(
+                buildPaginationResponse(
+                    result.data,
+                    result.total,
                     paginationParams.page,
-                    paginationParams.limit,
-                    result.total
-                ),
-            });
+                    paginationParams.limit
+                )
+            );
         } catch (error) {
-            logger.error('GET /api/v2/users', error);
+            logError('GET /api/v2/users failed', error);
             reply.code(500).send({ error: { message: 'Failed to list users' } });
         }
     });
@@ -63,13 +69,13 @@ export async function registerV2Routes(
     // GET single user
     app.get('/api/v2/users/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
-            const userContext = requireUserContext(request);
+            requireUserContext(request);
             const { id } = request.params as { id: string };
 
             const user = await userService.findUserById(id);
             reply.send({ data: user });
         } catch (error) {
-            logger.error('GET /api/v2/users/:id', error);
+            logError('GET /api/v2/users/:id failed', error);
             reply.code(500).send({ error: { message: 'Failed to fetch user' } });
         }
     });
@@ -77,13 +83,13 @@ export async function registerV2Routes(
     // CREATE user
     app.post('/api/v2/users', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
-            const userContext = requireUserContext(request);
+            requireUserContext(request);
             const body = request.body as any;
 
             const user = await userService.createUser(body);
             reply.code(201).send({ data: user });
         } catch (error) {
-            logger.error('POST /api/v2/users', error);
+            logError('POST /api/v2/users failed', error);
             reply.code(400).send({ error: { message: (error as Error).message } });
         }
     });
@@ -91,14 +97,14 @@ export async function registerV2Routes(
     // UPDATE user (PATCH)
     app.patch('/api/v2/users/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
-            const userContext = requireUserContext(request);
+            requireUserContext(request);
             const { id } = request.params as { id: string };
             const body = request.body as any;
 
             const user = await userService.updateUser(id, body);
             reply.send({ data: user });
         } catch (error) {
-            logger.error('PATCH /api/v2/users/:id', error);
+            logError('PATCH /api/v2/users/:id failed', error);
             reply.code(400).send({ error: { message: (error as Error).message } });
         }
     });
@@ -106,13 +112,13 @@ export async function registerV2Routes(
     // DELETE user
     app.delete('/api/v2/users/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
-            const userContext = requireUserContext(request);
+            requireUserContext(request);
             const { id } = request.params as { id: string };
 
             await userService.deleteUser(id);
             reply.code(204).send();
         } catch (error) {
-            logger.error('DELETE /api/v2/users/:id', error);
+            logError('DELETE /api/v2/users/:id failed', error);
             reply.code(400).send({ error: { message: (error as Error).message } });
         }
     });
@@ -126,7 +132,7 @@ export async function registerV2Routes(
         '/api/v2/organizations',
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const userContext = requireUserContext(request);
+                requireUserContext(request);
                 const paginationParams = validatePaginationParams(request.query as any);
 
                 const result = await orgService.findOrganizations({
@@ -135,16 +141,16 @@ export async function registerV2Routes(
                     status: (request.query as any).status,
                 });
 
-                reply.send({
-                    data: result.data,
-                    pagination: buildPaginationResponse(
+                reply.send(
+                    buildPaginationResponse(
+                        result.data,
+                        result.total,
                         paginationParams.page,
-                        paginationParams.limit,
-                        result.total
-                    ),
-                });
+                        paginationParams.limit
+                    )
+                );
             } catch (error) {
-                logger.error('GET /api/v2/organizations', error);
+                logError('GET /api/v2/organizations failed', error);
                 reply.code(500).send({ error: { message: 'Failed to list organizations' } });
             }
         }
@@ -155,13 +161,13 @@ export async function registerV2Routes(
         '/api/v2/organizations/:id',
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const userContext = requireUserContext(request);
+                requireUserContext(request);
                 const { id } = request.params as { id: string };
 
                 const org = await orgService.findOrganizationById(id);
                 reply.send({ data: org });
             } catch (error) {
-                logger.error('GET /api/v2/organizations/:id', error);
+                logError('GET /api/v2/organizations/:id failed', error);
                 reply.code(500).send({ error: { message: 'Failed to fetch organization' } });
             }
         }
@@ -172,13 +178,13 @@ export async function registerV2Routes(
         '/api/v2/organizations',
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const userContext = requireUserContext(request);
+                requireUserContext(request);
                 const body = request.body as any;
 
                 const org = await orgService.createOrganization(body);
                 reply.code(201).send({ data: org });
             } catch (error) {
-                logger.error('POST /api/v2/organizations', error);
+                logError('POST /api/v2/organizations failed', error);
                 reply.code(400).send({ error: { message: (error as Error).message } });
             }
         }
@@ -189,14 +195,14 @@ export async function registerV2Routes(
         '/api/v2/organizations/:id',
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const userContext = requireUserContext(request);
+                requireUserContext(request);
                 const { id } = request.params as { id: string };
                 const body = request.body as any;
 
                 const org = await orgService.updateOrganization(id, body);
                 reply.send({ data: org });
             } catch (error) {
-                logger.error('PATCH /api/v2/organizations/:id', error);
+                logError('PATCH /api/v2/organizations/:id failed', error);
                 reply.code(400).send({ error: { message: (error as Error).message } });
             }
         }
@@ -207,13 +213,13 @@ export async function registerV2Routes(
         '/api/v2/organizations/:id',
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const userContext = requireUserContext(request);
+                requireUserContext(request);
                 const { id } = request.params as { id: string };
 
                 await orgService.deleteOrganization(id);
                 reply.code(204).send();
             } catch (error) {
-                logger.error('DELETE /api/v2/organizations/:id', error);
+                logError('DELETE /api/v2/organizations/:id failed', error);
                 reply.code(400).send({ error: { message: (error as Error).message } });
             }
         }
@@ -228,7 +234,7 @@ export async function registerV2Routes(
         '/api/v2/memberships',
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const userContext = requireUserContext(request);
+                requireUserContext(request);
                 const paginationParams = validatePaginationParams(request.query as any);
 
                 const result = await membershipService.findMemberships({
@@ -239,16 +245,16 @@ export async function registerV2Routes(
                     status: (request.query as any).status,
                 });
 
-                reply.send({
-                    data: result.data,
-                    pagination: buildPaginationResponse(
+                reply.send(
+                    buildPaginationResponse(
+                        result.data,
+                        result.total,
                         paginationParams.page,
-                        paginationParams.limit,
-                        result.total
-                    ),
-                });
+                        paginationParams.limit
+                    )
+                );
             } catch (error) {
-                logger.error('GET /api/v2/memberships', error);
+                logError('GET /api/v2/memberships failed', error);
                 reply.code(500).send({ error: { message: 'Failed to list memberships' } });
             }
         }
@@ -259,13 +265,13 @@ export async function registerV2Routes(
         '/api/v2/memberships/:id',
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const userContext = requireUserContext(request);
+                requireUserContext(request);
                 const { id } = request.params as { id: string };
 
                 const membership = await membershipService.findMembershipById(id);
                 reply.send({ data: membership });
             } catch (error) {
-                logger.error('GET /api/v2/memberships/:id', error);
+                logError('GET /api/v2/memberships/:id failed', error);
                 reply.code(500).send({ error: { message: 'Failed to fetch membership' } });
             }
         }
@@ -276,13 +282,13 @@ export async function registerV2Routes(
         '/api/v2/memberships',
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const userContext = requireUserContext(request);
+                requireUserContext(request);
                 const body = request.body as any;
 
                 const membership = await membershipService.createMembership(body);
                 reply.code(201).send({ data: membership });
             } catch (error) {
-                logger.error('POST /api/v2/memberships', error);
+                logError('POST /api/v2/memberships failed', error);
                 reply.code(400).send({ error: { message: (error as Error).message } });
             }
         }
@@ -293,14 +299,14 @@ export async function registerV2Routes(
         '/api/v2/memberships/:id',
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const userContext = requireUserContext(request);
+                requireUserContext(request);
                 const { id } = request.params as { id: string };
                 const body = request.body as any;
 
                 const membership = await membershipService.updateMembership(id, body);
                 reply.send({ data: membership });
             } catch (error) {
-                logger.error('PATCH /api/v2/memberships/:id', error);
+                logError('PATCH /api/v2/memberships/:id failed', error);
                 reply.code(400).send({ error: { message: (error as Error).message } });
             }
         }
@@ -311,13 +317,13 @@ export async function registerV2Routes(
         '/api/v2/memberships/:id',
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const userContext = requireUserContext(request);
+                requireUserContext(request);
                 const { id } = request.params as { id: string };
 
                 await membershipService.deleteMembership(id);
                 reply.code(204).send();
             } catch (error) {
-                logger.error('DELETE /api/v2/memberships/:id', error);
+                logError('DELETE /api/v2/memberships/:id failed', error);
                 reply.code(400).send({ error: { message: (error as Error).message } });
             }
         }
@@ -332,7 +338,7 @@ export async function registerV2Routes(
         '/api/v2/invitations',
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const userContext = requireUserContext(request);
+                requireUserContext(request);
                 const paginationParams = validatePaginationParams(request.query as any);
 
                 const result = await invitationService.findInvitations({
@@ -342,16 +348,16 @@ export async function registerV2Routes(
                     status: (request.query as any).status,
                 });
 
-                reply.send({
-                    data: result.data,
-                    pagination: buildPaginationResponse(
+                reply.send(
+                    buildPaginationResponse(
+                        result.data,
+                        result.total,
                         paginationParams.page,
-                        paginationParams.limit,
-                        result.total
-                    ),
-                });
+                        paginationParams.limit
+                    )
+                );
             } catch (error) {
-                logger.error('GET /api/v2/invitations', error);
+                logError('GET /api/v2/invitations failed', error);
                 reply.code(500).send({ error: { message: 'Failed to list invitations' } });
             }
         }
@@ -362,13 +368,13 @@ export async function registerV2Routes(
         '/api/v2/invitations/:id',
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const userContext = requireUserContext(request);
+                requireUserContext(request);
                 const { id } = request.params as { id: string };
 
                 const invitation = await invitationService.findInvitationById(id);
                 reply.send({ data: invitation });
             } catch (error) {
-                logger.error('GET /api/v2/invitations/:id', error);
+                logError('GET /api/v2/invitations/:id failed', error);
                 reply.code(500).send({ error: { message: 'Failed to fetch invitation' } });
             }
         }
@@ -379,13 +385,13 @@ export async function registerV2Routes(
         '/api/v2/invitations',
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const userContext = requireUserContext(request);
+                requireUserContext(request);
                 const body = request.body as any;
 
                 const invitation = await invitationService.createInvitation(body);
                 reply.code(201).send({ data: invitation });
             } catch (error) {
-                logger.error('POST /api/v2/invitations', error);
+                logError('POST /api/v2/invitations failed', error);
                 reply.code(400).send({ error: { message: (error as Error).message } });
             }
         }
@@ -396,14 +402,14 @@ export async function registerV2Routes(
         '/api/v2/invitations/:id',
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const userContext = requireUserContext(request);
+                requireUserContext(request);
                 const { id } = request.params as { id: string };
                 const body = request.body as any;
 
                 const invitation = await invitationService.updateInvitation(id, body);
                 reply.send({ data: invitation });
             } catch (error) {
-                logger.error('PATCH /api/v2/invitations/:id', error);
+                logError('PATCH /api/v2/invitations/:id failed', error);
                 reply.code(400).send({ error: { message: (error as Error).message } });
             }
         }
@@ -414,13 +420,13 @@ export async function registerV2Routes(
         '/api/v2/invitations/:id',
         async (request: FastifyRequest, reply: FastifyReply) => {
             try {
-                const userContext = requireUserContext(request);
+                requireUserContext(request);
                 const { id } = request.params as { id: string };
 
                 await invitationService.deleteInvitation(id);
                 reply.code(204).send();
             } catch (error) {
-                logger.error('DELETE /api/v2/invitations/:id', error);
+                logError('DELETE /api/v2/invitations/:id failed', error);
                 reply.code(400).send({ error: { message: (error as Error).message } });
             }
         }

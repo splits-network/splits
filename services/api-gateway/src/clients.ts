@@ -139,8 +139,8 @@ export class ServiceClient {
         return this.request<T>('PATCH', path, data, undefined, correlationId, customHeaders);
     }
 
-    async delete<T>(path: string, correlationId?: string): Promise<T> {
-        return this.request<T>('DELETE', path, undefined, undefined, correlationId);
+    async delete<T>(path: string, correlationId?: string, customHeaders?: Record<string, string>): Promise<T> {
+        return this.request<T>('DELETE', path, undefined, undefined, correlationId, customHeaders);
     }
 }
 

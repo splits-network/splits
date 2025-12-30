@@ -1,6 +1,5 @@
 /**
  * Event Publisher for Identity Service - V2
- * Mirrors the v1 API but uses new internal structure.
  */
 
 import * as amqp from 'amqplib';
@@ -8,8 +7,8 @@ import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
 import { randomUUID } from 'crypto';
 
-export class EventPublisher {
-    private connection: amqp.Connection | null = null;
+export class EventPublisherV2 {
+    private connection: amqp.ChannelModel | null = null;
     private channel: amqp.Channel | null = null;
     private readonly exchange = 'splits-network-events';
 
@@ -22,6 +21,9 @@ export class EventPublisher {
     async connect(): Promise<void> {
         try {
             this.connection = await amqp.connect(this.rabbitMqUrl);
+            if (!this.connection) {
+                throw new Error('Failed to establish RabbitMQ connection');
+            }
             this.channel = await this.connection.createChannel();
             if (!this.channel) throw new Error('Failed to create channel');
             await this.channel.assertExchange(this.exchange, 'topic', { durable: true });
@@ -40,7 +42,7 @@ export class EventPublisher {
         if (!this.channel) {
             this.logger.error(
                 { event_type: eventType, payload },
-                '❌ CRITICAL: RabbitMQ not connected - event will NOT be published!'
+                '? CRITICAL: RabbitMQ not connected - event will NOT be published!'
             );
             return;
         }
