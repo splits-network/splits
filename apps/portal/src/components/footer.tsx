@@ -173,7 +173,7 @@ export function Footer() {
             {/* Floating CTA Badge (optional - shows on scroll) */}
             <div className="hidden">
                 <div className="fixed bottom-8 right-8 z-40">
-                    <Link href="/sign-up" className="btn btn-primary btn-lg shadow-2xl">
+                    <Link href="/sign-up" className="btn btn-primary btn-lg shadow">
                         <i className="fa-solid fa-rocket"></i>
                         Get Started Free
                     </Link>

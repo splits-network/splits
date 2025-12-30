@@ -121,7 +121,7 @@ export default function Header() {
                     <li>
                         <details>
                             <summary>Jobs</summary>
-                            <ul className="p-6 bg-base-100 shadow-2xl border border-base-300 rounded-box min-w-[600px] z-50">
+                            <ul className="p-6 bg-base-100 shadow border border-base-300 rounded-box min-w-[600px] z-50">
                                 <div className="grid grid-cols-2 gap-6">
                                     <div>
                                         <h3 className="font-bold text-sm mb-3 text-base-content/60">BROWSE BY CATEGORY</h3>
@@ -186,7 +186,7 @@ export default function Header() {
                     <li>
                         <details>
                             <summary>Resources</summary>
-                            <ul className="p-6 bg-base-100 shadow-2xl border border-base-300 rounded-box min-w-[500px] z-50">
+                            <ul className="p-6 bg-base-100 shadow border border-base-300 rounded-box min-w-[500px] z-50">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
                                         <li>
@@ -263,7 +263,7 @@ export default function Header() {
                     <li>
                         <details>
                             <summary>Companies</summary>
-                            <ul className="p-6 bg-base-100 shadow-2xl border border-base-300 rounded-box min-w-[450px] z-50">
+                            <ul className="p-6 bg-base-100 shadow border border-base-300 rounded-box min-w-[450px] z-50">
                                 <h3 className="font-bold text-sm mb-3 text-base-content/60">EXPLORE COMPANIES</h3>
                                 <div className="space-y-1">
                                     <li>

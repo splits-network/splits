@@ -315,7 +315,7 @@ export default function UpdatesPage() {
             <section className="py-20 bg-base-100">
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto">
-                        <div className="card bg-primary text-primary-content shadow-2xl">
+                        <div className="card bg-primary text-primary-content shadow">
                             <div className="card-body text-center p-12">
                                 <i className="fa-solid fa-lightbulb text-6xl mb-6 opacity-80"></i>
                                 <h2 className="text-3xl font-bold mb-4">Help Shape Our Roadmap</h2>

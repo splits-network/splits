@@ -299,7 +299,7 @@ export default async function HomePage() {
                             </div>
                         </div>
                         <div className="relative">
-                            <div className="card bg-base-100 text-base-content shadow-2xl">
+                            <div className="card bg-base-100 text-base-content shadow">
                                 <div className="card-body">
                                     <div className="text-sm opacity-60 mb-2">Recruiter Dashboard Preview</div>
                                     <div className="space-y-3">
@@ -336,7 +336,7 @@ export default async function HomePage() {
                 <div className="container mx-auto px-4">
                     <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
                         <div className="order-2 lg:order-1 relative">
-                            <div className="card bg-base-100 text-base-content shadow-2xl">
+                            <div className="card bg-base-100 text-base-content shadow">
                                 <div className="card-body">
                                     <div className="text-sm opacity-60 mb-2">Company Roles Dashboard</div>
                                     <div className="space-y-3">

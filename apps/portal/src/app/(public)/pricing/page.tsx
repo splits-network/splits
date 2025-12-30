@@ -73,7 +73,7 @@ export default function PricingPage() {
                         </div>
 
                         {/* Pro Plan */}
-                        <div className="card bg-primary text-primary-content shadow-2xl border-4 border-primary scale-105">
+                        <div className="card bg-primary text-primary-content shadow border-4 border-primary scale-105">
                             <div className="card-body">
                                 <div className="badge badge-secondary mb-4">MOST POPULAR</div>
                                 <h3 className="card-title text-3xl mb-2">

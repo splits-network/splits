@@ -360,7 +360,7 @@ export default function HowItWorksPage() {
                         </div>
 
                         {/* Example Calculation */}
-                        <div className="card bg-base-100 text-base-content shadow-2xl">
+                        <div className="card bg-base-100 text-base-content shadow">
                             <div className="card-body p-8">
                                 <h3 className="text-2xl font-bold mb-6 text-center">Example Placement Breakdown</h3>
 

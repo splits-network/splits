@@ -120,7 +120,7 @@ export default function BlogPage() {
             <section className="py-20 bg-base-100">
                 <div className="container mx-auto px-4">
                     <div className="max-w-3xl mx-auto">
-                        <div className="card bg-primary text-primary-content shadow-2xl">
+                        <div className="card bg-primary text-primary-content shadow">
                             <div className="card-body p-12 text-center">
                                 <i className="fa-solid fa-envelope-open-text text-5xl mb-6 opacity-80"></i>
                                 <h2 className="card-title justify-center text-3xl mb-4">
