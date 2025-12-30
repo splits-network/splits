@@ -11,6 +11,8 @@ import { NotificationService } from './service';
 import { DomainEventConsumer } from './domain-consumer';
 import { ServiceRegistry } from './clients';
 import { registerInAppNotificationRoutes } from './in-app-routes';
+import { registerV2Routes } from './v2/routes';
+import { EventPublisher as V2EventPublisher } from './v2/shared/events';
 import * as Sentry from '@sentry/node';
 
 async function main() {
@@ -88,8 +90,20 @@ async function main() {
     const consumer = new DomainEventConsumer(rabbitConfig.url, notificationService, services, logger);
     await consumer.connect();
 
+    const v2EventPublisher = new V2EventPublisher(
+        rabbitConfig.url,
+        logger,
+        baseConfig.serviceName
+    );
+    await v2EventPublisher.connect();
+
     // Register in-app notification HTTP routes
     registerInAppNotificationRoutes(app, repository);
+    await registerV2Routes(app, {
+        supabaseUrl: dbConfig.supabaseUrl,
+        supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        eventPublisher: v2EventPublisher,
+    });
 
     // Optional: Add HTTP endpoint for manual notifications
     app.post('/send-test-email', async (request, reply) => {
@@ -136,6 +150,7 @@ async function main() {
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down gracefully');
         await consumer.close();
+        await v2EventPublisher.close();
         await app.close();
         process.exit(0);
     });
@@ -151,6 +166,7 @@ async function main() {
             await Sentry.flush(2000);
         }
         await consumer.close();
+        await v2EventPublisher.close();
         process.exit(1);
     }
 }

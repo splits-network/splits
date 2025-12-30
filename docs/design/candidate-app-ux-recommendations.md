@@ -38,7 +38,7 @@ This document provides a comprehensive UI/UX evaluation of the Candidate Portal 
 - **Clear Value Proposition**: Homepage effectively communicates the platform's benefits
 
 ### Areas for Improvement 🔧
-- **Hero Section Engagement**: Video background may impact performance; stats are static
+- **Hero Section Engagement**: Static statistics need dynamic data integration
 - **Navigation Complexity**: Mega menus could overwhelm first-time users
 - **Empty States**: Generic empty states don't guide users effectively
 - **Loading States**: Some loading experiences feel disjointed
@@ -52,22 +52,33 @@ This document provides a comprehensive UI/UX evaluation of the Candidate Portal 
 ### 2.1 Hero Section
 
 **Current Issues:**
-- Video background impacts page load performance
 - Static statistics lack credibility (10K+, 500+, etc.)
 - Two CTAs may cause decision paralysis
 
 **Recommendations:**
 
-#### A. Replace Video with Animated Illustrations
+#### A. Optimize Video Hero Performance
 ```tsx
-// Instead of video, use a modern animated gradient or illustration
-<section className="hero min-h-[85vh] relative overflow-hidden bg-gradient-to-br from-primary/10 via-base-100 to-secondary/10">
-    {/* Animated floating elements */}
-    <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-pulse delay-1000" />
+// Enhance video performance while maintaining visual impact
+<section className="hero min-h-[85vh] relative overflow-hidden">
+    <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="metadata"
+        poster="/hero-poster.webp"
+        className="absolute inset-0 w-full h-full object-cover opacity-20"
+    >
+        <source src="/hero-video.webm" type="video/webm" />
+        <source src="/hero-video.mp4" type="video/mp4" />
+    </video>
+    {/* Improved content overlay */}
+    <div className="hero-content relative z-10 text-center">
+        <div className="backdrop-blur-sm bg-base-100/10 rounded-2xl p-8">
+            {/* Hero content with better readability */}
+        </div>
     </div>
-    {/* Content */}
 </section>
 ```
 

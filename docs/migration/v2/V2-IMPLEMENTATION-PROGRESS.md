@@ -1,7 +1,7 @@
 # V2 Architecture Implementation Progress
 
 **Date**: December 29, 2025  
-**Status**: Phase 3 Complete - ATS + Network + Billing Services migrated to V2
+**Status**: Phase 4 Complete - Document, Notification, and Automation Services migrated to V2
 
 ---
 
@@ -215,23 +215,102 @@ services/billing-service/src/v2/
 - ATS Service: 25 V2 routes (jobs, companies, candidates, applications, placements)
 - Network Service: 25 V2 routes (recruiters, assignments, recruiter-candidates, reputation, proposals)
 - Billing Service: 15 V2 routes (plans, subscriptions, payouts)
-- Total so far: 65 standardized V2 routes across 13 resources
+- Document Service: 5 V2 routes (documents uploads + lifecycle)
+- Notification Service: 10 V2 routes (notifications + templates)
+- Automation Service: 20 V2 routes (matches, fraud, rules, metrics)
+- Total so far: 100 standardized V2 routes across 20 resources
+
+---
+
+## Completed: Phase 4 - Supporting Services (Document, Notification, Automation)
+
+### Structure Created
+```
+services/document-service/src/v2/
+|- shared/helpers.ts
+|- shared/events.ts
+|- types.ts
+|- documents/
+   |- repository.ts
+   |- service.ts
+|- routes.ts
+
+services/notification-service/src/v2/
+|- shared/helpers.ts
+|- shared/events.ts
+|- types.ts
+|- notifications/
+   |- repository.ts
+   |- service.ts
+|- templates/
+   |- repository.ts
+   |- service.ts
+|- routes.ts
+
+services/automation-service/src/v2/
+|- shared/helpers.ts
+|- shared/events.ts
+|- types.ts
+|- matches/
+   |- repository.ts
+   |- service.ts
+|- fraud-signals/
+   |- repository.ts
+   |- service.ts
+|- rules/
+   |- repository.ts
+   |- service.ts
+|- metrics/
+   |- repository.ts
+   |- service.ts
+|- routes.ts
+```
+
+### Features Implemented
+- Standardized 5-route pattern applied to eight new resources (documents, notifications, templates, matches, fraud signals, automation rules, marketplace metrics)
+- Multipart upload support + Supabase Storage integration for documents with signed URL responses
+- Notification routes expose log management + template CRUD with event publishing hooks
+- Automation service split into dedicated domains with Supabase-driven repositories and RabbitMQ events
+- All three services now register both legacy and V2 routes for safe cutover
+
+### API Endpoints Available
+**Documents (5 routes)**  
+`GET /v2/documents`, `GET /v2/documents/:id`, `POST /v2/documents`, `PATCH /v2/documents/:id`, `DELETE /v2/documents/:id`
+
+**Notifications (5 routes)**  
+`GET /v2/notifications`, `GET /v2/notifications/:id`, `POST /v2/notifications`, `PATCH /v2/notifications/:id`, `DELETE /v2/notifications/:id`
+
+**Notification Templates (5 routes)**  
+`GET /v2/templates`, `GET /v2/templates/:id`, `POST /v2/templates`, `PATCH /v2/templates/:id`, `DELETE /v2/templates/:id`
+
+**Automation Matches (5 routes)**  
+`GET /v2/matches`, `GET /v2/matches/:id`, `POST /v2/matches`, `PATCH /v2/matches/:id`, `DELETE /v2/matches/:id`
+
+**Fraud Signals (5 routes)**  
+`GET /v2/fraud-signals`, `GET /v2/fraud-signals/:id`, `POST /v2/fraud-signals`, `PATCH /v2/fraud-signals/:id`, `DELETE /v2/fraud-signals/:id`
+
+**Automation Rules (5 routes)**  
+`GET /v2/automation-rules`, `GET /v2/automation-rules/:id`, `POST /v2/automation-rules`, `PATCH /v2/automation-rules/:id`, `DELETE /v2/automation-rules/:id`
+
+**Marketplace Metrics (5 routes)**  
+`GET /v2/marketplace-metrics`, `GET /v2/marketplace-metrics/:id`, `POST /v2/marketplace-metrics`, `PATCH /v2/marketplace-metrics/:id`, `DELETE /v2/marketplace-metrics/:id`
 
 ---
 
 ## Remaining Work
 
-### Phase 4: API Gateway V2 Routes (Estimated: 2 hours)
+### Phase 5: API Gateway V2 Routes (Estimated: 2 hours)
 - [ ] Create services/api-gateway/src/routes/v2/routes.ts
-- [ ] Register proxy routes for ATS, Network, and Billing V2 endpoints (65 routes once billing lands)
+- [ ] Register proxy routes for ATS, Network, Billing, Document, Notification, and Automation (100 routes)
 - [ ] Apply requireRoles() middleware for each proxy
 - [ ] Update api-gateway/src/index.ts to register both legacy and V2 proxies
 
-### Phase 5: Frontend Migration + Testing & Cleanup (Estimated: 6-8 hours)
+### Phase 6: Frontend Migration + Testing & Cleanup (Estimated: 6-8 hours)
 - [ ] Wire portal + candidate apps to `/api/v2/*` endpoints page-by-page
 - [ ] Test all ATS V2 endpoints
 - [ ] Test all Network V2 endpoints
 - [ ] Test all Billing V2 endpoints
+- [ ] Test new Document, Notification, and Automation V2 endpoints
 - [ ] Compare V1 vs V2 performance + capture metrics
 - [ ] V1 deprecation strategy and code removal
 
@@ -353,6 +432,41 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 13. `services/billing-service/src/v2/routes.ts`
 14. Updated `services/billing-service/src/index.ts`
 
+### Document Service (Complete)
+1. `services/document-service/src/v2/types.ts`
+2. `services/document-service/src/v2/shared/helpers.ts`
+3. `services/document-service/src/v2/shared/events.ts`
+4. `services/document-service/src/v2/documents/repository.ts`
+5. `services/document-service/src/v2/documents/service.ts`
+6. `services/document-service/src/v2/routes.ts`
+7. Updated `services/document-service/src/index.ts`
+
+### Notification Service (Complete)
+1. `services/notification-service/src/v2/types.ts`
+2. `services/notification-service/src/v2/shared/helpers.ts`
+3. `services/notification-service/src/v2/shared/events.ts`
+4. `services/notification-service/src/v2/notifications/repository.ts`
+5. `services/notification-service/src/v2/notifications/service.ts`
+6. `services/notification-service/src/v2/templates/repository.ts`
+7. `services/notification-service/src/v2/templates/service.ts`
+8. `services/notification-service/src/v2/routes.ts`
+9. Updated `services/notification-service/src/index.ts`
+
+### Automation Service (Complete)
+1. `services/automation-service/src/v2/types.ts`
+2. `services/automation-service/src/v2/shared/helpers.ts`
+3. `services/automation-service/src/v2/shared/events.ts`
+4. `services/automation-service/src/v2/matches/repository.ts`
+5. `services/automation-service/src/v2/matches/service.ts`
+6. `services/automation-service/src/v2/fraud-signals/repository.ts`
+7. `services/automation-service/src/v2/fraud-signals/service.ts`
+8. `services/automation-service/src/v2/rules/repository.ts`
+9. `services/automation-service/src/v2/rules/service.ts`
+10. `services/automation-service/src/v2/metrics/repository.ts`
+11. `services/automation-service/src/v2/metrics/service.ts`
+12. `services/automation-service/src/v2/routes.ts`
+13. Updated `services/automation-service/src/index.ts`
+
 ---
 
 ## Success Metrics
@@ -379,7 +493,18 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 - [x] Repository + services mirroring ATS/Network patterns
 - [x] Dual registration alongside v1 until frontend migration completes
 
-### Phase 4 (Gateway + Frontend) - Pending
-- [ ] Register API Gateway proxies for all 65 V2 endpoints
+### Phase 4 (Supporting Services) - Complete
+- [x] Document service V2 structure with storage + event publisher
+- [x] Notification service V2 routes for logs and templates
+- [x] Automation service V2 routes for matches, fraud, rules, metrics
+- [x] services/*/src/index.ts updated to register V1 + V2 side-by-side
+
+### Phase 5 (API Gateway) - Pending
+- [ ] Register API Gateway proxies for all 100 V2 endpoints
+- [ ] Apply role requirements per proxy route
+- [ ] Confirm gateway forwards user-context headers for RBAC
+
+### Phase 6 (Frontend + Cleanup) - Pending
 - [ ] Frontend routes migrated to `/api/v2/*`
 - [ ] V1 traffic monitored for safe deprecation
+- [ ] Side-by-side testing + documentation refresh

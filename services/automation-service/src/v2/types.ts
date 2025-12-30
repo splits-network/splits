@@ -28,6 +28,8 @@ export interface MatchFilters {
     job_id?: string;
     status?: string;
     min_score?: number;
+    page?: number;
+    limit?: number;
 }
 
 export type MatchUpdate = Partial<Omit<CandidateJobMatch, 'id' | 'created_at' | 'updated_at'>>;
@@ -58,6 +60,8 @@ export interface FraudSignalFilters {
     severity?: string;
     status?: string;
     signal_type?: string;
+    page?: number;
+    limit?: number;
 }
 
 export type FraudSignalUpdate = Partial<Omit<FraudSignal, 'id' | 'created_at' | 'updated_at'>>;
@@ -82,6 +86,8 @@ export interface AutomationRule {
 export interface RuleFilters {
     trigger_type?: string;
     status?: string;
+    page?: number;
+    limit?: number;
 }
 
 export type RuleUpdate = Partial<Omit<AutomationRule, 'id' | 'created_at' | 'updated_at'>>;
@@ -107,6 +113,8 @@ export interface MarketplaceMetric {
 export interface MetricFilters {
     date_from?: string;
     date_to?: string;
+    page?: number;
+    limit?: number;
 }
 
 export type MetricUpdate = Partial<Omit<MarketplaceMetric, 'id' | 'created_at' | 'updated_at'>>;

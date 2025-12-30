@@ -1,0 +1,190 @@
+import { fileTypeFromBuffer } from 'file-type';
+import { randomUUID } from 'crypto';
+import { StorageClient } from '../../storage';
+import {
+    DocumentFilters,
+    DocumentUpdate,
+    DocumentCreateInput,
+} from '../types';
+import { buildPaginationResponse } from '../shared/helpers';
+import { DocumentRepositoryV2 } from './repository';
+import { EventPublisher } from '../shared/events';
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_MIME_TYPES = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'text/plain',
+    'application/rtf',
+];
+
+interface CreateDocumentPayload extends DocumentCreateInput {
+    file: Buffer;
+    originalFileName: string;
+    uploadedBy?: string;
+}
+
+export class DocumentServiceV2 {
+    constructor(
+        private repository: DocumentRepositoryV2,
+        private storage: StorageClient,
+        private eventPublisher?: EventPublisher
+    ) {}
+
+    private async validateFile(
+        file: Buffer,
+        filename: string
+    ): Promise<string> {
+        if (file.length > MAX_FILE_SIZE) {
+            throw new Error(`File size exceeds ${MAX_FILE_SIZE / 1024 / 1024}MB limit`);
+        }
+
+        const detectedType = await fileTypeFromBuffer(file);
+        let contentType = detectedType?.mime;
+
+        if (!contentType) {
+            const extension = filename.split('.').pop()?.toLowerCase();
+            switch (extension) {
+                case 'pdf':
+                    contentType = 'application/pdf';
+                    break;
+                case 'doc':
+                    contentType = 'application/msword';
+                    break;
+                case 'docx':
+                    contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                    break;
+                case 'txt':
+                    contentType = 'text/plain';
+                    break;
+                case 'rtf':
+                    contentType = 'application/rtf';
+                    break;
+                default:
+                    throw new Error('Unsupported file type. Allowed: PDF, DOC, DOCX, TXT, RTF');
+            }
+        }
+
+        if (!ALLOWED_MIME_TYPES.includes(contentType)) {
+            throw new Error(`File type ${contentType} is not allowed`);
+        }
+
+        return contentType;
+    }
+
+    private generateStoragePath(entityType: string, entityId: string, filename: string): string {
+        const timestamp = Date.now();
+        const slug = randomUUID().split('-')[0];
+        const sanitized = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
+        return `${entityType}/${entityId}/${timestamp}-${slug}-${sanitized}`;
+    }
+
+    async listDocuments(filters: DocumentFilters) {
+        const result = await this.repository.findDocuments(filters);
+        return {
+            data: result.data,
+            pagination: buildPaginationResponse(
+                filters.page ?? 1,
+                filters.limit ?? 25,
+                result.total
+            ),
+        };
+    }
+
+    async getDocument(id: string) {
+        const document = await this.repository.findDocument(id);
+        if (!document) {
+            throw new Error('Document not found');
+        }
+
+        const downloadUrl = await this.storage.getSignedUrl(
+            document.storage_bucket,
+            document.file_path,
+            3600
+        );
+
+        return {
+            ...document,
+            download_url: downloadUrl,
+        };
+    }
+
+    async createDocument(payload: CreateDocumentPayload) {
+        const mimeType = await this.validateFile(payload.file, payload.originalFileName);
+        const storageBucket = this.storage.getBucketName(payload.entity_type);
+        const storagePath = this.generateStoragePath(
+            payload.entity_type,
+            payload.entity_id,
+            payload.originalFileName
+        );
+
+        await this.storage.uploadFile(
+            storageBucket,
+            storagePath,
+            payload.file,
+            mimeType
+        );
+
+        const document = await this.repository.createDocument({
+            entity_type: payload.entity_type,
+            entity_id: payload.entity_id,
+            document_type: payload.document_type,
+            file_name: payload.originalFileName,
+            file_path: storagePath,
+            file_size: payload.file.length,
+            mime_type: mimeType,
+            storage_bucket: storageBucket,
+            uploaded_by: payload.uploadedBy,
+            metadata: payload.metadata,
+            processing_status: 'pending',
+        });
+
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish('documents.created', {
+                document_id: document.id,
+                entity_type: document.entity_type,
+                entity_id: document.entity_id,
+                document_type: document.document_type,
+            });
+        }
+
+        return this.getDocument(document.id);
+    }
+
+    async updateDocument(id: string, updates: DocumentUpdate) {
+        const existing = await this.repository.findDocument(id);
+        if (!existing) {
+            throw new Error('Document not found');
+        }
+
+        const updated = await this.repository.updateDocument(id, updates);
+
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish('documents.updated', {
+                document_id: id,
+                updates,
+            });
+        }
+
+        return updated;
+    }
+
+    async deleteDocument(id: string) {
+        const existing = await this.repository.findDocument(id);
+        if (!existing) {
+            throw new Error('Document not found');
+        }
+
+        await this.storage.deleteFile(existing.storage_bucket, existing.file_path);
+        await this.repository.softDeleteDocument(id);
+
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish('documents.deleted', {
+                document_id: id,
+                entity_type: existing.entity_type,
+                entity_id: existing.entity_id,
+            });
+        }
+    }
+}

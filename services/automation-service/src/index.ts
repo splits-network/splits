@@ -1,4 +1,4 @@
-import { loadBaseConfig, loadDatabaseConfig } from '@splits-network/shared-config';
+import { loadBaseConfig, loadDatabaseConfig, loadRabbitMQConfig } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
@@ -9,10 +9,15 @@ import { FraudDetectionService } from './fraud-service';
 import { AutomationExecutor } from './automation-executor';
 import { MetricsAggregationService } from './metrics-service';
 import { registerRoutes } from './routes';
+import { registerV2Routes } from './v2/routes';
+import { EventPublisher } from './v2/shared/events';
 
 async function main() {
     const baseConfig = loadBaseConfig('automation-service');
     const dbConfig = loadDatabaseConfig();
+    const rabbitConfig = loadRabbitMQConfig();
+
+    let v2EventPublisher: EventPublisher | null = null;
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
@@ -55,28 +60,63 @@ async function main() {
         };
     });
 
-    // Initialize repository and services
-    const repository = new AutomationRepository(
-        dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey!
-    );
+    try {
+        // Initialize repository and services
+        const repository = new AutomationRepository(
+            dbConfig.supabaseUrl,
+            dbConfig.supabaseServiceRoleKey!
+        );
 
-    const matchingService = new MatchingService(repository, logger);
-    const fraudService = new FraudDetectionService(repository, logger);
-    const automationExecutor = new AutomationExecutor(repository, logger);
-    const metricsService = new MetricsAggregationService(repository, logger);
+        const matchingService = new MatchingService(repository, logger);
+        const fraudService = new FraudDetectionService(repository, logger);
+        const automationExecutor = new AutomationExecutor(repository, logger);
+        const metricsService = new MetricsAggregationService(repository, logger);
 
-    // Register routes
-    registerRoutes(app, matchingService, fraudService, automationExecutor, metricsService, repository, logger);
+        v2EventPublisher = new EventPublisher(
+            rabbitConfig.url,
+            logger,
+            baseConfig.serviceName
+        );
+        await v2EventPublisher.connect();
 
-    // Start server
-    const HOST = process.env.HOST || '0.0.0.0';
-    await app.listen({ port: baseConfig.port, host: HOST });
+        // Register routes
+        registerRoutes(app, matchingService, fraudService, automationExecutor, metricsService, repository, logger);
+        await registerV2Routes(app, {
+            supabaseUrl: dbConfig.supabaseUrl,
+            supabaseKey: dbConfig.supabaseServiceRoleKey!,
+            eventPublisher: v2EventPublisher,
+        });
 
-    logger.info(
-        { port: baseConfig.port, host: HOST, env: baseConfig.nodeEnv },
-        'Automation service started'
-    );
+        process.on('SIGTERM', async () => {
+            logger.info('SIGTERM received, shutting down automation-service gracefully');
+            try {
+                await app.close();
+                if (v2EventPublisher) {
+                    await v2EventPublisher.close();
+                }
+            } finally {
+                process.exit(0);
+            }
+        });
+
+        // Start server
+        const HOST = process.env.HOST || '0.0.0.0';
+        await app.listen({ port: baseConfig.port, host: HOST });
+
+        logger.info(
+            { port: baseConfig.port, host: HOST, env: baseConfig.nodeEnv },
+            'Automation service started'
+        );
+    } catch (error) {
+        if (v2EventPublisher) {
+            try {
+                await v2EventPublisher.close();
+            } catch {
+                // ignore close failures
+            }
+        }
+        throw error;
+    }
 }
 
 main().catch((error) => {
