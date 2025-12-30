@@ -150,7 +150,7 @@ app.get('/api/jobs', async (request, reply) => {
 - Gateway enforces authorization (RBAC), not filtering logic
 - All auth context passed via headers (`x-clerk-user-id`, `x-user-role`, `x-organization-id`)
 - No role-specific routing logic
-- Query parameters only for pagination/filtering, not scoping
+- Query parameters only for pagination, searching/filtering, sorting, not scoping
 
 ---
 
