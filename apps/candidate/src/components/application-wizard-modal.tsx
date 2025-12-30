@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { getJob, getPreScreenQuestions, getMyDocuments, submitApplication } from '@/lib/api-client';
-import StepIndicator from '@/app/(authenticated)/jobs/[id]/apply/components/step-indicator';
-import StepDocuments from '@/app/(authenticated)/jobs/[id]/apply/components/step-documents';
-import StepQuestions from '@/app/(authenticated)/jobs/[id]/apply/components/step-questions';
-import StepReview from '@/app/(authenticated)/jobs/[id]/apply/components/step-review';
+import StepIndicator from '@/components/application-wizard/step-indicator';
+import StepDocuments from '@/components/application-wizard/step-documents';
+import StepQuestions from '@/components/application-wizard/step-questions';
+import StepReview from '@/components/application-wizard/step-review';
 
 interface ApplicationWizardModalProps {
     jobId: string;
@@ -147,7 +147,7 @@ export default function ApplicationWizardModal({
                         documents={localDocuments}
                         selected={formData.documents.selected}
                         primaryResumeId={formData.documents.primary_resume_id}
-                        onChange={(docs) => setFormData({ ...formData, documents: docs })}
+                        onChange={(docs: any) => setFormData({ ...formData, documents: docs })}
                         onNext={handleNext}
                         onDocumentsUpdated={setLocalDocuments}
                     />
@@ -158,7 +158,7 @@ export default function ApplicationWizardModal({
                         <StepQuestions
                             questions={questions}
                             answers={formData.pre_screen_answers}
-                            onChange={(answers) => setFormData({ ...formData, pre_screen_answers: answers })}
+                            onChange={(answers: any) => setFormData({ ...formData, pre_screen_answers: answers })}
                             onNext={handleNext}
                             onBack={handleBack}
                         />
