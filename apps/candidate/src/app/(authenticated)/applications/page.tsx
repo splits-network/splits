@@ -126,10 +126,14 @@ export default function ApplicationsPage({
     });
 
     const activeApps = filteredApplications.filter(app =>
-        !['rejected', 'withdrawn'].includes(app.stage)
+        !['rejected', 'withdrawn'].includes(app.stage) &&
+        app.job?.status !== 'closed' &&
+        app.job?.status !== 'filled'
     );
     const inactiveApps = filteredApplications.filter(app =>
-        ['rejected', 'withdrawn'].includes(app.stage)
+        ['rejected', 'withdrawn'].includes(app.stage) ||
+        app.job?.status === 'closed' ||
+        app.job?.status === 'filled'
     );
 
     if (loading) {

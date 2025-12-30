@@ -158,13 +158,12 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
                 throw new BadRequestError('job_id is required');
             }
 
-            // Look up candidate by user_id
-            const allCandidates = await service.getCandidates({ limit: 1000 });
-            const candidate = allCandidates.find((c: any) => c.user_id === clerkUserId);
+            // Look up candidate by Clerk user ID (using JOIN with identity.users)
+            const candidate = await repository.findCandidateByClerkUserId(clerkUserId);
             
             if (!candidate) {
                 return reply.status(404).send({ 
-                    error: { code: 'NOT_FOUND', message: 'Candidate profile not found' } 
+                    error: { code: 'NOT_FOUND', message: 'Candidate profile not found. Please create your profile first.' } 
                 });
             }
 
