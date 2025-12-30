@@ -2,21 +2,32 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { formatSalary, formatDate } from '@/lib/utils';
+import { formatSalary, formatDate, formatRelativeTime } from '@/lib/utils';
 import ApplicationWizardModal from '@/components/application-wizard-modal';
+
+interface JobRequirement {
+    id: string;
+    requirement_type: 'mandatory' | 'preferred';
+    description: string;
+    sort_order: number;
+}
 
 interface Job {
     id: string;
     title: string;
     company?: { name: string; description?: string };
+    department?: string;
     location?: string;
     salary_min?: number;
     salary_max?: number;
     employment_type?: string;
     open_to_relocation?: boolean;
     posted_at?: string;
+    created_at?: string;
+    status?: string;
     description?: string;
     candidate_description?: string;
+    requirements?: JobRequirement[];
 }
 
 interface JobDetailClientProps {
@@ -166,15 +177,139 @@ export default function JobDetailClient({
                     </div>
                 )}
 
-                {/* Job Description */}
+                {/* Job Description & Sidebar */}
                 {(job.candidate_description || job.description) && (
-                    <div className="card bg-base-100 shadow mb-6">
-                        <div className="card-body">
-                            <h3 className="card-title text-xl mb-4">
-                                <i className="fa-solid fa-file-lines"></i>
-                                Job Description
-                            </h3>
-                            <p className="whitespace-pre-line">{job.candidate_description || job.description}</p>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                        {/* Main Description - 2/3 width */}
+                        <div className="lg:col-span-2">
+                            <div className="card bg-base-100 shadow h-full">
+                                <div className="card-body">
+                                    <h3 className="card-title text-xl mb-4">
+                                        <i className="fa-solid fa-file-lines"></i>
+                                        Job Description
+                                    </h3>
+                                    <p className="whitespace-pre-line">{job.candidate_description || job.description}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Sidebar - 1/3 width */}
+                        <div className="lg:col-span-1 space-y-6">
+                            {/* Job Details Card */}
+                            <div className="card bg-base-100 shadow sticky top-4">
+                                <div className="card-body">
+                                    <h3 className="card-title text-xl mb-4">
+                                        <i className="fa-solid fa-circle-info"></i>
+                                        Job Details
+                                    </h3>
+
+                                    <div className="space-y-3">
+                                        {/* Posted Date (relative) */}
+                                        {(job.posted_at || job.created_at) && (
+                                            <div className="flex items-start gap-3">
+                                                <i className="fa-solid fa-calendar text-base-content/70 mt-1"></i>
+                                                <div>
+                                                    <div className="text-xs text-base-content/70">Posted</div>
+                                                    <div className="font-semibold">
+                                                        {formatRelativeTime(job.posted_at || job.created_at!)}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Job Status */}
+                                        {job.status && (
+                                            <div className="flex items-start gap-3">
+                                                <i className="fa-solid fa-circle-check text-base-content/70 mt-1"></i>
+                                                <div>
+                                                    <div className="text-xs text-base-content/70">Status</div>
+                                                    <div className="font-semibold">
+                                                        <span className={`badge ${job.status === 'active' ? 'badge-success' :
+                                                                job.status === 'paused' ? 'badge-warning' :
+                                                                    job.status === 'filled' ? 'badge-info' :
+                                                                        'badge-neutral'
+                                                            }`}>
+                                                            {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Department */}
+                                        {job.department && (
+                                            <div className="flex items-start gap-3">
+                                                <i className="fa-solid fa-sitemap text-base-content/70 mt-1"></i>
+                                                <div>
+                                                    <div className="text-xs text-base-content/70">Department</div>
+                                                    <div className="font-semibold">{job.department}</div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Job ID */}
+                                        <div className="flex items-start gap-3">
+                                            <i className="fa-solid fa-hashtag text-base-content/70 mt-1"></i>
+                                            <div>
+                                                <div className="text-xs text-base-content/70">Job ID</div>
+                                                <div className="font-mono text-sm">{job.id.slice(0, 8)}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Requirements Card */}
+                            {job.requirements && job.requirements.length > 0 && (
+                                <div className="card bg-base-100 shadow">
+                                    <div className="card-body">
+                                        <h3 className="card-title text-xl mb-4">
+                                            <i className="fa-solid fa-list-check"></i>
+                                            Requirements
+                                        </h3>
+
+                                        {/* Mandatory Requirements */}
+                                        {job.requirements.filter(r => r.requirement_type === 'mandatory').length > 0 && (
+                                            <div className="mb-4">
+                                                <h4 className="font-semibold text-sm text-error mb-2">
+                                                    <i className="fa-solid fa-asterisk text-xs"></i> Required
+                                                </h4>
+                                                <ul className="space-y-2">
+                                                    {job.requirements
+                                                        .filter(r => r.requirement_type === 'mandatory')
+                                                        .sort((a, b) => a.sort_order - b.sort_order)
+                                                        .map((req) => (
+                                                            <li key={req.id} className="flex gap-2">
+                                                                <i className="fa-solid fa-check-circle text-error mt-1 shrink-0"></i>
+                                                                <span className="text-sm">{req.description}</span>
+                                                            </li>
+                                                        ))}
+                                                </ul>
+                                            </div>
+                                        )}
+
+                                        {/* Preferred Requirements */}
+                                        {job.requirements.filter(r => r.requirement_type === 'preferred').length > 0 && (
+                                            <div>
+                                                <h4 className="font-semibold text-sm text-info mb-2">
+                                                    <i className="fa-solid fa-star text-xs"></i> Preferred
+                                                </h4>
+                                                <ul className="space-y-2">
+                                                    {job.requirements
+                                                        .filter(r => r.requirement_type === 'preferred')
+                                                        .sort((a, b) => a.sort_order - b.sort_order)
+                                                        .map((req) => (
+                                                            <li key={req.id} className="flex gap-2">
+                                                                <i className="fa-solid fa-circle-plus text-info mt-1 shrink-0"></i>
+                                                                <span className="text-sm">{req.description}</span>
+                                                            </li>
+                                                        ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
