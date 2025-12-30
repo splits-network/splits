@@ -19,6 +19,117 @@ Current architecture has **mixed responsibility** for authorization logic:
 
 ---
 
+## Critical: Database-First Role Resolution
+
+**All services share the same Supabase database**. This is a key architectural advantage for performance.
+
+### Role Resolution Strategy: SQL JOINs, Not HTTP Calls
+
+**❌ WRONG - Service-to-Service Calls** (high latency):
+```typescript
+// This adds 100-300ms latency per additional service call!
+async resolveEntityId(clerkUserId: string, userRole: string) {
+  // HTTP call to identity-service
+  const user = await identityClient.getUserByClerkId(clerkUserId);
+  
+  // HTTP call to network-service
+  const recruiter = await networkClient.getRecruiterByUserId(user.id);
+  
+  return recruiter.id;
+}
+```
+
+**✅ CORRECT - Database JOINs** (single query, ~10-20ms):
+```typescript
+// Single query with JOINs resolves everything at once
+const query = `
+  SELECT 
+    p.*,
+    u.clerk_user_id,
+    r.id as recruiter_id,
+    c.identity_organization_id as company_id,
+    m.role as membership_role
+  FROM ats.proposals p
+  LEFT JOIN identity.users u ON u.clerk_user_id = $1
+  LEFT JOIN network.recruiters r ON r.user_id = u.id
+  LEFT JOIN identity.memberships m ON m.user_id = u.id
+  LEFT JOIN ats.companies c ON c.identity_organization_id = m.organization_id
+  WHERE 
+    (r.id IS NOT NULL AND p.recruiter_id = r.id)  -- Recruiter: see their proposals
+    OR (m.role IN ('company_admin', 'hiring_manager') AND p.company_id = c.id)  -- Company: see company proposals
+    OR (m.role = 'platform_admin')  -- Platform admin: see all
+`;
+```
+
+**Performance Impact**:
+- Service calls: 200-500ms (multiple HTTP round-trips)
+- Database JOINs: 10-50ms (single query with indexes)
+- **10-25x faster with JOINs!**
+
+### Role Determination from Database
+
+Roles are **NOT** stored in Clerk. They are determined by database records:
+
+| Role | Database Record | Table | Condition |
+|------|----------------|-------|------------|
+| `recruiter` | ✅ Exists | `network.recruiters` | `user_id` matches, `status = 'active'` |
+| `company_admin` | ✅ Exists | `identity.memberships` | `user_id` matches, `role = 'company_admin'` |
+| `hiring_manager` | ✅ Exists | `identity.memberships` | `user_id` matches, `role = 'hiring_manager'` |
+| `platform_admin` | ✅ Exists | `identity.memberships` | `user_id` matches, `role = 'platform_admin'` |
+| `candidate` | ✅ Exists | `ats.candidates` | `user_id` matches |
+
+**A user can have multiple roles** (e.g., both recruiter and company_admin).
+
+### Standard JOIN Pattern for All Queries
+
+Every backend query that needs role-based filtering should:
+
+1. **Start with the resource table** (proposals, applications, jobs, candidates)
+2. **JOIN to identity.users** using `clerk_user_id` from headers
+3. **LEFT JOIN to role tables**:
+   - `network.recruiters` (determines recruiter role)
+   - `identity.memberships` (determines company_admin, hiring_manager, platform_admin)
+   - `ats.candidates` (determines candidate role)
+4. **Apply WHERE clause** with role-based conditions
+
+**Example** (proposals query):
+```sql
+SELECT 
+  p.*,
+  -- Include role context for debugging/logging
+  r.id as user_recruiter_id,
+  c.id as user_company_id,
+  m.role as user_membership_role
+FROM ats.proposals p
+LEFT JOIN identity.users u ON u.clerk_user_id = $1  -- From x-clerk-user-id header
+LEFT JOIN network.recruiters r ON r.user_id = u.id AND r.status = 'active'
+LEFT JOIN identity.memberships m ON m.user_id = u.id
+LEFT JOIN ats.companies c ON c.identity_organization_id = m.organization_id
+WHERE 
+  -- Recruiter: see proposals they're assigned to
+  (r.id IS NOT NULL AND p.recruiter_id = r.id)
+  
+  OR
+  
+  -- Company users: see proposals for their company
+  (m.role IN ('company_admin', 'hiring_manager') AND p.company_id = c.id)
+  
+  OR
+  
+  -- Platform admin: see all (or filtered by organization if specified)
+  (m.role = 'platform_admin' AND ($2::uuid IS NULL OR c.identity_organization_id = $2))
+;
+```
+
+**Key Points**:
+- Single query resolves role AND filters data
+- No HTTP calls to other services
+- Fast with proper indexes on foreign keys
+- Role determined by presence of records in role tables
+- Handles multi-role users (WHERE with OR conditions)
+
+---
+
 ## Important: Public + Authenticated Endpoints
 
 This migration applies to **ALL endpoints**, but some handle both public and authenticated access.

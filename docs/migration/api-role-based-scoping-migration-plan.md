@@ -111,90 +111,180 @@ This plan provides detailed, step-by-step instructions for migrating from fronte
 
 ---
 
-### Step 0.2: Add resolveEntityId() to Services
-**Duration**: 3 hours  
-**Priority**: HIGH - Core business logic
+### Step 0.2: Create Database Functions with JOINs (No Service Calls!)
+**Duration**: 4 hours  
+**Priority**: HIGH - Core performance optimization
 
-#### Task: Implement Entity Resolution in ATS Service
+**⚠️ CRITICAL**: All services share the same Supabase database. Use SQL JOINs to resolve roles and filter data in a **single query**. **DO NOT** make HTTP calls to other services - this adds 200-500ms latency!
 
-1. Add to service class (e.g., `ProposalService`):
+#### Task: Create Database Function for Proposals
+
+1. Create migration SQL (`services/ats-service/migrations/XXX_proposals_for_user.sql`):
+   ```sql
+   -- Function to get proposals with role-based filtering
+   -- Uses JOINs to resolve user role from database tables
+   -- 10-50ms vs 200-500ms with service calls!
+   
+   CREATE OR REPLACE FUNCTION ats.get_proposals_for_user(
+     p_clerk_user_id TEXT,
+     p_organization_id UUID DEFAULT NULL,
+     p_limit INT DEFAULT 25,
+     p_offset INT DEFAULT 0,
+     p_status TEXT DEFAULT NULL,
+     p_search TEXT DEFAULT NULL,
+     p_sort_by TEXT DEFAULT 'created_at',
+     p_sort_order TEXT DEFAULT 'DESC'
+   )
+   RETURNS TABLE (
+     id UUID,
+     job_id UUID,
+     candidate_id UUID,
+     recruiter_id UUID,
+     company_id UUID,
+     state TEXT,
+     proposal_notes TEXT,
+     response_notes TEXT,
+     proposed_at TIMESTAMPTZ,
+     response_due_at TIMESTAMPTZ,
+     accepted_at TIMESTAMPTZ,
+     declined_at TIMESTAMPTZ,
+     created_at TIMESTAMPTZ,
+     updated_at TIMESTAMPTZ,
+     -- Enriched data from JOINs
+     job_title TEXT,
+     company_name TEXT,
+     candidate_name TEXT,
+     recruiter_name TEXT
+   )
+   LANGUAGE plpgsql
+   SECURITY DEFINER
+   AS $$
+   BEGIN
+     RETURN QUERY
+     SELECT 
+       p.id,
+       p.job_id,
+       p.candidate_id,
+       p.recruiter_id,
+       p.company_id,
+       p.state,
+       p.proposal_notes,
+       p.response_notes,
+       p.proposed_at,
+       p.response_due_at,
+       p.accepted_at,
+       p.declined_at,
+       p.created_at,
+       p.updated_at,
+       j.title as job_title,
+       c.name as company_name,
+       cand.full_name as candidate_name,
+       u_rec.name as recruiter_name
+     FROM network.candidate_role_assignments p
+     JOIN ats.jobs j ON j.id = p.job_id
+     JOIN ats.companies c ON c.id = j.company_id
+     JOIN ats.candidates cand ON cand.id = p.candidate_id
+     JOIN network.recruiters rec ON rec.id = p.recruiter_id
+     JOIN identity.users u_rec ON u_rec.id = rec.user_id
+     
+     -- JOINs to resolve requesting user's role (NO HTTP calls!)
+     LEFT JOIN identity.users u ON u.clerk_user_id = p_clerk_user_id
+     LEFT JOIN network.recruiters req_r ON req_r.user_id = u.id AND req_r.status = 'active'
+     LEFT JOIN identity.memberships m ON m.user_id = u.id
+     LEFT JOIN ats.companies user_company ON user_company.identity_organization_id = m.organization_id
+     
+     WHERE 
+       -- Recruiter: see proposals they're assigned to
+       (req_r.id IS NOT NULL AND p.recruiter_id = req_r.id)
+       
+       OR
+       
+       -- Company users: see proposals for their company
+       (m.role IN ('company_admin', 'hiring_manager') AND j.company_id = user_company.id)
+       
+       OR
+       
+       -- Platform admin: see all (or filtered by org if specified)
+       (m.role = 'platform_admin' AND (
+         p_organization_id IS NULL 
+         OR user_company.identity_organization_id = p_organization_id
+       ))
+     
+     -- Optional status filter
+     AND (p_status IS NULL OR p.state = p_status)
+     
+     -- Optional search filter
+     AND (
+       p_search IS NULL 
+       OR j.title ILIKE '%' || p_search || '%'
+       OR c.name ILIKE '%' || p_search || '%'
+       OR cand.full_name ILIKE '%' || p_search || '%'
+     )
+     
+     ORDER BY 
+       CASE WHEN p_sort_by = 'created_at' AND p_sort_order = 'ASC' THEN p.created_at END ASC,
+       CASE WHEN p_sort_by = 'created_at' AND p_sort_order = 'DESC' THEN p.created_at END DESC,
+       CASE WHEN p_sort_by = 'proposed_at' AND p_sort_order = 'ASC' THEN p.proposed_at END ASC,
+       CASE WHEN p_sort_by = 'proposed_at' AND p_sort_order = 'DESC' THEN p.proposed_at END DESC
+     
+     LIMIT p_limit
+     OFFSET p_offset;
+   END;
+   $$;
+   
+   -- Ensure indexes exist for performance
+   CREATE INDEX IF NOT EXISTS idx_users_clerk_user_id ON identity.users(clerk_user_id);
+   CREATE INDEX IF NOT EXISTS idx_recruiters_user_id ON network.recruiters(user_id);
+   CREATE INDEX IF NOT EXISTS idx_memberships_user_id ON identity.memberships(user_id);
+   CREATE INDEX IF NOT EXISTS idx_proposals_recruiter_id ON network.candidate_role_assignments(recruiter_id);
+   CREATE INDEX IF NOT EXISTS idx_jobs_company_id ON ats.jobs(company_id);
+   ```
+
+2. Update Repository to use function:
    ```typescript
-   private async resolveEntityId(
+   async findForUser(
      clerkUserId: string,
-     userRole: string,
-     organizationId?: string
-   ): Promise<{ type: 'recruiter' | 'company'; id: string }> {
-     switch (userRole) {
-       case 'recruiter': {
-         // Call identity service to get internal user UUID
-         const identityResponse = await this.identityClient.get(
-           `/users?clerk_user_id=${clerkUserId}`
-         );
-         const userData = identityResponse.data.data[0];
-         if (!userData) {
-           throw new Error(`User not found for Clerk ID: ${clerkUserId}`);
-         }
-         
-         // Query recruiter by internal user UUID
-         const recruiterResponse = await this.networkClient.get(
-           `/recruiters/by-user/${userData.id}`
-         );
-         const recruiter = recruiterResponse.data.data;
-         
-         if (!recruiter) {
-           throw new Error(`Recruiter profile not found for user: ${userData.id}`);
-         }
-         
-         return { type: 'recruiter', id: recruiter.id };
-       }
-       
-       case 'company_admin':
-       case 'hiring_manager': {
-         if (!organizationId) {
-           throw new Error('Organization ID is required for company users');
-         }
-         
-         // Find company by organization ID
-         const companyResponse = await this.atsClient.get(
-           `/companies?organization_id=${organizationId}`
-         );
-         const company = companyResponse.data.data[0];
-         
-         if (!company) {
-           throw new Error(`Company not found for organization: ${organizationId}`);
-         }
-         
-         return { type: 'company', id: company.id };
-       }
-       
-       case 'platform_admin': {
-         // Platform admin can see all data
-         // Return null to indicate no filtering needed
-         return { type: 'company', id: '*' };
-       }
-       
-       default:
-         throw new Error(`Unsupported user role: ${userRole}`);
+     organizationId: string | null,
+     filters: PaginationFilters
+   ): Promise<Proposal[]> {
+     // Call database function - role resolution via JOINs, no service calls!
+     const { data, error } = await this.supabase
+       .rpc('get_proposals_for_user', {
+         p_clerk_user_id: clerkUserId,
+         p_organization_id: organizationId,
+         p_limit: filters.limit,
+         p_offset: filters.offset,
+         p_status: filters.status,
+         p_search: filters.search,
+         p_sort_by: filters.sortBy || 'created_at',
+         p_sort_order: filters.sortOrder || 'DESC'
+       });
+     
+     if (error) {
+       this.logger.error('Failed to fetch proposals', { error });
+       throw error;
      }
+     
+     return data || [];
    }
    ```
 
-2. Inject required clients in constructor:
-   ```typescript
-   constructor(
-     private repository: ProposalRepository,
-     private identityClient: IdentityServiceClient,
-     private networkClient: NetworkServiceClient,
-     private atsClient: ATSServiceClient,
-     private logger: Logger
-   ) {}
-   ```
+**Performance Comparison**:
+- ❌ Service calls: 200-500ms (HTTP round-trips to identity + network services)
+- ✅ Database JOINs: 10-50ms (single query with indexes)
+- **10-25x faster!**
 
 **Verification**:
-- [ ] Method added to service class
-- [ ] All role cases handled
-- [ ] Error handling in place
-- [ ] Clients injected properly
+- [ ] Database function created
+- [ ] Indexes exist on all JOIN foreign keys
+- [ ] Repository method uses function
+- [ ] NO HTTP calls to other services
+- [ ] Performance tested (query < 50ms)
+- [ ] All role cases handled in WHERE clause
+- [ ] Role determined by presence in database tables:
+  - `network.recruiters` → recruiter role
+  - `identity.memberships` → company_admin, hiring_manager, platform_admin
+  - `ats.candidates` → candidate role
 
 ---
 
@@ -204,48 +294,78 @@ This plan provides detailed, step-by-step instructions for migrating from fronte
 **Duration**: 1 day  
 **Status**: ~90% complete (fix remaining issues)
 
-#### Task 1.1.1: Update ProposalService Methods
+#### Task 1.1.1: Simplify ProposalService Methods (Repository Does the Work)
 
-1. Update `getProposalsForUser()`:
+**Key Change**: Service layer is now thin. All role resolution and filtering happens in database via JOINs.
+
+1. Simplify `getProposalsForUser()`:
    ```typescript
    async getProposalsForUser(
      clerkUserId: string,
-     userRole: string,
+     filters: PaginationFilters,
+     correlationId: string,
+     organizationId?: string  // Optional: platform admin can scope to org
+   ): Promise<{ data: Proposal[]; pagination: PaginationMeta }> {
+     // Single repository call - role resolution via database JOINs!
+     // No service calls, no role branching, much faster
+     const data = await this.repository.findForUser(
+       clerkUserId,
+       organizationId || null,
+       filters
+     );
+     
+     // Calculate pagination metadata
+     const total = await this.repository.countForUser(clerkUserId, organizationId || null, filters);
+     
+     return {
+       data,
+       pagination: {
+         total,
+         page: filters.page || 1,
+         limit: filters.limit || 25,
+         totalPages: Math.ceil(total / (filters.limit || 25))
+       }
+     };
+   }
+   ```
+
+2. Add similar simple methods:
+   ```typescript
+   async getActionableProposalsForUser(
+     clerkUserId: string,
      filters: PaginationFilters,
      correlationId: string,
      organizationId?: string
    ): Promise<{ data: Proposal[]; pagination: PaginationMeta }> {
-     // Resolve entity ID based on role
-     const entity = await this.resolveEntityId(clerkUserId, userRole, organizationId);
-     
-     // Apply role-based filtering
-     switch (entity.type) {
-       case 'recruiter':
-         return this.repository.findByRecruiter(entity.id, filters);
-       
-       case 'company':
-         if (entity.id === '*') {
-           // Platform admin - return all
-           return this.repository.findAll(filters);
-         }
-         return this.repository.findByCompany(entity.id, filters);
-       
-       default:
-         throw new Error(`Unsupported entity type: ${entity.type}`);
-     }
+     // Add state filter for actionable (proposed state)
+     const actionableFilters = { ...filters, status: 'proposed' };
+     return this.getProposalsForUser(clerkUserId, actionableFilters, correlationId, organizationId);
+   }
+   
+   async getProposalByIdForUser(
+     proposalId: string,
+     clerkUserId: string,
+     correlationId: string,
+     organizationId?: string
+   ): Promise<Proposal | null> {
+     // Repository verifies access via same JOINs
+     return this.repository.findByIdForUser(proposalId, clerkUserId, organizationId || null);
    }
    ```
 
-2. Add similar methods for:
-   - `getActionableProposalsForUser()`
-   - `getPendingProposalsForUser()`
-   - `getProposalSummaryForUser()`
-   - `getProposalByIdForUser()` (with access verification)
+**Key Changes**:
+- **NO `resolveEntityId()` method** - not needed with database JOINs
+- **NO `userRole` parameter** - role determined by database records
+- **NO role branching** (switch statements) - WHERE clause in SQL handles all roles
+- **NO service clients** - no HTTP calls to identity/network services
+- **10-25x faster** - single database query vs multiple service calls
+- **Much simpler** - service layer is thin, just calls repository
 
 **Verification**:
-- [ ] All methods accept auth context parameters
-- [ ] Methods call `resolveEntityId()`
-- [ ] Role-based filtering implemented
+- [ ] All methods simplified to single repository calls
+- [ ] No role branching logic in service
+- [ ] No service-to-service HTTP calls
+- [ ] No role parameter (role determined from database)
 - [ ] Existing tests updated
 
 ---
