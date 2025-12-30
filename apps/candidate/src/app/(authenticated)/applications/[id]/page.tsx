@@ -147,69 +147,189 @@ export default async function ApplicationDetailPage({
                                 Job Details
                             </h2>
 
-                            <div className="space-y-4">
-                                {job.location && (
-                                    <div>
-                                        <div className="text-sm text-base-content/60 mb-1">Location</div>
-                                        <div className="flex items-center gap-2">
-                                            <i className="fa-solid fa-location-dot"></i>
-                                            {job.location}
+                            <div className="space-y-6">
+                                {/* Quick Facts Grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-base-200 rounded-lg">
+                                    {job.location && (
+                                        <div>
+                                            <div className="text-sm text-base-content/60 mb-1">Location</div>
+                                            <div className="flex items-center gap-2 font-medium">
+                                                <i className="fa-solid fa-location-dot text-primary"></i>
+                                                {job.location}
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
 
-                                {job.employment_type && (
-                                    <div>
-                                        <div className="text-sm text-base-content/60 mb-1">Employment Type</div>
-                                        <div className="flex items-center gap-2">
-                                            <i className="fa-solid fa-clock"></i>
-                                            {job.employment_type}
+                                    {job.employment_type && (
+                                        <div>
+                                            <div className="text-sm text-base-content/60 mb-1">Employment Type</div>
+                                            <div className="flex items-center gap-2 font-medium">
+                                                <i className="fa-solid fa-clock text-primary"></i>
+                                                {job.employment_type === 'full_time' ? 'Full Time' :
+                                                    job.employment_type === 'contract' ? 'Contract' :
+                                                        job.employment_type === 'temporary' ? 'Temporary' :
+                                                            job.employment_type}
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
 
-                                {job.salary_min && job.salary_max && (
-                                    <div>
-                                        <div className="text-sm text-base-content/60 mb-1">Salary Range</div>
-                                        <div className="flex items-center gap-2">
-                                            <i className="fa-solid fa-dollar-sign"></i>
-                                            ${job.salary_min.toLocaleString()} - ${job.salary_max.toLocaleString()}
-                                            {job.salary_currency && ` ${job.salary_currency}`}
+                                    {(job.salary_min || job.salary_max) && (
+                                        <div>
+                                            <div className="text-sm text-base-content/60 mb-1">Salary Range</div>
+                                            <div className="flex items-center gap-2 font-medium">
+                                                <i className="fa-solid fa-dollar-sign text-primary"></i>
+                                                {job.salary_min && job.salary_max ? (
+                                                    `$${job.salary_min.toLocaleString()} - $${job.salary_max.toLocaleString()}`
+                                                ) : job.salary_min ? (
+                                                    `From $${job.salary_min.toLocaleString()}`
+                                                ) : (
+                                                    `Up to $${job.salary_max?.toLocaleString()}`
+                                                )}
+                                                {job.salary_currency && job.salary_currency !== 'USD' && ` ${job.salary_currency}`}
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
 
-                                {job.description && (
+                                    {job.department && (
+                                        <div>
+                                            <div className="text-sm text-base-content/60 mb-1">Department</div>
+                                            <div className="flex items-center gap-2 font-medium">
+                                                <i className="fa-solid fa-building text-primary"></i>
+                                                {job.department}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {typeof job.open_to_relocation !== 'undefined' && (
+                                        <div>
+                                            <div className="text-sm text-base-content/60 mb-1">Relocation</div>
+                                            <div className="flex items-center gap-2 font-medium">
+                                                <i className={`fa-solid ${job.open_to_relocation ? 'fa-check-circle text-success' : 'fa-times-circle text-base-content/40'}`}></i>
+                                                {job.open_to_relocation ? 'Open to Relocation' : 'No Relocation'}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Description */}
+                                {(job.candidate_description || job.recruiter_description || job.description) && (
                                     <div>
-                                        <div className="text-sm text-base-content/60 mb-1">Description</div>
+                                        <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                                            <i className="fa-solid fa-align-left text-primary"></i>
+                                            About This Role
+                                        </h3>
                                         <div className="prose max-w-none">
-                                            {job.description}
+                                            <div className="whitespace-pre-wrap">
+                                                {job.candidate_description || job.recruiter_description || job.description}
+                                            </div>
                                         </div>
                                     </div>
                                 )}
-                            </div>
 
-                            <div className="card-actions justify-end mt-4">
-                                <Link href={`/jobs/${job.id}`} className="btn btn-outline">
-                                    <i className="fa-solid fa-arrow-up-right-from-square"></i>
-                                    View Full Job Posting
-                                </Link>
+                                {/* Requirements */}
+                                {job.requirements && job.requirements.length > 0 && (
+                                    <div>
+                                        <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                                            <i className="fa-solid fa-list-check text-primary"></i>
+                                            Requirements
+                                        </h3>
+
+                                        {/* Mandatory Requirements */}
+                                        {job.requirements.filter((r: any) => r.requirement_type === 'mandatory').length > 0 && (
+                                            <div className="mb-4">
+                                                <div className="text-sm font-medium text-error mb-2">Required</div>
+                                                <ul className="space-y-2">
+                                                    {job.requirements
+                                                        .filter((r: any) => r.requirement_type === 'mandatory')
+                                                        .sort((a: any, b: any) => a.sort_order - b.sort_order)
+                                                        .map((req: any) => (
+                                                            <li key={req.id} className="flex items-start gap-2">
+                                                                <i className="fa-solid fa-circle-check text-error mt-1 flex-shrink-0"></i>
+                                                                <span>{req.description}</span>
+                                                            </li>
+                                                        ))}
+                                                </ul>
+                                            </div>
+                                        )}
+
+                                        {/* Preferred Requirements */}
+                                        {job.requirements.filter((r: any) => r.requirement_type === 'preferred').length > 0 && (
+                                            <div>
+                                                <div className="text-sm font-medium text-info mb-2">Preferred</div>
+                                                <ul className="space-y-2">
+                                                    {job.requirements
+                                                        .filter((r: any) => r.requirement_type === 'preferred')
+                                                        .sort((a: any, b: any) => a.sort_order - b.sort_order)
+                                                        .map((req: any) => (
+                                                            <li key={req.id} className="flex items-start gap-2">
+                                                                <i className="fa-solid fa-circle-plus text-info mt-1 flex-shrink-0"></i>
+                                                                <span>{req.description}</span>
+                                                            </li>
+                                                        ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Company Information */}
+                                {company && (company.description || company.industry || company.company_size || company.headquarters_location || company.website) && (
+                                    <div>
+                                        <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                                            <i className="fa-solid fa-building text-primary"></i>
+                                            About {company.name}
+                                        </h3>
+
+                                        <div className="space-y-3">
+                                            {/* Company Quick Facts */}
+                                            {(company.industry || company.company_size || company.headquarters_location) && (
+                                                <div className="flex flex-wrap gap-4 text-sm">
+                                                    {company.industry && (
+                                                        <div className="flex items-center gap-2">
+                                                            <i className="fa-solid fa-industry text-base-content/60"></i>
+                                                            <span>{company.industry}</span>
+                                                        </div>
+                                                    )}
+                                                    {company.company_size && (
+                                                        <div className="flex items-center gap-2">
+                                                            <i className="fa-solid fa-users text-base-content/60"></i>
+                                                            <span>{company.company_size}</span>
+                                                        </div>
+                                                    )}
+                                                    {company.headquarters_location && (
+                                                        <div className="flex items-center gap-2">
+                                                            <i className="fa-solid fa-map-marker-alt text-base-content/60"></i>
+                                                            <span>{company.headquarters_location}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {company.description && (
+                                                <div className="prose max-w-none">
+                                                    <p className="text-base-content/80">{company.description}</p>
+                                                </div>
+                                            )}
+
+                                            {company.website && (
+                                                <div>
+                                                    <a
+                                                        href={company.website}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="btn btn-sm btn-outline"
+                                                    >
+                                                        <i className="fa-solid fa-external-link-alt"></i>
+                                                        Company Website
+                                                    </a>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
-
-                    {/* AI Review Panel - Show if ai_review stage or later */}
-                    {(application.stage === 'ai_review' ||
-                        application.stage === 'screen' ||
-                        application.stage === 'submitted' ||
-                        application.stage === 'interviewing' ||
-                        application.stage === 'offer' ||
-                        application.ai_reviewed) && (
-                            <AIReviewPanel
-                                applicationId={application.id}
-                                token={token || ''}
-                            />
-                        )}
 
                     {/* Application Notes */}
                     {(application.notes || application.recruiter_notes) && (
@@ -334,6 +454,20 @@ export default async function ApplicationDetailPage({
                             </div>
                         </div>
                     </div>
+
+
+                    {/* AI Review Panel - Show if ai_review stage or later */}
+                    {(application.stage === 'ai_review' ||
+                        application.stage === 'screen' ||
+                        application.stage === 'submitted' ||
+                        application.stage === 'interviewing' ||
+                        application.stage === 'offer' ||
+                        application.ai_reviewed) && (
+                            <AIReviewPanel
+                                applicationId={application.id}
+                                token={token || ''}
+                            />
+                        )}
 
                     {/* Recruiter Info */}
                     {recruiter && (
