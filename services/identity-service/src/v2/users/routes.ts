@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { UserServiceV2 } from '../services/user';
+import { UserServiceV2 } from './service';
 import {
     requireUserContext,
     validatePaginationParams,

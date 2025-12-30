@@ -4,14 +4,14 @@
  */
 
 import { Logger } from '@splits-network/shared-logging';
-import { RepositoryV2 } from '../repository';
 import { EventPublisherV2 } from '../shared/events';
-import { OrganizationUpdate } from '../organizations/types';
+import { OrganizationUpdate } from './types';
+import { OrganizationRepository } from './repository';
 import { v4 as uuidv4 } from 'uuid';
 
 export class OrganizationServiceV2 {
     constructor(
-        private repository: RepositoryV2,
+        private repository: OrganizationRepository,
         private eventPublisher: EventPublisherV2,
         private logger: Logger
     ) {}

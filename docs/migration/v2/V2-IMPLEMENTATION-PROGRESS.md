@@ -467,6 +467,12 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 12. `services/automation-service/src/v2/routes.ts`
 13. Updated `services/automation-service/src/index.ts`
 
+### Identity Service (In Progress)
+1. Domain type modules under `services/identity-service/src/v2/{users,organizations,memberships,invitations}/types.ts`
+2. Added per-domain repositories at `services/identity-service/src/v2/<domain>/repository.ts` (legacy `src/v2/repository.ts` removed)
+3. Moved service logic to `services/identity-service/src/v2/<domain>/service.ts` (legacy `src/v2/services/*.ts` removed)
+4. `services/identity-service/src/v2/routes.ts` now instantiates each domain repository/service directly
+
 ---
 
 ## Success Metrics

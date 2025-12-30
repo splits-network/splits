@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { OrganizationServiceV2 } from '../services/organization';
+import { OrganizationServiceV2 } from './service';
 import {
     requireUserContext,
     validatePaginationParams,
