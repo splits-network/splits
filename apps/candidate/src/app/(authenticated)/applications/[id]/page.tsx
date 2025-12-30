@@ -331,38 +331,6 @@ export default async function ApplicationDetailPage({
                         </div>
                     </div>
 
-                    {/* Application Notes */}
-                    {(application.notes || application.recruiter_notes) && (
-                        <div className="card bg-base-100 shadow">
-                            <div className="card-body">
-                                <h2 className="card-title mb-4">
-                                    <i className="fa-solid fa-note-sticky"></i>
-                                    Notes
-                                </h2>
-
-                                {application.notes && (
-                                    <div className="mb-4">
-                                        <div className="text-sm text-base-content/60 mb-2">Your Notes</div>
-                                        <div className="alert">
-                                            <i className="fa-solid fa-user"></i>
-                                            <span>{application.notes}</span>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {application.recruiter_notes && (
-                                    <div>
-                                        <div className="text-sm text-base-content/60 mb-2">Recruiter Notes</div>
-                                        <div className="alert alert-info">
-                                            <i className="fa-solid fa-circle-info"></i>
-                                            <span>{application.recruiter_notes}</span>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
                     {/* Documents */}
                     {application.documents && application.documents.length > 0 && (
                         <div className="card bg-base-100 shadow">
@@ -455,6 +423,57 @@ export default async function ApplicationDetailPage({
                         </div>
                     </div>
 
+                    {/* Actions */}
+                    <div className="card bg-base-100 shadow">
+                        <div className="card-body">
+                            <h2 className="card-title mb-4">
+                                <i className="fa-solid fa-ellipsis"></i>
+                                Actions
+                            </h2>
+
+                            <div className="space-y-2">
+                                {application.stage !== 'withdrawn' && application.stage !== 'rejected' && (
+                                    <WithdrawButton
+                                        applicationId={application.id}
+                                        jobTitle={job.title || 'this position'}
+                                        isJobClosed={['closed', 'filled', 'cancelled'].includes(job.status)}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Application Notes */}
+                    {(application.notes || application.recruiter_notes) && (
+                        <div className="card bg-base-100 shadow">
+                            <div className="card-body">
+                                <h2 className="card-title mb-4">
+                                    <i className="fa-solid fa-note-sticky"></i>
+                                    Notes
+                                </h2>
+
+                                {application.notes && (
+                                    <div className="mb-4">
+                                        <div className="text-sm text-base-content/60 mb-2">Your Notes</div>
+                                        <div className="alert">
+                                            <i className="fa-solid fa-user"></i>
+                                            <span>{application.notes}</span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {application.recruiter_notes && (
+                                    <div>
+                                        <div className="text-sm text-base-content/60 mb-2">Recruiter Notes</div>
+                                        <div className="alert alert-info">
+                                            <i className="fa-solid fa-circle-info"></i>
+                                            <span>{application.recruiter_notes}</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {/* AI Review Panel - Show if ai_review stage or later */}
                     {(application.stage === 'ai_review' ||
@@ -507,31 +526,6 @@ export default async function ApplicationDetailPage({
                             </div>
                         </div>
                     )}
-
-                    {/* Actions */}
-                    <div className="card bg-base-100 shadow">
-                        <div className="card-body">
-                            <h2 className="card-title mb-4">
-                                <i className="fa-solid fa-ellipsis"></i>
-                                Actions
-                            </h2>
-
-                            <div className="space-y-2">
-                                {application.stage !== 'withdrawn' && application.stage !== 'rejected' && (
-                                    <WithdrawButton
-                                        applicationId={application.id}
-                                        jobTitle={job.title || 'this position'}
-                                        isJobClosed={['closed', 'filled', 'cancelled'].includes(job.status)}
-                                    />
-                                )}
-
-                                <Link href="/applications" className="btn btn-outline w-full">
-                                    <i className="fa-solid fa-arrow-left"></i>
-                                    Back to Applications
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
