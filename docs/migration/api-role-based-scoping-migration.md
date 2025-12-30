@@ -172,6 +172,62 @@ These endpoints support **both** unauthenticated and authenticated access with d
 
 **Backend-Determined Scoping**: Single endpoint per resource, backend filters based on authenticated user's role.
 
+### Standard Query Parameters for ALL List Endpoints
+
+**CRITICAL**: Every list endpoint (proposals, applications, jobs, candidates, etc.) MUST support:
+
+#### 1. Pagination (Required)
+```
+?page=1           // Page number (1-indexed, default: 1)
+&limit=25         // Items per page (default: 25, max: 100)
+```
+
+#### 2. Search (Optional)
+```
+?search=query     // Text search across multiple fields
+                  // Backend determines which fields to search
+                  // Example: "John Smith" might search name, email, company
+```
+
+#### 3. Filtering (Optional)
+```
+?status=active                    // Single field filter
+&job_id=uuid                      // Filter by related entity
+&created_after=2025-01-01         // Date range filter
+&salary_min=100000                // Numeric range filter
+```
+
+#### 4. Sorting (Optional)
+```
+?sort_by=created_at              // Field to sort by (default: created_at)
+&sort_order=DESC                 // ASC or DESC (default: DESC)
+```
+
+#### Complete Example
+```
+GET /api/proposals?page=2&limit=25&search=engineer&status=pending&sort_by=created_at&sort_order=DESC
+```
+
+#### Response Format
+```json
+{
+  "data": [...],
+  "pagination": {
+    "total": 1000,
+    "page": 2,
+    "limit": 25,
+    "total_pages": 40
+  }
+}
+```
+
+**Performance Requirements**:
+- ✅ ALL filtering, searching, sorting MUST happen server-side in SQL
+- ❌ NEVER implement client-side filtering/sorting (does not scale)
+- ✅ Use database indexes on frequently searched/filtered columns
+- ✅ Use full-text search indexes for text search when appropriate
+- ✅ Debounce search input on frontend (300ms) to reduce API calls
+
 ### Current Pattern (Problematic):
 ```typescript
 // Frontend has role logic:
