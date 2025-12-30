@@ -27,6 +27,15 @@ interface UserProfile {
     memberships: Membership[];
 }
 
+interface Stats {
+    totalRoles: number;
+    activeRoles: number;
+    applicationsCount?: number;
+    placementsCount?: number;
+    companiesCount?: number;
+    inReviewCount?: number;
+}
+
 function getStatusBadge(status: string) {
     const styles = {
         active: 'badge-success',
@@ -55,6 +64,8 @@ export default function RolesList() {
     const [searchQuery, setSearchQuery] = useState('');
     const [userRole, setUserRole] = useState<string | null>(null);
     const [viewMode, setViewMode] = useViewMode('rolesViewMode');
+    const [stats, setStats] = useState<Stats | null>(null);
+    const [statsLoading, setStatsLoading] = useState(true);
 
     // Check if user can manage roles
     const canManageRole = userRole === 'company_admin' || userRole === 'platform_admin';
@@ -64,6 +75,13 @@ export default function RolesList() {
         fetchJobs();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [statusFilter]);
+
+    useEffect(() => {
+        if (userRole) {
+            fetchStats();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [userRole, statusFilter]);
 
     const fetchUserRole = async () => {
         try {
@@ -105,6 +123,66 @@ export default function RolesList() {
         }
     };
 
+    const fetchStats = async () => {
+        try {
+            const token = await getToken();
+            if (!token) {
+                console.error('No auth token available');
+                setStatsLoading(false);
+                return;
+            }
+
+            const client = createAuthenticatedClient(token);
+
+            // Fetch role-specific stats
+            if (userRole === 'platform_admin') {
+                // Platform admin sees system-wide stats
+                const [rolesRes, companiesRes] = await Promise.all([
+                    client.getRoles({ status: statusFilter === 'all' ? undefined : statusFilter }) as Promise<{ data: Job[] }>,
+                    client.get('/api/companies') as Promise<{ data: any[] }>,
+                ]);
+
+                const allRoles = rolesRes.data || [];
+                setStats({
+                    totalRoles: allRoles.length,
+                    activeRoles: allRoles.filter((j: Job) => j.status === 'active').length,
+                    companiesCount: companiesRes.data?.length || 0,
+                    applicationsCount: 0, // Will be enhanced later
+                });
+            } else if (userRole === 'recruiter') {
+                // Recruiter sees their assigned roles and activities
+                const rolesRes = await client.getRoles({
+                    status: statusFilter === 'all' ? undefined : statusFilter
+                }) as { data: Job[] };
+                const allRoles = rolesRes.data || [];
+
+                setStats({
+                    totalRoles: allRoles.length,
+                    activeRoles: allRoles.filter((j: Job) => j.status === 'active').length,
+                    applicationsCount: 0, // Will be enhanced with real data
+                    placementsCount: 0, // Will be enhanced with real data
+                });
+            } else if (userRole === 'company_admin' || userRole === 'hiring_manager') {
+                // Company users see their company's roles
+                const rolesRes = await client.getRoles({
+                    status: statusFilter === 'all' ? undefined : statusFilter
+                }) as { data: Job[] };
+                const allRoles = rolesRes.data || [];
+
+                setStats({
+                    totalRoles: allRoles.length,
+                    activeRoles: allRoles.filter((j: Job) => j.status === 'active').length,
+                    applicationsCount: 0, // Will be enhanced with real data
+                    inReviewCount: 0, // Will be enhanced with real data
+                });
+            }
+        } catch (error) {
+            console.error('Failed to fetch stats:', error);
+        } finally {
+            setStatsLoading(false);
+        }
+    };
+
     const filteredJobs = jobs.filter(job =>
         searchQuery === '' ||
         job.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -120,12 +198,120 @@ export default function RolesList() {
 
     return (
         <div className="space-y-6">
+            {/* Stats Section */}
+            {statsLoading ? (
+                <div className="flex justify-center py-6">
+                    <span className="loading loading-spinner loading-md"></span>
+                </div>
+            ) : stats && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="stats bg-base-100 shadow">
+                        <div className="stat">
+                            <div className="stat-figure text-primary">
+                                <i className="fa-solid fa-briefcase text-3xl"></i>
+                            </div>
+                            <div className="stat-title">Total Roles</div>
+                            <div className="stat-value">{stats.totalRoles}</div>
+                            <div className="stat-desc">
+                                {userRole === 'platform_admin' ? 'System-wide' :
+                                    userRole === 'recruiter' ? 'Assigned to you' : 'In your company'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="stats bg-base-100 shadow">
+                        <div className="stat">
+                            <div className="stat-figure text-success">
+                                <i className="fa-solid fa-circle-check text-3xl"></i>
+                            </div>
+                            <div className="stat-title">Active Roles</div>
+                            <div className="stat-value text-success">{stats.activeRoles}</div>
+                            <div className="stat-desc">Currently open</div>
+                        </div>
+                    </div>
+
+                    {userRole === 'recruiter' && (
+                        <>
+                            <div className="stats bg-base-100 shadow">
+                                <div className="stat">
+                                    <div className="stat-figure text-primary">
+                                        <i className="fa-solid fa-paper-plane text-3xl"></i>
+                                    </div>
+                                    <div className="stat-title">Applications</div>
+                                    <div className="stat-value text-primary">{stats.applicationsCount}</div>
+                                    <div className="stat-desc">Submitted by you</div>
+                                </div>
+                            </div>
+                            <div className="stats bg-base-100 shadow">
+                                <div className="stat">
+                                    <div className="stat-figure text-accent">
+                                        <i className="fa-solid fa-handshake text-3xl"></i>
+                                    </div>
+                                    <div className="stat-title">Placements</div>
+                                    <div className="stat-value text-accent">{stats.placementsCount}</div>
+                                    <div className="stat-desc">Successfully placed</div>
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+                    {(userRole === 'company_admin' || userRole === 'hiring_manager') && (
+                        <>
+                            <div className="stats bg-base-100 shadow">
+                                <div className="stat">
+                                    <div className="stat-figure text-primary">
+                                        <i className="fa-solid fa-file-lines text-3xl"></i>
+                                    </div>
+                                    <div className="stat-title">Total Applications</div>
+                                    <div className="stat-value text-primary">{stats.applicationsCount}</div>
+                                    <div className="stat-desc">All submissions</div>
+                                </div>
+                            </div>
+                            <div className="stats bg-base-100 shadow">
+                                <div className="stat">
+                                    <div className="stat-figure text-warning">
+                                        <i className="fa-solid fa-clock text-3xl"></i>
+                                    </div>
+                                    <div className="stat-title">In Review</div>
+                                    <div className="stat-value text-warning">{stats.inReviewCount}</div>
+                                    <div className="stat-desc">Awaiting decision</div>
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+                    {userRole === 'platform_admin' && (
+                        <>
+                            <div className="stats bg-base-100 shadow">
+                                <div className="stat">
+                                    <div className="stat-figure text-info">
+                                        <i className="fa-solid fa-building text-3xl"></i>
+                                    </div>
+                                    <div className="stat-title">Companies</div>
+                                    <div className="stat-value text-info">{stats.companiesCount}</div>
+                                    <div className="stat-desc">Active companies</div>
+                                </div>
+                            </div>
+                            <div className="stats bg-base-100 shadow">
+                                <div className="stat">
+                                    <div className="stat-figure text-primary">
+                                        <i className="fa-solid fa-file-lines text-3xl"></i>
+                                    </div>
+                                    <div className="stat-title">Applications</div>
+                                    <div className="stat-value text-primary">{stats.applicationsCount}</div>
+                                    <div className="stat-desc">Platform-wide</div>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
+            )}
+
             {/* Filters and View Toggle */}
             <div className="card bg-base-100 shadow">
-                <div className="card-body">
-                    <div className="flex flex-wrap gap-4 items-end">
+                <div className="card-body p-2">
+                    <div className="flex flex-wrap gap-4 items-center">
                         <div className="fieldset">
-                            <label className="label">Status</label>
                             <select
                                 className="select w-full max-w-xs"
                                 value={statusFilter}
@@ -139,7 +325,6 @@ export default function RolesList() {
                             </select>
                         </div>
                         <div className="fieldset flex-1">
-                            <label className="label">Search</label>
                             <input
                                 type="text"
                                 placeholder="Search roles..."

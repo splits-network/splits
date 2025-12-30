@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useViewMode } from '@/hooks/use-view-mode';
-import { useSearchParams, useRouter } from 'next/navigation';
 import { ApplicationCard } from './application-card';
 import { ApplicationTableRow } from './application-table-row';
 import { ApplicationFilters } from './application-filters';
@@ -56,10 +55,63 @@ interface PaginationInfo {
     total_pages: number;
 }
 
-export default function ApplicationsListClient() {
+interface ApplicationStats {
+    totalApplications: number;
+    awaitingReview: number;
+    aiPending: number;
+    acceptedByCompany: number;
+}
+
+interface ApplicationsListClientProps {
+    initialUserRole?: string | null;
+    initialOrganizationId?: string | null;
+}
+
+const personaDescriptor = (role: string | null) => {
+    if (role === 'platform_admin') {
+        return 'System-wide';
+    }
+    if (role === 'recruiter') {
+        return 'Assigned to you';
+    }
+    if (role === 'company_admin' || role === 'hiring_manager') {
+        return 'In your company';
+    }
+    return 'Your activity';
+};
+
+const buildStats = (data: Application[], total: number): ApplicationStats => {
+    const awaitingReviewStages = new Set(['submitted', 'screen', 'interview']);
+    const stats = data.reduce(
+        (acc, application) => {
+            if (awaitingReviewStages.has(application.stage)) {
+                acc.awaitingReview += 1;
+            }
+            if (application.stage === 'ai_review' && !application.ai_reviewed) {
+                acc.aiPending += 1;
+            }
+            if (application.accepted_by_company) {
+                acc.acceptedByCompany += 1;
+            }
+            return acc;
+        },
+        {
+            totalApplications: total,
+            awaitingReview: 0,
+            aiPending: 0,
+            acceptedByCompany: 0,
+        } as ApplicationStats,
+    );
+
+    stats.totalApplications = total;
+    return stats;
+};
+
+export default function ApplicationsListClient({
+    initialUserRole = null,
+    initialOrganizationId = null,
+}: ApplicationsListClientProps) {
     const { getToken } = useAuth();
-    const router = useRouter();
-    const searchParams = useSearchParams();
 
     // State
     const [applications, setApplications] = useState<Application[]>([]);
@@ -75,8 +127,21 @@ export default function ApplicationsListClient() {
     const [stageFilter, setStageFilter] = useState('');
     const [aiScoreFilter, setAIScoreFilter] = useState('');
     const [viewMode, setViewMode] = useViewMode('applicationsViewMode');
-    const [userRole, setUserRole] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<string | null>(initialUserRole);
+    const [organizationId, setOrganizationId] = useState<string | null>(initialOrganizationId);
     const [acceptingId, setAcceptingId] = useState<string | null>(null);
+    const [companyId, setCompanyId] = useState<string | null>(null);
+    const [stats, setStats] = useState<ApplicationStats | null>(null);
+    const [statsLoading, setStatsLoading] = useState(true);
+    const [hasBootstrapped, setHasBootstrapped] = useState(false);
+
+    const isCompanyUser = userRole === 'company_admin' || userRole === 'hiring_manager';
+    const isRecruiter = userRole === 'recruiter';
+    const isPlatformAdmin = userRole === 'platform_admin';
+    const personaReady = Boolean(
+        userRole &&
+        (!isCompanyUser || !!companyId)
+    );
 
     // Bulk actions state
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -84,91 +149,186 @@ export default function ApplicationsListClient() {
     const [bulkAction, setBulkAction] = useState<'stage' | 'reject' | null>(null);
     const [bulkLoading, setBulkLoading] = useState(false);
 
-    // Load applications
-    const loadApplications = useCallback(async () => {
+    const loadApplications = useCallback(async (options: {
+        page?: number;
+        stage?: string;
+        search?: string;
+        aiScore?: string;
+        company?: string | null;
+    } = {}) => {
+        if (!personaReady) {
+            return;
+        }
+
         try {
             setLoading(true);
             setError(null);
+            setStatsLoading(true);
 
             const token = await getToken();
             if (!token) {
                 setError('Not authenticated');
                 setLoading(false);
+                setStatsLoading(false);
                 return;
             }
 
             const client = createAuthenticatedClient(token);
+            const pageToFetch = options.page ?? pagination.page;
+            const stageValue = options.stage ?? stageFilter;
+            const searchValue = options.search ?? searchQuery;
+            const aiScoreValue = options.aiScore ?? aiScoreFilter;
+            const companyFilter = options.company ?? companyId ?? undefined;
 
-            // Get user profile
-            const profileRes = await client.get('/me');
-            const profile = profileRes.data;
-            const membership = profile?.memberships?.[0];
-            const role = membership?.role;
-            setUserRole(role);
-
-            // Build query parameters
             const params = new URLSearchParams({
-                page: pagination.page.toString(),
+                page: pageToFetch.toString(),
                 limit: pagination.limit.toString(),
                 sort_by: 'created_at',
                 sort_order: 'desc',
             });
 
-            if (searchQuery) {
-                params.append('search', searchQuery);
+            if (searchValue) {
+                params.append('search', searchValue);
             }
-            if (stageFilter) {
-                params.append('stage', stageFilter);
+            if (stageValue) {
+                params.append('stage', stageValue);
             }
-            if (aiScoreFilter) {
-                params.append('ai_score_filter', aiScoreFilter);
+            if (aiScoreValue) {
+                params.append('ai_score_filter', aiScoreValue);
             }
-
-            if (role === 'company_admin' || role === 'hiring_manager') {
-                const companiesRes = await client.get(`/companies?org_id=${membership.organization_id}`);
-                const companies = companiesRes.data || [];
-                if (companies.length > 0) {
-                    params.append('company_id', companies[0].id);
-                }
+            if (companyFilter) {
+                params.append('company_id', companyFilter);
             }
 
             const response = await client.get(`/applications/paginated?${params.toString()}`);
+            const nextData = response.data || [];
+            const paginationPayload = response.pagination || {};
 
-            setApplications(response.data || []);
-            setPagination(response.pagination || pagination);
-
+            setApplications(nextData);
+            setSelectedIds(new Set());
+            setPagination(prev => ({
+                ...prev,
+                total: paginationPayload.total ?? nextData.length,
+                total_pages: paginationPayload.total_pages ?? prev.total_pages,
+                limit: paginationPayload.limit ?? prev.limit,
+                page: pageToFetch,
+            }));
+            setStats(buildStats(nextData, paginationPayload.total ?? nextData.length));
+            setHasBootstrapped(true);
         } catch (err: any) {
             console.error('Failed to load applications:', err);
             setError(err.message || 'Failed to load applications');
         } finally {
             setLoading(false);
+            setStatsLoading(false);
         }
-    }, [getToken, pagination.page, pagination.limit, searchQuery, stageFilter, aiScoreFilter]);
+    }, [aiScoreFilter, companyId, getToken, pagination.limit, pagination.page, personaReady, searchQuery, stageFilter]);
 
-    // Initial load
     useEffect(() => {
-        loadApplications();
-    }, []);
+        if (userRole && (!isCompanyUser || organizationId)) {
+            return;
+        }
 
-    // Reload when filters change (debounced for search)
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (pagination.page !== 1) {
-                setPagination(prev => ({ ...prev, page: 1 }));
-            } else {
-                loadApplications();
+        let cancelled = false;
+
+        const resolveProfile = async () => {
+            try {
+                const token = await getToken();
+                if (!token || cancelled) {
+                    return;
+                }
+                const client = createAuthenticatedClient(token);
+                const response: any = await client.get('/me');
+                const profile = response.data;
+                const membership = profile?.memberships?.[0];
+                if (!cancelled) {
+                    setUserRole(membership?.role ?? null);
+                    setOrganizationId(membership?.organization_id ?? null);
+                }
+            } catch (err) {
+                console.error('Failed to load user profile for applications:', err);
             }
+        };
+
+        resolveProfile();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [getToken, isCompanyUser, organizationId, userRole]);
+
+    const resolveCompanyFromOrg = useCallback(async (orgId: string) => {
+        try {
+            const token = await getToken();
+            if (!token) {
+                return;
+            }
+            const client = createAuthenticatedClient(token);
+            const response: any = await client.get(`/companies?org_id=${orgId}`);
+            const companies = response.data || response;
+            if (Array.isArray(companies) && companies.length > 0) {
+                setCompanyId(companies[0].id);
+            }
+        } catch (err) {
+            console.error('Failed to resolve company for organization:', err);
+        }
+    }, [getToken]);
+
+    useEffect(() => {
+        if (!organizationId || companyId || !isCompanyUser) {
+            return;
+        }
+        resolveCompanyFromOrg(organizationId);
+    }, [companyId, isCompanyUser, organizationId, resolveCompanyFromOrg]);
+
+    useEffect(() => {
+        if (!personaReady) {
+            return;
+        }
+        loadApplications({ page: 1 });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [personaReady]);
+
+    useEffect(() => {
+        if (!personaReady || !hasBootstrapped) {
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            setPagination(prev => ({ ...prev, page: 1 }));
+            loadApplications({ page: 1, search: searchQuery });
         }, searchQuery ? 300 : 0);
 
         return () => clearTimeout(timer);
-    }, [searchQuery, stageFilter, aiScoreFilter]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchQuery, personaReady, hasBootstrapped]);
 
-    // Reload when page changes
-    useEffect(() => {
-        if (pagination.page > 0) {
-            loadApplications();
+    const handleStageFilterChange = (value: string) => {
+        setStageFilter(value);
+        setPagination(prev => ({ ...prev, page: 1 }));
+        if (personaReady) {
+            loadApplications({ page: 1, stage: value });
         }
-    }, [pagination.page]);
+    };
+
+    const handleAIScoreFilterChange = (value: string) => {
+        setAIScoreFilter(value);
+        setPagination(prev => ({ ...prev, page: 1 }));
+        if (personaReady) {
+            loadApplications({ page: 1, aiScore: value });
+        }
+    };
+
+    const handleSearchChange = (value: string) => {
+        setSearchQuery(value);
+    };
+
+    const handlePageChange = (page: number) => {
+        setPagination(prev => ({ ...prev, page }));
+        if (personaReady) {
+            loadApplications({ page });
+        }
+    };
 
     const handleAcceptApplication = async (applicationId: string) => {
         try {
@@ -272,20 +432,8 @@ export default function ApplicationsListClient() {
         return colors[stage] || 'badge-ghost';
     };
 
-    const isCompanyUser = userRole === 'company_admin' || userRole === 'hiring_manager';
-    const isRecruiter = userRole === 'recruiter';
-    const isPlatformAdmin = userRole === 'platform_admin';
-
-    if (loading && applications.length === 0) {
-        return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                    <span className="loading loading-spinner loading-lg"></span>
-                    <p className="mt-4 text-base-content/70">Loading applications...</p>
-                </div>
-            </div>
-        );
-    }
+    const listIsLoading = loading;
+    const showResultsSummary = !listIsLoading && applications.length > 0;
 
     return (
         <div className="space-y-6">
@@ -296,151 +444,199 @@ export default function ApplicationsListClient() {
                 </div>
             )}
 
+            {statsLoading ? (
+                <div className="flex justify-center py-6">
+                    <span className="loading loading-spinner loading-md"></span>
+                </div>
+            ) : stats && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="stats bg-base-100 shadow">
+                        <div className="stat">
+                            <div className="stat-figure text-primary">
+                                <i className="fa-solid fa-folder-open text-3xl"></i>
+                            </div>
+                            <div className="stat-title">Total Applications</div>
+                            <div className="stat-value">{stats.totalApplications}</div>
+                            <div className="stat-desc">{personaDescriptor(userRole)}</div>
+                        </div>
+                    </div>
+                    <div className="stats bg-base-100 shadow">
+                        <div className="stat">
+                            <div className="stat-figure text-warning">
+                                <i className="fa-solid fa-hourglass-half text-3xl"></i>
+                            </div>
+                            <div className="stat-title">Awaiting Review</div>
+                            <div className="stat-value text-warning">{stats.awaitingReview}</div>
+                            <div className="stat-desc">Need action</div>
+                        </div>
+                    </div>
+                    <div className="stats bg-base-100 shadow">
+                        <div className="stat">
+                            <div className="stat-figure text-info">
+                                <i className="fa-solid fa-robot text-3xl"></i>
+                            </div>
+                            <div className="stat-title">AI Reviews Pending</div>
+                            <div className="stat-value text-info">{stats.aiPending}</div>
+                            <div className="stat-desc">Queued for AI triage</div>
+                        </div>
+                    </div>
+                    <div className="stats bg-base-100 shadow">
+                        <div className="stat">
+                            <div className="stat-figure text-success">
+                                <i className="fa-solid fa-circle-check text-3xl"></i>
+                            </div>
+                            <div className="stat-title">Accepted by Company</div>
+                            <div className="stat-value text-success">{stats.acceptedByCompany}</div>
+                            <div className="stat-desc">Greenlit offers</div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <ApplicationFilters
                 searchQuery={searchQuery}
                 stageFilter={stageFilter}
                 aiScoreFilter={aiScoreFilter}
                 viewMode={viewMode}
-                onSearchChange={setSearchQuery}
-                onStageFilterChange={setStageFilter}
-                onAIScoreFilterChange={setAIScoreFilter}
+                onSearchChange={handleSearchChange}
+                onStageFilterChange={handleStageFilterChange}
+                onAIScoreFilterChange={handleAIScoreFilterChange}
                 onViewModeChange={setViewMode}
             />
 
-            {applications.length > 0 && (
+            {showResultsSummary && (
                 <div className="text-sm text-base-content/70">
                     Showing {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} applications
                 </div>
             )}
 
-            {/* Grid View */}
-            {viewMode === 'grid' && applications.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {applications.map((application) => (
-                        <ApplicationCard
-                            key={application.id}
-                            application={application}
-                            canAccept={isCompanyUser && !application.accepted_by_company}
-                            isAccepting={acceptingId === application.id}
-                            onAccept={() => handleAcceptApplication(application.id)}
-                            getStageColor={getStageColor}
-                            formatDate={formatDate}
-                        />
-                    ))}
+            {listIsLoading ? (
+                <div className="flex justify-center py-12">
+                    <span className="loading loading-spinner loading-lg"></span>
                 </div>
-            )}
-
-            {/* Bulk Action Bar */}
-            {selectedIds.size > 0 && isRecruiter && (
-                <div className="alert shadow">
-                    <div className="flex-1">
-                        <i className="fa-solid fa-check-square text-xl"></i>
-                        <div>
-                            <h3 className="font-bold">{selectedIds.size} application{selectedIds.size !== 1 ? 's' : ''} selected</h3>
-                            <div className="text-xs">Choose an action to apply to all selected applications</div>
+            ) : (
+                <>
+                    {viewMode === 'grid' && applications.length > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {applications.map((application) => (
+                                <ApplicationCard
+                                    key={application.id}
+                                    application={application}
+                                    canAccept={isCompanyUser && !application.accepted_by_company}
+                                    isAccepting={acceptingId === application.id}
+                                    onAccept={() => handleAcceptApplication(application.id)}
+                                    getStageColor={getStageColor}
+                                    formatDate={formatDate}
+                                />
+                            ))}
                         </div>
-                    </div>
-                    <div className="flex-none flex gap-2">
-                        {isPlatformAdmin && (
-                            <button
-                                onClick={() => handleBulkAction('stage')}
-                                className="btn btn-sm btn-primary gap-2"
-                            >
-                                <i className="fa-solid fa-list-check"></i>
-                                Update Stage
-                            </button>
-                        )}
-                        <button
-                            onClick={() => handleBulkAction('reject')}
-                            className="btn btn-sm btn-error gap-2"
-                        >
-                            <i className="fa-solid fa-ban"></i>
-                            Reject
-                        </button>
-                        <button
-                            onClick={clearSelections}
-                            className="btn btn-sm btn-ghost"
-                        >
-                            Clear
-                        </button>
-                    </div>
-                </div>
-            )}
+                    )}
 
-            {/* Table View */}
-            {viewMode === 'table' && applications.length > 0 && (
-                <div className="card bg-base-100 shadow overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="table table-zebra">
-                            <thead>
-                                <tr>
-                                    {isRecruiter && (
-                                        <th>
-                                            <input
-                                                type="checkbox"
-                                                className="checkbox checkbox-sm"
-                                                checked={selectedIds.size === applications.length && applications.length > 0}
-                                                onChange={toggleSelectAll}
+                    {selectedIds.size > 0 && isRecruiter && (
+                        <div className="alert shadow">
+                            <div className="flex-1">
+                                <i className="fa-solid fa-check-square text-xl"></i>
+                                <div>
+                                    <h3 className="font-bold">{selectedIds.size} application{selectedIds.size !== 1 ? 's' : ''} selected</h3>
+                                    <div className="text-xs">Choose an action to apply to all selected applications</div>
+                                </div>
+                            </div>
+                            <div className="flex-none flex gap-2">
+                                {isPlatformAdmin && (
+                                    <button
+                                        onClick={() => handleBulkAction('stage')}
+                                        className="btn btn-sm btn-primary gap-2"
+                                    >
+                                        <i className="fa-solid fa-list-check"></i>
+                                        Update Stage
+                                    </button>
+                                )}
+                                <button
+                                    onClick={() => handleBulkAction('reject')}
+                                    className="btn btn-sm btn-error gap-2"
+                                >
+                                    <i className="fa-solid fa-ban"></i>
+                                    Reject
+                                </button>
+                                <button
+                                    onClick={clearSelections}
+                                    className="btn btn-sm btn-ghost"
+                                >
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {viewMode === 'table' && applications.length > 0 && (
+                        <div className="card bg-base-100 shadow overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="table table-zebra">
+                                    <thead>
+                                        <tr>
+                                            {isRecruiter && (
+                                                <th>
+                                                    <input
+                                                        type="checkbox"
+                                                        className="checkbox checkbox-sm"
+                                                        checked={selectedIds.size === applications.length && applications.length > 0}
+                                                        onChange={toggleSelectAll}
+                                                    />
+                                                </th>
+                                            )}
+                                            <th>Candidate</th>
+                                            <th>Job</th>
+                                            <th>Company</th>
+                                            <th>AI Score</th>
+                                            <th>Stage</th>
+                                            {isRecruiter && <th>Recruiter</th>}
+                                            <th>Submitted</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {applications.map((application) => (
+                                            <ApplicationTableRow
+                                                key={application.id}
+                                                application={application}
+                                                isSelected={selectedIds.has(application.id)}
+                                                onToggleSelect={() => toggleSelection(application.id)}
+                                                canAccept={isCompanyUser && !application.accepted_by_company}
+                                                isAccepting={acceptingId === application.id}
+                                                onAccept={() => handleAcceptApplication(application.id)}
+                                                getStageColor={getStageColor}
+                                                formatDate={formatDate}
+                                                isRecruiter={isRecruiter}
+                                                isCompanyUser={isCompanyUser}
                                             />
-                                        </th>
-                                    )}
-                                    <th>Candidate</th>
-                                    <th>Job</th>
-                                    <th>Company</th>
-                                    <th>AI Score</th>
-                                    <th>Stage</th>
-                                    {isRecruiter && <th>Recruiter</th>}
-                                    <th>Submitted</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {applications.map((application) => (
-                                    <ApplicationTableRow
-                                        key={application.id}
-                                        application={application}
-                                        isSelected={selectedIds.has(application.id)}
-                                        onToggleSelect={() => toggleSelection(application.id)}
-                                        canAccept={isCompanyUser && !application.accepted_by_company}
-                                        isAccepting={acceptingId === application.id}
-                                        onAccept={() => handleAcceptApplication(application.id)}
-                                        getStageColor={getStageColor}
-                                        formatDate={formatDate}
-                                        isRecruiter={isRecruiter}
-                                        isCompanyUser={isCompanyUser}
-                                    />
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
 
-            {/* Pagination */}
-            <PaginationControls
-                currentPage={pagination.page}
-                totalPages={pagination.total_pages}
-                onPageChange={(page) => setPagination(prev => ({ ...prev, page }))}
-                disabled={loading}
-            />
+                    <PaginationControls
+                        currentPage={pagination.page}
+                        totalPages={pagination.total_pages}
+                        onPageChange={handlePageChange}
+                        disabled={loading}
+                    />
 
-            {/* Empty State */}
-            {applications.length === 0 && !loading && (
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body text-center py-12">
-                        <i className="fa-solid fa-folder-open text-6xl text-base-content/20 mb-4"></i>
-                        <h3 className="text-xl font-semibold">No applications found</h3>
-                        <p className="text-base-content/70">
-                            {searchQuery || stageFilter
-                                ? 'Try adjusting your filters'
-                                : isCompanyUser
-                                    ? 'No candidates have been submitted to your jobs yet'
-                                    : isRecruiter
-                                        ? 'No applications for your assigned candidates yet'
-                                        : 'No applications to display'}
-                        </p>
-                    </div>
-                </div>
+                    {applications.length === 0 && (
+                        <div className="card bg-base-100 shadow">
+                            <div className="card-body text-center py-12">
+                                <i className="fa-solid fa-briefcase text-6xl text-base-content/20"></i>
+                                <h3 className="text-xl font-semibold mt-4">No Applications Found</h3>
+                                <p className="text-base-content/70 mt-2">
+                                    {searchQuery || stageFilter
+                                        ? 'Try adjusting your search or filters'
+                                        : 'No applications have been created yet'}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </>
             )}
 
             {/* Bulk Action Modal */}
