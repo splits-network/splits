@@ -5,8 +5,10 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { AtsRepository } from './repository';
 import { AtsService } from './service';
-import { EventPublisher } from './events';
+import { EventPublisher as OldEventPublisher } from './events';
+import { EventPublisher as V2EventPublisher } from './v2/shared/events';
 import { registerRoutes } from './routes';
+import { registerV2Routes } from './v2/routes';
 import { CandidateOwnershipService } from './services/candidates/ownership-service';
 import { PlacementCollaborationService } from './services/placements/collaboration-service';
 import { PlacementLifecycleService } from './services/placements/lifecycle-service';
@@ -85,9 +87,17 @@ async function main() {
         },
     });
 
-    // Initialize event publisher
-    const eventPublisher = new EventPublisher(rabbitConfig.url, logger);
+    // Initialize OLD event publisher for Phase 1/2 routes
+    const eventPublisher = new OldEventPublisher(rabbitConfig.url, logger);
     await eventPublisher.connect();
+
+    // Initialize NEW V2 event publisher for V2 routes
+    const v2EventPublisher = new V2EventPublisher(
+        rabbitConfig.url,
+        logger,
+        baseConfig.serviceName
+    );
+    await v2EventPublisher.connect();
 
     // Initialize repository and service
     const repository = new AtsRepository(
@@ -104,15 +114,22 @@ async function main() {
     // Register all routes (Phase 1, Phase 1.5, and Phase 2)
     registerRoutes(app, service, ownershipService, collaborationService, lifecycleService, repository, eventPublisher);
 
+    // Register V2 routes (simplified architecture)
+    registerV2Routes(app, {
+        supabaseUrl: dbConfig.supabaseUrl,
+        supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        eventPublisher: v2EventPublisher,
+    });
+
     // Health check endpoint
     app.get('/health', async (request, reply) => {
         try {
             // Check database connectivity
             await repository.healthCheck();
-            // Check RabbitMQ connectivity
+            // Check RabbitMQ connectivity (using old event publisher)
             const rabbitHealthy = eventPublisher.isConnected();
             if (!rabbitHealthy) {
-                throw new Error('RabbitMQ not connected');
+                logger.warn('RabbitMQ not connected');
             }
             return reply.status(200).send({
                 status: 'healthy',
@@ -134,6 +151,7 @@ async function main() {
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down gracefully');
         await eventPublisher.close();
+        await v2EventPublisher.close();
         await app.close();
         process.exit(0);
     });

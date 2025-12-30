@@ -1,27 +1,57 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ServiceRegistry } from '../../clients';
 import { requireRoles } from '../../rbac';
+import { buildAuthHeaders } from '../../helpers/auth-headers';
 
 /**
  * Companies Routes
  * - Company CRUD operations
  * - Company-scoped resources (applications, candidates)
+ * 
+ * NEW PATTERN: Use buildAuthHeaders() for role-based scoping
+ * - Sends x-clerk-user-id and x-organization-id headers
+ * - Backend resolves role via database JOINs (no x-user-role header)
  */
 export function registerCompaniesRoutes(app: FastifyInstance, services: ServiceRegistry) {
     const atsService = () => services.get('ats');
     const getCorrelationId = (request: FastifyRequest) => (request as any).correlationId;
 
-    // List all companies (platform admins only)
+    /**
+     * NEW ENDPOINT: List companies with role-based scoping
+     * - Platform Admin: All companies
+     * - Company User: Only their company
+     * - Recruiter: All companies (marketplace model)
+     */
     app.get('/api/companies', {
+        preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager', 'platform_admin'], services),
         schema: {
-            description: 'List all companies',
+            description: 'List companies with role-based scoping',
+            tags: ['companies'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const correlationId = getCorrelationId(request);
+        const authHeaders = buildAuthHeaders(request);
+        const queryString = new URLSearchParams(request.query as any).toString();
+        const path = queryString ? `/companies?${queryString}` : '/companies';
+        const data = await atsService().get(path, undefined, correlationId, authHeaders);
+        return reply.send(data);
+    });
+
+    /**
+     * LEGACY ENDPOINT: For backward compatibility
+     * List all companies (no role scoping)
+     */
+    app.get('/api/companies/legacy', {
+        schema: {
+            description: 'List all companies (legacy endpoint)',
             tags: ['companies'],
             security: [{ clerkAuth: [] }],
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const correlationId = getCorrelationId(request);
         const queryString = new URLSearchParams(request.query as any).toString();
-        const path = queryString ? `/companies?${queryString}` : '/companies';
+        const path = queryString ? `/companies/legacy?${queryString}` : '/companies/legacy';
         const data = await atsService().get(path, undefined, correlationId);
         return reply.send(data);
     });

@@ -3,11 +3,14 @@ import { ServiceRegistry } from '../../clients';
 import { requireRoles, AuthenticatedRequest, isPlatformAdmin, isCompanyAdmin, isHiringManager, isRecruiter } from '../../rbac';
 import { registerMeRecruitersRoute } from './me-recruiters';
 import { convertClerkIdsInBody } from '../../clerk-id-converter';
+import { buildAuthHeaders } from '../../helpers/auth-headers';
 
 /**
  * Determine the primary user role for header passing to backend services
- * Uses the role that was matched by requireRoles() middleware
- * This is for logging/audit purposes - authorization already enforced by requireRoles()
+ * LEGACY HELPER - Used by old endpoints that pass x-user-role header
+ * 
+ * NEW PATTERN: Use buildAuthHeaders() instead - does NOT send x-user-role
+ * Backend resolves role via database JOINs for security
  * 
  * Maps portal role names to ATS service role names:
  * - platform_admin -> admin
@@ -47,7 +50,13 @@ function determineUserRole(req: AuthenticatedRequest): string {
 /**
  * Candidates Routes (API Gateway)
  * 
- * Simple proxy to ATS Service - all business logic moved to backend
+ * Migration to direct database queries with role-based JOINs for 10-25x performance improvement.
+ * See: docs/api-role-based-scoping-migration-plan.md
+ * 
+ * Pattern:
+ * - Gateway enforces authorization via requireRoles() middleware
+ * - Backend services use buildAuthHeaders() (x-clerk-user-id, x-organization-id)
+ * - NO x-user-role header - backend resolves role via database JOINs for security
  */
 export function registerCandidatesRoutes(app: FastifyInstance, services: ServiceRegistry) {
     // Register sub-routes
@@ -56,11 +65,31 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
     const networkService = () => services.get('network');
     const getCorrelationId = (request: FastifyRequest) => (request as any).correlationId;
 
-    // List candidates
+    // List candidates (NEW PATTERN - uses buildAuthHeaders())
     app.get('/api/candidates', {
         preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager', 'platform_admin'], services),
         schema: {
-            description: 'List all candidates',
+            description: 'List all candidates with role-based scoping',
+            tags: ['candidates'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const req = request as AuthenticatedRequest;
+        const correlationId = getCorrelationId(request);
+        const authHeaders = buildAuthHeaders(request);
+        
+        const queryParams = new URLSearchParams(request.query as any);
+        const path = queryParams.toString() ? `/candidates?${queryParams.toString()}` : '/candidates';
+        
+        const data = await atsService().get(path, undefined, correlationId, authHeaders);
+        return reply.send(data);
+    });
+
+    // LEGACY: List candidates (old pattern with x-user-role)
+    app.get('/api/candidates/legacy', {
+        preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager', 'platform_admin'], services),
+        schema: {
+            description: 'List all candidates (legacy endpoint)',
             tags: ['candidates'],
             security: [{ clerkAuth: [] }],
         },
@@ -70,7 +99,7 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         const userRole = determineUserRole(req);
         
         const queryParams = new URLSearchParams(request.query as any);
-        const path = queryParams.toString() ? `/candidates?${queryParams.toString()}` : '/candidates';
+        const path = queryParams.toString() ? `/candidates/legacy?${queryParams.toString()}` : '/candidates/legacy';
         
         const data = await atsService().get(path, undefined, correlationId, {
             'x-clerk-user-id': req.auth.clerkUserId,

@@ -2,10 +2,66 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { AtsService } from '../../service';
 import { BadRequestError } from '@splits-network/shared-fastify';
 
+/**
+ * Extract user context from headers (set by API Gateway)
+ * NEW PATTERN: Backend resolves role via database JOINs
+ * NO x-user-role header - security via database queries
+ */
+function requireUserContext(request: FastifyRequest): { clerkUserId: string; organizationId: string | null } {
+    const clerkUserId = request.headers['x-clerk-user-id'] as string;
+    const organizationId = (request.headers['x-organization-id'] as string) || null;
+
+    if (!clerkUserId) {
+        throw new Error('Missing x-clerk-user-id header');
+    }
+
+    return { clerkUserId, organizationId };
+}
+
 export function registerCompanyRoutes(app: FastifyInstance, service: AtsService) {
-    // Get all companies or filter by org_id
+    /**
+     * NEW ENDPOINT: Get companies with role-based scoping
+     * - Platform Admin: All companies
+     * - Company User: Only their company
+     * - Recruiter: All companies (marketplace model)
+     * 
+     * Query params: search, sort_by, sort_order, page, limit
+     * Returns: { data: Company[], pagination: { total, page, limit, total_pages } }
+     */
     app.get(
         '/companies',
+        async (request: FastifyRequest<{
+            Querystring: {
+                search?: string;
+                sort_by?: string;
+                sort_order?: 'asc' | 'desc';
+                page?: number;
+                limit?: number;
+            };
+        }>, reply: FastifyReply) => {
+            const { clerkUserId, organizationId } = requireUserContext(request);
+
+            const result = await service.getCompaniesForUser(clerkUserId, organizationId, {
+                search: request.query.search,
+                sort_by: request.query.sort_by,
+                sort_order: request.query.sort_order,
+                page: request.query.page ? parseInt(request.query.page.toString()) : undefined,
+                limit: request.query.limit ? parseInt(request.query.limit.toString()) : undefined,
+            });
+
+            return reply.send({
+                data: result.data,
+                pagination: result.pagination,
+            });
+        }
+    );
+
+    /**
+     * LEGACY ENDPOINT: For backward compatibility
+     * Get all companies or filter by org_id
+     */
+    app.get(
+        '/companies/legacy',
         async (request: FastifyRequest<{ Querystring: { org_id?: string } }>, reply: FastifyReply) => {
             const { org_id } = request.query;
             if (org_id) {

@@ -1,4 +1,4 @@
-import { loadBaseConfig, loadDatabaseConfig, loadStripeConfig } from '@splits-network/shared-config';
+import { loadBaseConfig, loadDatabaseConfig, loadStripeConfig, loadRabbitMQConfig } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
@@ -6,11 +6,14 @@ import swaggerUi from '@fastify/swagger-ui';
 import { BillingRepository } from './repository';
 import { BillingService } from './service';
 import { registerRoutes } from './routes';
+import { registerV2Routes } from './v2/routes';
+import { EventPublisher as V2EventPublisher } from './v2/shared/events';
 import * as Sentry from '@sentry/node';
 
 async function main() {
     const baseConfig = loadBaseConfig('billing-service');
     const dbConfig = loadDatabaseConfig();
+    const rabbitConfig = loadRabbitMQConfig();
     const stripeConfig = loadStripeConfig();
 
     const logger = createLogger({
@@ -99,8 +102,27 @@ async function main() {
     );
     const service = new BillingService(repository, stripeConfig.secretKey, logger);
 
+    const v2EventPublisher = new V2EventPublisher(
+        rabbitConfig.url,
+        logger,
+        baseConfig.serviceName
+    );
+
+    try {
+        await v2EventPublisher.connect();
+        logger.info('Billing V2 event publisher connected');
+    } catch (error) {
+        logger.warn({ err: error }, 'Failed to connect Billing V2 event publisher - continuing without events');
+    }
+
     // Register all routes (plans, subscriptions, webhooks, payouts)
     registerRoutes(app, service, stripeConfig.webhookSecret);
+
+    await registerV2Routes(app, {
+        supabaseUrl: dbConfig.supabaseUrl,
+        supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        eventPublisher: v2EventPublisher,
+    });
 
     // Health check endpoint
     app.get('/health', async (request, reply) => {
@@ -121,6 +143,13 @@ async function main() {
                 error: error instanceof Error ? error.message : 'Unknown error',
             });
         }
+    });
+
+    process.on('SIGTERM', async () => {
+        logger.info('SIGTERM received, shutting down billing service');
+        await v2EventPublisher.close();
+        await app.close();
+        process.exit(0);
     });
 
     // Start server

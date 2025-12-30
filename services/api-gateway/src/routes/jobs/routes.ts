@@ -2,29 +2,54 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ServiceRegistry } from '../../clients';
 import { requireRoles, AuthenticatedRequest } from '../../rbac';
 import { convertClerkIdsInBody } from '../../clerk-id-converter';
+import { buildAuthHeaders } from '../../helpers/auth-headers';
 
 /**
  * Jobs Routes (API Gateway)
+ * Part of API Role-Based Scoping Migration (Phase 3 - Jobs)
  * 
- * Simple proxy - no business logic, no entity resolution.
- * Backend services handle filtering and authorization.
+ * Uses buildAuthHeaders() helper for consistent auth context.
+ * NO x-user-role header - backend resolves role from database JOINs.
+ * 
+ * @see docs/migration/MIGRATION-PROGRESS.md
+ * @see docs/migration/DATABASE-JOIN-PATTERN.md
  */
 export function registerJobsRoutes(app: FastifyInstance, services: ServiceRegistry) {
     const atsService = () => services.get('ats');
     const networkService = () => services.get('network');
     const getCorrelationId = (request: FastifyRequest) => (request as any).correlationId;
 
-    // List jobs (unfiltered - use /api/roles for recruiter-filtered view)
+    /**
+     * NEW: List jobs (role-filtered by backend via database JOINs)
+     * Backend determines data scope - no x-user-role header needed
+     */
     app.get('/api/jobs', {
         schema: {
-            description: 'List all jobs (unfiltered)',
+            description: 'List jobs with role-based filtering',
+            tags: ['jobs'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const correlationId = getCorrelationId(request);
+        const authHeaders = buildAuthHeaders(request);
+        
+        const queryString = new URLSearchParams(request.query as any).toString();
+        const path = queryString ? `/jobs?${queryString}` : '/jobs';
+        const data = await atsService().get(path, undefined, correlationId, authHeaders);
+        return reply.send(data);
+    });
+
+    // LEGACY: List jobs (unfiltered)
+    app.get('/api/jobs/legacy', {
+        schema: {
+            description: 'List all jobs (unfiltered - legacy)',
             tags: ['jobs'],
             security: [{ clerkAuth: [] }],
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const correlationId = getCorrelationId(request);
         const queryString = new URLSearchParams(request.query as any).toString();
-        const path = queryString ? `/jobs?${queryString}` : '/jobs';
+        const path = queryString ? `/jobs/legacy?${queryString}` : '/jobs/legacy';
         const data = await atsService().get(path, undefined, correlationId);
         return reply.send(data);
     });

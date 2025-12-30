@@ -22,6 +22,74 @@ export class JobService {
         return { jobs, total };
     }
 
+    /**
+     * NEW: Get jobs for a specific user with role-based scoping
+     * Part of API Role-Based Scoping Migration (Phase 3 - Jobs)
+     * 
+     * Backend determines data scope via database JOINs - NO userRole parameter.
+     * 
+     * Returns:
+     * - Recruiters: All active jobs (marketplace)
+     * - Company users: Jobs from their organization only
+     * - Candidates: All active jobs
+     * 
+     * @see docs/migration/MIGRATION-PROGRESS.md
+     */
+    async getJobsForUser(
+        clerkUserId: string,
+        organizationId: string | null,
+        filters: {
+            search?: string;
+            status?: string;
+            location?: string;
+            employment_type?: string;
+            sort_by?: string;
+            sort_order?: 'asc' | 'desc';
+            page?: number;
+            limit?: number;
+        }
+    ): Promise<{
+        data: any[];
+        pagination: {
+            total: number;
+            page: number;
+            limit: number;
+            total_pages: number;
+        };
+    }> {
+        const page = filters.page || 1;
+        const limit = filters.limit || 25;
+
+        // Call repository with role resolution via database JOINs
+        const { data, total } = await this.repository.findJobsForUser(
+            clerkUserId,
+            organizationId,
+            {
+                search: filters.search,
+                status: filters.status,
+                location: filters.location,
+                employment_type: filters.employment_type,
+                sort_by: filters.sort_by,
+                sort_order: filters.sort_order?.toUpperCase() as 'ASC' | 'DESC' || 'DESC',
+                page,
+                limit,
+            }
+        );
+
+        // Build pagination object
+        const total_pages = Math.ceil(total / limit);
+
+        return {
+            data,
+            pagination: {
+                total,
+                page,
+                limit,
+                total_pages,
+            },
+        };
+    }
+
     async getJobById(id: string): Promise<Job> {
         const job = await this.repository.findJobById(id);
         if (!job) {

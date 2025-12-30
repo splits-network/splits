@@ -1,79 +1,35 @@
+/**
+ * proposals/routes.ts
+ * Proposals Routes using Direct Supabase Query Pattern
+ * 
+ * Key improvements:
+ * - Uses buildAuthHeaders() helper for consistent auth context
+ * - Role-based filtering handled by backend via database JOINs
+ * - No userRole in headers - backend resolves from database records
+ * - Cleaner, more maintainable code
+ * 
+ * @see docs/migration/MIGRATION-PROGRESS.md
+ * @see docs/migration/DATABASE-JOIN-PATTERN.md
+ */
+
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ServiceRegistry } from '../../clients';
 import { requireRoles, AuthenticatedRequest } from '../../rbac';
-
-/**
- * Unified Proposals Routes (Phase 1A) - API Gateway
- * 
- * Passes raw Clerk user ID and role to ATS Service.
- * NO business logic here - ATS Service handles entity resolution internally.
- * 
- * @see docs/guidance/unified-proposals-system.md
- */
+import { buildAuthHeaders } from '../../helpers/auth-headers';
 
 export function registerProposalsRoutes(app: FastifyInstance, services: ServiceRegistry) {
     const atsService = () => services.get('ats');
-    const networkService = () => services.get('network');
     const getCorrelationId = (request: FastifyRequest) => (request as any).correlationId;
 
     /**
-     * Determine user's primary role from Clerk memberships AND network service
-     * 
-     * Important: Recruiters are NOT in memberships - they're stored in network.recruiters table
-     * We must check network service for recruiter status
-     */
-    async function determineUserRole(auth: any, correlationId?: string): Promise<'candidate' | 'recruiter' | 'company' | 'admin'> {
-        const memberships = auth.memberships || [];
-        
-        if (memberships.some((m: any) => m.role === 'platform_admin')) {
-            return 'admin';
-        }
-        if (memberships.some((m: any) => m.role === 'company_admin' || m.role === 'hiring_manager')) {
-            return 'company';
-        }
-        
-        // Check if user is a recruiter by querying network service
-        try {
-            const recruiterResponse: any = await networkService().get(
-                `/recruiters/by-user/${auth.userId}`,
-                undefined,
-                correlationId
-            );
-            
-            if (recruiterResponse?.data) {
-                return 'recruiter';
-            }
-        } catch (error) {
-            // Not a recruiter - continue to candidate fallback
-        }
-        
-        return 'candidate';
-    }
-
-    /**
-     * Build headers for ATS service requests
-     * Includes Clerk user ID, role, and organization_id for company users
-     */
-    function buildHeaders(auth: any, userRole: string): Record<string, string> {
-        const headers: Record<string, string> = {
-            'x-clerk-user-id': auth.clerkUserId,
-            'x-user-role': userRole,
-        };
-
-        // For company users, pass organization_id from first membership
-        // ATS service needs this to resolve Clerk user ID → organization_id → company_id
-        if (userRole === 'company' && auth.memberships && auth.memberships.length > 0) {
-            headers['x-organization-id'] = auth.memberships[0].organization_id;
-        }
-
-        return headers;
-    }
-
-    /**
      * GET /api/proposals
-     * Get all proposals for current user (role-filtered)
+     * Get all proposals for current user (role-filtered by backend)
+     * 
+     * Backend (ATS Service) determines data scope via database JOINs.
+     * Role resolved from database records (recruiters, memberships, candidates).
      */
     app.get('/api/proposals', {
+        preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager', 'platform_admin', 'candidate'], services),
         schema: {
             description: 'Get all proposals for current user',
             tags: ['proposals'],
@@ -83,17 +39,14 @@ export function registerProposalsRoutes(app: FastifyInstance, services: ServiceR
         const req = request as AuthenticatedRequest;
         const correlationId = getCorrelationId(request);
 
-        // Determine user role (no entity resolution in gateway)
-        const userRole = await determineUserRole(req.auth, correlationId);
+        // Use helper to build auth headers
+        const authHeaders = buildAuthHeaders(request);
 
         // Forward query params directly to ATS service
         const queryString = new URLSearchParams(request.query as any).toString();
-        const path = `/api/proposals?${queryString}`;
+        const path = `/api/proposals${queryString ? `?${queryString}` : ''}`;
 
-        // Build headers including organization_id for company users
-        const headers = buildHeaders(req.auth, userRole);
-
-        const data = await atsService().get(path, undefined, correlationId, headers);
+        const data = await atsService().get(path, undefined, correlationId, authHeaders);
         return reply.send(data);
     });
 
@@ -102,19 +55,17 @@ export function registerProposalsRoutes(app: FastifyInstance, services: ServiceR
      * Get proposals requiring user's action
      */
     app.get('/api/proposals/actionable', {
+        preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager', 'platform_admin', 'candidate'], services),
         schema: {
             description: 'Get proposals requiring your action',
             tags: ['proposals'],
             security: [{ clerkAuth: [] }],
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
-        const req = request as AuthenticatedRequest;
         const correlationId = getCorrelationId(request);
-
-        const userRole = await determineUserRole(req.auth, correlationId);
-        const headers = buildHeaders(req.auth, userRole);
+        const authHeaders = buildAuthHeaders(request);
         
-        const data = await atsService().get('/api/proposals/actionable', undefined, correlationId, headers);
+        const data = await atsService().get('/api/proposals/actionable', undefined, correlationId, authHeaders);
         return reply.send(data);
     });
 
@@ -123,19 +74,17 @@ export function registerProposalsRoutes(app: FastifyInstance, services: ServiceR
      * Get proposals awaiting response from others
      */
     app.get('/api/proposals/pending', {
+        preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager', 'platform_admin', 'candidate'], services),
         schema: {
             description: 'Get proposals awaiting response from others',
             tags: ['proposals'],
             security: [{ clerkAuth: [] }],
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
-        const req = request as AuthenticatedRequest;
         const correlationId = getCorrelationId(request);
-
-        const userRole = await determineUserRole(req.auth, correlationId);
-        const headers = buildHeaders(req.auth, userRole);
+        const authHeaders = buildAuthHeaders(request);
         
-        const data = await atsService().get('/api/proposals/pending', undefined, correlationId, headers);
+        const data = await atsService().get('/api/proposals/pending', undefined, correlationId, authHeaders);
         return reply.send(data);
     });
 
@@ -144,19 +93,17 @@ export function registerProposalsRoutes(app: FastifyInstance, services: ServiceR
      * Get summary statistics
      */
     app.get('/api/proposals/summary', {
+        preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager', 'platform_admin', 'candidate'], services),
         schema: {
             description: 'Get proposal summary statistics',
             tags: ['proposals'],
             security: [{ clerkAuth: [] }],
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
-        const req = request as AuthenticatedRequest;
         const correlationId = getCorrelationId(request);
-
-        const userRole = await determineUserRole(req.auth, correlationId);
-        const headers = buildHeaders(req.auth, userRole);
+        const authHeaders = buildAuthHeaders(request);
         
-        const data = await atsService().get('/api/proposals/summary', undefined, correlationId, headers);
+        const data = await atsService().get('/api/proposals/summary', undefined, correlationId, authHeaders);
         return reply.send(data);
     });
 
@@ -165,20 +112,18 @@ export function registerProposalsRoutes(app: FastifyInstance, services: ServiceR
      * Get single proposal details
      */
     app.get('/api/proposals/:id', {
+        preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager', 'platform_admin', 'candidate'], services),
         schema: {
             description: 'Get proposal by ID',
             tags: ['proposals'],
             security: [{ clerkAuth: [] }],
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
-        const req = request as AuthenticatedRequest;
         const { id } = request.params as { id: string };
         const correlationId = getCorrelationId(request);
-
-        const userRole = await determineUserRole(req.auth, correlationId);
-        const headers = buildHeaders(req.auth, userRole);
+        const authHeaders = buildAuthHeaders(request);
         
-        const data = await atsService().get(`/api/proposals/${id}`, undefined, correlationId, headers);
+        const data = await atsService().get(`/api/proposals/${id}`, undefined, correlationId, authHeaders);
         return reply.send(data);
     });
 
@@ -187,6 +132,7 @@ export function registerProposalsRoutes(app: FastifyInstance, services: ServiceR
      * Accept a proposal (candidate accepts job opportunity, company accepts application)
      */
     app.post('/api/proposals/:id/accept', {
+        preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager', 'candidate'], services),
         schema: {
             description: 'Accept a proposal',
             tags: ['proposals'],
@@ -195,11 +141,10 @@ export function registerProposalsRoutes(app: FastifyInstance, services: ServiceR
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const { id } = request.params as { id: string };
         const correlationId = getCorrelationId(request);
+        const authHeaders = buildAuthHeaders(request);
 
         // Map to appropriate ATS endpoint based on stage
-        // For recruiter_proposed → candidate accepting job opportunity
-        // For submitted → company accepting application
-        const data = await atsService().post(`/applications/${id}/accept`, request.body, correlationId);
+        const data = await atsService().post(`/applications/${id}/accept`, request.body, correlationId, authHeaders);
         return reply.send(data);
     });
 
@@ -208,6 +153,7 @@ export function registerProposalsRoutes(app: FastifyInstance, services: ServiceR
      * Decline a proposal
      */
     app.post('/api/proposals/:id/decline', {
+        preHandler: requireRoles(['recruiter', 'company_admin', 'hiring_manager', 'candidate'], services),
         schema: {
             description: 'Decline a proposal',
             tags: ['proposals'],
@@ -216,9 +162,10 @@ export function registerProposalsRoutes(app: FastifyInstance, services: ServiceR
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const { id } = request.params as { id: string };
         const correlationId = getCorrelationId(request);
+        const authHeaders = buildAuthHeaders(request);
 
         // Map to appropriate ATS endpoint
-        const data = await atsService().post(`/applications/${id}/decline`, request.body, correlationId);
+        const data = await atsService().post(`/applications/${id}/decline`, request.body, correlationId, authHeaders);
         return reply.send(data);
     });
 }

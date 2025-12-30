@@ -34,6 +34,7 @@ export class AtsService {
     // Delegate to domain services for backward compatibility
     // Companies
     async getCompanies() { return this.companies.getCompanies(); }
+    async getCompaniesForUser(clerkUserId: string, organizationId: string | null, filters: any) { return this.companies.getCompaniesForUser(clerkUserId, organizationId, filters); }
     async getCompanyById(id: string) { return this.companies.getCompanyById(id); }
     async getCompanyByOrgId(orgId: string) { return this.companies.getCompanyByOrgId(orgId); }
     async createCompany(name: string, identityOrgId?: string, profileFields?: any) { return this.companies.createCompany(name, identityOrgId, profileFields); }
@@ -50,6 +51,20 @@ export class AtsService {
         limit?: number; 
         offset?: number;
     }) { return this.jobs.getJobs(filters); }
+    async getJobsForUser(
+        clerkUserId: string,
+        organizationId: string | null,
+        filters: {
+            search?: string;
+            status?: string;
+            location?: string;
+            employment_type?: string;
+            sort_by?: string;
+            sort_order?: 'asc' | 'desc';
+            page?: number;
+            limit?: number;
+        }
+    ) { return this.jobs.getJobsForUser(clerkUserId, organizationId, filters); }
     async getJobById(id: string) { return this.jobs.getJobById(id); }
     async getJobsByCompanyId(companyId: string) { return this.jobs.getJobsByCompanyId(companyId); }
     async getJobsByIds(ids: string[]) { return this.jobs.getJobsByIds(ids); }
@@ -58,6 +73,18 @@ export class AtsService {
 
     // Candidates
     async getCandidates(filters?: { search?: string; limit?: number; offset?: number; recruiter_id?: string }) { return this.candidates.getCandidates(filters); }
+    async getCandidatesForUser(
+        clerkUserId: string,
+        organizationId: string | null,
+        filters: {
+            search?: string;
+            verification_status?: string;
+            sort_by?: string;
+            sort_order?: 'asc' | 'desc';
+            page?: number;
+            limit?: number;
+        }
+    ) { return this.candidates.getCandidatesForUser(clerkUserId, organizationId, filters); }
     async getCandidateById(id: string) { return this.candidates.getCandidateById(id); }
     async findOrCreateCandidate(email: string, fullName: string, linkedinUrl?: string, recruiterId?: string) { return this.candidates.findOrCreateCandidate(email, fullName, linkedinUrl, recruiterId); }
     async updateCandidate(id: string, updates: { full_name?: string; email?: string; linkedin_url?: string; github_url?: string; portfolio_url?: string; phone?: string; location?: string; current_title?: string; current_company?: string; bio?: string; skills?: string }) { return this.candidates.updateCandidate(id, updates); }
@@ -66,6 +93,22 @@ export class AtsService {
 
     // Applications
     async getApplications(filters?: { recruiter_id?: string; job_id?: string; stage?: string }) { return this.applications.getApplications(filters); }
+    async getApplicationsForUser(
+        clerkUserId: string,
+        organizationId: string | null,
+        filters: {
+            search?: string;
+            job_id?: string;
+            candidate_id?: string;
+            recruiter_id?: string;
+            company_id?: string;
+            stage?: string;
+            sort_by?: string;
+            sort_order?: 'asc' | 'desc';
+            page?: number;
+            limit?: number;
+        }
+    ) { return this.applications.getApplicationsForUser(clerkUserId, organizationId, filters); }
     async getApplicationsPaginated(params: any, correlationId?: string) { return this.applications.getApplicationsPaginated(params, correlationId); }
     async getApplicationById(id: string) { return this.applications.getApplicationById(id); }
     async getApplicationsByJobId(jobId: string) { return this.applications.getApplicationsByJobId(jobId); }

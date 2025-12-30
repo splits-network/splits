@@ -3,10 +3,72 @@ import { AtsService } from '../../service';
 import { BadRequestError } from '@splits-network/shared-fastify';
 import { CreateJobDTO } from '@splits-network/shared-types';
 
+/**
+ * Extract user context from gateway-provided headers
+ * 
+ * CRITICAL: We do NOT use x-user-role anymore. Role is resolved from database.
+ * Only clerk_user_id and optional organization_id are needed.
+ */
+function requireUserContext(request: FastifyRequest): { clerkUserId: string; organizationId: string | null } {
+    const clerkUserId = request.headers['x-clerk-user-id'] as string;
+    const organizationId = (request.headers['x-organization-id'] as string) || null;
+    
+    if (!clerkUserId) {
+        throw new Error('Missing x-clerk-user-id header');
+    }
+    
+    return { clerkUserId, organizationId };
+}
+
 export function registerJobRoutes(app: FastifyInstance, service: AtsService) {
-    // Get all jobs with optional filters
+    /**
+     * NEW: Get jobs for current user (role-filtered by backend via database JOINs)
+     * 
+     * Backend determines data scope via database JOINs to:
+     *   - network.recruiters (recruiter role - marketplace jobs)
+     *   - identity.memberships (company_admin, hiring_manager - org jobs only)
+     *   - ats.candidates (candidate role - all active jobs)
+     */
     app.get(
         '/jobs',
+        async (request: FastifyRequest<{ 
+            Querystring: { 
+                page?: string;
+                limit?: string;
+                search?: string;
+                status?: string;
+                location?: string;
+                employment_type?: string;
+                sort_by?: string;
+                sort_order?: 'asc' | 'desc';
+            } 
+        }>, reply: FastifyReply) => {
+            const { clerkUserId, organizationId } = requireUserContext(request);
+            
+            const page = request.query.page ? parseInt(request.query.page, 10) : 1;
+            const limit = request.query.limit ? parseInt(request.query.limit, 10) : 25;
+            
+            const result = await service.getJobsForUser(clerkUserId, organizationId, {
+                search: request.query.search,
+                status: request.query.status,
+                location: request.query.location,
+                employment_type: request.query.employment_type,
+                sort_by: request.query.sort_by,
+                sort_order: request.query.sort_order,
+                page,
+                limit,
+            });
+            
+            return reply.send({ 
+                data: result.data,
+                pagination: result.pagination,
+            });
+        }
+    );
+
+    // LEGACY: Get all jobs with optional filters (OLD PATTERN)
+    app.get(
+        '/jobs/legacy',
         async (request: FastifyRequest<{ 
             Querystring: { 
                 status?: string; 

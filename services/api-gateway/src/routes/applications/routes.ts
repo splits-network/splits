@@ -2,12 +2,17 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ServiceRegistry } from '../../clients';
 import { requireRoles, AuthenticatedRequest, isRecruiter } from '../../rbac';
 import { convertClerkIdsInBody } from '../../clerk-id-converter';
+import { buildAuthHeaders } from '../../helpers/auth-headers';
 
 /**
  * Applications Routes (API Gateway)
+ * Part of API Role-Based Scoping Migration (Phase 2 - Applications)
  * 
- * Passes raw Clerk user ID to ATS Service.
- * NO business logic here - ATS Service handles entity resolution internally.
+ * Uses buildAuthHeaders() helper for consistent auth context.
+ * NO x-user-role header - backend resolves role from database JOINs.
+ * 
+ * @see docs/migration/MIGRATION-PROGRESS.md
+ * @see docs/migration/DATABASE-JOIN-PATTERN.md
  */
 export function registerApplicationsRoutes(app: FastifyInstance, services: ServiceRegistry) {
     const atsService = () => services.get('ats');
@@ -40,7 +45,9 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
     }
 
     /**
-     * Determine user's primary role from Clerk memberships
+     * LEGACY: Determine user's primary role from Clerk memberships
+     * Used by old endpoints that still need x-user-role header.
+     * NEW endpoints should use buildAuthHeaders() instead.
      */
     function determineUserRole(auth: any): 'candidate' | 'recruiter' | 'company' | 'admin' {
         const memberships = auth.memberships || [];
@@ -57,7 +64,30 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
         return 'candidate';
     }
 
-    // List applications with server-side pagination and filtering
+    /**
+     * NEW: List applications with server-side pagination, search, and filters
+     * Backend determines data scope via database JOINs (no x-user-role header)
+     */
+    app.get('/api/applications', {
+        schema: {
+            description: 'List applications with pagination, search, and filters',
+            tags: ['applications'],
+            security: [{ clerkAuth: [] }],
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
+        const correlationId = getCorrelationId(request);
+        const authHeaders = buildAuthHeaders(request);
+        
+        // Build query params - pass query filters as-is
+        const queryParams = new URLSearchParams(request.query as any);
+        const queryString = queryParams.toString();
+        const path = queryString ? `/applications?${queryString}` : '/applications';
+        
+        const data = await atsService().get(path, undefined, correlationId, authHeaders);
+        return reply.send(data);
+    });
+
+    // LEGACY: List applications with server-side pagination and filtering (OLD PATTERN with x-user-role)
     app.get('/api/applications/paginated', {
         schema: {
             description: 'List applications with pagination, search, and filters',
@@ -83,20 +113,6 @@ export function registerApplicationsRoutes(app: FastifyInstance, services: Servi
         };
         
         const data = await atsService().get(path, undefined, correlationId, headers);
-        return reply.send(data);
-    });
-
-    // List applications (legacy endpoint)
-    app.get('/api/applications', {
-        schema: {
-            description: 'List all applications',
-            tags: ['applications'],
-            security: [{ clerkAuth: [] }],
-        },
-    }, async (request: FastifyRequest, reply: FastifyReply) => {
-        const queryString = new URLSearchParams(request.query as any).toString();
-        const path = queryString ? `/applications?${queryString}` : '/applications';
-        const data = await atsService().get(path);
         return reply.send(data);
     });
 

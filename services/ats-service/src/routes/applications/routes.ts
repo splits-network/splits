@@ -8,13 +8,36 @@ import { EventPublisher } from '../../events';
 
 /**
  * Applications Routes
+ * Part of API Role-Based Scoping Migration (Phase 2 - Applications)
  * 
- * Receives Clerk user ID from API Gateway (in x-clerk-user-id header).
- * Services handle entity resolution internally (e.g., Clerk userId → recruiter_id).
+ * Uses direct database queries with role resolution via JOINs.
+ * NO userRole in headers - backend resolves role from database records.
+ * 
+ * @see docs/migration/MIGRATION-PROGRESS.md
+ * @see docs/migration/DATABASE-JOIN-PATTERN.md
  */
 
 /**
  * Extract user context from gateway-provided headers
+ * 
+ * CRITICAL: We do NOT use x-user-role anymore. Role is resolved from database.
+ * Only clerk_user_id and optional organization_id are needed.
+ */
+function requireUserContext(request: FastifyRequest): { clerkUserId: string; organizationId: string | null } {
+    const clerkUserId = request.headers['x-clerk-user-id'] as string;
+    const organizationId = (request.headers['x-organization-id'] as string) || null;
+    
+    if (!clerkUserId) {
+        throw new Error('Missing x-clerk-user-id header');
+    }
+    
+    return { clerkUserId, organizationId };
+}
+
+/**
+ * LEGACY: Extract user context from gateway-provided headers (OLD PATTERN)
+ * This is kept for backward compatibility with old endpoints.
+ * NEW endpoints should use requireUserContext() instead.
  */
 function getUserContext(request: FastifyRequest): { clerkUserId: string; userRole: 'candidate' | 'recruiter' | 'company' | 'admin' } {
     const clerkUserId = request.headers['x-clerk-user-id'] as string;
@@ -31,7 +54,54 @@ function getUserContext(request: FastifyRequest): { clerkUserId: string; userRol
 }
 
 export function registerApplicationRoutes(app: FastifyInstance, service: AtsService, repository: AtsRepository, eventPublisher: EventPublisher) {
-    // Get paginated applications with optional filters and search
+    /**
+     * NEW: Get applications for current user (role-filtered by backend via database JOINs)
+     * 
+     * Backend determines data scope via database JOINs to:
+     *   - network.recruiters (recruiter role)
+     *   - identity.memberships (company_admin, hiring_manager, platform_admin)
+     *   - ats.candidates (candidate role)
+     */
+    app.get(
+        '/applications',
+        async (request: FastifyRequest<{ 
+            Querystring: { 
+                page?: string;
+                limit?: string;
+                search?: string;
+                stage?: string;
+                job_id?: string;
+                candidate_id?: string;
+                company_id?: string;
+                sort_by?: string;
+                sort_order?: 'asc' | 'desc';
+            } 
+        }>, reply: FastifyReply) => {
+            const { clerkUserId, organizationId } = requireUserContext(request);
+            
+            const page = request.query.page ? parseInt(request.query.page, 10) : 1;
+            const limit = request.query.limit ? parseInt(request.query.limit, 10) : 25;
+            
+            const result = await service.getApplicationsForUser(clerkUserId, organizationId, {
+                search: request.query.search,
+                stage: request.query.stage,
+                job_id: request.query.job_id,
+                candidate_id: request.query.candidate_id,
+                company_id: request.query.company_id,
+                sort_by: request.query.sort_by,
+                sort_order: request.query.sort_order,
+                page,
+                limit,
+            });
+            
+            return reply.send({ 
+                data: result.data,
+                pagination: result.pagination,
+            });
+        }
+    );
+
+    // LEGACY: Get paginated applications with optional filters and search (OLD PATTERN)
     app.get(
         '/applications/paginated',
         async (request: FastifyRequest<{ 

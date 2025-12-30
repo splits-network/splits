@@ -5,11 +5,13 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { NetworkRepository } from './repository';
 import { NetworkService } from './service';
-import { EventPublisher } from './events';
+import { EventPublisher as LegacyEventPublisher } from './events';
+import { EventPublisherV2 } from './v2/shared/events';
 import { registerRoutes } from './routes';
 import { CandidateRoleAssignmentService } from './services/proposals/service';
 import { RecruiterReputationService } from './services/reputation/service';
 import { DomainEventConsumer } from './domain-consumer';
+import { registerV2Routes } from './v2/routes';
 import * as Sentry from '@sentry/node';
 
 async function main() {
@@ -89,13 +91,21 @@ async function main() {
 
     // Initialize event publisher
     const rabbitMqUrl = process.env.RABBITMQ_URL || 'amqp://localhost';
-    const eventPublisher = new EventPublisher(rabbitMqUrl, logger);
+    const eventPublisher = new LegacyEventPublisher(rabbitMqUrl, logger);
     
     try {
         await eventPublisher.connect();
         logger.info('Event publisher connected');
     } catch (error) {
         logger.warn({ err: error }, 'Failed to connect event publisher - continuing without it');
+    }
+
+    const v2EventPublisher = new EventPublisherV2(rabbitMqUrl, logger);
+    try {
+        await v2EventPublisher.connect();
+        logger.info('Network V2 event publisher connected');
+    } catch (error) {
+        logger.warn({ err: error }, 'Failed to connect Network V2 event publisher - continuing without it');
     }
 
     const service = new NetworkService(repository, eventPublisher);
@@ -119,12 +129,20 @@ async function main() {
         logger.info('SIGTERM received, shutting down gracefully');
         await domainConsumer.stop();
         await eventPublisher.close();
+        await v2EventPublisher.close();
         await app.close();
         process.exit(0);
     });
 
     // Register all routes (Phase 1, Phase 2, and Phase 4B)
     registerRoutes(app, service, proposalService, reputationService);
+
+    // Register V2 routes
+    await registerV2Routes(app, {
+        supabaseUrl: dbConfig.supabaseUrl,
+        supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
+        eventPublisher: v2EventPublisher,
+    });
 
     // Health check endpoint
     app.get('/health', async (request, reply) => {

@@ -1,0 +1,114 @@
+/**
+ * V2 User Service - Identity Service
+ * Handles user lifecycle and events
+ */
+
+import { Logger } from '@splits-network/shared-logging';
+import { RepositoryV2 } from '../repository';
+import { EventPublisherV2 } from '../shared/events';
+import { UserUpdate } from '../types';
+import { v4 as uuidv4 } from 'uuid';
+
+export class UserServiceV2 {
+    constructor(
+        private repository: RepositoryV2,
+        private eventPublisher: EventPublisherV2,
+        private logger: Logger
+    ) {}
+
+    /**
+     * Find all users with pagination and filters
+     */
+    async findUsers(filters: any) {
+        this.logger.info('UserService.findUsers', { filters });
+        const result = await this.repository.findUsers(filters);
+        return result;
+    }
+
+    /**
+     * Find user by ID
+     */
+    async findUserById(id: string) {
+        this.logger.info('UserService.findUserById', { id });
+        const user = await this.repository.findUserById(id);
+        if (!user) {
+            throw new Error(`User not found: ${id}`);
+        }
+        return user;
+    }
+
+    /**
+     * Create a new user
+     */
+    async createUser(userData: any) {
+        this.logger.info('UserService.createUser', { email: userData.email });
+
+        if (!userData.email) {
+            throw new Error('Email is required');
+        }
+
+        if (!userData.clerk_user_id) {
+            throw new Error('Clerk user ID is required');
+        }
+
+        const user = await this.repository.createUser({
+            id: uuidv4(),
+            email: userData.email,
+            clerk_user_id: userData.clerk_user_id,
+            full_name: userData.full_name || null,
+            avatar_url: userData.avatar_url || null,
+            status: 'active',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        });
+
+        await this.eventPublisher.publish('user.created', {
+            user_id: user.id,
+            email: user.email,
+            clerk_user_id: user.clerk_user_id,
+        });
+
+        this.logger.info('UserService.createUser - user created', { id: user.id });
+        return user;
+    }
+
+    /**
+     * Update user
+     */
+    async updateUser(id: string, updates: UserUpdate) {
+        this.logger.info('UserService.updateUser', { id, updates });
+
+        const user = await this.findUserById(id);
+
+        const updateData: any = {
+            ...updates,
+            updated_at: new Date().toISOString(),
+        };
+
+        const updated = await this.repository.updateUser(id, updateData);
+
+        await this.eventPublisher.publish('user.updated', {
+            user_id: id,
+            changes: updateData,
+        });
+
+        this.logger.info('UserService.updateUser - user updated', { id });
+        return updated;
+    }
+
+    /**
+     * Delete user (soft delete)
+     */
+    async deleteUser(id: string) {
+        this.logger.info('UserService.deleteUser', { id });
+
+        await this.findUserById(id);
+        await this.repository.deleteUser(id);
+
+        await this.eventPublisher.publish('user.deleted', {
+            user_id: id,
+        });
+
+        this.logger.info('UserService.deleteUser - user deleted', { id });
+    }
+}
