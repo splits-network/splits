@@ -4,7 +4,7 @@ import {
     NotificationCreateInput,
     NotificationFilters,
     NotificationUpdate,
-} from '../types';
+} from './types';
 
 export class NotificationRepositoryV2 {
     private supabase: SupabaseClient;

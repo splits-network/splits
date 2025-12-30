@@ -1,8 +1,7 @@
-import { Plan } from '../types';
 import { EventPublisher } from '../shared/events';
 import { buildPaginationResponse, UserContext, requireBillingAdmin } from '../shared/helpers';
 import { PlanRepository } from './repository';
-import { PlanCreateInput, PlanListFilters, PlanUpdateInput } from './types';
+import { Plan, PlanCreateInput, PlanListFilters, PlanUpdateInput } from './types';
 
 export class PlanServiceV2 {
     constructor(

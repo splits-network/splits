@@ -4,12 +4,10 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import {
-    UserFilters,
-    OrganizationFilters,
-    MembershipFilters,
-    InvitationFilters,
-} from './types';
+import { UserFilters } from './users/types';
+import { OrganizationFilters } from './organizations/types';
+import { MembershipFilters } from './memberships/types';
+import { InvitationFilters } from './invitations/types';
 
 export class RepositoryV2 {
     private supabase: SupabaseClient;

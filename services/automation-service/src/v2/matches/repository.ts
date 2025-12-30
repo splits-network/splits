@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { CandidateJobMatch, MatchFilters, MatchUpdate } from '../types';
+import { CandidateJobMatch, MatchFilters, MatchUpdate } from './types';
 
 export interface CreateMatchInput {
     candidate_id: string;

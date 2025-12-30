@@ -1,8 +1,4 @@
-import {
-    NotificationCreateInput,
-    NotificationFilters,
-    NotificationUpdate,
-} from '../types';
+import { NotificationCreateInput, NotificationFilters, NotificationUpdate } from './types';
 import { buildPaginationResponse } from '../shared/helpers';
 import { NotificationRepositoryV2 } from './repository';
 import { EventPublisher } from '../shared/events';

@@ -1,11 +1,7 @@
 import { fileTypeFromBuffer } from 'file-type';
 import { randomUUID } from 'crypto';
 import { StorageClient } from '../../storage';
-import {
-    DocumentFilters,
-    DocumentUpdate,
-    DocumentCreateInput,
-} from '../types';
+import { DocumentFilters, DocumentUpdate, DocumentCreateInput } from './types';
 import { buildPaginationResponse } from '../shared/helpers';
 import { DocumentRepositoryV2 } from './repository';
 import { EventPublisher } from '../shared/events';

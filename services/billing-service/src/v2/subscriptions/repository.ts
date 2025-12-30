@@ -1,6 +1,10 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Subscription } from '../types';
-import { SubscriptionCreateInput, SubscriptionListFilters, SubscriptionUpdateInput } from './types';
+import {
+    Subscription,
+    SubscriptionCreateInput,
+    SubscriptionListFilters,
+    SubscriptionUpdateInput,
+} from './types';
 
 interface RepositoryListResult<T> {
     data: T[];

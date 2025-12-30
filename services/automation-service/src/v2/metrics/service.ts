@@ -1,5 +1,5 @@
 import { buildPaginationResponse } from '../shared/helpers';
-import { MetricFilters, MetricUpdate } from '../types';
+import { MetricFilters, MetricUpdate } from './types';
 import { CreateMetricInput, MarketplaceMetricsRepository } from './repository';
 import { EventPublisher } from '../shared/events';
 

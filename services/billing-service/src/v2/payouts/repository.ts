@@ -1,6 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Payout } from '../types';
-import { PayoutCreateInput, PayoutListFilters, PayoutUpdateInput } from './types';
+import { Payout, PayoutCreateInput, PayoutListFilters, PayoutUpdateInput } from './types';
 
 interface RepositoryListResult<T> {
     data: T[];

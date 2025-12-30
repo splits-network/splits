@@ -1,10 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import {
-    Document,
-    DocumentFilters,
-    DocumentUpdate,
-    ProcessingStatus,
-} from '../types';
+import { Document, DocumentFilters, DocumentUpdate, ProcessingStatus } from './types';
 
 export interface CreateDocumentRecord {
     entity_type: string;

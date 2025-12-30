@@ -1,5 +1,5 @@
 import { buildPaginationResponse } from '../shared/helpers';
-import { FraudSignalFilters, FraudSignalUpdate } from '../types';
+import { FraudSignalFilters, FraudSignalUpdate } from './types';
 import { CreateFraudSignalInput, FraudSignalRepository } from './repository';
 import { EventPublisher } from '../shared/events';
 

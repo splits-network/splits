@@ -367,12 +367,12 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 ## Files Created So Far
 
 ### ATS Service (Complete)
-1. `services/ats-service/src/v2/types.ts`
+1. Domain type modules under `services/ats-service/src/v2/<domain>/types.ts` (legacy `src/v2/types.ts` removed)
 2. `services/ats-service/src/v2/helpers.ts`
 3. `services/ats-service/src/v2/shared/helpers.ts`
 4. `services/ats-service/src/v2/shared/events.ts`
 5. `services/ats-service/src/v2/shared/pagination.ts`
-6. `services/ats-service/src/v2/repository.ts`
+6. Removed `services/ats-service/src/v2/repository.ts` in favor of per-domain repositories
 7. `services/ats-service/src/v2/jobs/repository.ts`
 8. `services/ats-service/src/v2/jobs/service.ts`
 9. `services/ats-service/src/v2/jobs/types.ts`
@@ -392,9 +392,9 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 23. Updated `services/ats-service/src/index.ts`
 
 ### Network Service (Complete)
-1. `services/network-service/src/v2/types.ts`
+1. Domain type modules under `services/network-service/src/v2/<domain>/types.ts` (legacy `src/v2/types.ts` removed)
 2. `services/network-service/src/v2/helpers.ts`
-3. `services/network-service/src/v2/repository.ts`
+3. Removed `services/network-service/src/v2/repository.ts` after splitting repositories per domain
 4. `services/network-service/src/v2/shared/helpers.ts`
 5. `services/network-service/src/v2/shared/pagination.ts`
 6. `services/network-service/src/v2/shared/events.ts`
@@ -417,7 +417,7 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 23. Updated `services/network-service/src/index.ts`
 
 ### Billing Service (Complete)
-1. `services/billing-service/src/v2/types.ts`
+1. Domain type modules under `services/billing-service/src/v2/{plans,subscriptions,payouts}/types.ts` (legacy `src/v2/types.ts` removed)
 2. `services/billing-service/src/v2/shared/helpers.ts`
 3. `services/billing-service/src/v2/shared/events.ts`
 4. `services/billing-service/src/v2/plans/types.ts`
@@ -433,7 +433,7 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 14. Updated `services/billing-service/src/index.ts`
 
 ### Document Service (Complete)
-1. `services/document-service/src/v2/types.ts`
+1. Domain type modules under `services/document-service/src/v2/documents/types.ts` (legacy `src/v2/types.ts` removed)
 2. `services/document-service/src/v2/shared/helpers.ts`
 3. `services/document-service/src/v2/shared/events.ts`
 4. `services/document-service/src/v2/documents/repository.ts`
@@ -442,7 +442,7 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 7. Updated `services/document-service/src/index.ts`
 
 ### Notification Service (Complete)
-1. `services/notification-service/src/v2/types.ts`
+1. Domain type modules under `services/notification-service/src/v2/{notifications,templates}/types.ts` (legacy `src/v2/types.ts` removed)
 2. `services/notification-service/src/v2/shared/helpers.ts`
 3. `services/notification-service/src/v2/shared/events.ts`
 4. `services/notification-service/src/v2/notifications/repository.ts`
@@ -453,7 +453,7 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 9. Updated `services/notification-service/src/index.ts`
 
 ### Automation Service (Complete)
-1. `services/automation-service/src/v2/types.ts`
+1. Domain type modules under `services/automation-service/src/v2/{matches,fraud-signals,rules,metrics}/types.ts` (legacy `src/v2/types.ts` removed)
 2. `services/automation-service/src/v2/shared/helpers.ts`
 3. `services/automation-service/src/v2/shared/events.ts`
 4. `services/automation-service/src/v2/matches/repository.ts`

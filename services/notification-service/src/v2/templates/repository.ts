@@ -1,19 +1,11 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import {
     EmailTemplate,
+    TemplateCreateInput,
     TemplateFilters,
     TemplateStatus,
     TemplateUpdate,
-} from '../types';
-
-export interface CreateTemplateInput {
-    name?: string;
-    event_type: string;
-    subject: string;
-    template_html: string;
-    variables?: string[];
-    status?: TemplateStatus;
-}
+} from './types';
 
 export class NotificationTemplateRepository {
     private supabase: SupabaseClient;
@@ -91,7 +83,7 @@ export class NotificationTemplateRepository {
         return data ? this.mapRow(data) : null;
     }
 
-    async createTemplate(input: CreateTemplateInput): Promise<EmailTemplate> {
+    async createTemplate(input: TemplateCreateInput): Promise<EmailTemplate> {
         const { data, error } = await this.supabase
             .schema('notifications')
             .from('email_templates')

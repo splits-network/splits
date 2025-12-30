@@ -1,5 +1,5 @@
 import { buildPaginationResponse } from '../shared/helpers';
-import { MatchFilters, MatchUpdate } from '../types';
+import { MatchFilters, MatchUpdate } from './types';
 import { CandidateMatchRepository, CreateMatchInput } from './repository';
 import { EventPublisher } from '../shared/events';
 

@@ -1,18 +1,20 @@
 /**
- * V2 Shared Types - Document Service
- * Type definitions for documents and file storage
+ * Document Domain Types
  */
-
-// ============================================
-// DOCUMENTS
-// ============================================
 
 export type DocumentStatus = 'active' | 'deleted';
 export type ProcessingStatus = 'pending' | 'processing' | 'processed' | 'failed';
 
 export interface Document {
     id: string;
-    entity_type: 'candidate' | 'job' | 'application' | 'company' | 'contract' | 'placement' | 'system';
+    entity_type:
+        | 'candidate'
+        | 'job'
+        | 'application'
+        | 'company'
+        | 'contract'
+        | 'placement'
+        | 'system';
     entity_id: string;
     document_type?: string | null;
     file_name: string;
@@ -48,22 +50,11 @@ export interface DocumentCreateInput {
 }
 
 export type DocumentUpdate = Partial<
-    Omit<Document, 'id' | 'file_path' | 'storage_bucket' | 'file_size' | 'mime_type' | 'created_at' | 'download_url'>
+    Omit<
+        Document,
+        'id' | 'file_path' | 'storage_bucket' | 'file_size' | 'mime_type' | 'created_at' | 'download_url'
+    >
 > & {
     metadata?: Record<string, any>;
     processing_status?: ProcessingStatus;
 };
-
-// ============================================
-// PAGINATION
-// ============================================
-
-export interface PaginationResponse<T> {
-    data: T[];
-    pagination: {
-        total: number;
-        page: number;
-        limit: number;
-        total_pages: number;
-    };
-}

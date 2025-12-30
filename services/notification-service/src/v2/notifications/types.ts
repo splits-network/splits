@@ -1,11 +1,6 @@
 /**
- * V2 Shared Types - Notification Service
- * Type definitions for notifications and email templates
+ * Notification Domain Types
  */
-
-// ============================================
-// NOTIFICATIONS
-// ============================================
 
 export type NotificationChannel = 'email' | 'in_app' | 'both';
 export type NotificationStatus = 'pending' | 'sent' | 'failed';
@@ -66,45 +61,3 @@ export interface NotificationCreateInput {
 export type NotificationUpdate = Partial<
     Omit<Notification, 'id' | 'created_at' | 'updated_at' | 'recipient_email'>
 >;
-
-// ============================================
-// EMAIL TEMPLATES
-// ============================================
-
-export type TemplateStatus = 'active' | 'archived' | 'draft';
-
-export interface EmailTemplate {
-    id: string;
-    name?: string | null;
-    event_type: string;
-    subject: string;
-    template_html: string;
-    status: TemplateStatus;
-    variables: string[]; // JSON array of required variables
-    created_at: string;
-    updated_at: string;
-}
-
-export interface TemplateFilters {
-    event_type?: string;
-    status?: TemplateStatus;
-    search?: string;
-    page?: number;
-    limit?: number;
-}
-
-export type TemplateUpdate = Partial<Omit<EmailTemplate, 'id' | 'created_at' | 'updated_at'>>;
-
-// ============================================
-// PAGINATION
-// ============================================
-
-export interface PaginationResponse<T> {
-    data: T[];
-    pagination: {
-        total: number;
-        page: number;
-        limit: number;
-        total_pages: number;
-    };
-}

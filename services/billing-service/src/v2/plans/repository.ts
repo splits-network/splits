@@ -1,6 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Plan } from '../types';
-import { PlanCreateInput, PlanListFilters, PlanUpdateInput } from './types';
+import { Plan, PlanCreateInput, PlanListFilters, PlanUpdateInput } from './types';
 
 interface RepositoryListResult<T> {
     data: T[];

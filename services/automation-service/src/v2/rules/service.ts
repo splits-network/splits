@@ -1,5 +1,5 @@
 import { buildPaginationResponse } from '../shared/helpers';
-import { RuleFilters, RuleUpdate } from '../types';
+import { RuleFilters, RuleUpdate } from './types';
 import { AutomationRuleRepository, CreateRuleInput } from './repository';
 import { EventPublisher } from '../shared/events';
 

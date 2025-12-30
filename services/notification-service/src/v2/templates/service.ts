@@ -1,14 +1,7 @@
 import { buildPaginationResponse } from '../shared/helpers';
-import {
-    EmailTemplate,
-    TemplateFilters,
-    TemplateUpdate,
-} from '../types';
-import {
-    CreateTemplateInput,
-    NotificationTemplateRepository,
-} from './repository';
 import { EventPublisher } from '../shared/events';
+import { NotificationTemplateRepository } from './repository';
+import { EmailTemplate, TemplateCreateInput, TemplateFilters, TemplateUpdate } from './types';
 
 export class TemplateServiceV2 {
     constructor(
@@ -36,7 +29,7 @@ export class TemplateServiceV2 {
         return template;
     }
 
-    async createTemplate(input: CreateTemplateInput) {
+    async createTemplate(input: TemplateCreateInput) {
         const template = await this.repository.createTemplate(input);
 
         if (this.eventPublisher) {

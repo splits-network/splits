@@ -6,7 +6,7 @@
 import { Logger } from '@splits-network/shared-logging';
 import { RepositoryV2 } from '../repository';
 import { EventPublisherV2 } from '../shared/events';
-import { OrganizationUpdate } from '../types';
+import { OrganizationUpdate } from '../organizations/types';
 import { v4 as uuidv4 } from 'uuid';
 
 export class OrganizationServiceV2 {
