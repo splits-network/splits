@@ -11,6 +11,7 @@ COPY packages/shared-config/package.json ./packages/shared-config/
 COPY packages/shared-fastify/package.json ./packages/shared-fastify/
 COPY packages/shared-logging/package.json ./packages/shared-logging/
 COPY packages/shared-types/package.json ./packages/shared-types/
+COPY packages/shared-access-context/package.json ./packages/shared-access-context/
 COPY services/billing-service/package.json ./services/billing-service/
 RUN pnpm install --frozen-lockfile
 
@@ -32,6 +33,7 @@ RUN pnpm --filter @splits-network/shared-config build
 RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-logging build
 RUN pnpm --filter @splits-network/shared-fastify build
+RUN pnpm --filter @splits-network/shared-access-context build
 # Then build service
 RUN pnpm --filter @splits-network/billing-service build
 
@@ -47,6 +49,7 @@ COPY --from=build /app/packages/shared-config/package.json ./packages/shared-con
 COPY --from=build /app/packages/shared-fastify/package.json ./packages/shared-fastify/
 COPY --from=build /app/packages/shared-logging/package.json ./packages/shared-logging/
 COPY --from=build /app/packages/shared-types/package.json ./packages/shared-types/
+COPY --from=build /app/packages/shared-access-context/package.json ./packages/shared-access-context/
 COPY --from=build /app/services/billing-service/package.json ./services/billing-service/
 
 # Production install (only dependencies, no devDependencies)
@@ -57,6 +60,7 @@ COPY --from=build /app/packages/shared-config/dist ./packages/shared-config/dist
 COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
 COPY --from=build /app/packages/shared-logging/dist ./packages/shared-logging/dist
 COPY --from=build /app/packages/shared-fastify/dist ./packages/shared-fastify/dist
+COPY --from=build /app/packages/shared-access-context/dist ./packages/shared-access-context/dist
 COPY --from=build /app/services/billing-service/dist ./services/billing-service/dist
 
 EXPOSE 3004

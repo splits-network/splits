@@ -12,6 +12,7 @@ COPY packages/shared-fastify/package.json ./packages/shared-fastify/
 COPY packages/shared-logging/package.json ./packages/shared-logging/
 COPY packages/shared-types/package.json ./packages/shared-types/
 COPY packages/shared-job-queue/package.json ./packages/shared-job-queue/
+COPY packages/shared-access-context/package.json ./packages/shared-access-context/
 COPY services/automation-service/package.json ./services/automation-service/
 RUN pnpm install --frozen-lockfile
 
@@ -34,6 +35,7 @@ RUN pnpm --filter @splits-network/shared-types build
 RUN pnpm --filter @splits-network/shared-logging build
 RUN pnpm --filter @splits-network/shared-fastify build
 RUN pnpm --filter @splits-network/shared-job-queue build
+RUN pnpm --filter @splits-network/shared-access-context build
 # Then build service
 RUN pnpm --filter @splits-network/automation-service build
 
@@ -57,6 +59,8 @@ COPY --from=build /app/packages/shared-types/package.json ./packages/shared-type
 COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
 COPY --from=build /app/packages/shared-job-queue/package.json ./packages/shared-job-queue/
 COPY --from=build /app/packages/shared-job-queue/dist ./packages/shared-job-queue/dist
+COPY --from=build /app/packages/shared-access-context/package.json ./packages/shared-access-context/
+COPY --from=build /app/packages/shared-access-context/dist ./packages/shared-access-context/dist
 
 # Copy built service
 COPY --from=build /app/services/automation-service/package.json ./services/automation-service/
