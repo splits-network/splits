@@ -357,8 +357,7 @@ export class ApplicationServiceV2 {
                     recruiter_id: application.recruiter_id,
                     job_id: application.job_id,
                     job_status: job.status,
-                },
-                'ats-service'
+                }
             );
         }
     }
@@ -390,8 +389,7 @@ export class ApplicationServiceV2 {
                     candidate_id: application.candidate_id,
                     recruiter_id: application.recruiter_id,
                     job_id: application.job_id,
-                },
-                'ats-service'
+                }
             );
         }
     }

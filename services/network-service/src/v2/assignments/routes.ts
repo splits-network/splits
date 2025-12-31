@@ -11,7 +11,7 @@ export function registerAssignmentRoutes(
     app: FastifyInstance,
     config: RegisterAssignmentRoutesConfig
 ) {
-    app.get('/v2/assignments', async (request, reply) => {
+    app.get('/api/v2/assignments', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const query = request.query as any;
@@ -35,7 +35,7 @@ export function registerAssignmentRoutes(
         }
     });
 
-    app.get('/v2/assignments/:id', async (request, reply) => {
+    app.get('/api/v2/assignments/:id', async (request, reply) => {
         try {
             const { id } = request.params as { id: string };
             const assignment = await config.assignmentService.getAssignment(id);
@@ -47,7 +47,7 @@ export function registerAssignmentRoutes(
         }
     });
 
-    app.post('/v2/assignments', async (request, reply) => {
+    app.post('/api/v2/assignments', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const body = request.body as any;
@@ -60,7 +60,7 @@ export function registerAssignmentRoutes(
         }
     });
 
-    app.patch('/v2/assignments/:id', async (request, reply) => {
+    app.patch('/api/v2/assignments/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -74,7 +74,7 @@ export function registerAssignmentRoutes(
         }
     });
 
-    app.delete('/v2/assignments/:id', async (request, reply) => {
+    app.delete('/api/v2/assignments/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };

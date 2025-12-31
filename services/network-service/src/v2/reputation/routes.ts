@@ -11,7 +11,7 @@ export function registerReputationRoutes(
     app: FastifyInstance,
     config: RegisterReputationRoutesConfig
 ) {
-    app.get('/v2/reputation', async (request, reply) => {
+    app.get('/api/v2/reputation', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const query = request.query as any;
@@ -33,7 +33,7 @@ export function registerReputationRoutes(
         }
     });
 
-    app.get('/v2/reputation/:id', async (request, reply) => {
+    app.get('/api/v2/reputation/:id', async (request, reply) => {
         try {
             requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -46,7 +46,7 @@ export function registerReputationRoutes(
         }
     });
 
-    app.post('/v2/reputation', async (request, reply) => {
+    app.post('/api/v2/reputation', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const body = request.body as any;
@@ -59,7 +59,7 @@ export function registerReputationRoutes(
         }
     });
 
-    app.patch('/v2/reputation/:id', async (request, reply) => {
+    app.patch('/api/v2/reputation/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -73,7 +73,7 @@ export function registerReputationRoutes(
         }
     });
 
-    app.delete('/v2/reputation/:id', async (request, reply) => {
+    app.delete('/api/v2/reputation/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };

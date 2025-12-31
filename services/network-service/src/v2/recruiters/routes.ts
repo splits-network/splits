@@ -11,7 +11,7 @@ export function registerRecruiterRoutes(
     app: FastifyInstance,
     config: RegisterRecruiterRoutesConfig
 ) {
-    app.get('/v2/recruiters', async (request, reply) => {
+    app.get('/api/v2/recruiters', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const query = request.query as any;
@@ -35,7 +35,7 @@ export function registerRecruiterRoutes(
         }
     });
 
-    app.get('/v2/recruiters/:id', async (request, reply) => {
+    app.get('/api/v2/recruiters/:id', async (request, reply) => {
         try {
             const { id } = request.params as { id: string };
             const recruiter = await config.recruiterService.getRecruiter(id);
@@ -47,7 +47,7 @@ export function registerRecruiterRoutes(
         }
     });
 
-    app.post('/v2/recruiters', async (request, reply) => {
+    app.post('/api/v2/recruiters', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const body = request.body as any;
@@ -60,7 +60,7 @@ export function registerRecruiterRoutes(
         }
     });
 
-    app.patch('/v2/recruiters/:id', async (request, reply) => {
+    app.patch('/api/v2/recruiters/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -74,7 +74,7 @@ export function registerRecruiterRoutes(
         }
     });
 
-    app.delete('/v2/recruiters/:id', async (request, reply) => {
+    app.delete('/api/v2/recruiters/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };

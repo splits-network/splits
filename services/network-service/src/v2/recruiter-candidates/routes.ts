@@ -11,7 +11,7 @@ export function registerRecruiterCandidateRoutes(
     app: FastifyInstance,
     config: RegisterRecruiterCandidateRoutesConfig
 ) {
-    app.get('/v2/recruiter-candidates', async (request, reply) => {
+    app.get('/api/v2/recruiter-candidates', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const query = request.query as any;
@@ -38,7 +38,7 @@ export function registerRecruiterCandidateRoutes(
         }
     });
 
-    app.get('/v2/recruiter-candidates/:id', async (request, reply) => {
+    app.get('/api/v2/recruiter-candidates/:id', async (request, reply) => {
         try {
             const { id } = request.params as { id: string };
             const record = await config.recruiterCandidateService.getRecruiterCandidate(id);
@@ -50,7 +50,7 @@ export function registerRecruiterCandidateRoutes(
         }
     });
 
-    app.post('/v2/recruiter-candidates', async (request, reply) => {
+    app.post('/api/v2/recruiter-candidates', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const body = request.body as any;
@@ -66,7 +66,7 @@ export function registerRecruiterCandidateRoutes(
         }
     });
 
-    app.patch('/v2/recruiter-candidates/:id', async (request, reply) => {
+    app.patch('/api/v2/recruiter-candidates/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -84,7 +84,7 @@ export function registerRecruiterCandidateRoutes(
         }
     });
 
-    app.delete('/v2/recruiter-candidates/:id', async (request, reply) => {
+    app.delete('/api/v2/recruiter-candidates/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -97,7 +97,7 @@ export function registerRecruiterCandidateRoutes(
         }
     });
 
-    app.get('/v2/recruiter-candidates/invitations/:token', async (request, reply) => {
+    app.get('/api/v2/recruiter-candidates/invitations/:token', async (request, reply) => {
         try {
             const { token } = request.params as { token: string };
             const invitation = await config.recruiterCandidateService.getInvitationByToken(token);
@@ -109,7 +109,7 @@ export function registerRecruiterCandidateRoutes(
         }
     });
 
-    app.post('/v2/recruiter-candidates/invitations/:token/accept', async (request, reply) => {
+    app.post('/api/v2/recruiter-candidates/invitations/:token/accept', async (request, reply) => {
         try {
             const { token } = request.params as { token: string };
             const body = (request.body as Record<string, any>) || {};
@@ -131,7 +131,7 @@ export function registerRecruiterCandidateRoutes(
         }
     });
 
-    app.post('/v2/recruiter-candidates/invitations/:token/decline', async (request, reply) => {
+    app.post('/api/v2/recruiter-candidates/invitations/:token/decline', async (request, reply) => {
         try {
             const { token } = request.params as { token: string };
             const body = (request.body as Record<string, any>) || {};
@@ -153,7 +153,7 @@ export function registerRecruiterCandidateRoutes(
         }
     });
 
-    app.post('/v2/recruiter-candidates/:id/resend-invitation', async (request, reply) => {
+    app.post('/api/v2/recruiter-candidates/:id/resend-invitation', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -166,7 +166,7 @@ export function registerRecruiterCandidateRoutes(
         }
     });
 
-    app.post('/v2/recruiter-candidates/:id/cancel-invitation', async (request, reply) => {
+    app.post('/api/v2/recruiter-candidates/:id/cancel-invitation', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };

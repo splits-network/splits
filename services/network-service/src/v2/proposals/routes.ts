@@ -11,7 +11,7 @@ export function registerProposalRoutes(
     app: FastifyInstance,
     config: RegisterProposalRoutesConfig
 ) {
-    app.get('/v2/proposals', async (request, reply) => {
+    app.get('/api/v2/proposals', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const query = request.query as any;
@@ -37,7 +37,7 @@ export function registerProposalRoutes(
         }
     });
 
-    app.get('/v2/proposals/:id', async (request, reply) => {
+    app.get('/api/v2/proposals/:id', async (request, reply) => {
         try {
             requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -50,7 +50,7 @@ export function registerProposalRoutes(
         }
     });
 
-    app.post('/v2/proposals', async (request, reply) => {
+    app.post('/api/v2/proposals', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const body = request.body as any;
@@ -63,7 +63,7 @@ export function registerProposalRoutes(
         }
     });
 
-    app.patch('/v2/proposals/:id', async (request, reply) => {
+    app.patch('/api/v2/proposals/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -77,7 +77,7 @@ export function registerProposalRoutes(
         }
     });
 
-    app.delete('/v2/proposals/:id', async (request, reply) => {
+    app.delete('/api/v2/proposals/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
