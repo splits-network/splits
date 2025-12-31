@@ -72,11 +72,9 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
 
                 setUserContext(userContext);
 
-                const canEditCandidate =
-                    userContext.role === 'platform_admin' ||
-                    userContext.role === 'company_admin' ||
-                    userContext.role === 'hiring_manager' ||
-                    (userContext.role === 'candidate' && candidateResponse.data.user_id === userContext.user_id);
+                const canEditCandidate = userContext && (
+                    userContext.roles?.some((role: string) => ['platform_admin', 'recruiter'].includes(role))
+                );
 
                 setCanEdit(canEditCandidate);
 
@@ -172,7 +170,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
     const handleCandidateUpdate = (updatedCandidate: any) => {
         setCandidate(updatedCandidate);
     };
-    console.log('user context', userContext);
+
     // Check if user can verify candidates (recruiters and platform admins)
     const canVerifyCandidate = userContext && (
         userContext.roles?.some((role: string) => ['platform_admin', 'recruiter'].includes(role))
@@ -185,27 +183,38 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
 
             const client = createAuthenticatedClient(token);
 
-            // Propose job to candidate (creates application in recruiter_proposed stage)
-            // Candidate will receive notification and must approve before application proceeds
-            const response = await client.post('/applications/propose-to-candidate', {
+            // Step 1: Create application (recruiter proposes job to candidate)
+            const response = await client.post('/applications', {
                 candidate_id: candidateId,
                 job_id: jobId,
-                pitch: notes,  // Renamed from recruiter_notes to pitch
-                document_ids: documentIds,
+                recruiter_notes: notes,
             });
 
             const applicationId = response.data?.data?.id || response.data?.id;
+            if (!applicationId) {
+                throw new Error('No application ID returned from server');
+            }
+
+            // Step 2: Link documents to the application (if any were provided)
+            if (documentIds.length > 0) {
+                await Promise.all(
+                    documentIds.map(docId =>
+                        client.patch(`/documents/${docId}`, {
+                            entity_type: 'application',
+                            entity_id: applicationId,
+                        }).catch(err => {
+                            console.error(`Failed to link document ${docId}:`, err);
+                            // Don't fail the whole operation if a document link fails
+                        })
+                    )
+                );
+            }
 
             // Show success message
             alert(`Job opportunity sent to ${candidate?.full_name || 'candidate'}! They'll receive an email notification and can review and approve the opportunity.`);
 
             // Redirect to the new application detail page
-            if (applicationId) {
-                router.push(`/applications/${applicationId}`);
-            } else {
-                // Refresh the page to show the new application
-                window.location.reload();
-            }
+            router.push(`/applications/${applicationId}`);
         } catch (err: any) {
             console.error('Failed to propose job to candidate:', err);
             throw new Error(err.message || 'Failed to send job opportunity to candidate');

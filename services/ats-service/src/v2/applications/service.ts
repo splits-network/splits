@@ -145,11 +145,10 @@ export class ApplicationServiceV2 {
 
         const application = await this.repository.createApplication({
             ...data,
-            status: data.status || 'active',
-            stage: data.stage || 'applied',
+            stage: data.stage || 'recruiter_proposed',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-        });
+        }, clerkUserId);
 
         // Emit event
         if (this.eventPublisher) {

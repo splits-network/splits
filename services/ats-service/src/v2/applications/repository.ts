@@ -5,6 +5,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ApplicationFilters, ApplicationUpdate } from './types';
 import { resolveAccessContext, AccessContext } from '../shared/access';
+import { create } from 'domain';
 
 export interface RepositoryListResponse<T> {
     data: T[];
@@ -111,7 +112,6 @@ export class ApplicationRepository {
             `)
             .eq('id', id)
             .single();
-
         if (error) {
             if (error.code === 'PGRST116') return null;
             throw error;
@@ -130,7 +130,7 @@ export class ApplicationRepository {
         if (accessContext.candidateId && data.candidate_id === accessContext.candidateId) {
             return data;
         }
-
+        
         if (accessContext.recruiterId && data.recruiter_id === accessContext.recruiterId) {
             return data;
         }
@@ -147,11 +147,13 @@ export class ApplicationRepository {
         return null;
     }
 
-    async createApplication(application: any): Promise<any> {
+    async createApplication(application: any, clerkUserId?: string): Promise<any> {
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+        console.log('Creating application with access context:', accessContext);
         const { data, error } = await this.supabase
             .schema('ats')
             .from('applications')
-            .insert(application)
+            .insert({...application, recruiter_id: accessContext.recruiterId || null })
             .select()
             .single();
 
@@ -173,11 +175,11 @@ export class ApplicationRepository {
     }
 
     async deleteApplication(id: string): Promise<void> {
-        // Soft delete
+        // Soft delete - move to withdrawn stage
         const { error } = await this.supabase
             .schema('ats')
             .from('applications')
-            .update({ status: 'withdrawn', updated_at: new Date().toISOString() })
+            .update({ stage: 'withdrawn', updated_at: new Date().toISOString() })
             .eq('id', id);
 
         if (error) throw error;
