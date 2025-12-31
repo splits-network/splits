@@ -29,7 +29,7 @@ export class RecruiterRepository {
             .schema('network')
             .from('recruiters')
             .select('*', { count: 'exact' });
-console.log(context);
+            
         // Apply role-based filtering from access context
         if (context.recruiterId) {
             // Recruiters can only see their own profile
@@ -61,7 +61,7 @@ console.log(context);
         query = query.range(offset, offset + limit - 1);
 
         const { data, error, count } = await query;
-console.log('RecruiterRepository.findRecruiters - data:', data, 'error:', error, 'count:', count);
+        
         if (error) throw error;
 
         return {

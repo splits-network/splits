@@ -42,7 +42,7 @@ export function MarketplaceSettings() {
             const client = createAuthenticatedClient(token);
             const response: any = await client.getRecruiterProfile();
             const recruiter = response?.data || response;
-console.log('MarketplaceSettings - recruiter profile:', response);
+            
             if (!recruiter?.id) {
                 throw new Error('Recruiter profile not found');
             }
