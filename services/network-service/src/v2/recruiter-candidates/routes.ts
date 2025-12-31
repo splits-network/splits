@@ -123,7 +123,7 @@ export function registerRecruiterCandidateRoutes(
             };
 
             const result = await config.recruiterCandidateService.acceptInvitationByToken(token, metadata);
-            return reply.send({ data: result });
+            return reply.send(result);
         } catch (error: any) {
             return reply
                 .code(error.statusCode || 500)
@@ -145,7 +145,7 @@ export function registerRecruiterCandidateRoutes(
             };
 
             const result = await config.recruiterCandidateService.declineInvitationByToken(token, metadata);
-            return reply.send({ data: result });
+            return reply.send(result);
         } catch (error: any) {
             return reply
                 .code(error.statusCode || 500)

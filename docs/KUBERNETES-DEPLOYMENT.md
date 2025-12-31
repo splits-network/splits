@@ -459,7 +459,7 @@ wget -O- http://api-gateway.splits-network.svc.cluster.local:3000/health
 
 ```bash
 # Verify database secret
-kubectl get secret database-secrets -n splits-network -o jsonpath='{.data.database-url}' | base64 -d
+kubectl get secret database-secrets -n splits-network -o jsonpath='{.database-url}' | base64 -d
 
 # Check if service can reach Supabase
 kubectl run -it --rm debug --image=postgres --restart=Never -- psql $DATABASE_URL -c "SELECT 1"

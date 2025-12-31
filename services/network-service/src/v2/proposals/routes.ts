@@ -29,7 +29,7 @@ export function registerProposalRoutes(
             };
 
             const result = await config.proposalService.getProposals(clerkUserId, filters);
-            return reply.send({ data: result });
+            return reply.send(result);
         } catch (error: any) {
             return reply
                 .code(error.statusCode || 500)

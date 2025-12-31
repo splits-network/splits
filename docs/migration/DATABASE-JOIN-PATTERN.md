@@ -487,7 +487,7 @@ app.get('/proposals', async (request, reply) => {
     request.query.organization_id as string | undefined
   );
   
-  return reply.send({ data: result });
+  return reply.send(result);
 });
 ```
 

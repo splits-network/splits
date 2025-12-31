@@ -146,7 +146,7 @@ export async function registerRoutes(fastify: FastifyInstance, service: Document
                     offset: offset ? parseInt(offset, 10) : undefined,
                 });
 
-                return reply.send({ data: result });
+                return reply.send(result);
             } catch (error: any) {
                 logger.error({ error: error.message }, 'List documents error');
                 return reply.status(500).send({

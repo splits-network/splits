@@ -344,7 +344,7 @@ When Copilot generates React/Next.js code:
    useEffect(() => {
      async function loadCandidate() {
        const res = await client.get(`/api/v2/candidates/${id}`);
-       setCandidate(res.data.data);
+       setCandidate(res.data);
        setLoading(false);
      }
      loadCandidate();
@@ -355,7 +355,7 @@ When Copilot generates React/Next.js code:
      async function loadApplications() {
        // V2 API with enriched data - applications WITH job data
        const res = await client.get(`/api/v2/applications?candidate_id=${id}&include=job,recruiter`);
-       setApplications(res.data.data);
+       setApplications(res.data);
        setApplicationsLoading(false);
      }
      if (candidate) loadApplications();
@@ -365,7 +365,7 @@ When Copilot generates React/Next.js code:
      async function loadRecruiters() {
        // V2 API with enriched recruiter metadata
        const res = await client.get(`/api/v2/recruiter-candidates?candidate_id=${id}`);
-       setRecruiters(res.data.data);
+       setRecruiters(res.data);
        setRecruitersLoading(false);
      }
      if (candidate) loadRecruiters();

@@ -69,7 +69,7 @@ describe('Users Routes', () => {
 
       expect(response.statusCode).toBe(200);
       const data = JSON.parse(response.payload);
-      expect(data.data).toEqual(mockUser);
+      expect(data).toEqual(mockUser);
     });
 
     it('should return 400 when missing required fields', async () => {
@@ -104,7 +104,7 @@ describe('Users Routes', () => {
 
       expect(response.statusCode).toBe(200);
       const data = JSON.parse(response.payload);
-      expect(data.data.id).toBe('user123');
+      expect(data.id).toBe('user123');
     });
 
     it('should return 404 when user not found', async () => {
@@ -146,7 +146,7 @@ describe('Users Routes', () => {
 
       expect(response.statusCode).toBe(200);
       const data = JSON.parse(response.payload);
-      expect(data.data.name).toBe('New Name');
+      expect(data.name).toBe('New Name');
     });
   });
 
@@ -207,7 +207,7 @@ describe('Users Routes', () => {
 
       expect(response.statusCode).toBe(200);
       const data = JSON.parse(response.payload);
-      expect(data.data.onboarding_status).toBe('in_progress');
+      expect(data.onboarding_status).toBe('in_progress');
     });
   });
 

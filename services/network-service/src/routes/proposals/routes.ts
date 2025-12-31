@@ -259,7 +259,7 @@ export function registerProposalRoutes(
                 jobId
             );
 
-            return reply.send({ data: result });
+            return reply.send(result);
         }
     );
 

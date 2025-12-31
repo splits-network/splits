@@ -114,7 +114,7 @@ export default function AIReviewPanel({ applicationId, token }: AIReviewPanelPro
                 }
 
                 const data = await response.json();
-                setAIReview(data.data);
+                setAIReview(data);
                 setError(null);
             } catch (err) {
                 // Network errors or JSON parsing errors

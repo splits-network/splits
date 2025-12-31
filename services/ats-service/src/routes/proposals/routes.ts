@@ -45,7 +45,7 @@ export async function proposalRoutes(fastify: FastifyInstance, repository: AtsRe
             correlationId,
             userContext.organizationId
         );
-        return reply.send({ data: result });
+        return reply.send(result);
     });
 
     /**

@@ -157,7 +157,7 @@ fastify.get('/api/proposals', async (request, reply) => {
     };
 
     const result = await proposalService.getProposalsForUser(clerkUserId, userRole, filters, correlationId, organizationId);
-    return reply.send({ data: result });
+    return reply.send(result);
 });
 ```
 
@@ -196,7 +196,7 @@ fastify.get('/api/proposals', async (request, reply) => {
         userContext.organizationId
     );
     
-    return reply.send({ data: result });
+    return reply.send(result);
 });
 ```
 
@@ -245,7 +245,7 @@ export default function ProposalsPage() {
       }
       
       const res = await client.get(url);
-      setProposals(res.data.data);
+      setProposals(res.data);
       setLoading(false);
     }
     
@@ -281,7 +281,7 @@ export default function ProposalsPage() {
       // Single API call - backend determines scope
       const res = await client.get('/api/proposals');
       
-      setProposals(res.data.data);
+      setProposals(res.data);
       setLoading(false);
     }
     

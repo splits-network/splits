@@ -108,7 +108,7 @@ export default function AIReviewPanel({ applicationId, token, compact = false }:
                 }
 
                 const data = await response.json();
-                setAIReview(data.data);
+                setAIReview(data);
             } catch (err) {
                 console.error('Error fetching AI review:', err);
                 setError(err instanceof Error ? err.message : 'Failed to load AI review');

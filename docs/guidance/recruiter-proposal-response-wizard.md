@@ -228,7 +228,7 @@ app.post(
             jobId: application.job_id,
         }, 'Candidate accepted recruiter proposal');
         
-        return reply.send({ data: result });
+        return reply.send(result);
     }
 );
 ```
@@ -399,7 +399,7 @@ app.post(
             reason,
         }, 'Candidate declined recruiter proposal');
         
-        return reply.send({ data: result });
+        return reply.send(result);
     }
 );
 ```
@@ -573,7 +573,7 @@ app.patch(
             hasAnswers: !!pre_screen_answers,
         }, 'Candidate completed application');
         
-        return reply.send({ data: result });
+        return reply.send(result);
     }
 );
 ```
@@ -1108,8 +1108,8 @@ export default function ProposalResponseWizard({
             );
             
             // Load pre-screen questions
-            if (response.data.data.next_steps?.pre_screen_questions) {
-                setQuestions(response.data.data.next_steps.pre_screen_questions);
+            if (response.data.next_steps?.pre_screen_questions) {
+                setQuestions(response.data.next_steps.pre_screen_questions);
             }
             
             setAccepting(false);

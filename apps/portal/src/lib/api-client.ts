@@ -153,7 +153,17 @@ export class ApiClient {
     async getUserRoles() {
         // Get basic user info from V1 identity service
         const userResponse = await this.getCurrentUser();
-        const user = userResponse?.data?.[0] || userResponse?.data || userResponse || {};
+        let user: any = {};
+        
+        if (userResponse && typeof userResponse === 'object' && userResponse !== null) {
+            if ('data' in userResponse) {
+                const responseData = (userResponse as any).data;
+                user = Array.isArray(responseData) ? responseData[0] || {} : responseData || {};
+            } else {
+                user = userResponse;
+            }
+        }
+        
         const roles: string[] = Array.isArray(user.roles) ? user.roles : [];
 
         // Check if user is a recruiter using V2 network service
@@ -161,8 +171,8 @@ export class ApiClient {
         try {
             const recruitersResponse = await this.get('/recruiters?limit=1');
             console.log('API Client - recruitersResponse:', recruitersResponse);
-            isRecruiter = Boolean(recruitersResponse?.data?.data && recruitersResponse.data.data.length > 0);
-            console.log('API Client - isRecruiter:', isRecruiter, 'data length:', recruitersResponse?.data?.data?.length);
+            isRecruiter = Boolean(recruitersResponse?.data && recruitersResponse.data.length > 0);
+            console.log('API Client - isRecruiter:', isRecruiter, 'data length:', recruitersResponse?.data?.length);
         } catch (error) {
             console.error('API Client - recruiter check error:', error);
             // If V2 recruiter query fails, user is not a recruiter
@@ -300,12 +310,12 @@ export class ApiClient {
         // For current user, get their recruiter profile via V2 filtered query
         const recruiters = await this.get('/recruiters?limit=1');
         console.log('getRecruiterProfile - recruiters response:', recruiters);
-        if (!recruiters?.data?.data || recruiters.data.data.length === 0) {
+        if (!recruiters?.data || recruiters.data.length === 0) {
             throw new Error('No recruiter profile found for current user');
         }
 
         // Return the recruiter data in the expected format
-        return { data: recruiters.data.data[0] };
+        return { data: recruiters.data[0] };
     }
 
     async updateRecruiterProfile(recruiterId: string, payload: Record<string, any>) {
@@ -421,6 +431,7 @@ export class ApiClient {
                 limit: 1,
             },
         });
+        console.log('getRecruiterCandidateRelationship - response:', response);
         if (Array.isArray(response?.data) && response.data.length > 0) {
             return { data: response.data[0] };
         }

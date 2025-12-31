@@ -110,7 +110,7 @@ export function registerRecruiterCandidateRoutes(app: FastifyInstance, services:
             const recruiterId = recruiterResponse.data.id;
             
             // Filter to only this recruiter's relationships
-            const filteredData = (data.data || []).filter((rel: any) => rel.recruiter_id === recruiterId);
+            const filteredData = (data || []).filter((rel: any) => rel.recruiter_id === recruiterId);
             
             return reply.send({ data: filteredData });
         } catch (err) {

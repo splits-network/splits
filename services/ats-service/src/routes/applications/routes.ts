@@ -1164,7 +1164,7 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
                 answersCount: pre_screen_answers?.length || 0,
             }, 'Candidate completed application');
 
-            return reply.send({ data: result });
+            return reply.send(result);
         }
     );
 }

@@ -101,7 +101,7 @@ export default function SubmitCandidateWizard({
                 const response = await client.get('/candidates', { params });
 
                 if (response.data?.data) {
-                    setCandidates(response.data.data);
+                    setCandidates(response.data);
                     if (response.data.pagination) {
                         setTotalPages(response.data.pagination.total_pages || 1);
                         setTotalCount(response.data.pagination.total || 0);

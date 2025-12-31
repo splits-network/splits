@@ -14,7 +14,7 @@ async function testEndpoints() {
         const response = await fetch(`${BASE_URL}/applications?recruiter_id=test-recruiter-id`);
         const data = await response.json();
         console.log(`   ✅ Status: ${response.status}`);
-        console.log(`   📊 Applications count: ${data.data?.length || 0}`);
+        console.log(`   📊 Applications count: ${data?.length || 0}`);
     } catch (error: any) {
         console.log(`   ❌ Error: ${error.message}`);
     }
@@ -25,7 +25,7 @@ async function testEndpoints() {
         const response = await fetch(`${BASE_URL}/placements?recruiter_id=test-recruiter-id`);
         const data = await response.json();
         console.log(`   ✅ Status: ${response.status}`);
-        console.log(`   📊 Placements count: ${data.data?.length || 0}`);
+        console.log(`   📊 Placements count: ${data?.length || 0}`);
     } catch (error: any) {
         console.log(`   ❌ Error: ${error.message}`);
     }
@@ -37,7 +37,7 @@ async function testEndpoints() {
         const response = await fetch(`${BASE_URL}/placements?date_from=${dateFrom}`);
         const data = await response.json();
         console.log(`   ✅ Status: ${response.status}`);
-        console.log(`   📊 Placements count: ${data.data?.length || 0}`);
+        console.log(`   📊 Placements count: ${data?.length || 0}`);
     } catch (error: any) {
         console.log(`   ❌ Error: ${error.message}`);
     }
@@ -49,10 +49,10 @@ async function testEndpoints() {
         const response = await fetch(`${BASE_URL}/recruiters/test-recruiter-id/stats`);
         const data = await response.json();
         console.log(`   ✅ Status: ${response.status}`);
-        if (data.data) {
-            console.log(`   📊 Submissions: ${data.data.submissions_count || 0}`);
-            console.log(`   📊 Placements: ${data.data.placements_count || 0}`);
-            console.log(`   💰 Total Earnings: $${data.data.total_earnings || 0}`);
+        if (data) {
+            console.log(`   📊 Submissions: ${data.submissions_count || 0}`);
+            console.log(`   📊 Placements: ${data.placements_count || 0}`);
+            console.log(`   💰 Total Earnings: $${data.total_earnings || 0}`);
         }
     } catch (error: any) {
         console.log(`   ❌ Error: ${error.message}`);
@@ -64,8 +64,8 @@ async function testEndpoints() {
         const response = await fetch(`${BASE_URL}/companies/test-company-id`);
         const data = await response.json();
         console.log(`   ✅ Status: ${response.status}`);
-        if (data.data) {
-            console.log(`   🏢 Company: ${data.data.name || 'N/A'}`);
+        if (data) {
+            console.log(`   🏢 Company: ${data.name || 'N/A'}`);
         }
     } catch (error: any) {
         console.log(`   ❌ Error: ${error.message}`);

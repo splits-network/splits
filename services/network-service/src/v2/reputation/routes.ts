@@ -25,7 +25,7 @@ export function registerReputationRoutes(
             };
 
             const result = await config.reputationService.getReputations(clerkUserId, filters);
-            return reply.send({ data: result });
+            return reply.send(result);
         } catch (error: any) {
             return reply
                 .code(error.statusCode || 500)

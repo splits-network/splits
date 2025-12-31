@@ -27,7 +27,7 @@ export function registerAssignmentRoutes(
             };
 
             const result = await config.assignmentService.getAssignments(clerkUserId, filters);
-            return reply.send({ data: result });
+            return reply.send(result);
         } catch (error: any) {
             return reply
                 .code(error.statusCode || 500)

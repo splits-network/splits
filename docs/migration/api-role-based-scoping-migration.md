@@ -466,7 +466,7 @@ export default function ProposalsPage() {
       const client = await createAuthenticatedClient();
       // Single endpoint, backend determines scope
       const res = await client.get('/api/proposals');
-      setProposals(res.data.data);
+      setProposals(res.data);
       setLoading(false);
     }
     
@@ -625,7 +625,7 @@ async getProposalsForUser(
 async function loadProposals() {
   const client = await createAuthenticatedClient();
   const res = await client.get('/api/proposals');  // No role logic!
-  return res.data.data;
+  return res.data;
 }
 ```
 
@@ -730,14 +730,14 @@ async function loadApplications() {
   const res = await client.get('/api/applications', {
     params: { page: 1, limit: 25 }  // Only pagination, no role params
   });
-  return res.data.data;
+  return res.data;
 }
 
 // apps/portal/src/app/(authenticated)/applications/[id]/page.tsx
 async function loadApplication(id: string) {
   const client = await createAuthenticatedClient();
   const res = await client.get(`/api/applications/${id}`);  // Backend checks access
-  return res.data.data;
+  return res.data;
 }
 ```
 
@@ -890,14 +890,14 @@ app.get('/api/jobs/:id', async (request, reply) => {
 async function loadPublicJobs() {
   const res = await fetch('/api/jobs');  // No auth
   const data = await res.json();
-  return data.data;
+  return data;
 }
 
 // apps/portal/src/app/(authenticated)/roles/page.tsx (Authenticated)
 async function loadJobs() {
   const client = await createAuthenticatedClient();
   const res = await client.get('/api/jobs');  // Auth applied, role-based data
-  return res.data.data;
+  return res.data;
 }
 ```
 
@@ -952,7 +952,7 @@ async getJobsForUser(
 async function loadJobs() {
   const client = await createAuthenticatedClient();
   const res = await client.get('/api/jobs');  // No role logic!
-  return res.data.data;
+  return res.data;
 }
 ```
 

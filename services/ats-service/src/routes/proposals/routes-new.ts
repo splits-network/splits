@@ -68,7 +68,7 @@ export async function proposalRoutesNew(fastify: FastifyInstance, repository: At
             userContext.organizationId
         );
         
-        return reply.send({ data: result });
+        return reply.send(result);
     });
 
     /**

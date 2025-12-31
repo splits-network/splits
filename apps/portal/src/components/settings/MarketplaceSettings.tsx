@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import { useDebouncedCallback } from '@/hooks/useDebounce';
+import { useDebouncedCallback } from '@/hooks/use-debounce';
 
 interface MarketplaceSettings {
     marketplace_enabled: boolean;

@@ -102,7 +102,7 @@ export default function SubmitToJobWizard({
                 const response = await client.get('/jobs', { params });
 
                 if (response.data?.data) {
-                    setJobs(response.data.data);
+                    setJobs(response.data);
                     if (response.data.pagination) {
                         setTotalPages(response.data.pagination.total_pages || 1);
                         setTotalCount(response.data.pagination.total || 0);

@@ -1057,7 +1057,7 @@ app.get('/jobs', async (request, reply) => {
     userContext?.correlationId
   );
   
-  return reply.send({ data: result });
+  return reply.send(result);
 });
 ```
 

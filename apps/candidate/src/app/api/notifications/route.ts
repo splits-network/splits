@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
         }
 
         // V2 returns { data, pagination }; keep existing response shape for clients
-        return NextResponse.json({ data: data.data || data });
+        return NextResponse.json({ data: data || data });
     } catch (error) {
         console.error('Error proxying notifications request:', error);
         return NextResponse.json(

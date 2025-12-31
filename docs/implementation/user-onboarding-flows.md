@@ -594,8 +594,8 @@ export function useOnboarding() {
         .then(res => res.json())
         .then(data => {
           setStatus({
-            status: data.data.onboarding_status,
-            step: data.data.onboarding_step,
+            status: data.onboarding_status,
+            step: data.onboarding_step,
           });
         });
     }

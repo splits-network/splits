@@ -204,7 +204,7 @@ try {
     const response = await fetch('/api/...');
     if (!response.ok) throw new Error('Failed to fetch');
     const data = await response.json();
-    setData(data.data);
+    setData(data);
 } catch (err) {
     setError(err instanceof Error ? err.message : 'An error occurred');
 } finally {

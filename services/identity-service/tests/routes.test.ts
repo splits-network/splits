@@ -491,7 +491,7 @@ describe('Route Handler Logic Tests', () => {
       if (response.statusCode === 200) {
         const responseData = JSON.parse(response.body);
         expect(responseData).toHaveProperty('data');
-        expect(responseData.data).toEqual(mockUser);
+        expect(responsedata).toEqual(mockUser);
       }
     });
 

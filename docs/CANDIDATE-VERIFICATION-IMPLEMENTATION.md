@@ -55,10 +55,10 @@ Successfully implemented candidate verification status tracking and confirmed th
 
 ```typescript
 // Create recruiter-candidate relationship in network service
-if (candidateData.data?.id) {
+if (candidatedata?.id) {
     await networkService().post('/recruiter-candidates', {
         recruiter_id: recruiterId,
-        candidate_id: candidateData.data.id
+        candidate_id: candidatedata.id
     }, undefined, correlationId);
 }
 ```

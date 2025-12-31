@@ -198,7 +198,7 @@ useEffect(() => {
             const response = await client.get('/items', { params });
 
             if (response.data?.data) {
-                setItems(response.data.data);
+                setItems(response.data);
                 if (response.data.pagination) {
                     setTotalPages(response.data.pagination.total_pages || 1);
                     setTotalCount(response.data.pagination.total || 0);
