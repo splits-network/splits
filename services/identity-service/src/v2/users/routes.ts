@@ -17,28 +17,16 @@ export function registerUserRoutes(
 ) {
     const { userService, logError } = config;
 
-    app.get('/api/v2/users/me', async (request: FastifyRequest, reply: FastifyReply) => {
-        try {
-            const { clerkUserId } = requireUserContext(request);
-            const user = await userService.getCurrentUser(clerkUserId);
-            reply.send({ data: user });
-        } catch (error) {
-            logError('GET /api/v2/users/me failed', error);
-            reply
-                .code((error as any)?.statusCode || 404)
-                .send({ error: { message: (error as Error).message || 'User not found' } });
-        }
-    });
-
     app.get('/api/v2/users', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
-            const paginationParams = validatePaginationParams(request.query as any);
+            const query = request.query as any;
+            const paginationParams = validatePaginationParams(query.page, query.limit);
 
             const result = await userService.findUsers(clerkUserId, {
                 ...paginationParams,
-                search: (request.query as any).search,
-                status: (request.query as any).status,
+                search: query.search,
+                status: query.status,
             });
 
             reply.send(

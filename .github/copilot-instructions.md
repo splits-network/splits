@@ -42,6 +42,7 @@ The repo is organized by **responsibility**, not by technology.
 │  ├─ shared-logging/        # Logging utilities
 │  ├─ shared-fastify/        # Fastify plugins, common middleware
 │  ├─ shared-clients/        # Typed HTTP/SDK clients for services
+│  ├─ shared-access-context/ # Access context resolution (V2 RBAC)
 │  └─ shared-job-queue/      # Job queue abstraction (RabbitMQ)
 │
 ├─ infra/
@@ -59,6 +60,13 @@ The repo is organized by **responsibility**, not by technology.
    - No reaching across into other service folders at runtime.
    - Use HTTP clients in `packages/shared-clients` to call other services.
 3. **Use shared packages** instead of copy-pasting common code.
+4. **Follow V2 API Architecture** (implemented in ATS, Network, Billing, Document, Notification, Automation services):
+   - Use standardized 5-route pattern (LIST, GET, CREATE, UPDATE, DELETE)
+   - Implement domain-based folder structure under `v2/`
+   - Use shared access context from `@splits-network/shared-access-context`
+   - No `/me` endpoints - use filtered queries with access context
+   - Single update methods with smart validation
+   - Direct Supabase queries with role-based scoping
 4. **ALWAYS use server-side filtering, searching, pagination, and sorting for list views.**
    - Client-side filtering does NOT scale and will cause performance issues with large datasets.
    - Backend endpoints MUST support query parameters: `?page=1&limit=25&search=query&sort_by=field&sort_order=asc`
@@ -102,30 +110,38 @@ Copilot should assume and suggest the following stack:
     - Each service owns its schema and migrations.
     - Supabase project-ref: `einhgkqmxbkgdohwfayv`.
     - Use Supabase MCP tools for database operations when available.
-  - **Database Schema Pattern for Clerk User IDs**:
+  - **Database Schema Pattern for User Access (V2)**:
     - `identity.users` table contains `clerk_user_id` (text) column - the source of truth for Clerk IDs
     - Other tables (e.g., `ats.candidates`, `network.recruiters`) have `user_id` (UUID) which is a foreign key to `identity.users.id`
-    - **CRITICAL**: To query by Clerk user ID in tables without a direct `clerk_user_id` column:
-      1. First query `identity.users` to get the internal UUID: `SELECT id FROM identity.users WHERE clerk_user_id = $1`
-      2. Then use that UUID to query the target table: `SELECT * FROM ats.candidates WHERE user_id = $uuid`
-    - **DO NOT** try to query `clerk_user_id` directly on tables that don't have this column
-    - Example (correct pattern):
+    - **V2 Services use shared access context** from `@splits-network/shared-access-context`:
+      - Import `resolveAccessContext(clerkUserId, supabase)` to get user context with roles
+      - Access context includes internal UUID, memberships, and scoped filtering logic
+      - Repository methods use access context to filter queries (e.g., candidates see their own data, recruiters see assigned data, company users see org data)
+    - **V1 Services (legacy)**: Still use direct Clerk ID resolution pattern above
+    - Example V2 pattern:
       ```typescript
-      // Step 1: Resolve Clerk ID to internal UUID
-      const { data: userData } = await supabase
-        .schema('identity')
-        .from('users')
-        .select('id')
-        .eq('clerk_user_id', clerkUserId)
-        .single();
+      import { resolveAccessContext } from '@splits-network/shared-access-context';
       
-      // Step 2: Query target table with internal UUID
-      const { data: candidate } = await supabase
-        .schema('ats')
-        .from('candidates')
-        .select('*')
-        .eq('user_id', userData.id)
-        .single();
+      // V2 Repository method
+      async list(clerkUserId: string, filters: CandidateFilters) {
+        const context = await resolveAccessContext(clerkUserId, this.supabase);
+        
+        // Access context handles role-based filtering automatically
+        const query = this.supabase
+          .schema('ats')
+          .from('candidates')
+          .select('*');
+          
+        // Apply role-based filters from context
+        if (context.role === 'recruiter') {
+          query.eq('user_id', context.userId);
+        } else if (context.role === 'company_admin') {
+          query.in('company_id', context.accessibleCompanyIds);
+        }
+        // Platform admins see everything (no filter)
+        
+        return query;
+      }
       ```
   - Kubernetes with raw YAML manifests (no Helm).
   - Redis for caching and rate limiting.
@@ -172,34 +188,46 @@ No domain-specific business logic here. It should mostly proxy and enforce auth/
   - `identity.organizations`
   - `identity.memberships`
 - Syncs users from Clerk (`clerk_user_id`).
-- Returns `/me` and memberships.
+- **V1**: Returns `/me` and memberships (legacy)
+- **V2**: Not yet implemented - still uses legacy endpoints
 
 Copilot: keep this service focused on identity, not ATS or billing concerns.
 
 ### 3.3 `services/ats-service`
 
 - Owns ATS domain:
-  - Companies (optionally linked to `identity.organizations`).
-  - Jobs / roles.
-  - Candidates.
-  - Applications (candidate ↔ job).
-  - Stages and notes.
-  - Placements (Phase 1: single recruiter per placement).
+  - Companies (optionally linked to `identity.organizations`)
+  - Jobs / roles
+  - Candidates
+  - Applications (candidate ↔ job)
+  - Stages and notes
+  - Placements (Phase 1: single recruiter per placement)
+- **V2 Implementation Complete**: Uses standardized 5-route pattern
+  - `/v2/jobs`, `/v2/companies`, `/v2/candidates`, `/v2/applications`, `/v2/placements`
+  - Domain-based folder structure under `src/v2/`
+  - Direct Supabase queries with role-based scoping
+  - Single update methods with smart validation
 
 Copilot:  
-When adding endpoints or models here, keep them about **jobs, candidates, applications, and placements**. Anything about recruiter permissions or subscriptions belongs to `network-service` or `billing-service`.
+**For new ATS features, use V2 patterns**. Extend existing V2 routes or add new V2 resources following the 5-route pattern. Anything about recruiter permissions or subscriptions belongs to `network-service` or `billing-service`.
 
 ### 3.4 `services/network-service`
 
 - Owns recruiter-centric data:
   - `network.recruiters`
   - `network.role_assignments`
+  - `network.candidate_role_assignments` (proposals)
+- **V2 Implementation Complete**: Uses standardized 5-route pattern
+  - `/v2/recruiters`, `/v2/assignments`, `/v2/recruiter-candidates`, `/v2/reputation`, `/v2/proposals`
+  - Domain-based folder structure under `src/v2/`
+  - Enriched queries with recruiter metadata
+  - Marketplace visibility and capacity management
 - Answers questions like:
-  - “Which jobs is this recruiter allowed to see?”
-  - “Is this user an active recruiter?”
+  - "Which jobs is this recruiter allowed to see?"
+  - "Is this user an active recruiter?"
 
 Copilot:  
-Do not add ATS-like logic here. Stay focused on recruiters and their access to jobs.
+**For new network features, use V2 patterns**. Extend existing V2 routes following the 5-route pattern. Do not add ATS-like logic here. Stay focused on recruiters and their marketplace relationships.
 
 ### 3.5 `services/billing-service`
 
@@ -207,31 +235,43 @@ Do not add ATS-like logic here. Stay focused on recruiters and their access to j
   - `billing.plans`
   - `billing.subscriptions`
   - `billing.payouts` - recruiter payment tracking
-- Handles Stripe webhooks.
-- Provides subscription status to `api-gateway` for gating recruiter features.
-- Manages payout processing and tracking.
+- **V2 Implementation Complete**: Uses standardized 5-route pattern
+  - `/v2/plans`, `/v2/subscriptions`, `/v2/payouts`
+  - Role-aware access (recruiters see their own, billing admins see all)
+  - Event publishing for all lifecycle hooks
+- Handles Stripe webhooks
+- Provides subscription status to `api-gateway` for gating recruiter features
+- Manages payout processing and tracking
 
 Copilot:  
-All subscription logic (free vs paid recruiter, plan changes, etc.) and payout processing belongs here.
+**For new billing features, use V2 patterns**. All subscription logic (free vs paid recruiter, plan changes, etc.) and payout processing belongs here.
 
 ### 3.6 `services/notification-service`
 
-- Listens to RabbitMQ events from other services.
-- Sends transactional email using **Resend**.
+- Listens to RabbitMQ events from other services
+- Sends transactional email using **Resend**
+- **V2 Implementation Complete**: Uses standardized 5-route pattern
+  - `/v2/notifications`, `/v2/templates`
+  - User-scoped notification access
+  - Template management for email content
 - Example events:
   - `application.created`
   - `application.stage_changed`
   - `placement.created`
 
 Copilot:  
-Do not embed SMTP logic elsewhere. Email sending should flow through notification-service and Resend.
+**For new notification features, use V2 patterns**. Do not embed SMTP logic elsewhere. Email sending should flow through notification-service and Resend.
 
 ### 3.7 `services/automation-service`
 
-- AI-assisted candidate-job matching with explainable scoring.
-- Fraud detection and anomaly monitoring.
-- Rule-based automation execution with human approval workflows.
-- Marketplace metrics aggregation and health scoring.
+- AI-assisted candidate-job matching with explainable scoring
+- Fraud detection and anomaly monitoring
+- Rule-based automation execution with human approval workflows
+- Marketplace metrics aggregation and health scoring
+- **V2 Implementation Complete**: Uses standardized 5-route pattern
+  - `/v2/matches`, `/v2/fraud`, `/v2/rules`, `/v2/metrics`
+  - Admin-gated access for sensitive operations
+  - Event-driven automation triggers
 - Handles:
   - Match generation and review
   - Fraud signal detection and admin workflows
@@ -239,21 +279,25 @@ Do not embed SMTP logic elsewhere. Email sending should flow through notificatio
   - Daily metrics and analytics
 
 Copilot:  
-This service orchestrates intelligent automation and monitoring. Keep it focused on matching, fraud detection, automation rules, and metrics - not core ATS or billing logic.
+**For new automation features, use V2 patterns**. This service orchestrates intelligent automation and monitoring. Keep it focused on matching, fraud detection, automation rules, and metrics - not core ATS or billing logic.
 
 ### 3.8 `services/document-service`
 
-- Universal document storage using Supabase Storage.
+- Universal document storage using Supabase Storage
+- **V2 Implementation Complete**: Uses standardized 5-route pattern
+  - `/v2/documents`
+  - Role-based access to documents
+  - Pre-signed URL generation and validation
 - Handles uploads for:
   - Candidate resumes and cover letters
   - Job descriptions and company documents
   - Contracts and agreements (future)
-- Provides secure pre-signed URLs for uploads/downloads.
-- File type validation and size limits.
-- Multi-entity attachments (candidates, jobs, applications, companies).
+- Provides secure pre-signed URLs for uploads/downloads
+- File type validation and size limits
+- Multi-entity attachments (candidates, jobs, applications, companies)
 
 Copilot:  
-All file storage operations should go through this service. Do not implement file handling in other services.
+**For new document features, use V2 patterns**. All file storage operations should go through this service. Do not implement file handling in other services.
 
 ---
 
@@ -269,8 +313,10 @@ When Copilot generates React/Next.js code:
    - NEVER create duplicate route groups like `(dashboard)` - always use `(authenticated)` for protected pages.
 
 2. **Data Fetching & Performance** ⚠️ **CRITICAL FOR PAGE SPEED**
-   - Use fetch / Axios to call **`api-gateway`**, not individual services.
-   - Handle auth via Clerk (session, tokens) and send bearer token to gateway.
+   - Use fetch / Axios to call **`/api/v2/*`** routes through `api-gateway`, not individual services
+   - Handle auth via Clerk (session, tokens) and send bearer token to gateway
+   - **V2 API Response Format**: All V2 endpoints return `{ data: <payload>, pagination?: <pagination> }`
+   - **No `/me` endpoints**: Use filtered queries (e.g., `/api/v2/candidates?limit=1` for current user)
    
    **Progressive Loading Pattern** (REQUIRED for all detail/list pages):
    - **Load critical data first**: Fetch primary entity (candidate, job, application) immediately to show page structure (~100-200ms).
@@ -284,31 +330,31 @@ When Copilot generates React/Next.js code:
    - **Never rely on sequential API calls**: If you need job data for 10 applications, the backend should JOIN and return enriched data, not force 10 separate API calls.
    - **Prefer server-side enrichment**: Backend services should use Supabase `.select('*, related_table(*)')` syntax to fetch related data in one query.
    
-   **Example** (Canonical Pattern from [apps/portal/src/app/(authenticated)/candidates/[id]/components/candidate-detail-client.tsx](../../apps/portal/src/app/(authenticated)/candidates/[id]/components/candidate-detail-client.tsx)):
+   **Example** (V2 Pattern for candidate detail page):
    ```tsx
-   // ✅ CORRECT - Progressive loading with independent states
+   // ✅ CORRECT - V2 Progressive loading with independent states
    const [candidate, setCandidate] = useState(null);
    const [loading, setLoading] = useState(true);
    const [applications, setApplications] = useState([]);
    const [applicationsLoading, setApplicationsLoading] = useState(true);
-   const [relationship, setRelationship] = useState(null);
-   const [relationshipLoading, setRelationshipLoading] = useState(true);
+   const [recruiters, setRecruiters] = useState([]);
+   const [recruitersLoading, setRecruitersLoading] = useState(true);
    
-   // Load primary data immediately
+   // Load primary data immediately (V2 API)
    useEffect(() => {
      async function loadCandidate() {
-       const res = await client.get(`/api/candidates/${id}`);
+       const res = await client.get(`/api/v2/candidates/${id}`);
        setCandidate(res.data.data);
        setLoading(false);
      }
      loadCandidate();
    }, [id]);
    
-   // Load secondary data in parallel
+   // Load secondary data in parallel (V2 APIs)
    useEffect(() => {
      async function loadApplications() {
-       // Uses enriched endpoint - returns applications WITH job data in single query
-       const res = await client.get(`/api/candidates/${id}/applications-with-jobs`);
+       // V2 API with enriched data - applications WITH job data
+       const res = await client.get(`/api/v2/applications?candidate_id=${id}&include=job,recruiter`);
        setApplications(res.data.data);
        setApplicationsLoading(false);
      }
@@ -316,12 +362,13 @@ When Copilot generates React/Next.js code:
    }, [candidate]);
    
    useEffect(() => {
-     async function loadRelationship() {
-       const res = await client.get(`/api/candidates/${id}/recruiters`);
-       setRelationship(res.data.data);
-       setRelationshipLoading(false);
+     async function loadRecruiters() {
+       // V2 API with enriched recruiter metadata
+       const res = await client.get(`/api/v2/recruiter-candidates?candidate_id=${id}`);
+       setRecruiters(res.data.data);
+       setRecruitersLoading(false);
      }
-     if (candidate) loadRelationship();
+     if (candidate) loadRecruiters();
    }, [candidate]);
    ```
    
@@ -358,9 +405,156 @@ When Copilot generates React/Next.js code:
 
 ---
 
-## 5. Backend Code Style & Patterns
+## 5. V2 Backend Architecture Patterns
 
-Copilot should follow these patterns for all services:
+**IMPORTANT**: For services with V2 implementations (ATS, Network, Billing, Document, Notification, Automation), always use V2 patterns. Only use V1 patterns for services not yet migrated (Identity).
+
+### 5.1 V2 Folder Structure (Domain-Based)
+
+```
+services/ats-service/src/v2/
+├── shared/                 # Shared V2 utilities
+│   ├── events.ts           # EventPublisher class
+│   ├── helpers.ts          # requireUserContext, validation
+│   └── pagination.ts       # PaginationParams, PaginationResponse
+├── jobs/                   # Jobs domain
+│   ├── types.ts            # JobFilters, JobUpdate
+│   ├── repository.ts       # Job CRUD methods (~100-150 lines)
+│   └── service.ts          # JobServiceV2 with validation
+├── companies/              # Companies domain
+│   ├── types.ts            # CompanyFilters, CompanyUpdate
+│   ├── repository.ts       # Company CRUD methods
+│   └── service.ts          # CompanyServiceV2
+├── candidates/             # Candidates domain (etc.)
+└── routes.ts               # All V2 routes (imports from domains)
+```
+
+### 5.2 V2 Standardized 5-Route Pattern
+
+**Every V2 resource** follows this exact pattern:
+
+```typescript
+// 1. LIST - Role-scoped collection  
+GET /v2/:resource?search=X&status=Y&sort_by=Z&page=1&limit=25
+Response: { data: [...], pagination: { total, page, limit, total_pages } }
+
+// 2. GET BY ID - Single resource
+GET /v2/:resource/:id?include=related1,related2
+Response: { data: {...} }
+
+// 3. CREATE - New resource
+POST /v2/:resource
+Body: { field1: value1, field2: value2, ... }
+Response: { data: {...} }
+
+// 4. UPDATE - Single method handles ALL updates
+PATCH /v2/:resource/:id
+Body: { field1: newValue1, status: newStatus, ... }
+Response: { data: {...} }
+
+// 5. DELETE - Soft delete
+DELETE /v2/:resource/:id
+Response: { data: { message: 'Deleted successfully' } }
+```
+
+### 5.3 V2 Repository Pattern
+
+```typescript
+import { resolveAccessContext } from '@splits-network/shared-access-context';
+
+export class CandidateRepositoryV2 {
+  constructor(private supabase: SupabaseClient) {}
+
+  async list(clerkUserId: string, filters: CandidateFilters) {
+    const context = await resolveAccessContext(clerkUserId, this.supabase);
+    
+    const query = this.supabase
+      .schema('ats')
+      .from('candidates')
+      .select('*');
+      
+    // Role-based filtering from access context
+    if (context.role === 'candidate') {
+      query.eq('user_id', context.userId);
+    } else if (context.role === 'recruiter') {
+      // Filter to assigned candidates via network.recruiter_candidates
+      const { data: assignments } = await this.supabase
+        .schema('network')
+        .from('recruiter_candidates')
+        .select('candidate_id')
+        .eq('recruiter_user_id', context.userId);
+      query.in('id', assignments?.map(a => a.candidate_id) || []);
+    } else if (context.isCompanyUser) {
+      query.in('company_id', context.accessibleCompanyIds);
+    }
+    // Platform admins see everything (no filter)
+    
+    // Apply search/sorting filters
+    if (filters.search) {
+      query.ilike('name', `%${filters.search}%`);
+    }
+    
+    return query;
+  }
+
+  async update(id: string, clerkUserId: string, updates: CandidateUpdate) {
+    const context = await resolveAccessContext(clerkUserId, this.supabase);
+    
+    const query = this.supabase
+      .schema('ats')
+      .from('candidates')
+      .update(updates)
+      .eq('id', id);
+      
+    // Apply same role-based filtering for updates
+    if (context.role === 'candidate') {
+      query.eq('user_id', context.userId);
+    }
+    
+    return query.select().single();
+  }
+}
+```
+
+### 5.4 V2 Service Pattern (Single Update Method)
+
+```typescript
+export class CandidateServiceV2 {
+  constructor(
+    private repository: CandidateRepositoryV2,
+    private events: EventPublisher
+  ) {}
+
+  async update(id: string, clerkUserId: string, updates: CandidateUpdate) {
+    // Smart validation based on what's being updated
+    if (updates.status) {
+      this.validateStatusTransition(updates.status);
+    }
+    if (updates.email) {
+      await this.validateEmailUnique(updates.email);
+    }
+    
+    const updated = await this.repository.update(id, clerkUserId, updates);
+    
+    // Publish events after successful update
+    await this.events.publish('candidate.updated', {
+      candidateId: id,
+      changes: Object.keys(updates),
+      updatedBy: clerkUserId
+    });
+    
+    return updated;
+  }
+}
+```
+
+---
+
+## 6. Legacy Backend Code Style & Patterns (V1)
+
+**Note**: Use these patterns only for services not yet migrated to V2 (Identity service).
+
+Copilot should follow these patterns for V1 services:
 
 1. **Fastify Setup**
    - Use a central `buildServer` function (if present) per service.
@@ -422,20 +616,47 @@ Copilot should follow these patterns for all services:
    - See `docs/guidance/user-identification-standard.md` for complete implementation guide
 
 9. **Authorization & RBAC**
-   - **ALL authorization is enforced at the API Gateway level** using `services/api-gateway/src/rbac.ts`
-   - **Backend services MUST NOT implement their own authorization checks**
-   - Backend services should trust headers from api-gateway:
-     - `x-clerk-user-id`: The authenticated user's Clerk ID
-     - `x-user-role`: The user's role (for logging/audit)
-   - Services focus on business logic, gateway handles RBAC
+   - **V2 Services**: Use shared access context from `@splits-network/shared-access-context`
+     - Repository methods call `resolveAccessContext(clerkUserId, supabase)` to get user roles and filtering logic
+     - Backend services apply role-based filtering in Supabase queries
+     - No authorization middleware needed - access control is data-level
+   - **V1 Services (legacy)**: API Gateway enforces authorization using `services/api-gateway/src/rbac.ts`
+     - Backend services trust headers from api-gateway: `x-clerk-user-id`, `x-user-role`
+     - Services focus on business logic, gateway handles RBAC
 
 ---
 
-## 6. Authorization & RBAC (API Gateway)
+## 6. Authorization & RBAC
 
-All authorization in Splits Network is centralized in `services/api-gateway/src/rbac.ts`. Backend services **MUST NOT** implement authorization - they should trust the API Gateway.
+### V2 Authorization (Access Context Pattern)
 
-### 6.1 Authorization Architecture
+**V2 services** (ATS, Network, Billing, Document, Notification, Automation) use shared access context for data-level authorization:
+
+```typescript
+import { resolveAccessContext } from '@splits-network/shared-access-context';
+
+// In repository methods
+const context = await resolveAccessContext(clerkUserId, supabase);
+// Context includes: userId, role, memberships, accessibleCompanyIds, etc.
+
+// Apply role-based filtering in Supabase queries
+if (context.role === 'candidate') {
+  query.eq('user_id', context.userId); // See only own data
+} else if (context.role === 'company_admin') {
+  query.in('company_id', context.accessibleCompanyIds); // See company data
+}
+// Platform admins see everything (no filter)
+```
+
+**Benefits**:
+- No `/me` endpoints needed - filtered queries handle user-scoped access
+- Consistent access control across all V2 services
+- Data-level security - impossible to bypass with malformed requests
+- Single source of truth for role resolution
+
+### V1 Authorization (Gateway Middleware - Legacy)
+
+**V1 services** (Identity) use centralized authorization in `services/api-gateway/src/rbac.ts`. Backend services **MUST NOT** implement authorization - they should trust the API Gateway.
 
 **Single Source of Truth**: API Gateway enforces all RBAC via the `requireRoles()` middleware.
 
@@ -451,9 +672,32 @@ All authorization in Splits Network is centralized in `services/api-gateway/src/
    - `x-user-role`: Role (for logging)
 5. Backend service processes request without authorization checks
 
-**Backend Service Pattern**:
+**V2 Backend Service Pattern**:
 ```typescript
-// ❌ WRONG - Do not check authorization in backend services
+// ✅ CORRECT - V2 uses access context for data-level authorization
+export class CandidateRepositoryV2 {
+  async list(clerkUserId: string, filters: CandidateFilters) {
+    const context = await resolveAccessContext(clerkUserId, this.supabase);
+    
+    const query = this.supabase.schema('ats').from('candidates').select('*');
+    
+    // Access context handles role-based filtering
+    if (context.role === 'candidate') {
+      query.eq('user_id', context.userId);
+    } else if (context.isRecruiter) {
+      // Filter to assigned candidates
+      const assignments = await this.getRecruiterAssignments(context.userId);
+      query.in('id', assignments.map(a => a.candidate_id));
+    }
+    
+    return query;
+  }
+}
+```
+
+**V1 Backend Service Pattern (Legacy)**:
+```typescript
+// ❌ WRONG - Do not check authorization in V1 backend services
 if (!isRecruiter(userId)) {
   throw new ForbiddenError('Only recruiters can access this');
 }
@@ -793,15 +1037,18 @@ When setting up new services or apps:
    - Document schema ownership in service README.
 
 3. **References**
-   - See `docs/splits-network-architecture.md` for detailed service responsibilities.
-   - See `docs/splits-network-phase1-prd.md` for Phase 1 scope and data models.
-   - See `docs/guidance/form-controls.md` for form implementation standards.
-   - See `docs/guidance/user-roles-and-permissions.md` for comprehensive RBAC, user roles, capabilities, restrictions, API endpoints, and workflows.
-   - See `docs/guidance/api-response-format.md` for API response format standards (all endpoints must comply).
-   - See `docs/guidance/pagination.md` for pagination implementation standards.
-   - See `docs/guidance/grid-table-view-switching.md` for implementing grid/table view toggles.
-   - See `docs/guidance/service-architecture-pattern.md` for service layer patterns.
-   - Check `.vscode/mcp.json` for configured Supabase MCP server.
+   - **V2 Architecture**: See `docs/migration/v2/V2-ARCHITECTURE-IMPLEMENTATION-GUIDE.md` for complete V2 patterns
+   - **V2 Progress**: See `docs/migration/v2/V2-IMPLEMENTATION-PROGRESS.md` for implementation status
+   - **V2 Context**: See `AGENTS.md` for additional V2 guidelines and requirements
+   - See `docs/splits-network-architecture.md` for detailed service responsibilities
+   - See `docs/splits-network-phase1-prd.md` for Phase 1 scope and data models
+   - See `docs/guidance/form-controls.md` for form implementation standards
+   - See `docs/guidance/user-roles-and-permissions.md` for comprehensive RBAC, user roles, capabilities, restrictions, API endpoints, and workflows
+   - See `docs/guidance/api-response-format.md` for API response format standards (all endpoints must comply)
+   - See `docs/guidance/pagination.md` for pagination implementation standards
+   - See `docs/guidance/grid-table-view-switching.md` for implementing grid/table view toggles
+   - See `docs/guidance/service-architecture-pattern.md` for service layer patterns
+   - Check `.vscode/mcp.json` for configured Supabase MCP server
 
 ---
 
@@ -809,17 +1056,32 @@ When setting up new services or apps:
 
 Copilot should prioritize:
 
-1. **Small, focused suggestions** that respect the existing patterns.
-2. **Completing existing code** over generating large new abstractions.
-3. **Using existing helpers** from `packages/*` before creating duplicates.
-4. **Explaining assumptions in comments** when generating complex logic, so it's easy to review and adjust.
-5. **Checking docs first** – when unsure, reference `docs/` for context before inventing patterns.
+1. **V2 patterns first** - For services with V2 implementations, always suggest V2 approaches
+2. **Small, focused suggestions** that respect the existing patterns
+3. **Completing existing code** over generating large new abstractions
+4. **Using existing helpers** from `packages/*` and `@splits-network/shared-access-context`
+5. **Explaining assumptions in comments** when generating complex logic
+6. **Checking V2 docs first** – reference `docs/migration/v2/` and `AGENTS.md` for V2 patterns
+
+When working with services:
+
+**V2 Services** (ATS, Network, Billing, Document, Notification, Automation):
+- Use standardized 5-route pattern
+- Use domain-based folder structure under `v2/`
+- Use shared access context for authorization
+- Single update methods with smart validation
+- Direct Supabase queries with role-based filtering
+
+**V1 Services** (Identity - not yet migrated):
+- Use legacy patterns until V2 migration
+- Follow gateway-based authorization
 
 When unsure about a domain decision, Copilot should lean toward:
 
-- Thin controllers.
-- Clear domain separation.
-- Simple, explicit data models.
-- Explicit > implicit (prefer obvious code over clever abstractions).
+- **V2 standardized patterns** over custom solutions
+- Thin controllers with business logic in services
+- Clear domain separation
+- Simple, explicit data models
+- Explicit > implicit (prefer obvious code over clever abstractions)
 
-Splits Network should feel like a **clean, well-structured recruiting and payouts platform**, not a ball of mud.
+Splits Network should feel like a **clean, well-structured recruiting and payouts platform** with **consistent, predictable APIs**, not a ball of mud.

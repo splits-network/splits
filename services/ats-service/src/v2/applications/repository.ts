@@ -4,7 +4,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ApplicationFilters, ApplicationUpdate } from './types';
-import { resolveAccessContext } from '../shared/access';
+import { resolveAccessContext, AccessContext } from '../shared/access';
 
 export interface RepositoryListResponse<T> {
     data: T[];
@@ -179,6 +179,275 @@ export class ApplicationRepository {
             .from('applications')
             .update({ status: 'withdrawn', updated_at: new Date().toISOString() })
             .eq('id', id);
+
+        if (error) throw error;
+    }
+
+    async getCandidateById(candidateId: string): Promise<any | null> {
+        if (!candidateId) {
+            return null;
+        }
+
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('candidates')
+            .select('*')
+            .eq('id', candidateId)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data ?? null;
+    }
+
+    async getJobById(jobId: string): Promise<any | null> {
+        if (!jobId) return null;
+
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('jobs')
+            .select(
+                `
+                *,
+                company:companies(*)
+            `
+            )
+            .eq('id', jobId)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data ?? null;
+    }
+
+    async getRecruiterById(recruiterId: string): Promise<any | null> {
+        if (!recruiterId) return null;
+
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('recruiters')
+            .select('*')
+            .eq('id', recruiterId)
+            .maybeSingle();
+
+        if (error) throw error;
+        if (!data) return null;
+
+        let user: { id: string; name?: string; email?: string } | undefined = undefined;
+        if (data.user_id) {
+            const { data: identityUser } = await this.supabase
+                .schema('identity')
+                .from('users')
+                .select('id, name, email')
+                .eq('id', data.user_id)
+                .maybeSingle();
+
+            if (identityUser) {
+                user = identityUser;
+            }
+        }
+
+        return {
+            ...data,
+            user,
+        };
+    }
+
+    async getDocumentsForApplication(applicationId: string): Promise<any[]> {
+        const { data, error } = await this.supabase
+            .schema('documents')
+            .from('documents')
+            .select('*')
+            .eq('entity_type', 'application')
+            .eq('entity_id', applicationId)
+            .is('deleted_at', null)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        return (data || []).map(doc => ({
+            ...doc,
+            file_name: doc.filename,
+            file_size: doc.file_size,
+            file_url: doc.storage_path,
+            uploaded_at: doc.created_at,
+            is_primary: doc.metadata?.is_primary || false,
+        }));
+    }
+
+    async getPreScreenAnswersForApplication(applicationId: string): Promise<any[]> {
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('job_pre_screen_answers')
+            .select(
+                `
+                *,
+                question:job_pre_screen_questions(*)
+            `
+            )
+            .eq('application_id', applicationId);
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    async getJobRequirements(jobId: string): Promise<any[]> {
+        if (!jobId) return [];
+
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('job_requirements')
+            .select('*')
+            .eq('job_id', jobId)
+            .order('sort_order', { ascending: true });
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    async getAIReviewForApplication(applicationId: string): Promise<any | null> {
+        if (!applicationId) {
+            return null;
+        }
+
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('ai_reviews')
+            .select('*')
+            .eq('application_id', applicationId)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data ?? null;
+    }
+
+    async getAuditLogsForApplication(applicationId: string): Promise<any[]> {
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('application_audit_log')
+            .select('*')
+            .eq('application_id', applicationId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    async resolveAccess(clerkUserId: string): Promise<AccessContext> {
+        return resolveAccessContext(this.supabase, clerkUserId);
+    }
+
+    async findCandidateByClerkUserId(clerkUserId: string): Promise<any | null> {
+        if (!clerkUserId) {
+            return null;
+        }
+
+        const { data: identityUser, error: identityError } = await this.supabase
+            .schema('identity')
+            .from('users')
+            .select('id')
+            .eq('clerk_user_id', clerkUserId)
+            .maybeSingle();
+
+        if (identityError) throw identityError;
+        if (!identityUser) {
+            return null;
+        }
+
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('candidates')
+            .select('*')
+            .eq('user_id', identityUser.id)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data ?? null;
+    }
+
+    async findUserByClerkUserId(clerkUserId: string): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .schema('identity')
+            .from('users')
+            .select('id, email, name')
+            .eq('clerk_user_id', clerkUserId)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data ?? null;
+    }
+
+    async findApplicationById(id: string): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('applications')
+            .select('*')
+            .eq('id', id)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data ?? null;
+    }
+
+    async linkDocumentToApplication(
+        documentId: string,
+        applicationId: string,
+        isPrimary: boolean
+    ): Promise<void> {
+        const { data: originalDoc, error: fetchError } = await this.supabase
+            .schema('documents')
+            .from('documents')
+            .select('*')
+            .eq('id', documentId)
+            .maybeSingle();
+
+        if (fetchError || !originalDoc) {
+            throw new Error(`Document ${documentId} not found`);
+        }
+
+        const { error: insertError } = await this.supabase
+            .schema('documents')
+            .from('documents')
+            .insert({
+                entity_type: 'application',
+                entity_id: applicationId,
+                document_type: originalDoc.document_type,
+                filename: originalDoc.filename,
+                storage_path: originalDoc.storage_path,
+                bucket_name: originalDoc.bucket_name,
+                content_type: originalDoc.content_type,
+                file_size: originalDoc.file_size,
+                uploaded_by_user_id: originalDoc.uploaded_by_user_id,
+                processing_status: originalDoc.processing_status,
+                metadata: {
+                    ...originalDoc.metadata,
+                    is_primary: isPrimary,
+                    original_document_id: documentId,
+                },
+            });
+
+        if (insertError) throw insertError;
+    }
+
+    async createAuditLog(log: {
+        application_id: string;
+        action: string;
+        performed_by_user_id: string;
+        performed_by_role: string;
+        old_value?: any;
+        new_value?: any;
+        metadata?: any;
+    }): Promise<void> {
+        const { error } = await this.supabase
+            .schema('ats')
+            .from('application_audit_log')
+            .insert({
+                application_id: log.application_id,
+                action: log.action,
+                performed_by_user_id: log.performed_by_user_id,
+                performed_by_role: log.performed_by_role,
+                old_value: log.old_value,
+                new_value: log.new_value,
+                metadata: log.metadata,
+            });
 
         if (error) throw error;
     }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, FormEvent } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { createAuthenticatedClient } from '@/lib/api-client';
 
 interface Team {
     id: string;
@@ -37,19 +38,13 @@ export default function TeamsPage() {
             setLoading(true);
             setError(null);
             const token = await getToken();
-
-            const response = await fetch('/api/network/teams', {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to load teams');
+            if (!token) {
+                throw new Error('Not authenticated');
             }
 
-            const data = await response.json();
-            setTeams(data.teams || []);
+            const client = createAuthenticatedClient(token);
+            const response = await client.get('/teams');
+            setTeams(response.data || []);
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -65,23 +60,14 @@ export default function TeamsPage() {
             setCreating(true);
             setError(null);
             const token = await getToken();
-
-            const response = await fetch('/api/network/teams', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ name: formData.name }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to create team');
+            if (!token) {
+                throw new Error('Not authenticated');
             }
 
-            const newTeam = await response.json();
-            setTeams([...teams, newTeam]);
+            const client = createAuthenticatedClient(token);
+            const response = await client.post('/teams', { name: formData.name });
+
+            setTeams([...teams, response.data]);
             setFormData({ name: '' });
             setShowCreateModal(false);
         } catch (err: any) {

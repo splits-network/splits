@@ -126,6 +126,10 @@ export class AIReviewService {
         return await this.repository.findAIReviewByApplicationId(applicationId);
     }
 
+    async getAIReviewById(id: string): Promise<AIReview | null> {
+        return await this.repository.findAIReviewById(id);
+    }
+
     /**
      * Get AI review statistics for a job
      */

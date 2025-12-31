@@ -31,10 +31,33 @@ export class UserServiceV2 {
      * Find all users with pagination and filters
      */
     async findUsers(clerkUserId: string, filters: any) {
-        await this.requirePlatformAdmin(clerkUserId);
+        const access = await this.resolveAccessContext(clerkUserId);
         this.logger.info({ filters }, 'UserService.findUsers');
-        const result = await this.repository.findUsers(filters);
-        return result;
+
+        if (!access.isPlatformAdmin) {
+            if (!access.identityUserId) {
+                this.logger.warn({ clerkUserId }, 'UserService.findUsers - no identity user in context');
+                throw new Error('User not found');
+            }
+
+            const result = await this.repository.findUsers(filters, {
+                accessibleUserIds: [access.identityUserId],
+            });
+
+            return {
+                data: result.data.map(user => ({
+                    ...user,
+                    roles: access.roles,
+                    organization_ids: access.organizationIds,
+                    candidate_id: access.candidateId,
+                    recruiter_id: access.recruiterId,
+                    is_platform_admin: access.isPlatformAdmin,
+                })),
+                total: result.total,
+            };
+        }
+
+        return this.repository.findUsers(filters);
     }
 
     /**
@@ -126,28 +149,5 @@ export class UserServiceV2 {
         });
 
         this.logger.info({ id }, 'UserService.deleteUser - user deleted');
-    }
-
-    async getCurrentUser(clerkUserId: string) {
-        const access = await this.resolveAccessContext(clerkUserId);
-        if (!access.identityUserId) {
-            this.logger.warn({ clerkUserId }, 'UserService.getCurrentUser - no identity user');
-            throw new Error('User not found');
-        }
-
-        const user = await this.repository.findUserById(access.identityUserId);
-
-        return {
-            id: user.id,
-            email: user.email,
-            full_name: user.full_name,
-            avatar_url: user.avatar_url,
-            clerk_user_id: user.clerk_user_id,
-            roles: access.roles,
-            organization_ids: access.organizationIds,
-            candidate_id: access.candidateId,
-            recruiter_id: access.recruiterId,
-            is_platform_admin: access.isPlatformAdmin,
-        };
     }
 }

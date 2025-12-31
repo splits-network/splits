@@ -1872,6 +1872,21 @@ export class AtsRepository {
         return data;
     }
 
+    async findAIReviewById(id: string): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('ai_reviews')
+            .select('*')
+            .eq('id', id)
+            .maybeSingle();
+
+        if (error) {
+            throw error;
+        }
+
+        return data ?? null;
+    }
+
     async getAIReviewStatsByJobId(jobId: string): Promise<{
         total_applications: number;
         ai_reviewed_count: number;

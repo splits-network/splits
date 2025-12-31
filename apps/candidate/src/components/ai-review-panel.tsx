@@ -90,7 +90,8 @@ export default function AIReviewPanel({ applicationId, token }: AIReviewPanelPro
         async function fetchAIReview() {
             try {
                 const apiUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
-                const response = await fetch(`${apiUrl}/api/v2/applications/${applicationId}/ai-review`, {
+                const query = new URLSearchParams({ application_id: applicationId });
+                const response = await fetch(`${apiUrl}/api/v2/ai-reviews?${query.toString()}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',

@@ -11,7 +11,7 @@ export function registerJobRoutes(
     app: FastifyInstance,
     config: RegisterJobRoutesConfig
 ) {
-    app.get('/v2/jobs', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.get('/api/v2/jobs', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const context = getUserContext(request);
             const filters = request.query as any;
@@ -22,7 +22,7 @@ export function registerJobRoutes(
         }
     });
 
-    app.get('/v2/jobs/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.get('/api/v2/jobs/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { id } = request.params as any;
             const context = getUserContext(request);
@@ -33,7 +33,7 @@ export function registerJobRoutes(
         }
     });
 
-    app.post('/v2/jobs', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.post('/api/v2/jobs', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const job = await config.jobService.createJob(request.body as any, clerkUserId);
@@ -43,7 +43,7 @@ export function registerJobRoutes(
         }
     });
 
-    app.patch('/v2/jobs/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.patch('/api/v2/jobs/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as any;
@@ -60,7 +60,7 @@ export function registerJobRoutes(
         }
     });
 
-    app.delete('/v2/jobs/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.delete('/api/v2/jobs/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as any;

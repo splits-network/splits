@@ -44,6 +44,12 @@ export class CompanyRepository {
             query = query.in('identity_organization_id', organizationIds);
         }
 
+        const requestedOrgId =
+            filters.identity_organization_id || filters.organization_id || filters.org_id;
+        if (requestedOrgId) {
+            query = query.eq('identity_organization_id', requestedOrgId);
+        }
+
         // Apply filters
         if (filters.search) {
             query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);

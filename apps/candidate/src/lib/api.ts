@@ -250,6 +250,70 @@ export async function getDocumentUrl(documentId: string, authToken: string): Pro
     return normalized.download_url || '';
 }
 
+export async function getJobPreScreenQuestions(jobId: string, authToken: string) {
+    return fetchApi<any[]>(
+        `/api/v2/job-pre-screen-questions?job_id=${encodeURIComponent(jobId)}`,
+        {},
+        authToken
+    );
+}
+
+export async function getJobPreScreenAnswers(applicationId: string, authToken: string) {
+    return fetchApi<any[]>(
+        `/api/v2/job-pre-screen-answers?application_id=${encodeURIComponent(applicationId)}`,
+        {},
+        authToken
+    );
+}
+
+export async function getJobRequirements(jobId: string, authToken: string) {
+    return fetchApi<any[]>(
+        `/api/v2/job-requirements?job_id=${encodeURIComponent(jobId)}`,
+        {},
+        authToken
+    );
+}
+
+export async function saveJobPreScreenAnswers(
+    applicationId: string,
+    answers: Record<string, any>,
+    authToken: string
+) {
+    const payload = Object.entries(answers).map(([question_id, answer]) => ({
+        application_id: applicationId,
+        question_id,
+        answer,
+    }));
+
+    if (payload.length === 0) {
+        return [];
+    }
+
+    return fetchApi(
+        '/api/v2/job-pre-screen-answers',
+        {
+            method: 'POST',
+            body: JSON.stringify({ answers: payload }),
+        },
+        authToken
+    );
+}
+
+export async function updateApplication(
+    applicationId: string,
+    updates: Record<string, any>,
+    authToken: string
+) {
+    return fetchApi(
+        `/api/v2/applications/${applicationId}`,
+        {
+            method: 'PATCH',
+            body: JSON.stringify(updates),
+        },
+        authToken
+    );
+}
+
 // Candidate Profile API
 export interface CandidateProfile {
     id: string;
@@ -301,7 +365,11 @@ export interface CurrentUserProfile {
 }
 
 export async function getCurrentUser(authToken: string): Promise<CurrentUserProfile> {
-    return fetchApi<CurrentUserProfile>('/api/v2/users/me', {}, authToken);
+    const users = await fetchApi<CurrentUserProfile[]>('/api/v2/users?limit=1', {}, authToken);
+    if (!users || users.length === 0) {
+        throw new ApiError('User not found', 404);
+    }
+    return users[0];
 }
 
 // Recruiter Relationships API

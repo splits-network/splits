@@ -30,21 +30,26 @@ export default async function BillingPage() {
     }
 
     // Fetch user profile to check permissions
-    const profileResponse: any = await fetchFromGateway('/api/me', token);
-    const profile = profileResponse?.data;
-    const memberships = profile?.memberships || [];
+    const profileResponse: any = await fetchFromGateway('/api/v2/users?limit=1', token);
+    const profileArray = Array.isArray(profileResponse?.data)
+        ? profileResponse.data
+        : Array.isArray(profileResponse)
+          ? profileResponse
+          : [];
+    const profile = profileArray[0] || {};
+    const roles: string[] = Array.isArray(profile.roles) ? profile.roles : [];
 
     // Check if user has access to billing
-    const hasAccess = memberships.some((m: any) =>
-        ['company_admin', 'recruiter', 'admin'].includes(m.role)
+    const hasAccess = roles.some(role =>
+        ['company_admin', 'hiring_manager', 'recruiter', 'platform_admin'].includes(role)
     );
 
     if (!hasAccess) {
         redirect('/dashboard');
     }
 
-    const isRecruiter = memberships.some((m: any) => m.role === 'recruiter');
-    const isCompanyAdmin = memberships.some((m: any) => m.role === 'company_admin');
+    const isRecruiter = Boolean(profile.recruiter_id || roles.includes('recruiter'));
+    const isCompanyAdmin = roles.includes('company_admin');
 
     return (
         <div className="container mx-auto py-6 px-4 max-w-6xl">
@@ -268,7 +273,7 @@ export default async function BillingPage() {
                 )}
 
                 {/* Danger Zone - Only for Admins */}
-                {(isCompanyAdmin || profile?.role === 'admin') && (
+                {(isCompanyAdmin || profile?.is_platform_admin) && (
                     <div className="card bg-base-100 shadow border-2 border-error">
                         <div className="card-body">
                             <h2 className="card-title text-error">

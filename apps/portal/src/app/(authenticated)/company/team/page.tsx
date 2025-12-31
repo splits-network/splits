@@ -31,20 +31,26 @@ export default async function CompanyTeamPage() {
     }
 
     // Fetch user profile
-    const profileResponse: any = await fetchFromGateway('/api/me', token);
-    const profile = profileResponse?.data;
+    const profileResponse: any = await fetchFromGateway('/api/v2/users?limit=1', token);
+    const profileArray = Array.isArray(profileResponse?.data)
+        ? profileResponse.data
+        : Array.isArray(profileResponse)
+          ? profileResponse
+          : [];
+    const profile = profileArray[0] || {};
+    const roles: string[] = Array.isArray(profile.roles) ? profile.roles : [];
 
-    // Check if user is company admin
-    const memberships = profile?.memberships || [];
-    const companyMembership = memberships.find((m: any) =>
-        m.role === 'company_admin' // Only company admins can manage team
-    );
-
-    if (!companyMembership) {
+    if (!roles.includes('company_admin')) {
         redirect('/dashboard');
     }
 
-    const organizationId = companyMembership.organization_id;
+    const organizationId = Array.isArray(profile.organization_ids)
+        ? profile.organization_ids[0]
+        : null;
+
+    if (!organizationId) {
+        redirect('/dashboard');
+    }
 
     return (
         <div className="container mx-auto py-6 px-4 max-w-6xl">

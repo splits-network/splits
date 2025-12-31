@@ -59,7 +59,7 @@ export default function InvitationsPageClient() {
             const client = createAuthenticatedClient(token);
 
             // Get all recruiter-candidate relationships for current user
-            const relationshipsResponse = await client.get('/recruiter-candidates/me');
+            const relationshipsResponse = await client.get('/recruiter-candidates?limit=250');
             const relationships: RecruiterCandidate[] = relationshipsResponse.data || [];
 
             // Fetch candidate details for each relationship

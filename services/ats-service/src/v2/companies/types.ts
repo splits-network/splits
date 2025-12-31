@@ -7,6 +7,9 @@ import { PaginationParams, SortParams } from '../shared/pagination';
 export interface CompanyFilters extends PaginationParams, SortParams {
     search?: string;
     status?: string;
+    organization_id?: string;
+    identity_organization_id?: string;
+    org_id?: string;
 }
 
 export interface CompanyUpdate {

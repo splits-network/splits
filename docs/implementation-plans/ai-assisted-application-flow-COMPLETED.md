@@ -138,7 +138,7 @@ async reviewApplication(applicationId: string): Promise<AIReview>
 
 **File:** `services/ats-service/src/routes/ai-review.ts`
 
-#### 1. **POST /api/applications/:id/ai-review**
+#### 1. **POST /api/ai-reviews**
 - Triggers AI review for an application
 - Supports `force` query param to re-review
 - Supports `auto_transition` param (default: true)
@@ -150,12 +150,12 @@ async reviewApplication(applicationId: string): Promise<AIReview>
 - Transitions: `draft` → `ai_review`
 - Publishes `application.draft_completed` event
 
-#### 3. **GET /api/applications/:id/ai-review**
+#### 3. **GET /api/ai-reviews**
 - Retrieves AI review results
 - Returns full analysis including fit score, strengths, concerns, skills match
 - **Auth:** Recruiter, Company, Candidate (own application), Admin
 
-#### 4. **GET /api/jobs/:jobId/ai-review-stats**
+#### 4. **GET /api/ai-review-stats?job_id=:jobId**
 - Aggregate AI review statistics for a job
 - Returns avg score, recommendation breakdown, top matched/missing skills
 - **Auth:** Company (owns job), Admin
@@ -379,10 +379,10 @@ async reviewApplication(applicationId: string): Promise<AIReview>
 **Week 3-4: Backend Service** ✅
 - [x] Implement AI review service in `ats-service`
 - [x] Create OpenAI integration
-- [x] Implement POST `/api/applications/:id/ai-review` endpoint
+- [x] Implement POST `/api/ai-reviews` endpoint
 - [x] Implement POST `/api/applications/:id/complete-draft` endpoint
-- [x] Implement GET `/api/applications/:id/ai-review` endpoint
-- [x] Implement GET `/api/jobs/:jobId/ai-review-stats` endpoint
+- [x] Implement GET `/api/ai-reviews` endpoint
+- [x] Implement GET `/api/ai-review-stats?job_id=:jobId` endpoint
 - [x] Add automatic stage transition logic
 - [x] Add event publishing
 
@@ -425,10 +425,10 @@ All new endpoints follow the standard API response format:
 ```
 
 **Verified Endpoints:**
-- ✅ `POST /api/applications/:id/ai-review` → `{ data: { ...aiReview } }`
+- ✅ `POST /api/ai-reviews` → `{ data: { ...aiReview } }`
 - ✅ `POST /api/applications/:id/complete-draft` → `{ data: { ...application } }`
-- ✅ `GET /api/applications/:id/ai-review` → `{ data: { ...aiReview } }`
-- ✅ `GET /api/jobs/:jobId/ai-review-stats` → `{ data: { ...stats } }`
+- ✅ `GET /api/ai-reviews` → `{ data: { ...aiReview } }`
+- ✅ `GET /api/ai-review-stats?job_id=:jobId` → `{ data: { ...stats } }`
 
 ---
 

@@ -34,9 +34,15 @@ export default async function DashboardPage() {
     }
 
     // Fetch user profile to determine persona
-    let profile: any;
+    let profileData: any = {};
     try {
-        profile = await fetchFromGateway('/api/me', token);
+        const profileResponse = await fetchFromGateway('/api/v2/users?limit=1', token);
+        const profileArray = Array.isArray(profileResponse?.data)
+            ? profileResponse.data
+            : Array.isArray(profileResponse)
+              ? profileResponse
+              : [];
+        profileData = profileArray[0] || {};
     } catch (error) {
         console.error('Failed to fetch user profile:', error);
         return (
@@ -50,33 +56,39 @@ export default async function DashboardPage() {
     }
 
     // Determine user role/persona
-    const memberships = profile.data?.memberships || [];
-    const isAdmin = memberships.some((m: any) => m.role === 'platform_admin');
-    const isCompanyUser = memberships.some((m: any) => ['company_admin', 'hiring_manager'].includes(m.role));
+    const roles: string[] = Array.isArray(profileData.roles) ? profileData.roles : [];
+    const isAdmin = Boolean(profileData.is_platform_admin || roles.includes('platform_admin'));
+    const isCompanyUser = roles.some((role: string) =>
+        role === 'company_admin' || role === 'hiring_manager'
+    );
 
     // Check if user is a recruiter by looking for recruiter profile in network service
     // Recruiters don't need organization memberships - they operate independently
     let isRecruiter = false;
     let recruiterProfile = null;
-    try {
-        const recruiterResponse = await fetchFromGateway(`/api/recruiters/by-user/${profile.data.id}`, token);
-        if (recruiterResponse.data && recruiterResponse.data.status === 'active') {
-            isRecruiter = true;
-            recruiterProfile = recruiterResponse.data;
+    if (profileData.recruiter_id) {
+        try {
+            const recruiterResponse = await fetchFromGateway(
+                `/api/v2/recruiters/${profileData.recruiter_id}`,
+                token
+            );
+            if (recruiterResponse?.data) {
+                isRecruiter = true;
+                recruiterProfile = recruiterResponse.data;
+            }
+        } catch (error) {
+            console.log('Failed to fetch recruiter profile', error);
         }
-    } catch (error) {
-        // User is not a recruiter or recruiter profile doesn't exist yet
-        console.log('User is not a recruiter or profile not found');
     }
 
     // Route to appropriate dashboard
     if (isAdmin) {
-        return <AdminDashboard token={token} profile={profile.data} />;
+        return <AdminDashboard token={token} profile={profileData} />;
     } else if (isCompanyUser) {
-        return <CompanyDashboard token={token} profile={profile.data} />;
+        return <CompanyDashboard token={token} profile={profileData} />;
     } else if (isRecruiter && recruiterProfile) {
         // Pass recruiter profile data to dashboard
-        return <RecruiterDashboard token={token} profile={{ ...profile.data, recruiter: recruiterProfile }} />;
+        return <RecruiterDashboard token={token} profile={{ ...profileData, recruiter: recruiterProfile }} />;
     }
 
     // Default: Show onboarding or empty state
@@ -90,7 +102,7 @@ export default async function DashboardPage() {
                         Your account is being set up. Please complete your profile to get started.
                     </p>
                     <div className="card-actions justify-center mt-4">
-                        <a href="/profile" className="btn btn-primary">
+                            <a href="/profile" className="btn btn-primary">
                             Complete Profile
                         </a>
                     </div>

@@ -117,7 +117,7 @@ export async function submitApplication(data: {
   pre_screen_answers?: Array<{ question_id: string; answer: any }>;
   notes?: string;
 }, token: string) {
-  return apiClient.post('/applications/submit', data, token);
+  return apiClient.post('/v2/applications', data, token);
 }
 
 export async function getMyApplications(token: string) {
@@ -145,7 +145,7 @@ export async function getJob(jobId: string, token: string) {
 }
 
 export async function getPreScreenQuestions(jobId: string, token: string) {
-  return apiClient.get(`/jobs/${jobId}/pre-screen-questions`, token);
+  return apiClient.get(`/v2/job-pre-screen-questions?job_id=${jobId}`, token);
 }
 
 // Document API methods

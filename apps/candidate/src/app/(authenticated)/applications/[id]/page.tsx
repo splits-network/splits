@@ -74,8 +74,8 @@ export default async function ApplicationDetailPage({
     let recruiter: any = null;
 
     try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
-        const response = await fetch(`${apiUrl}/v2/applications/${id}`, {
+        const apiBase = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
+        const response = await fetch(`${apiBase}/api/v2/applications/${id}?include=job,recruiter,documents,pre_screen_answers`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',

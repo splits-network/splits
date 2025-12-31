@@ -636,7 +636,9 @@ export class ApplicationsEventConsumer {
             const candidate = candidateResponse.data || candidateResponse;
 
             // Fetch AI review details
-            const reviewResponse = await this.services.getAtsService().get<any>(`/v2/applications/${application_id}/ai-review`);
+            const reviewResponse = await this.services
+                .getAtsService()
+                .get<any>(`/v2/ai-reviews?application_id=${encodeURIComponent(application_id)}`);
             const aiReview = reviewResponse.data || reviewResponse;
 
             // Send email to candidate if they have an email

@@ -20,13 +20,14 @@ export function registerMembershipRoutes(
     app.get('/api/v2/memberships', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
-            const paginationParams = validatePaginationParams(request.query as any);
+            const query = request.query as any;
+            const paginationParams = validatePaginationParams(query.page, query.limit);
 
             const result = await membershipService.findMemberships(clerkUserId, {
                 ...paginationParams,
-                user_id: (request.query as any).user_id,
-                organization_id: (request.query as any).organization_id,
-                role: (request.query as any).role,
+                user_id: query.user_id,
+                organization_id: query.organization_id,
+                role: query.role,
             });
 
             reply.send(

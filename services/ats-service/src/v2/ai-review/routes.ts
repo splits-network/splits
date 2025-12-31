@@ -93,19 +93,28 @@ export function registerAIReviewRoutes(app: FastifyInstance, config: RegisterAIR
     };
 
     app.get(
-        '/v2/applications/:id/ai-review',
-        async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+        '/api/v2/ai-reviews',
+        async (
+            request: FastifyRequest<{ Querystring: { application_id?: string } }>,
+            reply: FastifyReply
+        ) => {
             try {
                 const { clerkUserId } = requireUserContext(request);
-                const { id } = request.params;
-                const accessResult = await requireApplicationAccess(clerkUserId, id);
+                const { application_id } = request.query;
+                if (!application_id) {
+                    return reply.status(400).send({
+                        error: { message: 'application_id query parameter is required' },
+                    });
+                }
+
+                const accessResult = await requireApplicationAccess(clerkUserId, application_id);
                 if (!accessResult.allowed) {
                     return reply.status(accessResult.status).send({
                         error: { message: accessResult.message },
                     });
                 }
 
-                const review = await aiReviewService.getAIReview(id);
+                const review = await aiReviewService.getAIReview(application_id);
                 if (!review) {
                     return reply.status(404).send({
                         error: { message: 'AI review not found for this application' },
@@ -122,21 +131,61 @@ export function registerAIReviewRoutes(app: FastifyInstance, config: RegisterAIR
         }
     );
 
+    app.get(
+        '/api/v2/ai-reviews/:id',
+        async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+            try {
+                const { clerkUserId } = requireUserContext(request);
+                const { id } = request.params;
+                const review = await aiReviewService.getAIReviewById(id);
+
+                if (!review) {
+                    return reply.status(404).send({
+                        error: { message: 'AI review not found' },
+                    });
+                }
+
+                const accessResult = await requireApplicationAccess(clerkUserId, review.application_id);
+                if (!accessResult.allowed) {
+                    return reply.status(accessResult.status).send({
+                        error: { message: accessResult.message },
+                    });
+                }
+
+                return reply.send({ data: review });
+            } catch (error: any) {
+                request.log.error({ err: error }, 'Failed to load AI review');
+                return reply.status(500).send({
+                    error: { message: error.message || 'Failed to load AI review' },
+                });
+            }
+        }
+    );
+
     app.post(
-        '/v2/applications/:id/ai-review',
+        '/api/v2/ai-reviews',
         async (
             request: FastifyRequest<{
-                Params: { id: string };
-                Body: { resume_text?: string; force?: boolean; auto_transition?: boolean };
+                Body: {
+                    application_id?: string;
+                    resume_text?: string;
+                    force?: boolean;
+                    auto_transition?: boolean;
+                };
             }>,
             reply: FastifyReply
         ) => {
             try {
                 const { clerkUserId } = requireUserContext(request);
-                const { id } = request.params;
-                const { resume_text, force, auto_transition = true } = request.body ?? {};
+                const { application_id, resume_text, force, auto_transition = true } = request.body ?? {};
 
-                const accessResult = await requireApplicationAccess(clerkUserId, id, false);
+                if (!application_id) {
+                    return reply.status(400).send({
+                        error: { message: 'application_id is required' },
+                    });
+                }
+
+                const accessResult = await requireApplicationAccess(clerkUserId, application_id, false);
                 if (!accessResult.allowed) {
                     return reply.status(accessResult.status).send({
                         error: { message: accessResult.message },
@@ -209,14 +258,22 @@ export function registerAIReviewRoutes(app: FastifyInstance, config: RegisterAIR
     );
 
     app.get(
-        '/v2/jobs/:jobId/ai-review-stats',
-        async (request: FastifyRequest<{ Params: { jobId: string } }>, reply: FastifyReply) => {
+        '/api/v2/ai-review-stats',
+        async (
+            request: FastifyRequest<{ Querystring: { job_id?: string } }>,
+            reply: FastifyReply
+        ) => {
             try {
                 const { clerkUserId } = requireUserContext(request);
-                const { jobId } = request.params;
-                const access = await resolveAccessContext(supabase, clerkUserId);
+                const { job_id } = request.query;
+                if (!job_id) {
+                    return reply.status(400).send({
+                        error: { message: 'job_id query parameter is required' },
+                    });
+                }
 
-                const job = await legacyRepository.findJobById(jobId);
+                const access = await resolveAccessContext(supabase, clerkUserId);
+                const job = await legacyRepository.findJobById(job_id);
                 if (!job) {
                     return reply.status(404).send({ error: { message: 'Job not found' } });
                 }
@@ -235,7 +292,7 @@ export function registerAIReviewRoutes(app: FastifyInstance, config: RegisterAIR
                     return reply.status(403).send({ error: { message: 'You do not have access to this job' } });
                 }
 
-                const stats = await aiReviewService.getAIReviewStats(jobId);
+                const stats = await aiReviewService.getAIReviewStats(job_id);
                 return reply.send({ data: stats });
             } catch (error: any) {
                 request.log.error({ err: error }, 'Failed to fetch AI review stats');

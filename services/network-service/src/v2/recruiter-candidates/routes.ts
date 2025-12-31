@@ -152,4 +152,30 @@ export function registerRecruiterCandidateRoutes(
                 .send({ error: error.message || 'Failed to decline invitation' });
         }
     });
+
+    app.post('/v2/recruiter-candidates/:id/resend-invitation', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as { id: string };
+            const relationship = await config.recruiterCandidateService.resendInvitation(id, clerkUserId);
+            return reply.send({ data: relationship });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 500)
+                .send({ error: error.message || 'Failed to resend invitation' });
+        }
+    });
+
+    app.post('/v2/recruiter-candidates/:id/cancel-invitation', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as { id: string };
+            const relationship = await config.recruiterCandidateService.cancelInvitation(id, clerkUserId);
+            return reply.send({ data: relationship });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 500)
+                .send({ error: error.message || 'Failed to cancel invitation' });
+        }
+    });
 }

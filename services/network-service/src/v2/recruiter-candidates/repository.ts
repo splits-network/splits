@@ -4,6 +4,7 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { randomBytes } from 'crypto';
 import { RecruiterCandidateFilters, RecruiterCandidateUpdate, RepositoryListResponse } from './types';
 import { resolveAccessContext } from '../shared/access';
 
@@ -139,6 +140,31 @@ export class RecruiterCandidateRepository {
 
         if (error) throw error;
         return data;
+    }
+
+    async resendInvitation(id: string): Promise<any> {
+        const invitationToken = this.generateInvitationToken();
+        const invitationExpiresAt = new Date();
+        invitationExpiresAt.setDate(invitationExpiresAt.getDate() + 7);
+
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('recruiter_candidates')
+            .update({
+                invitation_token: invitationToken,
+                invitation_expires_at: invitationExpiresAt.toISOString(),
+                invited_at: new Date().toISOString(),
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    private generateInvitationToken(): string {
+        return randomBytes(32).toString('hex');
     }
 
     private async enrichRecruiterDetails(records: any[]): Promise<void> {

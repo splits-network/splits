@@ -36,27 +36,15 @@ export default function SettingsPage() {
                 }
 
                 const apiClient = createAuthenticatedClient(token);
-                const profile: any = await apiClient.get('/me');
-                const memberships = profile.data?.memberships || [];
-
-                // Check if user is a recruiter by looking for recruiter profile in network service
-                // Recruiters don't need organization memberships - they operate independently
-                let isRecruiterRole = false;
-                try {
-                    const recruiterResponse: any = await apiClient.get(`/recruiters/by-user/${profile.data.id}`);
-                    if (recruiterResponse?.data && recruiterResponse.data.status === 'active') {
-                        isRecruiterRole = true;
-                    }
-                } catch (error) {
-                    // User is not a recruiter or recruiter profile doesn't exist yet
-                    isRecruiterRole = false;
-                }
+                const profileResponse: any = await apiClient.getCurrentUser();
+                const profile = profileResponse?.data?.[0] || profileResponse?.data || profileResponse || {};
+                const roles: string[] = Array.isArray(profile.roles) ? profile.roles : [];
 
                 setUserRoles({
-                    isRecruiter: isRecruiterRole,
-                    isCompanyAdmin: memberships.some((m: any) => m.role === 'company_admin'),
-                    isHiringManager: memberships.some((m: any) => m.role === 'hiring_manager'),
-                    isPlatformAdmin: memberships.some((m: any) => m.role === 'platform_admin'),
+                    isRecruiter: Boolean(profile.recruiter_id),
+                    isCompanyAdmin: roles.includes('company_admin'),
+                    isHiringManager: roles.includes('hiring_manager'),
+                    isPlatformAdmin: Boolean(profile.is_platform_admin || roles.includes('platform_admin')),
                 });
                 setLoading(false);
             } catch (error) {

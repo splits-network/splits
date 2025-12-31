@@ -17,19 +17,13 @@ export default async function PendingApplicationsPage({
 
     const client = createAuthenticatedClient(token);
 
-    // Get recruiter profile
-    let recruiter: any = null;
     let applications: any[] = [];
     let error: string | null = null;
     const params = await searchParams;
     const showSuccess = params.success === 'true';
 
     try {
-        const recruiterResponse: any = await client.getRecruiterProfile();
-        recruiter = recruiterResponse.data || recruiterResponse;
-
-        // Get pending applications
-        const appsResponse: any = await client.getPendingApplications(recruiter.id);
+        const appsResponse: any = await client.getPendingApplications();
         applications = (appsResponse.data || appsResponse) || [];
     } catch (err: any) {
         console.error('Error loading pending applications:', err);

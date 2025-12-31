@@ -2,6 +2,7 @@
 
 import { useState, useEffect, FormEvent, use } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { createAuthenticatedClient } from '@/lib/api-client';
 
 interface Team {
   id: string;
@@ -66,24 +67,17 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
       setLoading(true);
       setError(null);
       const token = await getToken();
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
 
-      // Load team details
-      const teamResponse = await fetch(`/api/network/teams/${teamId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const client = createAuthenticatedClient(token);
 
-      if (!teamResponse.ok) throw new Error('Failed to load team');
-      const teamData = await teamResponse.json();
-      setTeam(teamData);
+      const teamResponse = await client.get(`/teams/${teamId}`);
+      setTeam(teamResponse.data);
 
-      // Load team members
-      const membersResponse = await fetch(`/api/network/teams/${teamId}/members`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!membersResponse.ok) throw new Error('Failed to load members');
-      const membersData = await membersResponse.json();
-      setMembers(membersData.members || []);
+      const membersResponse = await client.get(`/teams/${teamId}/members`);
+      setMembers(membersResponse.data || []);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -99,20 +93,12 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
       setInviting(true);
       setError(null);
       const token = await getToken();
-
-      const response = await fetch(`/api/network/teams/${teamId}/invitations`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(inviteForm),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to send invitation');
+      if (!token) {
+        throw new Error('Not authenticated');
       }
+
+      const client = createAuthenticatedClient(token);
+      await client.post(`/teams/${teamId}/invitations`, inviteForm);
 
       setShowInviteModal(false);
       setInviteForm({ email: '', role: 'member' });
@@ -130,15 +116,12 @@ export default function TeamDetailPage({ params }: { params: Promise<{ id: strin
 
     try {
       const token = await getToken();
-      const response = await fetch(`/api/network/teams/${teamId}/members/${memberId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to remove member');
+      if (!token) {
+        throw new Error('Not authenticated');
       }
+
+      const client = createAuthenticatedClient(token);
+      await client.delete(`/teams/${teamId}/members/${memberId}`);
 
       // Refresh members list
       await loadTeamData();

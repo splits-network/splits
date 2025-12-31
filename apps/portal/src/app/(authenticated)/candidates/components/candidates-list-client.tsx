@@ -33,38 +33,18 @@ export default function CandidatesListClient() {
                 const client = createAuthenticatedClient(token);
 
                 // Get user profile to check role
-                const profileRes = await client.get('/me');
-                const profile = profileRes.data;
+                const profileRes: any = await client.getCurrentUser();
+                const profile = profileRes?.data?.[0] || profileRes?.data || profileRes || {};
+                const roles: string[] = Array.isArray(profile.roles) ? profile.roles : [];
+                const isRecruiter = Boolean(profile.recruiter_id || roles.includes('recruiter'));
+                const resolvedRole = isRecruiter
+                    ? 'recruiter'
+                    : roles[0] || (profile.is_platform_admin ? 'platform_admin' : 'candidate');
 
-                // Determine user role from memberships
-                const membership = profile?.memberships?.[0];
-                let role = membership?.role;
+                setUserRole(resolvedRole);
 
-                // Check if user is an independent recruiter (no memberships but has recruiter profile)
-                if (!role || role === 'candidate') {
-                    try {
-                        const recruiterRes = await client.get(`/recruiters/by-user/${profile.id}`);
-                        if (recruiterRes.data?.id && recruiterRes.data?.status === 'active') {
-                            role = 'recruiter';
-                            setRecruiterId(recruiterRes.data.id);
-                        }
-                    } catch (err) {
-                        // Not a recruiter, keep original role
-                    }
-                }
-
-                setUserRole(role);
-
-                // If recruiter with membership, still get their recruiter profile ID
-                if (role === 'recruiter' && !recruiterId) {
-                    try {
-                        const recruiterRes = await client.get(`/recruiters/by-user/${profile.id}`);
-                        if (recruiterRes.data?.id) {
-                            setRecruiterId(recruiterRes.data.id);
-                        }
-                    } catch (err) {
-                        console.warn('Could not load recruiter profile:', err);
-                    }
+                if (isRecruiter && profile.recruiter_id) {
+                    setRecruiterId(profile.recruiter_id);
                 }
 
                 // Fetch candidates with scope parameter

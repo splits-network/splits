@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
         // Forward query params
         const searchParams = request.nextUrl.searchParams;
         const queryString = searchParams.toString();
-        const url = `${API_GATEWAY_URL}/api/notifications${queryString ? `?${queryString}` : ''}`;
+        const url = `${API_GATEWAY_URL}/api/v2/notifications${queryString ? `?${queryString}` : ''}`;
 
         const response = await fetch(url, {
             method: 'GET',

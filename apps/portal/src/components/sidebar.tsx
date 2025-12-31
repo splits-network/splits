@@ -40,30 +40,15 @@ export function Sidebar() {
                 if (!token) return;
 
                 const apiClient = createAuthenticatedClient(token);
-                const profile: any = await apiClient.get('/me');
+                const profileResponse: any = await apiClient.getCurrentUser();
+                const profile = profileResponse?.data?.[0] || profileResponse?.data || profileResponse || {};
+                const roleList: string[] = Array.isArray(profile.roles) ? profile.roles : [];
 
-                const memberships = profile.data?.memberships || [];
-
-                const hasAdminRole = memberships.some(
-                    (m: any) => m.role === 'platform_admin'
+                const hasAdminRole = Boolean(profile.is_platform_admin || roleList.includes('platform_admin'));
+                const hasCompanyRole = roleList.some((role) =>
+                    role === 'company_admin' || role === 'hiring_manager'
                 );
-
-                const hasCompanyRole = memberships.some(
-                    (m: any) => ['company_admin', 'hiring_manager'].includes(m.role)
-                );
-
-                // Check if user is a recruiter by looking for recruiter profile in network service
-                // Recruiters don't need organization memberships - they operate independently
-                let hasRecruiterRole = false;
-                try {
-                    const recruiterResponse: any = await apiClient.get(`/recruiters/by-user/${profile.data.id}`);
-                    if (recruiterResponse?.data && recruiterResponse.data.status === 'active') {
-                        hasRecruiterRole = true;
-                    }
-                } catch (error) {
-                    // User is not a recruiter or recruiter profile doesn't exist yet
-                    hasRecruiterRole = false;
-                }
+                const hasRecruiterRole = Boolean(profile.recruiter_id);
 
                 setIsAdmin(hasAdminRole);
                 setIsCompanyUser(hasCompanyRole);

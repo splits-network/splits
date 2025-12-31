@@ -24,7 +24,10 @@ interface Membership {
 }
 
 interface UserProfile {
-    memberships: Membership[];
+    memberships?: Membership[];
+    roles?: string[];
+    is_platform_admin?: boolean;
+    recruiter_id?: string | null;
 }
 
 interface Stats {
@@ -83,6 +86,29 @@ export default function RolesList() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userRole, statusFilter]);
 
+    const resolveUserRole = (profile: UserProfile): string | null => {
+        const membershipRoles = Array.isArray(profile.memberships)
+            ? profile.memberships
+                .map((membership) => membership.role)
+                .filter((role): role is string => Boolean(role))
+            : [];
+        const normalizedRoles = Array.isArray(profile.roles) ? profile.roles : membershipRoles;
+
+        if (profile.is_platform_admin || normalizedRoles.includes('platform_admin')) {
+            return 'platform_admin';
+        }
+        if (normalizedRoles.includes('company_admin')) {
+            return 'company_admin';
+        }
+        if (normalizedRoles.includes('hiring_manager')) {
+            return 'hiring_manager';
+        }
+        if (profile.recruiter_id || normalizedRoles.includes('recruiter')) {
+            return 'recruiter';
+        }
+        return normalizedRoles[0] || null;
+    };
+
     const fetchUserRole = async () => {
         try {
             const token = await getToken();
@@ -90,14 +116,16 @@ export default function RolesList() {
 
             const client = createAuthenticatedClient(token);
             const response: any = await client.getCurrentUser();
-            const profile: UserProfile = response.data;
+            const profile: UserProfile = response.data?.[0] || response.data;
+            const role = resolveUserRole(profile);
+            setUserRole(role);
 
-            // Get the first membership role (Phase 1: users have one membership)
-            if (profile.memberships && profile.memberships.length > 0) {
-                setUserRole(profile.memberships[0].role);
+            if (!role) {
+                setStatsLoading(false);
             }
         } catch (error) {
             console.error('Failed to fetch user role:', error);
+            setStatsLoading(false);
         }
     };
 
@@ -139,7 +167,7 @@ export default function RolesList() {
                 // Platform admin sees system-wide stats
                 const [rolesRes, companiesRes] = await Promise.all([
                     client.getRoles({ status: statusFilter === 'all' ? undefined : statusFilter }) as Promise<{ data: Job[] }>,
-                    client.get('/api/companies') as Promise<{ data: any[] }>,
+                    client.get('/companies') as Promise<{ data: any[] }>,
                 ]);
 
                 const allRoles = rolesRes.data || [];

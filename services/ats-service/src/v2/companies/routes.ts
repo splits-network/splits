@@ -11,7 +11,7 @@ export function registerCompanyRoutes(
     app: FastifyInstance,
     config: RegisterCompanyRoutesConfig
 ) {
-    app.get('/v2/companies', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.get('/api/v2/companies', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const filters = request.query as any;
@@ -22,7 +22,7 @@ export function registerCompanyRoutes(
         }
     });
 
-    app.get('/v2/companies/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.get('/api/v2/companies/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { id } = request.params as any;
             const company = await config.companyService.getCompany(id);
@@ -32,7 +32,7 @@ export function registerCompanyRoutes(
         }
     });
 
-    app.post('/v2/companies', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.post('/api/v2/companies', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const company = await config.companyService.createCompany(request.body as any, clerkUserId);
@@ -42,7 +42,7 @@ export function registerCompanyRoutes(
         }
     });
 
-    app.patch('/v2/companies/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.patch('/api/v2/companies/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as any;
@@ -57,7 +57,7 @@ export function registerCompanyRoutes(
         }
     });
 
-    app.delete('/v2/companies/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.delete('/api/v2/companies/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as any;

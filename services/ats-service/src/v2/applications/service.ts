@@ -35,12 +35,103 @@ export class ApplicationServiceV2 {
         };
     }
 
-    async getApplication(id: string, clerkUserId?: string): Promise<any> {
+    async getApplication(id: string, clerkUserId?: string, includes: string[] = []): Promise<any> {
         const application = await this.repository.findApplication(id, clerkUserId);
         if (!application) {
             throw new Error(`Application ${id} not found`);
         }
-        return application;
+
+        if (!includes || includes.length === 0) {
+            return application;
+        }
+
+        const includeSet = new Set(
+            includes
+                .map(include => include?.toLowerCase?.().trim())
+                .filter((value): value is string => Boolean(value))
+        );
+
+        const enrichedApplication: any = { ...application };
+        const tasks: Promise<void>[] = [];
+
+        const hasInclude = (...keys: string[]) => keys.some(key => includeSet.has(key));
+
+        if (hasInclude('candidate') && application.candidate_id) {
+            tasks.push(
+                this.repository
+                    .getCandidateById(application.candidate_id)
+                    .then(candidate => {
+                        if (candidate) {
+                            enrichedApplication.candidate = candidate;
+                        }
+                    })
+            );
+        }
+
+        if (hasInclude('job') && application.job_id) {
+            tasks.push(
+                this.repository.getJobById(application.job_id).then(job => {
+                    if (job) {
+                        enrichedApplication.job = job;
+                    }
+                })
+            );
+        }
+
+        if (hasInclude('recruiter') && application.recruiter_id) {
+            tasks.push(
+                this.repository.getRecruiterById(application.recruiter_id).then(recruiter => {
+                    if (recruiter) {
+                        enrichedApplication.recruiter = recruiter;
+                    }
+                })
+            );
+        }
+
+        if (hasInclude('documents', 'document')) {
+            tasks.push(
+                this.repository.getDocumentsForApplication(application.id).then(docs => {
+                    enrichedApplication.documents = docs;
+                })
+            );
+        }
+
+        if (hasInclude('pre_screen_answers', 'pre-screen-answers')) {
+            tasks.push(
+                this.repository
+                    .getPreScreenAnswersForApplication(application.id)
+                    .then(answers => {
+                        enrichedApplication.pre_screen_answers = answers;
+                    })
+            );
+        }
+
+        if (hasInclude('audit_log', 'audit')) {
+            tasks.push(
+                this.repository.getAuditLogsForApplication(application.id).then(logs => {
+                    enrichedApplication.audit_log = logs;
+                })
+            );
+        }
+
+        if (hasInclude('job_requirements') && application.job_id) {
+            tasks.push(
+                this.repository.getJobRequirements(application.job_id).then(requirements => {
+                    enrichedApplication.job_requirements = requirements;
+                })
+            );
+        }
+
+        if (hasInclude('ai_review', 'ai-review')) {
+            tasks.push(
+                this.repository.getAIReviewForApplication(application.id).then(review => {
+                    enrichedApplication.ai_review = review || null;
+                })
+            );
+        }
+
+        await Promise.all(tasks);
+        return enrichedApplication;
     }
 
     async createApplication(data: any, clerkUserId?: string): Promise<any> {
@@ -85,9 +176,14 @@ export class ApplicationServiceV2 {
             throw new Error(`Application ${id} not found`);
         }
 
-        // Smart validation based on what's changing
+        const {
+            document_ids,
+            primary_resume_id,
+            decline_reason,
+            decline_details,
+            ...persistedUpdates
+        } = updates;
 
-        // Stage change validation
         if (updates.stage && updates.stage !== currentApplication.stage) {
             await this.validateStageTransition(
                 currentApplication.stage,
@@ -95,14 +191,49 @@ export class ApplicationServiceV2 {
             );
         }
 
-        // If rejecting, require rejection reason
-        if (updates.stage === 'rejected' && !updates.notes && !currentApplication.notes) {
+        // Candidate-specific actions from recruiter_proposed stage
+        if (
+            clerkUserId &&
+            currentApplication.stage === 'recruiter_proposed' &&
+            updates.stage &&
+            ['ai_review', 'rejected'].includes(updates.stage)
+        ) {
+            const candidateContext = await this.getCandidateContext(clerkUserId);
+            if (!candidateContext || candidateContext.candidate.id !== currentApplication.candidate_id) {
+                throw new Error('Not authorized to update this application');
+            }
+
+            if (updates.stage === 'ai_review') {
+                await this.handleCandidateAcceptance(
+                    currentApplication,
+                    candidateContext.identityUser.id,
+                    document_ids,
+                    primary_resume_id,
+                    persistedUpdates.candidate_notes
+                );
+            } else if (updates.stage === 'rejected') {
+                await this.handleCandidateDecline(
+                    currentApplication,
+                    candidateContext.identityUser.id,
+                    decline_reason || persistedUpdates.notes || decline_details,
+                    decline_details
+                );
+                if (!persistedUpdates.notes) {
+                    persistedUpdates.notes = decline_details;
+                }
+            }
+        }
+        if (
+            updates.stage === 'rejected' &&
+            !persistedUpdates.notes &&
+            !decline_details &&
+            !decline_reason
+        ) {
             throw new Error('Notes/rejection reason required when rejecting');
         }
 
-        const updatedApplication = await this.repository.updateApplication(id, updates);
+        const updatedApplication = await this.repository.updateApplication(id, persistedUpdates);
 
-        // Emit events based on what changed
         if (this.eventPublisher) {
             if (updates.stage && updates.stage !== currentApplication.stage) {
                 await this.eventPublisher.publish('application.stage_changed', {
@@ -115,7 +246,7 @@ export class ApplicationServiceV2 {
 
             await this.eventPublisher.publish('application.updated', {
                 applicationId: id,
-                updatedFields: Object.keys(updates),
+                updatedFields: Object.keys(persistedUpdates),
                 updatedBy: clerkUserId,
             });
         }
@@ -153,12 +284,114 @@ export class ApplicationServiceV2 {
             interview: ['offer', 'rejected', 'screening'],
             offer: ['hired', 'rejected', 'interview'],
             hired: ['rejected'], // Can reject after hire (fell through)
+            recruiter_proposed: ['ai_review', 'rejected'],
             rejected: [], // Cannot move from rejected
         };
 
         if (!allowedTransitions[fromStage]?.includes(toStage)) {
             throw new Error(
                 `Invalid stage transition: ${fromStage} -> ${toStage}`
+            );
+        }
+    }
+
+    private async getCandidateContext(clerkUserId?: string) {
+        if (!clerkUserId) {
+            return null;
+        }
+        const candidate = await this.repository.findCandidateByClerkUserId(clerkUserId);
+        if (!candidate) {
+            return null;
+        }
+        const identityUser = await this.repository.findUserByClerkUserId(clerkUserId);
+        if (!identityUser) {
+            return null;
+        }
+        return { candidate, identityUser };
+    }
+
+    private async handleCandidateAcceptance(
+        application: any,
+        identityUserId: string,
+        documentIds?: string[],
+        primaryResumeId?: string,
+        candidateNotes?: string
+    ) {
+        const job = await this.repository.getJobById(application.job_id);
+        if (!job) {
+            throw new Error('Job not found');
+        }
+        if (job.status && job.status !== 'active') {
+            throw new Error('This job is no longer accepting applications');
+        }
+
+        if (documentIds && documentIds.length > 0) {
+            for (const docId of documentIds) {
+                await this.repository.linkDocumentToApplication(
+                    docId,
+                    application.id,
+                    !!primaryResumeId && docId === primaryResumeId
+                );
+            }
+        }
+
+        await this.repository.createAuditLog({
+            application_id: application.id,
+            action: 'candidate_approved_opportunity',
+            performed_by_user_id: identityUserId,
+            performed_by_role: 'candidate',
+            old_value: { stage: 'recruiter_proposed' },
+            new_value: {
+                stage: 'ai_review',
+                primary_resume_id: primaryResumeId,
+                candidate_notes: candidateNotes,
+            },
+        });
+
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish(
+                'application.candidate_approved',
+                {
+                    application_id: application.id,
+                    candidate_id: application.candidate_id,
+                    recruiter_id: application.recruiter_id,
+                    job_id: application.job_id,
+                    job_status: job.status,
+                },
+                'ats-service'
+            );
+        }
+    }
+
+    private async handleCandidateDecline(
+        application: any,
+        identityUserId: string,
+        reason?: string | null,
+        details?: string | null
+    ) {
+        await this.repository.createAuditLog({
+            application_id: application.id,
+            action: 'candidate_declined_opportunity',
+            performed_by_user_id: identityUserId,
+            performed_by_role: 'candidate',
+            old_value: { stage: 'recruiter_proposed' },
+            new_value: {
+                stage: 'rejected',
+                reason,
+                details,
+            },
+        });
+
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish(
+                'application.candidate_declined',
+                {
+                    application_id: application.id,
+                    candidate_id: application.candidate_id,
+                    recruiter_id: application.recruiter_id,
+                    job_id: application.job_id,
+                },
+                'ats-service'
             );
         }
     }

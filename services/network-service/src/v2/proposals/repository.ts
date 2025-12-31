@@ -9,6 +9,7 @@ import { resolveAccessContext } from '../shared/access';
 
 export class ProposalRepository {
     private supabase: SupabaseClient;
+    private static readonly TABLE = 'candidate_role_assignments';
 
     constructor(supabaseUrl: string, supabaseKey: string) {
         this.supabase = createClient(supabaseUrl, supabaseKey);
@@ -25,20 +26,11 @@ export class ProposalRepository {
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
         const organizationIds = accessContext.organizationIds;
 
-        // Build query with enriched data
+        // Build base query (cross-schema relations resolved after initial fetch)
         let query = this.supabase
             .schema('network')
-            .from('proposals')
-            .select(`
-                *,
-                recruiter:recruiters(id, name, email),
-                job:ats.jobs!inner(
-                    id,
-                    title,
-                    company:ats.companies!inner(id, name, identity_organization_id)
-                ),
-                candidate:ats.candidates(id, full_name, email)
-            `, { count: 'exact' });
+            .from(ProposalRepository.TABLE)
+            .select('*', { count: 'exact' });
 
         if (accessContext.recruiterId) {
             query = query.eq('recruiter_id', accessContext.recruiterId);
@@ -46,12 +38,17 @@ export class ProposalRepository {
             if (organizationIds.length === 0) {
                 return { data: [], total: 0 };
             }
-            query = query.in('job.company.identity_organization_id', organizationIds);
+            const accessibleJobIds = await this.findJobIdsForOrganizations(organizationIds);
+            if (!accessibleJobIds.length) {
+                return { data: [], total: 0 };
+            }
+            query = query.in('job_id', accessibleJobIds);
         }
 
         // Apply filters
         if (filters.search) {
-            query = query.or(`notes.ilike.%${filters.search}%`);
+            const like = `%${filters.search}%`;
+            query = query.or(`proposal_notes.ilike.${like},response_notes.ilike.${like}`);
         }
         if (filters.state) {
             query = query.eq('state', filters.state);
@@ -78,8 +75,10 @@ export class ProposalRepository {
 
         if (error) throw error;
 
+        const enriched = await this.enrichProposals(data || []);
+
         return {
-            data: data || [],
+            data: enriched,
             total: count || 0,
         };
     }
@@ -87,17 +86,8 @@ export class ProposalRepository {
     async findProposal(id: string): Promise<any | null> {
         const { data, error } = await this.supabase
             .schema('network')
-            .from('proposals')
-            .select(`
-                *,
-                recruiter:recruiters(id, name, email),
-                job:ats.jobs(
-                    id,
-                    title,
-                    company:ats.companies(id, name)
-                ),
-                candidate:ats.candidates(id, full_name, email, phone)
-            `)
+            .from(ProposalRepository.TABLE)
+            .select('*')
             .eq('id', id)
             .single();
 
@@ -105,13 +95,15 @@ export class ProposalRepository {
             if (error.code === 'PGRST116') return null;
             throw error;
         }
-        return data;
+
+        const enriched = await this.enrichProposals(data ? [data] : []);
+        return enriched[0] || null;
     }
 
     async createProposal(proposal: any): Promise<any> {
         const { data, error } = await this.supabase
             .schema('network')
-            .from('proposals')
+            .from(ProposalRepository.TABLE)
             .insert(proposal)
             .select()
             .single();
@@ -123,7 +115,7 @@ export class ProposalRepository {
     async updateProposal(id: string, updates: ProposalUpdate): Promise<any> {
         const { data, error } = await this.supabase
             .schema('network')
-            .from('proposals')
+            .from(ProposalRepository.TABLE)
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id)
             .select()
@@ -137,10 +129,153 @@ export class ProposalRepository {
         // Soft delete
         const { error } = await this.supabase
             .schema('network')
-            .from('proposals')
+            .from(ProposalRepository.TABLE)
             .update({ state: 'cancelled', updated_at: new Date().toISOString() })
             .eq('id', id);
 
         if (error) throw error;
+    }
+
+    private async findJobIdsForOrganizations(organizationIds: string[]): Promise<string[]> {
+        const { data: companies, error: companiesError } = await this.supabase
+            .schema('ats')
+            .from('companies')
+            .select('id, identity_organization_id')
+            .in('identity_organization_id', organizationIds);
+
+        if (companiesError) throw companiesError;
+
+        const companyIds = (companies || []).map((company) => company.id).filter(Boolean);
+        if (!companyIds.length) {
+            return [];
+        }
+
+        const { data: jobs, error: jobsError } = await this.supabase
+            .schema('ats')
+            .from('jobs')
+            .select('id, company_id')
+            .in('company_id', companyIds);
+
+        if (jobsError) throw jobsError;
+
+        return (jobs || []).map((job) => job.id).filter(Boolean);
+    }
+
+    private async enrichProposals(proposals: any[]): Promise<any[]> {
+        if (!proposals.length) {
+            return [];
+        }
+
+        const jobIds = Array.from(new Set(proposals.map((proposal) => proposal.job_id).filter(Boolean)));
+        const candidateIds = Array.from(
+            new Set(proposals.map((proposal) => proposal.candidate_id).filter(Boolean))
+        );
+        const recruiterIds = Array.from(
+            new Set(proposals.map((proposal) => proposal.recruiter_id).filter(Boolean))
+        );
+
+        const [jobs, candidates, recruiters] = await Promise.all([
+            this.fetchJobs(jobIds),
+            this.fetchCandidates(candidateIds),
+            this.fetchRecruiters(recruiterIds),
+        ]);
+
+        return proposals.map((proposal) => ({
+            ...proposal,
+            job: proposal.job_id ? jobs.get(proposal.job_id) || null : null,
+            candidate: proposal.candidate_id ? candidates.get(proposal.candidate_id) || null : null,
+            recruiter: proposal.recruiter_id ? recruiters.get(proposal.recruiter_id) || null : null,
+        }));
+    }
+
+    private async fetchJobs(jobIds: string[]): Promise<Map<string, any>> {
+        if (!jobIds.length) {
+            return new Map();
+        }
+
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('jobs')
+            .select(
+                `
+                id,
+                title,
+                location,
+                status,
+                company:companies!inner(
+                    id,
+                    name,
+                    identity_organization_id
+                )
+            `
+            )
+            .in('id', jobIds);
+
+        if (error) throw error;
+
+        return new Map((data || []).map((job) => [job.id, job]));
+    }
+
+    private async fetchCandidates(candidateIds: string[]): Promise<Map<string, any>> {
+        if (!candidateIds.length) {
+            return new Map();
+        }
+
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('candidates')
+            .select('id, full_name, email, phone')
+            .in('id', candidateIds);
+
+        if (error) throw error;
+
+        return new Map((data || []).map((candidate) => [candidate.id, candidate]));
+    }
+
+    private async fetchRecruiters(recruiterIds: string[]): Promise<Map<string, any>> {
+        if (!recruiterIds.length) {
+            return new Map();
+        }
+
+        const { data, error } = await this.supabase
+            .schema('network')
+            .from('recruiters')
+            .select('*')
+            .in('id', recruiterIds);
+
+        if (error) throw error;
+
+        const recruiters = data || [];
+        const userIds = recruiters.map((recruiter) => recruiter.user_id).filter(Boolean);
+        const usersMap = await this.fetchUsers(userIds);
+
+        const recruiterMap = new Map<string, any>();
+        recruiters.forEach((recruiter) => {
+            const user = recruiter.user_id ? usersMap.get(recruiter.user_id) || null : null;
+            recruiterMap.set(recruiter.id, {
+                ...recruiter,
+                name: user?.name || null,
+                email: user?.email || null,
+                user,
+            });
+        });
+
+        return recruiterMap;
+    }
+
+    private async fetchUsers(userIds: string[]): Promise<Map<string, any>> {
+        if (!userIds.length) {
+            return new Map();
+        }
+
+        const { data, error } = await this.supabase
+            .schema('identity')
+            .from('users')
+            .select('id, name, email')
+            .in('id', userIds);
+
+        if (error) throw error;
+
+        return new Map((data || []).map((user) => [user.id, user]));
     }
 }

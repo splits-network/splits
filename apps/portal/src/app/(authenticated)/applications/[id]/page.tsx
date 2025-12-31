@@ -125,7 +125,12 @@ export default async function ApplicationDetailPage({
             if (companyMembership) {
                 try {
                     // Get company for this organization
-                    const companiesRes: any = await client.get(`/companies?org_id=${companyMembership.organization_id}`);
+                    const companiesRes: any = await client.get('/companies', {
+                        params: {
+                            identity_organization_id: companyMembership.organization_id,
+                            limit: 1,
+                        },
+                    });
                     const companies = companiesRes.data || [];
 
                     if (companies.length > 0) {

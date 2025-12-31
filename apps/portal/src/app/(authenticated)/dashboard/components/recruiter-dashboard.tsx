@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ApiClient } from '@/lib/api-client';
+import { createAuthenticatedClient } from '@/lib/api-client';
 import ActionableProposalsWidget from './actionable-proposals-widget';
 
 interface RecruiterStats {
@@ -30,6 +30,48 @@ interface RecruiterDashboardProps {
     profile: any;
 }
 
+const ACTIVITY_TYPE_BY_STAGE: Record<string, RecentActivity['type']> = {
+    draft: 'application_submitted',
+    screen: 'application_submitted',
+    submitted: 'stage_changed',
+    interview: 'stage_changed',
+    offer: 'offer_extended',
+    hired: 'placement_created',
+    rejected: 'stage_changed',
+};
+
+const STAGE_MESSAGE: Record<string, string> = {
+    draft: 'started a draft application',
+    screen: 'needs your review',
+    submitted: 'was submitted to the company',
+    interview: 'moved to interview stage',
+    offer: 'has an offer pending',
+    hired: 'was marked as hired',
+    rejected: 'was rejected',
+};
+
+const formatActivityTimestamp = (value?: string) => {
+    const date = value ? new Date(value) : new Date();
+    return date.toLocaleString();
+};
+
+const mapApplicationToActivity = (application: any): RecentActivity => {
+    const stage = application.stage || 'submitted';
+    const candidateName = application.candidate?.full_name || 'Unknown Candidate';
+    const jobTitle = application.job?.title;
+    const messageSuffix = STAGE_MESSAGE[stage] || 'was updated';
+
+    return {
+        id: application.id,
+        type: ACTIVITY_TYPE_BY_STAGE[stage] || 'stage_changed',
+        message: `${candidateName} ${messageSuffix}${jobTitle ? ` for ${jobTitle}` : ''}`,
+        job_title: jobTitle,
+        candidate_name: candidateName,
+        timestamp: formatActivityTimestamp(application.updated_at || application.created_at),
+        link: `/applications/${application.id}`,
+    };
+};
+
 export default function RecruiterDashboard({ token, profile }: RecruiterDashboardProps) {
     const [stats, setStats] = useState<RecruiterStats | null>(null);
     const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
@@ -43,27 +85,50 @@ export default function RecruiterDashboard({ token, profile }: RecruiterDashboar
     const loadDashboardData = async () => {
         setLoading(true);
         try {
-            const api = new ApiClient(undefined, token);
+            const api = createAuthenticatedClient(token);
 
-            // TODO: Implement /recruiter/dashboard/stats endpoint in API Gateway
-            // For now, use placeholder stats
-            setStats({
-                active_roles: 0,
-                candidates_in_process: 0,
-                offers_pending: 0,
-                placements_this_month: 0,
-                placements_this_year: 0,
-                total_earnings_ytd: 0,
-                pending_payouts: 0
+            const statsResponse: any = await api.getStats({
+                scope: 'recruiter',
+                range: 'ytd',
             });
+            const recruiterStats =
+                statsResponse?.data?.metrics ||
+                statsResponse?.data ||
+                statsResponse ||
+                null;
+            setStats(
+                recruiterStats || {
+                    active_roles: 0,
+                    candidates_in_process: 0,
+                    offers_pending: 0,
+                    placements_this_month: 0,
+                    placements_this_year: 0,
+                    total_earnings_ytd: 0,
+                    pending_payouts: 0,
+                }
+            );
 
-            // Load recent activity
-            const activityResponse = await api.get<{ data: RecentActivity[] }>('/recruiter/dashboard/activity');
-            setRecentActivity(activityResponse.data || []);
+            // Load recent activity from latest applications
+            const activityResponse: any = await api.get('/v2/applications', {
+                params: {
+                    limit: 8,
+                    sort_by: 'updated_at',
+                    sort_order: 'desc',
+                },
+            });
+            const applications = activityResponse?.data || activityResponse || [];
+            setRecentActivity(
+                Array.isArray(applications)
+                    ? applications.map(mapApplicationToActivity)
+                    : []
+            );
 
             // Load top active roles
-            const rolesResponse = await api.get<{ data: any[] }>('/roles?limit=5&status=open');
-            setTopRoles(rolesResponse.data || []);
+            const rolesResponse: any = await api.getRoles({
+                status: 'active',
+                limit: 5,
+            });
+            setTopRoles(rolesResponse.data || rolesResponse || []);
         } catch (error) {
             console.error('Failed to load dashboard data:', error);
         } finally {

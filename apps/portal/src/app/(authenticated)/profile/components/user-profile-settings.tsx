@@ -45,11 +45,16 @@ export function UserProfileSettings() {
             }
 
             const apiClient = createAuthenticatedClient(token);
-            const response: any = await apiClient.get('/me');
+            const response: any = await apiClient.getCurrentUser();
+            const userProfile = response?.data?.[0] || response?.data || response;
 
-            if (response.data) {
-                setProfile(response.data);
-                setName(response.data.name || '');
+            if (userProfile) {
+                setProfile({
+                    id: userProfile.id,
+                    email: userProfile.email,
+                    name: userProfile.full_name || '',
+                });
+                setName(userProfile.full_name || '');
             }
         } catch (err: any) {
             console.error('Failed to load profile:', err);
@@ -75,15 +80,26 @@ export function UserProfileSettings() {
             const token = await getToken();
             if (!token) {
                 setError('Please sign in to update your profile.');
+                setSubmitting(false);
+                return;
+            }
+            if (!profile?.id) {
+                setError('User profile not loaded yet. Please refresh and try again.');
+                setSubmitting(false);
                 return;
             }
 
             const apiClient = createAuthenticatedClient(token);
-            const response: any = await apiClient.patch('/me', { name: name.trim() });
+            const response: any = await apiClient.updateUser(profile.id, { full_name: name.trim() });
+            const updated = response?.data || response;
 
-            if (response.data) {
-                setProfile(response.data);
-                setName(response.data.name);
+            if (updated) {
+                setProfile({
+                    id: updated.id,
+                    email: updated.email,
+                    name: updated.full_name || updated.name || '',
+                });
+                setName(updated.full_name || updated.name || '');
                 setSuccess('Profile updated successfully!');
 
                 // Clear success message after 3 seconds

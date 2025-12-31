@@ -49,6 +49,7 @@ export function ProfileSettings() {
         years_experience: 0,
         bio: '',
     });
+    const [recruiterId, setRecruiterId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
@@ -69,15 +70,21 @@ export function ProfileSettings() {
             }
 
             const client = createAuthenticatedClient(token);
-            const result = await client.get('/recruiters/me/marketplace');
+            const response: any = await client.getRecruiterProfile();
+            const data = response?.data || response;
 
+            if (!data?.id) {
+                throw new Error('Recruiter profile not found');
+            }
+
+            setRecruiterId(data.id);
             setProfile({
-                industries: result.data.industries || [],
-                specialties: result.data.specialties || [],
-                location: result.data.location || '',
-                tagline: result.data.tagline || '',
-                years_experience: result.data.years_experience || 0,
-                bio: result.data.bio || '',
+                industries: data.industries || [],
+                specialties: data.specialties || [],
+                location: data.location || '',
+                tagline: data.tagline || '',
+                years_experience: data.years_experience || 0,
+                bio: data.bio || '',
             });
         } catch (err) {
             console.error('Failed to load profile:', err);
@@ -102,7 +109,12 @@ export function ProfileSettings() {
             }
 
             const client = createAuthenticatedClient(token);
-            await client.patch('/recruiters/me/marketplace', profile);
+            if (!recruiterId) {
+                setError('Recruiter profile not loaded. Please refresh and try again.');
+                setSubmitting(false);
+                return;
+            }
+            await client.updateRecruiterProfile(recruiterId, profile);
 
             setSuccess('Profile updated successfully!');
             setTimeout(() => setSuccess(''), 3000);

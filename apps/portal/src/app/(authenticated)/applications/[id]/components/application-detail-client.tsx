@@ -76,7 +76,7 @@ export default function ApplicationDetailClient({
                 try {
                     const client = createAuthenticatedClient(authToken);
                     const response: any = await client.getCurrentUser();
-                    const profile = response.data;
+                    const profile = response.data?.[0] || response.data;
 
                     // Get user's role from first membership
                     if (profile.memberships && profile.memberships.length > 0) {

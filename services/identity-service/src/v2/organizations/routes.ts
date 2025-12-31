@@ -20,12 +20,13 @@ export function registerOrganizationRoutes(
     app.get('/api/v2/organizations', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
-            const paginationParams = validatePaginationParams(request.query as any);
+            const query = request.query as any;
+            const paginationParams = validatePaginationParams(query.page, query.limit);
 
             const result = await organizationService.findOrganizations(clerkUserId, {
                 ...paginationParams,
-                search: (request.query as any).search,
-                status: (request.query as any).status,
+                search: query.search,
+                status: query.status,
             });
 
             reply.send(

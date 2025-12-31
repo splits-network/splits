@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 const API_GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
 
-export async function POST() {
+async function handleMarkAllRead() {
     try {
         const { userId, getToken } = await auth();
 
@@ -30,15 +30,20 @@ export async function POST() {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({}),
+            body: JSON.stringify({ userId }),
         });
 
+        if (response.status === 204) {
+            return NextResponse.json({}, { status: 204 });
+        }
+
+        const data = await response.json().catch(() => ({}));
+
         if (!response.ok) {
-            const data = await response.json();
             return NextResponse.json(data, { status: response.status });
         }
 
-        return NextResponse.json({ data: { success: true } });
+        return NextResponse.json(data, { status: response.status });
     } catch (error) {
         console.error('Error marking all as read:', error);
         return NextResponse.json(
@@ -46,4 +51,8 @@ export async function POST() {
             { status: 500 }
         );
     }
+}
+
+export async function POST() {
+    return handleMarkAllRead();
 }

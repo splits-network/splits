@@ -21,12 +21,12 @@ export default async function AdminLayout({
         }
 
         const apiClient = createAuthenticatedClient(token);
-        const profile: any = await apiClient.get('/me');
-        
+        const profileResponse: any = await apiClient.getCurrentUser();
+        const profile = profileResponse?.data || profileResponse || {};
+        const roles: string[] = Array.isArray(profile.roles) ? profile.roles : [];
+
         // Check if user has platform_admin role
-        const isAdmin = profile.data?.memberships?.some(
-            (m: any) => m.role === 'platform_admin'
-        );
+        const isAdmin = Boolean(profile.is_platform_admin || roles.includes('platform_admin'));
 
         if (!isAdmin) {
             // Not an admin, redirect to dashboard

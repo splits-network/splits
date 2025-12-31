@@ -249,4 +249,56 @@ export class RecruiterCandidateServiceV2 {
             declined_at: updatedRelationship.declined_at,
         };
     }
+
+    async resendInvitation(id: string, clerkUserId: string) {
+        const relationship = await this.repository.findRecruiterCandidate(id);
+        if (!relationship) {
+            throw { statusCode: 404, message: 'Relationship not found' };
+        }
+
+        if (relationship.consent_given === true) {
+            throw { statusCode: 400, message: 'Candidate has already accepted' };
+        }
+
+        if (relationship.declined_at) {
+            throw { statusCode: 400, message: 'Candidate has already declined' };
+        }
+
+        const updatedRelationship = await this.repository.resendInvitation(id);
+
+        await this.eventPublisher.publish('candidate.invited', {
+                relationship_id: updatedRelationship.id,
+                recruiter_id: updatedRelationship.recruiter_id,
+                candidate_id: updatedRelationship.candidate_id,
+                invitation_token: updatedRelationship.invitation_token,
+                invitation_expires_at: updatedRelationship.invitation_expires_at,
+                resend: true,
+            });
+
+        return updatedRelationship;
+    }
+
+    async cancelInvitation(id: string, clerkUserId: string) {
+        const relationship = await this.repository.findRecruiterCandidate(id);
+        if (!relationship) {
+            throw { statusCode: 404, message: 'Relationship not found' };
+        }
+
+        if (relationship.consent_given === true) {
+            throw { statusCode: 400, message: 'Candidate has already accepted' };
+        }
+
+        const updatedRelationship = await this.repository.updateRecruiterCandidate(id, {
+            status: 'terminated',
+            updated_at: new Date().toISOString(),
+        });
+
+        await this.eventPublisher.publish('candidate.invitation_cancelled', {
+                relationship_id: updatedRelationship.id,
+                recruiter_id: updatedRelationship.recruiter_id,
+                candidate_id: updatedRelationship.candidate_id,
+            });
+
+        return updatedRelationship;
+    }
 }

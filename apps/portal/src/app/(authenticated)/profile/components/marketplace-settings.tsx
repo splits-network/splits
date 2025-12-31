@@ -19,6 +19,7 @@ export function MarketplaceSettings() {
         show_success_metrics: false,
         show_contact_info: true,
     });
+    const [recruiterId, setRecruiterId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
@@ -39,8 +40,20 @@ export function MarketplaceSettings() {
             }
 
             const client = createAuthenticatedClient(token);
-            const result = await client.get('/recruiters/me/marketplace');
-            setSettings(result.data);
+            const response: any = await client.getRecruiterProfile();
+            const recruiter = response?.data || response;
+
+            if (!recruiter?.id) {
+                throw new Error('Recruiter profile not found');
+            }
+
+            setRecruiterId(recruiter.id);
+            setSettings({
+                marketplace_enabled: recruiter.marketplace_enabled ?? false,
+                marketplace_visibility: recruiter.marketplace_visibility || 'public',
+                show_success_metrics: recruiter.show_success_metrics ?? false,
+                show_contact_info: recruiter.show_contact_info ?? true,
+            });
         } catch (err) {
             console.error('Failed to load marketplace settings:', err);
             setError('Failed to load settings. Please try again.');
@@ -63,8 +76,14 @@ export function MarketplaceSettings() {
                 return;
             }
 
+            if (!recruiterId) {
+                setError('Recruiter profile not loaded.');
+                setSubmitting(false);
+                return;
+            }
+
             const client = createAuthenticatedClient(token);
-            await client.patch('/recruiters/me/marketplace', settings);
+            await client.updateRecruiterProfile(recruiterId, settings);
 
             setSuccess('Marketplace settings updated successfully!');
             setTimeout(() => setSuccess(''), 3000);

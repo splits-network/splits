@@ -200,7 +200,7 @@ export default function ApplicationsListClient({
                 params.append('company_id', companyFilter);
             }
 
-            const response = await client.get(`/applications/paginated?${params.toString()}`);
+            const response = await client.get(`/applications?${params.toString()}`);
             const nextData = response.data || [];
             const paginationPayload = response.pagination || {};
 
@@ -238,12 +238,16 @@ export default function ApplicationsListClient({
                     return;
                 }
                 const client = createAuthenticatedClient(token);
-                const response: any = await client.get('/me');
-                const profile = response.data;
-                const membership = profile?.memberships?.[0];
+                const response: any = await client.getCurrentUser();
+                const profile = response?.data?.[0] || response?.data || response || {};
+                const roles: string[] = Array.isArray(profile.roles) ? profile.roles : [];
+                const membershipRole =
+                    roles.find(role => ['company_admin', 'hiring_manager', 'recruiter', 'platform_admin'].includes(role)) ||
+                    (profile.is_platform_admin ? 'platform_admin' : null);
+                const orgId = Array.isArray(profile.organization_ids) ? profile.organization_ids[0] : null;
                 if (!cancelled) {
-                    setUserRole(membership?.role ?? null);
-                    setOrganizationId(membership?.organization_id ?? null);
+                    setUserRole(membershipRole);
+                    setOrganizationId(orgId);
                 }
             } catch (err) {
                 console.error('Failed to load user profile for applications:', err);
@@ -264,7 +268,12 @@ export default function ApplicationsListClient({
                 return;
             }
             const client = createAuthenticatedClient(token);
-            const response: any = await client.get(`/companies?org_id=${orgId}`);
+            const response: any = await client.get('/v2/companies', {
+                params: {
+                    identity_organization_id: orgId,
+                    limit: 1,
+                },
+            });
             const companies = response.data || response;
             if (Array.isArray(companies) && companies.length > 0) {
                 setCompanyId(companies[0].id);
@@ -337,7 +346,9 @@ export default function ApplicationsListClient({
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            await client.post(`/applications/${applicationId}/accept`, {});
+            await client.patch(`/v2/applications/${applicationId}`, {
+                accepted_by_company: true
+            });
 
             await loadApplications();
         } catch (err: any) {

@@ -8,11 +8,11 @@ import { useDebouncedCallback } from '@/hooks/useDebounce';
 interface MarketplaceSettings {
     marketplace_enabled: boolean;
     marketplace_visibility: 'public' | 'limited' | 'hidden';
-    marketplace_industries: string[];
-    marketplace_specialties: string[];
-    marketplace_location: string;
-    marketplace_tagline: string;
-    marketplace_years_experience: number;
+    industries: string[];
+    specialties: string[];
+    location: string;
+    tagline: string;
+    years_experience: number;
     marketplace_profile: Record<string, any>;
     show_success_metrics: boolean;
     show_contact_info: boolean;
@@ -49,15 +49,16 @@ export function MarketplaceSettings() {
     const [settings, setSettings] = useState<MarketplaceSettings>({
         marketplace_enabled: false,
         marketplace_visibility: 'public',
-        marketplace_industries: [],
-        marketplace_specialties: [],
-        marketplace_location: '',
-        marketplace_tagline: '',
-        marketplace_years_experience: 0,
+        industries: [],
+        specialties: [],
+        location: '',
+        tagline: '',
+        years_experience: 0,
         marketplace_profile: {},
         show_success_metrics: false,
         show_contact_info: true,
     });
+    const [recruiterId, setRecruiterId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
@@ -78,13 +79,20 @@ export function MarketplaceSettings() {
             }
 
             const client = createAuthenticatedClient(token);
-            const result = await client.get('/recruiters/me/marketplace');
-            // Convert null values to empty strings for controlled inputs
-            const data = result.data;
+            const result = await client.getRecruiterProfile();
+            const data = result.data || result;
+            setRecruiterId(data.id);
             setSettings({
-                ...data,
-                marketplace_location: data.marketplace_location || '',
-                marketplace_tagline: data.marketplace_tagline || '',
+                marketplace_enabled: data.marketplace_enabled ?? false,
+                marketplace_visibility: data.marketplace_visibility || 'public',
+                industries: data.industries || [],
+                specialties: data.specialties || [],
+                location: data.location || '',
+                tagline: data.tagline || '',
+                years_experience: data.years_experience || 0,
+                marketplace_profile: data.marketplace_profile || {},
+                show_success_metrics: data.show_success_metrics ?? false,
+                show_contact_info: data.show_contact_info !== false,
             });
         } catch (err) {
             console.error('Failed to load marketplace settings:', err);
@@ -104,8 +112,25 @@ export function MarketplaceSettings() {
                 return;
             }
 
+            if (!recruiterId) {
+                setError('Recruiter profile not loaded. Please refresh and try again.');
+                return;
+            }
+
             const client = createAuthenticatedClient(token);
-            await client.patch('/recruiters/me/marketplace', updatedSettings);
+            const payload = {
+                marketplace_enabled: updatedSettings.marketplace_enabled,
+                marketplace_visibility: updatedSettings.marketplace_visibility,
+                industries: updatedSettings.industries,
+                specialties: updatedSettings.specialties,
+                location: updatedSettings.location,
+                tagline: updatedSettings.tagline,
+                years_experience: updatedSettings.years_experience,
+                marketplace_profile: updatedSettings.marketplace_profile,
+                show_success_metrics: updatedSettings.show_success_metrics,
+                show_contact_info: updatedSettings.show_contact_info,
+            };
+            await client.patch(`/recruiters/${recruiterId}`, payload);
             setLastSaved(new Date());
         } catch (err) {
             console.error('Failed to update marketplace settings:', err);
@@ -130,17 +155,17 @@ export function MarketplaceSettings() {
     };
 
     const toggleIndustry = (industry: string) => {
-        const newIndustries = settings.marketplace_industries.includes(industry)
-            ? settings.marketplace_industries.filter(i => i !== industry)
-            : [...settings.marketplace_industries, industry];
-        updateSettings({ marketplace_industries: newIndustries });
+        const newIndustries = settings.industries.includes(industry)
+            ? settings.industries.filter(i => i !== industry)
+            : [...settings.industries, industry];
+        updateSettings({ industries: newIndustries });
     };
 
     const toggleSpecialty = (specialty: string) => {
-        const newSpecialties = settings.marketplace_specialties.includes(specialty)
-            ? settings.marketplace_specialties.filter(s => s !== specialty)
-            : [...settings.marketplace_specialties, specialty];
-        updateSettings({ marketplace_specialties: newSpecialties });
+        const newSpecialties = settings.specialties.includes(specialty)
+            ? settings.specialties.filter(s => s !== specialty)
+            : [...settings.specialties, specialty];
+        updateSettings({ specialties: newSpecialties });
     };
 
     if (loading) {
@@ -235,8 +260,8 @@ export function MarketplaceSettings() {
                                     className="input w-full"
                                     placeholder="e.g., Specialized in Tech Executive Placements"
                                     maxLength={255}
-                                    value={settings.marketplace_tagline}
-                                    onChange={(e) => updateSettings({ marketplace_tagline: e.target.value })}
+                                value={settings.tagline}
+                                onChange={(e) => updateSettings({ tagline: e.target.value })}
                                 />
                                 <label className="label">
                                     <span className="label-text-alt">Short description shown in search results</span>
@@ -249,8 +274,8 @@ export function MarketplaceSettings() {
                                     type="text"
                                     className="input w-full"
                                     placeholder="e.g., New York, NY"
-                                    value={settings.marketplace_location}
-                                    onChange={(e) => updateSettings({ marketplace_location: e.target.value })}
+                                value={settings.location}
+                                onChange={(e) => updateSettings({ location: e.target.value })}
                                 />
                             </div>
 
@@ -260,8 +285,8 @@ export function MarketplaceSettings() {
                                     type="number"
                                     className="input w-full"
                                     min="0"
-                                    value={settings.marketplace_years_experience}
-                                    onChange={(e) => updateSettings({ marketplace_years_experience: parseInt(e.target.value) || 0 })}
+                                value={settings.years_experience}
+                                onChange={(e) => updateSettings({ years_experience: parseInt(e.target.value) || 0 })}
                                 />
                             </div>
                         </div>
@@ -280,7 +305,7 @@ export function MarketplaceSettings() {
                                     <button
                                         key={industry}
                                         type="button"
-                                        className={`btn btn-sm ${settings.marketplace_industries.includes(industry)
+                                        className={`btn btn-sm ${settings.industries.includes(industry)
                                             ? 'btn-primary'
                                             : 'btn-outline'
                                             }`}
@@ -306,7 +331,7 @@ export function MarketplaceSettings() {
                                     <button
                                         key={specialty}
                                         type="button"
-                                        className={`btn btn-sm ${settings.marketplace_specialties.includes(specialty)
+                                        className={`btn btn-sm ${settings.specialties.includes(specialty)
                                             ? 'btn-primary'
                                             : 'btn-outline'
                                             }`}

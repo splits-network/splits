@@ -34,6 +34,8 @@ export interface UnreadCountResponse {
 /**
  * Fetch notifications for the current user
  */
+const API_PATH = '/api/v2/notifications';
+
 export async function fetchNotifications(options?: {
     unreadOnly?: boolean;
     limit?: number;
@@ -42,7 +44,7 @@ export async function fetchNotifications(options?: {
     if (options?.unreadOnly) params.set('unreadOnly', 'true');
     if (options?.limit) params.set('limit', options.limit.toString());
 
-    const response = await fetch(`/api/notifications?${params.toString()}`, {
+    const response = await fetch(`${API_PATH}?${params.toString()}`, {
         credentials: 'include',
     });
 
@@ -58,7 +60,7 @@ export async function fetchNotifications(options?: {
  * Get unread notification count (for badge)
  */
 export async function fetchUnreadCount(): Promise<number> {
-    const response = await fetch('/api/notifications/unread-count', {
+    const response = await fetch(`${API_PATH}/unread-count`, {
         credentials: 'include',
     });
 
@@ -74,7 +76,7 @@ export async function fetchUnreadCount(): Promise<number> {
  * Mark a notification as read
  */
 export async function markAsRead(notificationId: string): Promise<void> {
-    const response = await fetch(`/api/notifications/${notificationId}`, {
+    const response = await fetch(`${API_PATH}/${notificationId}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {
@@ -92,7 +94,7 @@ export async function markAsRead(notificationId: string): Promise<void> {
  * Mark all notifications as read
  */
 export async function markAllAsRead(): Promise<void> {
-    const response = await fetch('/api/notifications/mark-all-read', {
+    const response = await fetch(`${API_PATH}/mark-all-read`, {
         method: 'POST',
         credentials: 'include',
     });
@@ -106,7 +108,7 @@ export async function markAllAsRead(): Promise<void> {
  * Dismiss a notification (hide from UI)
  */
 export async function dismissNotification(notificationId: string): Promise<void> {
-    const response = await fetch(`/api/notifications/${notificationId}`, {
+    const response = await fetch(`${API_PATH}/${notificationId}`, {
         method: 'DELETE',
         credentials: 'include',
     });

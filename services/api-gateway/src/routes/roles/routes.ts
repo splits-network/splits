@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ServiceRegistry } from '../../clients';
 import { requireRoles, AuthenticatedRequest, isAdmin, isCompanyUser, isRecruiter } from '../../rbac';
+import { buildAuthHeaders } from '../../helpers/auth-headers';
 
 /**
  * Roles Routes (RBAC-Filtered Job Listings)
@@ -49,7 +50,12 @@ export function registerRolesRoutes(app: FastifyInstance, services: ServiceRegis
             }
 
             try {
-                const companiesResponse: any = await atsService.get('/companies', undefined, correlationId);
+                const companiesResponse: any = await atsService.get(
+                    '/companies',
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
                 const allCompanies = companiesResponse.data || [];
                 
                 const orgIds = companyMemberships.map(m => m.organization_id);
@@ -73,7 +79,12 @@ export function registerRolesRoutes(app: FastifyInstance, services: ServiceRegis
         // Get all jobs from ATS service
         const queryString = new URLSearchParams(queryParams).toString();
         const path = queryString ? `/jobs?${queryString}` : '/jobs';
-        const jobsResponse: any = await atsService.get(path, undefined, correlationId);
+        const jobsResponse: any = await atsService.get(
+            path,
+            undefined,
+            correlationId,
+            buildAuthHeaders(request)
+        );
 
         let jobs = jobsResponse.data || [];
 

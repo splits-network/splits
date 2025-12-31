@@ -473,18 +473,21 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 3. Moved service logic to `services/identity-service/src/v2/<domain>/service.ts` (legacy `src/v2/services/*.ts` removed)
 4. `services/identity-service/src/v2/routes.ts` now instantiates each domain repository/service directly
 
-### Candidate Portal (In Progress)
+### Candidate Portal (Complete) ✅
 1. `/jobs` list now consumes the V2 jobs payload shape (`data` + `pagination`) via the public gateway proxy
 2. `services/api-gateway/src/routes/jobs/public-routes.ts` proxies `/api/public/jobs*` to `/v2/jobs*` so public pages read from the new backend
 3. `/applications` dashboard and detail pages now call `/api/v2/applications` using the shared API client; responses consume the V2 `{ data, pagination }` format
 4. In-app notifications proxy through `/api/v2/notifications*`, leveraging the shared `resolveAccessContext` helper for per-user scoping (list/read/dismiss/unread-count)
 5. Recruiter relationships page now queries `/api/v2/recruiter-candidates`, with candidate-scoped access enforced in `services/network-service/src/v2/recruiter-candidates/repository.ts`
 6. Candidate dashboard stats + recent applications panels now read from `/api/v2/candidate-dashboard/*`, backed by ATS V2 routes that scope entirely via the shared `resolveAccessContext` helper (no `/candidates/me` dependency)
-7. Current-user lookups now use `/api/v2/users/me`, which in turn leverages the shared `resolveAccessContext` helper so the UI never calls the legacy `/api/me` endpoint.
+7. Current-user lookups now use `/api/v2/users?limit=1`, which leverages the shared `resolveAccessContext` helper so the UI never calls the legacy `/api/me` endpoint.
 8. Document uploads and metadata updates now flow through `/api/v2/documents` (gateway proxies multipart payloads straight to the document service), so the candidate UI no longer depends on `/api/documents/upload`.
 9. Cookie consent flows hit `/api/v2/consent`, backed by the identity service’s V2 consent domain (shared access context determines the identity user instead of `/api/consent`).
 10. Recruiter invitation acceptance/decline now uses `/api/v2/recruiter-candidates/invitations/*`, with the network service handling token validation + candidate linking inside its V2 service, so the invitation UI no longer depends on `/api/network/recruiter-candidates/invitation/*`.
-11. AI review reads/triggers live at `/api/v2/applications/:id/ai-review` (`GET/POST`) and `/api/v2/jobs/:jobId/ai-review-stats`, backed by new ATS V2 routes that enforce access via the shared resolveAccessContext helper.
+11. AI review reads/triggers live at `/api/v2/ai-reviews` (`GET ?application_id=...`, `GET /:id`, `POST`) plus `/api/v2/ai-review-stats?job_id=...`, backed by new ATS V2 routes that enforce access via the shared resolveAccessContext helper.
+12. **Application submission V2**: `POST /v2/applications` replaces legacy `/applications/submit` endpoint
+13. **Pre-screen questions V2**: `GET /v2/job-pre-screen-questions?job_id=...` replaces legacy `/jobs/:id/pre-screen-questions` 
+14. **All API client endpoints V2**: Complete migration from legacy endpoints to standardized V2 5-route pattern
 
 ---
 

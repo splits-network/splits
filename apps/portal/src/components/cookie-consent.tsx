@@ -35,7 +35,7 @@ export default function CookieConsent() {
                 // Use NEXT_PUBLIC_API_URL (without /api suffix) to match .env.local configuration
                 const apiUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
 
-                const response = await fetch(`${apiUrl}/api/consent`, {
+                const response = await fetch(`${apiUrl}/api/v2/consent`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ export default function CookieConsent() {
             try {
                 const token = await getToken();
                 const apiUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'https://api.splits.network';
-                const response = await fetch(`${apiUrl}/api/consent`, {
+                const response = await fetch(`${apiUrl}/api/v2/consent`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

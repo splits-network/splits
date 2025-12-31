@@ -465,7 +465,7 @@ export class RepositoryV2 {
 3. **One method per CRUD operation** - find, findById, create, update, delete
 4. **Consistent return types** - `{ data, total }` for lists, single object for findById
 5. **Soft delete by default** - Update status/deleted_at, don't hard delete
-6. **Enriched queries** - Use JOINs to include related data (company, candidate, etc.)
+6. **Enriched queries** - Prefer additive query parameters (for example `?include=candidate,job`) to request optional relations. Services should load the base resource first, then execute follow-up queries for each requested include (never cross schemas inside a single Supabase select). Standard include keys for applications are `candidate`, `job`, `recruiter`, `documents`, `pre_screen_answers`, `audit_log`, and `job_requirements`.
 
 ---
 

@@ -67,9 +67,11 @@ const NETWORK_VIEW_ROLES: UserRole[] = [
 ];
 const NETWORK_ASSIGNMENT_ROLES: UserRole[] = ['company_admin', 'platform_admin'];
 const NETWORK_ADMIN_ROLES: UserRole[] = ['platform_admin'];
+const NETWORK_TEAM_ROLES: UserRole[] = ['recruiter', 'company_admin', 'platform_admin'];
 
 const BILLING_VIEW_ROLES: UserRole[] = ['platform_admin'];
 const BILLING_SUBSCRIPTION_ROLES: UserRole[] = ['recruiter', 'company_admin', 'platform_admin'];
+const IDENTITY_ADMIN_ROLES: UserRole[] = ['platform_admin'];
 
 const RESOURCES: ResourceDefinition[] = [
     // ATS
@@ -138,6 +140,45 @@ const RESOURCES: ResourceDefinition[] = [
             delete: ATS_DELETE_ROLES,
         },
     },
+    {
+        name: 'job-pre-screen-questions',
+        service: 'ats',
+        basePath: '/job-pre-screen-questions',
+        tag: 'job-pre-screen-questions',
+        roles: {
+            list: ATS_VIEW_ROLES,
+            get: ATS_VIEW_ROLES,
+            create: ATS_MANAGE_ROLES,
+            update: ATS_MANAGE_ROLES,
+            delete: ATS_MANAGE_ROLES,
+        },
+    },
+    {
+        name: 'job-pre-screen-answers',
+        service: 'ats',
+        basePath: '/job-pre-screen-answers',
+        tag: 'job-pre-screen-answers',
+        roles: {
+            list: ATS_VIEW_ROLES,
+            get: ATS_VIEW_ROLES,
+            create: ATS_VIEW_ROLES,
+            update: ATS_VIEW_ROLES,
+            delete: ATS_VIEW_ROLES,
+        },
+    },
+    {
+        name: 'job-requirements',
+        service: 'ats',
+        basePath: '/job-requirements',
+        tag: 'job-requirements',
+        roles: {
+            list: ATS_VIEW_ROLES,
+            get: ATS_VIEW_ROLES,
+            create: ATS_MANAGE_ROLES,
+            update: ATS_MANAGE_ROLES,
+            delete: ATS_MANAGE_ROLES,
+        },
+    },
     // Network
     {
         name: 'recruiters',
@@ -202,6 +243,20 @@ const RESOURCES: ResourceDefinition[] = [
             create: ['recruiter', 'company_admin', 'hiring_manager', 'platform_admin'],
             update: ['recruiter', 'company_admin', 'hiring_manager', 'platform_admin'],
             delete: ['company_admin', 'platform_admin'],
+        },
+    },
+    // Identity
+    {
+        name: 'users',
+        service: 'identity',
+        basePath: '/users',
+        tag: 'users',
+        roles: {
+            list: AUTHENTICATED_ROLES,
+            get: IDENTITY_ADMIN_ROLES,
+            create: IDENTITY_ADMIN_ROLES,
+            update: IDENTITY_ADMIN_ROLES,
+            delete: IDENTITY_ADMIN_ROLES,
         },
     },
     // Billing
@@ -312,28 +367,6 @@ export function registerV2GatewayRoutes(app: FastifyInstance, services: ServiceR
                 ? `/v2/candidate-dashboard/recent-applications?${queryString}`
                 : '/v2/candidate-dashboard/recent-applications';
             const data = await atsService().get(path, undefined, correlationId, authHeaders);
-            return reply.send(data);
-        }
-    );
-
-    app.get(
-        '/api/v2/users/me',
-        {
-            schema: {
-                description: 'Get current user profile and access context',
-                tags: ['users'],
-                security: [{ clerkAuth: [] }],
-            },
-        },
-        async (request: FastifyRequest, reply: FastifyReply) => {
-            const correlationId = getCorrelationId(request);
-            const authHeaders = buildAuthHeaders(request);
-            const data = await identityService().get(
-                '/api/v2/users/me',
-                undefined,
-                correlationId,
-                authHeaders
-            );
             return reply.send(data);
         }
     );
@@ -526,12 +559,164 @@ export function registerV2GatewayRoutes(app: FastifyInstance, services: ServiceR
     );
 
     app.get(
-        '/api/v2/applications/:id/ai-review',
+        '/api/v2/stats',
+        {
+            preHandler: requireRoles(AUTHENTICATED_ROLES, services),
+            schema: {
+                description: 'Get dashboard statistics',
+                tags: ['stats'],
+                security: [{ clerkAuth: [] }],
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const query = request.query as Record<string, any>;
+            const queryString = (() => {
+                if (!query || Object.keys(query).length === 0) {
+                    return '';
+                }
+                const params = new URLSearchParams();
+                Object.entries(query).forEach(([key, value]) => {
+                    if (value === undefined || value === null) {
+                        return;
+                    }
+                    if (Array.isArray(value)) {
+                        value.forEach(item => params.append(key, String(item)));
+                    } else {
+                        params.append(key, String(value));
+                    }
+                });
+                return params.toString();
+            })();
+            const path = queryString ? `/v2/stats?${queryString}` : '/v2/stats';
+            try {
+                const data = await atsService().get(path, undefined, correlationId, authHeaders);
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch stats');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to load stats' });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/recruiter-candidates/:id/resend-invitation',
+        {
+            preHandler: requireRoles(['recruiter', 'platform_admin'], services),
+            schema: {
+                description: 'Resend recruiter invitation for a candidate',
+                tags: ['recruiter-candidates'],
+                security: [{ clerkAuth: [] }],
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            try {
+                const data = await networkService().post(
+                    `/v2/recruiter-candidates/${id}/resend-invitation`,
+                    {},
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to resend invitation');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to resend invitation' });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/recruiter-candidates/:id/cancel-invitation',
+        {
+            preHandler: requireRoles(['recruiter', 'platform_admin'], services),
+            schema: {
+                description: 'Cancel a pending recruiter invitation',
+                tags: ['recruiter-candidates'],
+                security: [{ clerkAuth: [] }],
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            try {
+                const data = await networkService().post(
+                    `/v2/recruiter-candidates/${id}/cancel-invitation`,
+                    {},
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to cancel invitation');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to cancel invitation' });
+            }
+        }
+    );
+
+    const buildQueryString = (query?: Record<string, any>) => {
+        if (!query || Object.keys(query).length === 0) {
+            return '';
+        }
+        const params = new URLSearchParams();
+        Object.entries(query).forEach(([key, value]) => {
+            if (value === undefined || value === null) {
+                return;
+            }
+            if (Array.isArray(value)) {
+                value.forEach(item => params.append(key, String(item)));
+            } else {
+                params.append(key, String(value));
+            }
+        });
+        return params.toString();
+    };
+
+    app.get(
+        '/api/v2/ai-reviews',
         {
             preHandler: requireRoles(ATS_VIEW_ROLES, services),
             schema: {
-                description: 'Get AI review for application (V2)',
-                tags: ['applications', 'ai-review'],
+                description: 'Get AI review by application',
+                tags: ['ai-review'],
+                security: [{ clerkAuth: [] }],
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const queryString = buildQueryString(request.query as Record<string, any>);
+            const path = queryString ? `/v2/ai-reviews?${queryString}` : '/v2/ai-reviews';
+
+            try {
+                const data = await atsService().get(path, undefined, correlationId, authHeaders);
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch AI review');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to fetch AI review' });
+            }
+        }
+    );
+
+    app.get(
+        '/api/v2/ai-reviews/:id',
+        {
+            preHandler: requireRoles(ATS_VIEW_ROLES, services),
+            schema: {
+                description: 'Get AI review by ID',
+                tags: ['ai-review'],
                 security: [{ clerkAuth: [] }],
             },
         },
@@ -542,7 +727,7 @@ export function registerV2GatewayRoutes(app: FastifyInstance, services: ServiceR
 
             try {
                 const data = await atsService().get(
-                    `/v2/applications/${id}/ai-review`,
+                    `/v2/ai-reviews/${id}`,
                     undefined,
                     correlationId,
                     authHeaders
@@ -558,30 +743,29 @@ export function registerV2GatewayRoutes(app: FastifyInstance, services: ServiceR
     );
 
     app.post(
-        '/api/v2/applications/:id/ai-review',
+        '/api/v2/ai-reviews',
         {
             preHandler: requireRoles(ATS_AI_TRIGGER_ROLES, services),
             schema: {
                 description: 'Trigger AI review for application (V2)',
-                tags: ['applications', 'ai-review'],
+                tags: ['ai-review'],
                 security: [{ clerkAuth: [] }],
             },
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
-            const { id } = request.params as { id: string };
             const correlationId = getCorrelationId(request);
             const authHeaders = buildAuthHeaders(request);
 
             try {
                 const data = await atsService().post(
-                    `/v2/applications/${id}/ai-review`,
+                    '/v2/ai-reviews',
                     request.body,
                     correlationId,
                     authHeaders
                 );
                 return reply.send(data);
             } catch (error: any) {
-                request.log.error({ error, id, correlationId }, 'Failed to trigger AI review');
+                request.log.error({ error, correlationId }, 'Failed to trigger AI review');
                 return reply
                     .status(error.statusCode || 500)
                     .send(error.jsonBody || { error: 'Failed to trigger AI review' });
@@ -590,36 +774,34 @@ export function registerV2GatewayRoutes(app: FastifyInstance, services: ServiceR
     );
 
     app.get(
-        '/api/v2/jobs/:jobId/ai-review-stats',
+        '/api/v2/ai-review-stats',
         {
             preHandler: requireRoles(ATS_AI_TRIGGER_ROLES, services),
             schema: {
-                description: 'Get AI review metrics for a job (V2)',
-                tags: ['applications', 'ai-review'],
+                description: 'Get AI review metrics scoped by job',
+                tags: ['ai-review'],
                 security: [{ clerkAuth: [] }],
             },
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
-            const { jobId } = request.params as { jobId: string };
             const correlationId = getCorrelationId(request);
             const authHeaders = buildAuthHeaders(request);
+            const queryString = buildQueryString(request.query as Record<string, any>);
+            const path = queryString ? `/v2/ai-review-stats?${queryString}` : '/v2/ai-review-stats';
 
             try {
-                const data = await atsService().get(
-                    `/v2/jobs/${jobId}/ai-review-stats`,
-                    undefined,
-                    correlationId,
-                    authHeaders
-                );
+                const data = await atsService().get(path, undefined, correlationId, authHeaders);
                 return reply.send(data);
             } catch (error: any) {
-                request.log.error({ error, jobId, correlationId }, 'Failed to fetch AI review stats');
+                request.log.error({ error, correlationId }, 'Failed to fetch AI review stats');
                 return reply
                     .status(error.statusCode || 500)
                     .send(error.jsonBody || { error: 'Failed to fetch AI review stats' });
             }
         }
     );
+
+    registerTeamRoutes(app, services);
 }
 
 function registerResourceRoutes(
@@ -630,7 +812,7 @@ function registerResourceRoutes(
     const serviceClient = () => services.get(resource.service);
     const getCorrelationId = (request: FastifyRequest) => (request as any).correlationId;
     const apiBase = `/api/v2${resource.basePath}`;
-    const serviceBase = `/v2${resource.basePath}`;
+    const serviceBase = `/api/v2${resource.basePath}`;
 
     const routeOptions = (description: string, roles?: UserRole[]) => {
         const options: Record<string, any> = {
@@ -671,8 +853,27 @@ function registerResourceRoutes(
         async (request: FastifyRequest, reply: FastifyReply) => {
             const { id } = request.params as { id: string };
             const correlationId = getCorrelationId(request);
+            const queryParams = request.query as Record<string, any>;
+            const queryString = (() => {
+                if (!queryParams || Object.keys(queryParams).length === 0) {
+                    return '';
+                }
+                const params = new URLSearchParams();
+                Object.entries(queryParams).forEach(([key, value]) => {
+                    if (value === undefined || value === null) {
+                        return;
+                    }
+                    if (Array.isArray(value)) {
+                        value.forEach(item => params.append(key, String(item)));
+                    } else {
+                        params.append(key, String(value));
+                    }
+                });
+                return params.toString();
+            })();
+            const path = queryString ? `${serviceBase}/${id}?${queryString}` : `${serviceBase}/${id}`;
             const data = await serviceClient().get(
-                `${serviceBase}/${id}`,
+                path,
                 undefined,
                 correlationId,
                 buildAuthHeaders(request)
@@ -727,6 +928,151 @@ function registerResourceRoutes(
                 buildAuthHeaders(request)
             );
             return reply.send(data);
+        }
+    );
+}
+
+function registerTeamRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const networkService = () => services.get('network');
+    const getCorrelationId = (request: FastifyRequest) => (request as any).correlationId;
+
+    const routeOptions = (description: string, roles?: UserRole[]) => {
+        const options: Record<string, any> = {
+            schema: {
+                description,
+                tags: ['teams'],
+                security: [{ clerkAuth: [] }],
+            },
+        };
+
+        if (roles && roles.length > 0) {
+            options.preHandler = requireRoles(roles, services);
+        }
+
+        return options;
+    };
+
+    const handleNetworkError = (request: FastifyRequest, reply: FastifyReply, error: any, message: string) => {
+        request.log.error({ error, message }, 'Teams route failed');
+        return reply
+            .status(error?.statusCode || 500)
+            .send(error?.jsonBody || { error: message });
+    };
+
+    app.get(
+        '/api/v2/teams',
+        routeOptions('List teams for current user', NETWORK_TEAM_ROLES),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const data: any = await networkService().get(
+                    '/teams',
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send({ data: data?.teams || [] });
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to list teams');
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/teams',
+        routeOptions('Create team', NETWORK_TEAM_ROLES),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const team = await networkService().post(
+                    '/teams',
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.code(201).send({ data: team });
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to create team');
+            }
+        }
+    );
+
+    app.get(
+        '/api/v2/teams/:teamId',
+        routeOptions('Get team by ID', NETWORK_TEAM_ROLES),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { teamId } = request.params as { teamId: string };
+                const correlationId = getCorrelationId(request);
+                const team = await networkService().get(
+                    `/teams/${teamId}`,
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send({ data: team });
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to fetch team');
+            }
+        }
+    );
+
+    app.get(
+        '/api/v2/teams/:teamId/members',
+        routeOptions('List team members', NETWORK_TEAM_ROLES),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { teamId } = request.params as { teamId: string };
+                const correlationId = getCorrelationId(request);
+                const response: any = await networkService().get(
+                    `/teams/${teamId}/members`,
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send({ data: response?.members || [] });
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to list team members');
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/teams/:teamId/invitations',
+        routeOptions('Invite team member', NETWORK_TEAM_ROLES),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { teamId } = request.params as { teamId: string };
+                const correlationId = getCorrelationId(request);
+                const invitation = await networkService().post(
+                    `/teams/${teamId}/invitations`,
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.code(201).send({ data: invitation });
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to invite member');
+            }
+        }
+    );
+
+    app.delete(
+        '/api/v2/teams/:teamId/members/:memberId',
+        routeOptions('Remove team member', NETWORK_TEAM_ROLES),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { teamId, memberId } = request.params as { teamId: string; memberId: string };
+                const correlationId = getCorrelationId(request);
+                await networkService().delete(
+                    `/teams/${teamId}/members/${memberId}`,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.status(204).send();
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to remove member');
+            }
         }
     );
 }

@@ -3,101 +3,91 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const API_GATEWAY_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
 
-export async function PATCH(
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
-) {
-    try {
-        const { userId, getToken } = await auth();
+async function requireAuth() {
+    const { userId, getToken } = await auth();
 
-        if (!userId) {
-            return NextResponse.json(
+    if (!userId) {
+        return {
+            error: NextResponse.json(
                 { error: { code: 'UNAUTHORIZED', message: 'Not authenticated' } },
                 { status: 401 }
-            );
-        }
+            ),
+        };
+    }
 
-        const token = await getToken();
-        if (!token) {
-            return NextResponse.json(
+    const token = await getToken();
+    if (!token) {
+        return {
+            error: NextResponse.json(
                 { error: { code: 'UNAUTHORIZED', message: 'No auth token' } },
                 { status: 401 }
-            );
+            ),
+        };
+    }
+
+    return { userId, token };
+}
+
+async function forwardRequest(
+    method: 'PATCH' | 'DELETE',
+    request: NextRequest,
+    params: Promise<{ id: string }>
+) {
+    const authResult = await requireAuth();
+    if ('error' in authResult) {
+        return authResult.error;
+    }
+
+    try {
+        const { id } = await params;
+        const url = `${API_GATEWAY_URL}/api/v2/notifications/${id}`;
+        const headers: Record<string, string> = {
+            Authorization: `Bearer ${authResult.token}`,
+        };
+        let body: string | undefined;
+
+        if (method === 'PATCH') {
+            headers['Content-Type'] = 'application/json';
+            const payload = await request.json();
+            body = JSON.stringify({ ...payload, userId: authResult.userId });
         }
 
-        const { id } = await params;
-        const body = await request.json();
-        const url = `${API_GATEWAY_URL}/api/v2/notifications/${id}`;
-
         const response = await fetch(url, {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(body),
+            method,
+            headers,
+            body,
         });
 
-        const data = await response.json();
+        if (response.status === 204) {
+            return NextResponse.json({}, { status: 204 });
+        }
+
+        const data = await response.json().catch(() => ({}));
 
         if (!response.ok) {
             return NextResponse.json(data, { status: response.status });
         }
 
-        return NextResponse.json(data);
+        return NextResponse.json(data, { status: response.status });
     } catch (error) {
-        console.error('Error updating notification:', error);
+        console.error('Error processing notification request:', error);
         return NextResponse.json(
-            { error: { code: 'INTERNAL_ERROR', message: 'Failed to update notification' } },
+            { error: { code: 'INTERNAL_ERROR', message: 'Failed to process notification request' } },
             { status: 500 }
         );
     }
 }
 
+export async function PATCH(
+    request: NextRequest,
+    context: { params: Promise<{ id: string }> }
+) {
+    return forwardRequest('PATCH', request, context.params);
+}
+
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    context: { params: Promise<{ id: string }> }
 ) {
-    try {
-        const { userId, getToken } = await auth();
-
-        if (!userId) {
-            return NextResponse.json(
-                { error: { code: 'UNAUTHORIZED', message: 'Not authenticated' } },
-                { status: 401 }
-            );
-        }
-
-        const token = await getToken();
-        if (!token) {
-            return NextResponse.json(
-                { error: { code: 'UNAUTHORIZED', message: 'No auth token' } },
-                { status: 401 }
-            );
-        }
-
-        const { id } = await params;
-        const url = `${API_GATEWAY_URL}/api/v2/notifications/${id}`;
-
-        const response = await fetch(url, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        });
-
-        if (!response.ok) {
-            const data = await response.json();
-            return NextResponse.json(data, { status: response.status });
-        }
-
-        return NextResponse.json({ data: { success: true } });
-    } catch (error) {
-        console.error('Error deleting notification:', error);
-        return NextResponse.json(
-            { error: { code: 'INTERNAL_ERROR', message: 'Failed to delete notification' } },
-            { status: 500 }
-        );
-    }
+    return forwardRequest('DELETE', request, context.params);
 }

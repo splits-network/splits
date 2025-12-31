@@ -9,8 +9,15 @@ export class UserRepository {
     }
 
     async findUsers(
-        filters: UserFilters & { page: number; limit: number }
+        filters: UserFilters & { page: number; limit: number },
+        options: { accessibleUserIds?: string[] } = {}
     ): Promise<{ data: any[]; total: number }> {
+        const accessibleUserIds = options.accessibleUserIds;
+
+        if (accessibleUserIds && accessibleUserIds.length === 0) {
+            return { data: [], total: 0 };
+        }
+
         let query = this.supabase.schema('identity').from('users').select('*', { count: 'exact' });
 
         if (filters.search) {
@@ -19,6 +26,14 @@ export class UserRepository {
 
         if (filters.status) {
             query = query.eq('status', filters.status);
+        }
+
+        if (accessibleUserIds && accessibleUserIds.length > 0) {
+            if (accessibleUserIds.length === 1) {
+                query = query.eq('id', accessibleUserIds[0]);
+            } else {
+                query = query.in('id', accessibleUserIds);
+            }
         }
 
         const { data, count, error } = await query

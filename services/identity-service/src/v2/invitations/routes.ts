@@ -20,13 +20,14 @@ export function registerInvitationRoutes(
     app.get('/api/v2/invitations', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
-            const paginationParams = validatePaginationParams(request.query as any);
+            const query = request.query as any;
+            const paginationParams = validatePaginationParams(query.page, query.limit);
 
             const result = await invitationService.findInvitations(clerkUserId, {
                 ...paginationParams,
-                organization_id: (request.query as any).organization_id,
-                status: (request.query as any).status,
-                email: (request.query as any).email,
+                organization_id: query.organization_id,
+                status: query.status,
+                email: query.email,
             });
 
             reply.send(

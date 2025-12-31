@@ -26,23 +26,6 @@ interface Placement {
     company_name?: string;
 }
 
-interface Candidate {
-    id: string;
-    name: string;
-    email: string;
-}
-
-interface Job {
-    id: string;
-    title: string;
-    company_id: string;
-}
-
-interface Company {
-    id: string;
-    name: string;
-}
-
 export default function PlacementsPage() {
     const { getToken } = useAuth();
     const [placements, setPlacements] = useState<Placement[]>([]);
@@ -68,47 +51,11 @@ export default function PlacementsPage() {
                 const placementsResponse = await client.getPlacements() as any;
                 const placementsData = (placementsResponse.data || []) as Placement[];
 
-                if (placementsData.length === 0) {
-                    setPlacements([]);
-                    setLoading(false);
-                    return;
-                }
-
-                // Extract unique IDs
-                const candidateIds = [...new Set(placementsData.map((p: Placement) => p.candidate_id))];
-                const jobIds = [...new Set(placementsData.map((p: Placement) => p.job_id))];
-                const companyIds = [...new Set(placementsData.map((p: Placement) => p.company_id))];
-
-                // Fetch related entities in parallel
-                const [candidatesRes, jobsRes, companiesRes] = await Promise.all([
-                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/candidates`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    }).then(res => res.json()),
-                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/jobs`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    }).then(res => res.json()),
-                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/companies`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    }).then(res => res.json())
-                ]);
-
-                // Create lookup maps
-                const candidatesMap = new Map<string, Candidate>(
-                    (candidatesRes.data || []).map((c: Candidate) => [c.id, c])
-                );
-                const jobsMap = new Map<string, Job>(
-                    (jobsRes.data || []).map((j: Job) => [j.id, j])
-                );
-                const companiesMap = new Map<string, Company>(
-                    (companiesRes.data || []).map((c: Company) => [c.id, c])
-                );
-
-                // Enrich placements with related data
-                const enrichedPlacements = placementsData.map((placement: Placement) => ({
+                const enrichedPlacements = placementsData.map((placement: any) => ({
                     ...placement,
-                    candidate_name: candidatesMap.get(placement.candidate_id)?.name,
-                    job_title: jobsMap.get(placement.job_id)?.title,
-                    company_name: companiesMap.get(placement.company_id)?.name
+                    candidate_name: placement.candidate?.full_name || placement.candidate_name,
+                    job_title: placement.job?.title || placement.job_title,
+                    company_name: placement.job?.company?.name || placement.company_name,
                 }));
 
                 setPlacements(enrichedPlacements);

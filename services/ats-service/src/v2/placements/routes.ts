@@ -11,7 +11,7 @@ export function registerPlacementRoutes(
     app: FastifyInstance,
     config: RegisterPlacementRoutesConfig
 ) {
-    app.get('/v2/placements', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.get('/api/v2/placements', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const filters = request.query as any;
@@ -22,7 +22,7 @@ export function registerPlacementRoutes(
         }
     });
 
-    app.get('/v2/placements/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.get('/api/v2/placements/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { id } = request.params as any;
             const placement = await config.placementService.getPlacement(id);
@@ -32,7 +32,7 @@ export function registerPlacementRoutes(
         }
     });
 
-    app.post('/v2/placements', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.post('/api/v2/placements', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const placement = await config.placementService.createPlacement(request.body as any, clerkUserId);
@@ -42,7 +42,7 @@ export function registerPlacementRoutes(
         }
     });
 
-    app.patch('/v2/placements/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.patch('/api/v2/placements/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as any;
@@ -57,7 +57,7 @@ export function registerPlacementRoutes(
         }
     });
 
-    app.delete('/v2/placements/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.delete('/api/v2/placements/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as any;

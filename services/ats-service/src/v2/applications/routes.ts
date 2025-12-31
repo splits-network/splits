@@ -11,7 +11,7 @@ export function registerApplicationRoutes(
     app: FastifyInstance,
     config: RegisterApplicationRoutesConfig
 ) {
-    app.get('/v2/applications', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.get('/api/v2/applications', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const filters = request.query as any;
@@ -22,18 +22,22 @@ export function registerApplicationRoutes(
         }
     });
 
-    app.get('/v2/applications/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.get('/api/v2/applications/:id', async (request: FastifyRequest<{ Params: { id: string }; Querystring: { include?: string } }>, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
-            const { id } = request.params as any;
-            const application = await config.applicationService.getApplication(id, clerkUserId);
+            const { id } = request.params as { id: string };
+            const includeParam = request.query?.include;
+            const includes = includeParam
+                ? includeParam.split(',').map(part => part.trim()).filter(Boolean)
+                : [];
+            const application = await config.applicationService.getApplication(id, clerkUserId, includes);
             return reply.send({ data: application });
         } catch (error: any) {
             return reply.code(404).send({ error: { message: error.message } });
         }
     });
 
-    app.post('/v2/applications', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.post('/api/v2/applications', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const application = await config.applicationService.createApplication(request.body as any, clerkUserId);
@@ -43,7 +47,7 @@ export function registerApplicationRoutes(
         }
     });
 
-    app.patch('/v2/applications/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.patch('/api/v2/applications/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as any;
@@ -55,7 +59,7 @@ export function registerApplicationRoutes(
         }
     });
 
-    app.delete('/v2/applications/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.delete('/api/v2/applications/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as any;
@@ -65,4 +69,5 @@ export function registerApplicationRoutes(
             return reply.code(400).send({ error: { message: error.message } });
         }
     });
+
 }

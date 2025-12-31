@@ -343,7 +343,7 @@ export type ApplicationStage =
 
 ### New Endpoints
 
-#### 1. **POST /api/applications/:id/ai-review** (Internal)
+#### 1. **POST /api/ai-reviews** (Internal)
 
 **Purpose:** Trigger AI review for an application
 
@@ -377,7 +377,7 @@ export type ApplicationStage =
 
 ---
 
-#### 2. **GET /api/applications/:id/ai-review**
+#### 2. **GET /api/ai-reviews**
 
 **Purpose:** Retrieve AI review results for an application
 
@@ -422,7 +422,7 @@ export type ApplicationStage =
 
 ---
 
-#### 3. **GET /api/jobs/:jobId/ai-review-stats**
+#### 3. **GET /api/ai-review-stats?job_id=:jobId**
 
 **Purpose:** Aggregate AI review statistics for a job
 
@@ -913,8 +913,8 @@ Next Steps:
 **Week 3-4: Backend Service**
 - [ ] Implement AI review service in `ats-service`
 - [ ] Create OpenAI/Anthropic integration
-- [ ] Implement POST `/api/applications/:id/ai-review` endpoint
-- [ ] Implement GET `/api/applications/:id/ai-review` endpoint
+- [ ] Implement POST `/api/ai-reviews` endpoint
+- [ ] Implement GET `/api/ai-reviews` endpoint
 - [ ] Add automatic stage transition logic
 - [ ] Add job queue for AI review processing
 

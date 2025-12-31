@@ -12,7 +12,7 @@ async function getPrimaryMembership(token: string): Promise<MembershipSummary | 
     try {
         const client = createAuthenticatedClient(token);
         const response: any = await client.getCurrentUser();
-        const profile = response.data;
+        const profile = response?.data?.[0] || response?.data || response;
         if (profile?.memberships?.length) {
             return profile.memberships[0];
         }

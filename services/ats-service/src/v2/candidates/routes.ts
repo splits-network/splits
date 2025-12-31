@@ -11,7 +11,7 @@ export function registerCandidateRoutes(
     app: FastifyInstance,
     config: RegisterCandidateRoutesConfig
 ) {
-    app.get('/v2/candidates', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.get('/api/v2/candidates', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const filters = request.query as any;
@@ -22,7 +22,7 @@ export function registerCandidateRoutes(
         }
     });
 
-    app.get('/v2/candidates/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.get('/api/v2/candidates/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { id } = request.params as any;
             const candidate = await config.candidateService.getCandidate(id);
@@ -32,7 +32,7 @@ export function registerCandidateRoutes(
         }
     });
 
-    app.post('/v2/candidates', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.post('/api/v2/candidates', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const candidate = await config.candidateService.createCandidate(request.body as any, clerkUserId);
@@ -42,7 +42,7 @@ export function registerCandidateRoutes(
         }
     });
 
-    app.patch('/v2/candidates/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.patch('/api/v2/candidates/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as any;
@@ -57,7 +57,7 @@ export function registerCandidateRoutes(
         }
     });
 
-    app.delete('/v2/candidates/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.delete('/api/v2/candidates/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as any;
@@ -68,7 +68,7 @@ export function registerCandidateRoutes(
         }
     });
 
-    app.get('/v2/candidate-dashboard/stats', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.get('/api/v2/candidate-dashboard/stats', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const stats = await config.candidateService.getCandidateDashboardStats(clerkUserId);

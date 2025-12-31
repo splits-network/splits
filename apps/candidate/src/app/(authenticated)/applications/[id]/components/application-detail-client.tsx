@@ -5,7 +5,12 @@ import { useRouter } from 'next/navigation';
 import { ProposalAlert } from './proposal-alert';
 import { DeclineModal } from './decline-modal';
 import { ProposalResponseWizard, type WizardData } from './proposal-response-wizard';
-import { uploadDocument } from '@/lib/api';
+import {
+    uploadDocument,
+    getJobPreScreenQuestions,
+    saveJobPreScreenAnswers,
+    updateApplication,
+} from '@/lib/api';
 
 interface ApplicationDetailClientProps {
     application: any;
@@ -28,36 +33,11 @@ export function ApplicationDetailClient({ application, job, token }: Application
         try {
             setError(null);
 
-            console.log('Fetching pre-screen questions for job:', application.job_id);
-
-            // Fetch pre-screen questions without changing application state
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/jobs/${application.job_id}/pre-screen-questions`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-
-            console.log('Pre-screen questions response status:', response.status);
-
-            if (response.ok) {
-                const result = await response.json();
-                console.log('Pre-screen questions result:', result);
-                setPreScreenQuestions(result.data || []);
-            } else {
-                console.warn('Failed to fetch pre-screen questions, status:', response.status);
-                // If endpoint doesn't exist or fails, continue with empty questions
-                setPreScreenQuestions([]);
-            }
-
-            // Open wizard - state change happens when they complete it
+            const questions = await getJobPreScreenQuestions(application.job_id, token);
+            setPreScreenQuestions(Array.isArray(questions) ? questions : []);
             setShowWizard(true);
         } catch (err) {
-            console.error('Error fetching pre-screen questions:', err);
             setError(err instanceof Error ? err.message : 'Failed to load application wizard');
-            console.error('Load wizard error:', err);
         }
     };
 
@@ -65,28 +45,21 @@ export function ApplicationDetailClient({ application, job, token }: Application
         try {
             setError(null);
 
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/applications/${application.id}/decline-proposal`,
+            await updateApplication(
+                application.id,
                 {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ reason, details }),
-                }
+                    stage: 'rejected',
+                    decline_reason: reason,
+                    decline_details: details,
+                    candidate_notes: details,
+                },
+                token
             );
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error?.message || 'Failed to decline proposal');
-            }
 
             // Refresh page to show updated state
             router.refresh();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to decline proposal');
-            console.error('Decline proposal error:', err);
             throw err; // Re-throw so modal can handle it
         }
     };
@@ -128,40 +101,25 @@ export function ApplicationDetailClient({ application, job, token }: Application
                 primaryResumeId = allDocumentIds[0];
             }
 
-            // Step 2: Accept proposal with all documents and answers
-            const acceptResponse = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/applications/${application.id}/accept-proposal`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({
-                        document_ids: allDocumentIds,
-                        primary_resume_id: primaryResumeId,
-                        pre_screen_answers: Object.entries(wizardData.preScreenAnswers).map(
-                            ([question_id, answer]) => ({
-                                question_id,
-                                answer,
-                            })
-                        ),
-                        additional_notes: wizardData.notes || undefined,
-                    }),
-                }
-            );
+            // Step 2: Save pre-screen answers via V2 endpoint
+            await saveJobPreScreenAnswers(application.id, wizardData.preScreenAnswers, token);
 
-            if (!acceptResponse.ok) {
-                const errorData = await acceptResponse.json();
-                throw new Error(errorData.error?.message || 'Failed to accept proposal');
-            }
-            // TODO: Add endpoint to save answers to existing application
+            // Step 3: Update application via V2 PATCH
+            await updateApplication(
+                application.id,
+                {
+                    stage: 'ai_review',
+                    document_ids: allDocumentIds,
+                    primary_resume_id: primaryResumeId,
+                    candidate_notes: wizardData.notes || undefined,
+                },
+                token
+            );
 
             // Success - refresh page
             router.refresh();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to complete application');
-            console.error('Complete application error:', err);
             throw err; // Re-throw so wizard can handle it
         }
     };
