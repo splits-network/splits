@@ -11,6 +11,7 @@ import { MetricsAggregationService } from './metrics-service';
 import { registerRoutes } from './routes';
 import { registerV2Routes } from './v2/routes';
 import { EventPublisher } from './v2/shared/events';
+import { DomainEventConsumer } from './v2/shared/domain-consumer';
 
 async function main() {
     const baseConfig = loadBaseConfig('automation-service');
@@ -18,6 +19,7 @@ async function main() {
     const rabbitConfig = loadRabbitMQConfig();
 
     let v2EventPublisher: EventPublisher | null = null;
+    let domainConsumer: DomainEventConsumer | null = null;
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
@@ -79,6 +81,12 @@ async function main() {
         );
         await v2EventPublisher.connect();
 
+        // Initialize V2 domain event consumer to trigger automated workflows (AI reviews, etc)
+        const atsServiceUrl = process.env.ATS_SERVICE_URL || 'http://localhost:3002';
+        domainConsumer = new DomainEventConsumer(rabbitConfig.url, atsServiceUrl, logger);
+        await domainConsumer.connect();
+        logger.info('V2 domain event consumer connected - listening for automation triggers');
+
         // Register routes
         registerRoutes(app, matchingService, fraudService, automationExecutor, metricsService, repository, logger);
         await registerV2Routes(app, {
@@ -93,6 +101,9 @@ async function main() {
                 await app.close();
                 if (v2EventPublisher) {
                     await v2EventPublisher.close();
+                }
+                if (domainConsumer) {
+                    await domainConsumer.close();
                 }
             } finally {
                 process.exit(0);

@@ -348,14 +348,17 @@ export class ApplicationServiceV2 {
         });
 
         if (this.eventPublisher) {
+            // Publish event to trigger AI review (matches V1 event name)
             await this.eventPublisher.publish(
-                'application.candidate_approved',
+                'application.submitted_for_ai_review',
                 {
                     application_id: application.id,
                     candidate_id: application.candidate_id,
                     recruiter_id: application.recruiter_id,
                     job_id: application.job_id,
-                    job_status: job.status,
+                    document_ids: documentIds || [],
+                    primary_resume_id: primaryResumeId || null,
+                    submitted_at: new Date().toISOString(),
                 }
             );
         }
