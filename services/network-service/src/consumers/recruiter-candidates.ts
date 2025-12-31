@@ -1,4 +1,5 @@
 import { NetworkService } from '../service';
+import { resolveAccessContext } from '@splits-network/shared-access-context';
 
 /**
  * Consumer for managing recruiter-candidate relationships
@@ -12,6 +13,9 @@ export class RecruiterCandidateConsumer {
             switch (event) {
                 case 'application.created':
                     await this.handleApplicationCreated(payload);
+                    break;
+                case 'candidate.created':
+                    await this.handleCandidateCreated(payload);
                     break;
                 default:
                     console.log(`[RecruiterCandidateConsumer] Ignoring event: ${event}`);
@@ -61,5 +65,60 @@ export class RecruiterCandidateConsumer {
         });
 
         console.log(`[RecruiterCandidateConsumer] Created recruiter-candidate relationship: recruiter=${recruiter_id}, candidate=${candidate_id}, expires=${relationshipEndDate.toISOString()}`);
+    }
+
+    /**
+     * When a candidate is created by a recruiter, send invitation email.
+     * The recruiter-candidate relationship is only created after the candidate accepts.
+     */
+    private async handleCandidateCreated(payload: any): Promise<void> {
+        const { candidateId, email, createdBy } = payload;
+
+        console.log(`[RecruiterCandidateConsumer] Processing candidate.created: candidate=${candidateId}, createdBy=${createdBy}`);
+
+        // Skip if no createdBy (system creation or other non-recruiter creation)
+        if (!createdBy) {
+            console.log('[RecruiterCandidateConsumer] No createdBy user, skipping invitation');
+            return;
+        }
+
+        // Use V2 access context to check if creator is a recruiter
+        try {
+            const accessContext = await resolveAccessContext(this.service.supabase, createdBy);
+            
+            if (!accessContext.recruiterId) {
+                console.log(`[RecruiterCandidateConsumer] User ${createdBy} is not a recruiter, skipping invitation`);
+                return;
+            }
+
+            console.log(`[RecruiterCandidateConsumer] Found recruiter ${accessContext.recruiterId} for user ${createdBy}, creating relationship and publishing candidate.invited event`);
+
+            // Create the recruiter-candidate relationship with invitation token
+            const relationship = await this.service.networkRepository.createRecruiterCandidateRelationship(
+                accessContext.recruiterId,
+                candidateId
+            );
+
+            console.log(`[RecruiterCandidateConsumer] Created relationship ${relationship.id} with token ${relationship.invitation_token?.substring(0, 8)}...`);
+
+            // Publish candidate.invited event for notification service to send email
+            const eventPublisher = this.service.getEventPublisher();
+            if (eventPublisher) {
+                await eventPublisher.publish('candidate.invited', {
+                    relationship_id: relationship.id,
+                    recruiter_id: accessContext.recruiterId,
+                    candidate_id: candidateId,
+                    candidate_email: email,
+                    invitation_token: relationship.invitation_token,
+                    invitation_expires_at: relationship.invitation_expires_at,
+                }, 'network-service');
+            }
+
+            console.log(`[RecruiterCandidateConsumer] Published candidate.invited event: relationship=${relationship.id}, recruiter=${accessContext.recruiterId}, candidate=${candidateId}`);
+
+        } catch (error) {
+            console.error(`[RecruiterCandidateConsumer] Error processing candidate.created for candidate ${candidateId}:`, error);
+            throw error;
+        }
     }
 }

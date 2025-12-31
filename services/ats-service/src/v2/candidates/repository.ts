@@ -35,13 +35,13 @@ export class CandidateRepository {
 
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
         const organizationIds = accessContext.organizationIds;
-        const restrictToOrganizations = !accessContext.isPlatformAdmin && !accessContext.candidateId;
+        const restrictToOrganizations = !accessContext.isPlatformAdmin && !accessContext.candidateId && !accessContext.recruiterId;
 
         if (restrictToOrganizations && organizationIds.length === 0) {
             return { data: [], total: 0 };
         }
 
-        // Build query - candidates visible if they have applications to jobs in user's org
+        // Build query based on user role and scope
         let query = this.supabase
             .schema('ats')
             .from('candidates')
@@ -49,10 +49,10 @@ export class CandidateRepository {
                 *,
                 applications:applications(
                     id,
-                    job:jobs!inner(
+                    job:jobs(
                         id,
                         title,
-                        company:companies!inner(identity_organization_id)
+                        company:companies(identity_organization_id)
                     )
                 )
             `, { count: 'exact' });
@@ -62,11 +62,83 @@ export class CandidateRepository {
             query = query.eq('id', accessContext.candidateId);
         }
 
+        // Handle recruiter filtering when scope is "mine" - use view to avoid cross-schema join issues
+        if (accessContext.recruiterId && filters.scope === 'mine') {
+            // Use the candidates_with_recruiters view for efficient filtering
+            query = this.supabase
+                .schema('ats')
+                .from('candidates_with_recruiters')
+                .select(`
+                    *,
+                    applications:applications(
+                        id,
+                        job:jobs(
+                            id,
+                            title,
+                            company:companies(identity_organization_id)
+                        )
+                    )
+                `, { count: 'exact' })
+                .eq('active_recruiter_id', accessContext.recruiterId);
+        }
+
+        // For recruiters with scope != 'mine', we need a broader initial query
+        // Get all candidate IDs they should see first
+        let allowedCandidateIds: Set<string> | null = null;
+        if (accessContext.recruiterId && filters.scope !== 'mine') {
+            allowedCandidateIds = new Set();
+
+            // 1. Get organization candidate IDs (if recruiter is part of organizations)
+            if (organizationIds.length > 0) {
+                const { data: orgCandidates, error: orgError } = await this.supabase
+                    .schema('ats')
+                    .from('candidates')
+                    .select(`
+                        id,
+                        applications:applications(
+                            job:jobs(
+                                company:companies(identity_organization_id)
+                            )
+                        )
+                    `);
+                
+                if (orgError) throw orgError;
+                
+                orgCandidates?.forEach((candidate: any) => {
+                    const hasOrgApp = candidate.applications?.some((app: any) => {
+                        return organizationIds.includes(app.job?.company?.identity_organization_id);
+                    });
+                    if (hasOrgApp) {
+                        allowedCandidateIds!.add(candidate.id);
+                    }
+                });
+            }
+
+            // 2. Get relationship candidate IDs
+            const { data: recruiterRelationships, error: relError } = await this.supabase
+                .schema('network')
+                .from('recruiter_candidates')
+                .select('candidate_id')
+                .eq('recruiter_id', accessContext.recruiterId)
+                .eq('status', 'active');
+            
+            if (relError) throw relError;
+            
+            recruiterRelationships?.forEach(rel => {
+                allowedCandidateIds!.add(rel.candidate_id);
+            });
+
+            // Filter the main query to only include allowed candidates
+            if (allowedCandidateIds.size === 0) {
+                return { data: [], total: 0 };
+            }
+
+            const candidateIdArray = Array.from(allowedCandidateIds);
+            query = query.in('id', candidateIdArray);
+        }
+
         if (filters.search) {
             query = query.or(`full_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
-        }
-        if (filters.status) {
-            query = query.eq('status', filters.status);
         }
         if (filters.location) {
             query = query.ilike('location', `%${filters.location}%`);
@@ -81,12 +153,15 @@ export class CandidateRepository {
         query = query.range(offset, offset + limit - 1);
 
         const { data, error, count } = await query;
-
+        
         if (error) throw error;
 
-        // Filter candidates by organization
+        // Filter candidates by access rules
         let filteredData = data || [];
-        if (restrictToOrganizations && organizationIds.length > 0) {
+        
+        // For recruiters with scope != 'mine', we already filtered in the query above
+        // For other users, apply organization filtering
+        if (!accessContext.recruiterId && restrictToOrganizations && organizationIds.length > 0) {
             filteredData = filteredData.filter((candidate: any) => {
                 return candidate.applications?.some((app: any) => {
                     return organizationIds.includes(app.job?.company?.identity_organization_id);
@@ -119,7 +194,7 @@ export class CandidateRepository {
         const { data, error } = await this.supabase
             .schema('ats')
             .from('candidates')
-            .insert(candidate)
+            .insert({...candidate, verification_status: 'verified' })
             .select()
             .single();
 
@@ -142,6 +217,7 @@ export class CandidateRepository {
 
     async deleteCandidate(id: string): Promise<void> {
         // Soft delete
+        throw new Error('Soft delete not implemented yet');
         const { error } = await this.supabase
             .schema('ats')
             .from('candidates')

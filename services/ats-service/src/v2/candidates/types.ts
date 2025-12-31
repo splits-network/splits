@@ -6,17 +6,19 @@ import { PaginationParams, SortParams } from '../shared/pagination';
 
 export interface CandidateFilters extends PaginationParams, SortParams {
     search?: string;
-    status?: string;
     location?: string;
+    scope?: string;
 }
 
 export interface CandidateUpdate {
-    first_name?: string;
-    last_name?: string;
+    full_name?: string;
     email?: string;
     phone?: string;
     location?: string;
-    status?: string;
+    verification_status?: string;
+    verification_metadata?: Record<string, any>;
+    verified_at?: string;
+    verified_by_user_id?: string;
     [key: string]: any;
 }
 

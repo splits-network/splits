@@ -28,7 +28,7 @@ export class CandidateServiceV2 {
             page,
             limit,
         });
-
+        
         return {
             data,
             pagination: buildPaginationResponse<any>(data, total, page, limit).pagination,
@@ -45,8 +45,8 @@ export class CandidateServiceV2 {
 
     async createCandidate(data: any, clerkUserId?: string): Promise<any> {
         // Validation
-        if (!data.first_name || !data.last_name) {
-            throw new Error('Candidate first name and last name are required');
+        if (!data.full_name) {
+            throw new Error('Candidate full name is required');
         }
         if (!data.email) {
             throw new Error('Candidate email is required');
@@ -60,7 +60,6 @@ export class CandidateServiceV2 {
 
         const candidate = await this.repository.createCandidate({
             ...data,
-            status: data.status || 'active',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         });
@@ -100,6 +99,33 @@ export class CandidateServiceV2 {
             if (!canManage && !isOwnProfile) {
                 throw new Error('You do not have permission to update this candidate');
             }
+
+            // Authorization check: only recruiters and platform admins can update verification status
+            if (updates.verification_status !== undefined) {
+                const canVerify = accessContext.isPlatformAdmin || accessContext.recruiterId !== null;
+                if (!canVerify) {
+                    throw new Error('Only recruiters and platform admins can update verification status');
+                }
+                
+                // Smart verification handling: set verified_by and verified_at when status changes
+                if (!updates.verified_by_user_id) {
+                    // Get the internal user_id from identity.users for verified_by_user_id
+                    const { data: verifierUser } = await this.repository['supabase']
+                        .schema('identity')
+                        .from('users')
+                        .select('id')
+                        .eq('clerk_user_id', clerkUserId)
+                        .single();
+                    
+                    if (verifierUser) {
+                        updates.verified_by_user_id = verifierUser.id;
+                    }
+                }
+                
+                if (!updates.verified_at) {
+                    updates.verified_at = new Date().toISOString();
+                }
+            }
         }
 
         // Validation
@@ -110,12 +136,8 @@ export class CandidateServiceV2 {
             }
         }
 
-        if (updates.first_name !== undefined && !updates.first_name.trim()) {
+        if (updates.full_name !== undefined && !updates.full_name.trim()) {
             throw new Error('First name cannot be empty');
-        }
-
-        if (updates.last_name !== undefined && !updates.last_name.trim()) {
-            throw new Error('Last name cannot be empty');
         }
 
         const updatedCandidate = await this.repository.updateCandidate(id, updates);

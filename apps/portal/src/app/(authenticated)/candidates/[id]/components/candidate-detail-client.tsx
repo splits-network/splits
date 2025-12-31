@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import DocumentList from '@/components/document-list';
 import SubmitToJobWizard from './submit-to-job-wizard';
+import VerificationModal from './verification-modal';
 
 interface CandidateDetailClientProps {
     candidateId: string;
@@ -19,6 +20,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
     // Candidate data (loads first - fast)
     const [candidate, setCandidate] = useState<any>(null);
     const [canEdit, setCanEdit] = useState(false);
+    const [userContext, setUserContext] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +35,9 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
 
     // Submit to job wizard
     const [showSubmitWizard, setShowSubmitWizard] = useState(false);
+
+    // Verification modal
+    const [showVerificationModal, setShowVerificationModal] = useState(false);
 
     // Load candidate data first (fast)
     useEffect(() => {
@@ -49,12 +54,31 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
 
                 const client = createAuthenticatedClient(token);
 
-                // Fetch candidate details only
-                const candidateResponse = await client.get(`/candidates/${candidateId}`);
-                setCandidate(candidateResponse.data);
+                // Fetch candidate details and user context
+                const [candidateResponse, userContextResponse] = await Promise.all([
+                    client.get(`/candidates/${candidateId}`),
+                    client.get('/users?limit=1')
+                ]);
 
-                // Assume can edit if we can view (RBAC handled by backend)
-                setCanEdit(true);
+                setCandidate(candidateResponse.data);
+                console.log('Loaded candidate:', candidateResponse.data);
+
+                // Check if user can edit (upload documents for) this candidate
+                // V2 users endpoint returns array, get first (current) user
+                const userContext = userContextResponse.data?.[0];
+                if (!userContext) {
+                    throw new Error('User context not found');
+                }
+
+                setUserContext(userContext);
+
+                const canEditCandidate =
+                    userContext.role === 'platform_admin' ||
+                    userContext.role === 'company_admin' ||
+                    userContext.role === 'hiring_manager' ||
+                    (userContext.role === 'candidate' && candidateResponse.data.user_id === userContext.user_id);
+
+                setCanEdit(canEditCandidate);
 
             } catch (err: any) {
                 console.error('Failed to load candidate:', err);
@@ -82,7 +106,13 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                 const client = createAuthenticatedClient(token);
 
                 // Fetch applications with enriched job data (single query - no N+1!)
-                const applicationsResponse = await client.get(`/candidates/${candidateId}/applications-with-jobs`);
+                // Use V2 API with query parameters and includes
+                const applicationsResponse = await client.get(`/applications`, {
+                    params: {
+                        candidate_id: candidateId,
+                        include: 'job,recruiter,company'
+                    }
+                });
                 const apps = applicationsResponse.data || [];
 
                 setApplications(apps);
@@ -112,7 +142,13 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
 
                 // Try to get detailed relationship info
                 try {
-                    const relationshipResponse = await client.get(`/recruiter-candidates/candidate/${candidateId}`);
+                    // Use V2 API pattern with query parameters
+                    const relationshipResponse = await client.get(`/recruiter-candidates`, {
+                        params: {
+                            candidate_id: candidateId,
+                            limit: 10 // Get multiple to find active one
+                        }
+                    });
                     if (relationshipResponse.data && relationshipResponse.data.length > 0) {
                         // Get the most recent active relationship
                         const activeRelationship = relationshipResponse.data.find((r: any) => r.status === 'active');
@@ -132,7 +168,15 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
         loadRelationship();
     }, [candidate, candidateId, getToken]);
 
-
+    // Handle candidate updates (from modals)
+    const handleCandidateUpdate = (updatedCandidate: any) => {
+        setCandidate(updatedCandidate);
+    };
+    console.log('user context', userContext);
+    // Check if user can verify candidates (recruiters and platform admins)
+    const canVerifyCandidate = userContext && (
+        userContext.roles?.some((role: string) => ['platform_admin', 'recruiter'].includes(role))
+    );
 
     const handleSubmitToJob = async (jobId: string, notes: string, documentIds: string[]) => {
         try {
@@ -363,21 +407,32 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                                 </div>
                             </div>
                         </div>
-                        {canEdit && (
-                            <div className="flex gap-2">
+                        <div className="flex gap-2">
+                            {canEdit && (
+                                <>
+                                    <button
+                                        onClick={() => setShowSubmitWizard(true)}
+                                        className="btn btn-success gap-2"
+                                    >
+                                        <i className="fa-solid fa-paper-plane"></i>
+                                        Send Job Opportunity
+                                    </button>
+                                    <Link href={`/candidates/${candidateId}/edit`} className="btn btn-primary gap-2">
+                                        <i className="fa-solid fa-edit"></i>
+                                        Edit
+                                    </Link>
+                                </>
+                            )}
+                            {canVerifyCandidate && (
                                 <button
-                                    onClick={() => setShowSubmitWizard(true)}
-                                    className="btn btn-success gap-2"
+                                    onClick={() => setShowVerificationModal(true)}
+                                    className="btn btn-outline gap-2"
                                 >
-                                    <i className="fa-solid fa-paper-plane"></i>
-                                    Send Job Opportunity
+                                    <i className="fa-solid fa-shield-check"></i>
+                                    Verify
                                 </button>
-                                <Link href={`/candidates/${candidateId}/edit`} className="btn btn-primary gap-2">
-                                    <i className="fa-solid fa-edit"></i>
-                                    Edit
-                                </Link>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -597,6 +652,14 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                     onSubmit={handleSubmitToJob}
                 />
             )}
+
+            {/* Verification Modal */}
+            <VerificationModal
+                candidate={candidate}
+                isOpen={showVerificationModal}
+                onClose={() => setShowVerificationModal(false)}
+                onUpdate={handleCandidateUpdate}
+            />
         </div>
     );
 }

@@ -51,6 +51,7 @@ export default function CandidatesListClient() {
                 // - scope=mine: Candidates sourced OR with active relationships (default)
                 // - scope=all: All candidates in system (talent pool discovery)
                 const response = await client.get(`/candidates?scope=${scope}`);
+                console.log('Loaded candidates:', response.data);
                 setCandidates(response.data || []);
             } catch (err: any) {
                 console.error('Failed to load candidates:', err);

@@ -20,6 +20,7 @@ export function registerMeRecruitersRoute(app: FastifyInstance, services: Servic
             security: [{ clerkAuth: [] }],
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
+        console.warn('me-recruiters is deprecated and will be removed in future versions. Please use /api/v2/candidates instead.');
         const req = request as AuthenticatedRequest;
         const correlationId = getCorrelationId(request);
 

@@ -143,45 +143,4 @@ export function registerNotificationRoutes(app: FastifyInstance, services: Servi
         );
         return reply.send(result);
     });
-
-    /**
-     * Mark all notifications as read via V2 service
-     */
-    app.post('/api/v2/notifications/mark-all-read', {
-        schema: {
-            description: 'Mark all notifications as read via V2 endpoint',
-            tags: ['notifications'],
-            security: [{ clerkAuth: [] }],
-        },
-    }, async (request: FastifyRequest, reply: FastifyReply) => {
-        const notificationService = services.get('notification');
-        const correlationId = getCorrelationId(request);
-        const authHeaders = buildAuthHeaders(request);
-        const data = await notificationService.post(
-            '/v2/notifications/mark-all-read',
-            request.body,
-            correlationId,
-            authHeaders
-        );
-        return reply.send(data);
-    });
-
-    /**
-     * Get unread count via V2 service
-     */
-    app.get('/api/v2/notifications/unread-count', {
-        schema: {
-            description: 'Get unread notification count via V2 endpoint',
-            tags: ['notifications'],
-            security: [{ clerkAuth: [] }],
-        },
-    }, async (request: FastifyRequest, reply: FastifyReply) => {
-        const notificationService = services.get('notification');
-        const correlationId = getCorrelationId(request);
-        const authHeaders = buildAuthHeaders(request);
-        const queryString = new URLSearchParams(request.query as any).toString();
-        const path = queryString ? `/v2/notifications/unread-count?${queryString}` : '/v2/notifications/unread-count';
-        const data = await notificationService.get(path, undefined, correlationId, authHeaders);
-        return reply.send(data);
-    });
 }

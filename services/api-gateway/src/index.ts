@@ -133,6 +133,7 @@ async function main() {
                 { name: 'documents', description: 'Document storage and retrieval' },
                 { name: 'dashboards', description: 'Dashboard stats and insights' },
                 { name: 'admin', description: 'Platform admin and automation' },
+                { name: 'automation', description: 'Automation rules, matches, fraud signals, marketplace metrics' },
             ],
         },
     });
@@ -241,6 +242,7 @@ async function main() {
     services.register('billing', process.env.BILLING_SERVICE_URL || 'http://localhost:3004');
     services.register('notification', process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3005');
     services.register('document', process.env.DOCUMENT_SERVICE_URL || 'http://localhost:3006');
+    services.register('automation', process.env.AUTOMATION_SERVICE_URL || 'http://localhost:3007');
 
     // Register OAuth routes
     registerOAuthRoutes(app, oauthTokenManager, logger);

@@ -9,7 +9,7 @@ import {
 } from '@splits-network/shared-types';
 
 export class NetworkRepository {
-    private supabase: SupabaseClient;
+    public supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
         this.supabase = createClient(supabaseUrl, supabaseKey, {

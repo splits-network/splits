@@ -402,6 +402,8 @@ export async function getMyRecruiters(authToken: string): Promise<MyRecruitersRe
         authToken
     );
 
+    console.log('Raw recruiter relationships response:', response);
+
     const relationships = Array.isArray(response) ? response : response?.data || [];
 
     const mapped: RecruiterRelationship[] = relationships.map((rel: any) => {
@@ -479,10 +481,33 @@ export async function getMyProfile(authToken: string): Promise<CandidateProfile 
     return getMyCandidateProfile(authToken);
 }
 
+export async function createMyProfile(authToken: string, profileData: Partial<CandidateProfile>): Promise<CandidateProfile> {
+    // Create a candidate profile for the current user
+    return fetchApi<CandidateProfile>('/api/v2/candidates', {
+        method: 'POST',
+        body: JSON.stringify({
+            first_name: profileData.full_name?.split(' ')[0] || '',
+            last_name: profileData.full_name?.split(' ').slice(1).join(' ') || '',
+            email: profileData.email || '',
+            phone: profileData.phone || '',
+            location: profileData.location || '',
+            current_title: profileData.current_title || '',
+            current_company: profileData.current_company || '',
+            linkedin_url: profileData.linkedin_url || '',
+            github_url: profileData.github_url || '',
+            portfolio_url: profileData.portfolio_url || '',
+            bio: profileData.bio || '',
+            skills: profileData.skills || '',
+            status: 'active',
+        }),
+    }, authToken);
+}
+
 export async function updateMyProfile(authToken: string, updates: Partial<CandidateProfile>): Promise<CandidateProfile> {
     const profile = await getMyCandidateProfile(authToken);
     if (!profile) {
-        throw new ApiError('Candidate profile not found', 404);
+        // If no profile exists, create it instead of updating
+        return createMyProfile(authToken, updates);
     }
 
     return fetchApi<CandidateProfile>(`/api/v2/candidates/${profile.id}`, {

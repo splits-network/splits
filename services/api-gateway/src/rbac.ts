@@ -62,31 +62,28 @@ export function requireRoles(allowedRoles: UserRole[], services?: ServiceRegistr
             }
         }
 
-        // Special case: 'candidate' role requires checking ATS service for candidate profile
-        // Candidates don't have memberships - they're just authenticated users with candidate profiles
+        // Special case: 'candidate' role requires checking if user has a candidate profile
+        // Call the gateway endpoint to check if user has a candidate profile
         if (allowedRoles.includes('candidate') && services) {
             try {
                 const correlationId = (request as any).correlationId;
                 const atsService = services.get('ats');
                 const candidateResponse: any = await atsService.get(
-                    `/v2/candidates`,
-                    { limit: 1 },
+                    `/api/v2/candidates?limit=1`,
+                    undefined,
                     correlationId,
-                    { 'x-clerk-user-id': req.auth.clerkUserId } // Forward Clerk user ID to ATS service
+                    {
+                        'x-clerk-user-id': req.auth.clerkUserId,
+                    }
                 );
 
-                // If we get a 200 response with data, candidate profile exists
-                const candidates = candidateResponse?.data;
-                if (Array.isArray(candidates) && candidates.length > 0) {
+                if (candidateResponse?.data && candidateResponse.data.length > 0) {
                     req.matchedRole = 'candidate';
-                    request.log.debug({ userId: req.auth.userId, clerkUserId: req.auth.clerkUserId }, 'Access granted: candidate profile found via ATS service');
+                    request.log.debug({ userId: req.auth.userId }, 'Access granted: user has candidate profile');
                     return;
                 }
-            } catch (error: any) {
-                // 404 means no candidate profile yet - this is expected for new signups
-                if (error?.statusCode !== 404) {
-                    request.log.debug({ error, userId: req.auth.userId }, 'Error checking candidate profile in ATS service');
-                }
+            } catch (error) {
+                request.log.debug({ error, userId: req.auth.userId }, 'User does not have candidate profile');
             }
         }
 

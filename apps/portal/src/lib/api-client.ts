@@ -243,7 +243,8 @@ export class ApiClient {
             params.append('search', filters.search);
         }
         const query = params.toString();
-        return this.request(`/candidates${query ? `?${query}` : ''}`);
+        console.log('getCandidates - query string:', query);
+        return this.get(`/api/v2/candidates${query ? `?${query}` : ''}`);
     }
 
     // Applications

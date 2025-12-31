@@ -176,7 +176,7 @@ export function registerCandidatesRoutes(app: FastifyInstance, services: Service
         const correlationId = getCorrelationId(request);
         const userRole = determineUserRole(req);
         const identityService = services.get('identity');
-        
+        console.log('Creating candidate with request body:', req.body);
         // Convert Clerk IDs to UUIDs
         const body = await convertClerkIdsInBody(
             request.body,

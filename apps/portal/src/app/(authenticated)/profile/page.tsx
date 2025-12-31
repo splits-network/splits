@@ -62,17 +62,6 @@ export default function SettingsPage() {
         <div className="p-6">
             <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
             
-            {/* Debug info - remove this later */}
-            <div className="alert alert-info mb-4">
-                <div>
-                    <h3 className="font-bold">Debug: User Roles</h3>
-                    <p>isRecruiter: {userRoles.isRecruiter ? 'true' : 'false'}</p>
-                    <p>isCompanyAdmin: {userRoles.isCompanyAdmin ? 'true' : 'false'}</p>
-                    <p>isHiringManager: {userRoles.isHiringManager ? 'true' : 'false'}</p>
-                    <p>isPlatformAdmin: {userRoles.isPlatformAdmin ? 'true' : 'false'}</p>
-                </div>
-            </div>
-
             <div className="space-y-4">
                 {/* Profile & Account Card - Available to ALL users */}
                 <UserProfileSettings />

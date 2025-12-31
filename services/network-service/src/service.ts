@@ -29,6 +29,22 @@ export class NetworkService {
     }
 
     // ========================================================================
+    // V2 Access Context Support
+    // ========================================================================
+    
+    get supabase() {
+        return this.repository.supabase;
+    }
+
+    get networkRepository() {
+        return this.repository;
+    }
+
+    getEventPublisher() {
+        return this.eventPublisher;
+    }
+
+    // ========================================================================
     // Delegation methods for backward compatibility
     // ========================================================================
 
