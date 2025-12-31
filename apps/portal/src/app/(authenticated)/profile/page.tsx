@@ -36,16 +36,10 @@ export default function SettingsPage() {
                 }
 
                 const apiClient = createAuthenticatedClient(token);
-                const profileResponse: any = await apiClient.getCurrentUser();
-                const profile = profileResponse?.data?.[0] || profileResponse?.data || profileResponse || {};
-                const roles: string[] = Array.isArray(profile.roles) ? profile.roles : [];
-
-                setUserRoles({
-                    isRecruiter: Boolean(profile.recruiter_id),
-                    isCompanyAdmin: roles.includes('company_admin'),
-                    isHiringManager: roles.includes('hiring_manager'),
-                    isPlatformAdmin: Boolean(profile.is_platform_admin || roles.includes('platform_admin')),
-                });
+                const roleData = await apiClient.getUserRoles();
+                
+                console.log('Profile page - roleData:', roleData);
+                setUserRoles(roleData);
                 setLoading(false);
             } catch (error) {
                 console.error('Failed to check user role:', error);
@@ -67,6 +61,17 @@ export default function SettingsPage() {
     return (
         <div className="p-6">
             <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
+            
+            {/* Debug info - remove this later */}
+            <div className="alert alert-info mb-4">
+                <div>
+                    <h3 className="font-bold">Debug: User Roles</h3>
+                    <p>isRecruiter: {userRoles.isRecruiter ? 'true' : 'false'}</p>
+                    <p>isCompanyAdmin: {userRoles.isCompanyAdmin ? 'true' : 'false'}</p>
+                    <p>isHiringManager: {userRoles.isHiringManager ? 'true' : 'false'}</p>
+                    <p>isPlatformAdmin: {userRoles.isPlatformAdmin ? 'true' : 'false'}</p>
+                </div>
+            </div>
 
             <div className="space-y-4">
                 {/* Profile & Account Card - Available to ALL users */}

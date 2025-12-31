@@ -45,6 +45,8 @@ const getApiBaseUrl = (pathSuffix: string) => {
 const API_V2_BASE_URL = getApiBaseUrl('/api/v2');
 const API_V1_BASE_URL = getApiBaseUrl('/api');
 
+console.log(`API Client module - API_V2_BASE_URL: "${API_V2_BASE_URL}", API_V1_BASE_URL: "${API_V1_BASE_URL}"`);
+
 export class ApiClient {
     private baseV2: string;
     private baseV1: string;
@@ -54,6 +56,7 @@ export class ApiClient {
         this.baseV2 = baseUrl;
         this.baseV1 = legacyBaseUrl;
         this.token = token;
+        console.log(`API Client constructor - baseV2: "${this.baseV2}", baseV1: "${this.baseV1}"`);
     }
 
     async request<T>(
@@ -63,6 +66,7 @@ export class ApiClient {
     ): Promise<T> {
         const baseUrl = version === 'v2' ? this.baseV2 : this.baseV1;
         const url = `${baseUrl}${endpoint}`;
+        console.log(`API Client - constructing URL: baseUrl="${baseUrl}" + endpoint="${endpoint}" = "${url}"`);
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
@@ -143,6 +147,35 @@ export class ApiClient {
     // Identity
     async getCurrentUser() {
         return this.request('/users?limit=1');
+    }
+
+    // Get user roles with V2 compatibility
+    async getUserRoles() {
+        // Get basic user info from V1 identity service
+        const userResponse = await this.getCurrentUser();
+        const user = userResponse?.data?.[0] || userResponse?.data || userResponse || {};
+        const roles: string[] = Array.isArray(user.roles) ? user.roles : [];
+
+        // Check if user is a recruiter using V2 network service
+        let isRecruiter = false;
+        try {
+            const recruitersResponse = await this.get('/recruiters?limit=1');
+            console.log('API Client - recruitersResponse:', recruitersResponse);
+            isRecruiter = Boolean(recruitersResponse?.data?.data && recruitersResponse.data.data.length > 0);
+            console.log('API Client - isRecruiter:', isRecruiter, 'data length:', recruitersResponse?.data?.data?.length);
+        } catch (error) {
+            console.error('API Client - recruiter check error:', error);
+            // If V2 recruiter query fails, user is not a recruiter
+            isRecruiter = false;
+        }
+
+        return {
+            isRecruiter,
+            isCompanyAdmin: roles.includes('company_admin'),
+            isHiringManager: roles.includes('hiring_manager'),
+            isPlatformAdmin: Boolean(user.is_platform_admin || roles.includes('platform_admin')),
+            user
+        };
     }
 
     // Jobs/Roles
@@ -259,17 +292,20 @@ export class ApiClient {
 
     // Recruiters
     async getRecruiterProfile(recruiterId?: string) {
-        let resolvedRecruiterId = recruiterId;
-        if (!resolvedRecruiterId) {
-            const currentUser: any = await this.getCurrentUser();
-            resolvedRecruiterId = currentUser?.data?.recruiter_id || currentUser?.recruiter_id;
+        if (recruiterId) {
+            // If specific recruiter ID provided, use it directly
+            return this.get(`/recruiters/${recruiterId}`);
         }
 
-        if (!resolvedRecruiterId) {
+        // For current user, get their recruiter profile via V2 filtered query
+        const recruiters = await this.get('/recruiters?limit=1');
+        console.log('getRecruiterProfile - recruiters response:', recruiters);
+        if (!recruiters?.data?.data || recruiters.data.data.length === 0) {
             throw new Error('No recruiter profile found for current user');
         }
 
-        return this.get(`/recruiters/${resolvedRecruiterId}`);
+        // Return the recruiter data in the expected format
+        return { data: recruiters.data.data[0] };
     }
 
     async updateRecruiterProfile(recruiterId: string, payload: Record<string, any>) {

@@ -4,6 +4,7 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { resolveAccessContext } from '@splits-network/shared-access-context';
 import { RecruiterFilters, RecruiterUpdate, RepositoryListResponse } from './types';
 
 export class RecruiterRepository {
@@ -21,11 +22,24 @@ export class RecruiterRepository {
         const limit = filters.limit || 25;
         const offset = (page - 1) * limit;
 
+        const context = await resolveAccessContext(this.supabase, clerkUserId);
+
         // Build query
         let query = this.supabase
             .schema('network')
             .from('recruiters')
             .select('*', { count: 'exact' });
+console.log(context);
+        // Apply role-based filtering from access context
+        if (context.recruiterId) {
+            // Recruiters can only see their own profile
+            query = query.eq('user_id', context.identityUserId);
+        } else if (context.organizationIds.length > 0) {
+            // Company users can see recruiters working on their jobs (future enhancement)
+            // For now, no access to recruiter profiles
+            return { data: [], total: 0 };
+        }
+        // Platform admins see all recruiters (no filter)
 
         // Apply filters
         if (filters.search) {
@@ -47,7 +61,7 @@ export class RecruiterRepository {
         query = query.range(offset, offset + limit - 1);
 
         const { data, error, count } = await query;
-
+console.log('RecruiterRepository.findRecruiters - data:', data, 'error:', error, 'count:', count);
         if (error) throw error;
 
         return {

@@ -61,8 +61,8 @@ export class ApplicationRepository {
         if (filters.search) {
             query = query.or(`notes.ilike.%${filters.search}%`);
         }
-        if (filters.status) {
-            query = query.eq('status', filters.status);
+        if (filters.stage) {
+            query = query.eq('stage', filters.stage);
         }
         if (filters.stage) {
             query = query.eq('stage', filters.stage);

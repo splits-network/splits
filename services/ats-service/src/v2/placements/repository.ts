@@ -45,7 +45,7 @@ export class PlacementRepository {
                     title,
                     company:companies!inner(id, name, identity_organization_id)
                 ),
-                application:applications(id, stage, status)
+                application:applications(id, stage)
             `, { count: 'exact' });
 
         // Apply organization filter
