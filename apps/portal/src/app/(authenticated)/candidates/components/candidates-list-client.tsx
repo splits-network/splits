@@ -108,12 +108,11 @@ export default function CandidatesListClient() {
 
             {/* Filters and View Toggle */}
             <div className="card bg-base-100 shadow">
-                <div className="card-body">
+                <div className="card-body p-2">
                     <div className="flex flex-wrap gap-4 items-end">
                         {/* Scope Filter - Only show for recruiters */}
                         {userRole === 'recruiter' && (
                             <div className="fieldset">
-                                <label className="label">Show</label>
                                 <select
                                     className="select"
                                     value={scope}
@@ -125,7 +124,6 @@ export default function CandidatesListClient() {
                             </div>
                         )}
                         <div className="fieldset flex-1">
-                            <label className="label">Search</label>
                             <input
                                 type="text"
                                 placeholder="Search by name or email..."

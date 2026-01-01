@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { apiClient } from '@/lib/api-client';
 import { useViewMode } from '@/hooks/useViewMode';
-import { formatSalary, formatDate } from '@/lib/utils';
+import { formatSalary, formatDate, getRoleBadges } from '@/lib/utils';
 
 interface Job {
     id: string;
@@ -19,6 +19,8 @@ interface Job {
     open_to_relocation?: boolean;
     posted_at?: string;
     description?: string;
+    application_count?: number;
+    created_at: string;
 }
 
 interface JobsResponse {
@@ -370,60 +372,121 @@ export default function JobsListClient({
             ) : (
                 <>
                     {viewMode === 'grid' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {jobs.map(job => (
-                                <Link
-                                    key={job.id}
-                                    href={`/jobs/${job.id}`}
-                                    className="card card-lg bg-base-100 shadow border border-base-200 hover:shadow-lg transition-shadow"
-                                >
-                                    <div className="card-body space-y-4">
-                                        <div className="flex justify-between items-start gap-4">
-                                            <div className="space-y-1">
-                                                <h2 className="card-title text-2xl">{job.title}</h2>
-                                                <p className="text-lg font-semibold text-base-content/80">{job.company?.name || 'Confidential'}</p>
-                                                <div className="flex flex-wrap gap-3 text-sm text-base-content/70">
-                                                    {job.location && (
-                                                        <span className="flex items-center gap-1">
-                                                            <i className="fa-solid fa-location-dot"></i>
-                                                            {job.location}
-                                                        </span>
-                                                    )}
-                                                    {job.employment_type && (
-                                                        <span className="flex items-center gap-1">
-                                                            <i className="fa-solid fa-briefcase"></i>
-                                                            {job.employment_type.replace('_', '-')}
-                                                        </span>
-                                                    )}
-                                                    {job.open_to_relocation && (
-                                                        <span className="flex items-center gap-1">
-                                                            <i className="fa-solid fa-house-laptop"></i>
-                                                            Remote Friendly
-                                                        </span>
-                                                    )}
-                                                    {job.posted_at && (
-                                                        <span className="flex items-center gap-1">
-                                                            <i className="fa-solid fa-calendar"></i>
-                                                            Posted {formatDate(job.posted_at)}
-                                                        </span>
-                                                    )}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {jobs.map(job => {
+                                const badges = getRoleBadges(job, jobs);
+                                return (
+                                    <Link
+                                        key={job.id}
+                                        href={`/jobs/${job.id}`}
+                                        className="group card bg-base-100 border border-base-300 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden"
+                                    >
+                                        {/* Company header with gradient background */}
+                                        <div className="relative h-20 bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10">
+                                            <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+
+                                            {/* Company logo placeholder */}
+                                            <div className="absolute -bottom-8 left-6">
+                                                <div className="w-16 h-16 rounded-xl bg-base-100 border-4 border-base-100 shadow-lg flex items-center justify-center">
+                                                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-content font-bold text-xl">
+                                                        {(job.company?.name || 'C')[0].toUpperCase()}
+                                                    </div>
                                                 </div>
                                             </div>
-                                            {job.salary_min && job.salary_max && (
-                                                <div className="shrink-0 flex items-center justify-center px-4 py-1 rounded-full bg-primary text-primary-content text-sm font-semibold whitespace-nowrap">
-                                                    {formatSalary(job.salary_min, job.salary_max)}
+
+                                            {/* Status badges */}
+                                            {badges.length > 0 && (
+                                                <div className="absolute top-3 right-3 flex gap-2">
+                                                    {badges.map((badge, idx) => (
+                                                        <div
+                                                            key={idx}
+                                                            className={`badge ${badge.class} gap-1 shadow-lg ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-left' : ''}`}
+                                                            data-tip={badge.tooltip}
+                                                        >
+                                                            <i className={`fa-solid ${badge.icon}`}></i>
+                                                            {badge.text && <span>{badge.text}</span>}
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             )}
                                         </div>
-                                        {job.description && (
-                                            <p className="text-base-content/70 line-clamp-3">{job.description}</p>
-                                        )}
-                                        <div className="card-actions justify-end">
-                                            <span className="btn btn-link px-0">View details →</span>
+
+                                        <div className="card-body pt-12 pb-6 space-y-4">
+                                            {/* Title and company */}
+                                            <div className="space-y-2">
+                                                <h3 className="text-xl font-bold leading-tight group-hover:text-primary transition-colors line-clamp-2">
+                                                    {job.title}
+                                                </h3>
+                                                <p className="text-base font-semibold text-base-content/70">
+                                                    {job.company?.name || 'Confidential Company'}
+                                                </p>
+                                            </div>
+
+                                            {/* Description preview */}
+                                            {job.description && (
+                                                <p className="text-sm text-base-content/60 line-clamp-2 leading-relaxed">
+                                                    {job.description}
+                                                </p>
+                                            )}
+
+                                            {/* Job metadata */}
+                                            <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                                                {job.location && (
+                                                    <span className="flex items-center gap-1.5 text-base-content/70">
+                                                        <i className="fa-solid fa-location-dot text-primary"></i>
+                                                        <span className="font-medium">{job.location}</span>
+                                                    </span>
+                                                )}
+                                                {job.employment_type && (
+                                                    <span className="flex items-center gap-1.5 text-base-content/70">
+                                                        <i className="fa-solid fa-briefcase text-primary"></i>
+                                                        <span className="font-medium">{job.employment_type.replace('_', '-')}</span>
+                                                    </span>
+                                                )}
+                                                {job.open_to_relocation && (
+                                                    <span className="flex items-center gap-1.5 text-base-content/70">
+                                                        <i className="fa-solid fa-house-laptop text-primary"></i>
+                                                        <span className="font-medium">Remote OK</span>
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            {/* Category tag */}
+                                            {job.category && (
+                                                <div className="pt-2">
+                                                    <span className="badge badge-outline badge-primary badge-sm">
+                                                        {job.category}
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            {/* Footer with salary and action */}
+                                            <div className="flex items-center justify-between pt-4 border-t border-base-300">
+                                                <div className="flex-1">
+                                                    {job.salary_min && job.salary_max ? (
+                                                        <div className="font-semibold text-base text-success">
+                                                            {formatSalary(job.salary_min, job.salary_max)}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-sm text-base-content/50">
+                                                            Salary not disclosed
+                                                        </div>
+                                                    )}
+                                                    {job.posted_at && (
+                                                        <div className="text-xs text-base-content/50 mt-0.5">
+                                                            Posted {formatDate(job.posted_at)}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <button className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
+                                                    View Role
+                                                    <i className="fa-solid fa-arrow-right"></i>
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                </Link>
-                            ))}
+                                    </Link>
+                                );
+                            })}
                         </div>
                     )}
 
@@ -442,33 +505,50 @@ export default function JobsListClient({
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {jobs.map(job => (
-                                            <tr key={job.id} className="hover">
-                                                <td>
-                                                    <div className="font-semibold">{job.title}</div>
-                                                    <div className="text-sm text-base-content/60">
-                                                        {job.employment_type ? job.employment_type.replace('_', '-') : '—'}
-                                                    </div>
-                                                </td>
-                                                <td>{job.company?.name || 'Confidential'}</td>
-                                                <td>{job.location || '—'}</td>
-                                                <td>
-                                                    {job.salary_min && job.salary_max ? (
-                                                        formatSalary(job.salary_min, job.salary_max)
-                                                    ) : (
-                                                        <span className="text-base-content/40">—</span>
-                                                    )}
-                                                </td>
-                                                <td>{job.posted_at ? formatDate(job.posted_at) : '—'}</td>
-                                                <td>
-                                                    <div className="flex justify-end">
-                                                        <Link href={`/jobs/${job.id}`} className="btn btn-primary btn-sm">
-                                                            View
-                                                        </Link>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        {jobs.map(job => {
+                                            const badges = getRoleBadges(job, jobs);
+                                            return (
+                                                <tr key={job.id} className="hover">
+                                                    <td>
+                                                        <div className="flex items-center gap-2">
+                                                            <div>
+                                                                <div className="font-semibold">{job.title}</div>
+                                                                <div className="text-sm text-base-content/60">
+                                                                    {job.employment_type ? job.employment_type.replace('_', '-') : '—'}
+                                                                </div>
+                                                            </div>
+                                                            {badges.map((badge, idx) => (
+                                                                <div
+                                                                    key={idx}
+                                                                    className={`badge badge-sm ${badge.class} gap-1 ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-right' : ''}`}
+                                                                    data-tip={badge.tooltip}
+                                                                >
+                                                                    <i className={`fa-solid ${badge.icon}`}></i>
+                                                                    {badge.text && <span>{badge.text}</span>}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </td>
+                                                    <td>{job.company?.name || 'Confidential'}</td>
+                                                    <td>{job.location || '—'}</td>
+                                                    <td>
+                                                        {job.salary_min && job.salary_max ? (
+                                                            formatSalary(job.salary_min, job.salary_max)
+                                                        ) : (
+                                                            <span className="text-base-content/40">—</span>
+                                                        )}
+                                                    </td>
+                                                    <td>{job.posted_at ? formatDate(job.posted_at) : '—'}</td>
+                                                    <td>
+                                                        <div className="flex justify-end">
+                                                            <Link href={`/jobs/${job.id}`} className="btn btn-primary btn-sm">
+                                                                View
+                                                            </Link>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>

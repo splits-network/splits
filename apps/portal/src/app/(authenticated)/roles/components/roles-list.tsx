@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useViewMode } from '@/hooks/use-view-mode';
-import { getJobStatusBadge, getJobStatusBorderColor } from '@/lib/utils';
+import { getJobStatusBadge, getJobStatusBorderColor, formatRelativeTime, getRoleBadges } from '@/lib/utils';
 
 interface Job {
     id: string;
@@ -20,6 +20,7 @@ interface Job {
     fee_percentage: number;
     status: string;
     created_at: string;
+    application_count?: number;
 }
 
 interface Membership {
@@ -385,69 +386,82 @@ export default function RolesList() {
             {/* Roles List - Grid View */}
             {viewMode === 'grid' && filteredJobs.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {filteredJobs.map((job) => (
-                        <div key={job.id} className={`card card-lg bg-base-100 shadow hover:shadow transition-shadow overflow-hidden relative border-2 ${getJobStatusBorderColor(job.status)}`}>
-                            <div className="flex flex-col items-end gap-2 absolute -top-1 -right-1">
-                                <div className={`badge ${getJobStatusBadge(job.status)}`}>
-                                    {job.status}
+                    {filteredJobs.map((job) => {
+                        const badges = getRoleBadges(job, filteredJobs);
+                        return (
+                            <div key={job.id} className={`card card-lg bg-base-100 shadow hover:shadow transition-shadow overflow-hidden relative border-2 ${getJobStatusBorderColor(job.status)}`}>
+                                <div className="flex flex-col items-end gap-2 absolute -top-1 -right-1">
+                                    <div className={`badge ${getJobStatusBadge(job.status)}`}>
+                                        {job.status}
+                                    </div>
+                                    {badges.map((badge, idx) => (
+                                        <div
+                                            key={idx}
+                                            className={`badge ${badge.class} gap-1 ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-left' : ''}`}
+                                            data-tip={badge.tooltip}
+                                        >
+                                            <i className={`fa-solid ${badge.icon}`}></i>
+                                            {badge.text && <span>{badge.text}</span>}
+                                        </div>
+                                    ))}
                                 </div>
-                            </div>
-                            <div className="card-body min-h-40">
-                                {(userRole === 'recruiter' || userRole === 'platform_admin' || userRole === 'company_admin') && (
-                                    <div className='badge badge-info rounded-lg text-nowrap'>
-                                        Max Fee: ${job.salary_max ? Math.round(job.fee_percentage * job.salary_max / 100) : 'N/A'}
-                                        <span className='tooltip' data-tip='Calculated as Fee Percentage multiplied by Maximum Salary'>
-                                            <i className='fa fa-info-circle'></i>
-                                        </span>
-                                    </div>
-                                )}
-                                <div className="flex flex-col justify-between items-start mb-auto min-h-40">
-                                    <div className='flex justify-between items-start'>
-                                        <Link href={`/roles/${job.id}`} className="hover:text-primary transition-colors">
-                                            <h2 className="card-title text-3xl">{job.title}</h2>JobStatusBorderColo
-                                        </Link>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4 mt-2 text-sm text-base-content/70">
-                                        <span className="flex items-center gap-1">
-                                            <i className="fa-solid fa-building"></i>
-                                            {job.company.name}
-                                        </span>
-                                        {job.location && (
-                                            <span className="flex items-center gap-1">
-                                                <i className="fa-solid fa-location-dot"></i>
-                                                {job.location}
+                                <div className="card-body min-h-40">
+                                    {(userRole === 'recruiter' || userRole === 'platform_admin' || userRole === 'company_admin') && (
+                                        <div className='badge badge-info rounded-lg text-nowrap'>
+                                            Max Fee: ${job.salary_max ? Math.round(job.fee_percentage * job.salary_max / 100) : 'N/A'}
+                                            <span className='tooltip' data-tip='Calculated as Fee Percentage multiplied by Maximum Salary'>
+                                                <i className='fa fa-info-circle'></i>
                                             </span>
-                                        )}
-                                        <span className="flex items-center gap-1">
-                                            <i className="fa-solid fa-percent"></i>
-                                            {job.fee_percentage}% placement fee
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="card-actions justify-between items-center">
-                                    <span className="text-sm text-base-content/60">
-                                        Posted {new Date(job.created_at).toLocaleDateString()}
-                                    </span>
-                                    <div className="flex gap-2">
-                                        {canManageRole && (
-                                            <Link
-                                                href={`/roles/${job.id}/edit`}
-                                                className="btn btn-ghost btn-sm gap-2"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <i className="fa-solid fa-pen"></i>
-                                                Edit
+                                        </div>
+                                    )}
+                                    <div className="flex flex-col justify-between items-start mb-auto min-h-40">
+                                        <div className='flex justify-between items-start'>
+                                            <Link href={`/roles/${job.id}`} className="hover:text-primary transition-colors">
+                                                <h2 className="card-title text-3xl">{job.title}</h2>
                                             </Link>
-                                        )}
-                                        <Link href={`/roles/${job.id}`} className="btn btn-primary btn-sm gap-2">
-                                            View Pipeline
-                                            <i className="fa-solid fa-arrow-right"></i>
-                                        </Link>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4 mt-2 text-sm text-base-content/70">
+                                            <span className="flex items-center gap-1">
+                                                <i className="fa-solid fa-building"></i>
+                                                {job.company.name}
+                                            </span>
+                                            {job.location && (
+                                                <span className="flex items-center gap-1">
+                                                    <i className="fa-solid fa-location-dot"></i>
+                                                    {job.location}
+                                                </span>
+                                            )}
+                                            <span className="flex items-center gap-1">
+                                                <i className="fa-solid fa-percent"></i>
+                                                {job.fee_percentage}% placement fee
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="card-actions justify-between items-center">
+                                        <span className="text-sm text-base-content/60">
+                                            Posted {formatRelativeTime(job.created_at)}
+                                        </span>
+                                        <div className="flex gap-2">
+                                            {canManageRole && (
+                                                <Link
+                                                    href={`/roles/${job.id}/edit`}
+                                                    className="btn btn-ghost btn-sm gap-2"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    <i className="fa-solid fa-pen"></i>
+                                                    Edit
+                                                </Link>
+                                            )}
+                                            <Link href={`/roles/${job.id}`} className="btn btn-primary btn-sm gap-2">
+                                                View Pipeline
+                                                <i className="fa-solid fa-arrow-right"></i>
+                                            </Link>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 
@@ -467,65 +481,80 @@ export default function RolesList() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredJobs.map((job) => (
-                                    <tr key={job.id} className="hover">
-                                        <td>
-                                            <Link href={`/roles/${job.id}`} className="font-semibold hover:text-primary transition-colors">
-                                                {job.title}
-                                            </Link>
-                                            <div className="text-sm text-base-content/60 mt-1">
-                                                <i className="fa-solid fa-building mr-1"></i>
-                                                {job.company.name}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            {job.location ? (
-                                                <span className="flex items-center gap-1">
-                                                    <i className="fa-solid fa-location-dot"></i>
-                                                    {job.location}
-                                                </span>
-                                            ) : (
-                                                <span className="text-base-content/40">—</span>
-                                            )}
-                                        </td>
-                                        <td>
-                                            <span className="flex items-center gap-1">
-                                                <i className="fa-solid fa-percent"></i>
-                                                {job.fee_percentage}%
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className={`badge ${getJobStatusBadge(job.status)}`}>
-                                                {job.status}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span className="text-sm">
-                                                {new Date(job.created_at).toLocaleDateString()}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className="flex gap-2 justify-end">
-                                                {canManageRole && (
-                                                    <Link
-                                                        href={`/roles/${job.id}/edit`}
-                                                        className="btn btn-ghost btn-sm"
-                                                        title="Edit Role"
-                                                    >
-                                                        <i className="fa-solid fa-pen"></i>
+                                {filteredJobs.map((job) => {
+                                    const badges = getRoleBadges(job, filteredJobs);
+                                    return (
+                                        <tr key={job.id} className="hover">
+                                            <td>
+                                                <div className="flex items-center gap-2">
+                                                    <Link href={`/roles/${job.id}`} className="font-semibold hover:text-primary transition-colors">
+                                                        {job.title}
                                                     </Link>
+                                                    {badges.map((badge, idx) => (
+                                                        <div
+                                                            key={idx}
+                                                            className={`badge badge-sm ${badge.class} gap-1 ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-right' : ''}`}
+                                                            data-tip={badge.tooltip}
+                                                        >
+                                                            <i className={`fa-solid ${badge.icon}`}></i>
+                                                            {badge.text && <span>{badge.text}</span>}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <div className="text-sm text-base-content/60 mt-1">
+                                                    <i className="fa-solid fa-building mr-1"></i>
+                                                    {job.company.name}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {job.location ? (
+                                                    <span className="flex items-center gap-1">
+                                                        <i className="fa-solid fa-location-dot"></i>
+                                                        {job.location}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-base-content/40">—</span>
                                                 )}
-                                                <Link
-                                                    href={`/roles/${job.id}`}
-                                                    className="btn btn-primary btn-sm"
-                                                    title="View Pipeline"
-                                                >
-                                                    <i className="fa-solid fa-arrow-right"></i>
-                                                </Link>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
+                                            </td>
+                                            <td>
+                                                <span className="flex items-center gap-1">
+                                                    <i className="fa-solid fa-percent"></i>
+                                                    {job.fee_percentage}%
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className={`badge ${getJobStatusBadge(job.status)}`}>
+                                                    {job.status}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span className="text-sm">
+                                                    {formatRelativeTime(job.created_at)}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div className="flex gap-2 justify-end">
+                                                    {canManageRole && (
+                                                        <Link
+                                                            href={`/roles/${job.id}/edit`}
+                                                            className="btn btn-ghost btn-sm"
+                                                            title="Edit Role"
+                                                        >
+                                                            <i className="fa-solid fa-pen"></i>
+                                                        </Link>
+                                                    )}
+                                                    <Link
+                                                        href={`/roles/${job.id}`}
+                                                        className="btn btn-primary btn-sm"
+                                                        title="View Pipeline"
+                                                    >
+                                                        <i className="fa-solid fa-arrow-right"></i>
+                                                    </Link>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>

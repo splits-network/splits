@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import { getJobStatusBadge } from '@/lib/utils';
+import { getJobStatusBadge, getRoleBadges } from '@/lib/utils';
 import SubmitCandidateWizard from './submit-candidate-wizard';
 
 interface Job {
@@ -26,6 +26,7 @@ interface Job {
     splits_fee_percentage: number;
     job_owner_id?: string;
     created_at: string;
+    application_count?: number;
 }
 
 interface Membership {
@@ -157,11 +158,21 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                 <div className="card-body">
                     <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                         <div className="flex-1">
-                            <div className="flex items-top md:items-center gap-3">
+                            <div className="flex items-top md:items-center gap-3 flex-wrap">
                                 <h1 className="text-3xl font-bold">{job.title}</h1>
                                 <div className={`badge ${getJobStatusBadge(job.status)}`}>
                                     {job.status}
                                 </div>
+                                {getRoleBadges(job, [job]).map((badge, idx) => (
+                                    <div
+                                        key={idx}
+                                        className={`badge ${badge.class} gap-1 ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-bottom' : ''}`}
+                                        data-tip={badge.tooltip}
+                                    >
+                                        <i className={`fa-solid ${badge.icon}`}></i>
+                                        {badge.text && <span>{badge.text}</span>}
+                                    </div>
+                                ))}
                             </div>
                             <div className="flex flex-wrap items-center gap-4 mt-3 text-base-content/70">
                                 <span className="flex items-center gap-2">
