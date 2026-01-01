@@ -197,7 +197,7 @@ export default function NotificationsPage() {
                                     onClick={() => handleNotificationClick(notification)}
                                 >
                                     {/* Icon */}
-                                    <div className="flex-shrink-0">
+                                    <div className="shrink-0">
                                         <div className={`
                                             w-12 h-12 rounded-full flex items-center justify-center
                                             ${!notification.read ? 'bg-primary text-primary-content' : 'bg-base-300'}

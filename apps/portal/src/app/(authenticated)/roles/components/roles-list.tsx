@@ -385,81 +385,188 @@ export default function RolesList() {
 
             {/* Roles List - Grid View */}
             {viewMode === 'grid' && filteredJobs.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                     {filteredJobs.map((job) => {
                         const badges = getRoleBadges(job, filteredJobs);
+                        const maxPayout = job.salary_max ? Math.round(job.fee_percentage * job.salary_max / 100) : null;
+                        const minPayout = job.salary_min ? Math.round(job.fee_percentage * job.salary_min / 100) : null;
+
                         return (
-                            <div key={job.id} className={`card card-lg bg-base-100 shadow hover:shadow transition-shadow overflow-hidden relative border-2 ${getJobStatusBorderColor(job.status)}`}>
-                                <div className="flex flex-col items-end gap-2 absolute -top-1 -right-1">
-                                    <div className={`badge ${getJobStatusBadge(job.status)}`}>
-                                        {job.status}
-                                    </div>
-                                    {badges.map((badge, idx) => (
-                                        <div
-                                            key={idx}
-                                            className={`badge ${badge.class} gap-1 ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-left' : ''}`}
-                                            data-tip={badge.tooltip}
-                                        >
-                                            <i className={`fa-solid ${badge.icon}`}></i>
-                                            {badge.text && <span>{badge.text}</span>}
+                            <Link
+                                key={job.id}
+                                href={`/roles/${job.id}`}
+                                className="group card bg-base-100 border border-base-100 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
+                                style={{ borderColor: getJobStatusBorderColor(job.status).replace('border-', '#').replace('border-base-300', 'hsl(var(--bc) / 0.2)').replace('border-success/30', 'hsl(var(--su) / 0.3)').replace('border-warning/30', 'hsl(var(--wa) / 0.3)').replace('border-error/30', 'hsl(var(--er) / 0.3)').replace('border-neutral/30', 'hsl(var(--n) / 0.3)') }}
+                            >
+                                {/* Company header with gradient background */}
+                                <div className="relative h-24 bg-linear-to-br from-primary/10 via-secondary/5 to-accent/10">
+                                    <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+
+                                    {/* Company logo placeholder */}
+                                    <div className="absolute -bottom-10 left-6 flex items-center gap-4">
+                                        <div className="w-20 h-20 rounded-xl bg-base-100 border-4 border-base-100 shadow-lg flex items-center justify-center">
+                                            <div className="w-16 h-16 rounded-lg bg-linear-to-br from-primary to-secondary flex items-center justify-center text-primary-content font-bold text-2xl">
+                                                {(job.company?.name || 'C')[0].toUpperCase()}
+                                            </div>
                                         </div>
-                                    ))}
+                                        <h3 className="text-xl font-bold leading-tight group-hover:text-primary transition-colors line-clamp-2">
+                                            {job.title}
+                                        </h3>
+                                    </div>
+
+                                    {/* Status and activity badges */}
+                                    <div className="absolute top-3 right-3 flex gap-2">
+                                        <div className={`badge ${getJobStatusBadge(job.status)} shadow-lg font-semibold`}>
+                                            {job.status}
+                                        </div>
+                                        {badges.map((badge, idx) => (
+                                            <div
+                                                key={idx}
+                                                className={`badge ${badge.class} gap-1 shadow-lg ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-left' : ''}`}
+                                                data-tip={badge.tooltip}
+                                            >
+                                                <i className={`fa-solid ${badge.icon}`}></i>
+                                                {badge.text && <span>{badge.text}</span>}
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                                <div className="card-body min-h-40">
-                                    {(userRole === 'recruiter' || userRole === 'platform_admin' || userRole === 'company_admin') && (
-                                        <div className='badge badge-info rounded-lg text-nowrap'>
-                                            Max Fee: ${job.salary_max ? Math.round(job.fee_percentage * job.salary_max / 100) : 'N/A'}
-                                            <span className='tooltip' data-tip='Calculated as Fee Percentage multiplied by Maximum Salary'>
-                                                <i className='fa fa-info-circle'></i>
-                                            </span>
+
+                                <div className="card-body pt-8 pb-6 space-y-4 flex-1 flex flex-col">
+                                    {/* Title and company - horizontal layout with logo */}
+                                    {/* Title and company stacked */}
+                                    <div className="mt-6">
+                                        <p className="text-sm font-semibold text-base-content/70 flex items-center gap-2">
+                                            <i className="fa-solid fa-building text-primary"></i>
+                                            {job.company?.name}
+                                        </p>
+                                    </div>
+
+                                    {/* Role-specific financial information */}
+
+                                    {/* Recruiter Commission Box */}
+                                    {(userRole === 'recruiter' || userRole === 'platform_admin') && (
+                                        <div className="bg-linear-to-r from-success/10 to-success/5 rounded-lg p-4 border border-success/20">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex-1">
+                                                    <div className="text-xs font-medium text-success/70 uppercase tracking-wide mb-1">
+                                                        Potential Commission
+                                                    </div>
+                                                    <div className="font-bold text-2xl text-success">
+                                                        {maxPayout ? `$${maxPayout.toLocaleString()}` : 'TBD'}
+                                                    </div>
+                                                    {minPayout && maxPayout && minPayout !== maxPayout && (
+                                                        <div className="text-xs text-base-content/60 mt-1">
+                                                            ${minPayout.toLocaleString()} - ${maxPayout.toLocaleString()} range
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="text-right">
+                                                    <div className="badge badge-success badge-lg gap-2">
+                                                        <i className="fa-solid fa-percent"></i>
+                                                        {job.fee_percentage}%
+                                                    </div>
+                                                    <div className="text-xs text-base-content/50 mt-1">
+                                                        placement fee
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
-                                    <div className="flex flex-col justify-between items-start mb-auto min-h-40">
-                                        <div className='flex justify-between items-start'>
-                                            <Link href={`/roles/${job.id}`} className="hover:text-primary transition-colors">
-                                                <h2 className="card-title text-3xl">{job.title}</h2>
-                                            </Link>
+
+                                    {/* Company Hiring Cost Box */}
+                                    {(userRole === 'company_admin' || userRole === 'hiring_manager' || userRole === 'platform_admin') && (
+                                        <div className="bg-linear-to-r from-info/10 to-info/5 rounded-lg p-4 border border-info/20">
+                                            <div className="space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex-1">
+                                                        <div className="text-xs font-medium text-info/70 uppercase tracking-wide mb-1">
+                                                            Total Hiring Cost
+                                                        </div>
+                                                        <div className="font-bold text-2xl text-info">
+                                                            {job.salary_max && maxPayout
+                                                                ? `$${(job.salary_max + maxPayout).toLocaleString()}`
+                                                                : 'TBD'}
+                                                        </div>
+                                                        {job.salary_min && job.salary_max && minPayout && maxPayout && (
+                                                            <div className="text-xs text-base-content/60 mt-1">
+                                                                Salary + placement fee
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <div className="badge badge-info badge-lg gap-2">
+                                                            <i className="fa-solid fa-receipt"></i>
+                                                            {maxPayout ? `$${maxPayout.toLocaleString()}` : 'TBD'}
+                                                        </div>
+                                                        <div className="text-xs text-base-content/50 mt-1">
+                                                            {job.fee_percentage}% fee
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-4 text-xs">
+                                                    <div className="flex items-center gap-1.5 text-base-content/60">
+                                                        <i className="fa-solid fa-users text-info"></i>
+                                                        <span>{job.application_count || 0} candidate{(job.application_count || 0) !== 1 ? 's' : ''} in pipeline</span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4 mt-2 text-sm text-base-content/70">
-                                            <span className="flex items-center gap-1">
-                                                <i className="fa-solid fa-building"></i>
-                                                {job.company.name}
+                                    )}
+
+                                    {/* Spacer to push footer section to bottom */}
+                                    <div className="flex-1"></div>
+
+                                    {/* Role details */}
+                                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm pb-3 border-b border-base-300">
+                                        {job.location && (
+                                            <span className="flex items-center gap-1.5 text-base-content/70">
+                                                <i className="fa-solid fa-location-dot text-primary"></i>
+                                                <span className="font-medium">{job.location}</span>
                                             </span>
-                                            {job.location && (
-                                                <span className="flex items-center gap-1">
-                                                    <i className="fa-solid fa-location-dot"></i>
-                                                    {job.location}
+                                        )}
+                                        {job.salary_min && job.salary_max && (
+                                            <span className="flex items-center gap-1.5 text-base-content/70">
+                                                <i className="fa-solid fa-dollar-sign text-primary"></i>
+                                                <span className="font-medium">
+                                                    ${(job.salary_min / 1000).toFixed(0)}k - ${(job.salary_max / 1000).toFixed(0)}k
                                                 </span>
-                                            )}
-                                            <span className="flex items-center gap-1">
-                                                <i className="fa-solid fa-percent"></i>
-                                                {job.fee_percentage}% placement fee
                                             </span>
-                                        </div>
+                                        )}
+                                        {job.application_count !== undefined && (
+                                            <span className="flex items-center gap-1.5 text-base-content/70">
+                                                <i className="fa-solid fa-users text-primary"></i>
+                                                <span className="font-medium">{job.application_count} applicant{job.application_count !== 1 ? 's' : ''}</span>
+                                            </span>
+                                        )}
                                     </div>
-                                    <div className="card-actions justify-between items-center">
-                                        <span className="text-sm text-base-content/60">
+
+                                    {/* Footer with date and actions */}
+                                    <div className="flex items-center justify-between pt-3 mt-auto">
+                                        <div className="text-xs text-base-content/50">
                                             Posted {formatRelativeTime(job.created_at)}
-                                        </span>
+                                        </div>
                                         <div className="flex gap-2">
                                             {canManageRole && (
-                                                <Link
-                                                    href={`/roles/${job.id}/edit`}
+                                                <button
                                                     className="btn btn-ghost btn-sm gap-2"
-                                                    onClick={(e) => e.stopPropagation()}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        window.location.href = `/roles/${job.id}/edit`;
+                                                    }}
                                                 >
                                                     <i className="fa-solid fa-pen"></i>
                                                     Edit
-                                                </Link>
+                                                </button>
                                             )}
-                                            <Link href={`/roles/${job.id}`} className="btn btn-primary btn-sm gap-2">
+                                            <button className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
                                                 View Pipeline
                                                 <i className="fa-solid fa-arrow-right"></i>
-                                            </Link>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         );
                     })}
                 </div>

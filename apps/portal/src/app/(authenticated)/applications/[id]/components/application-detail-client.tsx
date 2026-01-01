@@ -170,8 +170,8 @@ export default function ApplicationDetailClient({
                             </div>
                         </div>
                         <div className="flex gap-2 items-center">
-                            <span className={`badge ${STAGE_COLORS[application.stage]} badge-lg`}>
-                                {STAGE_LABELS[application.stage]}
+                            <span className={`badge ${getApplicationStageBadge(application.stage)} badge-lg`}>
+                                {getApplicationStageLabel(application.stage)}
                             </span>
                         </div>
                     </div>

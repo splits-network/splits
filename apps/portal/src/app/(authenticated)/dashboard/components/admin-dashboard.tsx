@@ -98,7 +98,7 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
     return (
         <div className="space-y-6">
             {/* Welcome Section */}
-            <div className="card bg-gradient-to-r from-primary to-secondary text-primary-content shadow">
+            <div className="card bg-linear-to-r from-primary to-secondary text-primary-content shadow">
                 <div className="card-body">
                     <h2 className="card-title text-3xl">
                         Platform Administration

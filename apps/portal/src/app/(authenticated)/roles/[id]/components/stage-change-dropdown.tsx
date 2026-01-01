@@ -21,7 +21,7 @@ export default function StageChangeDropdown({ currentStage, stages, onStageChang
                 {stage?.label}
                 <i className="fa-solid fa-chevron-down text-xs"></i>
             </label>
-            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 mt-1">
+            <ul tabIndex={0} className="dropdown-content z-1 menu p-2 shadow bg-base-100 rounded-box w-52 mt-1">
                 {stages.map((s) => (
                     <li key={s.key}>
                         <a

@@ -484,7 +484,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className="flex-shrink-0">
+                                                    <div className="shrink-0">
                                                         <Link
                                                             href={`/applications/${application.id}`}
                                                             className="btn btn-sm btn-ghost"

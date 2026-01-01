@@ -382,13 +382,13 @@ export default function JobsListClient({
                                         className="group card bg-base-100 border border-base-300 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden"
                                     >
                                         {/* Company header with gradient background */}
-                                        <div className="relative h-20 bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10">
+                                        <div className="relative h-20 bg-linear-to-br from-primary/10 via-secondary/5 to-accent/10">
                                             <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
                                             {/* Company logo placeholder */}
                                             <div className="absolute -bottom-8 left-6">
                                                 <div className="w-16 h-16 rounded-xl bg-base-100 border-4 border-base-100 shadow-lg flex items-center justify-center">
-                                                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-content font-bold text-xl">
+                                                    <div className="w-12 h-12 rounded-lg bg-linear-to-br from-primary to-secondary flex items-center justify-center text-primary-content font-bold text-xl">
                                                         {(job.company?.name || 'C')[0].toUpperCase()}
                                                     </div>
                                                 </div>
