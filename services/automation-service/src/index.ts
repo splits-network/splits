@@ -82,8 +82,8 @@ async function main() {
         await v2EventPublisher.connect();
 
         // Initialize V2 domain event consumer to trigger automated workflows (AI reviews, etc)
-        const atsServiceUrl = process.env.ATS_SERVICE_URL || 'http://localhost:3002';
-        domainConsumer = new DomainEventConsumer(rabbitConfig.url, atsServiceUrl, logger);
+        const aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:3009';
+        domainConsumer = new DomainEventConsumer(rabbitConfig.url, aiServiceUrl, logger);
         await domainConsumer.connect();
         logger.info('V2 domain event consumer connected - listening for automation triggers');
 

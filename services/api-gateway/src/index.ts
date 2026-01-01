@@ -227,6 +227,15 @@ async function main() {
             return;
         }
         
+        // Skip auth for public V2 endpoints (jobs listing and individual jobs)
+        // These endpoints handle optional authentication in the service layer
+        if (request.method === 'GET' && (
+            request.url.startsWith('/api/v2/jobs') || 
+            request.url.match(/^\/api\/v2\/jobs\/[^/]+(\?|$)/)
+        )) {
+            return;
+        }
+        
         if (request.url.startsWith('/api/')) {
             await authMiddleware.createMiddleware()(request, reply);
         }

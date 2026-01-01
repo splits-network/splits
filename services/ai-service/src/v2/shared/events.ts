@@ -1,6 +1,6 @@
 /**
  * Event Publisher (V2)
- * Mirrors the Network Service implementation for consistency.
+ * Publishes domain events to RabbitMQ
  */
 
 import amqp from 'amqplib';
@@ -23,7 +23,7 @@ export class EventPublisher {
     constructor(
         private rabbitMqUrl: string,
         private logger: Logger,
-        private sourceService = 'ats-service'
+        private sourceService = 'ai-service'
     ) {}
 
     async connect(): Promise<void> {

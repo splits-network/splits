@@ -17,10 +17,10 @@ export class DomainEventConsumer {
 
     constructor(
         private rabbitMqUrl: string,
-        private atsServiceUrl: string,
+        private aiServiceUrl: string,
         private logger: Logger
     ) {
-        this.aiReviewService = new AIReviewService(atsServiceUrl, logger);
+        this.aiReviewService = new AIReviewService(aiServiceUrl, logger);
     }
 
     async connect(): Promise<void> {

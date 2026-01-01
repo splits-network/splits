@@ -19,6 +19,8 @@ export interface AuthHeaders extends Record<string, string> {
   'x-clerk-user-id': string;
 }
 
+export type OptionalAuthHeaders = Partial<AuthHeaders>;
+
 // Extend FastifyRequest to include auth property
 declare module 'fastify' {
   interface FastifyRequest {
@@ -32,14 +34,18 @@ declare module 'fastify' {
  * IMPORTANT: We do NOT pass user role in headers. Backend services determine role
  * from database records using SQL JOINs for 10-25x better performance.
  * 
- * @param request - Fastify request with auth context populated by Clerk middleware
- * @returns Object with auth headers to pass to backend services
+ * For public endpoints (e.g., jobs listing), this returns empty headers when no auth
+ * is present, allowing backend services to handle optional authentication.
+ * 
+ * @param request - Fastify request with optional auth context populated by Clerk middleware
+ * @returns Object with auth headers to pass to backend services (empty if no auth)
  */
-export function buildAuthHeaders(request: FastifyRequest): AuthHeaders {
+export function buildAuthHeaders(request: FastifyRequest): Partial<AuthHeaders> {
   const auth = request.auth;
 
   if (!auth) {
-    throw new Error('Request must be authenticated to build auth headers');
+    // Return empty headers for public/unauthenticated requests
+    return {};
   }
 
   const headers: AuthHeaders = {

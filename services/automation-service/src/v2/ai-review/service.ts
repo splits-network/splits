@@ -1,6 +1,6 @@
 /**
  * AI Review Service - V2
- * Orchestrates AI-powered candidate reviews by calling ATS service
+ * Orchestrates AI-powered candidate reviews by calling AI service
  */
 
 import { Logger } from '@splits-network/shared-logging';
@@ -8,7 +8,7 @@ import { DomainEvent } from '@splits-network/shared-types';
 
 export class AIReviewService {
     constructor(
-        private atsServiceUrl: string,
+        private aiServiceUrl: string,
         private logger: Logger
     ) {}
 
@@ -36,17 +36,17 @@ export class AIReviewService {
         );
 
         try {
-            // Call ATS service to perform AI review
-            // ATS service has all the AI logic (OpenAI integration, scoring, etc)
+            // Call AI service to perform AI review
+            // AI service has all the OpenAI integration, scoring, etc
             const response = await fetch(
-                `${this.atsServiceUrl}/applications/${application_id}/ai-review`,
+                `${this.aiServiceUrl}/v2/ai-reviews`,
                 {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        auto_transition: true, // Auto-move to next stage after review
+                        application_id,
                     }),
                     signal: AbortSignal.timeout(90000), // 90 second timeout (AI reviews can be slow)
                 }
@@ -82,7 +82,7 @@ export class AIReviewService {
 
             // Don't throw - we don't want to requeue endlessly if AI review keeps failing
             // The application is already in ai_review stage, recruiter can manually trigger if needed
-            // The AI review service in ATS will publish ai_review.failed event with details
+            // The AI service will publish ai_review.failed event with details
         }
     }
 }

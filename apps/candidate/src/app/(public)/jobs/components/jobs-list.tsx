@@ -138,7 +138,7 @@ export default function JobsListClient({
             params.set('limit', JOBS_PER_PAGE.toString());
             params.set('offset', offset.toString());
 
-            const response = await apiClient.get<JobsResponse>(`/public/jobs?${params.toString()}`);
+            const response = await apiClient.get<JobsResponse>(`/v2/jobs?${params.toString()}`);
             const fetchedJobs = response.data || [];
             const pagination = response.pagination;
             const totalCount = pagination?.total ?? fetchedJobs.length;
