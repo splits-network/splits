@@ -118,6 +118,7 @@ export default function ApplicationWizardModal({
                     primary_resume_id: formData.documents.primary_resume_id!,
                     pre_screen_answers: formData.pre_screen_answers,
                     notes: formData.notes,
+                    stage: 'ai_review',
                 },
                 token
             );

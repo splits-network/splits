@@ -1,29 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: automation-service
+  name: ai-service
   namespace: splits-network
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: automation-service
+      app: ai-service
   template:
     metadata:
       labels:
-        app: automation-service
+        app: ai-service
     spec:
       containers:
-        - name: automation-service
-          image: ${ACR_SERVER}/automation-service:${IMAGE_TAG}
+        - name: ai-service
+          image: ${ACR_SERVER}/ai-service:${IMAGE_TAG}
           ports:
-            - containerPort: 3007
+            - containerPort: 3009
               name: http
           env:
             - name: NODE_ENV
               value: "production"
             - name: PORT
-              value: "3007"
+              value: "3009"
             - name: SUPABASE_URL
               valueFrom:
                 secretKeyRef:
@@ -41,8 +41,13 @@ spec:
                   key: supabase-service-role-key
             - name: RABBITMQ_URL
               value: "amqp://splits:splits_production@rabbitmq:5672"
-            - name: AI_SERVICE_URL
-              value: "http://ai-service:3009"
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai-secrets
+                  key: openai-api-key
+            - name: OPENAI_MODEL
+              value: "gpt-4-turbo-2024-04-09"
             - name: INTERNAL_SERVICE_KEY
               valueFrom:
                 secretKeyRef:
@@ -50,34 +55,34 @@ spec:
                   key: internal-service-key
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 200m
+              memory: 256Mi
             limits:
-              cpu: 500m
-              memory: 512Mi
+              cpu: 1000m
+              memory: 1Gi
           livenessProbe:
             httpGet:
               path: /health
-              port: 3007
+              port: 3009
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /health
-              port: 3007
+              port: 3009
             initialDelaySeconds: 10
             periodSeconds: 5
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: automation-service
+  name: ai-service
   namespace: splits-network
 spec:
   selector:
-    app: automation-service
+    app: ai-service
   ports:
     - protocol: TCP
-      port: 3007
-      targetPort: 3007
+      port: 3009
+      targetPort: 3009
   type: ClusterIP

@@ -11,6 +11,7 @@ import { Logger } from '@splits-network/shared-logging';
 export class AIReviewServiceV2 {
     private openaiApiKey: string;
     private modelVersion: string;
+    private atsServiceUrl: string;
 
     constructor(
         private repository: AIReviewRepository,
@@ -19,11 +20,69 @@ export class AIReviewServiceV2 {
     ) {
         this.openaiApiKey = process.env.OPENAI_API_KEY || '';
         this.modelVersion = process.env.OPENAI_MODEL || 'gpt-4-turbo-2024-04-09';
+        this.atsServiceUrl = process.env.ATS_SERVICE_URL || 'http://ats-service:3003';
 
         if (!this.openaiApiKey) {
             this.logger.warn('⚠️ OPENAI_API_KEY not set. AI review service will not function.');
         }
         this.logger.info(`🤖 AI Review Service initialized with model: ${this.modelVersion}`);
+    }
+
+    /**
+     * Enrich minimal application data by fetching full details from ATS service
+     */
+    async enrichApplicationData(input: Partial<AIReviewInput>): Promise<AIReviewInput> {
+        // If all required fields provided, return as-is
+        if (
+            input.job_title &&
+            input.job_description &&
+            input.required_skills &&
+            Array.isArray(input.required_skills)
+        ) {
+            return input as AIReviewInput;
+        }
+
+        // Fetch full application with job requirements
+        const response = await fetch(
+            `${this.atsServiceUrl}/api/v2/applications/${input.application_id}?include=job,candidate,job_requirements`,
+            {
+                headers: {
+                    'x-internal-service-key': process.env.INTERNAL_SERVICE_KEY || '',
+                },
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch application data: HTTP ${response.status}`);
+        }
+
+        const { data: application } = (await response.json()) as { data: any };
+
+        // Build required_skills and preferred_skills from job_requirements
+        const mandatoryRequirements =
+            application.job_requirements
+                ?.filter((req: any) => req.requirement_type === 'mandatory')
+                .map((req: any) => req.description) || [];
+
+        const preferredRequirements =
+            application.job_requirements
+                ?.filter((req: any) => req.requirement_type === 'preferred')
+                .map((req: any) => req.description) || [];
+
+        return {
+            application_id: input.application_id!,
+            candidate_id: input.candidate_id || application.candidate_id,
+            job_id: input.job_id || application.job_id,
+            resume_text: input.resume_text || '',
+            job_description: input.job_description || application.job?.recruiter_description || application.job?.description || '',
+            job_title: input.job_title || application.job?.title || 'Unknown Position',
+            required_skills: input.required_skills || mandatoryRequirements,
+            preferred_skills: input.preferred_skills || preferredRequirements,
+            required_years: input.required_years,
+            candidate_location: input.candidate_location || application.candidate?.location,
+            job_location: input.job_location || application.job?.location,
+            auto_transition: input.auto_transition,
+        };
     }
 
     /**

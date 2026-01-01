@@ -267,62 +267,6 @@ export default async function ApplicationDetailPage({
                                         )}
                                     </div>
                                 )}
-
-                                {/* Company Information */}
-                                {company && (company.description || company.industry || company.company_size || company.headquarters_location || company.website) && (
-                                    <div>
-                                        <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                                            <i className="fa-solid fa-building text-primary"></i>
-                                            About {company.name}
-                                        </h3>
-
-                                        <div className="space-y-3">
-                                            {/* Company Quick Facts */}
-                                            {(company.industry || company.company_size || company.headquarters_location) && (
-                                                <div className="flex flex-wrap gap-4 text-sm">
-                                                    {company.industry && (
-                                                        <div className="flex items-center gap-2">
-                                                            <i className="fa-solid fa-industry text-base-content/60"></i>
-                                                            <span>{company.industry}</span>
-                                                        </div>
-                                                    )}
-                                                    {company.company_size && (
-                                                        <div className="flex items-center gap-2">
-                                                            <i className="fa-solid fa-users text-base-content/60"></i>
-                                                            <span>{company.company_size}</span>
-                                                        </div>
-                                                    )}
-                                                    {company.headquarters_location && (
-                                                        <div className="flex items-center gap-2">
-                                                            <i className="fa-solid fa-map-marker-alt text-base-content/60"></i>
-                                                            <span>{company.headquarters_location}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            {company.description && (
-                                                <div className="prose max-w-none">
-                                                    <p className="text-base-content/80">{company.description}</p>
-                                                </div>
-                                            )}
-
-                                            {company.website && (
-                                                <div>
-                                                    <a
-                                                        href={company.website}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="btn btn-sm btn-outline"
-                                                    >
-                                                        <i className="fa-solid fa-external-link-alt"></i>
-                                                        Company Website
-                                                    </a>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     </div>
@@ -389,6 +333,65 @@ export default async function ApplicationDetailPage({
 
                 {/* Sidebar */}
                 <div className="space-y-6">
+
+                    {/* Company Information */}
+                    {company && (company.description || company.industry || company.company_size || company.headquarters_location || company.website) && (
+                        <div className='card bg-base-100 shadow'>
+                            <div className="card-body">
+
+                                <h2 className="card-title mb-4">
+                                    <i className="fa-solid fa-building text-primary"></i>
+                                    About {company.name || 'the Company'}
+                                </h2>
+
+                                <div className="space-y-3">
+                                    {/* Company Quick Facts */}
+                                    {(company.industry || company.company_size || company.headquarters_location) && (
+                                        <div className="flex flex-wrap gap-4 text-sm">
+                                            {company.industry && (
+                                                <div className="flex items-center gap-2">
+                                                    <i className="fa-solid fa-industry text-base-content/60"></i>
+                                                    <span>{company.industry}</span>
+                                                </div>
+                                            )}
+                                            {company.company_size && (
+                                                <div className="flex items-center gap-2">
+                                                    <i className="fa-solid fa-users text-base-content/60"></i>
+                                                    <span>{company.company_size}</span>
+                                                </div>
+                                            )}
+                                            {company.headquarters_location && (
+                                                <div className="flex items-center gap-2">
+                                                    <i className="fa-solid fa-map-marker-alt text-base-content/60"></i>
+                                                    <span>{company.headquarters_location}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {company.description && (
+                                        <div className="prose max-w-none">
+                                            <p className="text-base-content/80">{company.description}</p>
+                                        </div>
+                                    )}
+
+                                    {company.website && (
+                                        <div>
+                                            <a
+                                                href={company.website}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="btn btn-sm btn-outline"
+                                            >
+                                                <i className="fa-solid fa-external-link-alt"></i>
+                                                Company Website
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     {/* Application Info */}
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">

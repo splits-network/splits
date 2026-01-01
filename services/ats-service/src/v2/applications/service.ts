@@ -156,10 +156,16 @@ export class ApplicationServiceV2 {
         // Extract document-related fields that shouldn't be persisted to applications table
         const { document_ids, primary_resume_id, pre_screen_answers, ...applicationData } = data;
 
+        // Determine initial stage:
+        // - recruiter_proposed: Recruiter submitted on behalf of candidate
+        // - ai_review: Direct candidate application (no recruiter)
+        const hasRecruiter = !!data.recruiter_id;
+        const initialStage = data.stage || (hasRecruiter ? 'recruiter_proposed' : 'ai_review');
+
         const application = await this.repository.createApplication({
             ...applicationData,
             candidate_id: candidateId,
-            stage: data.stage || 'recruiter_proposed',
+            stage: initialStage,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         }, clerkUserId);

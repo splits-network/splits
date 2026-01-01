@@ -116,6 +116,7 @@ export async function submitApplication(data: {
   primary_resume_id: string;
   pre_screen_answers?: Array<{ question_id: string; answer: any }>;
   notes?: string;
+  stage?: string;
 }, token: string) {
   return apiClient.post('/v2/applications', data, token);
 }

@@ -2,9 +2,30 @@
  * Helper functions for V2 routes
  */
 
-import { FastifyReply } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
 
-export function requireUserContext(clerkUserId: string | undefined, reply: FastifyReply) {
+/**
+ * Validate internal service authentication
+ * Allows trusted services (automation, notification) to call endpoints without user auth
+ */
+export function validateInternalService(request: FastifyRequest): boolean {
+    const serviceKey = request.headers['x-internal-service-key'] as string | undefined;
+    const expectedKey = process.env.INTERNAL_SERVICE_KEY;
+    
+    if (!expectedKey) {
+        // If no internal service key is configured, don't allow internal service auth
+        return false;
+    }
+    
+    return serviceKey === expectedKey;
+}
+
+export function requireUserContext(clerkUserId: string | undefined, reply: FastifyReply, request?: FastifyRequest) {
+    // Allow internal services to bypass user auth
+    if (request && validateInternalService(request)) {
+        return true;
+    }
+    
     if (!clerkUserId) {
         reply.status(401).send({
             error: {

@@ -36,6 +36,12 @@ export class AIReviewService {
         );
 
         try {
+            // Get internal service key for authentication
+            const internalServiceKey = process.env.INTERNAL_SERVICE_KEY;
+            if (!internalServiceKey) {
+                throw new Error('INTERNAL_SERVICE_KEY not configured - cannot authenticate with AI service');
+            }
+
             // Call AI service to perform AI review
             // AI service has all the OpenAI integration, scoring, etc
             const response = await fetch(
@@ -44,6 +50,7 @@ export class AIReviewService {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'x-internal-service-key': internalServiceKey,
                     },
                     body: JSON.stringify({
                         application_id,

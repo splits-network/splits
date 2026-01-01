@@ -211,6 +211,7 @@ services:
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
       RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
       AI_SERVICE_URL: http://ai-service:3009
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:-dev_internal_service_key_change_in_production}
     volumes:
       - ./services/automation-service/src:/app/services/automation-service/src
       - ./packages:/app/packages
@@ -238,6 +239,7 @@ services:
       RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_MODEL: gpt-4-turbo-2024-04-09
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:-dev_internal_service_key_change_in_production}
     volumes:
       - ./services/ai-service/src:/app/services/ai-service/src
       - ./packages:/app/packages

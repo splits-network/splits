@@ -21,12 +21,12 @@ export function registerAIReviewRoutes(app: FastifyInstance, config: RouteConfig
     app.post<{
         Body: {
             application_id: string;
-            candidate_id: string;
-            job_id: string;
+            candidate_id?: string;
+            job_id?: string;
             resume_text?: string;
-            job_description: string;
-            job_title: string;
-            required_skills: string[];
+            job_description?: string;
+            job_title?: string;
+            required_skills?: string[];
             preferred_skills?: string[];
             required_years?: number;
             candidate_location?: string;
@@ -35,13 +35,15 @@ export function registerAIReviewRoutes(app: FastifyInstance, config: RouteConfig
         };
     }>('/v2/ai-reviews', async (request, reply) => {
         const clerkUserId = request.headers['x-clerk-user-id'] as string | undefined;
-        if (!requireUserContext(clerkUserId, reply)) return;
+        if (!requireUserContext(clerkUserId, reply, request)) return;
 
         try {
-            const review = await service.createReview(request.body);
+            // If minimal data provided, fetch full application details
+            const inputData = await service.enrichApplicationData(request.body);
+            const review = await service.createReview(inputData);
             return reply.send({ data: review });
         } catch (error: any) {
-            request.log.error({ err: error }, 'Failed to create AI review');
+            request.log.error({ err: error, application_id: request.body.application_id }, 'AI review failed');
             return reply.status(500).send({
                 error: {
                     code: 'AI_REVIEW_FAILED',
@@ -59,7 +61,7 @@ export function registerAIReviewRoutes(app: FastifyInstance, config: RouteConfig
         Params: { id: string };
     }>('/v2/ai-reviews/:id', async (request, reply) => {
         const clerkUserId = request.headers['x-clerk-user-id'] as string | undefined;
-        if (!requireUserContext(clerkUserId, reply)) return;
+        if (!requireUserContext(clerkUserId, reply, request)) return;
 
         const { id } = request.params;
 
