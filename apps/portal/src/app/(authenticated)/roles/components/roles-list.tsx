@@ -10,6 +10,9 @@ interface Job {
     id: string;
     title: string;
     company_id: string;
+    company: {
+        name: string;
+    };
     location?: string;
     salary_min?: number;
     salary_max?: number;
@@ -415,29 +418,27 @@ export default function RolesList() {
                                         </span>
                                     </div>
                                 )}
-                                <div className="flex justify-between items-start mb-auto min-h-40">
-                                    <div className="flex-1">
-                                        <div className='flex justify-between items-start'>
-                                            <Link href={`/roles/${job.id}`} className="hover:text-primary transition-colors">
-                                                <h2 className="card-title text-3xl">{job.title}</h2>
-                                            </Link>
-                                        </div>
-                                        <div className="flex justify-between items-center gap-4 mt-2 text-sm text-base-content/70">
+                                <div className="flex flex-col justify-between items-start mb-auto min-h-40">
+                                    <div className='flex justify-between items-start'>
+                                        <Link href={`/roles/${job.id}`} className="hover:text-primary transition-colors">
+                                            <h2 className="card-title text-3xl">{job.title}</h2>
+                                        </Link>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4 mt-2 text-sm text-base-content/70">
+                                        <span className="flex items-center gap-1">
+                                            <i className="fa-solid fa-building"></i>
+                                            {job.company.name}
+                                        </span>
+                                        {job.location && (
                                             <span className="flex items-center gap-1">
-                                                <i className="fa-solid fa-building"></i>
-                                                Company {job.company_id.substring(0, 8)}
+                                                <i className="fa-solid fa-location-dot"></i>
+                                                {job.location}
                                             </span>
-                                            {job.location && (
-                                                <span className="flex items-center gap-1">
-                                                    <i className="fa-solid fa-location-dot"></i>
-                                                    {job.location}
-                                                </span>
-                                            )}
-                                            <span className="flex items-center gap-1">
-                                                <i className="fa-solid fa-percent"></i>
-                                                {job.fee_percentage}% fee
-                                            </span>
-                                        </div>
+                                        )}
+                                        <span className="flex items-center gap-1">
+                                            <i className="fa-solid fa-percent"></i>
+                                            {job.fee_percentage}% placement fee
+                                        </span>
                                     </div>
                                 </div>
                                 <div className="card-actions justify-between items-center">
@@ -491,7 +492,7 @@ export default function RolesList() {
                                             </Link>
                                             <div className="text-sm text-base-content/60 mt-1">
                                                 <i className="fa-solid fa-building mr-1"></i>
-                                                Company {job.company_id.substring(0, 8)}
+                                                {job.company.name}
                                             </div>
                                         </td>
                                         <td>

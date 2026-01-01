@@ -154,9 +154,9 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
 
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
-                    <div className="flex justify-between items-start gap-4">
+                    <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                         <div className="flex-1">
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-top md:items-center gap-3">
                                 <h1 className="text-3xl font-bold">{job.title}</h1>
                                 <div className={`badge ${job.status === 'active' ? 'badge-success' :
                                     job.status === 'paused' ? 'badge-warning' :
