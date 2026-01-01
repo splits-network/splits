@@ -118,7 +118,8 @@ export class ApplicationRepository {
             throw error;
         }
 
-        if (!data || !clerkUserId) {
+        // If no clerkUserId or internal service, skip access control
+        if (!data || !clerkUserId || clerkUserId === 'internal-service') {
             return data;
         }
 
