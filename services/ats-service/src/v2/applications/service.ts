@@ -153,11 +153,11 @@ export class ApplicationServiceV2 {
         // Emit event
         if (this.eventPublisher) {
             await this.eventPublisher.publish('application.created', {
-                applicationId: application.id,
-                jobId: application.job_id,
-                candidateId: application.candidate_id,
+                application_id: application.id,
+                job_id: application.job_id,
+                candidate_id: application.candidate_id,
                 stage: application.stage,
-                createdBy: clerkUserId,
+                created_by: clerkUserId,
             });
         }
 
@@ -236,17 +236,22 @@ export class ApplicationServiceV2 {
         if (this.eventPublisher) {
             if (updates.stage && updates.stage !== currentApplication.stage) {
                 await this.eventPublisher.publish('application.stage_changed', {
-                    applicationId: id,
-                    previousStage: currentApplication.stage,
-                    newStage: updates.stage,
-                    changedBy: clerkUserId,
+                    application_id: id,
+                    job_id: updatedApplication.job_id,
+                    candidate_id: updatedApplication.candidate_id,
+                    recruiter_id: updatedApplication.recruiter_id,
+                    old_stage: currentApplication.stage,
+                    new_stage: updates.stage,
+                    changed_by: clerkUserId,
                 });
             }
 
             await this.eventPublisher.publish('application.updated', {
-                applicationId: id,
-                updatedFields: Object.keys(persistedUpdates),
-                updatedBy: clerkUserId,
+                application_id: id,
+                job_id: updatedApplication.job_id,
+                candidate_id: updatedApplication.candidate_id,
+                updated_fields: Object.keys(persistedUpdates),
+                updated_by: clerkUserId,
             });
         }
 

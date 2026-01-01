@@ -62,10 +62,10 @@ export class ProposalServiceV2 {
 
         // Publish event
         await this.eventPublisher.publish('proposal.created', {
-            proposalId: proposal.id,
-            recruiterId: proposal.recruiter_id,
-            jobId: proposal.job_id,
-            candidateId: proposal.candidate_id,
+            proposal_id: proposal.id,
+            recruiter_id: proposal.recruiter_id,
+            job_id: proposal.job_id,
+            candidate_id: proposal.candidate_id,
         });
 
         return proposal;
@@ -89,9 +89,9 @@ export class ProposalServiceV2 {
 
         // Publish event
         await this.eventPublisher.publish('proposal.updated', {
-            proposalId: id,
+            proposal_id: id,
             updates: Object.keys(updates),
-            newState: updates.state,
+            new_state: updates.state,
         });
 
         return proposal;
@@ -102,7 +102,7 @@ export class ProposalServiceV2 {
 
         // Publish event
         await this.eventPublisher.publish('proposal.deleted', {
-                proposalId: id,
+                proposal_id: id,
             });
     }
 
