@@ -202,8 +202,8 @@ export class ApiClient {
         return this.request(`/jobs${query ? `?${query}` : ''}`);
     }
 
-    // Filtered by recruiter assignments - preferred for most UI
-    async getRoles(filters?: { status?: string; search?: string; limit?: number }) {
+    // V2: Role-filtered jobs (recruiters see all active, company users see their org's jobs)
+    async getRoles(filters?: { status?: string; search?: string; limit?: number; page?: number; job_owner_filter?: 'all' | 'assigned' }) {
         const params = new URLSearchParams();
         if (filters?.status && filters.status !== 'all') {
             params.append('status', filters.status);
@@ -214,12 +214,23 @@ export class ApiClient {
         if (filters?.limit) {
             params.append('limit', String(filters.limit));
         }
+        if (filters?.page) {
+            params.append('page', String(filters.page));
+        }
+        if (filters?.job_owner_filter) {
+            params.append('job_owner_filter', filters.job_owner_filter);
+        }
         const query = params.toString();
         return this.request(`/jobs${query ? `?${query}` : ''}`);
     }
 
-    async getJob(id: string) {
-        return this.request(`/jobs/${id}`);
+    async getJob(id: string, include?: string[]) {
+        const params = new URLSearchParams();
+        if (include && include.length > 0) {
+            params.append('include', include.join(','));
+        }
+        const query = params.toString();
+        return this.request(`/jobs/${id}${query ? `?${query}` : ''}`);
     }
 
     async createJob(data: any) {
@@ -244,12 +255,12 @@ export class ApiClient {
         }
         const query = params.toString();
         console.log('getCandidates - query string:', query);
-        return this.get(`/api/v2/candidates${query ? `?${query}` : ''}`);
+        return this.get(`/candidates${query ? `?${query}` : ''}`);
     }
 
     // Applications
     async getApplicationsByJob(jobId: string) {
-        return this.get('/applications', { params: { job_id: jobId } });
+        return this.request(`/applications?job_id=${jobId}&include=candidate,recruiter`);
     }
 
     async submitCandidate(data: {
@@ -270,7 +281,10 @@ export class ApiClient {
     }
 
     async updateApplicationStage(id: string, stage: string, notes?: string) {
-        return this.patch(`/applications/${id}`, { stage, notes });
+        return this.request(`/v2/applications/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ stage, notes }),
+        });
     }
 
     async addApplicationNote(id: string, note: string) {

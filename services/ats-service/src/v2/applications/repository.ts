@@ -46,6 +46,7 @@ export class ApplicationRepository {
         if (accessContext.candidateId) {
             query = query.eq('candidate_id', accessContext.candidateId);
         } else if (accessContext.recruiterId) {
+            console.log('Filtering applications for recruiter:', accessContext.recruiterId);
             query = query.eq('recruiter_id', accessContext.recruiterId);
         } else if (!accessContext.isPlatformAdmin) {
             if (accessContext.organizationIds.length > 0) {

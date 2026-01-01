@@ -43,8 +43,8 @@ export class JobServiceV2 {
     /**
      * Get single job by ID
      */
-    async getJob(id: string, clerkUserId?: string): Promise<any> {
-        const job = await this.repository.findJob(id, clerkUserId);
+    async getJob(id: string, clerkUserId?: string, include: string[] = []): Promise<any> {
+        const job = await this.repository.findJob(id, clerkUserId, include);
         if (!job) {
             throw new Error(`Job ${id} not found`);
         }

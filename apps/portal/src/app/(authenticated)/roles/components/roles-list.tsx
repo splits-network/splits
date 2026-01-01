@@ -64,6 +64,7 @@ export default function RolesList() {
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('all');
+    const [ownershipFilter, setOwnershipFilter] = useState<'all' | 'assigned'>('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [userRole, setUserRole] = useState<string | null>(null);
     const [viewMode, setViewMode] = useViewMode('rolesViewMode');
@@ -77,7 +78,7 @@ export default function RolesList() {
         fetchUserRole();
         fetchJobs();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [statusFilter]);
+    }, [statusFilter, ownershipFilter]);
 
     useEffect(() => {
         if (userRole) {
@@ -139,10 +140,12 @@ export default function RolesList() {
             }
 
             const client = createAuthenticatedClient(token);
-            // Use getRoles() which filters by recruiter assignments
+            // Use V2 getRoles() which shows all active jobs to recruiters, org jobs to company users
             const response: any = await client.getRoles({
                 status: statusFilter === 'all' ? undefined : statusFilter,
+                job_owner_filter: ownershipFilter,
             });
+            // V2 returns { data, pagination }
             setJobs(response.data || []);
         } catch (error) {
             console.error('Failed to fetch jobs:', error);
@@ -352,6 +355,18 @@ export default function RolesList() {
                                 <option value="closed">Closed</option>
                             </select>
                         </div>
+                        {(userRole === 'recruiter' || userRole === 'company_admin' || userRole === 'hiring_manager') && (
+                            <div className="fieldset">
+                                <select
+                                    className="select w-full max-w-xs"
+                                    value={ownershipFilter}
+                                    onChange={(e) => setOwnershipFilter(e.target.value as 'all' | 'assigned')}
+                                >
+                                    <option value="all">{userRole === 'recruiter' ? 'All Jobs' : 'All Organization Jobs'}</option>
+                                    <option value="assigned">My Assigned Jobs</option>
+                                </select>
+                            </div>
+                        )}
                         <div className="fieldset flex-1">
                             <input
                                 type="text"

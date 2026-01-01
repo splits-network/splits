@@ -27,7 +27,9 @@ export function registerJobRoutes(
         try {
             const { id } = request.params as any;
             const context = getUserContext(request);
-            const job = await config.jobService.getJob(id, context?.clerkUserId);
+            const query = request.query as any;
+            const include = query.include ? query.include.split(',') : [];
+            const job = await config.jobService.getJob(id, context?.clerkUserId, include);
             return reply.send({ data: job });
         } catch (error: any) {
             return reply.code(404).send({ error: { message: error.message } });

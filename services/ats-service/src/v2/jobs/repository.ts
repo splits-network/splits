@@ -47,15 +47,33 @@ export class JobRepository {
             const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
 
             if (accessContext.isPlatformAdmin) {
-                // full access
+                // Platform admins see all jobs
             } else if (accessContext.organizationIds.length > 0) {
+                // Company users see only their organization's jobs
                 query = query.in('company.identity_organization_id', accessContext.organizationIds);
+                
+                if (filters.job_owner_filter === 'assigned' && accessContext.identityUserId) {
+                    // Further filter to only jobs where this user is the job_owner_id
+                    query = query.eq('job_owner_id', accessContext.identityUserId);
+                }
+            } else if (accessContext.recruiterId) {
+                // Recruiters see all active jobs (marketplace model)
+                // OR only jobs where they are the job_owner_id if job_owner_filter is 'assigned'
+                query = query.eq('status', 'active');
+                
+                if (filters.job_owner_filter === 'assigned') {
+                    // Filter to only jobs where this recruiter is the job_owner_id
+                    query = query.eq('job_owner_id', accessContext.recruiterId);
+                }
             } else if (accessContext.candidateId) {
+                // Candidates see all active jobs
                 query = query.eq('status', 'active');
             } else {
+                // No role found - return empty
                 return { data: [], total: 0 };
             }
         } else {
+            // Unauthenticated - show active jobs only
             query = query.eq('status', 'active');
         }
 
@@ -95,7 +113,7 @@ export class JobRepository {
         };
     }
 
-    async findJob(id: string, clerkUserId?: string): Promise<any | null> {
+    async findJob(id: string, clerkUserId?: string, include: string[] = []): Promise<any | null> {
         let query = this.supabase
             .schema('ats')
             .from('jobs')
@@ -117,6 +135,19 @@ export class JobRepository {
             if (error.code === 'PGRST116') return null;
             throw error;
         }
+
+        // Fetch related data based on include parameter
+        if (include.includes('requirements')) {
+            const { data: requirements } = await this.supabase
+                .schema('ats')
+                .from('job_requirements')
+                .select('*')
+                .eq('job_id', id)
+                .order('requirement_type')
+                .order('created_at');
+            data.requirements = requirements || [];
+        }
+
         return data;
     }
 

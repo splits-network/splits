@@ -59,10 +59,12 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
 
             const client = createAuthenticatedClient(token);
             const response: any = await client.getApplicationsByJob(roleId);
-            setApplications(response.data || []);
+            // V2 API returns { data: [...] }
+            const applicationsData = response.data || [];
+            setApplications(applicationsData);
 
             // Get company ID from first application (if any)
-            if (response.data && response.data.length > 0) {
+            if (applicationsData.length > 0) {
                 const jobResponse: any = await client.getJob(roleId);
                 setCompanyId(jobResponse.data?.company_id || '');
             }
@@ -113,183 +115,176 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
 
     return (
         <>
-            <div className="card bg-base-100 shadow">
-                <div className="card-body">
-                    <h2 className="card-title">Candidate Pipeline</h2>
+            <h2 className="font-semibold text-lg mb-3">Candidate Pipeline</h2>
 
-                    {/* Stage Tabs */}
-                    <div className="tabs tabs-boxed bg-base-200 mt-4">
+            {/* Stage Tabs */}
+            <div className="tabs tabs-boxed bg-base-200 mt-4">
+                <a
+                    className={`tab ${!showNeedsPreScreen && selectedStage === null ? 'tab-active' : ''}`}
+                    onClick={() => {
+                        setShowNeedsPreScreen(false);
+                        setSelectedStage(null);
+                    }}
+                >
+                    All
+                    <span className="badge badge-sm ml-2">{applications.length}</span>
+                </a>
+                {needsPreScreenCount > 0 && (
+                    <a
+                        className={`tab ${showNeedsPreScreen ? 'tab-active' : ''}`}
+                        onClick={() => {
+                            setShowNeedsPreScreen(true);
+                            setSelectedStage(null);
+                        }}
+                    >
+                        <i className="fa-solid fa-user-check mr-1"></i>
+                        Needs Pre-Screen
+                        <span className="badge badge-warning badge-sm ml-2">
+                            {needsPreScreenCount}
+                        </span>
+                    </a>
+                )}
+                {stages.map((stage) => {
+                    const count = applications.filter(app => app.stage === stage.key).length;
+                    return (
                         <a
-                            className={`tab ${!showNeedsPreScreen && selectedStage === null ? 'tab-active' : ''}`}
+                            key={stage.key}
+                            className={`tab ${!showNeedsPreScreen && selectedStage === stage.key ? 'tab-active' : ''}`}
                             onClick={() => {
                                 setShowNeedsPreScreen(false);
-                                setSelectedStage(null);
+                                setSelectedStage(stage.key);
                             }}
                         >
-                            All
-                            <span className="badge badge-sm ml-2">{applications.length}</span>
-                        </a>
-                        {needsPreScreenCount > 0 && (
-                            <a
-                                className={`tab ${showNeedsPreScreen ? 'tab-active' : ''}`}
-                                onClick={() => {
-                                    setShowNeedsPreScreen(true);
-                                    setSelectedStage(null);
-                                }}
-                            >
-                                <i className="fa-solid fa-user-check mr-1"></i>
-                                Needs Pre-Screen
-                                <span className="badge badge-warning badge-sm ml-2">
-                                    {needsPreScreenCount}
+                            {stage.label}
+                            {count > 0 && (
+                                <span className={`badge ${stage.color} badge-sm ml-2`}>
+                                    {count}
                                 </span>
-                            </a>
-                        )}
-                        {stages.map((stage) => {
-                            const count = applications.filter(app => app.stage === stage.key).length;
-                            return (
-                                <a
-                                    key={stage.key}
-                                    className={`tab ${!showNeedsPreScreen && selectedStage === stage.key ? 'tab-active' : ''}`}
-                                    onClick={() => {
-                                        setShowNeedsPreScreen(false);
-                                        setSelectedStage(stage.key);
-                                    }}
-                                >
-                                    {stage.label}
-                                    {count > 0 && (
-                                        <span className={`badge ${stage.color} badge-sm ml-2`}>
-                                            {count}
-                                        </span>
-                                    )}
-                                </a>
-                            );
-                        })}
-                    </div>
-
-                    {/* Candidates List */}
-                    {filteredApplications.length > 0 ? (
-                        <div className="overflow-x-auto mt-6">
-                            <table className="table table-zebra">
-                                <thead>
-                                    <tr>
-                                        <th>Candidate</th>
-                                        <th>Stage</th>
-                                        <th>Status</th>
-                                        <th>Notes</th>
-                                        <th>Submitted</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredApplications.map((application) => {
-                                        const stage = stages.find(s => s.key === application.stage);
-                                        const isExpanded = expandedCandidate === application.candidate_id;
-                                        return (
-                                            <>
-                                                <tr key={application.id} className="hover">
-                                                    <td>
-                                                        <div className="flex items-center gap-3">
-                                                            <button
-                                                                className="btn btn-ghost btn-xs"
-                                                                onClick={() => setExpandedCandidate(isExpanded ? null : application.candidate_id)}
-                                                            >
-                                                                <i className={`fa-solid fa-chevron-${isExpanded ? 'down' : 'right'}`}></i>
-                                                            </button>
-                                                            <div className="avatar avatar-placeholder">
-                                                                <div className="bg-neutral text-neutral-content rounded-full w-10">
-                                                                    <span className="text-xs">
-                                                                        {application.candidate_id.substring(0, 2).toUpperCase()}
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                            <div>
-                                                                <div className="font-medium">
-                                                                    Candidate {application.candidate_id.substring(0, 8)}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <StageChangeDropdown
-                                                            currentStage={application.stage}
-                                                            stages={stages}
-                                                            onStageChange={(newStage) => handleStageChange(application.id, newStage)}
-                                                        />
-                                                    </td>
-                                                    <td>
-                                                        <div className={`badge ${application.status === 'active' ? 'badge-success' : 'badge-neutral'}`}>
-                                                            {application.status}
-                                                        </div>
-                                                    </td>
-                                                    <td className="max-w-xs truncate">{application.notes || '-'}</td>
-                                                    <td>{new Date(application.created_at).toLocaleDateString()}</td>
-                                                    <td>
-                                                        <div className="flex gap-2">
-                                                            {!application.recruiter_id && application.stage === 'submitted' && (
-                                                                <button
-                                                                    className="btn btn-warning btn-xs gap-1"
-                                                                    onClick={() => setPreScreenApplication(application)}
-                                                                >
-                                                                    <i className="fa-solid fa-user-check"></i>
-                                                                    Request Pre-Screen
-                                                                </button>
-                                                            )}
-                                                            {application.stage === 'offer' && application.status === 'active' && (
-                                                                <button
-                                                                    className="btn btn-success btn-xs gap-1"
-                                                                    onClick={() => setHireApplication(application)}
-                                                                >
-                                                                    <i className="fa-solid fa-check"></i>
-                                                                    Hire
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                {isExpanded && (
-                                                    <tr key={`${application.id}-expanded`}>
-                                                        <td colSpan={6} className="bg-base-200">
-                                                            <div className="p-4">
-                                                                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                                                    <i className="fa-solid fa-paperclip"></i>
-                                                                    Documents
-                                                                </h4>
-                                                                <DocumentList
-                                                                    entityType="candidate"
-                                                                    entityId={application.candidate_id}
-                                                                    showUpload={true}
-                                                                />
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                )}
-                                            </>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    ) : (
-                        <div className="text-center py-12">
-                            <i className="fa-solid fa-users text-6xl text-base-content/20"></i>
-                            <h3 className="text-xl font-semibold mt-4">
-                                {showNeedsPreScreen
-                                    ? 'No Applications Need Pre-Screen'
-                                    : selectedStage
-                                        ? `No candidates in ${stages.find(s => s.key === selectedStage)?.label}`
-                                        : 'No Candidates Yet'}
-                            </h3>
-                            <p className="text-base-content/70 mt-2">
-                                {showNeedsPreScreen
-                                    ? 'All direct applications have been assigned to recruiters'
-                                    : selectedStage
-                                        ? 'Try a different stage'
-                                        : 'Be the first to submit a candidate for this role'}
-                            </p>
-                        </div>
-                    )}
-                </div>
+                            )}
+                        </a>
+                    );
+                })}
             </div>
+
+            {/* Candidates List */}
+            {filteredApplications.length > 0 ? (
+                <div className="overflow-x-auto mt-6">
+                    <table className="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>Candidate</th>
+                                <th>Stage</th>
+                                <th>Notes</th>
+                                <th>Submitted</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredApplications.map((application) => {
+                                const stage = stages.find(s => s.key === application.stage);
+                                const isExpanded = expandedCandidate === application.candidate_id;
+                                return (
+                                    <>
+                                        <tr key={application.id} className="hover">
+                                            <td>
+                                                <div className="flex items-center gap-3">
+                                                    <button
+                                                        className="btn btn-ghost btn-xs"
+                                                        onClick={() => setExpandedCandidate(isExpanded ? null : application.candidate_id)}
+                                                    >
+                                                        <i className={`fa-solid fa-chevron-${isExpanded ? 'down' : 'right'}`}></i>
+                                                    </button>
+                                                    <div className="avatar avatar-placeholder">
+                                                        <div className="bg-neutral text-neutral-content rounded-full w-10">
+                                                            <span className="text-xs">
+                                                                {(() => {
+                                                                    const names = application.candidate.full_name.split(' ').filter((n: any) => n);
+                                                                    return (names[0]?.[0] || '') + (names[names.length - 1]?.[0] || '');
+                                                                })().toUpperCase()}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-medium">
+                                                            {application.candidate.full_name}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <StageChangeDropdown
+                                                    currentStage={application.stage}
+                                                    stages={stages}
+                                                    onStageChange={(newStage) => handleStageChange(application.id, newStage)}
+                                                />
+                                            </td>
+                                            <td className="max-w-xs truncate">{application.notes || '-'}</td>
+                                            <td>{new Date(application.created_at).toLocaleDateString()}</td>
+                                            <td>
+                                                <div className="flex gap-2">
+                                                    {!application.recruiter_id && application.stage === 'submitted' && (
+                                                        <button
+                                                            className="btn btn-warning btn-xs gap-1"
+                                                            onClick={() => setPreScreenApplication(application)}
+                                                        >
+                                                            <i className="fa-solid fa-user-check"></i>
+                                                            Request Pre-Screen
+                                                        </button>
+                                                    )}
+                                                    {application.stage === 'offer' && application.status === 'active' && (
+                                                        <button
+                                                            className="btn btn-success btn-xs gap-1"
+                                                            onClick={() => setHireApplication(application)}
+                                                        >
+                                                            <i className="fa-solid fa-check"></i>
+                                                            Hire
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {isExpanded && (
+                                            <tr key={`${application.id}-expanded`}>
+                                                <td colSpan={6} className="bg-base-200">
+                                                    <div className="p-4">
+                                                        <h4 className="font-semibold mb-3 flex items-center gap-2">
+                                                            <i className="fa-solid fa-paperclip"></i>
+                                                            Documents
+                                                        </h4>
+                                                        <DocumentList
+                                                            entityType="candidate"
+                                                            entityId={application.candidate_id}
+                                                            showUpload={true}
+                                                        />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            ) : (
+                <div className="text-center py-12">
+                    <i className="fa-solid fa-users text-6xl text-base-content/20"></i>
+                    <h3 className="text-xl font-semibold mt-4">
+                        {showNeedsPreScreen
+                            ? 'No Applications Need Pre-Screen'
+                            : selectedStage
+                                ? `No candidates in ${stages.find(s => s.key === selectedStage)?.label}`
+                                : 'No Candidates Yet'}
+                    </h3>
+                    <p className="text-base-content/70 mt-2">
+                        {showNeedsPreScreen
+                            ? 'All direct applications have been assigned to recruiters'
+                            : selectedStage
+                                ? 'Try a different stage'
+                                : 'Be the first to submit a candidate for this role'}
+                    </p>
+                </div>
+            )}
 
             {hireApplication && (
                 <HireModal
