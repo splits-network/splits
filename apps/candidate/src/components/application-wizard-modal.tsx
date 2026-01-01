@@ -122,7 +122,8 @@ export default function ApplicationWizardModal({
                 token
             );
 
-            const applicationId = (result as any).data.application.id;
+            // V2 API returns { data: <application> } directly
+            const applicationId = (result as any).data.id;
 
             // Call success callback if provided
             if (onSuccess) {

@@ -139,16 +139,56 @@ export class ApplicationServiceV2 {
         if (!data.job_id) {
             throw new Error('Job ID is required');
         }
-        if (!data.candidate_id) {
-            throw new Error('Candidate ID is required');
+        
+        // Auto-resolve candidate_id from clerkUserId if not provided
+        let candidateId = data.candidate_id;
+        if (!candidateId && clerkUserId) {
+            const candidateContext = await this.getCandidateContext(clerkUserId);
+            if (candidateContext) {
+                candidateId = candidateContext.candidate.id;
+            }
+        }
+        
+        if (!candidateId) {
+            throw new Error('Candidate ID is required and could not be resolved from user context');
         }
 
+        // Extract document-related fields that shouldn't be persisted to applications table
+        const { document_ids, primary_resume_id, pre_screen_answers, ...applicationData } = data;
+
         const application = await this.repository.createApplication({
-            ...data,
+            ...applicationData,
+            candidate_id: candidateId,
             stage: data.stage || 'recruiter_proposed',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         }, clerkUserId);
+
+        // Link documents to application if provided
+        if (document_ids && Array.isArray(document_ids) && document_ids.length > 0) {
+            await Promise.all(
+                document_ids.map((docId: string) =>
+                    this.repository.linkDocumentToApplication(
+                        docId,
+                        application.id,
+                        docId === primary_resume_id
+                    )
+                )
+            );
+        }
+
+        // Save pre-screen answers if provided
+        if (pre_screen_answers && Array.isArray(pre_screen_answers) && pre_screen_answers.length > 0) {
+            await Promise.all(
+                pre_screen_answers.map((answer: any) =>
+                    this.repository.savePreScreenAnswer({
+                        application_id: application.id,
+                        question_id: answer.question_id,
+                        answer: answer.answer,
+                    })
+                )
+            );
+        }
 
         // Emit event
         if (this.eventPublisher) {

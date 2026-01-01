@@ -292,6 +292,25 @@ export class ApplicationRepository {
         return data || [];
     }
 
+    async savePreScreenAnswer(answer: {
+        application_id: string;
+        question_id: string;
+        answer: any;
+    }): Promise<any> {
+        // Use UPSERT to handle resubmissions - update answer if it exists
+        const { data, error } = await this.supabase
+            .schema('ats')
+            .from('job_pre_screen_answers')
+            .upsert(answer, {
+                onConflict: 'application_id,question_id',
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
     async getJobRequirements(jobId: string): Promise<any[]> {
         if (!jobId) return [];
 

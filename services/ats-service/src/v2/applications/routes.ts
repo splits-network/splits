@@ -40,9 +40,11 @@ export function registerApplicationRoutes(
     app.post('/api/v2/applications', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
+            request.log.info({ clerkUserId, body: request.body }, 'Creating application');
             const application = await config.applicationService.createApplication(request.body as any, clerkUserId);
             return reply.code(201).send({ data: application });
         } catch (error: any) {
+            request.log.error({ error: error.message, stack: error.stack, clerkUserId: request.headers['x-clerk-user-id'] }, 'Failed to create application');
             return reply.code(400).send({ error: { message: error.message } });
         }
     });
