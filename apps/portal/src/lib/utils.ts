@@ -101,25 +101,36 @@ export function getActivityIcon(activity: string): string {
   }
 }
 
-export function getAlertClass(level: 'high' | 'medium' | 'low'): string {
+export function getAlertClass(level: 'info' | 'warning' | 'error'): string {
   switch (level) {
-    case 'high':
+    case 'error':
       return 'alert-error';
-    case 'medium':
+    case 'warning':
       return 'alert-warning';
-    case 'low':
+    case 'info':
       return 'alert-info';
     default:
       return 'alert-info';
   }
 }
 
-export function getHealthScore(metrics: { success_rate?: number; response_time?: number; error_rate?: number }): number {
+export function getHealthScore(metrics: { success_rate?: number; response_time?: number; error_rate?: number }): { score: number; color: string } {
   const successScore = (metrics.success_rate || 95) * 0.5;
   const speedScore = Math.max(0, 100 - (metrics.response_time || 200) / 10) * 0.3;
   const errorScore = Math.max(0, 100 - (metrics.error_rate || 1) * 20) * 0.2;
   
-  return Math.round(successScore + speedScore + errorScore);
+  const score = Math.round(successScore + speedScore + errorScore);
+  
+  // Determine color based on response time (for days)
+  let color = 'text-success';
+  const responseTime = metrics.response_time || 0;
+  if (responseTime > 10) {
+    color = 'text-error';
+  } else if (responseTime > 5) {
+    color = 'text-warning';
+  }
+  
+  return { score, color };
 }
 
 export function getJobStatusBadge(status: string): string {

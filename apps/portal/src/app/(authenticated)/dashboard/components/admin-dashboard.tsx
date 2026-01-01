@@ -246,13 +246,13 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
                             <p className="text-sm font-semibold mt-2">Company Satisfaction</p>
                         </div>
                         <div className="text-center">
-                            <div className={`text-4xl font-bold ${getHealthScore(health?.avg_time_to_first_candidate_days || 0).color}`}>
+                            <div className={`text-4xl font-bold ${getHealthScore({ response_time: health?.avg_time_to_first_candidate_days || 0 }).color}`}>
                                 {health?.avg_time_to_first_candidate_days || 0}
                             </div>
                             <p className="text-sm font-semibold mt-2">Days to First Candidate</p>
                         </div>
                         <div className="text-center">
-                            <div className={`text-4xl font-bold ${getHealthScore(100 - (health?.avg_time_to_placement_days || 0) / 2).color}`}>
+                            <div className={`text-4xl font-bold ${getHealthScore({ response_time: health?.avg_time_to_placement_days || 0 }).color}`}>
                                 {health?.avg_time_to_placement_days || 0}
                             </div>
                             <p className="text-sm font-semibold mt-2">Avg Time to Placement</p>
