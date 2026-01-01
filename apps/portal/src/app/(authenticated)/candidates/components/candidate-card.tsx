@@ -69,25 +69,31 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
                         {candidate.full_name}
                     </h3>
                     <div className="flex items-center gap-2 mt-2">
-                        <a
-                            href={`mailto:${candidate.email}`}
-                            className="text-sm text-base-content/70 hover:text-primary transition-colors flex items-center gap-1.5"
-                            onClick={(e) => e.stopPropagation()}
+                        <span
+                            className="text-sm text-base-content/70 hover:text-primary transition-colors flex items-center gap-1.5 cursor-pointer"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                window.location.href = `mailto:${candidate.email}`;
+                            }}
                         >
                             <i className="fa-solid fa-envelope"></i>
                             {candidate.email}
-                        </a>
+                        </span>
                         {candidate.phone && (
                             <>
                                 <span className="text-base-content/30">•</span>
-                                <a
-                                    href={`tel:${candidate.phone}`}
-                                    className="text-sm text-base-content/70 hover:text-primary transition-colors flex items-center gap-1.5"
-                                    onClick={(e) => e.stopPropagation()}
+                                <span
+                                    className="text-sm text-base-content/70 hover:text-primary transition-colors flex items-center gap-1.5 cursor-pointer"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        window.location.href = `tel:${candidate.phone}`;
+                                    }}
                                 >
                                     <i className="fa-solid fa-phone"></i>
                                     {candidate.phone}
-                                </a>
+                                </span>
                             </>
                         )}
                     </div>

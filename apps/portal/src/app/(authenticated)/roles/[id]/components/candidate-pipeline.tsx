@@ -184,8 +184,8 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
                                 const stage = stages.find(s => s.key === application.stage);
                                 const isExpanded = expandedCandidate === application.candidate_id;
                                 return (
-                                    <>
-                                        <tr key={application.id} className="hover">
+                                    <React.Fragment key={application.id}>
+                                        <tr className="hover">
                                             <td>
                                                 <div className="flex items-center gap-3">
                                                     <button
@@ -244,7 +244,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
                                             </td>
                                         </tr>
                                         {isExpanded && (
-                                            <tr key={`${application.id}-expanded`}>
+                                            <tr>
                                                 <td colSpan={6} className="bg-base-200">
                                                     <div className="p-4">
                                                         <h4 className="font-semibold mb-3 flex items-center gap-2">
@@ -260,7 +260,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
                                                 </td>
                                             </tr>
                                         )}
-                                    </>
+                                    </React.Fragment>
                                 );
                             })}
                         </tbody>
