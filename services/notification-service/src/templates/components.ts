@@ -11,9 +11,9 @@ export interface ButtonProps {
 
 export function button({ href, text, variant = 'primary' }: ButtonProps): string {
     const colors = {
-        primary: { bg: '#233876', text: '#ffffff' },
-        secondary: { bg: '#0f9d8a', text: '#ffffff' },
-        accent: { bg: '#60a5fa', text: '#ffffff' },
+        primary: { bg: '#0d9488', text: '#ffffff' }, // Teal to match dashboard
+        secondary: { bg: '#14b8a6', text: '#ffffff' }, // Lighter teal
+        accent: { bg: '#233876', text: '#ffffff' }, // Navy blue accent
     };
 
     const color = colors[variant];
@@ -76,10 +76,10 @@ export interface AlertProps {
 
 export function alert({ type, title, message }: AlertProps): string {
     const styles = {
-        info: { bg: '#dbeafe', border: '#60a5fa', text: '#1e40af', icon: 'ℹ️' },
-        success: { bg: '#dcfce7', border: '#16a34a', text: '#166534', icon: '✅' },
-        warning: { bg: '#fef3c7', border: '#eab308', text: '#854d0e', icon: '⚠️' },
-        error: { bg: '#fee2e2', border: '#dc2626', text: '#991b1b', icon: '❌' },
+        info: { bg: '#dbeafe', border: '#60a5fa', text: '#1e40af' },
+        success: { bg: '#dcfce7', border: '#16a34a', text: '#166534' },
+        warning: { bg: '#fef3c7', border: '#eab308', text: '#854d0e' },
+        error: { bg: '#fee2e2', border: '#dc2626', text: '#991b1b' },
     };
 
     const style = styles[type];
@@ -88,19 +88,10 @@ export function alert({ type, title, message }: AlertProps): string {
 <table cellpadding="0" cellspacing="0" role="presentation" style="width: 100%; background-color: ${style.bg}; border-left: 4px solid ${style.border}; border-radius: 8px; margin: 20px 0;">
   <tr>
     <td style="padding: 16px 20px;">
-      <table cellpadding="0" cellspacing="0" role="presentation">
-        <tr>
-          <td style="padding-right: 12px; font-size: 20px; vertical-align: top;">
-            ${style.icon}
-          </td>
-          <td>
-            ${title ? `<p style="margin: 0 0 4px; font-size: 14px; font-weight: 700; color: ${style.text};">${title}</p>` : ''}
-            <p style="margin: 0; font-size: 14px; line-height: 20px; color: ${style.text};">
-              ${message}
-            </p>
-          </td>
-        </tr>
-      </table>
+      ${title ? `<p style="margin: 0 0 8px; font-size: 14px; font-weight: 700; color: ${style.text};">${title}</p>` : ''}
+      <p style="margin: 0; font-size: 14px; line-height: 20px; color: ${style.text};">
+        ${message}
+      </p>
     </td>
   </tr>
 </table>
@@ -133,10 +124,9 @@ export function divider({ text }: DividerProps = {}): string {
 export interface HeadingProps {
     level: 1 | 2 | 3;
     text: string;
-    icon?: string;
 }
 
-export function heading({ level, text, icon }: HeadingProps): string {
+export function heading({ level, text }: HeadingProps): string {
     const sizes = {
         1: { size: '28px', weight: '800', margin: '0 0 16px' },
         2: { size: '22px', weight: '700', margin: '0 0 12px' },
@@ -147,7 +137,7 @@ export function heading({ level, text, icon }: HeadingProps): string {
 
     return `
 <h${level} style="margin: ${style.margin}; font-size: ${style.size}; font-weight: ${style.weight}; color: #111827; line-height: 1.2;">
-  ${icon ? `<span style="margin-right: 8px;">${icon}</span>` : ''}${text}
+  ${text}
 </h${level}>
     `.trim();
 }

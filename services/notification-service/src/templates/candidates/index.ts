@@ -16,7 +16,7 @@ export interface CandidateSourcedData {
 
 export function candidateSourcedEmail(data: CandidateSourcedData): string {
     const content = `
-${heading({ level: 1, text: 'Candidate Successfully Sourced', icon: '✅' })}
+${heading({ level: 1, text: 'Candidate Successfully Sourced' })}
 
 ${alert({
     type: 'success',
@@ -65,7 +65,7 @@ export interface OwnershipConflictData {
 
 export function ownershipConflictEmail(data: OwnershipConflictData): string {
     const content = `
-${heading({ level: 1, text: 'Ownership Conflict Detected', icon: '⚠️' })}
+${heading({ level: 1, text: 'Ownership Conflict Detected' })}
 
 ${alert({
     type: 'warning',
@@ -114,7 +114,7 @@ export interface OwnershipConflictRejectionData {
 
 export function ownershipConflictRejectionEmail(data: OwnershipConflictRejectionData): string {
     const content = `
-${heading({ level: 1, text: 'Candidate Already Claimed', icon: '❌' })}
+${heading({ level: 1, text: 'Candidate Already Claimed' })}
 
 ${alert({
     type: 'error',
@@ -162,7 +162,7 @@ export interface CandidateAddedToNetworkData {
 
 export function candidateAddedToNetworkEmail(data: CandidateAddedToNetworkData): string {
     const content = `
-${heading({ level: 1, text: "You've Been Added to a Recruiter's Network", icon: '👋' })}
+${heading({ level: 1, text: "You've Been Added to a Recruiter's Network" })}
 
 ${alert({
     type: 'info',

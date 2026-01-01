@@ -16,7 +16,7 @@ export interface ProposalAcceptedData {
 
 export function proposalAcceptedEmail(data: ProposalAcceptedData): string {
     const content = `
-${heading({ level: 1, text: 'Your Proposal Has Been Accepted!', icon: '✅' })}
+${heading({ level: 1, text: 'Your Proposal Has Been Accepted!' })}
 
 ${alert({
     type: 'success',
@@ -116,7 +116,7 @@ export interface ProposalTimeoutData {
 
 export function proposalTimeoutEmail(data: ProposalTimeoutData): string {
     const content = `
-${heading({ level: 1, text: 'Proposal Has Timed Out', icon: '⏰' })}
+${heading({ level: 1, text: 'Proposal Has Timed Out' })}
 
 ${alert({
     type: 'info',

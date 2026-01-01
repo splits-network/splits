@@ -60,7 +60,7 @@ ${paragraph('Keep up the great work! Every successful placement builds your repu
     `.trim();
 
     return baseEmailTemplate({
-        preheader: `🎉 Placement confirmed: ${data.candidateName} - $${data.recruiterShare.toLocaleString()}`,
+        preheader: `Placement confirmed: ${data.candidateName} - $${data.recruiterShare.toLocaleString()}`,
         content,
         source: data.source || 'portal',
     });
@@ -251,7 +251,7 @@ export interface GuaranteeExpiringData {
 
 export function guaranteeExpiringEmail(data: GuaranteeExpiringData): string {
     const content = `
-${heading({ level: 1, text: 'Guarantee Period Ending Soon', icon: '⏰' })}
+${heading({ level: 1, text: 'Guarantee Period Ending Soon' })}
 
 ${paragraph(
     `The guarantee period for <strong>${data.candidateName}</strong> at <strong>${data.companyName}</strong> is ending in <strong>${data.daysRemaining} days</strong>.`

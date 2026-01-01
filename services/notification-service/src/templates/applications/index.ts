@@ -17,7 +17,7 @@ export interface ApplicationCreatedData {
 
 export function applicationCreatedEmail(data: ApplicationCreatedData): string {
     const content = `
-${heading({ level: 1, text: 'New Candidate Application', icon: '📝' })}
+${heading({ level: 1, text: 'New Candidate Application' })}
 
 ${paragraph(`Your candidate <strong>${data.candidateName}</strong> has submitted an application for review.`)}
 
@@ -67,7 +67,7 @@ export interface ApplicationStageChangedData {
 
 export function applicationStageChangedEmail(data: ApplicationStageChangedData): string {
     const content = `
-${heading({ level: 1, text: 'Application Status Update', icon: '🔄' })}
+${heading({ level: 1, text: 'Application Status Update' })}
 
 ${paragraph(
     `The application for <strong>${data.candidateName}</strong> has moved to a new stage in the hiring process.`
@@ -116,7 +116,7 @@ export interface ApplicationAcceptedData {
 
 export function applicationAcceptedEmail(data: ApplicationAcceptedData): string {
     const content = `
-${heading({ level: 1, text: 'Application Accepted! 🎉', icon: '✅' })}
+${heading({ level: 1, text: 'Application Accepted!' })}
 
 ${alert({
     type: 'success',
@@ -275,7 +275,7 @@ export interface CandidateApplicationSubmittedData {
 
 export function candidateApplicationSubmittedEmail(data: CandidateApplicationSubmittedData): string {
     const content = `
-${heading({ level: 1, text: 'Application Received', icon: '✉️' })}
+${heading({ level: 1, text: 'Application Received' })}
 
 ${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
 
@@ -328,7 +328,7 @@ export interface CompanyApplicationReceivedData {
 
 export function companyApplicationReceivedEmail(data: CompanyApplicationReceivedData): string {
     const content = `
-${heading({ level: 1, text: 'New Candidate Application', icon: '👤' })}
+${heading({ level: 1, text: 'New Candidate Application' })}
 
 ${paragraph(`A new candidate has applied for <strong>${data.jobTitle}</strong>.`)}
 
@@ -454,7 +454,7 @@ export interface PreScreenRequestConfirmationData {
 
 export function preScreenRequestConfirmationEmail(data: PreScreenRequestConfirmationData): string {
     const content = `
-${heading({ level: 1, text: 'Pre-Screen Request Submitted', icon: '✅' })}
+${heading({ level: 1, text: 'Pre-Screen Request Submitted' })}
 
 ${alert({
     type: 'success',
@@ -528,7 +528,7 @@ export interface ApplicationSubmittedToCompanyData {
 
 export function applicationSubmittedToCompanyEmail(data: ApplicationSubmittedToCompanyData): string {
     const content = `
-${heading({ level: 1, text: 'Application Submitted to Company', icon: '✉️' })}
+${heading({ level: 1, text: 'Application Submitted to Company' })}
 
 ${paragraph(
     `The application for <strong>${data.candidateName}</strong> has been submitted to <strong>${data.companyName}</strong> for review.`
@@ -594,7 +594,7 @@ export function aiReviewCompletedCandidateEmail(data: AIReviewCompletedCandidate
     const alertType = isGoodMatch ? 'success' : 'info';
 
     const content = `
-${heading({ level: 1, text: 'Your Application Has Been Reviewed', icon: '🤖' })}
+${heading({ level: 1, text: 'Your Application Has Been Reviewed' })}
 
 ${paragraph(
     `Hi <strong>${data.candidateName}</strong>, good news! Your application for <strong>${data.jobTitle}</strong> has been reviewed by our AI system.`
@@ -610,14 +610,14 @@ ${infoCard({
 })}
 
 ${data.strengths.length > 0 ? `
-${heading({ level: 3, text: 'Your Strengths', icon: '💪' })}
+${heading({ level: 3, text: 'Your Strengths' })}
 <ul style="margin: 8px 0 20px; padding-left: 24px; color: #374151; line-height: 1.6;">
 ${data.strengths.map(s => `  <li style="margin-bottom: 6px;">${s}</li>`).join('\n')}
 </ul>
 ` : ''}
 
 ${data.concerns.length > 0 ? `
-${heading({ level: 3, text: 'Areas to Address', icon: '📋' })}
+${heading({ level: 3, text: 'Areas to Address' })}
 <ul style="margin: 8px 0 20px; padding-left: 24px; color: #374151; line-height: 1.6;">
 ${data.concerns.map(c => `  <li style="margin-bottom: 6px;">${c}</li>`).join('\n')}
 </ul>
@@ -680,7 +680,7 @@ export function aiReviewCompletedRecruiterEmail(data: AIReviewCompletedRecruiter
     const alertType = isStrongCandidate ? 'success' : 'info';
 
     const content = `
-${heading({ level: 1, text: 'AI Review Complete', icon: '🎯' })}
+${heading({ level: 1, text: 'AI Review Complete' })}
 
 ${paragraph(
     `Hi <strong>${data.recruiterName}</strong>, the AI review for <strong>${data.candidateName}</strong>'s application to <strong>${data.jobTitle}</strong> is now complete.`
@@ -696,32 +696,32 @@ ${infoCard({
     ],
 })}
 
-${heading({ level: 3, text: 'AI Assessment', icon: '📊' })}
+${heading({ level: 3, text: 'AI Assessment' })}
 ${paragraph(data.overallSummary)}
 
 ${data.matchedSkills.length > 0 ? `
-${heading({ level: 3, text: 'Matched Skills', icon: '✅' })}
+${heading({ level: 3, text: 'Matched Skills' })}
 <ul style="margin: 8px 0 20px; padding-left: 24px; color: #374151; line-height: 1.6;">
 ${data.matchedSkills.map(s => `  <li style="margin-bottom: 6px;"><strong>${s}</strong></li>`).join('\n')}
 </ul>
 ` : ''}
 
 ${data.strengths.length > 0 ? `
-${heading({ level: 3, text: 'Key Strengths', icon: '💪' })}
+${heading({ level: 3, text: 'Key Strengths' })}
 <ul style="margin: 8px 0 20px; padding-left: 24px; color: #374151; line-height: 1.6;">
 ${data.strengths.map(s => `  <li style="margin-bottom: 6px;">${s}</li>`).join('\n')}
 </ul>
 ` : ''}
 
 ${data.missingSkills.length > 0 ? `
-${heading({ level: 3, text: 'Missing Skills', icon: '⚠️' })}
+${heading({ level: 3, text: 'Missing Skills' })}
 <ul style="margin: 8px 0 20px; padding-left: 24px; color: #6b7280; line-height: 1.6;">
 ${data.missingSkills.map(s => `  <li style="margin-bottom: 6px;">${s}</li>`).join('\n')}
 </ul>
 ` : ''}
 
 ${data.concerns.length > 0 ? `
-${heading({ level: 3, text: 'Concerns', icon: '📋' })}
+${heading({ level: 3, text: 'Concerns' })}
 <ul style="margin: 8px 0 20px; padding-left: 24px; color: #6b7280; line-height: 1.6;">
 ${data.concerns.map(c => `  <li style="margin-bottom: 6px;">${c}</li>`).join('\n')}
 </ul>

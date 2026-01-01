@@ -24,7 +24,7 @@ export interface NewOpportunityData {
 
 export function newOpportunityEmail(data: NewOpportunityData): string {
     const content = `
-${heading({ level: 1, text: 'New Opportunity for You! 🎉', icon: '💼' })}
+${heading({ level: 1, text: 'New Opportunity for You!' })}
 
 ${alert({
     type: 'success',
@@ -98,7 +98,7 @@ export interface CandidateApprovedData {
 
 export function candidateApprovedEmail(data: CandidateApprovedData): string {
     const content = `
-${heading({ level: 1, text: 'Opportunity Approved! ✅', icon: '🚀' })}
+${heading({ level: 1, text: 'Opportunity Approved!' })}
 
 ${alert({
     type: 'success',
@@ -165,7 +165,7 @@ export interface CandidateDeclinedData {
 
 export function candidateDeclinedEmail(data: CandidateDeclinedData): string {
     const content = `
-${heading({ level: 1, text: 'Opportunity Declined', icon: '📋' })}
+${heading({ level: 1, text: 'Opportunity Declined' })}
 
 ${alert({
     type: 'warning',
@@ -233,7 +233,7 @@ export interface OpportunityExpiredData {
 
 export function opportunityExpiredEmail(data: OpportunityExpiredData): string {
     const content = `
-${heading({ level: 1, text: 'Opportunity Expired', icon: '⏰' })}
+${heading({ level: 1, text: 'Opportunity Expired' })}
 
 ${alert({
     type: 'info',
