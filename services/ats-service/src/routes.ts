@@ -5,7 +5,6 @@ import { registerJobRoutes } from './routes/jobs/routes';
 import { registerApplicationRoutes } from './routes/applications/routes';
 import { registerCandidateRoutes } from './routes/candidates/routes';
 import { registerPlacementRoutes } from './routes/placements/routes';
-import { registerStatsRoutes } from './routes/stats/routes';
 import { registerIntegrationRoutes } from './routes/integrations/routes';
 import { aiReviewRoutes } from './routes/ai-review';
 import { proposalRoutes } from './routes/proposals/routes';
@@ -37,7 +36,6 @@ export function registerRoutes(
     registerApplicationRoutes(app, service, repository, eventPublisher);
     registerCandidateRoutes(app, service, candidatesService);
     registerPlacementRoutes(app, service);
-    registerStatsRoutes(app, service);
     registerIntegrationRoutes(app);
     
     // Register AI review routes (Phase 1.5)

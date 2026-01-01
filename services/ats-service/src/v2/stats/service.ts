@@ -1,5 +1,12 @@
 import { StatsRepository } from './repository';
-import { RecruiterStatsResponse, StatsQueryParams, StatsRange, StatsScope } from './types';
+import {
+    CandidateStatsResponse,
+    RecruiterStatsResponse,
+    StatsQueryParams,
+    StatsRange,
+    StatsResponse,
+    StatsScope,
+} from './types';
 
 function startOfYear(date: Date) {
     return new Date(date.getFullYear(), 0, 1);
@@ -37,7 +44,7 @@ function parseRange(range?: string): StatsRange {
 export class StatsServiceV2 {
     constructor(private repository: StatsRepository) {}
 
-    async getStats(clerkUserId: string, params: StatsQueryParams): Promise<RecruiterStatsResponse> {
+    async getStats(clerkUserId: string, params: StatsQueryParams): Promise<StatsResponse> {
         const scope = this.normalizeScope(params.scope || params.type || 'recruiter');
         const range = parseRange(params.range);
 
@@ -50,6 +57,22 @@ export class StatsServiceV2 {
                 const metrics = await this.repository.getRecruiterStats(accessContext.recruiterId);
                 return {
                     scope: 'recruiter',
+                    range: {
+                        label: range.label,
+                        from: range.from.toISOString(),
+                        to: range.to.toISOString(),
+                    },
+                    metrics,
+                };
+            }
+            case 'candidate': {
+                const accessContext = await this.repository.getAccessContext(clerkUserId);
+                if (!accessContext.candidateId) {
+                    throw new Error('Candidate profile required to view candidate stats');
+                }
+                const metrics = await this.repository.getCandidateStats(accessContext.candidateId);
+                return {
+                    scope: 'candidate',
                     range: {
                         label: range.label,
                         from: range.from.toISOString(),

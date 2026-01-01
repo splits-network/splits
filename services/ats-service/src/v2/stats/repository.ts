@@ -1,6 +1,13 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { resolveAccessContext } from '../shared/access';
-import { RecruiterStatsMetrics } from './types';
+import { CandidateStatsMetrics, RecruiterStatsMetrics } from './types';
+
+const DEFAULT_CANDIDATE_STATS: CandidateStatsMetrics = {
+    total_applications: 0,
+    active_applications: 0,
+    interviews_scheduled: 0,
+    offers_received: 0,
+};
 
 const DEFAULT_RECRUITER_STATS: RecruiterStatsMetrics = {
     active_roles: 0,
@@ -113,6 +120,55 @@ export class StatsRepository {
             placements_this_year: placementsThisYear,
             total_earnings_ytd: totalEarningsYTD,
             pending_payouts: pendingPayouts,
+        };
+    }
+
+    async getCandidateStats(candidateId: string): Promise<CandidateStatsMetrics> {
+        if (!candidateId) {
+            return DEFAULT_CANDIDATE_STATS;
+        }
+
+        const [totalApplicationsResult, activeApplicationsResult, interviewsResult, offersResult] =
+            await Promise.all([
+                // Total applications
+                this.supabase
+                    .schema('ats')
+                    .from('applications')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('candidate_id', candidateId),
+                // Active applications (in process stages)
+                this.supabase
+                    .schema('ats')
+                    .from('applications')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('candidate_id', candidateId)
+                    .in('stage', PIPELINE_STAGES),
+                // Interviews scheduled
+                this.supabase
+                    .schema('ats')
+                    .from('applications')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('candidate_id', candidateId)
+                    .eq('stage', 'interview'),
+                // Offers received
+                this.supabase
+                    .schema('ats')
+                    .from('applications')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('candidate_id', candidateId)
+                    .eq('stage', 'offer'),
+            ]);
+
+        if (totalApplicationsResult.error) throw totalApplicationsResult.error;
+        if (activeApplicationsResult.error) throw activeApplicationsResult.error;
+        if (interviewsResult.error) throw interviewsResult.error;
+        if (offersResult.error) throw offersResult.error;
+
+        return {
+            total_applications: totalApplicationsResult.count || 0,
+            active_applications: activeApplicationsResult.count || 0,
+            interviews_scheduled: interviewsResult.count || 0,
+            offers_received: offersResult.count || 0,
         };
     }
 }

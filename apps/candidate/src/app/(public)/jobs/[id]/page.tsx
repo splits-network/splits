@@ -42,7 +42,7 @@ export default async function JobDetailPage({ params }: PageProps) {
     let existingApplication: any = null;
 
     try {
-        const response = await apiClient.get<{ data: Job }>(`/public/jobs/${id}`);
+        const response = await apiClient.get<{ data: Job }>(`/v2/jobs/${id}`);
         job = response.data;
     } catch (error) {
         console.error('Failed to fetch job:', error);

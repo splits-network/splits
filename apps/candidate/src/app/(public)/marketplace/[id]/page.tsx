@@ -125,7 +125,7 @@ export default function RecruiterDetailPage() {
     }
 
     return (
-        <div className="container mx-auto p-6 max-w-4xl">
+        <div className="container mx-auto p-6">
             {success && (
                 <div className="alert alert-success mb-4">
                     <i className="fa-solid fa-circle-check"></i>
@@ -208,70 +208,93 @@ export default function RecruiterDetailPage() {
 
             {/* Stats */}
             {recruiter.total_placements !== undefined && (
-                <div className="stats shadow w-full mb-6">
-                    <div className="stat">
-                        <div className="stat-title">Total Placements</div>
-                        <div className="stat-value">{recruiter.total_placements}</div>
-                    </div>
-                    {recruiter.success_rate !== undefined && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div className="stats bg-base-100 shadow w-full mb-6">
                         <div className="stat">
-                            <div className="stat-title">Success Rate</div>
-                            <div className="stat-value">{Math.round(recruiter.success_rate * 100)}%</div>
+                            <div className='stat-figure'>
+                                <i className="fa-solid fa-trophy text-primary text-3xl"></i>
+                            </div>
+                            <div className="stat-title">Total Placements</div>
+                            <div className="stat-value text-primary">{recruiter.total_placements}</div>
+                            <div className='stat-desc wrap-normal'>Total number of candidates placed in a role.</div>
                         </div>
-                    )}
-                    {recruiter.reputation_score !== undefined && (
-                        <div className="stat">
-                            <div className="stat-title">Reputation Score</div>
-                            <div className="stat-value">{recruiter.reputation_score.toFixed(1)}</div>
-                            <div className="stat-desc">Out of 10</div>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* Bio */}
-            {recruiter.bio && (
-                <div className="card bg-base-100 shadow mb-6">
-                    <div className="card-body">
-                        <h2 className="card-title">About</h2>
-                        <p className="text-base-content/80 whitespace-pre-wrap">{recruiter.bio}</p>
                     </div>
-                </div>
-            )}
-
-            {/* Industries & Specialties */}
-            {(recruiter.industries && recruiter.industries.length > 0) ||
-                (recruiter.specialties && recruiter.specialties.length > 0) ? (
-                <div className="card bg-base-100 shadow mb-6">
-                    <div className="card-body">
-                        {recruiter.industries && recruiter.industries.length > 0 && (
-                            <div className="mb-4">
-                                <h3 className="font-semibold mb-2">Industries</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {recruiter.industries.map(industry => (
-                                        <span key={industry} className="badge badge-lg">
-                                            {industry}
-                                        </span>
-                                    ))}
+                    <div className="stats bg-base-100 shadow w-full mb-6">
+                        {recruiter.success_rate !== undefined && (
+                            <div className="stat">
+                                <div className='stat-figure'>
+                                    <i className="fa-solid fa-chart-pie text-secondary text-3xl"></i>
                                 </div>
+                                <div className="stat-title">Success Rate</div>
+                                <div className="stat-value text-secondary">{Math.round(recruiter.success_rate * 100)}%</div>
+                                <div className="stat-desc wrap-normal">Percentage of successful placements.</div>
                             </div>
                         )}
-
-                        {recruiter.specialties && recruiter.specialties.length > 0 && (
-                            <div>
-                                <h3 className="font-semibold mb-2">Specialties</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {recruiter.specialties.map(specialty => (
-                                        <span key={specialty} className="badge badge-lg badge-outline">
-                                            {specialty}
-                                        </span>
-                                    ))}
+                    </div>
+                    <div className="stats bg-base-100 shadow w-full mb-6">
+                        {recruiter.reputation_score !== undefined && (
+                            <div className="stat">
+                                <div className='stat-figure'>
+                                    <i className="fa-solid fa-star text-accent text-3xl"></i>
                                 </div>
+                                <div className="stat-title">Reputation Score</div>
+                                <div className="stat-value text-accent">{recruiter.reputation_score.toFixed(1)}</div>
+                                <div className="stat-desc wrap-normal">Based on client and candidate feedback.</div>
                             </div>
                         )}
                     </div>
                 </div>
-            ) : null}
+            )}
+
+            <div className='flex flex-col md:flex-row gap-6'>
+                <div className='basis-2/3'>
+                    {/* Bio */}
+                    {recruiter.bio && (
+                        <div className="card bg-base-100 shadow mb-6">
+                            <div className="card-body">
+                                <h2 className="card-title">Bio & Information</h2>
+                                <p className="text-base-content/80 whitespace-pre-wrap">{recruiter.bio}</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className='basis-1/3'>
+                    {/* Industries & Specialties */}
+                    {(recruiter.industries && recruiter.industries.length > 0) ||
+                        (recruiter.specialties && recruiter.specialties.length > 0) ? (
+                        <div className="card bg-base-100 shadow mb-6">
+                            <div className="card-body">
+                                {recruiter.industries && recruiter.industries.length > 0 && (
+                                    <div className="mb-4">
+                                        <h3 className="font-semibold mb-2">Industries</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {recruiter.industries.map(industry => (
+                                                <span key={industry} className="badge badge-lg">
+                                                    {industry}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {recruiter.specialties && recruiter.specialties.length > 0 && (
+                                    <div>
+                                        <h3 className="font-semibold mb-2">Specialties</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {recruiter.specialties.map(specialty => (
+                                                <span key={specialty} className="badge badge-lg badge-outline">
+                                                    {specialty}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ) : null}
+                </div>
+            </div>
 
             {/* Connect Modal */}
             {showConnectModal && (

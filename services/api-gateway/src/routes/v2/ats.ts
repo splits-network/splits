@@ -128,62 +128,10 @@ const ATS_RESOURCES: ResourceDefinition[] = [
     },
 ];
 
-const candidateRoles: UserRole[] = ['candidate', 'platform_admin'];
-
 export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistry) {
     ATS_RESOURCES.forEach(resource => registerResourceRoutes(app, services, resource));
-    registerCandidateDashboardRoutes(app, services);
     registerStatsRoutes(app, services);
     registerAiReviewRoutes(app, services);
-}
-
-function registerCandidateDashboardRoutes(app: FastifyInstance, services: ServiceRegistry) {
-    const atsService = () => services.get('ats');
-
-    app.get(
-        '/api/v2/candidate-dashboard/stats',
-        {
-            preHandler: requireRoles(candidateRoles, services),
-            schema: {
-                description: 'Get candidate dashboard stats',
-                tags: ['candidate-dashboard'],
-                security: [{ clerkAuth: [] }],
-            },
-        },
-        async (request: FastifyRequest, reply: FastifyReply) => {
-            const correlationId = getCorrelationId(request);
-            const authHeaders = buildAuthHeaders(request);
-            const data = await atsService().get(
-                '/v2/candidate-dashboard/stats',
-                undefined,
-                correlationId,
-                authHeaders
-            );
-            return reply.send(data);
-        }
-    );
-
-    app.get(
-        '/api/v2/candidate-dashboard/recent-applications',
-        {
-            preHandler: requireRoles(candidateRoles, services),
-            schema: {
-                description: 'Get candidate recent applications',
-                tags: ['candidate-dashboard'],
-                security: [{ clerkAuth: [] }],
-            },
-        },
-        async (request: FastifyRequest, reply: FastifyReply) => {
-            const correlationId = getCorrelationId(request);
-            const authHeaders = buildAuthHeaders(request);
-            const queryString = buildQueryString(request.query as Record<string, any>);
-            const path = queryString
-                ? `/v2/candidate-dashboard/recent-applications?${queryString}`
-                : '/v2/candidate-dashboard/recent-applications';
-            const data = await atsService().get(path, undefined, correlationId, authHeaders);
-            return reply.send(data);
-        }
-    );
 }
 
 function registerStatsRoutes(app: FastifyInstance, services: ServiceRegistry) {
@@ -307,34 +255,6 @@ function registerAiReviewRoutes(app: FastifyInstance, services: ServiceRegistry)
                 return reply
                     .status(error.statusCode || 500)
                     .send(error.jsonBody || { error: 'Failed to trigger AI review' });
-            }
-        }
-    );
-
-    app.get(
-        '/api/v2/ai-review-stats',
-        {
-            preHandler: requireRoles(ATS_AI_TRIGGER_ROLES, services),
-            schema: {
-                description: 'Get AI review metrics scoped by job',
-                tags: ['ai-review'],
-                security: [{ clerkAuth: [] }],
-            },
-        },
-        async (request: FastifyRequest, reply: FastifyReply) => {
-            const correlationId = getCorrelationId(request);
-            const authHeaders = buildAuthHeaders(request);
-            const queryString = buildQueryString(request.query as Record<string, any>);
-            const path = queryString ? `/v2/ai-review-stats?${queryString}` : '/v2/ai-review-stats';
-
-            try {
-                const data = await atsService().get(path, undefined, correlationId, authHeaders);
-                return reply.send(data);
-            } catch (error: any) {
-                request.log.error({ error, correlationId }, 'Failed to fetch AI review stats');
-                return reply
-                    .status(error.statusCode || 500)
-                    .send(error.jsonBody || { error: 'Failed to fetch AI review stats' });
             }
         }
     );

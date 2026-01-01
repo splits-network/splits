@@ -97,15 +97,19 @@ export default function RecruiterCard({ recruiter }: RecruiterCardProps) {
                 )}
 
                 {recruiter.total_placements !== undefined && (
-                    <div className="stats stats-horizontal shadow mt-3">
-                        <div className="stat px-2 py-2">
-                            <div className="stat-title text-xs">Placements</div>
-                            <div className="stat-value text-lg">{recruiter.total_placements}</div>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-6'>
+                        <div className="stats bg-base-200 shadow mt-3">
+                            <div className="stat">
+                                <div className="stat-title text-xs">Placements</div>
+                                <div className="stat-value text-lg">{recruiter.total_placements}</div>
+                            </div>
                         </div>
                         {recruiter.success_rate !== undefined && (
-                            <div className="stat px-2 py-2">
-                                <div className="stat-title text-xs">Success Rate</div>
-                                <div className="stat-value text-lg">{Math.round(recruiter.success_rate * 100)}%</div>
+                            <div className="stats bg-base-200 shadow mt-3">
+                                <div className="stat">
+                                    <div className="stat-title text-xs">Success Rate</div>
+                                    <div className="stat-value text-lg">{Math.round(recruiter.success_rate * 100)}%</div>
+                                </div>
                             </div>
                         )}
                     </div>

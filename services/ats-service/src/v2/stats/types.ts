@@ -23,6 +23,13 @@ export interface RecruiterStatsMetrics {
     pending_payouts: number;
 }
 
+export interface CandidateStatsMetrics {
+    total_applications: number;
+    active_applications: number;
+    interviews_scheduled: number;
+    offers_received: number;
+}
+
 export interface RecruiterStatsResponse {
     scope: 'recruiter';
     range: {
@@ -33,4 +40,14 @@ export interface RecruiterStatsResponse {
     metrics: RecruiterStatsMetrics;
 }
 
-export type StatsResponse = RecruiterStatsResponse;
+export interface CandidateStatsResponse {
+    scope: 'candidate';
+    range: {
+        label: string;
+        from: string;
+        to: string;
+    };
+    metrics: CandidateStatsMetrics;
+}
+
+export type StatsResponse = RecruiterStatsResponse | CandidateStatsResponse;
