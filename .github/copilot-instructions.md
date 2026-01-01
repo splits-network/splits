@@ -747,16 +747,6 @@ export async function candidatesRoutes(
 }
 ```
 
-**Authorization Flow**:
-1. **Memberships check** (fast path): If user has membership with allowed role, grant access
-2. **Network service check** (for recruiters): If `'recruiter'` in allowedRoles AND services provided:
-   - Query `GET /recruiters/by-user/:userId` from network service
-   - If recruiter exists with `status === 'active'`, grant access
-3. **ATS service check** (for candidates): If `'candidate'` in allowedRoles AND services provided:
-   - Query `GET /candidates?id={id}` from ATS service
-   - If candidate profile found, grant access
-4. **Deny**: If no match, throw `ForbiddenError`
-
 **Critical Rules**:
 - **ALWAYS pass `services` parameter** when allowing recruiters or candidates
 - Without services parameter, independent recruiters and candidates (no memberships) will be denied

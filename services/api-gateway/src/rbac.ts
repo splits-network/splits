@@ -47,12 +47,14 @@ export function requireRoles(allowedRoles: UserRole[], services?: ServiceRegistr
                 const correlationId = (request as any).correlationId;
                 const networkService = services.get('network');
                 const recruiterResponse: any = await networkService.get(
-                    `/recruiters/by-user/${req.auth.userId}`,
+                    `/api/v2/recruiters?limit=1`,
                     undefined,
-                    correlationId
+                    correlationId,
+                    { 'x-clerk-user-id': req.auth.clerkUserId }
                 );
 
-                if (recruiterResponse?.data && recruiterResponse.data.status === 'active') {
+                const recruiters = recruiterResponse?.data?.data || recruiterResponse?.data || [];
+                if (recruiters.length > 0 && recruiters[0]?.status === 'active') {
                     req.matchedRole = 'recruiter';
                     request.log.debug({ userId: req.auth.userId }, 'Access granted: active recruiter via network service');
                     return;
@@ -174,11 +176,14 @@ export async function isRecruiter(auth: AuthContext, services?: ServiceRegistry,
         try {
             const networkService = services.get('network');
             const recruiterResponse: any = await networkService.get(
-                `/recruiters/by-user/${auth.userId}`,
+                `/api/v2/recruiters?limit=1`,
                 undefined,
-                correlationId
+                correlationId,
+                { 'x-clerk-user-id': auth.clerkUserId }
             );
-            return recruiterResponse?.data?.status === 'active';
+            // V2 API returns { data: [...] }
+            const recruiters = recruiterResponse?.data?.data || recruiterResponse?.data || [];
+            return recruiters.length > 0 && recruiters[0]?.status === 'active';
         } catch (error) {
             return false;
         }

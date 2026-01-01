@@ -25,18 +25,20 @@ export function registerRecruiterCandidateRoutes(app: FastifyInstance, services:
 
         // Get recruiter ID for current user
         const recruiterResponse: any = await networkService().get(
-            `/recruiters/by-user/${req.auth.userId}`,
-            undefined,
-            correlationId
+            `/v2/recruiters`,
+            { limit: 1 },
+            correlationId,
+            { 'x-clerk-user-id': req.auth.clerkUserId }
         );
 
-        if (!recruiterResponse.data) {
+        const recruiters = recruiterResponse?.data?.data || recruiterResponse?.data || [];
+        if (recruiters.length === 0) {
             return reply.status(404).send({ 
                 error: 'Recruiter profile not found' 
             });
         }
 
-        const recruiterId = recruiterResponse.data.id;
+        const recruiterId = recruiters[0].id;
         const data = await networkService().get(
             `/recruiter-candidates/recruiter/${recruiterId}`,
             undefined,
@@ -97,17 +99,19 @@ export function registerRecruiterCandidateRoutes(app: FastifyInstance, services:
         // Get recruiter ID for current user
         try {
             const recruiterResponse: any = await networkService().get(
-                `/recruiters/by-user/${req.auth.userId}`,
-                undefined,
-                correlationId
+                `/v2/recruiters`,
+                { limit: 1 },
+                correlationId,
+                { 'x-clerk-user-id': req.auth.clerkUserId }
             );
             
-            if (!recruiterResponse.data) {
+            const recruiters = recruiterResponse?.data?.data || recruiterResponse?.data || [];
+            if (recruiters.length === 0) {
                 // User is a recruiter but doesn't have a recruiter profile yet
                 return reply.send({ data: [] });
             }
             
-            const recruiterId = recruiterResponse.data.id;
+            const recruiterId = recruiters[0].id;
             
             // Filter to only this recruiter's relationships
             const filteredData = (data || []).filter((rel: any) => rel.recruiter_id === recruiterId);

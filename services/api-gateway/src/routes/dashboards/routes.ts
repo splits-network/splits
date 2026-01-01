@@ -33,9 +33,10 @@ export function registerDashboardsRoutes(app: FastifyInstance, services: Service
             // Pass Clerk user ID to Network Service for recruiter resolution
             // Backend will handle entity resolution and inactive user check
             const data = await networkService().get(
-                `/recruiters/by-user/${req.auth.userId}/dashboard-stats`,
-                undefined,
-                correlationId
+                `/v2/recruiters`,
+                { limit: 1 },
+                correlationId,
+                { 'x-clerk-user-id': req.auth.clerkUserId }
             );
             return reply.send(data);
         } catch (error) {

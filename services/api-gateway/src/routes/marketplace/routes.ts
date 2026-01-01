@@ -74,8 +74,14 @@ export function registerMarketplaceRoutes(app: FastifyInstance, services: Servic
         const req = request as AuthenticatedRequest;
         
         // Get recruiter ID from user's profile
-        let recruiterResponse = await networkService().get(`/recruiters/by-user/${req.auth.userId}`);
-        let recruiter = (recruiterResponse as any).data;
+        let recruiterResponse = await networkService().get(
+            `/v2/recruiters`,
+            { limit: 1 },
+            undefined,
+            { 'x-clerk-user-id': req.auth.clerkUserId }
+        );
+        const recruiters = (recruiterResponse as any)?.data?.data || (recruiterResponse as any)?.data || [];
+        let recruiter = recruiters[0];
 
         // If recruiter doesn't exist, create one automatically
         if (!recruiter) {
@@ -125,8 +131,14 @@ export function registerMarketplaceRoutes(app: FastifyInstance, services: Servic
         const req = request as AuthenticatedRequest;
         
         // Get recruiter ID from user's profile
-        const recruiterResponse = await networkService().get(`/recruiters/by-user/${req.auth.userId}`);
-        const recruiter = (recruiterResponse as any).data;
+        const recruiterResponse = await networkService().get(
+            `/v2/recruiters`,
+            { limit: 1 },
+            undefined,
+            { 'x-clerk-user-id': req.auth.clerkUserId }
+        );
+        const recruiters = (recruiterResponse as any)?.data?.data || (recruiterResponse as any)?.data || [];
+        const recruiter = recruiters[0];
 
         if (!recruiter) {
             return reply.status(404).send({
@@ -205,8 +217,14 @@ export function registerMarketplaceRoutes(app: FastifyInstance, services: Servic
         const req = request as AuthenticatedRequest;
 
         // Get recruiter ID from user's profile
-        const recruiterResponse = await networkService().get(`/recruiters/by-user/${req.auth.userId}`);
-        const recruiter = (recruiterResponse as any).data?.data;
+        const recruiterResponse = await networkService().get(
+            `/v2/recruiters`,
+            { limit: 1 },
+            undefined,
+            { 'x-clerk-user-id': req.auth.clerkUserId }
+        );
+        const recruiters = (recruiterResponse as any)?.data?.data || (recruiterResponse as any)?.data || [];
+        const recruiter = recruiters[0];
 
         if (!recruiter) {
             return reply.status(404).send({

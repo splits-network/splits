@@ -21,7 +21,12 @@ export function registerRecruitersRoutes(app: FastifyInstance, services: Service
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const req = request as AuthenticatedRequest;
-        const data = await networkService().get(`/recruiters/by-user/${req.auth.userId}`);
+        const data = await networkService().get(
+            `/v2/recruiters`,
+            { limit: 1 },
+            undefined,
+            { 'x-clerk-user-id': req.auth.clerkUserId }
+        );
         return reply.send(data);
     });
 
@@ -35,19 +40,6 @@ export function registerRecruitersRoutes(app: FastifyInstance, services: Service
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
         const data = await networkService().get('/recruiters');
-        return reply.send(data);
-    });
-
-    // Get recruiter by user ID (must come before :id route)
-    app.get('/api/recruiters/by-user/:userId', {
-        schema: {
-            description: 'Get recruiter profile by user ID',
-            tags: ['recruiters'],
-            security: [{ clerkAuth: [] }],
-        },
-    }, async (request: FastifyRequest, reply: FastifyReply) => {
-        const { userId } = request.params as { userId: string };
-        const data = await networkService().get(`/recruiters/by-user/${userId}`);
         return reply.send(data);
     });
 

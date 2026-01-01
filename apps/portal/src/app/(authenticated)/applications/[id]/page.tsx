@@ -42,14 +42,22 @@ export default async function ApplicationDetailPage({
             m.role === 'company_admin' || m.role === 'hiring_manager'
         );
         const isPlatformAdmin = memberships.some((m: any) => m.role === 'platform_admin');
-        const isRecruiter = !isCompanyUser && !isPlatformAdmin;
 
         if (isCompanyUser) {
             userRole = 'company';
         } else if (isPlatformAdmin) {
             userRole = 'admin';
-        } else if (isRecruiter) {
-            userRole = 'recruiter';
+        } else {
+            // Try to determine if user is a recruiter by checking if they have a recruiter profile
+            try {
+                const recruiterCheckResponse: any = await client.getRecruiterProfile();
+                if (recruiterCheckResponse.data || recruiterCheckResponse) {
+                    userRole = 'recruiter';
+                }
+            } catch (err) {
+                // Not a recruiter - user might be a candidate or unassigned user
+                console.log('User is not a recruiter');
+            }
         }
 
         console.log('User role:', userRole, 'Memberships:', memberships);
@@ -114,7 +122,8 @@ export default async function ApplicationDetailPage({
                 }
             } catch (err) {
                 console.error('Error loading recruiter profile:', err);
-                error = 'Failed to load recruiter profile';
+                // Don't set error here - the recruiter check above already validated the role
+                // If they can't load their profile, they just won't see recruiter-specific data
             }
         } else if (userRole === 'company') {
             // For company admins/hiring managers: verify application belongs to their company

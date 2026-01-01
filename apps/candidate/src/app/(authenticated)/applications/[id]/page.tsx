@@ -372,12 +372,15 @@ export default async function ApplicationDetailPage({
                                 </h2>
 
                                 <div className="space-y-4">
-                                    {application.pre_screen_answers.map((answer: any, index: number) => (
-                                        <div key={index}>
-                                            <div className="font-medium mb-1">{answer.question}</div>
-                                            <div className="text-base-content/70">{answer.answer}</div>
-                                        </div>
-                                    ))}
+                                    {application.pre_screen_answers.map((answer: any, index: number) => {
+                                        const questionText = answer.question?.question || answer.question || `Question ${index + 1}`;
+                                        return (
+                                            <div key={index}>
+                                                <div className="font-medium mb-1">{questionText}</div>
+                                                <div className="text-base-content/70">{answer.answer}</div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>

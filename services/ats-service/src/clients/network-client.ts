@@ -32,12 +32,13 @@ export class NetworkServiceClient {
         try {
             const headers: Record<string, string> = {
                 'Content-Type': 'application/json',
+                'x-clerk-user-id': clerkUserId,
             };
             if (correlationId) {
                 headers['x-correlation-id'] = correlationId;
             }
 
-            const url = `${this.baseURL}/recruiters/by-user/${clerkUserId}`;
+            const url = `${this.baseURL}/v2/recruiters?limit=1`;
             
             const response = await fetch(
                 url,
@@ -59,8 +60,14 @@ export class NetworkServiceClient {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
 
-            const result = await response.json() as { data: RecruiterProfile };
-            const recruiter = result.data;
+            const result = await response.json() as { data: { data: RecruiterProfile[] } };
+            const recruiters = result.data?.data || result.data || [];
+            
+            if (recruiters.length === 0) {
+                return null;
+            }
+            
+            const recruiter = recruiters[0];
             
             // Return null if recruiter is inactive
             if (recruiter.status !== 'active') {
@@ -72,7 +79,7 @@ export class NetworkServiceClient {
             console.log('[NetworkClient] Error fetching recruiter:', error.message);
             logger.error({
                 err: error,
-                url: `/recruiters/by-user/${clerkUserId}`,
+                url: `/v2/recruiters`,
             }, 'Network service request failed');
             
             // Don't re-throw on 404

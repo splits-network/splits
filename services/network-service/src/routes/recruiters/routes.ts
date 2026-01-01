@@ -45,18 +45,6 @@ export function registerRecruiterRoutes(app: FastifyInstance, service: NetworkSe
         }
     );
 
-    // Get recruiter by user ID (MUST come before :id route to avoid matching "by-user" as an ID)
-    app.get(
-        '/recruiters/by-user/:clerkUserId',
-        async (request: FastifyRequest<{ Params: { clerkUserId: string } }>, reply: FastifyReply) => {
-            const recruiter = await service.getRecruiterByClerkUserId(request.params.clerkUserId);
-            if (!recruiter) {
-                throw new NotFoundError('Recruiter for user', request.params.clerkUserId);
-            }
-            return reply.send({ data: recruiter });
-        }
-    );
-
     // Get recruiter by ID
     app.get(
         '/recruiters/:id',

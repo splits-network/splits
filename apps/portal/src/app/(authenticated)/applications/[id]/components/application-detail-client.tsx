@@ -373,11 +373,12 @@ export default function ApplicationDetailClient({
                                 </h2>
                                 <div className="space-y-4">
                                     {preScreenAnswers.map((answer: any, index: number) => {
-                                        const question = questions.find((q: any) => q.id === answer.question_id);
+                                        const questionObj = questions.find((q: any) => q.id === answer.question_id);
+                                        const questionText = questionObj?.question || `Question ${index + 1}`;
                                         return (
                                             <div key={index} className="border-l-4 border-primary pl-4">
                                                 <p className="font-semibold mb-1">
-                                                    {question?.question || `Question ${index + 1}`}
+                                                    {questionText}
                                                 </p>
                                                 <p className="text-sm text-base-content/70">
                                                     {typeof answer.answer === 'string'
