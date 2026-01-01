@@ -42,10 +42,7 @@ export function ApplicationCard({
     const isMasked = candidate._masked;
 
     return (
-        <Link
-            href={`/applications/${application.id}`}
-            className={`group card bg-base-100 border border-base-100 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col`}
-        >
+        <div className={`group card bg-base-100 border border-base-100 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col`} >
             {/* Header with gradient background */}
             <div className="relative h-24 bg-linear-to-br from-primary/10 via-secondary/5 to-accent/10">
                 <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
@@ -189,6 +186,6 @@ export function ApplicationCard({
                     </div>
                 </div>
             </div>
-        </Link>
+        </div>
     );
 }

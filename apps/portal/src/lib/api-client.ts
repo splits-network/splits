@@ -457,7 +457,7 @@ export class ApiClient {
     }
 
     async getStats(params?: { scope?: string; type?: string; range?: string }) {
-        return this.get('/stats', {
+        return this.get('/api/v2/stats', {
             params,
         });
     }

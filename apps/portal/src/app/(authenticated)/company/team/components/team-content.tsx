@@ -54,7 +54,7 @@ export default function TeamManagementContent({ organizationId }: TeamManagement
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.get(`/organizations/${organizationId}/memberships`);
+            const response: any = await client.get(`/organizations/${organizationId}`);
             setMembers(response.data || []);
         } catch (error) {
             console.error('Failed to fetch team members:', error);
@@ -69,7 +69,7 @@ export default function TeamManagementContent({ organizationId }: TeamManagement
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.get(`/organizations/${organizationId}/invitations`);
+            const response: any = await client.get(`/organizations/${organizationId}`);
             setInvitations(response.data || []);
         } catch (error) {
             console.error('Failed to fetch invitations:', error);

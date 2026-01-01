@@ -270,7 +270,7 @@ export default function ApplicationsListClient({
                 return;
             }
             const client = createAuthenticatedClient(token);
-            const response: any = await client.get('/v2/companies', {
+            const response: any = await client.get('/companies', {
                 params: {
                     identity_organization_id: orgId,
                     limit: 1,

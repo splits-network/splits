@@ -399,7 +399,7 @@ export default function RolesList() {
 
             {/* Roles List - Grid View */}
             {viewMode === 'grid' && filteredJobs.length > 0 && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
                     {filteredJobs.map((job) => {
                         const badges = getRoleBadges(job, filteredJobs);
                         const maxPayout = job.salary_max ? Math.round(job.fee_percentage * job.salary_max / 100) : null;
