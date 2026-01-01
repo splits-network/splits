@@ -79,6 +79,9 @@ export function registerResourceRoutes(
         apiBase,
         routeOptions(`List ${resource.name}`, resource.roles.list),
         async (request: FastifyRequest, reply: FastifyReply) => {
+            console.log(`[Gateway V2] ${apiBase} - Request received`);
+            console.log(`[Gateway V2] Query:`, request.query);
+            console.log(`[Gateway V2] Auth headers:`, buildAuthHeaders(request));
             const correlationId = getCorrelationId(request);
             const data = await serviceClient().get(
                 serviceBase,
@@ -86,8 +89,6 @@ export function registerResourceRoutes(
                 correlationId,
                 buildAuthHeaders(request)
             );
-            console.log('data:', data);
-            console.log('auth headers:', buildAuthHeaders(request));
             return reply.send(data);
         }
     );

@@ -227,12 +227,20 @@ async function main() {
             return;
         }
         
-        // Skip auth for public V2 endpoints (jobs listing and individual jobs)
-        // These endpoints handle optional authentication in the service layer
+        // Skip auth for public V2 job endpoints (optional authentication)
+        // GET /api/v2/jobs - list all jobs (or filter by company if authenticated)
+        // GET /api/v2/jobs/:id - get job details
         if (request.method === 'GET' && (
             request.url.startsWith('/api/v2/jobs') || 
             request.url.match(/^\/api\/v2\/jobs\/[^/]+(\?|$)/)
         )) {
+            // Try to authenticate if token is present, but don't fail if missing
+            try {
+                await authMiddleware.createMiddleware()(request, reply);
+            } catch (error) {
+                // Ignore auth errors for public endpoints
+                request.log.debug('No valid auth token for public endpoint, continuing as anonymous');
+            }
             return;
         }
         

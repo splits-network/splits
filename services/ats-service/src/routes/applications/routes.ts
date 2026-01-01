@@ -122,16 +122,7 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
             
             const page = request.query.page ? parseInt(request.query.page, 10) : 1;
             const limit = request.query.limit ? parseInt(request.query.limit, 10) : 25;
-            
-            console.log('[DEBUG] /applications/paginated query params:', {
-                clerkUserId,
-                userRole,
-                page,
-                limit,
-                search: request.query.search,
-                stage: request.query.stage,
-            });
-            
+                        
             // Note: recruiter_id is now resolved internally by the service from clerkUserId
             const result = await service.getApplicationsPaginated({
                 clerkUserId,
@@ -146,13 +137,7 @@ export function registerApplicationRoutes(app: FastifyInstance, service: AtsServ
                 sort_by: request.query.sort_by,
                 sort_order: request.query.sort_order,
             }, correlationId);
-            
-            console.log('[DEBUG] Result:', {
-                total: result.total,
-                returned: result.data.length,
-                recruiter_ids: result.data.map(app => app.recruiter_id),
-            });
-            
+                        
             return reply.send({ 
                 data: result.data,
                 pagination: {

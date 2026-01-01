@@ -28,7 +28,7 @@ const ATS_RESOURCES: ResourceDefinition[] = [
         basePath: '/jobs',
         tag: 'jobs',
         roles: {
-            list: undefined, // Public endpoint - no authentication required
+            list: undefined, // Public endpoint with optional authentication - filters by role if authenticated
             get: undefined, // Public endpoint - individual jobs viewable by anyone
             create: ATS_MANAGE_ROLES,
             update: ATS_MANAGE_ROLES,

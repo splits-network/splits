@@ -45,25 +45,77 @@ export class JobRepository {
 
         if (clerkUserId) {
             const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-
+console.log('[DEBUG][JobRepository] Access context for user', clerkUserId, ':', accessContext);
             if (accessContext.isPlatformAdmin) {
                 // Platform admins see all jobs
+                console.log('[JobRepository] User is platform admin - showing all jobs');
+            } else if (accessContext.recruiterId && accessContext.roles.includes('recruiter')) {
+                // Recruiters see all active jobs (marketplace model)
+                // OR only jobs where they have active involvement if job_owner_filter is 'assigned'
+                // NOTE: Check recruiter FIRST before company roles, even if they have both
+                console.log('[JobRepository] User is recruiter - applying recruiter filters');
+                query = query.eq('status', 'active');
+                // Recruiters see all active jobs (marketplace model)
+                // OR only jobs where they have active involvement if job_owner_filter is 'assigned'
+                query = query.eq('status', 'active');
+                
+                if (filters.job_owner_filter === 'assigned') {
+                    console.log('[JobRepository] Filtering for assigned jobs, recruiterId:', accessContext.recruiterId);
+                    
+                    // Filter to jobs where recruiter has:
+                    // 1. Applications in active stages (recruiter_proposed, draft, ai_review, screen, submitted, interview, offer)
+                    // 2. OR placements (hired candidates)
+                    
+                    // Get job IDs from applications with active stages
+                    const { data: applications, error: appsError } = await this.supabase
+                        .schema('ats')
+                        .from('applications')
+                        .select('job_id, stage, candidate_id')
+                        .eq('recruiter_id', accessContext.recruiterId)
+                        .in('stage', ['recruiter_proposed', 'draft', 'ai_review', 'screen', 'submitted', 'interview', 'offer']);
+                    
+                    console.log('[JobRepository] Applications query result:', { 
+                        count: applications?.length || 0, 
+                        applications: applications?.slice(0, 3),
+                        error: appsError 
+                    });
+                    
+                    // Get job IDs from placements
+                    const { data: placements, error: placementsError } = await this.supabase
+                        .schema('ats')
+                        .from('placements')
+                        .select('job_id, candidate_id')
+                        .eq('recruiter_id', accessContext.recruiterId);
+                    
+                    console.log('[JobRepository] Placements query result:', { 
+                        count: placements?.length || 0, 
+                        placements: placements?.slice(0, 3),
+                        error: placementsError 
+                    });
+                    
+                    // Combine unique job IDs
+                    const applicationJobIds = applications?.map(a => a.job_id) || [];
+                    const placementJobIds = placements?.map(p => p.job_id) || [];
+                    const involvedJobIds = [...new Set([...applicationJobIds, ...placementJobIds])];
+                    
+                    console.log('[JobRepository] Combined involved job IDs:', involvedJobIds);
+                    
+                    if (involvedJobIds.length > 0) {
+                        query = query.in('id', involvedJobIds);
+                    } else {
+                        // No involved jobs - return empty
+                        console.log('[JobRepository] No involved jobs found, returning empty');
+                        return { data: [], total: 0 };
+                    }
+                }
             } else if (accessContext.organizationIds.length > 0) {
-                // Company users see only their organization's jobs
+                // Company users (company_admin, hiring_manager) see only their organization's jobs
+                console.log('[JobRepository] User is company user with org IDs:', accessContext.organizationIds);
                 query = query.in('company.identity_organization_id', accessContext.organizationIds);
                 
                 if (filters.job_owner_filter === 'assigned' && accessContext.identityUserId) {
                     // Further filter to only jobs where this user is the job_owner_id
                     query = query.eq('job_owner_id', accessContext.identityUserId);
-                }
-            } else if (accessContext.recruiterId) {
-                // Recruiters see all active jobs (marketplace model)
-                // OR only jobs where they are the job_owner_id if job_owner_filter is 'assigned'
-                query = query.eq('status', 'active');
-                
-                if (filters.job_owner_filter === 'assigned') {
-                    // Filter to only jobs where this recruiter is the job_owner_id
-                    query = query.eq('job_owner_id', accessContext.recruiterId);
                 }
             } else if (accessContext.candidateId) {
                 // Candidates see all active jobs

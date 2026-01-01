@@ -56,17 +56,17 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
         try {
             const api = new ApiClient(undefined, token);
 
-            // Load company stats
-            const statsResponse = await api.get<{ data: CompanyStats }>('/company/dashboard/stats');
+            // Load company stats using V2 endpoint
+            const statsResponse = await api.get<{ data: CompanyStats }>('/stats', {
+                params: { scope: 'company' }
+            });
             setStats(statsResponse.data);
 
-            // Load role breakdown
-            const rolesResponse = await api.get<{ data: RoleBreakdown[] }>('/company/dashboard/roles');
-            setRoleBreakdown(rolesResponse.data || []);
-
-            // Load recent activity
-            const activityResponse = await api.get<{ data: RecentActivity[] }>('/company/dashboard/activity');
-            setRecentActivity(activityResponse.data || []);
+            // TODO: Load role breakdown and recent activity
+            // These will need V2 endpoints as well
+            // For now, leaving them empty
+            setRoleBreakdown([]);
+            setRecentActivity([]);
         } catch (error) {
             console.error('Failed to load dashboard data:', error);
         } finally {

@@ -76,6 +76,9 @@ export class ApiClient {
         // Add authorization header if token is available
         if (this.token) {
             headers['Authorization'] = `Bearer ${this.token}`;
+            console.log(`API Client - Added Authorization header (token exists, length: ${this.token.length})`);
+        } else {
+            console.log(`API Client - No token available, skipping Authorization header`);
         }
 
         const response = await fetch(url, {
@@ -260,7 +263,7 @@ export class ApiClient {
 
     // Applications
     async getApplicationsByJob(jobId: string) {
-        return this.request(`/applications?job_id=${jobId}&include=candidate,recruiter`);
+        return this.request(`/applications?job_id=${jobId}`);
     }
 
     async submitCandidate(data: {

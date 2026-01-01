@@ -1171,32 +1171,31 @@ export class AtsRepository {
             candidateSubquery,
         ]);
 
-        // Apply role-based filters
+        // Apply role-based filters with priority (check recruiter FIRST)
+        // NOTE: If user has multiple roles (e.g., recruiter + company_admin),
+        // we prioritize recruiter role to show only their own applications
         let isRecruiter = false;
         let isCompanyUser = false;
         let isCandidate = false;
 
         if (recruiterResult.data) {
             // User is a recruiter - filter by their recruiter_id
+            // NOTE: Check recruiter FIRST before company roles, even if they have both
             isRecruiter = true;
             query = query.eq('recruiter_id', recruiterResult.data.id);
-        }
-
-        if (membershipResult?.data) {
+        } else if (membershipResult?.data) {
             // User is company admin/hiring manager - filter by company
+            // Only apply this if NOT a recruiter
             isCompanyUser = true;
             // Get company_id from the jobs table via JOIN
             query = query.eq('job.company_id', membershipResult.data.organization_id);
-        }
-
-        if (candidateResult.data) {
+        } else if (candidateResult.data) {
             // User is a candidate - filter by their candidate_id
+            // Only apply this if NOT a recruiter or company user
             isCandidate = true;
             query = query.eq('candidate_id', candidateResult.data.id);
-        }
-
-        // If user has no matching role, return empty results
-        if (!isRecruiter && !isCompanyUser && !isCandidate) {
+        } else {
+            // If user has no matching role, return empty results
             return { data: [], total: 0 };
         }
 

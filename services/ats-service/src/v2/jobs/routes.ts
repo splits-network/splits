@@ -16,9 +16,9 @@ export function registerJobRoutes(
             const context = getUserContext(request);
             const filters = request.query as any;
             const result = await config.jobService.getJobs(context?.clerkUserId, filters);
-            console.log('Jobs result:', result);
             return reply.send({ data: result.data, pagination: result.pagination });
         } catch (error: any) {
+            console.error('[V2 Jobs Route] Error:', error);
             return reply.code(400).send({ error: { message: error.message } });
         }
     });

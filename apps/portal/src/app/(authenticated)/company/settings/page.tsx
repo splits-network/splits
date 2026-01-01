@@ -70,7 +70,7 @@ export default async function CompanySettingsPage() {
     }
 
     return (
-        <div className="container mx-auto py-6 px-4 max-w-4xl">
+        <div className="container mx-auto py-6 px-4">
             <div className="mb-6">
                 <h1 className="text-3xl font-bold">Company Settings</h1>
                 <p className="text-base-content/70 mt-2">

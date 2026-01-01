@@ -150,7 +150,7 @@ export class ApplicationRepository {
 
     async createApplication(application: any, clerkUserId?: string): Promise<any> {
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-        console.log('Creating application with access context:', accessContext);
+        
         const { data, error } = await this.supabase
             .schema('ats')
             .from('applications')

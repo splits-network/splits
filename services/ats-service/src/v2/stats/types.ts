@@ -30,6 +30,17 @@ export interface CandidateStatsMetrics {
     offers_received: number;
 }
 
+export interface CompanyStatsMetrics {
+    active_roles: number;
+    total_applications: number;
+    interviews_scheduled: number;
+    offers_extended: number;
+    placements_this_month: number;
+    placements_this_year: number;
+    avg_time_to_hire_days: number;
+    active_recruiters: number;
+}
+
 export interface RecruiterStatsResponse {
     scope: 'recruiter';
     range: {
@@ -50,4 +61,14 @@ export interface CandidateStatsResponse {
     metrics: CandidateStatsMetrics;
 }
 
-export type StatsResponse = RecruiterStatsResponse | CandidateStatsResponse;
+export interface CompanyStatsResponse {
+    scope: 'company';
+    range: {
+        label: string;
+        from: string;
+        to: string;
+    };
+    metrics: CompanyStatsMetrics;
+}
+
+export type StatsResponse = RecruiterStatsResponse | CandidateStatsResponse | CompanyStatsResponse;

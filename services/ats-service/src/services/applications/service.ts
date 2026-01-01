@@ -33,9 +33,7 @@ export class ApplicationService {
         userRole: 'candidate' | 'recruiter' | 'company' | 'admin',
         correlationId?: string
     ): Promise<string | null> {
-        if (userRole === 'recruiter') {
-            console.log('[ApplicationService] Resolving recruiter entity ID for Clerk user:', clerkUserId);
-            
+        if (userRole === 'recruiter') {            
             const recruiter = await this.networkClient.getRecruiterByClerkUserId(clerkUserId);
             
             if (!recruiter) {
@@ -43,7 +41,6 @@ export class ApplicationService {
                 return null;
             }
             
-            console.log('[ApplicationService] Resolved to recruiter_id:', recruiter.id);
             return recruiter.id;
         }
         
@@ -84,7 +81,6 @@ export class ApplicationService {
             
             if (!entityId && params.userRole === 'recruiter') {
                 // Inactive recruiter - return empty results
-                console.log('[ApplicationService] Inactive recruiter, returning empty results');
                 return {
                     data: [],
                     total: 0,
@@ -598,14 +594,12 @@ export class ApplicationService {
         
         try {
             const recruiterRelationship = await this.repository.findActiveRecruiterForCandidate(candidateId);
-            console.log('[DEBUG] findActiveRecruiterForCandidate result:', JSON.stringify(recruiterRelationship));
             
             if (recruiterRelationship) {
                 // Candidate has an active recruiter relationship
                 hasRecruiter = true;
                 // IMPORTANT: applications.recruiter_id FK constraint now correctly points to network.recruiters.id
                 recruiterId = recruiterRelationship.recruiter_id;
-                console.log('[DEBUG] Set recruiterId to:', recruiterId, 'typeof:', typeof recruiterId);
             } else {
                 console.log('[DEBUG] No recruiter relationship found for candidateId:', candidateId);
             }

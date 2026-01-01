@@ -30,11 +30,15 @@ export function registerJobsRoutes(app: FastifyInstance, services: ServiceRegist
             security: [{ clerkAuth: [] }],
         },
     }, async (request: FastifyRequest, reply: FastifyReply) => {
+        console.log('[Gateway V1] /api/jobs - Request received (OLD ENDPOINT)');
+        console.log('[Gateway V1] Query:', request.query);
+        console.log('[Gateway V1] Auth headers:', buildAuthHeaders(request));
         const correlationId = getCorrelationId(request);
         const authHeaders = buildAuthHeaders(request);
         
         const queryString = new URLSearchParams(request.query as any).toString();
         const path = queryString ? `/jobs?${queryString}` : '/jobs';
+        console.log('[Gateway V1] Calling ATS service at:', path);
         const data = await atsService().get(path, undefined, correlationId, authHeaders);
         return reply.send(data);
     });

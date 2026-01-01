@@ -1,6 +1,7 @@
 import { StatsRepository } from './repository';
 import {
     CandidateStatsResponse,
+    CompanyStatsResponse,
     RecruiterStatsResponse,
     StatsQueryParams,
     StatsRange,
@@ -73,6 +74,22 @@ export class StatsServiceV2 {
                 const metrics = await this.repository.getCandidateStats(accessContext.candidateId);
                 return {
                     scope: 'candidate',
+                    range: {
+                        label: range.label,
+                        from: range.from.toISOString(),
+                        to: range.to.toISOString(),
+                    },
+                    metrics,
+                };
+            }
+            case 'company': {
+                const accessContext = await this.repository.getAccessContext(clerkUserId);
+                if (accessContext.organizationIds.length === 0) {
+                    throw new Error('Company membership required to view company stats');
+                }
+                const metrics = await this.repository.getCompanyStats(accessContext.organizationIds);
+                return {
+                    scope: 'company',
                     range: {
                         label: range.label,
                         from: range.from.toISOString(),
