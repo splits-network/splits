@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import ActionableProposalsWidget from './actionable-proposals-widget';
+import { getActivityIcon } from '@/lib/utils';
 
 interface RecruiterStats {
     active_roles: number;
@@ -144,15 +145,6 @@ export default function RecruiterDashboard({ token, profile }: RecruiterDashboar
         );
     }
 
-    const getActivityIcon = (type: string) => {
-        switch (type) {
-            case 'application_submitted': return 'fa-user-plus';
-            case 'stage_changed': return 'fa-arrow-right';
-            case 'offer_extended': return 'fa-file-contract';
-            case 'placement_created': return 'fa-trophy';
-            default: return 'fa-circle-info';
-        }
-    };
 
     return (
         <div className="space-y-6">

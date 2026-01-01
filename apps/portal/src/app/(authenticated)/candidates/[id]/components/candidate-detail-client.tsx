@@ -8,6 +8,15 @@ import { createAuthenticatedClient } from '@/lib/api-client';
 import DocumentList from '@/components/document-list';
 import SubmitToJobWizard from './submit-to-job-wizard';
 import VerificationModal from './verification-modal';
+import {
+    formatDate,
+    getApplicationStageBadge,
+    getApplicationStageBgColor,
+    getApplicationStageIcon,
+    getRelationshipStatusBadge,
+    getVerificationStatusBadge,
+    getVerificationStatusIcon
+} from '@/lib/utils';
 
 interface CandidateDetailClientProps {
     candidateId: string;
@@ -176,6 +185,9 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
         userContext.roles?.some((role: string) => ['platform_admin', 'recruiter'].includes(role))
     );
 
+    // Check if candidate is already verified or rejected
+    const isVerificationComplete = candidate?.verification_status === 'verified' || candidate?.verification_status === 'rejected';
+
     const handleSubmitToJob = async (jobId: string, notes: string, documentIds: string[]) => {
         try {
             const token = await getToken();
@@ -218,81 +230,6 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
         } catch (err: any) {
             console.error('Failed to propose job to candidate:', err);
             throw new Error(err.message || 'Failed to send job opportunity to candidate');
-        }
-    };
-
-    const getStageColor = (stage: string) => {
-        switch (stage) {
-            case 'submitted': return 'badge-info';
-            case 'screen': return 'badge-primary';
-            case 'interview': return 'badge-warning';
-            case 'offer': return 'badge-success';
-            case 'hired': return 'badge-success';
-            case 'rejected': return 'badge-error';
-            default: return 'badge-ghost';
-        }
-    };
-
-    const getStageIcon = (stage: string) => {
-        switch (stage) {
-            case 'submitted': return 'fa-file-import';
-            case 'screen': return 'fa-phone';
-            case 'interview': return 'fa-comments';
-            case 'offer': return 'fa-file-contract';
-            case 'hired': return 'fa-check-circle';
-            case 'rejected': return 'fa-times-circle';
-            default: return 'fa-circle';
-        }
-    };
-
-    const formatDate = (date: string) => {
-        return new Date(date).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-        });
-    };
-
-    const getRelationshipStatusBadge = (status: string) => {
-        switch (status) {
-            case 'active':
-                return 'badge-success';
-            case 'expired':
-                return 'badge-warning';
-            case 'terminated':
-                return 'badge-error';
-            default:
-                return 'badge-ghost';
-        }
-    };
-
-    const getVerificationStatusBadge = (status: string) => {
-        switch (status) {
-            case 'verified':
-                return 'badge-success';
-            case 'pending':
-                return 'badge-warning';
-            case 'unverified':
-                return 'badge-neutral';
-            case 'rejected':
-                return 'badge-error';
-            default:
-                return 'badge-ghost';
-        }
-    };
-
-    const getVerificationStatusIcon = (status: string) => {
-        switch (status) {
-            case 'verified':
-                return 'fa-circle-check';
-            case 'pending':
-                return 'fa-clock';
-            case 'unverified':
-                return 'fa-circle-question';
-            case 'rejected':
-                return 'fa-circle-xmark';
-            default:
-                return 'fa-circle';
         }
     };
 
@@ -432,7 +369,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                                     </Link>
                                 </>
                             )}
-                            {canVerifyCandidate && (
+                            {canVerifyCandidate && !isVerificationComplete && (
                                 <button
                                     onClick={() => setShowVerificationModal(true)}
                                     className="btn btn-outline gap-2"
@@ -445,209 +382,233 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                     </div>
                 </div>
             </div>
+            <div className="flex flex-col md:flex-row gap-4">
+                <div className='basis-2/3'>
+                    {/* Bio */}
+                    <div className="card bg-base-100 shadow mb-6">
+                        <div className="card-body">
+                            <h2 className="card-title text-lg mb-4">
+                                <i className="fa-solid fa-user-circle mr-2"></i>
+                                Bio
+                            </h2>
+                            {candidate.bio ? (
+                                <p className="whitespace-pre-line">{candidate.bio}</p>
+                            ) : (
+                                <p className="text-base-content/70 italic">No bio available.</p>
+                            )}
+                        </div>
+                    </div>
+                    {/* Applications */}
+                    <div className='card bg-base-100 shadow'>
+                        <div className="card-body">
+                            <h2 className="card-title text-lg mb-4">
+                                <i className="fa-solid fa-briefcase mr-2"></i>
+                                Applications ({applications.length})
+                            </h2>
 
-            {/* Recruiter Relationship Information */}
-            {relationship && (
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body">
-                        <h2 className="card-title text-lg">Recruiter Relationship</h2>
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                    <span className="font-semibold">Status:</span>
-                                    <span className={`badge ${getRelationshipStatusBadge(relationship.status)}`}>
-                                        {relationship.status.charAt(0).toUpperCase() + relationship.status.slice(1)}
-                                    </span>
+                            {applicationsLoading ? (
+                                <div className="card bg-base-200">
+                                    <div className="card-body items-center text-center py-12">
+                                        <span className="loading loading-spinner loading-lg"></span>
+                                        <p className="mt-4 text-base-content/70">Loading applications...</p>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-4 text-sm text-base-content/70">
-                                    <div>
-                                        <i className="fa-solid fa-calendar-plus mr-1"></i>
-                                        Started: {formatDate(relationship.relationship_start_date)}
-                                    </div>
-                                    <div>
-                                        <i className="fa-solid fa-calendar-xmark mr-1"></i>
-                                        Expires: {formatDate(relationship.relationship_end_date)}
+                            ) : applicationsError ? (
+                                <div className="alert alert-error">
+                                    <i className="fa-solid fa-circle-exclamation"></i>
+                                    <span>{applicationsError}</span>
+                                </div>
+                            ) : applications.length === 0 ? (
+                                <div className="card bg-base-200">
+                                    <div className="card-body items-center text-center py-12">
+                                        <i className="fa-solid fa-inbox text-6xl text-base-content/20"></i>
+                                        <h3 className="text-xl font-semibold mt-4">No Applications</h3>
+                                        <p className="text-base-content/70 mt-2">
+                                            This candidate hasn't been submitted to any roles yet.
+                                        </p>
                                     </div>
                                 </div>
-                                {relationship.status === 'active' && isRelationshipExpiringSoon(relationship.relationship_end_date) && (
-                                    <div className="alert alert-warning mt-2">
-                                        <i className="fa-solid fa-triangle-exclamation"></i>
-                                        <span>Relationship expires in less than 30 days. Consider renewing.</span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {candidate.user_id && (
-                <div className="alert alert-info">
-                    <i className="fa-solid fa-info-circle"></i>
-                    <span>This candidate is self-managed and has their own platform account.</span>
-                </div>
-            )}
-
-            {/* Documents */}
-            <div className="card bg-base-100 shadow">
-                <div className="card-body">
-                    <h2 className="card-title text-lg mb-4">
-                        <i className="fa-solid fa-file-lines mr-2"></i>
-                        Documents
-                    </h2>
-                    <DocumentList
-                        entityType="candidate"
-                        entityId={candidateId}
-                        showUpload={canEdit}
-                    />
-                </div>
-            </div>
-
-            {/* Applications */}
-            <div>
-                <h2 className="text-2xl font-bold mb-4">Applications ({applications.length})</h2>
-
-                {applicationsLoading ? (
-                    <div className="card bg-base-100 shadow">
-                        <div className="card-body items-center text-center py-12">
-                            <span className="loading loading-spinner loading-lg"></span>
-                            <p className="mt-4 text-base-content/70">Loading applications...</p>
-                        </div>
-                    </div>
-                ) : applicationsError ? (
-                    <div className="alert alert-error">
-                        <i className="fa-solid fa-circle-exclamation"></i>
-                        <span>{applicationsError}</span>
-                    </div>
-                ) : applications.length === 0 ? (
-                    <div className="card bg-base-100 shadow">
-                        <div className="card-body items-center text-center py-12">
-                            <i className="fa-solid fa-inbox text-6xl text-base-content/20"></i>
-                            <h3 className="text-xl font-semibold mt-4">No Applications</h3>
-                            <p className="text-base-content/70 mt-2">
-                                This candidate hasn't been submitted to any roles yet.
-                            </p>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {applications.map((application) => (
-                            <div key={application.id} className="card bg-base-100 shadow hover:shadow transition-shadow">
-                                <div className="card-body">
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-3 mb-2">
-                                                <Link
-                                                    href={`/roles/${application.job_id}`}
-                                                    className="text-lg font-semibold hover:link"
-                                                >
-                                                    {application.job?.title || 'Unknown Role'}
-                                                </Link>
-                                                <span className={`badge ${getStageColor(application.stage)}`}>
-                                                    <i className={`fa-solid ${getStageIcon(application.stage)} mr-1`}></i>
-                                                    {application.stage.charAt(0).toUpperCase() + application.stage.slice(1)}
-                                                </span>
-                                            </div>
-                                            {application.job && (
-                                                <div className="flex items-center gap-4 text-sm text-base-content/70 mb-3">
-                                                    {application.job.location && (
-                                                        <div className="flex items-center gap-1">
-                                                            <i className="fa-solid fa-location-dot"></i>
-                                                            <span>{application.job.location}</span>
+                            ) : (
+                                <div className="space-y-4">
+                                    {applications.map((application) => (
+                                        <div key={application.id} className="card bg-base-200 hover:shadow-xl transition-shadow">
+                                            <div className="card-body">
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-3 mb-2">
+                                                            <Link
+                                                                href={`/roles/${application.job_id}`}
+                                                                className="text-lg font-semibold hover:link"
+                                                            >
+                                                                {application.job?.title || 'Unknown Role'}
+                                                            </Link>
+                                                            <span className={`badge ${getApplicationStageBadge(application.stage)}`}>
+                                                                <i className={`fa-solid ${getApplicationStageIcon(application.stage)} mr-1`}></i>
+                                                                {application.stage.charAt(0).toUpperCase() + application.stage.slice(1)}
+                                                            </span>
                                                         </div>
-                                                    )}
-                                                    {application.job.department && (
-                                                        <div className="flex items-center gap-1">
-                                                            <i className="fa-solid fa-building"></i>
-                                                            <span>{application.job.department}</span>
+                                                        {application.job && (
+                                                            <div className="flex items-center gap-4 text-sm text-base-content/70 mb-3">
+                                                                {application.job.location && (
+                                                                    <div className="flex items-center gap-1">
+                                                                        <i className="fa-solid fa-location-dot"></i>
+                                                                        <span>{application.job.location}</span>
+                                                                    </div>
+                                                                )}
+                                                                {application.job.department && (
+                                                                    <div className="flex items-center gap-1">
+                                                                        <i className="fa-solid fa-building"></i>
+                                                                        <span>{application.job.department}</span>
+                                                                    </div>
+                                                                )}
+                                                                <div className="flex items-center gap-1">
+                                                                    <i className="fa-solid fa-percent"></i>
+                                                                    <span>{application.job.fee_percentage}% fee</span>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                        {application.notes && (
+                                                            <div className="bg-base-200 rounded-lg p-3 mt-2">
+                                                                <div className="text-xs font-semibold text-base-content/60 mb-1">Notes</div>
+                                                                <div className="text-sm">{application.notes}</div>
+                                                            </div>
+                                                        )}
+                                                        <div className="flex items-center gap-4 text-xs text-base-content/60 mt-3">
+                                                            <div>
+                                                                <i className="fa-solid fa-calendar-plus mr-1"></i>
+                                                                Submitted {formatDate(application.created_at)}
+                                                            </div>
+                                                            <div>
+                                                                <i className="fa-solid fa-clock mr-1"></i>
+                                                                Updated {formatDate(application.updated_at)}
+                                                            </div>
                                                         </div>
-                                                    )}
-                                                    <div className="flex items-center gap-1">
-                                                        <i className="fa-solid fa-percent"></i>
-                                                        <span>{application.job.fee_percentage}% fee</span>
                                                     </div>
-                                                </div>
-                                            )}
-                                            {application.notes && (
-                                                <div className="bg-base-200 rounded-lg p-3 mt-2">
-                                                    <div className="text-xs font-semibold text-base-content/60 mb-1">Notes</div>
-                                                    <div className="text-sm">{application.notes}</div>
-                                                </div>
-                                            )}
-                                            <div className="flex items-center gap-4 text-xs text-base-content/60 mt-3">
-                                                <div>
-                                                    <i className="fa-solid fa-calendar-plus mr-1"></i>
-                                                    Submitted {formatDate(application.created_at)}
-                                                </div>
-                                                <div>
-                                                    <i className="fa-solid fa-clock mr-1"></i>
-                                                    Updated {formatDate(application.updated_at)}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="flex-shrink-0">
-                                            <Link
-                                                href={`/applications/${application.id}`}
-                                                className="btn btn-sm btn-ghost"
-                                            >
-                                                <i className="fa-solid fa-arrow-right"></i>
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            {/* Activity Timeline (Phase 1 - Simple version) */}
-            <div>
-                <h2 className="text-2xl font-bold mb-4">Activity Timeline</h2>
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body">
-                        {applicationsLoading ? (
-                            <div className="text-center py-8">
-                                <span className="loading loading-spinner loading-md"></span>
-                                <p className="mt-2 text-sm text-base-content/70">Loading timeline...</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {applications
-                                    .slice()
-                                    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-                                    .map((app) => (
-                                        <div key={app.id} className="flex gap-4">
-                                            <div className="flex flex-col items-center">
-                                                <div className={`w-3 h-3 rounded-full ${getStageColor(app.stage).replace('badge-', 'bg-')}`}></div>
-                                                <div className="w-px h-full bg-base-300"></div>
-                                            </div>
-                                            <div className="flex-1 pb-4">
-                                                <div className="font-semibold">
-                                                    Stage updated to {app.stage}
-                                                </div>
-                                                <div className="text-sm text-base-content/70">
-                                                    {app.job?.title || 'Unknown Role'}
-                                                </div>
-                                                <div className="text-xs text-base-content/60 mt-1">
-                                                    {formatDate(app.updated_at)}
+                                                    <div className="flex-shrink-0">
+                                                        <Link
+                                                            href={`/applications/${application.id}`}
+                                                            className="btn btn-sm btn-ghost"
+                                                        >
+                                                            <i className="fa-solid fa-arrow-right"></i>
+                                                        </Link>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
-                                <div className="flex gap-4">
-                                    <div className="flex flex-col items-center">
-                                        <div className="w-3 h-3 rounded-full bg-base-300"></div>
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="font-semibold">Candidate added</div>
-                                        <div className="text-xs text-base-content/60 mt-1">
-                                            {formatDate(candidate.created_at)}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+                <div className='basis-1/3 gap-4 flex flex-col'>
+
+                    {/* Recruiter Relationship Information */}
+                    {relationship && (
+                        <div className="card bg-base-100 shadow">
+                            <div className="card-body">
+                                <h2 className="card-title text-lg">
+                                    <i className="fa-solid fa-handshake mr-2"></i>
+                                    Recruiter Relationship
+                                </h2>
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-semibold">Status:</span>
+                                            <span className={`badge ${getRelationshipStatusBadge(relationship.status)}`}>
+                                                {relationship.status.charAt(0).toUpperCase() + relationship.status.slice(1)}
+                                            </span>
                                         </div>
+                                        <div className="flex items-center gap-4 text-sm text-base-content/70">
+                                            <div>
+                                                <i className="fa-solid fa-calendar-plus mr-1"></i>
+                                                Started: {formatDate(relationship.relationship_start_date)}
+                                            </div>
+                                            <div>
+                                                <i className="fa-solid fa-calendar-xmark mr-1"></i>
+                                                Expires: {formatDate(relationship.relationship_end_date)}
+                                            </div>
+                                        </div>
+                                        {relationship.status === 'active' && isRelationshipExpiringSoon(relationship.relationship_end_date) && (
+                                            <div className="alert alert-warning mt-2">
+                                                <i className="fa-solid fa-triangle-exclamation"></i>
+                                                <span>Relationship expires in less than 30 days. Consider renewing.</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
-                        )}
+                        </div>
+                    )}
+
+                    {/* Documents */}
+                    <div className="card bg-base-100 shadow">
+                        <div className="card-body">
+                            <h2 className="card-title text-lg mb-4">
+                                <i className="fa-solid fa-file-lines mr-2"></i>
+                                Documents
+                            </h2>
+                            <DocumentList
+                                entityType="candidate"
+                                entityId={candidateId}
+                                showUpload={canEdit}
+                            />
+                        </div>
+                    </div>
+
+
+                    {/* Activity Timeline (Phase 1 - Simple version) */}
+                    <div>
+                        <div className="card bg-base-100 shadow">
+                            <div className="card-body">
+                                <h2 className="card-title text-lg">
+                                    <i className="fa-solid fa-clock-rotate-left mr-2"></i>
+                                    Activity Timeline
+                                </h2>
+                                {applicationsLoading ? (
+                                    <div className="text-center py-8">
+                                        <span className="loading loading-spinner loading-md"></span>
+                                        <p className="mt-2 text-sm text-base-content/70">Loading timeline...</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {applications
+                                            .slice()
+                                            .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+                                            .map((app) => (
+                                                <div key={app.id} className="flex gap-4">
+                                                    <div className="flex flex-col items-center">
+                                                        <div className={`w-3 h-3 rounded-full ${getApplicationStageBgColor(app.stage)}`}></div>
+                                                        <div className="w-px h-full bg-base-300"></div>
+                                                    </div>
+                                                    <div className="flex-1 pb-4">
+                                                        <div className="font-semibold">
+                                                            Stage updated to {app.stage}
+                                                        </div>
+                                                        <div className="text-sm text-base-content/70">
+                                                            {app.job?.title || 'Unknown Role'}
+                                                        </div>
+                                                        <div className="text-xs text-base-content/60 mt-1">
+                                                            {formatDate(app.updated_at)}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        <div className="flex gap-4">
+                                            <div className="flex flex-col items-center">
+                                                <div className="w-3 h-3 rounded-full bg-base-300"></div>
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="font-semibold">Candidate added</div>
+                                                <div className="text-xs text-base-content/60 mt-1">
+                                                    {formatDate(candidate.created_at)}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

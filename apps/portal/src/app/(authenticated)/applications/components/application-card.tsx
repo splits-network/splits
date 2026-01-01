@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getApplicationStageBadge, getApplicationStageBorderColor } from '@/lib/utils';
 
 interface ApplicationCardProps {
     application: {
@@ -27,38 +28,23 @@ interface ApplicationCardProps {
     canAccept: boolean;
     isAccepting: boolean;
     onAccept: () => void;
-    getStageColor: (stage: string) => string;
     formatDate: (date: string) => string;
 }
-
-const stageBorder = (stage: string) => {
-    const borders: Record<string, string> = {
-        ai_review: 'border-warning',
-        submitted: 'border-info',
-        screen: 'border-primary',
-        interview: 'border-warning',
-        offer: 'border-success',
-        hired: 'border-success',
-        rejected: 'border-error',
-    };
-    return borders[stage] || 'border-base-200';
-};
 
 export function ApplicationCard({
     application,
     canAccept,
     isAccepting,
     onAccept,
-    getStageColor,
     formatDate,
 }: ApplicationCardProps) {
     const candidate = application.candidate;
     const isMasked = candidate._masked;
 
     return (
-        <div className={`card card-lg bg-base-100 shadow border-2 ${stageBorder(application.stage)} relative`}>
-            <div className="absolute right-4 top-4">
-                <span className={`badge ${getStageColor(application.stage)}`}>
+        <div className={`card card-lg bg-base-100 shadow border-2 ${getApplicationStageBorderColor(application.stage)} relative overflow-hidden`}>
+            <div className="absolute -right-1 -top-1">
+                <span className={`badge ${getApplicationStageBadge(application.stage)}`}>
                     {application.stage}
                 </span>
             </div>

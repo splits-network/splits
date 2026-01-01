@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { getPlatformIcon, getPlatformBadge } from '@/lib/utils';
 
 interface ATSIntegration {
     id: string;
@@ -58,28 +59,6 @@ export default function IntegrationsPage() {
         } finally {
             setLoading(false);
         }
-    };
-
-    const getPlatformIcon = (platform: string) => {
-        const icons: Record<string, string> = {
-            greenhouse: 'fa-leaf',
-            lever: 'fa-sliders',
-            workable: 'fa-briefcase',
-            ashby: 'fa-building',
-            generic: 'fa-plug',
-        };
-        return icons[platform] || 'fa-plug';
-    };
-
-    const getPlatformColor = (platform: string) => {
-        const colors: Record<string, string> = {
-            greenhouse: 'badge-success',
-            lever: 'badge-primary',
-            workable: 'badge-info',
-            ashby: 'badge-warning',
-            generic: 'badge-neutral',
-        };
-        return colors[platform] || 'badge-neutral';
     };
 
     const toggleSync = async (integration: ATSIntegration) => {
@@ -189,7 +168,7 @@ export default function IntegrationsPage() {
                                         </div>
                                         <div>
                                             <h3 className="card-title capitalize">{integration.platform}</h3>
-                                            <span className={`badge ${getPlatformColor(integration.platform)} badge-sm`}>
+                                            <span className={`badge ${getPlatformBadge(integration.platform)} badge-sm`}>
                                                 {integration.sync_enabled ? 'Active' : 'Paused'}
                                             </span>
                                         </div>

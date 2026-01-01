@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ApiClient } from '@/lib/api-client';
+import { getActivityIcon, getAlertClass, getHealthScore } from '@/lib/utils';
 
 interface PlatformStats {
     total_active_roles: number;
@@ -93,33 +94,6 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
             </div>
         );
     }
-
-    const getActivityIcon = (type: string) => {
-        switch (type) {
-            case 'placement_created': return 'fa-trophy';
-            case 'company_joined': return 'fa-building';
-            case 'recruiter_joined': return 'fa-user-plus';
-            case 'role_created': return 'fa-briefcase';
-            case 'payout_processed': return 'fa-money-bill-transfer';
-            case 'alert': return 'fa-triangle-exclamation';
-            default: return 'fa-circle-info';
-        }
-    };
-
-    const getAlertClass = (severity: string) => {
-        switch (severity) {
-            case 'error': return 'alert-error';
-            case 'warning': return 'alert-warning';
-            default: return 'alert-info';
-        }
-    };
-
-    const getHealthScore = (score: number) => {
-        if (score >= 80) return { color: 'text-success', label: 'Excellent' };
-        if (score >= 60) return { color: 'text-info', label: 'Good' };
-        if (score >= 40) return { color: 'text-warning', label: 'Fair' };
-        return { color: 'text-error', label: 'Needs Attention' };
-    };
 
     return (
         <div className="space-y-6">

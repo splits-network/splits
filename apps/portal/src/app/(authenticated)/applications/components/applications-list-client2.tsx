@@ -9,6 +9,7 @@ import { ApplicationTableRow } from './application-table-row';
 import { ApplicationFilters } from './application-filters';
 import { PaginationControls } from './pagination-controls';
 import BulkActionModal from './bulk-action-modal';
+import { formatDate, getApplicationStageBadge } from '@/lib/utils';
 
 interface Application {
     id: string;
@@ -37,10 +38,10 @@ interface Application {
         id: string;
         title: string;
         company_id?: string;
-    };
-    company: {
-        id: string;
-        name: string;
+        company?: {
+            id: string;
+            name: string;
+        };
     };
     ai_review?: {
         fit_score: number;
@@ -422,26 +423,7 @@ export default function ApplicationsListClient({
         }
     };
 
-    const formatDate = (date: string) => {
-        return new Date(date).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-        });
-    };
-
-    const getStageColor = (stage: string) => {
-        const colors: Record<string, string> = {
-            ai_review: 'badge-warning',
-            submitted: 'badge-info',
-            screen: 'badge-primary',
-            interview: 'badge-warning',
-            offer: 'badge-success',
-            hired: 'badge-success',
-            rejected: 'badge-error',
-        };
-        return colors[stage] || 'badge-ghost';
-    };
+    // Using centralized utilities from @/lib/utils
 
     const listIsLoading = loading;
     const showResultsSummary = !listIsLoading && applications.length > 0;
@@ -532,11 +514,13 @@ export default function ApplicationsListClient({
                             {applications.map((application) => (
                                 <ApplicationCard
                                     key={application.id}
-                                    application={application}
+                                    application={{
+                                        ...application,
+                                        company: application.job?.company
+                                    }}
                                     canAccept={isCompanyUser && !application.accepted_by_company}
                                     isAccepting={acceptingId === application.id}
                                     onAccept={() => handleAcceptApplication(application.id)}
-                                    getStageColor={getStageColor}
                                     formatDate={formatDate}
                                 />
                             ))}
@@ -615,7 +599,7 @@ export default function ApplicationsListClient({
                                                 canAccept={isCompanyUser && !application.accepted_by_company}
                                                 isAccepting={acceptingId === application.id}
                                                 onAccept={() => handleAcceptApplication(application.id)}
-                                                getStageColor={getStageColor}
+                                                getStageColor={getApplicationStageBadge}
                                                 formatDate={formatDate}
                                                 isRecruiter={isRecruiter}
                                                 isCompanyUser={isCompanyUser}

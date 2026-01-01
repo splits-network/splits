@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useViewMode } from '@/hooks/use-view-mode';
+import { formatDate, getVerificationStatusBadge, getVerificationStatusIcon } from '@/lib/utils';
 
 export default function CandidatesListClient() {
     const { getToken } = useAuth();
@@ -63,44 +64,6 @@ export default function CandidatesListClient() {
 
         loadCandidates();
     }, [getToken, scope]);
-
-    const formatDate = (date: string) => {
-        return new Date(date).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-        });
-    };
-
-    const getVerificationStatusBadge = (status: string) => {
-        switch (status) {
-            case 'verified':
-                return 'badge-success';
-            case 'pending':
-                return 'badge-warning';
-            case 'unverified':
-                return 'badge-neutral';
-            case 'rejected':
-                return 'badge-error';
-            default:
-                return 'badge-ghost';
-        }
-    };
-
-    const getVerificationStatusIcon = (status: string) => {
-        switch (status) {
-            case 'verified':
-                return 'fa-circle-check';
-            case 'pending':
-                return 'fa-clock';
-            case 'unverified':
-                return 'fa-circle-question';
-            case 'rejected':
-                return 'fa-circle-xmark';
-            default:
-                return 'fa-circle';
-        }
-    };
 
     const filteredCandidates = candidates.filter(candidate =>
         searchQuery === '' ||

@@ -38,10 +38,9 @@ export default async function CompanySettingsPage() {
     const profileArray = Array.isArray(profileResponse?.data)
         ? profileResponse.data
         : Array.isArray(profileResponse)
-          ? profileResponse
-          : [];
+            ? profileResponse
+            : [];
     const profile = profileArray[0] || {};
-    console.log('[Company Settings] Profile:', JSON.stringify(profile, null, 2));
 
     const roles: string[] = Array.isArray(profile.roles) ? profile.roles : [];
     const hasCompanyRole = roles.some((role) => role === 'company_admin' || role === 'hiring_manager');
@@ -54,7 +53,6 @@ export default async function CompanySettingsPage() {
 
     // Fetch company details
     let company = null;
-    console.log('[Company Settings] Organization ID:', organizationId);
     if (organizationId) {
         try {
             console.log('[Company Settings] Fetching companies for org:', organizationId);

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { getJobStatusBadge } from '@/lib/utils';
 import SubmitCandidateWizard from './submit-candidate-wizard';
 
 interface Job {
@@ -158,11 +159,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                         <div className="flex-1">
                             <div className="flex items-top md:items-center gap-3">
                                 <h1 className="text-3xl font-bold">{job.title}</h1>
-                                <div className={`badge ${job.status === 'active' ? 'badge-success' :
-                                    job.status === 'paused' ? 'badge-warning' :
-                                        job.status === 'filled' ? 'badge-info' :
-                                            'badge-neutral'
-                                    }`}>
+                                <div className={`badge ${getJobStatusBadge(job.status)}`}>
                                     {job.status}
                                 </div>
                             </div>

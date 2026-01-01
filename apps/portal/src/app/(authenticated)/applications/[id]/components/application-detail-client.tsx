@@ -9,6 +9,7 @@ import StageUpdateModal from './stage-update-modal';
 import AddNoteModal from './add-note-modal';
 import ApplicationTimeline from './application-timeline';
 import AIReviewPanel from '@/components/ai-review-panel';
+import { formatDate, getApplicationStageBadge, getApplicationStageLabel } from '@/lib/utils';
 
 interface ApplicationDetailClientProps {
     application: any;
@@ -21,28 +22,6 @@ interface ApplicationDetailClientProps {
     relationship: any;
     auditLogs: any[];
 }
-
-const STAGE_LABELS: Record<string, string> = {
-    draft: 'Draft',
-    ai_review: 'AI Review',
-    screen: 'Screening',
-    submitted: 'Submitted',
-    interview: 'Interview',
-    offer: 'Offer',
-    hired: 'Hired',
-    rejected: 'Rejected',
-};
-
-const STAGE_COLORS: Record<string, string> = {
-    draft: 'badge-neutral',
-    ai_review: 'badge-warning',
-    screen: 'badge-info',
-    submitted: 'badge-primary',
-    interview: 'badge-warning',
-    offer: 'badge-success',
-    hired: 'badge-success',
-    rejected: 'badge-error',
-};
 
 export default function ApplicationDetailClient({
     application,
@@ -421,8 +400,8 @@ export default function ApplicationDetailClient({
                             <div className="space-y-3">
                                 <div>
                                     <div className="text-sm text-base-content/70 mb-1">Current Stage</div>
-                                    <span className={`badge ${STAGE_COLORS[application.stage]} badge-lg`}>
-                                        {STAGE_LABELS[application.stage]}
+                                    <span className={`badge ${getApplicationStageBadge(application.stage)} badge-lg`}>
+                                        {getApplicationStageLabel(application.stage)}
                                     </span>
                                 </div>
                                 <div>

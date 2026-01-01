@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useViewMode } from '@/hooks/use-view-mode';
+import { getJobStatusBadge, getJobStatusBorderColor } from '@/lib/utils';
 
 interface Job {
     id: string;
@@ -42,25 +43,7 @@ interface Stats {
     inReviewCount?: number;
 }
 
-function getStatusBadge(status: string) {
-    const styles = {
-        active: 'badge-success',
-        paused: 'badge-warning',
-        filled: 'badge-info',
-        closed: 'badge-neutral',
-    };
-    return styles[status as keyof typeof styles] || 'badge-neutral';
-}
-
-function getCardBorder(status: string) {
-    const styles = {
-        active: 'border-green-500',
-        paused: 'border-yellow-500',
-        filled: 'border-blue-500',
-        closed: 'border-gray-500',
-    };
-    return styles[status as keyof typeof styles] || 'border-gray-300';
-}
+// Using centralized utilities from @/lib/utils
 
 export default function RolesList() {
     const { getToken } = useAuth();
@@ -403,9 +386,9 @@ export default function RolesList() {
             {viewMode === 'grid' && filteredJobs.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {filteredJobs.map((job) => (
-                        <div key={job.id} className={`card card-lg bg-base-100 shadow hover:shadow transition-shadow overflow-hidden relative border-2 ${getCardBorder(job.status)}`}>
+                        <div key={job.id} className={`card card-lg bg-base-100 shadow hover:shadow transition-shadow overflow-hidden relative border-2 ${getJobStatusBorderColor(job.status)}`}>
                             <div className="flex flex-col items-end gap-2 absolute -top-1 -right-1">
-                                <div className={`badge ${getStatusBadge(job.status)}`}>
+                                <div className={`badge ${getJobStatusBadge(job.status)}`}>
                                     {job.status}
                                 </div>
                             </div>
@@ -421,7 +404,7 @@ export default function RolesList() {
                                 <div className="flex flex-col justify-between items-start mb-auto min-h-40">
                                     <div className='flex justify-between items-start'>
                                         <Link href={`/roles/${job.id}`} className="hover:text-primary transition-colors">
-                                            <h2 className="card-title text-3xl">{job.title}</h2>
+                                            <h2 className="card-title text-3xl">{job.title}</h2>JobStatusBorderColo
                                         </Link>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 mt-2 text-sm text-base-content/70">
@@ -512,7 +495,7 @@ export default function RolesList() {
                                             </span>
                                         </td>
                                         <td>
-                                            <div className={`badge ${getStatusBadge(job.status)}`}>
+                                            <div className={`badge ${getJobStatusBadge(job.status)}`}>
                                                 {job.status}
                                             </div>
                                         </td>

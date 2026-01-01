@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ApiClient } from '@/lib/api-client';
+import { getActivityIcon, getJobStatusBadge } from '@/lib/utils';
 
 interface CompanyStats {
     active_roles: number;
@@ -80,27 +81,6 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
             </div>
         );
     }
-
-    const getActivityIcon = (type: string) => {
-        switch (type) {
-            case 'application_received': return 'fa-inbox';
-            case 'interview_scheduled': return 'fa-calendar-check';
-            case 'offer_extended': return 'fa-file-contract';
-            case 'placement_completed': return 'fa-check-circle';
-            case 'role_created': return 'fa-plus-circle';
-            default: return 'fa-circle-info';
-        }
-    };
-
-    const getStatusBadge = (status: string) => {
-        const statusMap: Record<string, string> = {
-            open: 'badge-success',
-            paused: 'badge-warning',
-            filled: 'badge-info',
-            closed: 'badge-ghost',
-        };
-        return statusMap[status] || 'badge-ghost';
-    };
 
     return (
         <div className="space-y-6">
@@ -281,7 +261,7 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
                                                         </span>
                                                     </td>
                                                     <td className="text-center">
-                                                        <div className={`badge ${getStatusBadge(role.status)}`}>
+                                                        <div className={`badge ${getJobStatusBadge(role.status)}`}>
                                                             {role.status}
                                                         </div>
                                                     </td>
