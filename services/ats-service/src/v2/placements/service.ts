@@ -79,13 +79,15 @@ export class PlacementServiceV2 {
         // Emit event
         if (this.eventPublisher) {
             await this.eventPublisher.publish('placement.created', {
-                placementId: placement.id,
-                jobId: placement.job_id,
-                candidateId: placement.candidate_id,
-                applicationId: placement.application_id,
+                placement_id: placement.id,
+                job_id: placement.job_id,
+                candidate_id: placement.candidate_id,
+                application_id: placement.application_id,
+                recruiter_id: placement.recruiter_id,
                 salary: placement.salary,
-                feePercentage: placement.fee_percentage,
-                createdBy: clerkUserId,
+                fee_percentage: placement.fee_percentage,
+                recruiter_share: placement.recruiter_share,
+                created_by: clerkUserId,
             });
         }
 
@@ -132,17 +134,17 @@ export class PlacementServiceV2 {
         if (this.eventPublisher) {
             if (updates.status && updates.status !== currentPlacement.status) {
                 await this.eventPublisher.publish('placement.status_changed', {
-                    placementId: id,
-                    previousStatus: currentPlacement.status,
-                    newStatus: updates.status,
-                    changedBy: clerkUserId,
+                    placement_id: id,
+                    previous_status: currentPlacement.status,
+                    new_status: updates.status,
+                    changed_by: clerkUserId,
                 });
             }
 
             await this.eventPublisher.publish('placement.updated', {
-                placementId: id,
-                updatedFields: Object.keys(updates),
-                updatedBy: clerkUserId,
+                placement_id: id,
+                updated_fields: Object.keys(updates),
+                updated_by: clerkUserId,
             });
         }
 
@@ -159,8 +161,8 @@ export class PlacementServiceV2 {
 
         if (this.eventPublisher) {
             await this.eventPublisher.publish('placement.deleted', {
-                placementId: id,
-                deletedBy: clerkUserId,
+                placement_id: id,
+                deleted_by: clerkUserId,
             });
         }
     }

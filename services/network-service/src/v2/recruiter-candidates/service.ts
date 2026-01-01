@@ -65,10 +65,10 @@ export class RecruiterCandidateServiceV2 {
 
         // Publish event
         await this.eventPublisher.publish('recruiter_candidate.created', {
-                relationshipId: relationship.id,
-                recruiterId: relationship.recruiter_id,
-                candidateId: relationship.candidate_id,
-            });
+            relationship_id: relationship.id,
+            recruiter_id: relationship.recruiter_id,
+            candidate_id: relationship.candidate_id,
+        });
 
         return relationship;
     }
@@ -102,9 +102,9 @@ export class RecruiterCandidateServiceV2 {
 
         // Publish event
         await this.eventPublisher.publish('recruiter_candidate.updated', {
-                relationshipId: id,
-                updates: Object.keys(updates),
-            });
+            relationship_id: id,
+            updates: Object.keys(updates),
+        });
 
         return relationship;
     }
@@ -113,9 +113,9 @@ export class RecruiterCandidateServiceV2 {
         await this.repository.deleteRecruiterCandidate(id);
 
         // Publish event
-            await this.eventPublisher.publish('recruiter_candidate.deleted', {
-                relationshipId: id,
-            });
+        await this.eventPublisher.publish('recruiter_candidate.deleted', {
+            relationship_id: id,
+        });
     }
 
     async getInvitationByToken(token: string) {
