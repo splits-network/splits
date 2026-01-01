@@ -40,7 +40,7 @@ declare module 'fastify' {
  * @param request - Fastify request with optional auth context populated by Clerk middleware
  * @returns Object with auth headers to pass to backend services (empty if no auth)
  */
-export function buildAuthHeaders(request: FastifyRequest): Partial<AuthHeaders> {
+export function buildAuthHeaders(request: FastifyRequest): Record<string, string> {
   const auth = request.auth;
 
   if (!auth) {
@@ -48,7 +48,7 @@ export function buildAuthHeaders(request: FastifyRequest): Partial<AuthHeaders> 
     return {};
   }
 
-  const headers: AuthHeaders = {
+  const headers: Record<string, string> = {
     'x-clerk-user-id': auth.clerkUserId,
   };
 
