@@ -10,7 +10,12 @@ import { formatSalary, formatDate, getRoleBadges } from '@/lib/utils';
 interface Job {
     id: string;
     title: string;
-    company?: { name: string };
+    company?: {
+        name: string;
+        industry?: string;
+        headquarters_location?: string;
+        logo_url?: string;
+    };
     location?: string;
     category?: string;
     salary_min?: number;
@@ -382,15 +387,52 @@ export default function JobsListClient({
                                         className="group card bg-base-100 border border-base-300 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden"
                                     >
                                         {/* Company header with gradient background */}
-                                        <div className="relative h-20 bg-linear-to-br from-primary/10 via-secondary/5 to-accent/10">
+                                        <div className="relative h-24 bg-linear-to-br from-primary/10 via-secondary/5 to-accent/10">
                                             <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
-                                            {/* Company logo placeholder */}
-                                            <div className="absolute -bottom-8 left-6">
-                                                <div className="w-16 h-16 rounded-xl bg-base-100 border-4 border-base-100 shadow-lg flex items-center justify-center">
-                                                    <div className="w-12 h-12 rounded-lg bg-linear-to-br from-primary to-secondary flex items-center justify-center text-primary-content font-bold text-xl">
+                                            {/* Company logo and info */}
+                                            <div className="absolute -bottom-10 left-6 flex items-center gap-4">
+                                                <div className="w-20 h-20 rounded-xl bg-base-100 border-4 border-base-100 shadow-lg flex items-center justify-center overflow-hidden">
+                                                    {job.company?.logo_url ? (
+                                                        <img
+                                                            src={job.company.logo_url}
+                                                            alt={`${job.company.name} logo`}
+                                                            className="w-20 h-20 object-contain rounded-lg"
+                                                            onError={(e) => {
+                                                                e.currentTarget.style.display = 'none';
+                                                                e.currentTarget.nextElementSibling?.removeAttribute('hidden');
+                                                            }}
+                                                        />
+                                                    ) : null}
+                                                    <div
+                                                        className={`w-20 h-20 rounded-lg bg-linear-to-br from-primary to-secondary flex items-center justify-center text-primary-content font-bold text-2xl ${job.company?.logo_url ? 'hidden' : ''
+                                                            }`}
+                                                        {...(job.company?.logo_url ? { hidden: true } : {})}
+                                                    >
                                                         {(job.company?.name || 'C')[0].toUpperCase()}
                                                     </div>
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <p className="text-base font-semibold text-base-content/70 flex items-center gap-2">
+                                                        <i className="fa-solid fa-building text-primary"></i>
+                                                        {job.company?.name || 'Confidential Company'}
+                                                    </p>
+                                                    {(job.company?.headquarters_location || job.company?.industry) && (
+                                                        <div className="mt-1 flex gap-2">
+                                                            {job.company?.headquarters_location && (
+                                                                <span className="badge badge-outline badge-sm gap-1">
+                                                                    <i className="fa-solid fa-location-dot text-xs"></i>
+                                                                    {job.company.headquarters_location}
+                                                                </span>
+                                                            )}
+                                                            {job.company?.industry && (
+                                                                <span className="badge badge-outline badge-sm gap-1">
+                                                                    <i className="fa-solid fa-industry text-xs"></i>
+                                                                    {job.company.industry}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -412,14 +454,11 @@ export default function JobsListClient({
                                         </div>
 
                                         <div className="card-body pt-12 pb-6 space-y-4">
-                                            {/* Title and company */}
-                                            <div className="space-y-2">
+                                            {/* Job title */}
+                                            <div className="mt-6">
                                                 <h3 className="text-xl font-bold leading-tight group-hover:text-primary transition-colors line-clamp-2">
                                                     {job.title}
                                                 </h3>
-                                                <p className="text-base font-semibold text-base-content/70">
-                                                    {job.company?.name || 'Confidential Company'}
-                                                </p>
                                             </div>
 
                                             {/* Description preview */}

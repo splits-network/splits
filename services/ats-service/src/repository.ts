@@ -291,6 +291,9 @@ export class AtsRepository {
             company: {
                 id: row.company_id,
                 name: row.company_name,
+                industry: row.company_industry,
+                headquarters_location: row.company_headquarters_location,
+                logo_url: row.company_logo_url,
                 identity_organization_id: row.company_identity_organization_id,
                 created_at: row.company_created_at,
                 updated_at: row.company_updated_at,
@@ -358,7 +361,7 @@ export class AtsRepository {
             .from('jobs')
             .select(`
                 *,
-                company:companies(id, name, identity_organization_id)
+                company:companies(id, name, industry, headquarters_location, logo_url, identity_organization_id)
             `, { count: 'exact' });
 
         // Parallel role resolution: Check which role(s) this user has

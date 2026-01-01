@@ -14,7 +14,13 @@ interface JobRequirement {
 interface Job {
     id: string;
     title: string;
-    company?: { name: string; description?: string };
+    company?: {
+        name: string;
+        description?: string;
+        industry?: string;
+        headquarters_location?: string;
+        logo_url?: string;
+    };
     department?: string;
     location?: string;
     salary_min?: number;

@@ -154,75 +154,104 @@ export default function CandidatesListClient() {
 
             {/* Candidates List - Grid View */}
             {viewMode === 'grid' && filteredCandidates.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                     {filteredCandidates.map((candidate) => (
-                        <div key={candidate.id} className="card bg-base-100 shadow hover:shadow transition-shadow">
-                            <div className="card-body">
-                                <div className="flex items-start gap-3">
-                                    <div className="avatar avatar-placeholder">
-                                        <div className="bg-primary/10 text-primary rounded-full w-12">
-                                            <span className="text-lg">{candidate.full_name[0]}</span>
-                                        </div>
+                        <Link
+                            key={candidate.id}
+                            href={`/candidates/${candidate.id}`}
+                            className="group card bg-base-100 border border-base-100 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
+                        >
+                            {/* Header with gradient background */}
+                            <div className="relative h-24 bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10">
+                                <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+
+                                {/* Verification and relationship badges */}
+                                <div className="absolute top-3 right-3 flex gap-2">
+                                    {candidate.verification_status && (
+                                        <span className={`badge ${getVerificationStatusBadge(candidate.verification_status)} gap-1 shadow-lg`} title={`Verification Status: ${candidate.verification_status.charAt(0).toUpperCase() + candidate.verification_status.slice(1)}`}>
+                                            <i className={`fa-solid ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
+                                        </span>
+                                    )}
+                                    {candidate.is_sourcer && (
+                                        <span className="badge badge-primary gap-1 shadow-lg" title="You sourced this candidate">
+                                            <i className="fa-solid fa-star"></i>
+                                            Sourcer
+                                        </span>
+                                    )}
+                                    {candidate.has_active_relationship && (
+                                        <span className="badge badge-success gap-1 shadow-lg" title="Active relationship">
+                                            <i className="fa-solid fa-handshake"></i>
+                                            Active
+                                        </span>
+                                    )}
+                                </div>
+
+                                {/* Avatar positioned at bottom of header */}
+                                <div className="absolute -bottom-10 left-6">
+                                    <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-content font-bold text-3xl shadow-lg border-4 border-base-100">
+                                        {candidate.full_name[0].toUpperCase()}
                                     </div>
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <Link href={`/candidates/${candidate.id}`} className="hover:text-primary transition-colors">
-                                                <h3 className="card-title text-xl">{candidate.full_name}</h3>
-                                            </Link>
-                                            {candidate.verification_status && (
-                                                <span className={`badge badge-sm ${getVerificationStatusBadge(candidate.verification_status)} gap-1`} title={`Verification Status: ${candidate.verification_status.charAt(0).toUpperCase() + candidate.verification_status.slice(1)}`}>
-                                                    <i className={`fa-solid ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
-                                                </span>
-                                            )}
-                                            {candidate.is_sourcer && (
-                                                <span className="badge badge-sm badge-primary gap-1" title="You sourced this candidate">
-                                                    <i className="fa-solid fa-star"></i>
-                                                    Sourcer
-                                                </span>
-                                            )}
-                                            {candidate.has_active_relationship && (
-                                                <span className="badge badge-sm badge-success gap-1" title="Active relationship">
-                                                    <i className="fa-solid fa-handshake"></i>
-                                                    Active
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="text-sm text-base-content/70 mt-1">
-                                            <a href={`mailto:${candidate.email}`} className="link link-hover">
-                                                {candidate.email}
-                                            </a>
-                                        </div>
+                                </div>
+                            </div>
+
+                            <div className="card-body pt-8 pb-6 space-y-4 flex-1 flex flex-col">
+                                {/* Candidate name as main focus */}
+                                <div className="mt-6">
+                                    <h3 className="text-xl font-bold leading-tight group-hover:text-primary transition-colors">
+                                        {candidate.full_name}
+                                    </h3>
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <a
+                                            href={`mailto:${candidate.email}`}
+                                            className="text-sm text-base-content/70 hover:text-primary transition-colors flex items-center gap-1.5"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <i className="fa-solid fa-envelope"></i>
+                                            {candidate.email}
+                                        </a>
                                     </div>
                                 </div>
 
+                                {/* LinkedIn section */}
                                 {candidate.linkedin_url && (
-                                    <div className="mt-3">
+                                    <div className="bg-gradient-to-r from-blue-50/50 to-blue-100/30 dark:from-blue-900/20 dark:to-blue-800/10 rounded-lg p-4 border border-blue-200/30 dark:border-blue-700/30">
                                         <a
                                             href={candidate.linkedin_url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="btn btn-ghost btn-sm gap-2"
+                                            className="flex items-center gap-3 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                                            onClick={(e) => e.stopPropagation()}
                                         >
-                                            <i className="fa-brands fa-linkedin"></i>
-                                            LinkedIn Profile
+                                            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center">
+                                                <i className="fa-brands fa-linkedin text-blue-600 dark:text-blue-400"></i>
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="text-sm font-medium">LinkedIn Profile</div>
+                                                <div className="text-xs opacity-70">View professional background</div>
+                                            </div>
+                                            <i className="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                                         </a>
                                     </div>
                                 )}
 
-                                <div className="card-actions justify-between items-center mt-4">
-                                    <span className="text-sm text-base-content/60">
+                                {/* Spacer to push footer to bottom */}
+                                <div className="flex-1"></div>
+
+                                {/* Footer with date */}
+                                <div className="flex items-center justify-between pt-4 border-t border-base-300">
+                                    <div className="text-xs text-base-content/50 flex items-center gap-1.5">
+                                        <i className="fa-solid fa-calendar-plus"></i>
                                         Added {formatDate(candidate.created_at)}
-                                    </span>
-                                    <Link
-                                        href={`/candidates/${candidate.id}`}
-                                        className="btn btn-primary btn-sm gap-2"
-                                    >
-                                        View Details
-                                        <i className="fa-solid fa-arrow-right"></i>
-                                    </Link>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
+                                            View Details
+                                            <i className="fa-solid fa-arrow-right"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             )}

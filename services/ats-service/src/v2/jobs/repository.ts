@@ -38,7 +38,7 @@ export class JobRepository {
             .select(
                 `
                 *,
-                company:companies!inner(id, name, identity_organization_id)
+                company:companies!inner(id, name, industry, headquarters_location, logo_url, identity_organization_id)
             `,
                 { count: 'exact' }
             );
@@ -120,7 +120,7 @@ export class JobRepository {
             .select(
                 `
                 *,
-                company:companies(id, name, description, website)
+                company:companies(id, name, industry, headquarters_location, logo_url, description, website)
             `
             )
             .eq('id', id);

@@ -15,7 +15,13 @@ interface JobRequirement {
 interface Job {
     id: string;
     title: string;
-    company?: { name: string; description?: string };
+    company?: {
+        name: string;
+        description?: string;
+        industry?: string;
+        headquarters_location?: string;
+        logo_url?: string;
+    };
     department?: string;
     location?: string;
     salary_min?: number;
@@ -225,9 +231,9 @@ export default function JobDetailClient({
                                                     <div className="text-xs text-base-content/70">Status</div>
                                                     <div className="font-semibold">
                                                         <span className={`badge ${job.status === 'active' ? 'badge-success' :
-                                                                job.status === 'paused' ? 'badge-warning' :
-                                                                    job.status === 'filled' ? 'badge-info' :
-                                                                        'badge-neutral'
+                                                            job.status === 'paused' ? 'badge-warning' :
+                                                                job.status === 'filled' ? 'badge-info' :
+                                                                    'badge-neutral'
                                                             }`}>
                                                             {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
                                                         </span>

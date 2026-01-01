@@ -30,6 +30,9 @@ RETURNS TABLE (
     created_at TIMESTAMPTZ,
     updated_at TIMESTAMPTZ,
     company_name TEXT,
+    company_industry TEXT,
+    company_headquarters_location TEXT,
+    company_logo_url TEXT,
     company_identity_organization_id TEXT,
     company_created_at TIMESTAMPTZ,
     company_updated_at TIMESTAMPTZ
@@ -57,6 +60,9 @@ BEGIN
         j.created_at,
         j.updated_at,
         c.name as company_name,
+        c.industry as company_industry,
+        c.headquarters_location as company_headquarters_location,
+        c.logo_url as company_logo_url,
         c.identity_organization_id as company_identity_organization_id,
         c.created_at as company_created_at,
         c.updated_at as company_updated_at
