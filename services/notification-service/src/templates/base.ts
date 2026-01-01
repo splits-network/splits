@@ -1,7 +1,10 @@
 /**
  * Base HTML Email Template for Splits Network
  * Matches brand styling from the portal: #0d9488 primary teal, #14b8a6 secondary teal
- * Features gradient header matching the dashboard design
+ * Features white header with dynamic logo switching based on recipient role:
+ * - source: 'candidate' → Applicant Network logo
+ * - source: 'portal' → Splits Network logo (default for recruiters, admins, etc.)
+ * - source: 'corporate' → Employment Networks logo
  */
 
 export type EmailSource = 'portal' | 'candidate' | 'corporate';
@@ -9,6 +12,7 @@ export type EmailSource = 'portal' | 'candidate' | 'corporate';
 export interface BaseEmailProps {
     preheader?: string;
     content: string;
+    /** Source determines which logo/branding to show. Use 'candidate' for candidates, 'portal' for all other users */
     source?: EmailSource;
 }
 
@@ -102,14 +106,14 @@ export function baseEmailTemplate({ preheader, content, source }: BaseEmailProps
           <!-- Main Email Card -->
           <table style="width: 100%; max-width: 600px;" cellpadding="0" cellspacing="0" role="presentation">
             
-            <!-- Header with gradient matching dashboard -->
+            <!-- Header with white background and full-color logo -->
             <tr>
-              <td style="background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%); padding: 40px 24px; text-align: center;">
+              <td style="background-color: #ffffff; padding: 40px 24px; text-align: center; border-bottom: 1px solid #e5e7eb;">
                 <table cellpadding="0" cellspacing="0" role="presentation" style="width: 100%;">
                   <tr>
                     <td style="text-align: center;">
-                      <img src="${logoUrl}" alt="Splits Network" width="180" height="48" style="height: 48px; width: auto; max-width: 180px; margin: 0 auto 16px; display: block; border: 0; outline: none; filter: brightness(0) invert(1);" />
-                      <p style="margin: 8px 0 0; font-size: 14px; color: #ffffff; font-weight: 500;">
+                      <img src="${logoUrl}" alt="Logo" width="180" height="48" style="height: 48px; width: auto; max-width: 180px; margin: 0 auto 12px; display: block; border: 0; outline: none;" />
+                      <p style="margin: 0; font-size: 14px; color: #6b7280; font-weight: 500;">
                         ${tagline}
                       </p>
                     </td>
