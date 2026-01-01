@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
 import UploadDocumentModal from './upload-document-modal';
 
 interface Document {
@@ -28,6 +29,7 @@ interface DocumentListProps {
 
 export default function DocumentList({ entityType, entityId, showUpload = false, onUpload }: DocumentListProps) {
     const { getToken } = useAuth();
+    const toast = useToast();
     const [documents, setDocuments] = useState<Document[]>([]);
     const [loading, setLoading] = useState(true);
     const [downloading, setDownloading] = useState<string | null>(null);
@@ -67,7 +69,7 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
             }
         } catch (error) {
             console.error('Failed to download document:', error);
-            alert('Failed to download document');
+            toast.error('Failed to download document');
         } finally {
             setDownloading(null);
         }
@@ -85,7 +87,7 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
             await fetchDocuments();
         } catch (error) {
             console.error('Failed to delete document:', error);
-            alert('Failed to delete document');
+            toast.error('Failed to delete document');
         }
     };
 

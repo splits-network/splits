@@ -45,8 +45,6 @@ const getApiBaseUrl = (pathSuffix: string) => {
 const API_V2_BASE_URL = getApiBaseUrl('/api/v2');
 const API_V1_BASE_URL = getApiBaseUrl('/api');
 
-console.log(`API Client module - API_V2_BASE_URL: "${API_V2_BASE_URL}", API_V1_BASE_URL: "${API_V1_BASE_URL}"`);
-
 export class ApiClient {
     private baseV2: string;
     private baseV1: string;
@@ -56,7 +54,6 @@ export class ApiClient {
         this.baseV2 = baseUrl;
         this.baseV1 = legacyBaseUrl;
         this.token = token;
-        console.log(`API Client constructor - baseV2: "${this.baseV2}", baseV1: "${this.baseV1}"`);
     }
 
     async request<T>(
@@ -66,7 +63,6 @@ export class ApiClient {
     ): Promise<T> {
         const baseUrl = version === 'v2' ? this.baseV2 : this.baseV1;
         const url = `${baseUrl}${endpoint}`;
-        console.log(`API Client - constructing URL: baseUrl="${baseUrl}" + endpoint="${endpoint}" = "${url}"`);
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
@@ -76,11 +72,8 @@ export class ApiClient {
         // Add authorization header if token is available
         if (this.token) {
             headers['Authorization'] = `Bearer ${this.token}`;
-            console.log(`API Client - Added Authorization header (token exists, length: ${this.token.length})`);
-        } else {
-            console.log(`API Client - No token available, skipping Authorization header`);
         }
-
+        
         const response = await fetch(url, {
             ...options,
             headers,
@@ -284,7 +277,7 @@ export class ApiClient {
     }
 
     async updateApplicationStage(id: string, stage: string, notes?: string) {
-        return this.request(`/v2/applications/${id}`, {
+        return this.request(`/applications/${id}`, {
             method: 'PATCH',
             body: JSON.stringify({ stage, notes }),
         });
@@ -457,7 +450,7 @@ export class ApiClient {
     }
 
     async getStats(params?: { scope?: string; type?: string; range?: string }) {
-        return this.get('/api/v2/stats', {
+        return this.get('/stats', {
             params,
         });
     }

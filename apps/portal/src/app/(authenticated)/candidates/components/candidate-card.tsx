@@ -7,10 +7,7 @@ interface CandidateCardProps {
 
 export default function CandidateCard({ candidate }: CandidateCardProps) {
     return (
-        <Link
-            href={`/candidates/${candidate.id}`}
-            className="group card bg-base-100 border border-base-100 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
-        >
+        <div className="group card bg-base-100 border border-base-100 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col" >
             {/* Header with gradient background */}
             <div className="relative h-24 bg-linear-to-br from-primary/10 via-secondary/5 to-accent/10">
                 <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
@@ -202,13 +199,13 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
                         Added {formatDate(candidate.created_at)}
                     </div>
                     <div className="flex gap-2">
-                        <button className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
+                        <Link href={`/candidates/${candidate.id}`} className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
                             View Details
                             <i className="fa-solid fa-arrow-right"></i>
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </div>
-        </Link>
+        </div>
     );
 }

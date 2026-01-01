@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
 
 interface Company {
     id: string;
@@ -22,6 +23,7 @@ interface UserProfile {
 export default function NewRolePage() {
     const router = useRouter();
     const { getToken } = useAuth();
+    const toast = useToast();
     const [loading, setLoading] = useState(false);
     const [initializing, setInitializing] = useState(true);
     const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);

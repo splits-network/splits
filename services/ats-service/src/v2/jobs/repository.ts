@@ -45,7 +45,7 @@ export class JobRepository {
 
         if (clerkUserId) {
             const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-console.log('[DEBUG][JobRepository] Access context for user', clerkUserId, ':', accessContext);
+            
             if (accessContext.isPlatformAdmin) {
                 // Platform admins see all jobs
                 console.log('[JobRepository] User is platform admin - showing all jobs');
@@ -60,7 +60,6 @@ console.log('[DEBUG][JobRepository] Access context for user', clerkUserId, ':', 
                 query = query.eq('status', 'active');
                 
                 if (filters.job_owner_filter === 'assigned') {
-                    console.log('[JobRepository] Filtering for assigned jobs, recruiterId:', accessContext.recruiterId);
                     
                     // Filter to jobs where recruiter has:
                     // 1. Applications in active stages (recruiter_proposed, draft, ai_review, screen, submitted, interview, offer)
@@ -73,13 +72,7 @@ console.log('[DEBUG][JobRepository] Access context for user', clerkUserId, ':', 
                         .select('job_id, stage, candidate_id')
                         .eq('recruiter_id', accessContext.recruiterId)
                         .in('stage', ['recruiter_proposed', 'draft', 'ai_review', 'screen', 'submitted', 'interview', 'offer']);
-                    
-                    console.log('[JobRepository] Applications query result:', { 
-                        count: applications?.length || 0, 
-                        applications: applications?.slice(0, 3),
-                        error: appsError 
-                    });
-                    
+                                        
                     // Get job IDs from placements
                     const { data: placements, error: placementsError } = await this.supabase
                         .schema('ats')
@@ -87,18 +80,12 @@ console.log('[DEBUG][JobRepository] Access context for user', clerkUserId, ':', 
                         .select('job_id, candidate_id')
                         .eq('recruiter_id', accessContext.recruiterId);
                     
-                    console.log('[JobRepository] Placements query result:', { 
-                        count: placements?.length || 0, 
-                        placements: placements?.slice(0, 3),
-                        error: placementsError 
-                    });
                     
                     // Combine unique job IDs
                     const applicationJobIds = applications?.map(a => a.job_id) || [];
                     const placementJobIds = placements?.map(p => p.job_id) || [];
                     const involvedJobIds = [...new Set([...applicationJobIds, ...placementJobIds])];
                     
-                    console.log('[JobRepository] Combined involved job IDs:', involvedJobIds);
                     
                     if (involvedJobIds.length > 0) {
                         query = query.in('id', involvedJobIds);
@@ -198,6 +185,16 @@ console.log('[DEBUG][JobRepository] Access context for user', clerkUserId, ':', 
                 .order('requirement_type')
                 .order('created_at');
             data.requirements = requirements || [];
+        }
+
+        if( include.includes('applications')) {
+            const { data: applications } = await this.supabase
+                .schema('ats')
+                .from('applications')
+                .select('*')
+                .eq('job_id', id)
+                .order('created_at', { ascending: false });
+            data.applications = applications || [];
         }
 
         return data;

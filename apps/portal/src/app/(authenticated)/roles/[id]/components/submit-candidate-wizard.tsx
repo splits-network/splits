@@ -2,8 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-
+import { createAuthenticatedClient } from '@/lib/api-client'; import { useToast } from '@/lib/toast-context';
 interface SubmitCandidateWizardProps {
     roleId: string;
     roleTitle: string;
@@ -29,6 +28,7 @@ export default function SubmitCandidateWizard({
     onClose,
 }: SubmitCandidateWizardProps) {
     const { getToken } = useAuth();
+    const toast = useToast();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Wizard state
@@ -208,19 +208,8 @@ export default function SubmitCandidateWizard({
 
             // Step 1: Create or use existing candidate
             if (mode === 'select' && selectedCandidate.id !== 'new') {
-                // Use existing candidate - call propose-to-candidate endpoint
+                // Use existing candidate
                 candidateId = selectedCandidate.id;
-
-                const proposeResponse: any = await client.post('/applications/propose-to-candidate', {
-                    job_id: roleId,
-                    candidate_id: candidateId,
-                    pitch: pitch.trim(),
-                });
-
-                applicationId =
-                    proposeResponse.data?.id ||
-                    proposeResponse.data?.application?.id ||
-                    proposeResponse.id;
             } else {
                 // Create new candidate first
                 const createResponse: any = await client.submitCandidate({
@@ -231,20 +220,21 @@ export default function SubmitCandidateWizard({
                 candidateId =
                     createResponse.data?.candidate?.id ||
                     createResponse.candidate?.id;
+            }
 
-                // If candidate was created, propose the job to them
-                if (candidateId) {
-                    const proposeResponse: any = await client.post('/applications/propose-to-candidate', {
-                        job_id: roleId,
-                        candidate_id: candidateId,
-                        pitch: pitch.trim(),
-                    });
+            // Step 2: Create application with proposal details
+            if (candidateId) {
+                const applicationResponse: any = await client.post('/applications', {
+                    job_id: roleId,
+                    candidate_id: candidateId,
+                    stage: 'recruiter_proposed',
+                    application_source: 'recruiter',
+                    recruiter_notes: pitch.trim(),
+                });
 
-                    applicationId =
-                        proposeResponse.data?.id ||
-                        proposeResponse.data?.application?.id ||
-                        proposeResponse.id;
-                }
+                applicationId =
+                    applicationResponse.data?.id ||
+                    applicationResponse.id;
             }
 
             if (!applicationId) {
@@ -263,21 +253,21 @@ export default function SubmitCandidateWizard({
             }
 
             // Success
-            alert(`Opportunity sent to ${selectedCandidate.full_name}! They'll receive an email notification.`);
+            toast.success(`Opportunity sent to ${selectedCandidate.full_name}! They'll receive an email notification.`);
             onClose();
             window.location.reload();
         } catch (err: any) {
             console.error('Failed to submit candidate:', err);
-            
+
             // Handle specific error cases
             let errorMessage = err.message || 'Failed to send opportunity to candidate';
-            
+
             if (errorMessage.includes('already has an active application')) {
                 errorMessage = `${selectedCandidate.full_name} already has an active application for this role. Please check the role's applications list.`;
             } else if (errorMessage.includes('HTTP 409')) {
                 errorMessage = `${selectedCandidate.full_name} already has an active application for this role. You cannot submit the same candidate twice.`;
             }
-            
+
             setError(errorMessage);
             setSubmitting(false);
         }

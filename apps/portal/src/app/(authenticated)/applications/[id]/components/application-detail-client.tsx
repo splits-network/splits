@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useAuth } from '@clerk/nextjs';
+import { useToast } from '@/lib/toast-context';
 import StageUpdateModal from './stage-update-modal';
 import AddNoteModal from './add-note-modal';
 import ApplicationTimeline from './application-timeline';
@@ -36,6 +37,7 @@ export default function ApplicationDetailClient({
 }: ApplicationDetailClientProps) {
     const router = useRouter();
     const { getToken } = useAuth();
+    const toast = useToast();
     const [showStageModal, setShowStageModal] = useState(false);
     const [showNoteModal, setShowNoteModal] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -94,7 +96,7 @@ export default function ApplicationDetailClient({
             router.refresh();
         } catch (error: any) {
             console.error('Failed to update stage:', error);
-            alert(error.message || 'Failed to update application stage');
+            toast.error(error.message || 'Failed to update application stage');
         } finally {
             setLoading(false);
         }
@@ -115,7 +117,7 @@ export default function ApplicationDetailClient({
             router.refresh();
         } catch (error: any) {
             console.error('Failed to add note:', error);
-            alert(error.message || 'Failed to add note');
+            toast.error(error.message || 'Failed to add note');
         } finally {
             setLoading(false);
         }

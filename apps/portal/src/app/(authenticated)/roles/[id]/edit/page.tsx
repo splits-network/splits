@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-
+import { createAuthenticatedClient } from '@/lib/api-client'; import { useToast } from '@/lib/toast-context';
 interface Job {
     id: string;
     title: string;

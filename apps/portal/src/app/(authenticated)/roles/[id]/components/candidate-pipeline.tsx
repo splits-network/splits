@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import StageChangeDropdown from './stage-change-dropdown';
+import { createAuthenticatedClient } from '@/lib/api-client'; import { useToast } from '@/lib/toast-context'; import StageChangeDropdown from './stage-change-dropdown';
 import HireModal from './hire-modal';
 import PreScreenRequestModal from './pre-screen-request-modal';
 import DocumentList from '@/components/document-list';
@@ -21,6 +20,9 @@ interface Application {
 }
 
 const stages = [
+    { key: 'recruiter_proposed', label: 'Proposed', color: 'badge-secondary' },
+    { key: 'draft', label: 'Draft', color: 'badge-accent' },
+    { key: 'ai_review', label: 'AI Review', color: 'badge-info' },
     { key: 'submitted', label: 'Submitted', color: 'badge-neutral' },
     { key: 'screen', label: 'Screen', color: 'badge-info' },
     { key: 'interview', label: 'Interview', color: 'badge-primary' },
@@ -35,6 +37,7 @@ interface CandidatePipelineProps {
 
 export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
     const { getToken } = useAuth();
+    const toast = useToast();
     const [applications, setApplications] = useState<Application[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedStage, setSelectedStage] = useState<string | null>(null);
@@ -89,7 +92,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
             await fetchApplications();
         } catch (error) {
             console.error('Failed to update stage:', error);
-            alert('Failed to update stage');
+            toast.error('Failed to update stage');
         }
     };
 

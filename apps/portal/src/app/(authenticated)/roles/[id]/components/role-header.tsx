@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
 import SubmitCandidateWizard from './submit-candidate-wizard';
 import { getJobStatusBadge } from '@/lib/utils/badge-styles';
 import { getRoleBadges } from '@/lib/utils/role-badges';
@@ -122,10 +123,10 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
 
             // Refresh the job data
             await fetchJob();
-            alert('Status updated successfully!');
+            toast.success('Status updated successfully!');
         } catch (error: any) {
             console.error('Failed to update status:', error);
-            alert(`Failed to update status: ${error.message}`);
+            toast.error(`Failed to update status: ${error.message}`);
         } finally {
             setUpdating(false);
         }

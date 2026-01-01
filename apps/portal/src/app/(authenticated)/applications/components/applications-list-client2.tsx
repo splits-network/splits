@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useViewMode } from '@/hooks/use-view-mode';
+import { useToast } from '@/lib/toast-context';
 import { ApplicationCard } from './application-card';
 import { ApplicationTableRow } from './application-table-row';
 import { ApplicationFilters } from './application-filters';
@@ -114,6 +115,7 @@ export default function ApplicationsListClient({
     initialOrganizationId = null,
 }: ApplicationsListClientProps) {
     const { getToken } = useAuth();
+    const toast = useToast();
 
     // State
     const [applications, setApplications] = useState<Application[]>([]);
@@ -355,7 +357,7 @@ export default function ApplicationsListClient({
             await loadApplications();
         } catch (err: any) {
             console.error('Failed to accept application:', err);
-            alert('Failed to accept application: ' + (err.message || 'Unknown error'));
+            toast.error('Failed to accept application: ' + (err.message || 'Unknown error'));
         } finally {
             setAcceptingId(null);
         }
@@ -418,7 +420,7 @@ export default function ApplicationsListClient({
             clearSelections();
         } catch (err: any) {
             console.error('Bulk action failed:', err);
-            alert('Bulk action failed: ' + (err.message || 'Unknown error'));
+            toast.error('Bulk action failed: ' + (err.message || 'Unknown error'));
         } finally {
             setBulkLoading(false);
         }

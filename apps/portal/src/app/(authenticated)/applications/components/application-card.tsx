@@ -179,10 +179,10 @@ export function ApplicationCard({
                                 )}
                             </button>
                         )}
-                        <button className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
+                        <Link href={`/applications/${application.id}`} className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
                             View Details
                             <i className="fa-solid fa-arrow-right"></i>
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </div>

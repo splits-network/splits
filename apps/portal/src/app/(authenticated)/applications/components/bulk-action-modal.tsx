@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useToast } from '@/lib/toast-context';
 
 interface BulkActionModalProps {
     action: 'stage' | 'reject';
@@ -26,6 +27,7 @@ export default function BulkActionModal({
     onConfirm,
     loading,
 }: BulkActionModalProps) {
+    const toast = useToast();
     const [newStage, setNewStage] = useState('');
     const [notes, setNotes] = useState('');
     const [reason, setReason] = useState('');
@@ -34,12 +36,12 @@ export default function BulkActionModal({
         e.preventDefault();
 
         if (action === 'stage' && !newStage) {
-            alert('Please select a stage');
+            toast.warning('Please select a stage');
             return;
         }
 
         if (action === 'reject' && !reason.trim()) {
-            alert('Please provide a rejection reason');
+            toast.warning('Please provide a rejection reason');
             return;
         }
 

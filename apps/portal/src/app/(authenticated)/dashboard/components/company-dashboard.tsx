@@ -57,16 +57,39 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
             const api = new ApiClient(undefined, token);
 
             // Load company stats using V2 endpoint
-            const statsResponse = await api.getStats({
-                scope: 'company'
-
-            });
+            const statsResponse = await api.get(`/stats?scope=company`);
             setStats(statsResponse.data);
 
-            // TODO: Load role breakdown and recent activity
-            // These will need V2 endpoints as well
-            // For now, leaving them empty
-            setRoleBreakdown([]);
+            // Load role breakdown using V2 API
+            // This will automatically filter to company's roles based on access context
+            const rolesResponse: any = await api.getRoles({
+                status: 'active',
+                limit: 100 // Get top 100 active roles
+            });
+
+            const rolesData = rolesResponse.data || [];
+
+            // Transform jobs into role breakdown format with calculated metrics
+            const breakdown: RoleBreakdown[] = rolesData.map((job: any) => {
+                const createdDate = new Date(job.created_at);
+                const now = new Date();
+                const daysOpen = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+
+                return {
+                    id: job.id,
+                    title: job.title,
+                    location: job.location || 'Remote',
+                    status: job.status,
+                    applications_count: job.application_count || 0,
+                    interview_count: job.interview_count || 0,
+                    offer_count: job.offer_count || 0,
+                    days_open: daysOpen
+                };
+            });
+
+            setRoleBreakdown(breakdown);
+
+            // TODO: Load recent activity - will need a V2 endpoint
             setRecentActivity([]);
         } catch (error) {
             console.error('Failed to load dashboard data:', error);

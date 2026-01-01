@@ -13,6 +13,7 @@ interface Job {
     recruiter_description?: string;
     candidate_description?: string;
     requirements?: Array<{ id: string; requirement_type: 'mandatory' | 'preferred'; description: string }>;
+    applications?: Array<any>;
 }
 
 interface RoleDetailsTabsProps {
@@ -39,8 +40,9 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
             }
 
             const client = createAuthenticatedClient(token);
-            const response = await client.getJob(roleId, ['requirements']) as { data: Job };
+            const response = await client.getJob(roleId, ['requirements,applications']) as { data: Job };
             const jobData = response.data;
+
             setJob(jobData);
         } catch (error) {
             console.error('Error fetching job:', error);
@@ -109,7 +111,7 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
                         onClick={() => setActiveTab('pipeline')}
                     >
                         <i className="fa-solid fa-users mr-2"></i>
-                        Candidate Pipeline
+                        Candidate Pipeline <span className='badge badge-info ml-2'>{job.applications?.length}</span>
                     </button>
                 </div>
 
