@@ -54,6 +54,7 @@ interface RoleHeaderProps {
 
 export default function RoleHeader({ roleId }: RoleHeaderProps) {
     const { getToken } = useAuth();
+    const toast = useToast();
     const [job, setJob] = useState<Job | null>(null);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
