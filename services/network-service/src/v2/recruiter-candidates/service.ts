@@ -78,6 +78,15 @@ export class RecruiterCandidateServiceV2 {
         updates: RecruiterCandidateUpdate,
         clerkUserId: string
     ): Promise<any> {
+        // Handle special action flags
+        if ((updates as any).resend_invitation === true) {
+            return this.resendInvitation(id, clerkUserId);
+        }
+
+        if ((updates as any).cancel_invitation === true) {
+            return this.cancelInvitation(id, clerkUserId);
+        }
+
         // Status validation
         if (updates.status) {
             const validStatuses = ['active', 'inactive', 'blocked'];

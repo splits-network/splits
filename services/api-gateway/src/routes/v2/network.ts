@@ -89,7 +89,6 @@ const INVITATION_MANAGEMENT_ROLES: UserRole[] = ['recruiter', 'platform_admin'];
 export function registerNetworkRoutes(app: FastifyInstance, services: ServiceRegistry) {
     NETWORK_RESOURCES.forEach(resource => registerResourceRoutes(app, services, resource));
     registerRecruiterCandidateInvitationRoutes(app, services);
-    registerRecruiterCandidateActions(app, services);
     registerTeamRoutes(app, services);
 }
 
@@ -160,7 +159,7 @@ function registerRecruiterCandidateInvitationRoutes(
 
             try {
                 const data = await networkService().post(
-                    `/v2/recruiter-candidates/invitations/${token}/accept`,
+                    `/api/v2/recruiter-candidates/invitations/${token}/accept`,
                     {
                         userId: req.auth.userId,
                         ip_address: forwardedIp,
@@ -221,72 +220,6 @@ function registerRecruiterCandidateInvitationRoutes(
                 return reply
                     .status(error.statusCode || 500)
                     .send(error.jsonBody || { error: 'Failed to decline invitation' });
-            }
-        }
-    );
-}
-
-function registerRecruiterCandidateActions(app: FastifyInstance, services: ServiceRegistry) {
-    const networkService = () => services.get('network');
-
-    app.post(
-        '/api/v2/recruiter-candidates/:id/resend-invitation',
-        {
-            preHandler: requireRoles(INVITATION_MANAGEMENT_ROLES, services),
-            schema: {
-                description: 'Resend recruiter invitation for a candidate',
-                tags: ['recruiter-candidates'],
-                security: [{ clerkAuth: [] }],
-            },
-        },
-        async (request: FastifyRequest, reply: FastifyReply) => {
-            const { id } = request.params as { id: string };
-            const correlationId = getCorrelationId(request);
-            const authHeaders = buildAuthHeaders(request);
-            try {
-                const data = await networkService().post(
-                    `/v2/recruiter-candidates/${id}/resend-invitation`,
-                    {},
-                    correlationId,
-                    authHeaders
-                );
-                return reply.send(data);
-            } catch (error: any) {
-                request.log.error({ error, id, correlationId }, 'Failed to resend invitation');
-                return reply
-                    .status(error.statusCode || 500)
-                    .send(error.jsonBody || { error: 'Failed to resend invitation' });
-            }
-        }
-    );
-
-    app.post(
-        '/api/v2/recruiter-candidates/:id/cancel-invitation',
-        {
-            preHandler: requireRoles(INVITATION_MANAGEMENT_ROLES, services),
-            schema: {
-                description: 'Cancel a pending recruiter invitation',
-                tags: ['recruiter-candidates'],
-                security: [{ clerkAuth: [] }],
-            },
-        },
-        async (request: FastifyRequest, reply: FastifyReply) => {
-            const { id } = request.params as { id: string };
-            const correlationId = getCorrelationId(request);
-            const authHeaders = buildAuthHeaders(request);
-            try {
-                const data = await networkService().post(
-                    `/v2/recruiter-candidates/${id}/cancel-invitation`,
-                    {},
-                    correlationId,
-                    authHeaders
-                );
-                return reply.send(data);
-            } catch (error: any) {
-                request.log.error({ error, id, correlationId }, 'Failed to cancel invitation');
-                return reply
-                    .status(error.statusCode || 500)
-                    .send(error.jsonBody || { error: 'Failed to cancel invitation' });
             }
         }
     );

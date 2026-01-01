@@ -21,3 +21,9 @@
 .animate-slide-up {
   animation: slide-up 0.3s ease-out;
 }
+
+/* Ensure stat descriptions wrap text properly */
+.stat-desc {
+  white-space: normal;
+  word-break: break-word;
+}

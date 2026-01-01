@@ -150,7 +150,8 @@ export default function InvitationsPageClient() {
             }
 
             const client = createAuthenticatedClient(token);
-            await client.post(`/recruiter-candidates/${invitationId}/resend-invitation`, {});
+            // V2 pattern: Use PATCH with action flag
+            await client.patch(`/recruiter-candidates/${invitationId}`, { resend_invitation: true });
 
             // Reload invitations to get updated data
             await loadInvitations();
@@ -178,7 +179,8 @@ export default function InvitationsPageClient() {
             }
 
             const client = createAuthenticatedClient(token);
-            await client.post(`/recruiter-candidates/${invitation.id}/cancel-invitation`, {});
+            // V2 pattern: Use PATCH with action flag
+            await client.patch(`/recruiter-candidates/${invitation.id}`, { cancel_invitation: true });
 
             // Reload invitations to get updated data
             await loadInvitations();
