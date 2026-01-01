@@ -156,6 +156,8 @@ export class ApplicationServiceV2 {
                 application_id: application.id,
                 job_id: application.job_id,
                 candidate_id: application.candidate_id,
+                recruiter_id: application.recruiter_id || null,
+                has_recruiter: !!application.recruiter_id,
                 stage: application.stage,
                 created_by: clerkUserId,
             });

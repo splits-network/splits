@@ -70,14 +70,12 @@ export class ApplicationsEventConsumer {
 
     async handleApplicationStageChanged(event: DomainEvent): Promise<void> {
         try {
-            const { application_id, old_stage, new_stage, job_id, candidate_id } = event.payload;
+            const { application_id, old_stage, new_stage, job_id, candidate_id, recruiter_id } = event.payload;
 
-            this.logger.info(
-                { application_id, old_stage, new_stage },
-                'Processing stage changed notification'
-            );
+            console.log('[APPLICATIONS-CONSUMER] 🔄 Stage changed:', { application_id, old_stage, new_stage });
+            this.logger.info({ application_id, old_stage, new_stage }, 'Processing stage changed notification');
 
-            // Fetch application to get recruiter ID
+            // Fetch application details
             const applicationResponse = await this.services.getAtsService().get<any>(`/applications/${application_id}`);
             const application = applicationResponse.data || applicationResponse;
 
@@ -89,38 +87,320 @@ export class ApplicationsEventConsumer {
             const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id || application.candidate_id}`);
             const candidate = candidateResponse.data || candidateResponse;
 
-            if (application.recruiter_id) {
-                // Get recruiter email using helper
-                const recruiterEmail = await this.emailLookup.getRecruiterEmail(application.recruiter_id);
+            const candidateEmail = candidate.email;
+            const candidateUserId = candidate.user_id;
+            const effectiveRecruiterId = recruiter_id || application.recruiter_id;
 
-                if (!recruiterEmail) {
-                    this.logger.warn(
-                        { application_id, recruiter_id: application.recruiter_id },
-                        'Cannot send stage changed email - recruiter has no email address'
-                    );
-                    return;
-                }
+            // Handle stage-specific notifications
+            switch (new_stage) {
+                case 'screen':
+                    // Recruiter screen scheduled
+                    console.log('[APPLICATIONS-CONSUMER] 📞 Screen stage - notifying candidate and recruiter');
+                    
+                    // Notify candidate
+                    if (candidateEmail) {
+                        await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName: job.company?.name || 'Unknown Company',
+                            hasRecruiter: !!effectiveRecruiterId,
+                            nextSteps: 'Your recruiter will contact you to schedule an initial screening call.',
+                            applicationId: application_id,
+                            userId: candidateUserId,
+                        });
+                    }
+                    
+                    // Notify recruiter
+                    if (effectiveRecruiterId) {
+                        const recruiterEmail = await this.emailLookup.getRecruiterEmail(effectiveRecruiterId);
+                        if (recruiterEmail) {
+                            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${effectiveRecruiterId}`);
+                            const recruiter = recruiterResponse.data || recruiterResponse;
+                            
+                            await this.emailService.sendApplicationStageChanged(recruiterEmail, {
+                                candidateName: candidate.full_name,
+                                jobTitle: job.title,
+                                companyName: job.company?.name || 'Unknown Company',
+                                oldStage: old_stage || 'Unknown',
+                                newStage: 'screen',
+                                applicationId: application_id,
+                                userId: recruiter.user_id,
+                            });
+                        }
+                    }
+                    break;
 
-                // Fetch recruiter to get user_id for tracking
-                const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${application.recruiter_id}`);
-                const recruiter = recruiterResponse.data || recruiterResponse;
+                case 'submitted':
+                    // Submitted to company
+                    console.log('[APPLICATIONS-CONSUMER] 📤 Submitted stage - notifying candidate, recruiter, and company');
+                    
+                    // Notify candidate
+                    if (candidateEmail) {
+                        await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName: job.company?.name || 'Unknown Company',
+                            hasRecruiter: !!effectiveRecruiterId,
+                            nextSteps: 'Your application has been submitted to the company for review.',
+                            applicationId: application_id,
+                            userId: candidateUserId,
+                        });
+                    }
+                    
+                    // Notify company admins
+                    const companyEmails = await this.emailLookup.getCompanyAdminEmails(job.company_id);
+                    for (const email of companyEmails) {
+                        await this.emailService.sendApplicationCreated(email, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName: job.company?.name || 'Unknown Company',
+                            applicationId: application_id,
+                        });
+                    }
+                    
+                    // Notify recruiter if present
+                    if (effectiveRecruiterId) {
+                        const recruiterEmail = await this.emailLookup.getRecruiterEmail(effectiveRecruiterId);
+                        if (recruiterEmail) {
+                            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${effectiveRecruiterId}`);
+                            const recruiter = recruiterResponse.data || recruiterResponse;
+                            
+                            await this.emailService.sendApplicationStageChanged(recruiterEmail, {
+                                candidateName: candidate.full_name,
+                                jobTitle: job.title,
+                                companyName: job.company?.name || 'Unknown Company',
+                                oldStage: old_stage || 'Unknown',
+                                newStage: 'submitted',
+                                applicationId: application_id,
+                                userId: recruiter.user_id,
+                            });
+                        }
+                    }
+                    break;
 
-                // Send email notification
-                await this.emailService.sendApplicationStageChanged(recruiterEmail, {
-                    candidateName: candidate.full_name,
-                    jobTitle: job.title,
-                    companyName: job.company?.name || 'Unknown Company',
-                    oldStage: old_stage || 'Unknown',
-                    newStage: new_stage,
-                    applicationId: application_id,
-                    userId: recruiter.user_id,
-                });
+                case 'interview':
+                    // Interview scheduled
+                    console.log('[APPLICATIONS-CONSUMER] 🎤 Interview stage - notifying all parties');
+                    
+                    // Notify candidate
+                    if (candidateEmail) {
+                        await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName: job.company?.name || 'Unknown Company',
+                            hasRecruiter: !!effectiveRecruiterId,
+                            nextSteps: 'The company would like to interview you! They will contact you to schedule.',
+                            applicationId: application_id,
+                            userId: candidateUserId,
+                        });
+                    }
+                    
+                    // Notify recruiter
+                    if (effectiveRecruiterId) {
+                        const recruiterEmail = await this.emailLookup.getRecruiterEmail(effectiveRecruiterId);
+                        if (recruiterEmail) {
+                            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${effectiveRecruiterId}`);
+                            const recruiter = recruiterResponse.data || recruiterResponse;
+                            
+                            await this.emailService.sendApplicationStageChanged(recruiterEmail, {
+                                candidateName: candidate.full_name,
+                                jobTitle: job.title,
+                                companyName: job.company?.name || 'Unknown Company',
+                                oldStage: old_stage || 'Unknown',
+                                newStage: 'interview',
+                                applicationId: application_id,
+                                userId: recruiter.user_id,
+                            });
+                        }
+                    }
+                    break;
 
-                this.logger.info(
-                    { application_id, recipient: recruiterEmail },
-                    'Application stage changed notification sent'
-                );
+                case 'offer':
+                    // Offer extended
+                    console.log('[APPLICATIONS-CONSUMER] 🎉 Offer stage - notifying candidate and recruiter');
+                    
+                    // Notify candidate
+                    if (candidateEmail) {
+                        await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName: job.company?.name || 'Unknown Company',
+                            hasRecruiter: !!effectiveRecruiterId,
+                            nextSteps: 'Congratulations! The company has extended an offer. Review the details and next steps.',
+                            applicationId: application_id,
+                            userId: candidateUserId,
+                        });
+                    }
+                    
+                    // Notify recruiter
+                    if (effectiveRecruiterId) {
+                        const recruiterEmail = await this.emailLookup.getRecruiterEmail(effectiveRecruiterId);
+                        if (recruiterEmail) {
+                            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${effectiveRecruiterId}`);
+                            const recruiter = recruiterResponse.data || recruiterResponse;
+                            
+                            await this.emailService.sendApplicationStageChanged(recruiterEmail, {
+                                candidateName: candidate.full_name,
+                                jobTitle: job.title,
+                                companyName: job.company?.name || 'Unknown Company',
+                                oldStage: old_stage || 'Unknown',
+                                newStage: 'offer',
+                                applicationId: application_id,
+                                userId: recruiter.user_id,
+                            });
+                        }
+                    }
+                    break;
+
+                case 'hired':
+                    // Candidate accepted offer
+                    console.log('[APPLICATIONS-CONSUMER] ✅ Hired stage - notifying everyone');
+                    
+                    // Notify candidate
+                    if (candidateEmail) {
+                        await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName: job.company?.name || 'Unknown Company',
+                            hasRecruiter: !!effectiveRecruiterId,
+                            nextSteps: 'Congratulations on your new role! Welcome to the team.',
+                            applicationId: application_id,
+                            userId: candidateUserId,
+                        });
+                    }
+                    
+                    // Notify recruiter
+                    if (effectiveRecruiterId) {
+                        const recruiterEmail = await this.emailLookup.getRecruiterEmail(effectiveRecruiterId);
+                        if (recruiterEmail) {
+                            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${effectiveRecruiterId}`);
+                            const recruiter = recruiterResponse.data || recruiterResponse;
+                            
+                            await this.emailService.sendApplicationStageChanged(recruiterEmail, {
+                                candidateName: candidate.full_name,
+                                jobTitle: job.title,
+                                companyName: job.company?.name || 'Unknown Company',
+                                oldStage: old_stage || 'Unknown',
+                                newStage: 'hired',
+                                applicationId: application_id,
+                                userId: recruiter.user_id,
+                            });
+                        }
+                    }
+                    
+                    // Notify company
+                    const companyEmailsHired = await this.emailLookup.getCompanyAdminEmails(job.company_id);
+                    for (const email of companyEmailsHired) {
+                        await this.emailService.sendApplicationStageChanged(email, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName: job.company?.name || 'Unknown Company',
+                            oldStage: old_stage || 'Unknown',
+                            newStage: 'hired',
+                            applicationId: application_id,
+                        });
+                    }
+                    break;
+
+                case 'rejected':
+                    // Application rejected
+                    console.log('[APPLICATIONS-CONSUMER] ❌ Rejected stage - notifying candidate and recruiter');
+                    
+                    // Notify candidate (if appropriate - may want to be gentle)
+                    if (candidateEmail) {
+                        await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName: job.company?.name || 'Unknown Company',
+                            hasRecruiter: !!effectiveRecruiterId,
+                            nextSteps: 'Thank you for your interest. The company has decided to move forward with other candidates at this time.',
+                            applicationId: application_id,
+                            userId: candidateUserId,
+                        });
+                    }
+                    
+                    // Notify recruiter
+                    if (effectiveRecruiterId) {
+                        const recruiterEmail = await this.emailLookup.getRecruiterEmail(effectiveRecruiterId);
+                        if (recruiterEmail) {
+                            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${effectiveRecruiterId}`);
+                            const recruiter = recruiterResponse.data || recruiterResponse;
+                            
+                            await this.emailService.sendApplicationStageChanged(recruiterEmail, {
+                                candidateName: candidate.full_name,
+                                jobTitle: job.title,
+                                companyName: job.company?.name || 'Unknown Company',
+                                oldStage: old_stage || 'Unknown',
+                                newStage: 'rejected',
+                                applicationId: application_id,
+                                userId: recruiter.user_id,
+                            });
+                        }
+                    }
+                    break;
+
+                case 'withdrawn':
+                    // Candidate withdrew
+                    console.log('[APPLICATIONS-CONSUMER] 🚫 Withdrawn stage - notifying recruiter and company');
+                    
+                    // Notify recruiter
+                    if (effectiveRecruiterId) {
+                        const recruiterEmail = await this.emailLookup.getRecruiterEmail(effectiveRecruiterId);
+                        if (recruiterEmail) {
+                            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${effectiveRecruiterId}`);
+                            const recruiter = recruiterResponse.data || recruiterResponse;
+                            
+                            await this.emailService.sendApplicationStageChanged(recruiterEmail, {
+                                candidateName: candidate.full_name,
+                                jobTitle: job.title,
+                                companyName: job.company?.name || 'Unknown Company',
+                                oldStage: old_stage || 'Unknown',
+                                newStage: 'withdrawn',
+                                applicationId: application_id,
+                                userId: recruiter.user_id,
+                            });
+                        }
+                    }
+                    
+                    // Notify company (if was already submitted)
+                    if (old_stage === 'submitted' || old_stage === 'interview' || old_stage === 'offer') {
+                        const companyEmailsWithdrawn = await this.emailLookup.getCompanyAdminEmails(job.company_id);
+                        for (const email of companyEmailsWithdrawn) {
+                            await this.emailService.sendApplicationStageChanged(email, {
+                                candidateName: candidate.full_name,
+                                jobTitle: job.title,
+                                companyName: job.company?.name || 'Unknown Company',
+                                oldStage: old_stage || 'Unknown',
+                                newStage: 'withdrawn',
+                                applicationId: application_id,
+                            });
+                        }
+                    }
+                    break;
+
+                default:
+                    // For draft, ai_review, or any other stage, notify recruiter if present
+                    console.log('[APPLICATIONS-CONSUMER] ℹ️ Other stage change - notifying recruiter only');
+                    if (effectiveRecruiterId) {
+                        const recruiterEmail = await this.emailLookup.getRecruiterEmail(effectiveRecruiterId);
+                        if (recruiterEmail) {
+                            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${effectiveRecruiterId}`);
+                            const recruiter = recruiterResponse.data || recruiterResponse;
+                            
+                            await this.emailService.sendApplicationStageChanged(recruiterEmail, {
+                                candidateName: candidate.full_name,
+                                jobTitle: job.title,
+                                companyName: job.company?.name || 'Unknown Company',
+                                oldStage: old_stage || 'Unknown',
+                                newStage: new_stage,
+                                applicationId: application_id,
+                                userId: recruiter.user_id,
+                            });
+                        }
+                    }
             }
+
+            this.logger.info({ application_id, new_stage }, 'Stage change notifications sent');
         } catch (error) {
             this.logger.error(
                 { error, event_payload: event.payload },
@@ -312,6 +592,37 @@ export class ApplicationsEventConsumer {
                 }
                 
                 console.log('[APPLICATIONS-CONSUMER] 🎉 Scenario 3 complete - all notifications sent');
+
+                return;
+            }
+
+            // Scenario 4: Recruiter proposes job to candidate (has_recruiter && stage === 'recruiter_proposed')
+            if (has_recruiter && stage === 'recruiter_proposed') {
+                console.log('[APPLICATIONS-CONSUMER] 📋 Scenario 4: Recruiter proposing job to candidate');
+                this.logger.info({ application_id, recruiter_id }, 'Recruiter proposing job - notifying candidate');
+
+                // Send notification email to candidate
+                if (candidateEmail) {
+                    console.log('[APPLICATIONS-CONSUMER] 📧 Sending job proposal email to candidate:', candidateEmail);
+                    
+                    // Get recruiter details
+                    const recruiterEmail = await this.emailLookup.getRecruiterEmail(recruiter_id);
+                    const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
+                    const recruiter = recruiterResponse.data || recruiterResponse;
+                    const recruiterName = await this.emailLookup.getUserName(recruiter.user_id) || recruiterEmail || 'Your recruiter';
+
+                    await this.emailService.sendJobProposalToCandidate(candidateEmail, {
+                        candidateName: candidate.full_name,
+                        recruiterName,
+                        jobTitle: job.title,
+                        companyName: job.company?.name || 'Unknown Company',
+                        applicationId: application_id,
+                        userId: candidateUserId,
+                    });
+                    console.log('[APPLICATIONS-CONSUMER] ✅ Job proposal email sent to candidate');
+                } else {
+                    console.log('[APPLICATIONS-CONSUMER] ⚠️ Skipping candidate email (no email address found)');
+                }
 
                 return;
             }

@@ -545,5 +545,97 @@ export class ApplicationsEmailService {
             category: 'application',
         });
     }
+
+    async sendJobProposalToCandidate(
+        recipientEmail: string,
+        data: {
+            candidateName: string;
+            recruiterName: string;
+            jobTitle: string;
+            companyName: string;
+            applicationId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `Job Opportunity: ${data.jobTitle} at ${data.companyName}`;
+        const candidatePortalUrl = process.env.CANDIDATE_PORTAL_URL || 'https://candidate.splits.network';
+        const applicationUrl = `${candidatePortalUrl}/applications/${data.applicationId}`;
+        
+        // Simple HTML email for job proposal
+        const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1 style="color: white; margin: 0; font-size: 28px;">New Job Opportunity</h1>
+    </div>
+    
+    <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+        <p style="font-size: 16px; margin-bottom: 20px;">Hi ${data.candidateName},</p>
+        
+        <p style="font-size: 16px; margin-bottom: 20px;">
+            ${data.recruiterName} has proposed an exciting opportunity for you:
+        </p>
+        
+        <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; margin: 20px 0;">
+            <h2 style="color: #667eea; margin-top: 0; font-size: 22px;">${data.jobTitle}</h2>
+            <p style="font-size: 16px; color: #666; margin: 5px 0;">
+                <strong>Company:</strong> ${data.companyName}
+            </p>
+        </div>
+        
+        <p style="font-size: 16px; margin: 20px 0;">
+            Your recruiter believes this role could be a great fit for your background and career goals. 
+            Review the full job details and take the next step in your application.
+        </p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="${applicationUrl}" 
+               style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                      color: white; 
+                      padding: 15px 40px; 
+                      text-decoration: none; 
+                      border-radius: 25px; 
+                      font-weight: bold; 
+                      font-size: 16px;
+                      display: inline-block;
+                      box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                View Job Details
+            </a>
+        </div>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+            <p style="font-size: 14px; color: #666; margin: 5px 0;">
+                <strong>Next Steps:</strong>
+            </p>
+            <ul style="font-size: 14px; color: #666;">
+                <li>Review the job description and requirements</li>
+                <li>If interested, proceed with your application</li>
+                <li>Your recruiter will guide you through the process</li>
+            </ul>
+        </div>
+        
+        <p style="font-size: 14px; color: #999; margin-top: 30px; text-align: center;">
+            Questions? Reply to this email or contact your recruiter directly.
+        </p>
+    </div>
+</body>
+</html>
+        `.trim();
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'application.job_proposed',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/applications/${data.applicationId}`,
+            actionLabel: 'View Job Details',
+            priority: 'high',
+            category: 'application',
+        });
+    }
 }
 
