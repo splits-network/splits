@@ -76,6 +76,7 @@ services:
       ENCRYPTION_SECRET: ${ENCRYPTION_SECRET:-default-encryption-secret-change-me}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-3.5-turbo}
+      INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY:-dev_internal_service_key_change_in_production}
     volumes:
       - ./services/ats-service/src:/app/services/ats-service/src
       - ./packages:/app/packages

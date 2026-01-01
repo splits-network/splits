@@ -235,8 +235,8 @@ export class AIReviewServiceV2 {
 **Job Information:**
 - Title: ${input.job_title}
 - Description: ${input.job_description}
-- Required Skills: ${input.required_skills.join(', ')}
-- Preferred Skills: ${input.preferred_skills?.join(', ') || 'None'}
+- Required Skills: ${input.required_skills?.length ? input.required_skills.join(', ') : 'None specified'}
+- Preferred Skills: ${input.preferred_skills?.length ? input.preferred_skills.join(', ') : 'None specified'}
 - Required Experience: ${input.required_years ? `${input.required_years} years` : 'Not specified'}
 - Location: ${input.job_location || 'Not specified'}
 
