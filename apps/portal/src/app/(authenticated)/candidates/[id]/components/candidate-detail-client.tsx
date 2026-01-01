@@ -10,13 +10,12 @@ import SubmitToJobWizard from './submit-to-job-wizard';
 import VerificationModal from './verification-modal';
 import {
     formatDate,
-    getApplicationStageBadge,
-    getApplicationStageBgColor,
-    getApplicationStageIcon,
-    getRelationshipStatusBadge,
     getVerificationStatusBadge,
     getVerificationStatusIcon
 } from '@/lib/utils';
+import { getApplicationStageBadge, getRelationshipStatusBadge } from '@/lib/utils/badge-styles';
+import { getApplicationStageIcon } from '@/lib/utils/icon-styles';
+import { getApplicationStageBgColor } from '@/lib/utils/color-styles';
 
 interface CandidateDetailClientProps {
     candidateId: string;
@@ -292,12 +291,38 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                             <div className="flex-1">
                                 <div className="flex items-center gap-3">
                                     <h1 className="text-3xl font-bold">{candidate.full_name}</h1>
-                                    {candidate.verification_status && (
-                                        <span className={`badge ${getVerificationStatusBadge(candidate.verification_status)} gap-1`}>
-                                            <i className={`fa-solid ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
-                                            {candidate.verification_status.charAt(0).toUpperCase() + candidate.verification_status.slice(1)}
-                                        </span>
-                                    )}
+                                    <div className="flex gap-2">
+                                        {candidate.verification_status && (
+                                            <span className={`badge ${getVerificationStatusBadge(candidate.verification_status)} gap-1`}>
+                                                <i className={`fa-solid ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
+                                                {candidate.verification_status.charAt(0).toUpperCase() + candidate.verification_status.slice(1)}
+                                            </span>
+                                        )}
+                                        {candidate.is_new && (
+                                            <span className="badge badge-info gap-1" title="Recently added candidate">
+                                                <i className="fa-solid fa-sparkles"></i>
+                                                New
+                                            </span>
+                                        )}
+                                        {candidate.has_other_active_recruiters && (
+                                            <span className="badge badge-warning gap-1" title={`${candidate.other_active_recruiters_count} other recruiter${candidate.other_active_recruiters_count > 1 ? 's' : ''} working with this candidate`}>
+                                                <i className="fa-solid fa-users"></i>
+                                                Assigned
+                                            </span>
+                                        )}
+                                        {candidate.is_sourcer && (
+                                            <span className="badge badge-primary gap-1" title="You sourced this candidate">
+                                                <i className="fa-solid fa-star"></i>
+                                                Sourcer
+                                            </span>
+                                        )}
+                                        {candidate.has_active_relationship && (
+                                            <span className="badge badge-success gap-1" title="Active relationship">
+                                                <i className="fa-solid fa-handshake"></i>
+                                                Active
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="flex items-center gap-4 mt-2 text-base-content/70">
                                     <div className="flex items-center gap-2">

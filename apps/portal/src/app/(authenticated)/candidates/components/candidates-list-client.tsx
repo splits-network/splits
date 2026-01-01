@@ -6,6 +6,7 @@ import { useAuth, useUser } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useViewMode } from '@/hooks/use-view-mode';
 import { formatDate, getVerificationStatusBadge, getVerificationStatusIcon } from '@/lib/utils';
+import CandidateCard from './candidate-card';
 
 export default function CandidatesListClient() {
     const { getToken } = useAuth();
@@ -48,7 +49,7 @@ export default function CandidatesListClient() {
                     setRecruiterId(profile.recruiter_id);
                 }
 
-                // Fetch candidates with scope parameter
+                // Fetch candidates with scope parameter using V2 API (includes relationship data)
                 // - scope=mine: Candidates sourced OR with active relationships (default)
                 // - scope=all: All candidates in system (talent pool discovery)
                 const response = await client.get(`/candidates?scope=${scope}`);
@@ -154,104 +155,11 @@ export default function CandidatesListClient() {
 
             {/* Candidates List - Grid View */}
             {viewMode === 'grid' && filteredCandidates.length > 0 && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="columns-1 lg:columns-2 xl:columns-3 gap-6 space-y-6">
                     {filteredCandidates.map((candidate) => (
-                        <Link
-                            key={candidate.id}
-                            href={`/candidates/${candidate.id}`}
-                            className="group card bg-base-100 border border-base-100 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
-                        >
-                            {/* Header with gradient background */}
-                            <div className="relative h-24 bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10">
-                                <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-
-                                {/* Verification and relationship badges */}
-                                <div className="absolute top-3 right-3 flex gap-2">
-                                    {candidate.verification_status && (
-                                        <span className={`badge ${getVerificationStatusBadge(candidate.verification_status)} gap-1 shadow-lg`} title={`Verification Status: ${candidate.verification_status.charAt(0).toUpperCase() + candidate.verification_status.slice(1)}`}>
-                                            <i className={`fa-solid ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
-                                        </span>
-                                    )}
-                                    {candidate.is_sourcer && (
-                                        <span className="badge badge-primary gap-1 shadow-lg" title="You sourced this candidate">
-                                            <i className="fa-solid fa-star"></i>
-                                            Sourcer
-                                        </span>
-                                    )}
-                                    {candidate.has_active_relationship && (
-                                        <span className="badge badge-success gap-1 shadow-lg" title="Active relationship">
-                                            <i className="fa-solid fa-handshake"></i>
-                                            Active
-                                        </span>
-                                    )}
-                                </div>
-
-                                {/* Avatar positioned at bottom of header */}
-                                <div className="absolute -bottom-10 left-6">
-                                    <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-content font-bold text-3xl shadow-lg border-4 border-base-100">
-                                        {candidate.full_name[0].toUpperCase()}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="card-body pt-8 pb-6 space-y-4 flex-1 flex flex-col">
-                                {/* Candidate name as main focus */}
-                                <div className="mt-6">
-                                    <h3 className="text-xl font-bold leading-tight group-hover:text-primary transition-colors">
-                                        {candidate.full_name}
-                                    </h3>
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <a
-                                            href={`mailto:${candidate.email}`}
-                                            className="text-sm text-base-content/70 hover:text-primary transition-colors flex items-center gap-1.5"
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            <i className="fa-solid fa-envelope"></i>
-                                            {candidate.email}
-                                        </a>
-                                    </div>
-                                </div>
-
-                                {/* LinkedIn section */}
-                                {candidate.linkedin_url && (
-                                    <div className="bg-gradient-to-r from-blue-50/50 to-blue-100/30 dark:from-blue-900/20 dark:to-blue-800/10 rounded-lg p-4 border border-blue-200/30 dark:border-blue-700/30">
-                                        <a
-                                            href={candidate.linkedin_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-3 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center">
-                                                <i className="fa-brands fa-linkedin text-blue-600 dark:text-blue-400"></i>
-                                            </div>
-                                            <div className="flex-1">
-                                                <div className="text-sm font-medium">LinkedIn Profile</div>
-                                                <div className="text-xs opacity-70">View professional background</div>
-                                            </div>
-                                            <i className="fa-solid fa-arrow-up-right-from-square text-xs"></i>
-                                        </a>
-                                    </div>
-                                )}
-
-                                {/* Spacer to push footer to bottom */}
-                                <div className="flex-1"></div>
-
-                                {/* Footer with date */}
-                                <div className="flex items-center justify-between pt-4 border-t border-base-300">
-                                    <div className="text-xs text-base-content/50 flex items-center gap-1.5">
-                                        <i className="fa-solid fa-calendar-plus"></i>
-                                        Added {formatDate(candidate.created_at)}
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
-                                            View Details
-                                            <i className="fa-solid fa-arrow-right"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </Link>
+                        <div key={candidate.id} className="break-inside-avoid mb-6">
+                            <CandidateCard candidate={candidate} />
+                        </div>
                     ))}
                 </div>
             )}
@@ -267,7 +175,7 @@ export default function CandidatesListClient() {
                                     <th>Email</th>
                                     <th>Status</th>
                                     {userRole === 'recruiter' && <th>Relationship</th>}
-                                    <th>LinkedIn</th>
+                                    <th>Links</th>
                                     <th>Added</th>
                                     <th className="text-right">Actions</th>
                                 </tr>
@@ -279,7 +187,14 @@ export default function CandidatesListClient() {
                                             <div className="flex items-center gap-3">
                                                 <div className="avatar avatar-placeholder">
                                                     <div className="bg-primary/10 text-primary rounded-full w-10">
-                                                        <span className="text-sm">{candidate.full_name[0]}</span>
+                                                        <span className="text-sm">
+                                                            {(() => {
+                                                                const names = candidate.full_name.split(' ');
+                                                                const firstInitial = names[0]?.[0]?.toUpperCase() || '';
+                                                                const lastInitial = names[names.length - 1]?.[0]?.toUpperCase() || '';
+                                                                return names.length > 1 ? firstInitial + lastInitial : firstInitial;
+                                                            })()}
+                                                        </span>
                                                     </div>
                                                 </div>
                                                 <Link href={`/candidates/${candidate.id}`} className="font-semibold hover:text-primary transition-colors">
@@ -319,19 +234,44 @@ export default function CandidatesListClient() {
                                             </td>
                                         )}
                                         <td>
-                                            {candidate.linkedin_url ? (
-                                                <a
-                                                    href={candidate.linkedin_url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="btn btn-ghost btn-sm"
-                                                    title="View LinkedIn Profile"
-                                                >
-                                                    <i className="fa-brands fa-linkedin"></i>
-                                                </a>
-                                            ) : (
-                                                <span className="text-base-content/40">—</span>
-                                            )}
+                                            <div className="flex gap-1">
+                                                {candidate.linkedin_url && (
+                                                    <a
+                                                        href={candidate.linkedin_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="btn btn-ghost btn-sm"
+                                                        title="View LinkedIn Profile"
+                                                    >
+                                                        <i className="fa-brands fa-linkedin text-blue-600"></i>
+                                                    </a>
+                                                )}
+                                                {candidate.portfolio_url && (
+                                                    <a
+                                                        href={candidate.portfolio_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="btn btn-ghost btn-sm"
+                                                        title="View Portfolio"
+                                                    >
+                                                        <i className="fa-solid fa-globe text-purple-600"></i>
+                                                    </a>
+                                                )}
+                                                {candidate.github_url && (
+                                                    <a
+                                                        href={candidate.github_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="btn btn-ghost btn-sm"
+                                                        title="View GitHub"
+                                                    >
+                                                        <i className="fa-brands fa-github text-gray-600"></i>
+                                                    </a>
+                                                )}
+                                                {!candidate.linkedin_url && !candidate.portfolio_url && !candidate.github_url && (
+                                                    <span className="text-base-content/40">—</span>
+                                                )}
+                                            </div>
                                         </td>
                                         <td className="text-sm text-base-content/70">
                                             {formatDate(candidate.created_at)}

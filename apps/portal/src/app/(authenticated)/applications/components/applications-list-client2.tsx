@@ -9,7 +9,8 @@ import { ApplicationTableRow } from './application-table-row';
 import { ApplicationFilters } from './application-filters';
 import { PaginationControls } from './pagination-controls';
 import BulkActionModal from './bulk-action-modal';
-import { formatDate, getApplicationStageBadge } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { getApplicationStageBadge } from '@/lib/utils/badge-styles';
 
 interface Application {
     id: string;

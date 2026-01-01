@@ -5,7 +5,10 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useViewMode } from '@/hooks/use-view-mode';
-import { getJobStatusBadge, getJobStatusBorderColor, formatRelativeTime, getRoleBadges } from '@/lib/utils';
+import { formatRelativeTime } from '@/lib/utils';
+import { getJobStatusBorderColor } from '@/lib/utils/color-styles';
+import { getRoleBadges } from '@/lib/utils/role-badges';
+import { getJobStatusBadge } from '@/lib/utils/badge-styles';
 
 interface Job {
     id: string;
@@ -45,6 +48,14 @@ interface Stats {
     placementsCount?: number;
     companiesCount?: number;
     inReviewCount?: number;
+}
+
+interface Badge {
+    class: string;
+    icon: string;
+    text?: string;
+    tooltip?: string;
+    animated?: boolean;
 }
 
 // Using centralized utilities from @/lib/utils
@@ -456,7 +467,7 @@ export default function RolesList() {
                                         <div className={`badge ${getJobStatusBadge(job.status)} shadow-lg font-semibold`}>
                                             {job.status}
                                         </div>
-                                        {badges.map((badge, idx) => (
+                                        {badges.map((badge: Badge, idx: number) => (
                                             <div
                                                 key={idx}
                                                 className={`badge ${badge.class} gap-1 shadow-lg ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-left' : ''}`}
@@ -632,7 +643,7 @@ export default function RolesList() {
                                                     <Link href={`/roles/${job.id}`} className="font-semibold hover:text-primary transition-colors">
                                                         {job.title}
                                                     </Link>
-                                                    {badges.map((badge, idx) => (
+                                                    {badges.map((badge: Badge, idx: number) => (
                                                         <div
                                                             key={idx}
                                                             className={`badge badge-sm ${badge.class} gap-1 ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-right' : ''}`}

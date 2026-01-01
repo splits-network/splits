@@ -25,7 +25,16 @@ export function registerCandidateRoutes(
     app.get('/api/v2/candidates/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { id } = request.params as any;
-            const candidate = await config.candidateService.getCandidate(id);
+            // Try to get user context for enrichment, but don't require it (allow admins/guests)
+            let clerkUserId: string | undefined;
+            try {
+                const userContext = requireUserContext(request);
+                clerkUserId = userContext.clerkUserId;
+            } catch {
+                // No user context available (guest/admin access)
+                clerkUserId = undefined;
+            }
+            const candidate = await config.candidateService.getCandidate(id, clerkUserId);
             return reply.send({ data: candidate });
         } catch (error: any) {
             return reply.code(404).send({ error: { message: error.message } });

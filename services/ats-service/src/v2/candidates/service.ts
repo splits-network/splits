@@ -35,8 +35,8 @@ export class CandidateServiceV2 {
         };
     }
 
-    async getCandidate(id: string): Promise<any> {
-        const candidate = await this.repository.findCandidate(id);
+    async getCandidate(id: string, clerkUserId?: string): Promise<any> {
+        const candidate = await this.repository.findCandidate(id, clerkUserId);
         if (!candidate) {
             throw new Error(`Candidate ${id} not found`);
         }

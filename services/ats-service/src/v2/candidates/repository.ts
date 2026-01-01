@@ -169,13 +169,18 @@ export class CandidateRepository {
             });
         }
 
+        // Enrich with recruiter relationship data
+        if (filteredData.length > 0) {
+            filteredData = await this.enrichWithRecruiterRelationships(filteredData, accessContext.recruiterId ?? undefined);
+        }
+
         return {
             data: filteredData,
             total: count || 0,
         };
     }
 
-    async findCandidate(id: string): Promise<any | null> {
+    async findCandidate(id: string, clerkUserId?: string): Promise<any | null> {
         const { data, error } = await this.supabase
             .schema('ats')
             .from('candidates')
@@ -187,6 +192,14 @@ export class CandidateRepository {
             if (error.code === 'PGRST116') return null;
             throw error;
         }
+
+        // Enrich single candidate with relationship data
+        if (data && clerkUserId) {
+            const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+            const enriched = await this.enrichWithRecruiterRelationships([data], accessContext.recruiterId ?? undefined);
+            return enriched[0];
+        }
+
         return data;
     }
 
@@ -331,6 +344,56 @@ export class CandidateRepository {
             stage: app.stage,
             applied_at: app.created_at,
             updated_at: app.updated_at,
+        }));
+    }
+
+    /**
+     * Enrich candidates with recruiter relationship data and status badges
+     */
+    private async enrichWithRecruiterRelationships(candidates: any[], currentRecruiterId?: string): Promise<any[]> {
+        if (candidates.length === 0) return candidates;
+
+        const candidateIds = candidates.map(c => c.id);
+
+        // Get all recruiter relationships for these candidates
+        const { data: allRelationships, error: relError } = await this.supabase
+            .schema('network')
+            .from('recruiter_candidates')
+            .select('candidate_id, recruiter_id, status')
+            .in('candidate_id', candidateIds)
+            .eq('status', 'active');
+
+        if (relError) {
+            console.error('Error fetching recruiter relationships:', relError);
+            // Continue without relationship data rather than failing
+        }
+
+        // Create maps for relationship data
+        const currentRecruiterRelationships = new Map<string, any>();
+        const otherActiveRecruiters = new Map<string, number>();
+
+        allRelationships?.forEach(rel => {
+            if (currentRecruiterId && rel.recruiter_id === currentRecruiterId) {
+                currentRecruiterRelationships.set(rel.candidate_id, rel);
+            } else {
+                // Count other active recruiters for this candidate
+                const current = otherActiveRecruiters.get(rel.candidate_id) || 0;
+                otherActiveRecruiters.set(rel.candidate_id, current + 1);
+            }
+        });
+
+        // Get current date for "new" badge logic (7 days ago)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        // Enrich candidates with relationship data and badge flags
+        return candidates.map(candidate => ({
+            ...candidate,
+            is_sourcer: currentRecruiterId && candidate.sourcer_recruiter_id === currentRecruiterId,
+            has_active_relationship: currentRecruiterId && currentRecruiterRelationships.get(candidate.id)?.status === 'active',
+            has_other_active_recruiters: (otherActiveRecruiters.get(candidate.id) || 0) > 0,
+            other_active_recruiters_count: otherActiveRecruiters.get(candidate.id) || 0,
+            is_new: new Date(candidate.created_at) > sevenDaysAgo,
         }));
     }
 }

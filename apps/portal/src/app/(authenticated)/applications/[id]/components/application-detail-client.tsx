@@ -9,7 +9,7 @@ import StageUpdateModal from './stage-update-modal';
 import AddNoteModal from './add-note-modal';
 import ApplicationTimeline from './application-timeline';
 import AIReviewPanel from '@/components/ai-review-panel';
-import { formatDate, getApplicationStageBadge, getApplicationStageLabel } from '@/lib/utils';
+import { getApplicationStageBadge, getApplicationStageLabel } from '@/lib/utils/badge-styles';
 
 interface ApplicationDetailClientProps {
     application: any;

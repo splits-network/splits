@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getPlatformIcon, getPlatformBadge } from '@/lib/utils';
+import { getPlatformIcon } from '@/lib/utils/icon-styles';
+import { getPlatformBadge } from '@/lib/utils/badge-styles';
 
 interface ATSIntegration {
     id: string;

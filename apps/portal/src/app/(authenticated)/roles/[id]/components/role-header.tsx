@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import { getJobStatusBadge, getRoleBadges } from '@/lib/utils';
 import SubmitCandidateWizard from './submit-candidate-wizard';
+import { getJobStatusBadge } from '@/lib/utils/badge-styles';
+import { getRoleBadges } from '@/lib/utils/role-badges';
 
 interface Job {
     id: string;
@@ -36,6 +37,14 @@ interface Membership {
 
 interface UserProfile {
     memberships: Membership[];
+}
+
+interface Badge {
+    class: string;
+    icon: string;
+    text?: string;
+    tooltip?: string;
+    animated?: boolean;
 }
 
 interface RoleHeaderProps {
@@ -163,7 +172,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                                 <div className={`badge ${getJobStatusBadge(job.status)}`}>
                                     {job.status}
                                 </div>
-                                {getRoleBadges(job, [job]).map((badge, idx) => (
+                                {getRoleBadges(job, [job]).map((badge: Badge, idx: number) => (
                                     <div
                                         key={idx}
                                         className={`badge ${badge.class} gap-1 ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-bottom' : ''}`}

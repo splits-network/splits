@@ -34,7 +34,7 @@ export default function ApplicationCard({ application: app, isActive = true }: A
     return (
         <div className={`group card bg-base-100 border border-base-300 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col ${!isActive ? 'opacity-70' : ''}`}>
             {/* Company header with gradient background */}
-            <div className="relative h-20 bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10">
+            <div className="relative h-20 bg-linear-to-br from-primary/10 via-secondary/5 to-accent/10">
                 <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
                 {/* Company logo placeholder */}
@@ -52,7 +52,7 @@ export default function ApplicationCard({ application: app, isActive = true }: A
                             />
                         ) : null}
                         <div
-                            className={`w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-content font-bold text-xl ${app.job?.company?.logo_url ? 'hidden' : ''
+                            className={`w-12 h-12 rounded-lg bg-linear-to-br from-primary to-secondary flex items-center justify-center text-primary-content font-bold text-xl ${app.job?.company?.logo_url ? 'hidden' : ''
                                 }`}
                             {...(app.job?.company?.logo_url ? { hidden: true } : {})}
                         >
@@ -106,7 +106,7 @@ export default function ApplicationCard({ application: app, isActive = true }: A
 
                 {/* Recruiter info */}
                 {app.recruiter && (
-                    <div className="bg-gradient-to-r from-info/10 to-info/5 rounded-lg p-3 border border-info/20">
+                    <div className="bg-linear-to-r from-info/10 to-info/5 rounded-lg p-3 border border-info/20">
                         <div className="flex items-center gap-2">
                             <i className="fa-solid fa-user text-info"></i>
                             <span className="font-medium text-info">
