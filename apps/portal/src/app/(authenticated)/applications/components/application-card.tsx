@@ -44,55 +44,56 @@ export function ApplicationCard({
     return (
         <div className={`group card bg-base-100 border border-base-100 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col`} >
             {/* Header with gradient background */}
-            <div className="relative h-24 bg-linear-to-br from-primary/10 via-secondary/5 to-accent/10">
-                <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+            <div className="relative h-24 bg-linear-90 from-secondary/20 to-transparent flex items-center">
 
                 {/* Status badges - vertical ribbon style */}
-                <div className="absolute top-3 right-3 flex flex-col gap-2 items-end">
-                    <span className={`badge ${getApplicationStageBadge(application.stage)} gap-1 shadow-lg`}>
-                        <i className="fa-solid fa-clipboard-check"></i>
+                <div className="absolute top-3 right-0 flex flex-col gap-2">
+                    <span className={`badge rounded-e-none ${getApplicationStageBadge(application.stage)} gap-1 shadow-lg`}>
+                        <i className="fa-solid fa-clipboard-check mr-1"></i>
                         {application.stage}
                     </span>
                     {application.accepted_by_company && (
                         <span className="badge badge-success gap-1 shadow-lg" title="Accepted by company">
-                            <i className="fa-solid fa-check"></i>
+                            <i className="fa-solid fa-check mr-1"></i>
                             Accepted
                         </span>
                     )}
                     {application.ai_reviewed && application.ai_review && (
-                        <span className="badge badge-accent gap-1 shadow-lg" title={`AI Score: ${application.ai_review.fit_score}/100`}>
-                            <i className="fa-solid fa-robot"></i>
+                        <span className="badge badge-accent rounded-e-none gap-1 shadow-lg" title={`AI Score: ${application.ai_review.fit_score}/100`}>
+                            <i className="fa-solid fa-robot mr-1"></i>
                             AI: {application.ai_review.fit_score}
                         </span>
                     )}
                     {isMasked && (
-                        <span className="badge badge-warning gap-1 shadow-lg" title="Anonymous candidate">
-                            <i className="fa-solid fa-eye-slash"></i>
+                        <span className="badge badge-warning rounded-e-none gap-1 shadow-lg" title="Anonymous candidate">
+                            <i className="fa-solid fa-eye-slash mr-1"></i>
                             Anonymous
                         </span>
                     )}
                 </div>
 
                 {/* Avatar positioned at bottom of header */}
-                <div className="absolute -bottom-10 left-6">
-                    <div className="w-20 h-20 rounded-xl bg-linear-to-br from-primary to-secondary flex items-center justify-center text-primary-content font-bold text-3xl shadow-lg border-4 border-base-100">
-                        {isMasked ? (
-                            <i className="fa-solid fa-user-secret text-2xl"></i>
-                        ) : (
-                            (() => {
-                                const names = candidate.full_name.split(' ');
-                                const firstInitial = names[0]?.[0]?.toUpperCase() || '';
-                                const lastInitial = names[names.length - 1]?.[0]?.toUpperCase() || '';
-                                return names.length > 1 ? firstInitial + lastInitial : firstInitial;
-                            })()
-                        )}
+                <div className="flex items-center gap-4 p-2">
+                    <div className="avatar avatar-placeholder">
+                        <div className={`bg-base-100 text-primary text-3xl font-bold w-16 p-2 rounded-full shadow-lg`}>
+                            {isMasked ? (
+                                <i className="fa-solid fa-user-secret text-2xl"></i>
+                            ) : (
+                                (() => {
+                                    const names = candidate.full_name.split(' ');
+                                    const firstInitial = names[0]?.[0]?.toUpperCase() || '';
+                                    const lastInitial = names[names.length - 1]?.[0]?.toUpperCase() || '';
+                                    return names.length > 1 ? firstInitial + lastInitial : firstInitial;
+                                })()
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div className="card-body pt-8 pb-6 space-y-4">
+            <div className="card-body pb-6 space-y-4">
                 {/* Candidate name as main focus */}
-                <div className="mt-6">
+                <div className="">
                     <h3 className="text-xl font-bold leading-tight group-hover:text-primary transition-colors">
                         {candidate.full_name}
                     </h3>

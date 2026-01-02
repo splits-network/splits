@@ -9,59 +9,60 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
     return (
         <div className="group card bg-base-100 border border-base-100 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col" >
             {/* Header with gradient background */}
-            <div className="relative h-24 bg-linear-to-br from-primary/10 via-secondary/5 to-accent/10">
-                <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+            <div className="relative h-24 bg-linear-90 from-secondary/20 to-transparent flex items-center">
 
                 {/* Verification and relationship badges - vertical ribbon style */}
-                <div className="absolute top-3 right-3 flex flex-col gap-2 items-end">
+                <div className="absolute top-3 right-0 flex flex-col gap-2 items-end">
                     {candidate.verification_status && (
-                        <span className={`badge ${getVerificationStatusBadge(candidate.verification_status)} gap-1 shadow-lg`} title={`Verification Status: ${candidate.verification_status.charAt(0).toUpperCase() + candidate.verification_status.slice(1)}`}>
-                            <i className={`fa-solid ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
+                        <span className={`badge ${getVerificationStatusBadge(candidate.verification_status)} gap-1 rounded-e-none shadow-lg`} title={`Verification Status: ${candidate.verification_status.charAt(0).toUpperCase() + candidate.verification_status.slice(1)}`}>
+                            <i className={`fa-solid mr-1 ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
                             {candidate.verification_status.charAt(0).toUpperCase() + candidate.verification_status.slice(1)}
                         </span>
                     )}
                     {candidate.is_new && (
-                        <span className="badge badge-info gap-1 shadow-lg" title="Recently added candidate">
-                            <i className="fa-solid fa-sparkles"></i>
+                        <span className="badge badge-info gap-1 rounded-e-none shadow-lg" title="Recently added candidate">
+                            <i className="fa-solid fa-sparkles mr-1"></i>
                             New
                         </span>
                     )}
                     {candidate.has_other_active_recruiters && (
-                        <span className="badge badge-warning gap-1 shadow-lg" title={`${candidate.other_active_recruiters_count} other recruiter${candidate.other_active_recruiters_count > 1 ? 's' : ''} working with this candidate`}>
-                            <i className="fa-solid fa-users"></i>
+                        <span className="badge badge-warning gap-1 rounded-e-none shadow-lg" title={`${candidate.other_active_recruiters_count} other recruiter${candidate.other_active_recruiters_count > 1 ? 's' : ''} working with this candidate`}>
+                            <i className="fa-solid fa-users mr-1"></i>
                             Assigned
                         </span>
                     )}
                     {candidate.is_sourcer && (
-                        <span className="badge badge-primary gap-1 shadow-lg" title="You sourced this candidate">
-                            <i className="fa-solid fa-star"></i>
+                        <span className="badge badge-primary gap-1 rounded-e-none shadow-lg" title="You sourced this candidate">
+                            <i className="fa-solid fa-star mr-1"></i>
                             Sourcer
                         </span>
                     )}
                     {candidate.has_active_relationship && (
-                        <span className="badge badge-success gap-1 shadow-lg" title="Active relationship">
-                            <i className="fa-solid fa-handshake"></i>
+                        <span className="badge badge-success gap-1 rounded-e-none shadow-lg" title="Active relationship">
+                            <i className="fa-solid fa-handshake mr-1"></i>
                             Active
                         </span>
                     )}
                 </div>
 
                 {/* Avatar positioned at bottom of header */}
-                <div className="absolute -bottom-10 left-6">
-                    <div className="w-20 h-20 rounded-xl bg-linear-to-br from-primary to-secondary flex items-center justify-center text-primary-content font-bold text-3xl shadow-lg border-4 border-base-100">
-                        {(() => {
-                            const names = candidate.full_name.split(' ');
-                            const firstInitial = names[0]?.[0]?.toUpperCase() || '';
-                            const lastInitial = names[names.length - 1]?.[0]?.toUpperCase() || '';
-                            return names.length > 1 ? firstInitial + lastInitial : firstInitial;
-                        })()}
+                <div className="flex items-center gap-4 p-2">
+                    <div className={`avatar avatar-placeholder`}>
+                        <div className={`bg-base-100 text-primary text-2xl font-bold w-16 p-2 rounded-full shadow-lg`}>
+                            {(() => {
+                                const names = candidate.full_name.split(' ');
+                                const firstInitial = names[0]?.[0]?.toUpperCase() || '';
+                                const lastInitial = names[names.length - 1]?.[0]?.toUpperCase() || '';
+                                return names.length > 1 ? firstInitial + lastInitial : firstInitial;
+                            })()}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div className="card-body pt-8 pb-6 space-y-4">
+            <div className="card-body pb-6 space-y-4">
                 {/* Candidate name as main focus */}
-                <div className="mt-6">
+                <div className="">
                     <h3 className="text-xl font-bold leading-tight group-hover:text-primary transition-colors">
                         {candidate.full_name}
                     </h3>

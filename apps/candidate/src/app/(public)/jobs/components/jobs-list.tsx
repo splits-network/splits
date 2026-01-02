@@ -377,7 +377,7 @@ export default function JobsListClient({
             ) : (
                 <>
                     {viewMode === 'grid' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {jobs.map(job => {
                                 const badges = getRoleBadges(job, jobs);
                                 return (
@@ -385,14 +385,13 @@ export default function JobsListClient({
                                         key={job.id}
                                         className="group card bg-base-100 border border-base-300 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden"
                                     >
-                                        {/* Company header with gradient background */}
-                                        <div className="relative h-24 bg-secondary/20">
-                                            <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+                                        {/* Company header with solid background */}
+                                        <div className="relative h-24 bg-linear-90 from-secondary/20 to-transparent flex items-center">
 
                                             {/* Company logo and info */}
-                                            <div className="absolute -bottom-10 left-6 flex items-center gap-4">
+                                            <div className="flex items-center gap-4 p-2">
                                                 <div className={`avatar avatar-placeholder`}>
-                                                    <div className={`bg-base-100 text-primary text-3xl font-bold w-20 p-2 rounded-full shadow-lg`}>
+                                                    <div className={`bg-base-100 text-primary text-3xl font-bold w-16 p-2 rounded-full shadow-lg`}>
                                                         {job.company?.logo_url ? (
                                                             <img
                                                                 src={job.company.logo_url}
@@ -434,14 +433,14 @@ export default function JobsListClient({
 
                                             {/* Status badges */}
                                             {badges.length > 0 && (
-                                                <div className="absolute top-3 right-3 flex gap-2">
+                                                <div className="absolute top-3 right-0 flex flex-col gap-2">
                                                     {badges.map((badge, idx) => (
                                                         <div
                                                             key={idx}
-                                                            className={`badge ${badge.class} gap-1 shadow-lg ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-left' : ''}`}
+                                                            className={`badge ${badge.class} gap-1 shadow-lg rounded-e-none ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-left' : ''}`}
                                                             data-tip={badge.tooltip}
                                                         >
-                                                            <i className={`fa-solid ${badge.icon}`}></i>
+                                                            <i className={`fa-solid mr-1 ${badge.icon}`}></i>
                                                             {badge.text && <span>{badge.text}</span>}
                                                         </div>
                                                     ))}
@@ -449,9 +448,9 @@ export default function JobsListClient({
                                             )}
                                         </div>
 
-                                        <div className="card-body pt-12 pb-6 space-y-4">
+                                        <div className="card-body pb-6 space-y-4">
                                             {/* Job title */}
-                                            <div className="mt-6">
+                                            <div className="">
                                                 <h3 className="text-xl font-bold leading-tight group-hover:text-primary transition-colors line-clamp-2">
                                                     {job.title}
                                                 </h3>

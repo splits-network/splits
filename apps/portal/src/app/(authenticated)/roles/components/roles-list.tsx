@@ -406,36 +406,32 @@ export default function RolesList() {
                         const minPayout = job.salary_min ? Math.round(job.fee_percentage * job.salary_min / 100) : null;
 
                         return (
-                            <Link
+                            <div
                                 key={job.id}
-                                href={`/roles/${job.id}`}
                                 className="group card bg-base-100 border border-base-100 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
                                 style={{ borderColor: getJobStatusBorderColor(job.status).replace('border-', '#').replace('border-base-300', 'hsl(var(--bc) / 0.2)').replace('border-success/30', 'hsl(var(--su) / 0.3)').replace('border-warning/30', 'hsl(var(--wa) / 0.3)').replace('border-error/30', 'hsl(var(--er) / 0.3)').replace('border-neutral/30', 'hsl(var(--n) / 0.3)') }}
                             >
                                 {/* Company header with gradient background */}
-                                <div className="relative h-24 bg-linear-to-br from-primary/10 via-secondary/5 to-accent/10">
-                                    <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+                                <div className="relative h-24 bg-linear-90 from-secondary/20 to-transparent flex items-center">
 
                                     {/* Company logo and info */}
-                                    <div className="absolute -bottom-10 left-6 flex items-center gap-4">
-                                        <div className="w-20 h-20 rounded-xl bg-base-100 border-4 border-base-100 shadow-lg flex items-center justify-center overflow-hidden">
-                                            {job.company?.logo_url ? (
-                                                <img
-                                                    src={job.company.logo_url}
-                                                    alt={`${job.company.name} logo`}
-                                                    className="w-16 h-16 object-contain rounded-lg"
-                                                    onError={(e) => {
-                                                        e.currentTarget.style.display = 'none';
-                                                        e.currentTarget.nextElementSibling?.removeAttribute('hidden');
-                                                    }}
-                                                />
-                                            ) : null}
-                                            <div
-                                                className={`w-16 h-16 rounded-lg bg-linear-to-br from-primary to-secondary flex items-center justify-center text-primary-content font-bold text-2xl ${job.company?.logo_url ? 'hidden' : ''
-                                                    }`}
-                                                {...(job.company?.logo_url ? { hidden: true } : {})}
-                                            >
-                                                {(job.company?.name || 'C')[0].toUpperCase()}
+
+                                    <div className="flex items-center gap-4 p-2">
+                                        <div className={`avatar avatar-placeholder`}>
+                                            <div className={`bg-base-100 text-primary text-3xl font-bold w-16 p-2 rounded-full shadow-lg`}>
+                                                {job.company?.logo_url ? (
+                                                    <img
+                                                        src={job.company.logo_url}
+                                                        alt={`${job.company.name} logo`}
+                                                        className="w-20 h-20 object-contain rounded-lg"
+                                                        onError={(e) => {
+                                                            e.currentTarget.style.display = 'none';
+                                                            e.currentTarget.nextElementSibling?.removeAttribute('hidden');
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    (job.company?.name || 'C')[0].toUpperCase()
+                                                )}
                                             </div>
                                         </div>
                                         <div className="flex flex-col">
@@ -463,17 +459,17 @@ export default function RolesList() {
                                     </div>
 
                                     {/* Status and activity badges */}
-                                    <div className="absolute top-3 right-3 flex gap-2">
-                                        <div className={`badge ${getJobStatusBadge(job.status)} shadow-lg font-semibold`}>
+                                    <div className="absolute top-3 right-0 flex flex-col items-end gap-2">
+                                        <div className={`badge ${getJobStatusBadge(job.status)} shadow-lg font-semibold rounded-e-none`}>
                                             {job.status}
                                         </div>
                                         {badges.map((badge: Badge, idx: number) => (
                                             <div
                                                 key={idx}
-                                                className={`badge ${badge.class} gap-1 shadow-lg ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-left' : ''}`}
+                                                className={`badge ${badge.class} gap-1 shadow-lg rounded-e-none ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-left' : ''}`}
                                                 data-tip={badge.tooltip}
                                             >
-                                                <i className={`fa-solid ${badge.icon}`}></i>
+                                                <i className={`fa-solid mr-1 ${badge.icon}`}></i>
                                                 {badge.text && <span>{badge.text}</span>}
                                             </div>
                                         ))}
@@ -605,14 +601,14 @@ export default function RolesList() {
                                                     Edit
                                                 </button>
                                             )}
-                                            <button className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
-                                                View Pipeline
+                                            <Link href={`/roles/${job.id}`} className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
+                                                View Details
                                                 <i className="fa-solid fa-arrow-right"></i>
-                                            </button>
+                                            </Link>
                                         </div>
                                     </div>
                                 </div>
-                            </Link>
+                            </div>
                         );
                     })}
                 </div>
