@@ -47,7 +47,7 @@ export default function DeclinedPage() {
                     <div className="card-actions justify-center">
                         <Link href="/" className="btn btn-primary btn-lg">
                             <i className="fa-solid fa-home"></i>
-                            Go to Home
+                            Go to Dashboard
                         </Link>
                     </div>
                 </div>

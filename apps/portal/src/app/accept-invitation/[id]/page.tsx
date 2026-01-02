@@ -68,7 +68,7 @@ export default async function AcceptInvitationPage({ params }: PageProps) {
                         </p>
                         <div className="card-actions justify-center mt-4">
                             <a href="/" className="btn btn-primary">
-                                Go to Home
+                                Go to Dashboard
                             </a>
                         </div>
                     </div>
@@ -111,7 +111,7 @@ export default async function AcceptInvitationPage({ params }: PageProps) {
                         <p className="text-base-content/70">{status.message}</p>
                         <div className="card-actions justify-center mt-4">
                             <a href="/" className="btn btn-primary">
-                                Go to Home
+                                Go to Dashboard
                             </a>
                         </div>
                     </div>
@@ -134,7 +134,7 @@ export default async function AcceptInvitationPage({ params }: PageProps) {
                         </p>
                         <div className="card-actions justify-center mt-4">
                             <a href="/" className="btn btn-primary">
-                                Go to Home
+                                Go to Dashboard
                             </a>
                         </div>
                     </div>
@@ -169,7 +169,7 @@ export default async function AcceptInvitationPage({ params }: PageProps) {
                                 Sign Out
                             </a>
                             <a href="/" className="btn btn-primary">
-                                Go to Home
+                                Go to Dashboard
                             </a>
                         </div>
                     </div>

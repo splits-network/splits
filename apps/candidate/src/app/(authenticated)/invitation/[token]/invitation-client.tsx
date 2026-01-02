@@ -168,7 +168,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                                 className="btn btn-outline"
                                 onClick={() => router.push('/')}
                             >
-                                Go to Home
+                                Go to Dashboard
                             </button>
                         </div>
                     </div>
