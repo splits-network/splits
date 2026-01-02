@@ -434,7 +434,7 @@ Official SDKs will be available for:
 ## Support
 
 - **Documentation:** https://docs.splits.network
-- **API Status:** https://status.splits.network
+- **API Status:** https://splits.network/status
 - **Support Email:** api-support@splits.network
 - **Discord:** https://discord.gg/splits-network
 

@@ -1,0 +1,35 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+export const revalidate = 15;
+
+export async function GET(request: NextRequest) {
+    try {
+        const notificationUrl = process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3005';
+        const response = await fetch(`${notificationUrl}/health`, {
+            cache: 'no-store',
+            signal: AbortSignal.timeout(5000),
+        });
+        const data = await response.json();
+        
+        return NextResponse.json(data, { 
+            status: response.status,
+            headers: {
+                'Cache-Control': 'public, s-maxage=15, stale-while-revalidate=30',
+            },
+        });
+    } catch (error) {
+        return NextResponse.json(
+            { 
+                status: 'unhealthy', 
+                error: error instanceof Error ? error.message : 'Health check failed',
+                timestamp: new Date().toISOString(),
+            }, 
+            { 
+                status: 503,
+                headers: {
+                    'Cache-Control': 'public, s-maxage=15, stale-while-revalidate=30',
+                },
+            }
+        );
+    }
+}

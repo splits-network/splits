@@ -1,7 +1,14 @@
+import { ServiceStatusBanner } from '@/components/ServiceStatusBanner';
+
 export default function AuthenticatedLayout({
-  children,
+    children,
 }: {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }) {
-  return <div className="bg-base-200">{children}</div>;
+    return (
+        <div className="bg-base-200">
+            <ServiceStatusBanner />
+            {children}
+        </div>
+    );
 }

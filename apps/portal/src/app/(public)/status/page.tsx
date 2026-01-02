@@ -1,87 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
-interface ServiceHealth {
-    name: string;
-    url: string;
-    status: 'healthy' | 'unhealthy' | 'checking';
-    timestamp?: string;
-    error?: string;
-    responseTime?: number;
-}
-
-const services: Omit<ServiceHealth, 'status' | 'timestamp' | 'error' | 'responseTime'>[] = [
-    { name: 'API Gateway', url: '/api-health/gateway' },
-    { name: 'Identity Service', url: '/api-health/identity' },
-    { name: 'ATS Service', url: '/api-health/ats' },
-    { name: 'Network Service', url: '/api-health/network' },
-    { name: 'Billing Service', url: '/api-health/billing' },
-    { name: 'Notification Service', url: '/api-health/notification' },
-    { name: 'Automation Service', url: '/api-health/automation' },
-    { name: 'Document Service', url: '/api-health/document' },
-];
+import { useServiceHealth } from '@/hooks/useServiceHealth';
 
 export default function StatusPage() {
-    const [serviceStatuses, setServiceStatuses] = useState<ServiceHealth[]>(
-        services.map(s => ({ ...s, status: 'checking' as const }))
-    );
-    const [lastChecked, setLastChecked] = useState<Date>(new Date());
-
-    const checkServiceHealth = async (service: typeof services[0]): Promise<ServiceHealth> => {
-        const startTime = Date.now();
-        try {
-            const response = await fetch(service.url, {
-                cache: 'no-store',
-                signal: AbortSignal.timeout(5000), // 5 second timeout
-            });
-            const responseTime = Date.now() - startTime;
-            const data = await response.json();
-
-            if (response.ok && data.status === 'healthy') {
-                return {
-                    ...service,
-                    status: 'healthy',
-                    timestamp: data.timestamp,
-                    responseTime,
-                };
-            } else {
-                return {
-                    ...service,
-                    status: 'unhealthy',
-                    error: data.error || 'Service returned unhealthy status',
-                    timestamp: data.timestamp,
-                    responseTime,
-                };
-            }
-        } catch (error) {
-            const responseTime = Date.now() - startTime;
-            return {
-                ...service,
-                status: 'unhealthy',
-                error: error instanceof Error ? error.message : 'Failed to connect to service',
-                responseTime,
-            };
-        }
-    };
-
-    const checkAllServices = async () => {
-        const results = await Promise.all(services.map(checkServiceHealth));
-        setServiceStatuses(results);
-        setLastChecked(new Date());
-    };
-
-    useEffect(() => {
-        checkAllServices();
-        // Auto-refresh every 30 seconds
-        const interval = setInterval(checkAllServices, 30000);
-        return () => clearInterval(interval);
-    }, []);
-
-    const healthyCount = serviceStatuses.filter(s => s.status === 'healthy').length;
-    const totalCount = serviceStatuses.length;
-    const allHealthy = healthyCount === totalCount;
-    const someUnhealthy = serviceStatuses.some(s => s.status === 'unhealthy');
+    const {
+        serviceStatuses,
+        lastChecked,
+        healthyCount,
+        totalCount,
+        allHealthy,
+        someUnhealthy,
+    } = useServiceHealth();
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -93,8 +22,8 @@ export default function StatusPage() {
 
             {/* Overall Status Card */}
             <div className={`card shadow mb-6 ${allHealthy ? 'bg-success text-success-content' :
-                    someUnhealthy ? 'bg-error text-error-content' :
-                        'bg-warning text-warning-content'
+                someUnhealthy ? 'bg-error text-error-content' :
+                    'bg-warning text-warning-content'
                 }`}>
                 <div className="card-body">
                     <div className="flex items-center justify-between">
@@ -149,8 +78,8 @@ export default function StatusPage() {
                                         <h3 className="font-semibold">{service.name}</h3>
                                         <div className="flex items-center gap-3 text-sm text-base-content/70">
                                             <span className={`badge badge-sm ${service.status === 'healthy' ? 'badge-success' :
-                                                    service.status === 'unhealthy' ? 'badge-error' :
-                                                        'badge-warning'
+                                                service.status === 'unhealthy' ? 'badge-error' :
+                                                    'badge-warning'
                                                 }`}>
                                                 {service.status === 'healthy' ? 'Operational' :
                                                     service.status === 'unhealthy' ? 'Down' :
