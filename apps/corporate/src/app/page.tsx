@@ -218,6 +218,7 @@ export default function HomePage() {
                         <Link href="#products" className="link link-hover">Products</Link>
                         <Link href="#about" className="link link-hover">About</Link>
                         <Link href="#contact" className="link link-hover">Contact</Link>
+                        <Link href="/status" className="link link-hover">System Status</Link>
                         <a href="https://splits.network" className="link link-hover">Splits</a>
                         <a href="https://applicant.network" className="link link-hover">Applicant</a>
                     </div>

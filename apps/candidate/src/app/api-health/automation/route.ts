@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit } from '@/lib/rate-limit';
 
 export const revalidate = 15;
 
 export async function GET(request: NextRequest) {
+    const rateLimitResponse = rateLimit(request, {
+        maxRequests: 10,
+        windowMs: 60 * 1000,
+    });
+    
+    if (rateLimitResponse) {
+        return rateLimitResponse;
+    }
+    
     try {
-        const automationUrl = process.env.AUTOMATION_SERVICE_URL || 'http://localhost:3006';
+        const automationUrl = process.env.AUTOMATION_SERVICE_URL || 'http://localhost:3007';
         const response = await fetch(`${automationUrl}/health`, {
             cache: 'no-store',
             signal: AbortSignal.timeout(5000),

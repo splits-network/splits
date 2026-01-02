@@ -381,35 +381,31 @@ export default function JobsListClient({
                             {jobs.map(job => {
                                 const badges = getRoleBadges(job, jobs);
                                 return (
-                                    <Link
+                                    <div
                                         key={job.id}
-                                        href={`/jobs/${job.id}`}
                                         className="group card bg-base-100 border border-base-300 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden"
                                     >
                                         {/* Company header with gradient background */}
-                                        <div className="relative h-24 bg-linear-to-br from-primary/10 via-secondary/5 to-accent/10">
+                                        <div className="relative h-24 bg-secondary/20">
                                             <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
                                             {/* Company logo and info */}
                                             <div className="absolute -bottom-10 left-6 flex items-center gap-4">
-                                                <div className="w-20 h-20 rounded-xl bg-base-100 border-4 border-base-100 shadow-lg flex items-center justify-center overflow-hidden">
-                                                    {job.company?.logo_url ? (
-                                                        <img
-                                                            src={job.company.logo_url}
-                                                            alt={`${job.company.name} logo`}
-                                                            className="w-20 h-20 object-contain rounded-lg"
-                                                            onError={(e) => {
-                                                                e.currentTarget.style.display = 'none';
-                                                                e.currentTarget.nextElementSibling?.removeAttribute('hidden');
-                                                            }}
-                                                        />
-                                                    ) : null}
-                                                    <div
-                                                        className={`w-20 h-20 rounded-lg bg-linear-to-br from-primary to-secondary flex items-center justify-center text-primary-content font-bold text-2xl ${job.company?.logo_url ? 'hidden' : ''
-                                                            }`}
-                                                        {...(job.company?.logo_url ? { hidden: true } : {})}
-                                                    >
-                                                        {(job.company?.name || 'C')[0].toUpperCase()}
+                                                <div className={`avatar avatar-placeholder`}>
+                                                    <div className={`bg-base-100 text-primary text-3xl font-bold w-20 p-2 rounded-full shadow-lg`}>
+                                                        {job.company?.logo_url ? (
+                                                            <img
+                                                                src={job.company.logo_url}
+                                                                alt={`${job.company.name} logo`}
+                                                                className="w-20 h-20 object-contain rounded-lg"
+                                                                onError={(e) => {
+                                                                    e.currentTarget.style.display = 'none';
+                                                                    e.currentTarget.nextElementSibling?.removeAttribute('hidden');
+                                                                }}
+                                                            />
+                                                        ) : (
+                                                            (job.company?.name || 'C')[0].toUpperCase()
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-col">
@@ -523,7 +519,7 @@ export default function JobsListClient({
                                                 </button>
                                             </div>
                                         </div>
-                                    </Link>
+                                    </div>
                                 );
                             })}
                         </div>

@@ -30,6 +30,7 @@ export default function Footer() {
                     <Link href="/privacy" className="link link-hover">Privacy Policy</Link>
                     <Link href="/terms" className="link link-hover">Terms of Service</Link>
                     <Link href="/cookies" className="link link-hover">Cookie Policy</Link>
+                    <Link href="/status" className="link link-hover">System Status</Link>
                 </nav>
             </footer>
             <footer className="footer footer-center p-4 bg-neutral text-neutral-content border-t border-base-300">

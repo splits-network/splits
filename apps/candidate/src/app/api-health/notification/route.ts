@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit } from '@/lib/rate-limit';
 
 export const revalidate = 15;
 
 export async function GET(request: NextRequest) {
+    const rateLimitResponse = rateLimit(request, {
+        maxRequests: 10,
+        windowMs: 60 * 1000,
+    });
+    
+    if (rateLimitResponse) {
+        return rateLimitResponse;
+    }
+    
     try {
         const notificationUrl = process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3005';
         const response = await fetch(`${notificationUrl}/health`, {
