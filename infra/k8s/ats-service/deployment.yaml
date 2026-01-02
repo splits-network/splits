@@ -43,13 +43,11 @@ spec:
                   key: supabase-service-role-key
             - name: RABBITMQ_URL
               value: "amqp://splits:splits_production@rabbitmq:5672"
-            - name: OPENAI_API_KEY
+            - name: INTERNAL_SERVICE_KEY
               valueFrom:
                 secretKeyRef:
-                  name: openai-secrets
-                  key: api-key
-            - name: OPENAI_MODEL
-              value: "gpt-3.5-turbo"  # Change to gpt-4-turbo for production
+                  name: service-secrets
+                  key: internal-service-key
           resources:
             requests:
               cpu: 100m
