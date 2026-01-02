@@ -46,7 +46,7 @@ spec:
             - name: INTERNAL_SERVICE_KEY
               valueFrom:
                 secretKeyRef:
-                  name: service-secrets
+                  name: internal-service-secrets
                   key: internal-service-key
           resources:
             requests:
