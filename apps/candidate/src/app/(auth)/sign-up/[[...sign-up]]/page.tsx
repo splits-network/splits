@@ -19,9 +19,10 @@ export default function SignUpPage() {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    // Get redirect parameter (from invitation or other flow)
-    const redirect = searchParams.get('redirect');
-    const isFromInvitation = redirect?.includes('/invitation/');
+    // Get redirect parameter (from invitation or other flow) and store in state
+    // so it persists through the entire sign-up flow even if URL changes
+    const [redirectUrl] = useState(() => searchParams.get('redirect'));
+    const isFromInvitation = redirectUrl?.includes('/invitation/');
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -63,7 +64,7 @@ export default function SignUpPage() {
 
             if (completeSignUp.status === 'complete') {
                 await setActive({ session: completeSignUp.createdSessionId });
-                router.push(redirect || '/dashboard');
+                router.push(redirectUrl || '/dashboard');
             } else {
                 setError('Verification incomplete. Please try again.');
             }
@@ -80,7 +81,7 @@ export default function SignUpPage() {
         signUp.authenticateWithRedirect({
             strategy: provider,
             redirectUrl: '/sso-callback',
-            redirectUrlComplete: redirect || '/dashboard',
+            redirectUrlComplete: redirectUrl || '/dashboard',
         });
     };
 
@@ -285,7 +286,7 @@ export default function SignUpPage() {
                     <p className="text-center text-sm mt-4">
                         Already have an account?{' '}
                         <Link
-                            href={redirect ? `/sign-in?redirect=${encodeURIComponent(redirect)}` : '/sign-in'}
+                            href={redirectUrl ? `/sign-in?redirect=${encodeURIComponent(redirectUrl)}` : '/sign-in'}
                             className="link link-primary"
                         >
                             Sign in

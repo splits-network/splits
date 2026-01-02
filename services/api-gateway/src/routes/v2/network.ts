@@ -87,9 +87,13 @@ const NETWORK_RESOURCES: ResourceDefinition[] = [
 const INVITATION_MANAGEMENT_ROLES: UserRole[] = ['recruiter', 'platform_admin'];
 
 export function registerNetworkRoutes(app: FastifyInstance, services: ServiceRegistry) {
-    NETWORK_RESOURCES.forEach(resource => registerResourceRoutes(app, services, resource));
+    // Register invitation routes FIRST before generic CRUD routes
+    // This ensures /invitations/:token matches before /:id
     registerRecruiterCandidateInvitationRoutes(app, services);
     registerTeamRoutes(app, services);
+    
+    // Register generic CRUD routes LAST
+    NETWORK_RESOURCES.forEach(resource => registerResourceRoutes(app, services, resource));
 }
 
 function registerRecruiterCandidateInvitationRoutes(
@@ -119,7 +123,7 @@ function registerRecruiterCandidateInvitationRoutes(
 
             try {
                 const data = await networkService().get(
-                    `/v2/recruiter-candidates/invitations/${token}`,
+                    `/api/v2/recruiter-candidates/invitations/${token}`,
                     undefined,
                     correlationId,
                     authHeaders
@@ -204,7 +208,7 @@ function registerRecruiterCandidateInvitationRoutes(
 
             try {
                 const data = await networkService().post(
-                    `/v2/recruiter-candidates/invitations/${token}/decline`,
+                    `/api/v2/recruiter-candidates/invitations/${token}/decline`,
                     {
                         userId: req.auth.userId,
                         ip_address: forwardedIp,

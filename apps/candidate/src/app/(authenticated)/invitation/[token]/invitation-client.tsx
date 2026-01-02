@@ -7,13 +7,11 @@ import {
     getInvitationDetails,
     getRecruiterDetails,
     getCandidateDetails,
-    getUserDetails,
     acceptInvitation,
     declineInvitation,
     ApiError,
     type InvitationDetails,
     type RecruiterDetails,
-    type UserDetails,
     type CandidateDetails,
 } from '@/lib/api';
 
@@ -28,7 +26,6 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
     const [error, setError] = useState<string | null>(null);
     const [invitation, setInvitation] = useState<InvitationDetails | null>(null);
     const [recruiter, setRecruiter] = useState<RecruiterDetails | null>(null);
-    const [recruiterUser, setRecruiterUser] = useState<UserDetails | null>(null);
     const [candidate, setCandidate] = useState<CandidateDetails | null>(null);
     const [processing, setProcessing] = useState(false);
     const [declineReason, setDeclineReason] = useState('');
@@ -59,17 +56,21 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             // Get auth token (we know user is signed in at this point)
             const authToken = await getToken();
 
-            // Fetch invitation details
+            // Fetch invitation details (includes enriched recruiter info)
             const invitationData = await getInvitationDetails(token, authToken);
             setInvitation(invitationData);
 
-            // Fetch recruiter details
-            const recruiterData = await getRecruiterDetails(invitationData.recruiter_id, authToken);
-            setRecruiter(recruiterData);
-
-            // Fetch recruiter user details
-            const userData = await getUserDetails(recruiterData.user_id, authToken);
-            setRecruiterUser(userData);
+            // Set recruiter from invitation data
+            if (invitationData.recruiter_name || invitationData.recruiter_email) {
+                setRecruiter({
+                    id: invitationData.recruiter_id,
+                    user_id: '', // Not needed
+                    name: invitationData.recruiter_name,
+                    email: invitationData.recruiter_email,
+                    bio: invitationData.recruiter_bio,
+                    status: 'active',
+                });
+            }
 
             // Fetch candidate details
             const candidateData = await getCandidateDetails(invitationData.candidate_id, authToken);
@@ -149,7 +150,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
         );
     }
 
-    if (error || !invitation || !recruiter || !recruiterUser || !candidate) {
+    if (error || !invitation || !recruiter || !candidate) {
         return (
             <div className="min-h-screen flex items-center justify-center p-4">
                 <div className="card w-full max-w-2xl bg-base-100 shadow">
@@ -190,7 +191,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                     <div className="card-body">
                         <h2 className="card-title text-2xl">Decline Invitation</h2>
                         <p className="text-base-content/70">
-                            Are you sure you want to decline this invitation from {recruiterUser.name}?
+                            Are you sure you want to decline this invitation from {recruiter?.name}?
                         </p>
 
                         <div className="fieldset mt-4">
@@ -266,16 +267,16 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                             <div className="avatar avatar-placeholder">
                                 <div className="bg-primary text-primary-content rounded-full w-16 h-16">
                                     <span className="text-2xl">
-                                        {recruiterUser?.name?.split(' ').map(part => part[0]).join('').slice(0, 2) || ''}
+                                        {recruiter?.name?.split(' ').map(part => part[0]).join('').slice(0, 2) || ''}
                                     </span>
                                 </div>
                             </div>
                             <div className="flex-1">
                                 <h3 className="text-xl font-bold">
-                                    {recruiterUser?.name}
+                                    {recruiter?.name}
                                 </h3>
-                                <p className="text-base-content/70">{recruiterUser?.email}</p>
-                                {recruiter.bio && (
+                                <p className="text-base-content/70">{recruiter?.email}</p>
+                                {recruiter?.bio && (
                                     <p className="mt-3">{recruiter.bio}</p>
                                 )}
                             </div>
@@ -327,7 +328,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                         <div className="divider my-2"></div>
 
                         <p className="mb-4">
-                            By accepting this invitation, you're giving {recruiterUser?.name} permission
+                            By accepting this invitation, you're giving {recruiter?.name} permission
                             to submit your profile to job opportunities on your behalf. This is a standard agreement in the recruiting industry.
                         </p>
 
@@ -369,7 +370,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                             <div className="space-y-3">
                                 <p>
                                     <strong>1. Authorization to Represent:</strong> By accepting this invitation, I, <strong>{candidate?.full_name || 'the Candidate'}</strong>,
-                                    hereby authorize {recruiterUser?.name} ("<strong>Recruiter</strong>") to represent me in seeking employment opportunities
+                                    hereby authorize {recruiter?.name} ("<strong>Recruiter</strong>") to represent me in seeking employment opportunities
                                     and to submit my profile, resume, and related information to potential employers.
                                 </p>
 
@@ -438,7 +439,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                             <i className="fa-solid fa-info-circle"></i>
                             <span className="text-sm">
                                 By clicking "Accept Invitation" below, you acknowledge that you have read and agree to the terms of this
-                                Right to Represent Agreement with {recruiterUser?.name}.
+                                Right to Represent Agreement with {recruiter?.name}.
                             </span>
                         </div>
                     </div>
@@ -449,7 +450,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                     <i className="fa-solid fa-clock"></i>
                     <span>
                         <strong>Time Sensitive:</strong> This invitation expires on {formattedExpiry}.
-                        If you don't respond by then, {recruiterUser?.name?.split(' ')[0]} will need to send a new invitation.
+                        If you don't respond by then, {recruiter?.name?.split(' ')[0]} will need to send a new invitation.
                     </span>
                 </div>
 
@@ -498,9 +499,9 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                         </div>
 
                         <p className="text-sm text-base-content/70 mt-4 text-center">
-                            Have questions? Contact {recruiterUser?.name?.split(' ')[0]} directly at{' '}
-                            <a href={`mailto:${recruiterUser?.email}`} className="link link-primary">
-                                {recruiterUser?.email}
+                            Have questions? Contact {recruiter?.name?.split(' ')[0]} directly at{' '}
+                            <a href={`mailto:${recruiter?.email}`} className="link link-primary">
+                                {recruiter?.email}
                             </a>
                         </p>
                     </div>

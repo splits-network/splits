@@ -99,11 +99,16 @@ export interface InvitationDetails {
     invited_at: string;
     expires_at: string;
     status: 'pending';
+    recruiter_name?: string;
+    recruiter_email?: string;
+    recruiter_bio?: string;
 }
 
 export interface RecruiterDetails {
     id: string;
     user_id: string;
+    name?: string;
+    email?: string;
     bio?: string;
     status: string;
 }

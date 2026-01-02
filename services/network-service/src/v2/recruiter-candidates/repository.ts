@@ -137,7 +137,7 @@ export class RecruiterCandidateRepository {
             .select('*')
             .eq('invitation_token', token)
             .maybeSingle();
-
+            
         if (error) throw error;
         return data;
     }
@@ -165,6 +165,15 @@ export class RecruiterCandidateRepository {
 
     private generateInvitationToken(): string {
         return randomBytes(32).toString('hex');
+    }
+
+    async enrichSingleRelationship(relationship: any): Promise<any> {
+        if (!relationship) {
+            return relationship;
+        }
+        const records = [relationship];
+        await this.enrichRecruiterDetails(records);
+        return records[0];
     }
 
     private async enrichRecruiterDetails(records: any[]): Promise<void> {
