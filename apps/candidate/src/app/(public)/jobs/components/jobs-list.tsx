@@ -512,10 +512,10 @@ export default function JobsListClient({
                                                         </div>
                                                     )}
                                                 </div>
-                                                <button className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
+                                                <Link href={`/jobs/${job.id}`} className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
                                                     View Role
                                                     <i className="fa-solid fa-arrow-right"></i>
-                                                </button>
+                                                </Link>
                                             </div>
                                         </div>
                                     </div>
