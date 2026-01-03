@@ -1,68 +1,62 @@
-// API client for communicating with the backend gateway
-// Use internal Docker URL for server-side calls, public URL for client-side
-const joinBasePath = (base: string, pathSuffix: string) => {
-    let normalizedBase = base.replace(/\/+$/, '');
-    const normalizedSuffix = pathSuffix ? (pathSuffix.startsWith('/') ? pathSuffix : `/${pathSuffix}`) : '';
+// Portal API Client - Direct V2 Implementation
+// Temporary solution while shared package types are being fixed
 
-    if (!normalizedSuffix) {
-        return normalizedBase;
-    }
-
-    if (normalizedSuffix.startsWith('/api')) {
-        // Strip any trailing /api or /api/v{X} fragments so we never wind up with /api/api/*
-        normalizedBase = normalizedBase.replace(/\/api(?:\/v[0-9]+)?$/, '');
-    }
-
-    return `${normalizedBase}${normalizedSuffix}`;
-};
-
-const getApiBaseUrl = (pathSuffix: string) => {
+const getApiBaseUrl = () => {
     // Server-side (inside Docker container or during build)
     if (typeof window === 'undefined') {
         // If NEXT_PUBLIC_API_GATEWAY_URL is set, use it (for server-side rendering)
         if (process.env.NEXT_PUBLIC_API_GATEWAY_URL) {
-            return joinBasePath(process.env.NEXT_PUBLIC_API_GATEWAY_URL, pathSuffix);
+            return process.env.NEXT_PUBLIC_API_GATEWAY_URL.replace(/\/+$/, '') + '/api/v2';
         }
 
         // Check if we're inside a Docker container
-        // In Docker, the hostname won't be the local machine name
         const isInDocker = process.env.RUNNING_IN_DOCKER === 'true';
 
         if (isInDocker) {
-            // Use Docker service name for server-side calls inside Docker
-            return joinBasePath('http://api-gateway:3000', pathSuffix);
+            return 'http://api-gateway:3000/api/v2';
         } else {
-            // Running outside Docker (dev mode), use localhost
-            return joinBasePath('http://localhost:3000', pathSuffix);
+            return 'http://localhost:3000/api/v2';
         }
     }
 
     // Client-side (browser)
     const publicApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    return joinBasePath(publicApiUrl, pathSuffix);
+    return publicApiUrl.replace(/\/+$/, '') + '/api/v2';
 };
 
-const API_V2_BASE_URL = getApiBaseUrl('/api/v2');
-const API_V1_BASE_URL = getApiBaseUrl('/api');
+const API_BASE_URL = getApiBaseUrl();
 
+/**
+ * Portal API client - Direct V2 implementation
+ */
 export class ApiClient {
-    private baseV2: string;
-    private baseV1: string;
+    private baseUrl: string;
     private token?: string;
 
-    constructor(baseUrl: string = API_V2_BASE_URL, token?: string, legacyBaseUrl: string = API_V1_BASE_URL) {
-        this.baseV2 = baseUrl;
-        this.baseV1 = legacyBaseUrl;
+    constructor(token?: string) {
+        this.baseUrl = API_BASE_URL;
         this.token = token;
     }
 
-    async request<T>(
+    /**
+     * Set authentication token
+     */
+    setToken(token: string): void {
+        this.token = token;
+    }
+
+    /**
+     * Remove authentication token
+     */
+    clearToken(): void {
+        this.token = undefined;
+    }
+
+    private async request<T>(
         endpoint: string,
-        options: RequestInit = {},
-        version: 'v1' | 'v2' = 'v2'
+        options: RequestInit = {}
     ): Promise<T> {
-        const baseUrl = version === 'v2' ? this.baseV2 : this.baseV1;
-        const url = `${baseUrl}${endpoint}`;
+        const url = `${this.baseUrl}${endpoint}`;
 
         const headers: Record<string, string> = {
             'Content-Type': 'application/json',
@@ -89,15 +83,14 @@ export class ApiClient {
             return undefined as any;
         }
 
-        return response.json();
+        const result = await response.json();
+        
+        // Return the full result (V2 APIs return {data, pagination} envelope)
+        return result;
     }
 
-    // Generic HTTP methods for admin operations
-    async get<T = any>(
-        endpoint: string,
-        options?: { params?: Record<string, any> },
-        version: 'v1' | 'v2' = 'v2'
-    ): Promise<T> {
+    // Generic HTTP methods
+    async get<T = any>(endpoint: string, options?: { params?: Record<string, any> }): Promise<T> {
         let url = endpoint;
         if (options?.params) {
             const params = new URLSearchParams();
@@ -111,43 +104,41 @@ export class ApiClient {
                 url = `${endpoint}?${query}`;
             }
         }
-        return this.request<T>(url, { method: 'GET' }, version);
+        return this.request<T>(url, { method: 'GET' });
     }
 
-    async post<T = any>(
-        endpoint: string,
-        data?: any,
-        version: 'v1' | 'v2' = 'v2'
-    ): Promise<T> {
+    async post<T = any>(endpoint: string, data?: any): Promise<T> {
         return this.request<T>(endpoint, {
             method: 'POST',
             body: data ? JSON.stringify(data) : undefined,
-        }, version);
+        });
     }
 
-    async patch<T = any>(
-        endpoint: string,
-        data?: any,
-        version: 'v1' | 'v2' = 'v2'
-    ): Promise<T> {
+    async patch<T = any>(endpoint: string, data?: any): Promise<T> {
         return this.request<T>(endpoint, {
             method: 'PATCH',
             body: data ? JSON.stringify(data) : undefined,
-        }, version);
+        });
     }
 
-    async delete<T = any>(endpoint: string, version: 'v1' | 'v2' = 'v2'): Promise<T> {
-        return this.request<T>(endpoint, { method: 'DELETE' }, version);
+    async delete<T = any>(endpoint: string): Promise<T> {
+        return this.request<T>(endpoint, { method: 'DELETE' });
     }
 
-    // Identity
+    // ===== ROLE AND USER METHODS =====
+    
+    /**
+     * Get current user information
+     */
     async getCurrentUser() {
         return this.request('/users?limit=1');
     }
 
-    // Get user roles with V2 compatibility
+    /**
+     * Get user roles with recruiter status checking
+     */
     async getUserRoles() {
-        // Get basic user info from V1 identity service
+        // Get basic user info from identity service
         const userResponse = await this.getCurrentUser();
         let user: any = {};
         
@@ -171,7 +162,6 @@ export class ApiClient {
             console.log('API Client - isRecruiter:', isRecruiter, 'data length:', recruitersResponse?.data?.length);
         } catch (error) {
             console.error('API Client - recruiter check error:', error);
-            // If V2 recruiter query fails, user is not a recruiter
             isRecruiter = false;
         }
 
@@ -184,79 +174,93 @@ export class ApiClient {
         };
     }
 
-    // Jobs/Roles
-    // Unfiltered - returns all jobs (admins only)
-    async getJobs(filters?: { status?: string; search?: string }) {
-        const params = new URLSearchParams();
-        if (filters?.status && filters.status !== 'all') {
-            params.append('status', filters.status);
+    async updateUser(userId: string, payload: Record<string, any>) {
+        if (!userId) {
+            throw new Error('User ID is required to update user profile');
         }
-        if (filters?.search) {
-            params.append('search', filters.search);
-        }
-        const query = params.toString();
-        return this.request(`/jobs${query ? `?${query}` : ''}`);
+        return this.patch(`/users/${userId}`, payload);
     }
 
-    // V2: Role-filtered jobs (recruiters see all active, company users see their org's jobs)
-    async getRoles(filters?: { status?: string; search?: string; limit?: number; page?: number; job_owner_filter?: 'all' | 'assigned' }) {
-        const params = new URLSearchParams();
+    // ===== JOB/ROLE METHODS =====
+    
+    /**
+     * Get jobs (unfiltered - admin access)
+     */
+    async getJobs(filters?: { status?: string; search?: string }) {
+        const params: any = {};
         if (filters?.status && filters.status !== 'all') {
-            params.append('status', filters.status);
+            params.status = filters.status;
         }
         if (filters?.search) {
-            params.append('search', filters.search);
+            params.search = filters.search;
+        }
+        return this.get('/jobs', { params });
+    }
+
+    /**
+     * Get roles (filtered by user context)
+     */
+    async getRoles(filters?: { 
+        status?: string; 
+        search?: string; 
+        limit?: number; 
+        page?: number; 
+        job_owner_filter?: 'all' | 'assigned' 
+    }) {
+        const params: any = {};
+        if (filters?.status && filters.status !== 'all') {
+            params.status = filters.status;
+        }
+        if (filters?.search) {
+            params.search = filters.search;
         }
         if (filters?.limit) {
-            params.append('limit', String(filters.limit));
+            params.limit = filters.limit;
         }
         if (filters?.page) {
-            params.append('page', String(filters.page));
+            params.page = filters.page;
         }
         if (filters?.job_owner_filter) {
-            params.append('job_owner_filter', filters.job_owner_filter);
+            params.job_owner_filter = filters.job_owner_filter;
         }
-        const query = params.toString();
-        return this.request(`/jobs${query ? `?${query}` : ''}`);
+        return this.get('/jobs', { params });
     }
 
     async getJob(id: string, include?: string[]) {
-        const params = new URLSearchParams();
+        const params: any = {};
         if (include && include.length > 0) {
-            params.append('include', include.join(','));
+            params.include = include.join(',');
         }
-        const query = params.toString();
-        return this.request(`/jobs/${id}${query ? `?${query}` : ''}`);
+        return this.get(`/jobs/${id}`, { params });
     }
 
     async createJob(data: any) {
-        return this.request('/jobs', {
-            method: 'POST',
-            body: JSON.stringify(data),
-        });
+        return this.post('/jobs', data);
     }
 
     async updateJob(id: string, data: any) {
-        return this.request(`/jobs/${id}`, {
-            method: 'PATCH',
-            body: JSON.stringify(data),
-        });
+        return this.patch(`/jobs/${id}`, data);
     }
 
-    // Candidates
+    async getRecruiterJobs(recruiterId: string) {
+        return this.get('/jobs', { params: { recruiter_id: recruiterId } });
+    }
+
+    // ===== CANDIDATE METHODS =====
+    
     async getCandidates(filters?: { search?: string }) {
-        const params = new URLSearchParams();
+        const params: any = {};
         if (filters?.search) {
-            params.append('search', filters.search);
+            params.search = filters.search;
         }
-        const query = params.toString();
-        console.log('getCandidates - query string:', query);
-        return this.get(`/candidates${query ? `?${query}` : ''}`);
+        console.log('getCandidates - query params:', params);
+        return this.get('/candidates', { params });
     }
 
-    // Applications
+    // ===== APPLICATION METHODS =====
+    
     async getApplicationsByJob(jobId: string) {
-        return this.request(`/applications?job_id=${jobId}`);
+        return this.get('/applications', { params: { job_id: jobId } });
     }
 
     async submitCandidate(data: {
@@ -270,99 +274,35 @@ export class ApiClient {
         linkedin_url?: string;
         notes?: string;
     }) {
-        return this.request('/applications', {
-            method: 'POST',
-            body: JSON.stringify(data),
-        });
+        return this.post('/applications', data);
     }
 
     async updateApplicationStage(id: string, stage: string, notes?: string) {
-        return this.request(`/applications/${id}`, {
-            method: 'PATCH',
-            body: JSON.stringify({ stage, notes }),
-        });
+        return this.patch(`/applications/${id}`, { stage, notes });
     }
 
     async addApplicationNote(id: string, note: string) {
         return this.patch(`/applications/${id}`, { notes: note });
     }
 
-    // Placements
-    async getPlacements(filters?: { recruiter_id?: string; company_id?: string }) {
-        const params = new URLSearchParams();
-        if (filters?.recruiter_id) {
-            params.append('recruiter_id', filters.recruiter_id);
-        }
-        if (filters?.company_id) {
-            params.append('company_id', filters.company_id);
-        }
-        const query = params.toString();
-        return this.request(`/placements${query ? `?${query}` : ''}`);
-    }
-
-    async createPlacement(data: {
-        application_id: string;
-        salary: number;
-        hired_at?: string;
-    }) {
-        return this.request('/placements', {
-            method: 'POST',
-            body: JSON.stringify(data),
-        });
-    }
-
-    // Recruiters
-    async getRecruiterProfile(recruiterId?: string) {
-        if (recruiterId) {
-            // If specific recruiter ID provided, use it directly
-            return this.get(`/recruiters/${recruiterId}`);
-        }
-
-        // For current user, get their recruiter profile via V2 filtered query
-        const recruiters = await this.get('/recruiters?limit=1');
-        console.log('getRecruiterProfile - recruiters response:', recruiters);
-        if (!recruiters?.data || recruiters.data.length === 0) {
-            throw new Error('No recruiter profile found for current user');
-        }
-
-        // Return the recruiter data in the expected format
-        return { data: recruiters.data[0] };
-    }
-
-    async updateRecruiterProfile(recruiterId: string, payload: Record<string, any>) {
-        if (!recruiterId) {
-            throw new Error('Recruiter ID is required to update recruiter profile');
-        }
-        return this.patch(`/recruiters/${recruiterId}`, payload);
-    }
-
-    async getRecruiterJobs(recruiterId: string) {
-        return this.get('/jobs', { params: { recruiter_id: recruiterId } });
-    }
-
-    // Recruiter Application Review Methods
     async getPendingApplications(options?: { limit?: number }) {
         return this.get('/applications', {
             params: {
                 stage: 'screen',
                 limit: options?.limit,
                 sort_by: 'created_at',
-                sort_order: 'desc',
-            },
+                sort_order: 'desc'
+            }
         });
     }
 
     async getApplicationFullDetails(applicationId: string, include?: string[]) {
-        const includes = (include && include.length > 0
+        const includes = include && include.length > 0
             ? include
-            : ['candidate', 'job', 'recruiter', 'documents', 'pre_screen_answers', 'audit_log', 'job_requirements']
-        )
-            .map(part => part.trim())
-            .filter(Boolean)
-            .join(',');
+            : ['candidate', 'job', 'recruiter', 'documents', 'pre_screen_answers', 'audit_log', 'job_requirements'];
 
         return this.get(`/applications/${applicationId}`, {
-            params: includes ? { include: includes } : undefined,
+            params: includes.length > 0 ? { include: includes.join(',') } : undefined
         });
     }
 
@@ -373,18 +313,88 @@ export class ApiClient {
         });
     }
 
-    // Subscriptions
+    async requestPreScreen(
+        applicationId: string,
+        data: {
+            company_id: string;
+            recruiter_id?: string;
+            message?: string;
+        }
+    ) {
+        return this.patch(`/applications/${applicationId}`, {
+            pre_screen_request: data
+        });
+    }
+
+    // ===== PLACEMENT METHODS =====
+    
+    async getPlacements(filters?: { recruiter_id?: string; company_id?: string }) {
+        return this.get('/placements', { params: filters });
+    }
+
+    async createPlacement(data: {
+        application_id: string;
+        salary: number;
+        hired_at?: string;
+    }) {
+        return this.post('/placements', data);
+    }
+
+    // ===== RECRUITER METHODS =====
+    
+    async getRecruiterProfile(recruiterId?: string) {
+        if (recruiterId) {
+            return this.get(`/recruiters/${recruiterId}`);
+        }
+
+        // For current user, get their recruiter profile via filtered query
+        const recruiters = await this.get('/recruiters?limit=1');
+        console.log('getRecruiterProfile - recruiters response:', recruiters);
+        if (!recruiters?.data || recruiters.data.length === 0) {
+            throw new Error('No recruiter profile found for current user');
+        }
+
+        return { data: recruiters.data[0] };
+    }
+
+    async updateRecruiterProfile(recruiterId: string, payload: Record<string, any>) {
+        if (!recruiterId) {
+            throw new Error('Recruiter ID is required to update recruiter profile');
+        }
+        return this.patch(`/recruiters/${recruiterId}`, payload);
+    }
+
+    // ===== RECRUITER-CANDIDATE RELATIONSHIP METHODS =====
+    
+    async getRecruiterCandidateRelationship(recruiterId: string, candidateId: string) {
+        const response = await this.get('/recruiter-candidates', {
+            params: {
+                recruiter_id: recruiterId,
+                candidate_id: candidateId,
+                limit: 1
+            }
+        });
+        console.log('getRecruiterCandidateRelationship - response:', response);
+        if (Array.isArray(response?.data) && response.data.length > 0) {
+            return { data: response.data[0] };
+        }
+        return { data: null };
+    }
+
+    // ===== SUBSCRIPTION METHODS =====
+    
     async getMySubscription() {
-        const response: any = await this.get('/subscriptions', { params: { limit: 1 } });
+        const response = await this.get('/subscriptions', { params: { limit: 1 } });
         if (Array.isArray(response?.data)) {
             return response;
         }
         return response;
     }
 
-    // Documents
+    // ===== DOCUMENT METHODS =====
+    
     async uploadDocument(formData: FormData) {
-        const url = `${this.baseV2}/documents`;
+        const url = `${this.baseUrl}/documents`;
         const headers: Record<string, string> = {};
 
         if (this.token) {
@@ -394,7 +404,7 @@ export class ApiClient {
         const response = await fetch(url, {
             method: 'POST',
             headers,
-            body: formData, // Don't set Content-Type, let browser set it with boundary
+            body: formData,
         });
 
         if (!response.ok) {
@@ -411,7 +421,7 @@ export class ApiClient {
 
     async getDocumentsByEntity(entityType: string, entityId: string) {
         return this.get('/documents', {
-            params: { entity_type: entityType, entity_id: entityId },
+            params: { entity_type: entityType, entity_id: entityId }
         });
     }
 
@@ -419,54 +429,17 @@ export class ApiClient {
         return this.delete(`/documents/${id}`);
     }
 
-    // Pre-screen requests (company feature)
-    async requestPreScreen(
-        applicationId: string,
-        data: {
-            company_id: string;
-            recruiter_id?: string;
-            message?: string;
-        }
-    ) {
-        return this.patch(`/applications/${applicationId}`, {
-            pre_screen_request: data
-        });
-    }
-
-    // Recruiter-Candidate Relationships
-    async getRecruiterCandidateRelationship(recruiterId: string, candidateId: string) {
-        const response: any = await this.get('/recruiter-candidates', {
-            params: {
-                recruiter_id: recruiterId,
-                candidate_id: candidateId,
-                limit: 1,
-            },
-        });
-        console.log('getRecruiterCandidateRelationship - response:', response);
-        if (Array.isArray(response?.data) && response.data.length > 0) {
-            return { data: response.data[0] };
-        }
-        return { data: null };
-    }
-
+    // ===== STATS METHODS =====
+    
     async getStats(params?: { scope?: string; type?: string; range?: string }) {
-        return this.get('/stats', {
-            params,
-        });
-    }
-
-    async updateUser(userId: string, payload: Record<string, any>) {
-        if (!userId) {
-            throw new Error('User ID is required to update user profile');
-        }
-        return this.patch(`/users/${userId}`, payload);
+        return this.get('/stats', { params });
     }
 }
 
-// Export a singleton instance (for non-authenticated endpoints, if any)
+// Export a singleton instance
 export const apiClient = new ApiClient();
 
 // Export a factory function for creating authenticated clients
 export function createAuthenticatedClient(token: string): ApiClient {
-    return new ApiClient(API_V2_BASE_URL, token, API_V1_BASE_URL);
+    return new ApiClient(token);
 }

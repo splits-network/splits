@@ -17,7 +17,7 @@ export default function MarketplaceMetricsPage() {
     const loadHealthScore = async () => {
         try {
             const api = new ApiClient();
-            const response = await api.request<{ health_score: number; status: string }>('/automation/metrics/health');
+            const response = await api.get<{ health_score: number; status: string }>('/automation/metrics/health');
             setHealthScore(response);
         } catch (error) {
             console.error('Failed to load health score:', error);
@@ -28,7 +28,7 @@ export default function MarketplaceMetricsPage() {
         setLoading(true);
         try {
             const api = new ApiClient();
-            const response = await api.request<{ data: any[] }>(`/automation/metrics/recent?days=${dateRange}`);
+            const response = await api.get<{ data: any[] }>(`/automation/metrics/recent?days=${dateRange}`);
 
             // Calculate aggregate metrics from daily data
             const dailyMetrics = response.data || [];
@@ -120,9 +120,9 @@ export default function MarketplaceMetricsPage() {
                         <div className="flex items-center gap-6">
                             <div
                                 className={`radial-progress text-6xl ${healthScore.status === 'excellent' ? 'text-success' :
-                                        healthScore.status === 'good' ? 'text-info' :
-                                            healthScore.status === 'fair' ? 'text-warning' :
-                                                'text-error'
+                                    healthScore.status === 'good' ? 'text-info' :
+                                        healthScore.status === 'fair' ? 'text-warning' :
+                                            'text-error'
                                     }`}
                                 style={{ '--value': healthScore.health_score } as any}
                                 role="progressbar"
@@ -131,9 +131,9 @@ export default function MarketplaceMetricsPage() {
                             </div>
                             <div>
                                 <div className={`badge badge-lg ${healthScore.status === 'excellent' ? 'badge-success' :
-                                        healthScore.status === 'good' ? 'badge-info' :
-                                            healthScore.status === 'fair' ? 'badge-warning' :
-                                                'badge-error'
+                                    healthScore.status === 'good' ? 'badge-info' :
+                                        healthScore.status === 'fair' ? 'badge-warning' :
+                                            'badge-error'
                                     }`}>
                                     {healthScore.status.toUpperCase()}
                                 </div>

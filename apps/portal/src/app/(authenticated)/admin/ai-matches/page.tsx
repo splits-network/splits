@@ -15,7 +15,7 @@ export default function AIMatchesPage() {
         setLoading(true);
         try {
             const api = new ApiClient();
-            const response = await api.request<{ data: any[] }>('/automation/matches/pending');
+            const response = await api.get<{ data: any[] }>('/automation/matches/pending');
             setMatches(response.data || []);
         } catch (error) {
             console.error('Failed to load matches:', error);
@@ -35,13 +35,10 @@ export default function AIMatchesPage() {
 
         try {
             const api = new ApiClient();
-            await api.request(`/automation/matches/${matchId}/review`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    reviewed_by: 'admin', // TODO: Get from auth
-                    accepted,
-                    rejection_reason: rejectionReason,
-                }),
+            await api.post(`/automation/matches/${matchId}/review`, {
+                reviewed_by: 'admin', // TODO: Get from auth
+                accepted,
+                rejection_reason: rejectionReason,
             });
             alert(`Match ${action}ed`);
             loadMatches();

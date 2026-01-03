@@ -1,0 +1,454 @@
+/**
+ * Unified API Client for Splits Network Frontend Applications
+ * 
+ * Key Features:
+ * - V2 API only (no legacy V1 support)
+ * - Automatic response unwrapping ({ data } envelope)
+ * - Consistent error handling
+ * - Type-safe with shared types
+ * - Environment-aware URL construction
+ * - Token-based authentication
+ */
+
+import type {
+    Application,
+    ApplicationCreate,
+    ApplicationUpdate,
+    Candidate,
+    CandidateCreate,
+    CandidateUpdate,
+    Job,
+    Document,
+    RecruiterRelationship,
+    AIReview,
+    DashboardStats
+} from '@splits-network/shared-types';
+
+export interface ApiClientConfig {
+    /** Auth token for API requests */
+    authToken?: string;
+    /** Base URL override (defaults to environment-based detection) */
+    baseUrl?: string;
+}
+
+export interface ApiResponse<T> {
+    data: T;
+    pagination?: {
+        total: number;
+        page: number;
+        limit: number;
+        total_pages: number;
+    };
+}
+
+export interface ListOptions {
+    limit?: number;
+    page?: number;
+    search?: string;
+    sort_by?: string;
+    sort_order?: 'asc' | 'desc';
+    [key: string]: any; // For resource-specific filters
+}
+
+export class ApiError extends Error {
+    constructor(
+        message: string,
+        public status: number,
+        public code?: string
+    ) {
+        super(message);
+        this.name = 'ApiError';
+    }
+}
+
+/**
+ * Get the appropriate API base URL based on environment
+ */
+function getApiBaseUrl(): string {
+    // Server-side (SSR/SSG)
+    if (typeof window === 'undefined') {
+        if (process.env.NEXT_PUBLIC_API_GATEWAY_URL) {
+            return normalizeBaseUrl(process.env.NEXT_PUBLIC_API_GATEWAY_URL);
+        }
+        
+        const isInDocker = process.env.RUNNING_IN_DOCKER === 'true';
+        return isInDocker 
+            ? 'http://api-gateway:3000'
+            : 'http://localhost:3000';
+    }
+
+    // Client-side (browser)
+    const publicApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    return normalizeBaseUrl(publicApiUrl);
+}
+
+function normalizeBaseUrl(url: string): string {
+    // Remove trailing slashes and any /api suffixes to prevent /api/api paths
+    return url.replace(/\/+$/, '').replace(/\/api(?:\/v[0-9]+)?$/, '');
+}
+
+/**
+ * Unified API Client for Splits Network Frontend Applications
+ */
+export class SplitsApiClient {
+    private baseUrl: string;
+    private authToken?: string;
+
+    constructor(config: ApiClientConfig = {}) {
+        this.baseUrl = config.baseUrl || getApiBaseUrl();
+        this.authToken = config.authToken;
+    }
+
+    /**
+     * Set auth token for authenticated requests
+     */
+    setAuthToken(token: string): void {
+        this.authToken = token;
+    }
+
+    /**
+     * Remove auth token
+     */
+    clearAuthToken(): void {
+        this.authToken = undefined;
+    }
+
+    /**
+     * Make a raw HTTP request to the API
+     */
+    private async request<T>(
+        endpoint: string,
+        options: RequestInit = {}
+    ): Promise<T> {
+        const url = `${this.baseUrl}/api/v2${endpoint}`;
+        
+        const headers: Record<string, string> = {
+            ...options.headers as Record<string, string>,
+        };
+
+        // Set Content-Type for requests with body (except FormData)
+        if (options.body && !(options.body instanceof FormData)) {
+            headers['Content-Type'] = 'application/json';
+        }
+
+        // Add authorization
+        if (this.authToken) {
+            headers['Authorization'] = `Bearer ${this.authToken}`;
+        }
+
+        const response = await fetch(url, {
+            ...options,
+            headers,
+        });
+
+        if (!response.ok) {
+            await this.handleError(response);
+        }
+
+        // Handle 204 No Content
+        if (response.status === 204) {
+            return undefined as any;
+        }
+
+        // Check if response has JSON content
+        const contentType = response.headers.get('content-type');
+        if (!contentType?.includes('application/json')) {
+            return {} as T;
+        }
+
+        const json = await response.json();
+        
+        // Unwrap API Gateway response envelope
+        if (json && typeof json === 'object' && 'data' in json) {
+            return json as T; // Keep pagination metadata
+        }
+        
+        return json as T;
+    }
+
+    private async handleError(response: Response): Promise<never> {
+        let errorMessage = 'An error occurred';
+        let errorCode: string | undefined;
+        
+        try {
+            const errorData = await response.json();
+            if (errorData.error && typeof errorData.error === 'object') {
+                errorMessage = errorData.error.message || errorData.error.code || errorMessage;
+                errorCode = errorData.error.code;
+            } else {
+                errorMessage = errorData.message || errorData.error || errorMessage;
+                errorCode = typeof errorData.error === 'string' ? errorData.error : undefined;
+            }
+        } catch {
+            errorMessage = response.statusText || errorMessage;
+        }
+        
+        throw new ApiError(errorMessage, response.status, errorCode);
+    }
+
+    /**
+     * HTTP GET request with query parameters
+     */
+    async get<T = any>(
+        endpoint: string, 
+        params?: Record<string, any>
+    ): Promise<T> {
+        let url = endpoint;
+        if (params) {
+            const searchParams = new URLSearchParams();
+            Object.entries(params).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    searchParams.append(key, String(value));
+                }
+            });
+            const query = searchParams.toString();
+            if (query) {
+                url = `${endpoint}?${query}`;
+            }
+        }
+        return this.request<T>(url, { method: 'GET' });
+    }
+
+    /**
+     * HTTP POST request
+     */
+    async post<T = any>(endpoint: string, data?: any): Promise<T> {
+        return this.request<T>(endpoint, {
+            method: 'POST',
+            body: data instanceof FormData ? data : JSON.stringify(data),
+        });
+    }
+
+    /**
+     * HTTP PATCH request
+     */
+    async patch<T = any>(endpoint: string, data?: any): Promise<T> {
+        return this.request<T>(endpoint, {
+            method: 'PATCH',
+            body: data ? JSON.stringify(data) : undefined,
+        });
+    }
+
+    /**
+     * HTTP DELETE request
+     */
+    async delete<T = any>(endpoint: string): Promise<T> {
+        return this.request<T>(endpoint, { method: 'DELETE' });
+    }
+
+    // === CANDIDATE API ===
+
+    /**
+     * Get current user's candidate profile
+     */
+    async getMyCandidateProfile(): Promise<ApiResponse<Candidate[]>> {
+        return this.get('/candidates', { limit: 1 });
+    }
+
+    /**
+     * Create candidate profile
+     */
+    async createCandidateProfile(data: CandidateCreate): Promise<ApiResponse<Candidate>> {
+        return this.post('/candidates', data);
+    }
+
+    /**
+     * Update candidate profile
+     */
+    async updateCandidateProfile(id: string, data: CandidateUpdate): Promise<ApiResponse<Candidate>> {
+        return this.patch(`/candidates/${id}`, data);
+    }
+
+    /**
+     * Get candidate by ID
+     */
+    async getCandidate(id: string): Promise<ApiResponse<Candidate>> {
+        return this.get(`/candidates/${id}`);
+    }
+
+    // === APPLICATIONS API ===
+
+    /**
+     * List applications with optional filtering
+     */
+    async getApplications(options: ListOptions = {}): Promise<ApiResponse<Application[]>> {
+        return this.get('/applications', options);
+    }
+
+    /**
+     * Get application by ID with optional includes
+     */
+    async getApplication(
+        id: string, 
+        include?: ('candidate' | 'job' | 'recruiter' | 'documents' | 'ai_review')[]
+    ): Promise<ApiResponse<Application>> {
+        const params = include?.length ? { include: include.join(',') } : undefined;
+        return this.get(`/applications/${id}`, params);
+    }
+
+    /**
+     * Create application
+     */
+    async createApplication(data: ApplicationCreate): Promise<ApiResponse<Application>> {
+        return this.post('/applications', data);
+    }
+
+    /**
+     * Update application
+     */
+    async updateApplication(id: string, data: ApplicationUpdate): Promise<ApiResponse<Application>> {
+        return this.patch(`/applications/${id}`, data);
+    }
+
+    // === JOBS API ===
+
+    /**
+     * List jobs with filtering
+     */
+    async getJobs(options: ListOptions = {}): Promise<ApiResponse<Job[]>> {
+        return this.get('/jobs', options);
+    }
+
+    /**
+     * Get job by ID
+     */
+    async getJob(id: string): Promise<ApiResponse<Job>> {
+        return this.get(`/jobs/${id}`);
+    }
+
+    /**
+     * Get job pre-screen questions
+     */
+    async getJobPreScreenQuestions(jobId: string): Promise<ApiResponse<any[]>> {
+        return this.get('/job-pre-screen-questions', { job_id: jobId });
+    }
+
+    /**
+     * Get job requirements
+     */
+    async getJobRequirements(jobId: string): Promise<ApiResponse<any[]>> {
+        return this.get('/job-requirements', { job_id: jobId });
+    }
+
+    // === DOCUMENTS API ===
+
+    /**
+     * Get user's documents
+     */
+    async getMyDocuments(): Promise<ApiResponse<Document[]>> {
+        return this.get('/documents');
+    }
+
+    /**
+     * Upload document
+     */
+    async uploadDocument(formData: FormData): Promise<ApiResponse<Document>> {
+        return this.post('/documents', formData);
+    }
+
+    /**
+     * Get document by ID
+     */
+    async getDocument(id: string): Promise<ApiResponse<Document>> {
+        return this.get(`/documents/${id}`);
+    }
+
+    /**
+     * Delete document
+     */
+    async deleteDocument(id: string): Promise<ApiResponse<void>> {
+        return this.delete(`/documents/${id}`);
+    }
+
+    // === RECRUITER RELATIONSHIPS API ===
+
+    /**
+     * Get current user's recruiter relationships
+     */
+    async getMyRecruiterRelationships(options: ListOptions = {}): Promise<ApiResponse<RecruiterRelationship[]>> {
+        return this.get('/recruiter-candidates', { limit: 250, ...options });
+    }
+
+    // === AI REVIEWS API ===
+
+    /**
+     * Get AI review for application
+     */
+    async getAIReview(applicationId: string): Promise<ApiResponse<AIReview>> {
+        return this.get('/ai-reviews', { application_id: applicationId });
+    }
+
+    /**
+     * Request new AI review (triggers async processing)
+     */
+    async requestNewAIReview(applicationId: string): Promise<ApiResponse<Application>> {
+        return this.patch(`/applications/${applicationId}`, { stage: 'ai_review' });
+    }
+
+    // === DASHBOARD API ===
+
+    /**
+     * Get dashboard statistics
+     */
+    async getDashboardStats(scope?: string): Promise<ApiResponse<DashboardStats>> {
+        return this.get('/stats', scope ? { scope } : undefined);
+    }
+
+    // === USER API ===
+
+    /**
+     * Get current user
+     */
+    async getCurrentUser(): Promise<ApiResponse<any>> {
+        return this.get('/users', { limit: 1 });
+    }
+
+    /**
+     * Update user profile
+     */
+    async updateUser(id: string, data: any): Promise<ApiResponse<any>> {
+        return this.patch(`/users/${id}`, data);
+    }
+
+    // === NOTIFICATIONS API ===
+
+    /**
+     * Get notifications
+     */
+    async getNotifications(options: ListOptions = {}): Promise<ApiResponse<any[]>> {
+        return this.get('/notifications', options);
+    }
+
+    /**
+     * Mark notification as read
+     */
+    async markNotificationAsRead(id: string): Promise<ApiResponse<any>> {
+        return this.patch(`/notifications/${id}`, { status: 'read' });
+    }
+
+    /**
+     * Mark all notifications as read
+     */
+    async markAllNotificationsAsRead(): Promise<ApiResponse<any>> {
+        return this.post('/notifications/mark-all-read');
+    }
+
+    /**
+     * Get unread notification count
+     */
+    async getUnreadNotificationCount(): Promise<ApiResponse<{ count: number }>> {
+        return this.get('/notifications/unread-count');
+    }
+}
+
+/**
+ * Create authenticated API client instance
+ */
+export function createApiClient(authToken?: string): SplitsApiClient {
+    return new SplitsApiClient({ authToken });
+}
+
+/**
+ * Default export for convenient imports
+ */
+export default SplitsApiClient;

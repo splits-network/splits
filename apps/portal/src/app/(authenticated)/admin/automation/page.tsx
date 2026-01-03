@@ -47,12 +47,13 @@ export default function AutomationControlsPage() {
             const api = new ApiClient();
 
             // Load automation rules
-            const rulesResponse = await api.request<{ data: AutomationRule[] }>('/admin/automation/rules');
+            const rulesResponse = await api.get<{ data: AutomationRule[] }>('/admin/automation/rules');
             setRules(rulesResponse.data || []);
 
             // Load pending executions requiring approval
-            const execResponse = await api.request<{ data: AutomationExecution[] }>(
-                '/admin/automation/executions?status=pending&requires_approval=true'
+            const execResponse = await api.get<{ data: AutomationExecution[] }>(
+                '/admin/automation/executions',
+                { params: { status: 'pending', requires_approval: 'true' } }
             );
             setPendingExecutions(execResponse.data || []);
         } catch (error) {
@@ -67,10 +68,7 @@ export default function AutomationControlsPage() {
 
         try {
             const api = new ApiClient();
-            await api.request(`/admin/automation/rules/${ruleId}`, {
-                method: 'PATCH',
-                body: JSON.stringify({ status: newStatus }),
-            });
+            await api.patch(`/admin/automation/rules/${ruleId}`, { status: newStatus });
             await loadData();
         } catch (error) {
             console.error('Failed to update rule status:', error);
@@ -83,9 +81,7 @@ export default function AutomationControlsPage() {
 
         try {
             const api = new ApiClient();
-            await api.request(`/admin/automation/executions/${executionId}/approve`, {
-                method: 'POST',
-            });
+            await api.post(`/admin/automation/executions/${executionId}/approve`);
             await loadData();
         } catch (error) {
             console.error('Failed to approve execution:', error);
@@ -99,10 +95,7 @@ export default function AutomationControlsPage() {
 
         try {
             const api = new ApiClient();
-            await api.request(`/admin/automation/executions/${executionId}/reject`, {
-                method: 'POST',
-                body: JSON.stringify({ reason }),
-            });
+            await api.post(`/admin/automation/executions/${executionId}/reject`, { reason });
             await loadData();
         } catch (error) {
             console.error('Failed to reject execution:', error);

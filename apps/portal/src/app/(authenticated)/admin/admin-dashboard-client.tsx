@@ -31,7 +31,7 @@ export default function AdminDashboardClient() {
                     return;
                 }
 
-                const client = new ApiClient(undefined, token);
+                const client = new ApiClient(token);
                 const response = await client.get('/admin/stats');
 
                 setStats(response.data);

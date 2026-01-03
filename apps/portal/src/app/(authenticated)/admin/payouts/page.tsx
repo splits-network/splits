@@ -17,7 +17,7 @@ export default function PayoutsAdminPage() {
         try {
             const api = new ApiClient();
             // TODO: Add filter to API
-            const response = await api.request<{ data: any[] }>('/billing/payouts');
+            const response = await api.get<{ data: any[] }>('/billing/payouts');
             setPayouts(response.data || []);
         } catch (error) {
             console.error('Failed to load payouts:', error);
@@ -31,9 +31,7 @@ export default function PayoutsAdminPage() {
 
         try {
             const api = new ApiClient();
-            await api.request(`/billing/payouts/${payoutId}/process`, {
-                method: 'POST',
-            });
+            await api.post(`/billing/payouts/${payoutId}/process`);
             alert('Payout processed successfully');
             loadPayouts();
         } catch (error) {

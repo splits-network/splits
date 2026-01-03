@@ -43,8 +43,9 @@ export default function DecisionAuditLogPage() {
                 queryParams.append('decision_type', filter);
             }
 
-            const response = await api.request<{ data: DecisionLog[]; total: number }>(
-                `/admin/decision-log?${queryParams.toString()}`
+            const response = await api.get<{ data: DecisionLog[]; total: number }>(
+                '/admin/decision-log',
+                { params: Object.fromEntries(queryParams) }
             );
 
             setLogs(response.data || []);

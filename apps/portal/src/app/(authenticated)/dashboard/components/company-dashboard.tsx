@@ -54,7 +54,7 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
     const loadDashboardData = async () => {
         setLoading(true);
         try {
-            const api = new ApiClient(undefined, token);
+            const api = new ApiClient();
 
             // Load company stats using V2 endpoint
             const statsResponse = await api.get(`/stats?scope=company`);

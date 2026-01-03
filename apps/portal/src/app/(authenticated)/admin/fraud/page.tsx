@@ -16,7 +16,7 @@ export default function FraudSignalsPage() {
         setLoading(true);
         try {
             const api = new ApiClient();
-            const response = await api.request<{ data: any[] }>(`/automation/fraud/signals?status=${filter}`);
+            const response = await api.get<{ data: any[] }>('/automation/fraud/signals', { params: { status: filter } });
             setSignals(response.data || []);
         } catch (error) {
             console.error('Failed to load fraud signals:', error);
@@ -33,13 +33,10 @@ export default function FraudSignalsPage() {
 
         try {
             const api = new ApiClient();
-            await api.request(`/automation/fraud/signals/${signalId}/resolve`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    reviewed_by: 'admin', // TODO: Get from auth
-                    is_false_positive: isFalsePositive,
-                    notes,
-                }),
+            await api.post(`/automation/fraud/signals/${signalId}/resolve`, {
+                reviewed_by: 'admin', // TODO: Get from auth
+                is_false_positive: isFalsePositive,
+                notes,
             });
             alert('Signal resolved');
             loadSignals();

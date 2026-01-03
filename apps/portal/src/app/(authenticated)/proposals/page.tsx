@@ -57,8 +57,8 @@ export default function ProposalsPage() {
                 throw new Error('Not authenticated');
             }
 
-            const client = new ApiClient(undefined, token);
-            const result: { data: ProposalsResponse } = await client.request(
+            const client = new ApiClient();
+            const result: { data: ProposalsResponse } = await client.get(
                 `/proposals?state=${stateParam}&page=${page}&limit=25`
             );
 
@@ -77,8 +77,8 @@ export default function ProposalsPage() {
             const token = await getToken();
             if (!token) return;
 
-            const client = new ApiClient(undefined, token);
-            const result: { data: any } = await client.request('/proposals/summary');
+            const client = new ApiClient();
+            const result: { data: any } = await client.get('/proposals/summary');
             setSummary(result.data);
         } catch (err) {
             console.error('Failed to fetch summary:', err);
@@ -91,11 +91,8 @@ export default function ProposalsPage() {
             throw new Error('Not authenticated');
         }
 
-        const client = new ApiClient(undefined, token);
-        await client.request(`/proposals/${proposalId}/accept`, {
-            method: 'POST',
-            body: JSON.stringify({ notes }),
-        });
+        const client = new ApiClient();
+        await client.post(`/proposals/${proposalId}/accept`, { notes });
 
         // Refresh proposals
         await fetchProposals();
@@ -108,11 +105,8 @@ export default function ProposalsPage() {
             throw new Error('Not authenticated');
         }
 
-        const client = new ApiClient(undefined, token);
-        await client.request(`/proposals/${proposalId}/decline`, {
-            method: 'POST',
-            body: JSON.stringify({ notes }),
-        });
+        const client = new ApiClient();
+        await client.post(`/proposals/${proposalId}/decline`, { notes });
 
         // Refresh proposals
         await fetchProposals();

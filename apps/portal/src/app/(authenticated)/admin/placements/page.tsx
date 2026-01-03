@@ -17,7 +17,7 @@ interface Placement {
 
 async function getPlacements(token: string): Promise<Placement[]> {
     try {
-        const client = new ApiClient(undefined, token);
+        const client = new ApiClient();
         const response = await client.get('/placements');
         return response.data || [];
     } catch (error) {

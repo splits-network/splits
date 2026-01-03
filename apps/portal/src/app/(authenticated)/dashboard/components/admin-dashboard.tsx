@@ -63,7 +63,7 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
     const loadDashboardData = async () => {
         setLoading(true);
         try {
-            const api = new ApiClient(undefined, token);
+            const api = new ApiClient();
 
             // Load platform stats
             const statsResponse = await api.get<{ data: PlatformStats }>('/admin/dashboard/stats');
