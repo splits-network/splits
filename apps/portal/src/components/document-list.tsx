@@ -10,14 +10,18 @@ interface Document {
     id: string;
     entity_type: string;
     entity_id: string;
-    document_type: string;
-    original_filename: string;
+    document_type?: string | null;
+    file_name?: string;
     file_size: number;
     mime_type: string;
-    storage_path: string;
-    processing_status: string;
-    uploaded_by_user_id: string;
+    file_path: string;
+    storage_bucket: string;
+    status?: string;
+    processing_status?: string;
+    uploaded_by?: string | null;
+    metadata?: Record<string, any> | null;
     created_at: string;
+    updated_at: string;
 }
 
 interface DocumentListProps {
@@ -40,15 +44,19 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
     }, [entityType, entityId]);
 
     const fetchDocuments = async () => {
+        setLoading(true);
         try {
             const token = await getToken();
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
             const response: any = await client.getDocumentsByEntity(entityType, entityId);
-            setDocuments(response.data || []);
+            const docs = (response?.data ?? response?.documents ?? []) as Document[];
+            setDocuments(docs);
         } catch (error) {
             console.error('Failed to fetch documents:', error);
+            toast.error('Failed to load documents');
+            setDocuments([]);
         } finally {
             setLoading(false);
         }
@@ -62,10 +70,13 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
 
             const client = createAuthenticatedClient(token);
             const response: any = await client.getDocument(doc.id);
+            const document = response?.data ?? response;
+            const downloadUrl = document?.download_url || document?.signed_url;
 
-            // Open signed URL in new tab
-            if (response.data?.signed_url) {
-                window.open(response.data.signed_url, '_blank');
+            if (downloadUrl) {
+                window.open(downloadUrl, '_blank');
+            } else {
+                throw new Error('No download URL available for this document');
             }
         } catch (error) {
             console.error('Failed to download document:', error);
@@ -162,44 +173,48 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
                         Add Document
                     </button>
                 )}
-                {documents.map((doc) => (
-                    <div key={doc.id} className="flex items-center justify-between p-3 bg-base-200 rounded-lg hover:bg-base-300 transition-colors">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <i className={`fa-solid ${getFileIcon(doc.mime_type)} text-xl`}></i>
-                            <div className="flex-1 min-w-0">
-                                <div className="font-medium truncate">{doc.original_filename}</div>
-                                <div className="text-xs text-base-content/60">
-                                    {formatFileSize(doc.file_size)} • {new Date(doc.created_at).toLocaleDateString()}
+                {documents.map((doc) => {
+                    const displayName = doc.file_name || (doc as any).original_filename || 'Document';
+                    return (
+                        <div key={doc.id} className="flex items-center justify-between p-3 bg-base-200 rounded-lg hover:bg-base-300 transition-colors">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <i className={`fa-solid ${getFileIcon(doc.mime_type)} text-xl`}></i>
+                                <div className="flex-1 min-w-0">
+                                    <div className="font-medium truncate">{displayName}</div>
+                                    <div className="text-xs text-base-content/60">
+                                        {formatFileSize(doc.file_size)} | {new Date(doc.created_at).toLocaleDateString()}
+                                    </div>
                                 </div>
-                            </div>
-                            {doc.processing_status === 'pending' && (
-                                <span className="badge badge-warning badge-sm">Processing</span>
-                            )}
-                            {doc.processing_status === 'failed' && (
-                                <span className="badge badge-error badge-sm">Failed</span>
-                            )}
-                        </div>
-                        <div className="flex gap-1 ml-2">
-                            <button
-                                className="btn btn-ghost btn-sm"
-                                onClick={() => handleDownload(doc)}
-                                disabled={downloading === doc.id}
-                            >
-                                {downloading === doc.id ? (
-                                    <span className="loading loading-spinner loading-xs"></span>
-                                ) : (
-                                    <i className="fa-solid fa-download"></i>
+                                {doc.processing_status === 'pending' && (
+                                    <span className="badge badge-warning badge-sm">Processing</span>
                                 )}
-                            </button>
-                            <button
-                                className="btn btn-ghost btn-sm text-error hover:bg-error hover:text-error-content"
-                                onClick={() => handleDelete(doc.id)}
-                            >
-                                <i className="fa-solid fa-trash"></i>
-                            </button>
+                                {doc.processing_status === 'failed' && (
+                                    <span className="badge badge-error badge-sm">Failed</span>
+                                )}
+                            </div>
+                            <div className="flex gap-1 ml-2">
+                                <button
+                                    className="btn btn-ghost btn-sm"
+                                    onClick={() => handleDownload(doc)}
+                                    disabled={downloading === doc.id}
+                                >
+                                    {downloading === doc.id ? (
+                                        <span className="loading loading-spinner loading-xs"></span>
+                                    ) : (
+                                        <i className="fa-solid fa-download"></i>
+                                    )}
+                                </button>
+                                <button
+                                    className="btn btn-ghost btn-sm text-error hover:bg-error hover:text-error-content"
+                                    onClick={() => handleDelete(doc.id)}
+                                >
+                                    <i className="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
+
             </div>
             {showUploadModal && (
                 <UploadDocumentModal

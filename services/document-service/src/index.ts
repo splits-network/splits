@@ -50,7 +50,12 @@ async function start() {
 
         // Add health check route
         fastify.get('/health', async (_request, reply) => {
-            reply.send({ status: 'ok', service: 'document-service' });
+            reply.send({
+                status: 'healthy',
+                service: 'document-service',
+                version: 'v2-only',
+                timestamp: new Date().toISOString(),
+            });
         });
 
         // Register V2 routes
