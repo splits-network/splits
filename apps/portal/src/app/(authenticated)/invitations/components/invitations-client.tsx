@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import ConfirmDialog from '@/components/confirm-dialog';
 
 interface RecruiterCandidate {
     id: string;
@@ -41,6 +42,12 @@ export default function InvitationsPageClient() {
     const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'declined'>('all');
     const [resendingId, setResendingId] = useState<string | null>(null);
     const [cancellingId, setCancellingId] = useState<string | null>(null);
+    const [confirmDialog, setConfirmDialog] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+    }>({ isOpen: false, title: '', message: '', onConfirm: () => { } });
 
     useEffect(() => {
         loadInvitations();
@@ -162,16 +169,22 @@ export default function InvitationsPageClient() {
         }
     };
 
-    const handleCancelInvitation = async (invitation: InvitationWithCandidate) => {
+    const handleCancelInvitation = (invitation: InvitationWithCandidate) => {
         const candidateName = invitation.candidate?.full_name || 'this candidate';
 
-        if (!confirm(`Are you sure you want to cancel the invitation for ${candidateName}? This action cannot be undone.`)) {
-            return;
-        }
+        setConfirmDialog({
+            isOpen: true,
+            title: 'Cancel Invitation',
+            message: `Are you sure you want to cancel the invitation for ${candidateName}? This action cannot be undone.`,
+            onConfirm: () => confirmCancelInvitation(invitation),
+        });
+    };
 
+    const confirmCancelInvitation = async (invitation: InvitationWithCandidate) => {
         try {
             setCancellingId(invitation.id);
             setError(null);
+            setConfirmDialog({ isOpen: false, title: '', message: '', onConfirm: () => { } });
 
             const token = await getToken();
             if (!token) {
@@ -179,8 +192,8 @@ export default function InvitationsPageClient() {
             }
 
             const client = createAuthenticatedClient(token);
-            // V2 pattern: Use PATCH with action flag
-            await client.patch(`/recruiter-candidates/${invitation.id}`, { cancel_invitation: true });
+            // V2 pattern: Use DELETE method to properly remove the invitation
+            await client.delete(`/recruiter-candidates/${invitation.id}`);
 
             // Reload invitations to get updated data
             await loadInvitations();
@@ -405,6 +418,19 @@ export default function InvitationsPageClient() {
                     </div>
                 </div>
             )}
+
+            {/* Custom confirm dialog */}
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                title={confirmDialog.title}
+                message={confirmDialog.message}
+                onConfirm={confirmDialog.onConfirm}
+                onCancel={() => setConfirmDialog({ isOpen: false, title: '', message: '', onConfirm: () => { } })}
+                confirmText="Cancel Invitation"
+                cancelText="Keep Invitation"
+                type="error"
+                loading={cancellingId !== null}
+            />
         </div>
     );
 }

@@ -120,14 +120,36 @@ export class RecruiterCandidateRepository {
     }
 
     async deleteRecruiterCandidate(id: string): Promise<void> {
-        // Soft delete
-        const { error } = await this.supabase
+        // First, get the current record to check its state
+        const { data: existing, error: fetchError } = await this.supabase
             .schema('network')
             .from('recruiter_candidates')
-            .update({ status: 'inactive', updated_at: new Date().toISOString() })
-            .eq('id', id);
+            .select('consent_given, candidate_id')
+            .eq('id', id)
+            .single();
 
-        if (error) throw error;
+        if (fetchError) throw fetchError;
+        if (!existing) throw new Error('Recruiter-candidate relationship not found');
+
+        // Hard delete if invitation not accepted and no candidate relationship
+        if (!existing.consent_given && !existing.candidate_id) {
+            const { error } = await this.supabase
+                .schema('network')
+                .from('recruiter_candidates')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw error;
+        } else {
+            // Soft delete for accepted relationships or those with candidate data
+            const { error } = await this.supabase
+                .schema('network')
+                .from('recruiter_candidates')
+                .update({ status: 'terminated', updated_at: new Date().toISOString() })
+                .eq('id', id);
+
+            if (error) throw error;
+        }
     }
 
     async findByInvitationToken(token: string): Promise<any | null> {

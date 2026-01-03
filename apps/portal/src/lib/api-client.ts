@@ -6,7 +6,11 @@ const getApiBaseUrl = () => {
     if (typeof window === 'undefined') {
         // If NEXT_PUBLIC_API_GATEWAY_URL is set, use it (for server-side rendering)
         if (process.env.NEXT_PUBLIC_API_GATEWAY_URL) {
-            return process.env.NEXT_PUBLIC_API_GATEWAY_URL.replace(/\/+$/, '') + '/api/v2';
+            // Strip any trailing /api or /api/v* paths to prevent double /api
+            const cleanUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL
+                .replace(/\/api(?:\/v\d+)?\/?\s*$/, '')
+                .replace(/\/+$/, '');
+            return cleanUrl + '/api/v2';
         }
 
         // Check if we're inside a Docker container
@@ -21,7 +25,11 @@ const getApiBaseUrl = () => {
 
     // Client-side (browser)
     const publicApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    return publicApiUrl.replace(/\/+$/, '') + '/api/v2';
+    // Strip any trailing /api or /api/v* paths to prevent double /api
+    const cleanUrl = publicApiUrl
+        .replace(/\/api(?:\/v\d+)?\/?\s*$/, '')
+        .replace(/\/+$/, '');
+    return cleanUrl + '/api/v2';
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -59,9 +67,13 @@ export class ApiClient {
         const url = `${this.baseUrl}${endpoint}`;
 
         const headers: Record<string, string> = {
-            'Content-Type': 'application/json',
             ...options.headers as Record<string, string>,
         };
+
+        // Only set Content-Type for requests that have a body
+        if (options.body) {
+            headers['Content-Type'] = 'application/json';
+        }
 
         // Add authorization header if token is available
         if (this.token) {

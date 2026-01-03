@@ -31,12 +31,12 @@ export default async function CompanyTeamPage() {
     }
 
     // Fetch user profile
-    const profileResponse: any = await fetchFromGateway('/api/v2/users?limit=1', token);
+    const profileResponse: any = await fetchFromGateway('/users?limit=1', token);
     const profileArray = Array.isArray(profileResponse?.data)
         ? profileResponse.data
         : Array.isArray(profileResponse)
-          ? profileResponse
-          : [];
+            ? profileResponse
+            : [];
     const profile = profileArray[0] || {};
     const roles: string[] = Array.isArray(profile.roles) ? profile.roles : [];
 

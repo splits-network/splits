@@ -34,7 +34,7 @@ export default async function CompanySettingsPage() {
     }
 
     // Fetch user profile
-    const profileResponse: any = await fetchFromGateway('/api/v2/users?limit=1', token);
+    const profileResponse: any = await fetchFromGateway('/users?limit=1', token);
     const profileArray = Array.isArray(profileResponse?.data)
         ? profileResponse.data
         : Array.isArray(profileResponse)
@@ -56,7 +56,7 @@ export default async function CompanySettingsPage() {
     if (organizationId) {
         try {
             console.log('[Company Settings] Fetching companies for org:', organizationId);
-            const companiesResponse: any = await fetchFromGateway('/api/v2/companies', token);
+            const companiesResponse: any = await fetchFromGateway('/companies', token);
             console.log('[Company Settings] Companies response:', JSON.stringify(companiesResponse, null, 2));
             const companies = companiesResponse?.data || [];
             console.log('[Company Settings] Found companies:', companies.length);

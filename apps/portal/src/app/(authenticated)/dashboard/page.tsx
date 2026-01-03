@@ -36,12 +36,12 @@ export default async function DashboardPage() {
     // Fetch user profile to determine persona
     let profileData: any = {};
     try {
-        const profileResponse = await fetchFromGateway('/api/v2/users?limit=1', token);
+        const profileResponse = await fetchFromGateway('/users?limit=1', token);
         const profileArray = Array.isArray(profileResponse?.data)
             ? profileResponse.data
             : Array.isArray(profileResponse)
-              ? profileResponse
-              : [];
+                ? profileResponse
+                : [];
         profileData = profileArray[0] || {};
     } catch (error) {
         console.error('Failed to fetch user profile:', error);
@@ -69,7 +69,7 @@ export default async function DashboardPage() {
     if (profileData.recruiter_id) {
         try {
             const recruiterResponse = await fetchFromGateway(
-                `/api/v2/recruiters/${profileData.recruiter_id}`,
+                `/recruiters/${profileData.recruiter_id}`,
                 token
             );
             if (recruiterResponse?.data) {
@@ -102,7 +102,7 @@ export default async function DashboardPage() {
                         Your account is being set up. Please complete your profile to get started.
                     </p>
                     <div className="card-actions justify-center mt-4">
-                            <a href="/profile" className="btn btn-primary">
+                        <a href="/profile" className="btn btn-primary">
                             Complete Profile
                         </a>
                     </div>

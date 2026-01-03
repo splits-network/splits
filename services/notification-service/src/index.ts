@@ -104,11 +104,6 @@ async function main() {
     });
 
     // Health check endpoint
-    app.get('/health', async (_request, reply) => {
-        reply.send({ status: 'ok', service: 'notification-service' });
-    });
-
-    // Health check endpoint
     app.get('/health', async (request, reply) => {
         try {
             // Check database connectivity

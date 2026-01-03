@@ -8,10 +8,9 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useUser, useAuth } from '@clerk/nextjs';
 import { OnboardingState, OnboardingContextType, UserRole } from './types';
+import { ApiClient } from '@/lib/api-client';
 
 const OnboardingContext = createContext<OnboardingContextType | null>(null);
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {
     const { user } = useUser();
@@ -34,22 +33,22 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 const token = await getToken();
                 if (!token) throw new Error('No authentication token');
 
-                const response = await fetch(`${API_URL}/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
-                if (!response.ok) throw new Error('Failed to fetch user data');
+                const apiClient = new ApiClient(token);
 
-                const { data } = await response.json();
+                // Get current user data using V2 API
+                const response = await apiClient.getCurrentUser();
+                if (!response?.data) throw new Error('No user data found');
+
+                // Handle both array and single object responses
+                const userData = Array.isArray(response.data) ? response.data[0] : response.data;
+                if (!userData) throw new Error('No user data found');
 
                 // Skip onboarding modal for platform_admin users
-                const isPlatformAdmin = data.memberships?.some((m: any) => m.role === 'platform_admin');
+                const isPlatformAdmin = userData.memberships?.some((m: any) => m.role === 'platform_admin');
                 if (isPlatformAdmin) {
                     setState(prev => ({
                         ...prev,
-                        currentStep: data.onboarding_step || 1,
+                        currentStep: userData.onboarding_step || 1,
                         status: 'completed', // Mark as completed so modal never shows
                         isModalOpen: false,
                     }));
@@ -57,12 +56,12 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 }
 
                 // Show modal if onboarding is pending or in progress
-                const shouldShowModal = data.onboarding_status === 'pending' || data.onboarding_status === 'in_progress';
+                const shouldShowModal = userData.onboarding_status === 'pending' || userData.onboarding_status === 'in_progress';
 
                 setState(prev => ({
                     ...prev,
-                    currentStep: data.onboarding_step || 1,
-                    status: data.onboarding_status || 'pending',
+                    currentStep: userData.onboarding_step || 1,
+                    status: userData.onboarding_status || 'pending',
                     isModalOpen: shouldShowModal,
                 }));
             } catch (error) {
@@ -86,25 +85,18 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 const token = await getToken();
                 if (!token) return;
 
-                const meResponse = await fetch(`${API_URL}/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
+                const apiClient = new ApiClient(token);
 
-                if (meResponse.ok) {
-                    const { data: userData } = await meResponse.json();
+                // Get current user data using V2 API
+                const response = await apiClient.getCurrentUser();
+                if (!response?.data) return;
 
-                    await fetch(`${API_URL}/users/${userData.id}/onboarding`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ step }),
-                    });
-                }
+                // Handle both array and single object responses
+                const userData = Array.isArray(response.data) ? response.data[0] : response.data;
+                if (!userData) return;
+
+                // Update onboarding step using API client
+                await apiClient.updateUser(userData.id, { onboarding_step: step });
             } catch (error) {
                 console.error('Failed to update onboarding step:', error);
             }
@@ -148,18 +140,18 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                     payload.company = companyInfo;
                 }
 
-                // Call completion endpoint - need to get internal user ID first from /me
-                const meResponse = await fetch(`${API_URL}/me`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
+                const apiClient = new ApiClient(token);
 
-                if (!meResponse.ok) throw new Error('Failed to get user data');
-                const { data: userData } = await meResponse.json();
+                // Get current user data using V2 API
+                const userResponse = await apiClient.getCurrentUser();
+                if (!userResponse?.data) throw new Error('No user data found');
 
-                const response = await fetch(`${API_URL}/users/${userData.id}/complete-onboarding`, {
+                // Handle both array and single object responses
+                const userData = Array.isArray(userResponse.data) ? userResponse.data[0] : userResponse.data;
+                if (!userData) throw new Error('No user data found');
+
+                // Call completion endpoint - use legacy path for now
+                const completionResponse = await fetch(`http://localhost:3000/api/users/${userData.id}/complete-onboarding`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -168,8 +160,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                     body: JSON.stringify(payload),
                 });
 
-                if (!response.ok) {
-                    const error = await response.json();
+                if (!completionResponse.ok) {
+                    const error = await completionResponse.json();
                     throw new Error(error.error?.message || 'Failed to complete onboarding');
                 }
 
