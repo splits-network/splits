@@ -21,6 +21,7 @@ interface Application {
 
 const stages = [
     { key: 'recruiter_proposed', label: 'Proposed', color: 'badge-secondary' },
+    { key: 'recruiter_request', label: 'Recruiter Request', color: 'badge-info' },
     { key: 'draft', label: 'Draft', color: 'badge-accent' },
     { key: 'ai_review', label: 'AI Review', color: 'badge-info' },
     { key: 'submitted', label: 'Submitted', color: 'badge-neutral' },

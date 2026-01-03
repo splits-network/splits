@@ -34,29 +34,25 @@ export default function ApplicationCard({ application: app, isActive = true }: A
     return (
         <div className={`group card bg-base-100 border border-base-300 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col ${!isActive ? 'opacity-70' : ''}`}>
             {/* Company header with gradient background */}
-            <div className="relative h-20 bg-linear-to-br from-primary/10 via-secondary/5 to-accent/10">
-                <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+            <div className="relative h-24 bg-linear-90 from-secondary/20 to-transparent flex items-center">
 
                 {/* Company logo placeholder */}
-                <div className="absolute -bottom-8 left-6">
-                    <div className="w-16 h-16 rounded-xl bg-base-100 border-4 border-base-100 shadow-lg flex items-center justify-center overflow-hidden">
-                        {app.job?.company?.logo_url ? (
-                            <img
-                                src={app.job.company.logo_url}
-                                alt={`${app.job.company.name} logo`}
-                                className="w-12 h-12 object-contain rounded-lg"
-                                onError={(e) => {
-                                    e.currentTarget.style.display = 'none';
-                                    e.currentTarget.nextElementSibling?.removeAttribute('hidden');
-                                }}
-                            />
-                        ) : null}
-                        <div
-                            className={`w-12 h-12 rounded-lg bg-linear-to-br from-primary to-secondary flex items-center justify-center text-primary-content font-bold text-xl ${app.job?.company?.logo_url ? 'hidden' : ''
-                                }`}
-                            {...(app.job?.company?.logo_url ? { hidden: true } : {})}
-                        >
-                            {(app.job?.company?.name || 'C')[0].toUpperCase()}
+                <div className="flex items-center gap-4 p-2">
+                    <div className={`avatar avatar-placeholder`}>
+                        <div className={`bg-base-100 text-primary text-3xl font-bold w-16 p-2 rounded-full shadow-lg`}>
+                            {app.job?.company?.logo_url ? (
+                                <img
+                                    src={app.job?.company.logo_url}
+                                    alt={`${app.job?.company.name} logo`}
+                                    className="w-20 h-20 object-contain rounded-lg"
+                                    onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                        e.currentTarget.nextElementSibling?.removeAttribute('hidden');
+                                    }}
+                                />
+                            ) : (
+                                (app.job?.company?.name || 'C')[0].toUpperCase()
+                            )}
                         </div>
                     </div>
                 </div>

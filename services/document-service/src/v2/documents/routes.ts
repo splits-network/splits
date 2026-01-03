@@ -19,7 +19,7 @@ export async function registerDocumentRoutes(
     config: RegisterDocumentRoutesConfig
 ) {
     if (!app.hasContentTypeParser('multipart/form-data')) {
-        await app.register(multipart, {
+        await app.register(multipart as any, {
             limits: {
                 fileSize: 10 * 1024 * 1024,
             },
@@ -71,7 +71,7 @@ export async function registerDocumentRoutes(
         try {
             const { clerkUserId } = requireUserContext(request);
 
-            if (!request.isMultipart || !request.isMultipart()) {
+            if (!(request as any).isMultipart || !(request as any).isMultipart()) {
                 return reply.code(400).send({
                     error: { message: 'multipart/form-data is required' },
                 });
@@ -81,7 +81,7 @@ export async function registerDocumentRoutes(
             let fileName: string | undefined;
             const fields: Record<string, any> = {};
 
-            for await (const part of request.parts()) {
+            for await (const part of (request as any).parts()) {
                 if (part.type === 'file') {
                     fileBuffer = await part.toBuffer();
                     fileName = part.filename;

@@ -7,20 +7,21 @@ import { useAuth } from '@clerk/nextjs';
 import { redirect } from 'next/navigation';
 import { getMyApplications } from '@/lib/api-client';
 import { useViewMode } from '@/hooks/useViewMode';
+import { useToast } from '@/lib/toast-context';
 import ApplicationCard from './components/application-card';
 import { getStatusColor, formatStage } from '@/lib/application-utils';
 
 export default function ApplicationsPage({
     searchParams,
 }: {
-    searchParams: Promise<{ success?: string }>;
+    searchParams: Promise<{ success?: string; draft?: string }>;
 }) {
     const { userId, getToken, isLoaded, isSignedIn } = useAuth();
     const [viewMode, setViewMode] = useViewMode('applicationsViewMode');
+    const { success, info } = useToast();
     const [applications, setApplications] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [showSuccess, setShowSuccess] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
 
@@ -58,10 +59,15 @@ export default function ApplicationsPage({
     useEffect(() => {
         async function checkSuccess() {
             const params = await searchParams;
-            setShowSuccess(params.success === 'true');
+            if (params.success === 'true') {
+                success("Application submitted successfully! You'll receive an email once it has been reviewed.");
+            }
+            if (params.draft === 'true') {
+                info('Application saved as draft! You can edit and submit it anytime.');
+            }
         }
         checkSuccess();
-    }, [searchParams]);
+    }, [searchParams, success, info]);
 
     // Show loading state while Clerk is initializing
     if (!isLoaded) {
@@ -123,14 +129,6 @@ export default function ApplicationsPage({
                     Track the status of all your job applications
                 </p>
             </div>
-
-            {/* Success Message */}
-            {showSuccess && (
-                <div className="alert alert-success mb-6">
-                    <i className="fa-solid fa-circle-check"></i>
-                    <span>Application submitted successfully!</span>
-                </div>
-            )}
 
             {/* Error Display */}
             {error && (
@@ -202,6 +200,8 @@ export default function ApplicationsPage({
                             >
                                 <option value="all">All Statuses</option>
                                 <option value="draft">Draft</option>
+                                <option value="recruiter_proposed">Recruiter Proposed</option>
+                                <option value="recruiter_request">Recruiter Request</option>
                                 <option value="ai_review">AI Review</option>
                                 <option value="screen">Recruiter Review</option>
                                 <option value="submitted">Submitted</option>

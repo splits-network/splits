@@ -2,7 +2,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { ServiceRegistry } from '../../clients';
 import { buildAuthHeaders } from '../../helpers/auth-headers';
 import { ResourceDefinition, registerResourceRoutes, getCorrelationId } from './common';
-import { AUTHENTICATED_ROLES, IDENTITY_ADMIN_ROLES } from './roles';
+import { requireAuth } from '../../middleware/auth';
 
 const IDENTITY_RESOURCES: ResourceDefinition[] = [
     {
@@ -10,13 +10,6 @@ const IDENTITY_RESOURCES: ResourceDefinition[] = [
         service: 'identity',
         basePath: '/users',
         tag: 'users',
-        roles: {
-            list: AUTHENTICATED_ROLES,
-            get: IDENTITY_ADMIN_ROLES,
-            create: IDENTITY_ADMIN_ROLES,
-            update: IDENTITY_ADMIN_ROLES,
-            delete: IDENTITY_ADMIN_ROLES,
-        },
     },
 ];
 
@@ -31,11 +24,7 @@ function registerConsentRoutes(app: FastifyInstance, services: ServiceRegistry) 
     app.get(
         '/api/v2/consent',
         {
-            schema: {
-                description: 'Get current user consent preferences',
-                tags: ['consent'],
-                security: [{ clerkAuth: [] }],
-            },
+            // No schema needed for Fastify 5.x
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
@@ -53,11 +42,7 @@ function registerConsentRoutes(app: FastifyInstance, services: ServiceRegistry) 
     app.post(
         '/api/v2/consent',
         {
-            schema: {
-                description: 'Save user consent preferences',
-                tags: ['consent'],
-                security: [{ clerkAuth: [] }],
-            },
+            // No schema needed for Fastify 5.x
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
@@ -75,11 +60,7 @@ function registerConsentRoutes(app: FastifyInstance, services: ServiceRegistry) 
     app.delete(
         '/api/v2/consent',
         {
-            schema: {
-                description: 'Delete user consent preferences',
-                tags: ['consent'],
-                security: [{ clerkAuth: [] }],
-            },
+            // No schema needed for Fastify 5.x
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);

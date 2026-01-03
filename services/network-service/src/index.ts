@@ -3,14 +3,7 @@ import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import { NetworkRepository } from './repository';
-import { NetworkService } from './service';
-import { EventPublisher as LegacyEventPublisher } from './events';
 import { EventPublisherV2 } from './v2/shared/events';
-import { registerRoutes } from './routes';
-import { CandidateRoleAssignmentService } from './services/proposals/service';
-import { RecruiterReputationService } from './services/reputation/service';
-import { DomainEventConsumer } from './domain-consumer';
 import { registerV2Routes } from './v2/routes';
 import * as Sentry from '@sentry/node';
 
@@ -53,7 +46,7 @@ async function main() {
     }
 
     // Register Swagger
-    await app.register(swagger, {
+    await app.register(swagger as any, {
         openapi: {
             info: {
                 title: 'Network Service API',
@@ -75,7 +68,7 @@ async function main() {
         },
     });
 
-    await app.register(swaggerUi, {
+    await app.register(swaggerUi as any, {
         routePrefix: '/docs',
         uiConfig: {
             docExpansion: 'list',
@@ -83,23 +76,8 @@ async function main() {
         },
     });
 
-    // Initialize repository and service
-    const repository = new NetworkRepository(
-        dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
-    );
-
-    // Initialize event publisher
+    // Initialize V2 event publisher
     const rabbitMqUrl = process.env.RABBITMQ_URL || 'amqp://localhost';
-    const eventPublisher = new LegacyEventPublisher(rabbitMqUrl, logger);
-    
-    try {
-        await eventPublisher.connect();
-        logger.info('Event publisher connected');
-    } catch (error) {
-        logger.warn({ err: error }, 'Failed to connect event publisher - continuing without it');
-    }
-
     const v2EventPublisher = new EventPublisherV2(rabbitMqUrl, logger);
     try {
         await v2EventPublisher.connect();
@@ -108,34 +86,13 @@ async function main() {
         logger.warn({ err: error }, 'Failed to connect Network V2 event publisher - continuing without it');
     }
 
-    const service = new NetworkService(repository, eventPublisher);
-    
-    // Phase 2 services
-    const proposalService = new CandidateRoleAssignmentService(repository);
-    const reputationService = new RecruiterReputationService(repository);
-
-    // Initialize and start domain event consumer (for recruiter-candidate relationships)
-    const domainConsumer = new DomainEventConsumer(rabbitMqUrl, service, logger);
-    
-    try {
-        await domainConsumer.start();
-        logger.info('Domain event consumer started');
-    } catch (error) {
-        logger.warn({ err: error }, 'Failed to start domain event consumer - continuing without it');
-    }
-
     // Graceful shutdown
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down gracefully');
-        await domainConsumer.stop();
-        await eventPublisher.close();
         await v2EventPublisher.close();
         await app.close();
         process.exit(0);
     });
-
-    // Register all routes (Phase 1, Phase 2, and Phase 4B)
-    registerRoutes(app, service, proposalService, reputationService);
 
     // Register V2 routes
     await registerV2Routes(app, {
@@ -146,23 +103,11 @@ async function main() {
 
     // Health check endpoint
     app.get('/health', async (request, reply) => {
-        try {
-            // Check database connectivity
-            await repository.healthCheck();
-            return reply.status(200).send({
-                status: 'healthy',
-                service: 'network-service',
-                timestamp: new Date().toISOString(),
-            });
-        } catch (error) {
-            logger.error({ err: error }, 'Health check failed');
-            return reply.status(503).send({
-                status: 'unhealthy',
-                service: 'network-service',
-                timestamp: new Date().toISOString(),
-                error: error instanceof Error ? error.message : 'Unknown error',
-            });
-        }
+        return reply.status(200).send({
+            status: 'healthy',
+            service: 'network-service',
+            timestamp: new Date().toISOString(),
+        });
     });
 
     // Start server

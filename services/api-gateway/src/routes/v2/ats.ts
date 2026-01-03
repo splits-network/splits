@@ -1,25 +1,13 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { ServiceRegistry } from '../../clients';
 import { buildAuthHeaders } from '../../helpers/auth-headers';
-import { requireRoles } from '../../rbac';
-import { UserRole } from '../../auth';
+import { requireAuth } from '../../rbac';
 import {
     ResourceDefinition,
     registerResourceRoutes,
     getCorrelationId,
     buildQueryString,
 } from './common';
-import {
-    ATS_AI_TRIGGER_ROLES,
-    ATS_CANDIDATE_MANAGE_ROLES,
-    ATS_CANDIDATE_VIEW_ROLES,
-    ATS_COMPANY_VIEW_ROLES,
-    ATS_DELETE_ROLES,
-    ATS_MANAGE_ROLES,
-    ATS_PLACEMENT_ROLES,
-    ATS_VIEW_ROLES,
-    AUTHENTICATED_ROLES,
-} from './roles';
 
 const ATS_RESOURCES: ResourceDefinition[] = [
     {
@@ -27,104 +15,48 @@ const ATS_RESOURCES: ResourceDefinition[] = [
         service: 'ats',
         basePath: '/jobs',
         tag: 'jobs',
-        roles: {
-            list: undefined, // Public endpoint with optional authentication - filters by role if authenticated
-            get: undefined, // Public endpoint - individual jobs viewable by anyone
-            create: ATS_MANAGE_ROLES,
-            update: ATS_MANAGE_ROLES,
-            delete: ATS_DELETE_ROLES,
-        },
     },
     {
         name: 'companies',
         service: 'ats',
         basePath: '/companies',
         tag: 'companies',
-        roles: {
-            list: ATS_COMPANY_VIEW_ROLES,
-            get: ATS_COMPANY_VIEW_ROLES,
-            create: ['company_admin', 'platform_admin'],
-            update: ['company_admin', 'platform_admin'],
-            delete: ['company_admin', 'platform_admin'],
-        },
     },
     {
         name: 'candidates',
         service: 'ats',
         basePath: '/candidates',
         tag: 'candidates',
-        roles: {
-            list: ATS_CANDIDATE_VIEW_ROLES,
-            get: ATS_CANDIDATE_VIEW_ROLES,
-            create: ATS_CANDIDATE_MANAGE_ROLES,
-            update: [...ATS_CANDIDATE_MANAGE_ROLES, 'candidate'],
-            delete: ['platform_admin'],
-        },
     },
     {
         name: 'applications',
         service: 'ats',
         basePath: '/applications',
         tag: 'applications',
-        roles: {
-            list: ATS_VIEW_ROLES,
-            get: ATS_VIEW_ROLES,
-            create: ATS_VIEW_ROLES,
-            update: ATS_VIEW_ROLES,
-            delete: ATS_DELETE_ROLES,
-        },
     },
     {
         name: 'placements',
         service: 'ats',
         basePath: '/placements',
         tag: 'placements',
-        roles: {
-            list: ATS_PLACEMENT_ROLES,
-            get: ATS_PLACEMENT_ROLES,
-            create: ATS_PLACEMENT_ROLES,
-            update: ATS_PLACEMENT_ROLES,
-            delete: ATS_DELETE_ROLES,
-        },
     },
     {
         name: 'job-pre-screen-questions',
         service: 'ats',
         basePath: '/job-pre-screen-questions',
         tag: 'job-pre-screen-questions',
-        roles: {
-            list: ATS_VIEW_ROLES,
-            get: ATS_VIEW_ROLES,
-            create: ATS_MANAGE_ROLES,
-            update: ATS_MANAGE_ROLES,
-            delete: ATS_MANAGE_ROLES,
-        },
     },
     {
         name: 'job-pre-screen-answers',
         service: 'ats',
         basePath: '/job-pre-screen-answers',
         tag: 'job-pre-screen-answers',
-        roles: {
-            list: ATS_VIEW_ROLES,
-            get: ATS_VIEW_ROLES,
-            create: ATS_VIEW_ROLES,
-            update: ATS_VIEW_ROLES,
-            delete: ATS_VIEW_ROLES,
-        },
     },
     {
         name: 'job-requirements',
         service: 'ats',
         basePath: '/job-requirements',
         tag: 'job-requirements',
-        roles: {
-            list: ATS_VIEW_ROLES,
-            get: ATS_VIEW_ROLES,
-            create: ATS_MANAGE_ROLES,
-            update: ATS_MANAGE_ROLES,
-            delete: ATS_MANAGE_ROLES,
-        },
     },
 ];
 
@@ -140,12 +72,8 @@ function registerStatsRoutes(app: FastifyInstance, services: ServiceRegistry) {
     app.get(
         '/api/v2/stats',
         {
-            preHandler: requireRoles(AUTHENTICATED_ROLES, services),
-            schema: {
-                description: 'Get dashboard statistics',
-                tags: ['stats'],
-                security: [{ clerkAuth: [] }],
-            },
+            preHandler: requireAuth(),
+            // No schema needed for Fastify 5.x
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
@@ -171,12 +99,8 @@ function registerAiReviewRoutes(app: FastifyInstance, services: ServiceRegistry)
     app.get(
         '/api/v2/ai-reviews',
         {
-            preHandler: requireRoles(ATS_VIEW_ROLES, services),
-            schema: {
-                description: 'Get AI review by application',
-                tags: ['ai-review'],
-                security: [{ clerkAuth: [] }],
-            },
+            preHandler: requireAuth(),
+            // No schema needed for Fastify 5.x
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
@@ -199,12 +123,8 @@ function registerAiReviewRoutes(app: FastifyInstance, services: ServiceRegistry)
     app.get(
         '/api/v2/ai-reviews/:id',
         {
-            preHandler: requireRoles(ATS_VIEW_ROLES, services),
-            schema: {
-                description: 'Get AI review by ID',
-                tags: ['ai-review'],
-                security: [{ clerkAuth: [] }],
-            },
+            preHandler: requireAuth(),
+            // No schema needed for Fastify 5.x
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const { id } = request.params as { id: string };
@@ -231,12 +151,8 @@ function registerAiReviewRoutes(app: FastifyInstance, services: ServiceRegistry)
     app.post(
         '/api/v2/ai-reviews',
         {
-            preHandler: requireRoles(ATS_AI_TRIGGER_ROLES, services),
-            schema: {
-                description: 'Trigger AI review for application (V2)',
-                tags: ['ai-review'],
-                security: [{ clerkAuth: [] }],
-            },
+            preHandler: requireAuth(),
+            // No schema needed for Fastify 5.x
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);

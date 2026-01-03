@@ -28,6 +28,8 @@ This document outlines the implementation of AI-assisted candidate screening tha
 | Stage | Description | Who Controls? |
 |-------|-------------|---------------|
 | `draft` | Application not yet complete | Candidate/Recruiter |
+| `recruiter_proposed` | Recruiter sent job opportunity, awaiting candidate decision | Recruiter |
+| `recruiter_request` | Recruiter requests candidate to update/change application | Recruiter |
 | `ai_review` | AI evaluates candidate-job fit, generates rating and feedback | System (automatic) |
 | `screen` | Initial phone screen by Splits recruiter network | Recruiter (represented only) |
 | `submitted` | Submitted to company, awaiting company review | System/Recruiter |
@@ -321,6 +323,8 @@ CREATE INDEX idx_applications_ai_reviewed ON ats.applications(ai_reviewed);
 ```typescript
 export type ApplicationStage = 
   | 'draft'       // Application not yet complete
+  | 'recruiter_proposed'  // Recruiter sent job opportunity, awaiting candidate decision
+  | 'recruiter_request' // Recruiter requests candidate to update/change application
   | 'ai_review'   // AI evaluating candidate-job fit
   | 'screen'      // Initial phone screen (recruiter only, for represented)
   | 'submitted'   // Submitted to company, awaiting company review
@@ -905,16 +909,16 @@ Next Steps:
 **Timeline:** 6-8 weeks
 
 **Week 1-2: Database & Types**
-- [ ] Create `ats.ai_reviews` table migration
-- [ ] Update `ApplicationStage` type in shared-types
+- [x] Create `ats.ai_reviews` table migration
+- [x] Update `ApplicationStage` type in shared-types
 - [ ] Add `ai_reviewed` column to applications table
 - [ ] Create indexes
 
 **Week 3-4: Backend Service**
-- [ ] Implement AI review service in `ats-service`
-- [ ] Create OpenAI/Anthropic integration
-- [ ] Implement POST `/api/ai-reviews` endpoint
-- [ ] Implement GET `/api/ai-reviews` endpoint
+- [x] Implement AI review service in `ai-service`
+- [x] Create OpenAI/Anthropic integration
+- [x] Implement POST `/api/ai-reviews` endpoint
+- [x] Implement GET `/api/ai-reviews` endpoint
 - [ ] Add automatic stage transition logic
 - [ ] Add job queue for AI review processing
 

@@ -86,13 +86,14 @@ export default function AIReviewPanel({ applicationId, token, compact = false }:
     const [loading, setLoading] = useState(true);
     const [aiReview, setAIReview] = useState<AIReview | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [requesting, setRequesting] = useState(false);
 
     useEffect(() => {
         async function fetchAIReview() {
             try {
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
                 const query = new URLSearchParams({ application_id: applicationId });
-                const response = await fetch(`${apiUrl}/v2/ai-reviews?${query.toString()}`, {
+                const response = await fetch(`${apiUrl}/api/v2/ai-reviews?${query.toString()}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
@@ -120,6 +121,36 @@ export default function AIReviewPanel({ applicationId, token, compact = false }:
         fetchAIReview();
     }, [applicationId, token]);
 
+    const handleRequestNewReview = async () => {
+        setRequesting(true);
+        setError(null);
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+            const response = await fetch(`${apiUrl}/api/v2/applications/${applicationId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ stage: 'ai_review' }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to request new AI review');
+            }
+
+            // Wait for event to process, then reload the review
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } catch (err) {
+            console.error('Error requesting new AI review:', err);
+            setError(err instanceof Error ? err.message : 'Failed to request new review');
+        } finally {
+            setRequesting(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="card bg-base-100 shadow">
@@ -138,9 +169,38 @@ export default function AIReviewPanel({ applicationId, token, compact = false }:
 
     if (error) {
         return (
-            <div className="alert alert-error">
-                <i className="fa-solid fa-circle-exclamation"></i>
-                <span>{error}</span>
+            <div className="card bg-base-100 shadow">
+                <div className="card-body">
+                    <h3 className="card-title text-lg">
+                        <i className="fa-solid fa-robot"></i>
+                        AI Analysis
+                    </h3>
+                    <div className="alert alert-error">
+                        <i className="fa-solid fa-circle-exclamation"></i>
+                        <div>
+                            <div className="font-semibold">Unable to Load AI Review</div>
+                            <div className="text-sm mt-1">{error}</div>
+                            <div className="text-sm mt-2">Please try again or check back later.</div>
+                        </div>
+                    </div>
+                    <button
+                        onClick={handleRequestNewReview}
+                        disabled={requesting}
+                        className="btn btn-primary btn-sm"
+                    >
+                        {requesting ? (
+                            <>
+                                <span className="loading loading-spinner loading-xs"></span>
+                                Requesting Review...
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-solid fa-rotate"></i>
+                                Request New Review
+                            </>
+                        )}
+                    </button>
+                </div>
             </div>
         );
     }
@@ -167,8 +227,28 @@ export default function AIReviewPanel({ applicationId, token, compact = false }:
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h3 className="card-title text-lg">
-                        <i className="fa-solid fa-robot"></i>
-                        AI Analysis
+                        <div>
+                            <i className="fa-solid fa-robot"></i>
+                            AI Analysis
+                        </div>
+
+                        <button
+                            onClick={handleRequestNewReview}
+                            disabled={requesting}
+                            className="btn btn-primary btn-sm"
+                        >
+                            {requesting ? (
+                                <>
+                                    <span className="loading loading-spinner loading-xs"></span>
+                                    Requesting...
+                                </>
+                            ) : (
+                                <>
+                                    <i className="fa-solid fa-rotate"></i>
+                                    Request New
+                                </>
+                            )}
+                        </button>
                     </h3>
 
                     <div className="flex items-center justify-between mb-4">
@@ -230,8 +310,28 @@ export default function AIReviewPanel({ applicationId, token, compact = false }:
         <div className="card bg-base-100 shadow">
             <div className="card-body">
                 <h3 className="card-title text-lg mb-4">
-                    <i className="fa-solid fa-robot"></i>
-                    AI Analysis
+                    <div>
+                        <i className="fa-solid fa-robot"></i>
+                        AI Analysis
+                    </div>
+
+                    <button
+                        onClick={handleRequestNewReview}
+                        disabled={requesting}
+                        className="btn btn-primary btn-sm"
+                    >
+                        {requesting ? (
+                            <>
+                                <span className="loading loading-spinner loading-xs"></span>
+                                Requesting Review...
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-solid fa-rotate"></i>
+                                Request New Review
+                            </>
+                        )}
+                    </button>
                 </h3>
 
                 {/* Fit Score & Recommendation */}

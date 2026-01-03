@@ -3,10 +3,6 @@ import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import { IdentityRepository } from './repository';
-import { IdentityService } from './service';
-import { EventPublisher } from './events';
-import { registerRoutes } from './routes';
 import { registerV2Routes } from './v2/routes';
 import { EventPublisherV2 } from './v2/shared/events';
 import * as Sentry from '@sentry/node';
@@ -51,12 +47,12 @@ async function main() {
     }
 
     // Register Swagger
-    await app.register(swagger, {
+    await app.register(swagger as any, {
         openapi: {
             info: {
-                title: 'Identity Service API',
-                description: 'User identity, organizations, and membership management',
-                version: '1.0.0',
+                title: 'Identity Service API V2',
+                description: 'V2 Identity Service - User identity, organizations, and membership management',
+                version: '2.0.0',
             },
             servers: [
                 {
@@ -65,16 +61,17 @@ async function main() {
                 },
             ],
             tags: [
-                { name: 'users', description: 'User management' },
-                { name: 'organizations', description: 'Organization management' },
-                { name: 'memberships', description: 'User-organization memberships' },
-                { name: 'invitations', description: 'Organization invitations' },
-                { name: 'webhooks', description: 'Webhook endpoints' },
+                { name: 'users', description: 'User management V2' },
+                { name: 'organizations', description: 'Organization management V2' },
+                { name: 'memberships', description: 'User-organization memberships V2' },
+                { name: 'invitations', description: 'Organization invitations V2' },
+                { name: 'consent', description: 'User consent management V2' },
+                { name: 'webhooks', description: 'Webhook endpoints V2' },
             ],
         },
     });
 
-    await app.register(swaggerUi, {
+    await app.register(swaggerUi as any, {
         routePrefix: '/docs',
         uiConfig: {
             docExpansion: 'list',
@@ -82,49 +79,30 @@ async function main() {
         },
     });
 
-    // Initialize repository and service
-    const repository = new IdentityRepository(
-        dbConfig.supabaseUrl,
-        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
-    );
-
-    // Initialize event publisher
+    // Initialize V2 event publisher
     const rabbitMqUrl = process.env.RABBITMQ_URL || 'amqp://localhost:5672';
-    const eventPublisher = new EventPublisher(rabbitMqUrl, logger);
-    
+    const eventPublisher = new EventPublisherV2(rabbitMqUrl, logger);
     try {
         await eventPublisher.connect();
     } catch (error) {
         logger.warn({ error }, 'Failed to connect to RabbitMQ - events will not be published');
     }
 
-    const service = new IdentityService(repository, eventPublisher);
-
-    const eventPublisherV2 = new EventPublisherV2(rabbitMqUrl, logger);
-    try {
-        await eventPublisherV2.connect();
-    } catch (error) {
-        logger.warn({ error }, 'Failed to connect V2 event publisher - V2 events disabled');
-    }
-
-    // Register routes
-    registerRoutes(app, service);
-
+    // Register V2 routes only
     await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
-        eventPublisher: eventPublisherV2,
+        eventPublisher,
         logger,
     });
 
     // Health check endpoint
     app.get('/health', async (request, reply) => {
         try {
-            // Check database connectivity
-            await repository.healthCheck();
             return reply.status(200).send({
                 status: 'healthy',
                 service: 'identity-service',
+                version: '2.0.0',
                 timestamp: new Date().toISOString(),
             });
         } catch (error) {
@@ -132,6 +110,7 @@ async function main() {
             return reply.status(503).send({
                 status: 'unhealthy',
                 service: 'identity-service',
+                version: '2.0.0',
                 timestamp: new Date().toISOString(),
                 error: error instanceof Error ? error.message : 'Unknown error',
             });

@@ -450,6 +450,19 @@ export class ApplicationRepository {
         if (insertError) throw insertError;
     }
 
+    async unlinkApplicationDocuments(applicationId: string): Promise<void> {
+        // Soft delete all documents linked to this application
+        const { error } = await this.supabase
+            .schema('documents')
+            .from('documents')
+            .update({ deleted_at: new Date().toISOString() })
+            .eq('entity_type', 'application')
+            .eq('entity_id', applicationId)
+            .is('deleted_at', null);
+
+        if (error) throw error;
+    }
+
     async createAuditLog(log: {
         application_id: string;
         action: string;

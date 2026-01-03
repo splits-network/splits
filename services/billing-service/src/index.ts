@@ -3,9 +3,9 @@ import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import { BillingRepository } from './repository';
-import { BillingService } from './service';
-import { registerRoutes } from './routes';
+import { registerWebhookRoutes } from './routes/webhooks/routes';
+import { BillingService } from './service'; // V1 - Keep for webhook compatibility until V2 migration
+import { BillingRepository } from './repository'; // V1 - Keep for webhook compatibility until V2 migration
 import { registerV2Routes } from './v2/routes';
 import { EventPublisher as V2EventPublisher } from './v2/shared/events';
 import * as Sentry from '@sentry/node';
@@ -51,7 +51,7 @@ async function main() {
     }
 
     // Register Swagger
-    await app.register(swagger, {
+    await app.register(swagger as any, {
         openapi: {
             info: {
                 title: 'Billing Service API',
@@ -72,7 +72,7 @@ async function main() {
         },
     });
 
-    await app.register(swaggerUi, {
+    await app.register(swaggerUi as any, {
         routePrefix: '/docs',
         uiConfig: {
             docExpansion: 'list',
@@ -95,13 +95,14 @@ async function main() {
         }
     );
 
-    // Initialize repository and service
+    // Initialize V1 repository and service (for webhook compatibility only)
     const repository = new BillingRepository(
         dbConfig.supabaseUrl,
         dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
     );
     const service = new BillingService(repository, stripeConfig.secretKey, logger);
 
+    // Initialize V2 event publisher
     const v2EventPublisher = new V2EventPublisher(
         rabbitConfig.url,
         logger,
@@ -115,14 +116,15 @@ async function main() {
         logger.warn({ err: error }, 'Failed to connect Billing V2 event publisher - continuing without events');
     }
 
-    // Register all routes (plans, subscriptions, webhooks, payouts)
-    registerRoutes(app, service, stripeConfig.webhookSecret);
-
+    // Register V2 routes (plans, subscriptions, payouts)
     await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
         eventPublisher: v2EventPublisher,
     });
+
+    // Register webhook routes (V1 - TODO: migrate to V2)
+    registerWebhookRoutes(app, service, stripeConfig.webhookSecret);
 
     // Health check endpoint
     app.get('/health', async (request, reply) => {

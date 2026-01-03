@@ -3,12 +3,6 @@ import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import { AutomationRepository } from './repository';
-import { MatchingService } from './matching-service';
-import { FraudDetectionService } from './fraud-service';
-import { AutomationExecutor } from './automation-executor';
-import { MetricsAggregationService } from './metrics-service';
-import { registerRoutes } from './routes';
 import { registerV2Routes } from './v2/routes';
 import { EventPublisher } from './v2/shared/events';
 import { DomainEventConsumer } from './v2/shared/domain-consumer';
@@ -38,7 +32,7 @@ async function main() {
     app.setErrorHandler(errorHandler);
 
     // Swagger documentation
-    await app.register(swagger, {
+    await app.register(swagger as any, {
         openapi: {
             info: {
                 title: 'Splits Network Automation API',
@@ -49,7 +43,7 @@ async function main() {
         },
     });
 
-    await app.register(swaggerUi, {
+    await app.register(swaggerUi as any, {
         routePrefix: '/docs',
     });
 
@@ -63,17 +57,6 @@ async function main() {
     });
 
     try {
-        // Initialize repository and services
-        const repository = new AutomationRepository(
-            dbConfig.supabaseUrl,
-            dbConfig.supabaseServiceRoleKey!
-        );
-
-        const matchingService = new MatchingService(repository, logger);
-        const fraudService = new FraudDetectionService(repository, logger);
-        const automationExecutor = new AutomationExecutor(repository, logger);
-        const metricsService = new MetricsAggregationService(repository, logger);
-
         v2EventPublisher = new EventPublisher(
             rabbitConfig.url,
             logger,
@@ -87,8 +70,7 @@ async function main() {
         await domainConsumer.connect();
         logger.info('V2 domain event consumer connected - listening for automation triggers');
 
-        // Register routes
-        registerRoutes(app, matchingService, fraudService, automationExecutor, metricsService, repository, logger);
+        // Register V2 routes only
         await registerV2Routes(app, {
             supabaseUrl: dbConfig.supabaseUrl,
             supabaseKey: dbConfig.supabaseServiceRoleKey!,

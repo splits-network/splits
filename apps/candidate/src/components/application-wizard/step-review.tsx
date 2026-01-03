@@ -24,6 +24,7 @@ interface StepReviewProps {
     additionalNotes: string;
     onBack: () => void;
     onSubmit: () => Promise<void>;
+    onSaveAsDraft: () => Promise<void>;
 }
 
 export default function StepReview({
@@ -36,6 +37,7 @@ export default function StepReview({
     additionalNotes,
     onBack,
     onSubmit,
+    onSaveAsDraft,
 }: StepReviewProps) {
     const router = useRouter();
     const [submitting, setSubmitting] = useState(false);
@@ -68,6 +70,20 @@ export default function StepReview({
             router.push('/applications?success=true');
         } catch (err: any) {
             setError(err.message || 'Failed to submit application. Please try again.');
+            setSubmitting(false);
+        }
+    };
+
+    const handleSaveAsDraft = async () => {
+        setSubmitting(true);
+        setError(null);
+
+        try {
+            await onSaveAsDraft();
+            // Success - redirect to applications list
+            router.push('/applications?draft=true');
+        } catch (err: any) {
+            setError(err.message || 'Failed to save draft. Please try again.');
             setSubmitting(false);
         }
     };
@@ -172,7 +188,7 @@ export default function StepReview({
             </div>
 
             {/* Navigation */}
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
                 <button
                     type="button"
                     className="btn"
@@ -182,24 +198,44 @@ export default function StepReview({
                     <i className="fa-solid fa-arrow-left"></i>
                     Back
                 </button>
-                <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={handleSubmit}
-                    disabled={submitting}
-                >
-                    {submitting ? (
-                        <>
-                            <span className="loading loading-spinner loading-sm"></span>
-                            Submitting...
-                        </>
-                    ) : (
-                        <>
-                            <i className="fa-solid fa-paper-plane"></i>
-                            Submit Application
-                        </>
-                    )}
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        type="button"
+                        className="btn btn-ghost"
+                        onClick={handleSaveAsDraft}
+                        disabled={submitting}
+                    >
+                        {submitting ? (
+                            <>
+                                <span className="loading loading-spinner loading-sm"></span>
+                                Saving...
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-solid fa-floppy-disk"></i>
+                                Save as Draft
+                            </>
+                        )}
+                    </button>
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={handleSubmit}
+                        disabled={submitting}
+                    >
+                        {submitting ? (
+                            <>
+                                <span className="loading loading-spinner loading-sm"></span>
+                                Submitting...
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-solid fa-paper-plane"></i>
+                                Submit Application
+                            </>
+                        )}
+                    </button>
+                </div>
             </div>
         </div>
     );

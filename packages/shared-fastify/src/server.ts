@@ -35,7 +35,7 @@ export async function buildServer(
 
     // Register CORS
     if (corsOptions) {
-        await app.register(cors, {
+        await app.register(cors as any, {
             origin: corsOptions.origin,
             credentials: corsOptions.credentials ?? true,
         });
@@ -43,7 +43,7 @@ export async function buildServer(
 
     // Register Helmet for security headers
     if (useHelmet) {
-        await app.register(helmet);
+        await app.register(helmet as any);
     }
 
     // Note: Health check endpoint should be registered by each service

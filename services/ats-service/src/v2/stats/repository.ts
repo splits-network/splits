@@ -31,7 +31,7 @@ const DEFAULT_COMPANY_STATS: CompanyStatsMetrics = {
 };
 
 const ACTIVE_ROLE_STATUSES = ['active', 'open'];
-const PIPELINE_STAGES = ['recruiter_proposed', 'ai_review', 'screen', 'submitted', 'interview'];
+const PIPELINE_STAGES = ['recruiter_proposed', 'recruiter_request', 'ai_review', 'screen', 'submitted', 'interview'];
 
 export class StatsRepository {
     private supabase: SupabaseClient;

@@ -226,11 +226,13 @@ export class ApplicationServiceV2 {
         const {
             document_ids,
             primary_resume_id,
+            pre_screen_answers,
             decline_reason,
             decline_details,
             ...persistedUpdates
         } = updates;
 
+        // Validate stage transitions
         if (updates.stage && updates.stage !== currentApplication.stage) {
             await this.validateStageTransition(
                 currentApplication.stage,
@@ -238,38 +240,7 @@ export class ApplicationServiceV2 {
             );
         }
 
-        // Candidate-specific actions from recruiter_proposed stage
-        if (
-            clerkUserId &&
-            currentApplication.stage === 'recruiter_proposed' &&
-            updates.stage &&
-            ['ai_review', 'rejected'].includes(updates.stage)
-        ) {
-            const candidateContext = await this.getCandidateContext(clerkUserId);
-            if (!candidateContext || candidateContext.candidate.id !== currentApplication.candidate_id) {
-                throw new Error('Not authorized to update this application');
-            }
-
-            if (updates.stage === 'ai_review') {
-                await this.handleCandidateAcceptance(
-                    currentApplication,
-                    candidateContext.identityUser.id,
-                    document_ids,
-                    primary_resume_id,
-                    persistedUpdates.candidate_notes
-                );
-            } else if (updates.stage === 'rejected') {
-                await this.handleCandidateDecline(
-                    currentApplication,
-                    candidateContext.identityUser.id,
-                    decline_reason || persistedUpdates.notes || decline_details,
-                    decline_details
-                );
-                if (!persistedUpdates.notes) {
-                    persistedUpdates.notes = decline_details;
-                }
-            }
-        }
+        // Validate rejection has notes
         if (
             updates.stage === 'rejected' &&
             !persistedUpdates.notes &&
@@ -279,10 +250,41 @@ export class ApplicationServiceV2 {
             throw new Error('Notes/rejection reason required when rejecting');
         }
 
+        // Link documents if provided
+        // Link documents to application if provided
+        if (document_ids && Array.isArray(document_ids) && document_ids.length > 0) {
+            // First, remove existing documents to avoid duplicates
+            await this.repository.unlinkApplicationDocuments(id);
+
+            // Then link the new documents
+            for (const docId of document_ids) {
+                await this.repository.linkDocumentToApplication(
+                    docId,
+                    id,
+                    !!primary_resume_id && docId === primary_resume_id
+                );
+            }
+        }
+
+        // Update pre-screen answers if provided (using UPSERT)
+        if (pre_screen_answers && Array.isArray(pre_screen_answers) && pre_screen_answers.length > 0) {
+            await Promise.all(
+                pre_screen_answers.map((answer: any) =>
+                    this.repository.savePreScreenAnswer({
+                        application_id: id,
+                        question_id: answer.question_id,
+                        answer: answer.answer,
+                    })
+                )
+            );
+        }
+
         const updatedApplication = await this.repository.updateApplication(id, persistedUpdates);
 
+        // Publish events
         if (this.eventPublisher) {
-            if (updates.stage && updates.stage !== currentApplication.stage) {
+            // Stage changed event - other services listen and react to stages they care about
+            if (updates.stage) {
                 await this.eventPublisher.publish('application.stage_changed', {
                     application_id: id,
                     job_id: updatedApplication.job_id,
@@ -294,6 +296,7 @@ export class ApplicationServiceV2 {
                 });
             }
 
+            // Generic update event
             await this.eventPublisher.publish('application.updated', {
                 application_id: id,
                 job_id: updatedApplication.job_id,
@@ -329,15 +332,47 @@ export class ApplicationServiceV2 {
         fromStage: string,
         toStage: string
     ): Promise<void> {
-        // Define allowed stage transitions
+        // Withdrawn is always allowed from active stages (candidate self-service)
+        if (toStage === 'withdrawn') {
+            return;
+        }
+
+        // Draft is allowed from most active stages (candidate back-to-draft, recruiter request changes)
+        if (toStage === 'draft') {
+            // Cannot go back to draft from terminal stages
+            if (['hired', 'withdrawn'].includes(fromStage)) {
+                throw new Error(
+                    `Invalid stage transition: ${fromStage} -> ${toStage}`
+                );
+            }
+            // Allow draft from all other stages
+            return;
+        }
+
+        // Recruiter can request changes/info from candidate at any active stage
+        if (toStage === 'recruiter_request') {
+            // Cannot request from terminal stages
+            if (['hired', 'rejected', 'withdrawn'].includes(fromStage)) {
+                throw new Error(
+                    `Invalid stage transition: ${fromStage} -> ${toStage}`
+                );
+            }
+            return;
+        }
+
+        // Define allowed stage transitions for forward progress
         const allowedTransitions: Record<string, string[]> = {
-            applied: ['screening', 'rejected'],
-            screening: ['interview', 'rejected', 'applied'],
-            interview: ['offer', 'rejected', 'screening'],
-            offer: ['hired', 'rejected', 'interview'],
-            hired: ['rejected'], // Can reject after hire (fell through)
-            recruiter_proposed: ['ai_review', 'rejected'],
-            rejected: [], // Cannot move from rejected
+            draft: ['ai_review', 'screen', 'rejected'], // Draft can move to review or screening
+            recruiter_proposed: ['ai_review', 'draft', 'rejected'], // Recruiter proposal can be reviewed or sent back
+            recruiter_request: ['draft', 'ai_review', 'rejected'], // Candidate responds to request, or recruiter rejects
+            ai_review: ['screen', 'rejected'], // After AI review, move to screening or reject
+            screen: ['submitted', 'rejected'], // After screening, submit to company or reject
+            submitted: ['interview', 'rejected'], // Company reviews application
+            interview: ['offer', 'rejected'], // Interview stage
+            offer: ['hired', 'rejected'], // Offer stage
+            hired: [], // Terminal state
+            rejected: [], // Terminal state
+            withdrawn: [], // Terminal state
         };
 
         if (!allowedTransitions[fromStage]?.includes(toStage)) {
@@ -360,92 +395,5 @@ export class ApplicationServiceV2 {
             return null;
         }
         return { candidate, identityUser };
-    }
-
-    private async handleCandidateAcceptance(
-        application: any,
-        identityUserId: string,
-        documentIds?: string[],
-        primaryResumeId?: string,
-        candidateNotes?: string
-    ) {
-        const job = await this.repository.getJobById(application.job_id);
-        if (!job) {
-            throw new Error('Job not found');
-        }
-        if (job.status && job.status !== 'active') {
-            throw new Error('This job is no longer accepting applications');
-        }
-
-        if (documentIds && documentIds.length > 0) {
-            for (const docId of documentIds) {
-                await this.repository.linkDocumentToApplication(
-                    docId,
-                    application.id,
-                    !!primaryResumeId && docId === primaryResumeId
-                );
-            }
-        }
-
-        await this.repository.createAuditLog({
-            application_id: application.id,
-            action: 'candidate_approved_opportunity',
-            performed_by_user_id: identityUserId,
-            performed_by_role: 'candidate',
-            old_value: { stage: 'recruiter_proposed' },
-            new_value: {
-                stage: 'ai_review',
-                primary_resume_id: primaryResumeId,
-                candidate_notes: candidateNotes,
-            },
-        });
-
-        if (this.eventPublisher) {
-            // Publish event to trigger AI review (matches V1 event name)
-            await this.eventPublisher.publish(
-                'application.submitted_for_ai_review',
-                {
-                    application_id: application.id,
-                    candidate_id: application.candidate_id,
-                    recruiter_id: application.recruiter_id,
-                    job_id: application.job_id,
-                    document_ids: documentIds || [],
-                    primary_resume_id: primaryResumeId || null,
-                    submitted_at: new Date().toISOString(),
-                }
-            );
-        }
-    }
-
-    private async handleCandidateDecline(
-        application: any,
-        identityUserId: string,
-        reason?: string | null,
-        details?: string | null
-    ) {
-        await this.repository.createAuditLog({
-            application_id: application.id,
-            action: 'candidate_declined_opportunity',
-            performed_by_user_id: identityUserId,
-            performed_by_role: 'candidate',
-            old_value: { stage: 'recruiter_proposed' },
-            new_value: {
-                stage: 'rejected',
-                reason,
-                details,
-            },
-        });
-
-        if (this.eventPublisher) {
-            await this.eventPublisher.publish(
-                'application.candidate_declined',
-                {
-                    application_id: application.id,
-                    candidate_id: application.candidate_id,
-                    recruiter_id: application.recruiter_id,
-                    job_id: application.job_id,
-                }
-            );
-        }
     }
 }

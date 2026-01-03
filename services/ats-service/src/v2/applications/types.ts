@@ -17,6 +17,7 @@ export interface ApplicationUpdate {
     candidate_notes?: string;
     document_ids?: string[];
     primary_resume_id?: string;
+    pre_screen_answers?: Array<{ question_id: string; answer: any }>;
     decline_reason?: string;
     decline_details?: string;
     [key: string]: any;

@@ -45,6 +45,40 @@ export class AIReviewRepository {
         return review;
     }
 
+    async upsert(data: {
+        application_id: string;
+        fit_score: number;
+        recommendation: string;
+        overall_summary: string;
+        confidence_level: number;
+        strengths: string[];
+        concerns: string[];
+        matched_skills: string[];
+        missing_skills: string[];
+        skills_match_percentage: number;
+        required_years?: number;
+        candidate_years?: number;
+        meets_experience_requirement?: boolean;
+        location_compatibility: string;
+        model_version: string;
+        processing_time_ms: number;
+    }): Promise<any> {
+        const { data: review, error } = await this.supabase
+            .schema('ats')
+            .from('ai_reviews')
+            .upsert({
+                ...data,
+                analyzed_at: new Date().toISOString(),
+            }, {
+                onConflict: 'application_id'
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return review;
+    }
+
     async findById(id: string): Promise<any | null> {
         const { data, error } = await this.supabase
             .schema('ats')

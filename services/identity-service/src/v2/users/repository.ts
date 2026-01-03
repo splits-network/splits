@@ -56,6 +56,21 @@ export class UserRepository {
         return data;
     }
 
+    async findUserByClerkId(clerkUserId: string): Promise<any | null> {
+        const { data, error } = await this.supabase
+            .schema('identity')
+            .from('users')
+            .select('*')
+            .eq('clerk_user_id', clerkUserId)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') return null; // Not found
+            throw error;
+        }
+        return data;
+    }
+
     async createUser(data: any): Promise<any> {
         const { data: user, error } = await this.supabase
             .schema('identity')

@@ -1,32 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-
-interface AIReview {
-    id: string;
-    application_id: string;
-    fit_score: number;
-    recommendation: 'strong_fit' | 'good_fit' | 'fair_fit' | 'poor_fit';
-    overall_summary: string;
-    confidence_level: number;
-    strengths: string[];
-    concerns: string[];
-    matched_skills: string[];
-    missing_skills: string[];
-    skills_match_percentage: number;
-    required_years?: number;
-    candidate_years?: number;
-    meets_experience_requirement?: boolean;
-    location_compatibility: 'perfect' | 'good' | 'challenging' | 'mismatch';
-    model_version: string;
-    processing_time_ms: number;
-    analyzed_at: string;
-    created_at: string;
-}
+import { useAuth } from '@clerk/nextjs';
+import { getAIReview, requestNewAIReview, type AIReview } from '@/lib/api';
 
 interface AIReviewPanelProps {
     applicationId: string;
-    token: string;
 }
 
 const getRecommendationColor = (recommendation: string) => {
@@ -81,52 +60,55 @@ const getLocationLabel = (compatibility: string) => {
     }
 };
 
-export default function AIReviewPanel({ applicationId, token }: AIReviewPanelProps) {
+export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
+    const { getToken } = useAuth();
     const [loading, setLoading] = useState(true);
     const [aiReview, setAIReview] = useState<AIReview | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [requesting, setRequesting] = useState(false);
 
     useEffect(() => {
         async function fetchAIReview() {
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
-                const query = new URLSearchParams({ application_id: applicationId });
-                const response = await fetch(`${apiUrl}/api/v2/ai-reviews?${query.toString()}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        // No AI review yet - this is expected for recently submitted applications
-                        setAIReview(null);
-                        setError(null);
-                        setLoading(false);
-                        return;
-                    }
-                    // For other errors (500, 403, etc), log but don't throw
-                    console.error(`Failed to fetch AI review: ${response.status} ${response.statusText}`);
-                    setError('Unable to load AI review at this time');
+                const token = await getToken();
+                if (!token) {
+                    setError('Authentication required');
                     setLoading(false);
                     return;
                 }
-
-                const data = await response.json();
-                setAIReview(data);
+                const review = await getAIReview(applicationId, token);
+                setAIReview(review);
                 setError(null);
             } catch (err) {
-                // Network errors or JSON parsing errors
+                // Network errors or other API errors
                 console.error('Error fetching AI review:', err);
-                setError('Unable to connect to AI review service');
+                setError('Unable to load AI review at this time');
             } finally {
                 setLoading(false);
             }
         }
 
         fetchAIReview();
-    }, [applicationId, token]);
+    }, [applicationId]);
+
+    const handleRequestNewReview = async () => {
+        setRequesting(true);
+        setError(null);
+        try {
+            const token = await getToken();
+            if (!token) {
+                setError('Authentication required');
+                return;
+            }
+            const newReview = await requestNewAIReview(applicationId, token);
+            setAIReview(newReview);
+        } catch (err) {
+            console.error('Error requesting new AI review:', err);
+            setError(err instanceof Error ? err.message : 'Failed to request new review');
+        } finally {
+            setRequesting(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -160,6 +142,23 @@ export default function AIReviewPanel({ applicationId, token }: AIReviewPanelPro
                             <div className="text-sm mt-2">Please try refreshing the page or check back later.</div>
                         </div>
                     </div>
+                    <button
+                        onClick={handleRequestNewReview}
+                        disabled={requesting}
+                        className="btn btn-primary btn-sm"
+                    >
+                        {requesting ? (
+                            <>
+                                <span className="loading loading-spinner loading-xs"></span>
+                                Requesting Review...
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-solid fa-rotate"></i>
+                                Request New Review
+                            </>
+                        )}
+                    </button>
                 </div>
             </div>
         );
@@ -185,9 +184,29 @@ export default function AIReviewPanel({ applicationId, token }: AIReviewPanelPro
     return (
         <div className="card bg-base-100 shadow">
             <div className="card-body">
-                <h2 className="card-title">
-                    <i className="fa-solid fa-robot"></i>
-                    AI Analysis
+                <h2 className="card-title justify-between">
+                    <div>
+                        <i className="fa-solid fa-robot"></i>
+                        AI Analysis
+                    </div>
+
+                    <button
+                        onClick={handleRequestNewReview}
+                        disabled={requesting}
+                        className="btn btn-primary btn-sm"
+                    >
+                        {requesting ? (
+                            <>
+                                <span className="loading loading-spinner loading-xs"></span>
+                                Requesting Review...
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-solid fa-rotate"></i>
+                                Request New Review
+                            </>
+                        )}
+                    </button>
                 </h2>
 
                 {/* Fit Score */}

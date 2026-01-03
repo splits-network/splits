@@ -1,10 +1,7 @@
 import { buildServer, errorHandler } from '@splits-network/shared-fastify';
 import { createLogger } from '@splits-network/shared-logging';
 import { loadBaseConfig, loadDatabaseConfig, loadRabbitMQConfig } from '@splits-network/shared-config';
-import { registerRoutes } from './routes.js';
 import { StorageClient } from './storage.js';
-import { DocumentRepository } from './repository.js';
-import { DocumentService } from './service.js';
 import { registerV2Routes } from './v2/routes.js';
 import { EventPublisher } from './v2/shared/events.js';
 
@@ -32,16 +29,11 @@ async function start() {
         // Set error handler
         fastify.setErrorHandler(errorHandler);
 
-        // Initialize repository, storage, and service
-        const repository = new DocumentRepository(
-            dbConfig.supabaseUrl,
-            dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
-        );
+        // Initialize storage
         const storage = new StorageClient(
             dbConfig.supabaseUrl,
             dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
         );
-        const service = new DocumentService(repository, storage);
 
         // Ensure storage buckets exist (development)
         if (baseConfig.nodeEnv === 'development') {
@@ -56,8 +48,12 @@ async function start() {
         );
         await eventPublisher.connect();
 
-        // Register routes
-        await registerRoutes(fastify, service);
+        // Add health check route
+        fastify.get('/health', async (_request, reply) => {
+            reply.send({ status: 'ok', service: 'document-service' });
+        });
+
+        // Register V2 routes
         await registerV2Routes(fastify, {
             supabaseUrl: dbConfig.supabaseUrl,
             supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,

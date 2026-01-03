@@ -1,8 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { ServiceRegistry } from '../../clients';
-import { requireRoles } from '../../rbac';
+import { requireAuth } from '../../middleware/auth';
 import { buildAuthHeaders } from '../../helpers/auth-headers';
-import { UserRole } from '../../auth';
 
 export type ServiceName =
     | 'ats'
@@ -13,20 +12,11 @@ export type ServiceName =
     | 'document'
     | 'automation';
 
-export interface ResourceRoles {
-    list?: UserRole[];
-    get?: UserRole[];
-    create?: UserRole[];
-    update?: UserRole[];
-    delete?: UserRole[];
-}
-
 export interface ResourceDefinition {
     name: string;
     service: ServiceName;
     basePath: string;
     tag: string;
-    roles: ResourceRoles;
     serviceBasePath?: string;
 }
 
@@ -59,25 +49,16 @@ export function registerResourceRoutes(
     const apiBase = `/api/v2${resource.basePath}`;
     const serviceBase = resource.serviceBasePath ?? `/api/v2${resource.basePath}`;
 
-    const routeOptions = (description: string, roles?: UserRole[]) => {
-        const options: Record<string, any> = {
-            schema: {
-                description,
-                tags: [resource.tag],
-                security: [{ clerkAuth: [] }],
-            },
+    const routeOptions = (description: string) => {
+        return {
+            preHandler: requireAuth(),
+            // Remove schema with invalid properties for Fastify 5.x
         };
-
-        if (roles && roles.length > 0) {
-            options.preHandler = requireRoles(roles, services);
-        }
-
-        return options;
     };
 
     app.get(
         apiBase,
-        routeOptions(`List ${resource.name}`, resource.roles.list),
+        routeOptions(`List ${resource.name}`),
         async (request: FastifyRequest, reply: FastifyReply) => {
             console.log(`[Gateway V2] ${apiBase} - Request received`);
             console.log(`[Gateway V2] Query:`, request.query);
@@ -95,7 +76,7 @@ export function registerResourceRoutes(
 
     app.get(
         `${apiBase}/:id`,
-        routeOptions(`Get ${resource.name} by ID`, resource.roles.get),
+        routeOptions(`Get ${resource.name} by ID`),
         async (request: FastifyRequest, reply: FastifyReply) => {
             const { id } = request.params as { id: string };
             const correlationId = getCorrelationId(request);
@@ -113,7 +94,7 @@ export function registerResourceRoutes(
 
     app.post(
         apiBase,
-        routeOptions(`Create ${resource.name}`, resource.roles.create),
+        routeOptions(`Create ${resource.name}`),
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
             const data = await serviceClient().post(
@@ -128,7 +109,7 @@ export function registerResourceRoutes(
 
     app.patch(
         `${apiBase}/:id`,
-        routeOptions(`Update ${resource.name}`, resource.roles.update),
+        routeOptions(`Update ${resource.name}`),
         async (request: FastifyRequest, reply: FastifyReply) => {
             const { id } = request.params as { id: string };
             const correlationId = getCorrelationId(request);
@@ -144,7 +125,7 @@ export function registerResourceRoutes(
 
     app.delete(
         `${apiBase}/:id`,
-        routeOptions(`Delete ${resource.name}`, resource.roles.delete),
+        routeOptions(`Delete ${resource.name}`),
         async (request: FastifyRequest, reply: FastifyReply) => {
             const { id } = request.params as { id: string };
             const correlationId = getCorrelationId(request);

@@ -14,7 +14,7 @@ export class AIReviewService {
 
     /**
      * Trigger AI review for an application
-     * Called when application.submitted_for_ai_review event is received
+     * Called when application.stage_changed event is received with new_stage='ai_review'
      */
     async triggerReview(event: DomainEvent): Promise<void> {
         const {

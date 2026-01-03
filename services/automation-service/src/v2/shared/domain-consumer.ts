@@ -39,7 +39,7 @@ export class DomainEventConsumer {
 
             // Bind to application events that trigger automation
             await this.channel.bindQueue(this.queue, this.exchange, 'application.created');
-            await this.channel.bindQueue(this.queue, this.exchange, 'application.submitted_for_ai_review');
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.stage_changed');
 
             this.logger.info('V2 domain consumer connected to RabbitMQ');
 
@@ -68,16 +68,9 @@ export class DomainEventConsumer {
         this.logger.info({ event_type: event.event_type, event_id: event.event_id }, 'Processing automation event');
 
         switch (event.event_type) {
-            case 'application.created':
-                // Trigger AI review for new applications
-                this.logger.info({ application_id: event.payload.application_id }, 'Triggering AI review for new application');
-                await this.aiReviewService.triggerReview(event);
-                break;
-
-            case 'application.submitted_for_ai_review':
-                await this.aiReviewService.triggerReview(event);
-                break;
-
+            // AI review triggering removed - AI service now listens directly for application events
+            // This service is reserved for complex automation workflows that require orchestration
+            
             default:
                 this.logger.debug({ event_type: event.event_type }, 'Unhandled event type');
         }

@@ -14,11 +14,15 @@ interface RegisterConfig {
     supabaseKey: string;
     eventPublisher?: EventPublisher;
     logger: Logger;
+    aiReviewService?: AIReviewServiceV2; // Optional: if provided, use this instance
 }
 
 export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
-    const reviewRepository = new AIReviewRepository(config.supabaseUrl, config.supabaseKey);
-    const reviewService = new AIReviewServiceV2(reviewRepository, config.eventPublisher, config.logger);
+    // Use provided service instance or create new one
+    const reviewService = config.aiReviewService || (() => {
+        const reviewRepository = new AIReviewRepository(config.supabaseUrl, config.supabaseKey);
+        return new AIReviewServiceV2(reviewRepository, config.eventPublisher, config.logger);
+    })();
 
     registerAIReviewRoutes(app, { service: reviewService });
 }

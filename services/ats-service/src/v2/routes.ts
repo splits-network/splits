@@ -15,7 +15,7 @@ import { registerCompanyRoutes } from './companies/routes';
 import { registerCandidateRoutes } from './candidates/routes';
 import { registerApplicationRoutes } from './applications/routes';
 import { registerPlacementRoutes } from './placements/routes';
-import { registerAIReviewRoutes } from './ai-review/routes';
+// import { registerAIReviewRoutes } from './ai-review/routes'; // TODO: Fix and re-enable
 import { StatsRepository } from './stats/repository';
 import { StatsServiceV2 } from './stats/service';
 import { registerStatsRoutes } from './stats/routes';
@@ -66,11 +66,7 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     registerCandidateRoutes(app, { candidateService });
     registerApplicationRoutes(app, { applicationService });
     registerPlacementRoutes(app, { placementService });
-    registerAIReviewRoutes(app, {
-        supabaseUrl: config.supabaseUrl,
-        supabaseKey: config.supabaseKey,
-        eventPublisher: config.eventPublisher,
-    });
+    // TODO: Re-implement AI review routes using V2 patterns
     registerStatsRoutes(app, { statsService });
     registerJobPreScreenQuestionRoutes(app, { service: preScreenQuestionService });
     registerJobPreScreenAnswerRoutes(app, { service: preScreenAnswerService });

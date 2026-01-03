@@ -1,7 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import {
     Notification,
-    NotificationCreateInput,
     NotificationFilters,
     NotificationUpdate,
 } from './types';
@@ -107,36 +106,6 @@ export class NotificationRepositoryV2 {
         }
 
         return data ? this.mapRow(data) : null;
-    }
-
-    async createNotification(input: NotificationCreateInput): Promise<Notification> {
-        const { data, error } = await this.supabase
-            .schema('notifications')
-            .from('notification_log')
-            .insert({
-                event_type: input.event_type,
-                recipient_email: input.recipient_email,
-                recipient_user_id: input.recipient_user_id,
-                subject: input.subject,
-                template: input.template || 'custom',
-                payload: input.payload || {},
-                channel: input.channel || 'email',
-                status: input.status || 'pending',
-                read: false,
-                dismissed: false,
-                priority: input.priority || 'normal',
-                category: input.category,
-                action_url: input.action_url,
-                action_label: input.action_label,
-            })
-            .select()
-            .single();
-
-        if (error) {
-            throw error;
-        }
-
-        return this.mapRow(data);
     }
 
     async updateNotification(id: string, updates: NotificationUpdate): Promise<Notification> {

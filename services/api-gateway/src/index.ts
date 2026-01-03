@@ -9,13 +9,7 @@ import Redis from 'ioredis';
 import { randomUUID } from 'crypto';
 import { AuthMiddleware } from './auth';
 import { ServiceRegistry } from './clients';
-import { registerRoutes } from './routes';
 import { registerV2GatewayRoutes } from './routes/v2/routes';
-import { OAuthTokenManager } from './oauth';
-import { registerOAuthRoutes } from './routes/oauth-routes';
-import { registerVersionInfo } from './versioning';
-import { registerWebhookRoutes } from './routes/webhook-routes';
-import { WebhookDeliveryService } from './webhooks';
 import * as Sentry from '@sentry/node';
 
 async function main() {
@@ -75,7 +69,7 @@ async function main() {
     }
 
     // Register Swagger
-    await app.register(swagger, {
+    await app.register(swagger as any, {
         openapi: {
             info: {
                 title: 'Splits Network API Gateway',
@@ -138,7 +132,7 @@ async function main() {
         },
     });
 
-    await app.register(swaggerUi, {
+    await app.register(swaggerUi as any, {
         routePrefix: '/docs',
         uiConfig: {
             docExpansion: 'list',
@@ -147,14 +141,14 @@ async function main() {
     });
 
     // Register rate limiting
-    await app.register(rateLimit, {
+    await app.register(rateLimit as any, {
         max: 100,
         timeWindow: '1 minute',
         redis,
     });
 
     // Register multipart support for file uploads
-    await app.register(multipart, {
+    await app.register(multipart as any, {
         limits: {
             fileSize: 10 * 1024 * 1024, // 10MB max file size
         },
@@ -203,22 +197,18 @@ async function main() {
     // Initialize auth middleware
     const authMiddleware = new AuthMiddleware(clerkConfig.secretKey);
 
-    // Initialize OAuth token manager
-    const jwtSecret = process.env.JWT_SECRET || process.env.CLERK_SECRET_KEY;
-    if (!jwtSecret) {
-        throw new Error('JWT_SECRET or CLERK_SECRET_KEY must be set for OAuth');
-    }
-    const oauthTokenManager = new OAuthTokenManager(jwtSecret);
 
-    // Register auth hook for all /api routes (except webhooks, OAuth endpoints, and public routes)
+
+    // Register auth hook for all /api routes (except webhooks and public routes)
     app.addHook('onRequest', async (request, reply) => {
         // Skip auth for webhook endpoints (verified by signature)
         if (request.url.includes('/webhooks/')) {
             return;
         }
         
-        // Skip auth for OAuth endpoints (they handle their own auth)
-        if (request.url.startsWith('/oauth/') || request.url.includes('/.well-known/')) {
+        // Skip auth for internal service calls (authenticated by service key)
+        const internalServiceKey = request.headers['x-internal-service-key'] as string;
+        if (internalServiceKey) {
             return;
         }
         
@@ -261,19 +251,7 @@ async function main() {
     services.register('document', process.env.DOCUMENT_SERVICE_URL || 'http://localhost:3006');
     services.register('automation', process.env.AUTOMATION_SERVICE_URL || 'http://localhost:3007');
 
-    // Register OAuth routes
-    registerOAuthRoutes(app, oauthTokenManager, logger);
-
-    // Register webhook management routes
-    registerWebhookRoutes(app, logger);
-
-    // Register API version info endpoint
-    registerVersionInfo(app);
-
-    // Register routes
-    registerRoutes(app, services);
-
-    // Register V2 proxy routes
+    // Register V2 proxy routes only
     registerV2GatewayRoutes(app, services);
 
     // Health check endpoint (no auth required)

@@ -68,6 +68,10 @@ export class EventPublisher {
         this.logger.info({ event_type: eventType, event_id: event.event_id }, 'Event published');
     }
 
+    isConnected(): boolean {
+        return this.channel !== null && this.connection !== null;
+    }
+
     async close(): Promise<void> {
         if (this.channel) {
             await this.channel.close();

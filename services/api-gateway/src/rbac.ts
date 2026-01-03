@@ -5,203 +5,38 @@ import { ServiceRegistry } from './clients';
 
 export interface AuthenticatedRequest extends FastifyRequest {
     auth: AuthContext;
-    matchedRole?: UserRole; // Role that granted access via requireRoles()
 }
 
 /**
- * RBAC middleware factory
- * Checks if the authenticated user has at least one of the required roles
+ * Simple authentication middleware - Gateway responsibility ends here
  * 
- * Role Resolution Order:
- * 1. Memberships (identity.memberships) - fast path for company/platform roles
- * 2. Network service check - for 'recruiter' role (independent contractors)
- * 3. ATS service check - for 'candidate' role (users with candidate profiles)
- * 
- * @param allowedRoles - Array of roles that can access this endpoint
- * @param services - ServiceRegistry required for 'recruiter' and 'candidate' role checks
+ * GATEWAY: Verify JWT and pass authenticated user to service
+ * SERVICE: Handle authorization via resolveAccessContext(clerkUserId, supabase)
  */
-export function requireRoles(allowedRoles: UserRole[], services?: ServiceRegistry) {
+export function requireAuth() {
     return async (request: FastifyRequest, reply: FastifyReply) => {
         const req = request as AuthenticatedRequest;
 
-        if (!req.auth) {
+        if (!req.auth || !req.auth.clerkUserId) {
             throw new UnauthorizedError('Authentication required');
         }
 
-        // Check memberships first if they exist
-        const userRoles = req.auth.memberships?.map(m => m.role) || [];
-        const hasAllowedRole = allowedRoles.some(role => userRoles.includes(role));
-        
-        if (hasAllowedRole) {
-            // Store the first matching role for later use
-            const matchedRole = allowedRoles.find(role => userRoles.includes(role));
-            req.matchedRole = matchedRole;
-            request.log.debug({ userId: req.auth.userId, role: userRoles, matchedRole }, 'Access granted via membership');
-            return;
-        }
-
-        // Special case: 'recruiter' role requires checking network service
-        // Recruiters can be independent contractors (no memberships) or affiliated with companies
-        if (allowedRoles.includes('recruiter') && services) {
-            try {
-                const correlationId = (request as any).correlationId;
-                const networkService = services.get('network');
-                const recruiterResponse: any = await networkService.get(
-                    `/api/v2/recruiters?limit=1`,
-                    undefined,
-                    correlationId,
-                    { 'x-clerk-user-id': req.auth.clerkUserId }
-                );
-
-                const recruiters = recruiterResponse?.data?.data || recruiterResponse?.data || [];
-                if (recruiters.length > 0 && recruiters[0]?.status === 'active') {
-                    req.matchedRole = 'recruiter';
-                    request.log.debug({ userId: req.auth.userId }, 'Access granted: active recruiter via network service');
-                    return;
-                }
-            } catch (error) {
-                request.log.debug({ error, userId: req.auth.userId }, 'User is not a recruiter in network service');
-            }
-        }
-
-        // Special case: 'candidate' role requires checking if user has a candidate profile
-        // Call the gateway endpoint to check if user has a candidate profile
-        if (allowedRoles.includes('candidate') && services) {
-            try {
-                const correlationId = (request as any).correlationId;
-                const atsService = services.get('ats');
-                const candidateResponse: any = await atsService.get(
-                    `/api/v2/candidates?limit=1`,
-                    undefined,
-                    correlationId,
-                    {
-                        'x-clerk-user-id': req.auth.clerkUserId,
-                    }
-                );
-
-                if (candidateResponse?.data && candidateResponse.data.length > 0) {
-                    req.matchedRole = 'candidate';
-                    request.log.debug({ userId: req.auth.userId }, 'Access granted: user has candidate profile');
-                    return;
-                }
-            } catch (error) {
-                request.log.debug({ error, userId: req.auth.userId }, 'User does not have candidate profile');
-            }
-        }
-
-        // No matching role found
-        // No matching role found
-        request.log.warn({
-            userId: req.auth.userId,
-            userRoles,
-            requiredRoles: allowedRoles,
-            path: request.url,
-        }, 'Access denied: insufficient permissions');
-
-        const isDevelopment = process.env.NODE_ENV === 'development';
-        const errorMessage = isDevelopment
-            ? `Access denied. Required roles: ${allowedRoles.join(' or ')}. Your roles: ${userRoles.length > 0 ? userRoles.join(', ') : 'none'}`
-            : 'Access denied: insufficient permissions';
-
-        throw new ForbiddenError(errorMessage);
+        request.log.debug({ 
+            clerkUserId: req.auth.clerkUserId, 
+            path: request.url 
+        }, 'Request authenticated - authorization delegated to service');
     };
 }
 
 /**
- * Check if user has a specific role
+ * @deprecated Use requireAuth() instead - authorization moved to services
  */
-export function hasRole(auth: AuthContext, role: UserRole): boolean {
-    return auth.memberships?.some(m => m.role === role) || false;
+export function requireRoles(allowedRoles: UserRole[], services?: ServiceRegistry) {
+    return requireAuth();
 }
 
-/**
- * Check if user has any of the specified roles
- */
-export function hasAnyRole(auth: AuthContext, roles: UserRole[]): boolean {
-    return auth.memberships?.some(m => roles.includes(m.role)) || false;
-}
+// ROLE HELPER FUNCTIONS REMOVED
+// Authorization logic moved to V2 services via access context resolution
+// Each service determines user permissions based on resolveAccessContext(clerkUserId, supabase)
 
-/**
- * ROLE HELPER FUNCTIONS
- * Centralized role checking for all portal roles
- */
 
-/**
- * Check if user is a platform admin
- */
-export function isPlatformAdmin(auth: AuthContext): boolean {
-    return hasRole(auth, 'platform_admin');
-}
-
-/**
- * @deprecated Use isPlatformAdmin() instead for clarity
- */
-export function isAdmin(auth: AuthContext): boolean {
-    return isPlatformAdmin(auth);
-}
-
-/**
- * Check if user is a company admin
- */
-export function isCompanyAdmin(auth: AuthContext): boolean {
-    return hasRole(auth, 'company_admin');
-}
-
-/**
- * Check if user is a hiring manager
- */
-export function isHiringManager(auth: AuthContext): boolean {
-    return hasRole(auth, 'hiring_manager');
-}
-
-/**
- * Check if user is a company user (admin or hiring manager)
- */
-export function isCompanyUser(auth: AuthContext): boolean {
-    return hasAnyRole(auth, ['company_admin', 'hiring_manager']);
-}
-
-/**
- * Check if user is a recruiter
- * Checks both memberships and network service (for independent recruiters)
- */
-export async function isRecruiter(auth: AuthContext, services?: ServiceRegistry, correlationId?: string): Promise<boolean> {
-    // Check memberships first (fast path)
-    if (hasRole(auth, 'recruiter')) {
-        return true;
-    }
-
-    // Check network service for independent recruiters or recruiters with other memberships
-    if (services) {
-        try {
-            const networkService = services.get('network');
-            const recruiterResponse: any = await networkService.get(
-                `/api/v2/recruiters?limit=1`,
-                undefined,
-                correlationId,
-                { 'x-clerk-user-id': auth.clerkUserId }
-            );
-            // V2 API returns { data: [...] }
-            const recruiters = recruiterResponse?.data?.data || recruiterResponse?.data || [];
-            return recruiters.length > 0 && recruiters[0]?.status === 'active';
-        } catch (error) {
-            return false;
-        }
-    }
-
-    return false;
-}
-
-/**
- * Get user's organization IDs
- */
-export function getUserOrganizationIds(auth: AuthContext): string[] {
-    return auth.memberships?.map(m => m.organization_id) || [];
-}
-
-/**
- * Check if user belongs to a specific organization
- */
-export function belongsToOrganization(auth: AuthContext, organizationId: string): boolean {
-    return auth.memberships?.some(m => m.organization_id === organizationId) || false;
-}

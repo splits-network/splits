@@ -10,7 +10,6 @@ import { NotificationRepository } from './repository';
 import { NotificationService } from './service';
 import { DomainEventConsumer } from './domain-consumer';
 import { ServiceRegistry } from './clients';
-import { registerInAppNotificationRoutes } from './in-app-routes';
 import { registerV2Routes } from './v2/routes';
 import { EventPublisher as V2EventPublisher } from './v2/shared/events';
 import * as Sentry from '@sentry/node';
@@ -97,27 +96,16 @@ async function main() {
     );
     await v2EventPublisher.connect();
 
-    // Register in-app notification HTTP routes
-    registerInAppNotificationRoutes(app, repository);
+    // Register V2 HTTP routes only
     await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
         eventPublisher: v2EventPublisher,
     });
 
-    // Optional: Add HTTP endpoint for manual notifications
-    app.post('/send-test-email', async (request, reply) => {
-        const { to, candidateName, jobTitle, companyName } = request.body as any;
-        
-        // Example: Send application created notification
-        await notificationService.sendApplicationCreated(to, {
-            candidateName: candidateName || 'Test Candidate',
-            jobTitle: jobTitle || 'Test Role',
-            companyName: companyName || 'Test Company',
-            applicationId: 'test-app-123',
-        });
-        
-        return reply.send({ success: true });
+    // Health check endpoint
+    app.get('/health', async (_request, reply) => {
+        reply.send({ status: 'ok', service: 'notification-service' });
     });
 
     // Health check endpoint

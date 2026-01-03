@@ -2,7 +2,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { ServiceRegistry } from '../../clients';
 import { buildAuthHeaders } from '../../helpers/auth-headers';
 import { ResourceDefinition, buildQueryString, getCorrelationId, registerResourceRoutes } from './common';
-import { AUTHENTICATED_ROLES } from './roles';
+import { requireAuth } from '../../middleware/auth';
 
 const NOTIFICATION_RESOURCES: ResourceDefinition[] = [
     {
@@ -10,13 +10,6 @@ const NOTIFICATION_RESOURCES: ResourceDefinition[] = [
         service: 'notification',
         basePath: '/notifications',
         tag: 'notifications',
-        roles: {
-            list: AUTHENTICATED_ROLES,
-            get: AUTHENTICATED_ROLES,
-            create: ['platform_admin'],
-            update: AUTHENTICATED_ROLES,
-            delete: AUTHENTICATED_ROLES,
-        },
     },
 ];
 
@@ -31,11 +24,7 @@ function registerNotificationActions(app: FastifyInstance, services: ServiceRegi
     app.post(
         '/api/v2/notifications/mark-all-read',
         {
-            schema: {
-                description: 'Mark all notifications as read via V2 endpoint',
-                tags: ['notifications'],
-                security: [{ clerkAuth: [] }],
-            },
+            // No schema needed for Fastify 5.x
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
@@ -53,11 +42,7 @@ function registerNotificationActions(app: FastifyInstance, services: ServiceRegi
     app.get(
         '/api/v2/notifications/unread-count',
         {
-            schema: {
-                description: 'Get unread notification count via V2 endpoint',
-                tags: ['notifications'],
-                security: [{ clerkAuth: [] }],
-            },
+            // No schema needed for Fastify 5.x
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);

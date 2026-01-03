@@ -34,6 +34,7 @@ The repo is organized by **responsibility**, not by technology.
 │  ├─ billing-service/       # Plans, subscriptions, Stripe, payouts
 │  ├─ notification-service/  # Event-driven email (Resend)
 │  ├─ automation-service/    # AI matching, fraud detection, metrics
+│  ├─ ai-service/            # AI-powered candidate-job fit analysis
 │  └─ document-service/      # File storage and processing (Supabase Storage)
 │
 ├─ packages/                 # Shared code, NOT directly deployable
@@ -56,9 +57,12 @@ The repo is organized by **responsibility**, not by technology.
 1. **Do NOT put backend logic in `apps/`.**  
    - All APIs and business logic go in `services/*`.  
    - Next.js app should call `api-gateway`, not talk directly to domain services.
-2. **Treat each service as independent.**  
-   - No reaching across into other service folders at runtime.
-   - Use HTTP clients in `packages/shared-clients` to call other services.
+2. **Treat each service as independent with NO direct service-to-service HTTP calls.**  
+   - Services share a single Supabase database backend with schema-per-service design
+   - For data access: Use direct database queries to any schema (cross-schema JOINs allowed)
+   - For coordination: Use RabbitMQ events for asynchronous communication between services
+   - **NEVER make HTTP calls between backend services** - this creates tight coupling and reliability issues
+   - Frontend apps only call `api-gateway`, which may proxy to services as needed
 3. **Use shared packages** instead of copy-pasting common code.
 4. **Follow V2 API Architecture** (implemented in ATS, Network, Billing, Document, Notification, Automation services):
    - Use standardized 5-route pattern (LIST, GET, CREATE, UPDATE, DELETE)
@@ -105,11 +109,16 @@ Copilot should assume and suggest the following stack:
   - REST APIs with OpenAPI documentation.
 
 - **Data & Infra**
-  - Supabase Postgres with **schema-per-service**:
-    - `identity.*`, `ats.*`, `network.*`, `billing.*`, `notifications.*`.
-    - Each service owns its schema and migrations.
-    - Supabase project-ref: `einhgkqmxbkgdohwfayv`.
-    - Use Supabase MCP tools for database operations when available.
+  - **Single Supabase Postgres database** shared across all services:
+    - Services use **schema-per-service** pattern: `identity.*`, `ats.*`, `network.*`, `billing.*`, `notifications.*`, `documents.*`
+    - Each service owns its schema and migrations but can query other schemas directly
+    - Cross-schema JOINs are allowed and encouraged for data enrichment
+    - Supabase project-ref: `einhgkqmxbkgdohwfayv`
+    - Use Supabase MCP tools for database operations when available
+  - **Service Communication Pattern**:
+    - ✅ **Direct database queries**: Services query their own schema or cross-schema JOINs for data needs
+    - ✅ **RabbitMQ events**: Asynchronous coordination and notifications between services
+    - ❌ **HTTP service-to-service calls**: Avoid at all costs - creates coupling and reliability issues
   - **Database Schema Pattern for User Access (V2)**:
     - `identity.users` table contains `clerk_user_id` (text) column - the source of truth for Clerk IDs
     - Other tables (e.g., `ats.candidates`, `network.recruiters`) have `user_id` (UUID) which is a foreign key to `identity.users.id`
@@ -281,7 +290,25 @@ Copilot:
 Copilot:  
 **For new automation features, use V2 patterns**. This service orchestrates intelligent automation and monitoring. Keep it focused on matching, fraud detection, automation rules, and metrics - not core ATS or billing logic.
 
-### 3.8 `services/document-service`
+### 3.8 `services/ai-service`
+
+- AI-powered candidate-job fit analysis and scoring
+- **V2 Implementation Complete**: Uses standardized 5-route pattern
+  - `/v2/reviews` - Generate and retrieve AI reviews
+  - Event-driven architecture - publishes `ai_review.completed` events
+  - No direct service-to-service HTTP calls
+- Handles:
+  - Resume analysis and skill extraction
+  - Job requirement matching
+  - Fit scoring with confidence levels
+  - Review recommendations (good_fit, poor_fit, etc.)
+- Dependencies: Document text extraction required for quality analysis
+- Event flow: Triggered by application creation → analyzes fit → publishes results
+
+Copilot:  
+**For new AI features, use V2 patterns**. This service owns AI analysis logic. Do not make HTTP calls to other services - use database queries and events only.
+
+### 3.9 `services/document-service`
 
 - Universal document storage using Supabase Storage
 - **V2 Implementation Complete**: Uses standardized 5-route pattern
@@ -295,6 +322,7 @@ Copilot:
 - Provides secure pre-signed URLs for uploads/downloads
 - File type validation and size limits
 - Multi-entity attachments (candidates, jobs, applications, companies)
+- **CRITICAL**: Document text extraction pipeline needed (see section 10.1)
 
 Copilot:  
 **For new document features, use V2 patterns**. All file storage operations should go through this service. Do not implement file handling in other services.
@@ -407,7 +435,7 @@ When Copilot generates React/Next.js code:
 
 ## 5. V2 Backend Architecture Patterns
 
-**IMPORTANT**: For services with V2 implementations (ATS, Network, Billing, Document, Notification, Automation), always use V2 patterns. Only use V1 patterns for services not yet migrated (Identity).
+**IMPORTANT**: For services with V2 implementations (ATS, Network, Billing, Document, Notification, Automation, AI), always use V2 patterns. Only use V1 patterns for services not yet migrated (Identity).
 
 ### 5.1 V2 Folder Structure (Domain-Based)
 
@@ -630,7 +658,7 @@ Copilot should follow these patterns for V1 services:
 
 ### V2 Authorization (Access Context Pattern)
 
-**V2 services** (ATS, Network, Billing, Document, Notification, Automation) use shared access context for data-level authorization:
+**V2 services** (ATS, Network, Billing, Document, Notification, Automation, AI) use shared access context for data-level authorization:
 
 ```typescript
 import { resolveAccessContext } from '@splits-network/shared-access-context';
@@ -1055,12 +1083,13 @@ Copilot should prioritize:
 
 When working with services:
 
-**V2 Services** (ATS, Network, Billing, Document, Notification, Automation):
+**V2 Services** (ATS, Network, Billing, Document, Notification, Automation, AI):
 - Use standardized 5-route pattern
 - Use domain-based folder structure under `v2/`
 - Use shared access context for authorization
 - Single update methods with smart validation
 - Direct Supabase queries with role-based filtering
+- Event-driven coordination (no HTTP service calls)
 
 **V1 Services** (Identity - not yet migrated):
 - Use legacy patterns until V2 migration
@@ -1075,3 +1104,68 @@ When unsure about a domain decision, Copilot should lean toward:
 - Explicit > implicit (prefer obvious code over clever abstractions)
 
 Splits Network should feel like a **clean, well-structured recruiting and payouts platform** with **consistent, predictable APIs**, not a ball of mud.
+
+---
+
+## 10. Critical Known Issues ⚠️
+
+### 10.1 Document Text Extraction Bug (BLOCKING AI REVIEWS)
+
+**Status:** Critical bug discovered January 2, 2026  
+**Impact:** AI reviews fail because resume text cannot be read  
+**Documentation:** `docs/implementation-plans/ai-flow-gap-analysis.md` section 2.1
+
+**Problem:**
+AI service expects `document.extracted_text` as a direct property, but the database schema stores extracted text in `document.metadata.extracted_text` (JSONB field). This causes all AI reviews to fail with "no resume text available."
+
+**Database Schema:**
+```sql
+-- documents.documents table
+CREATE TABLE documents.documents (
+    id UUID PRIMARY KEY,
+    filename VARCHAR,
+    storage_path TEXT,
+    processing_status processing_status DEFAULT 'pending',  -- enum: pending/processing/processed/failed
+    metadata JSONB DEFAULT '{}',  -- ✅ Text stored here as metadata.extracted_text
+    -- ❌ NO extracted_text column exists!
+);
+```
+
+**Root Cause:**
+Document processing service doesn't exist yet. Documents are stored but no text extraction pipeline processes them from `processing_status='pending'` to `'processed'` with extracted text in `metadata.extracted_text`.
+
+**Current Code:**
+```typescript
+// services/ai-service/src/v2/reviews/service.ts - CORRECTLY reads from metadata
+if (primaryResume && primaryResume.metadata?.extracted_text) {
+    resumeText = primaryResume.metadata.extracted_text;
+} else {
+    console.warn('No resume text available for analysis');
+    // Falls back to job description analysis only
+}
+```
+
+**Implementation Required:**
+Document processing service needs to be implemented:
+1. Create separate `document-processing-service` (CPU-intensive operations)
+2. Add dependencies: `pdf-parse` (PDFs), `mammoth` (DOCX), OpenAI embeddings
+3. Listen for `document.uploaded` events via RabbitMQ
+4. Process documents asynchronously: extract text → store in `metadata.extracted_text`
+5. Update `processing_status`: pending → processing → processed/failed
+6. Publish `document.processed` event when complete
+7. Process 99+ existing pending documents retroactively
+
+See `docs/guidance/document-processing-service.md` for complete implementation guide.
+
+**Important Rules:**
+- ✅ Always access document text via `document.metadata?.extracted_text`
+- ✅ Check `document.processing_status` before expecting text
+- ✅ Use optional chaining for JSONB fields: `metadata?.property`
+- ❌ Never expect `extracted_text` as direct property on document
+- ❌ Don't assume existing documents have extracted text (99 documents need processing)
+
+**Related Components:**
+- `services/ai-service/src/v2/reviews/service.ts` - needs immediate fix
+- `services/ats-service/src/v2/applications/repository.ts` - correctly returns metadata field
+- `services/document-service/` - needs text extraction implementation
+- `documents.documents` table - JSONB metadata structure

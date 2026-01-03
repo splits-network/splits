@@ -1,49 +1,41 @@
 # Notification Service
 
-The notification service handles all transactional emails for the Splits Network platform using **professional branded HTML templates** that match the portal design.
+**Status**: 🔄 MIXED V1/V2 - Event-driven email processing (V1) + In-app notification APIs (V2)
 
-## ✅ What's Implemented
+The Notification Service handles all notification delivery for the Splits Network platform using a **pure event-driven architecture** for notification creation and HTTP APIs for state management.
 
-### Professional Email Templates
+## Architecture Overview
 
-We've implemented a comprehensive template system featuring:
-- **Brand-consistent design** with Splits Network colors (#233876 primary, #0f9d8a secondary)
-- **Responsive HTML** optimized for all major email clients (Gmail, Outlook, Apple Mail)
-- **Rich content** with info cards, alerts, buttons, and formatted data
-- **Reusable components** for consistent UI elements
+### 🎯 **Core Principle: Event-Driven Only**
+All notification creation happens via RabbitMQ events. **No HTTP endpoints for creating notifications.**
 
-See [TEMPLATES.md](./TEMPLATES.md) for complete documentation.
+```
+Service Event → RabbitMQ → Notification Service → Email/In-App Created
+                                                          ↓
+Frontend ← HTTP APIs ← Notification State Management ←────┘
+```
 
-### Email Template Categories
+## ✅ Current Capabilities
 
-1. **Application Emails**
-   - New candidate application notifications
-   - Stage change updates with context
-   - Application accepted/rejected
-   - Pre-screen requests
+### **V1: Event-Driven Notification Processing**
+- **Email Delivery**: Professional branded HTML templates via Resend
+- **In-App Notification Creation**: Stores notifications for frontend consumption
+- **RabbitMQ Event Processing**: Listens to 25+ domain events
+- **Template System**: Rich responsive templates with brand consistency
 
-2. **Placement Emails**
-   - Placement confirmation with fee breakdown
-   - Placement activation (start date)
-   - Placement completion celebration
-   - Guarantee expiring reminders
+### **V2: Notification State Management APIs**
+- **GET /v2/notifications** - Fetch notifications for notification center
+- **PATCH /v2/notifications/:id** - Mark as read/unread
+- **DELETE /v2/notifications/:id** - Dismiss notifications
+- **GET /v2/notifications/unread-count** - Badge counts
+- **POST /v2/notifications/mark-all-read** - Bulk operations
 
-### Service Communication
-
-- **HTTP Client** for inter-service communication
-  - Fetches user data from identity-service
-  - Fetches job/candidate/application data from ats-service
-  - Fetches recruiter data from network-service
-
-### Event Handlers
-
-- `application.created` - Professional notification when candidate is submitted
-- `application.stage_changed` - Rich stage update with context
-- `application.accepted` - Celebration email with next steps
-- `placement.created` - Congratulations email with fee breakdown
-- `placement.activated` - Start date notification
-- `placement.completed` - Success celebration
-- `guarantee.expiring` - Reminder with countdown
+### **V2: Template Management APIs**
+- **GET /v2/templates** - List email templates
+- **GET /v2/templates/:id** - Get template details
+- **POST /v2/templates** - Create templates
+- **PATCH /v2/templates/:id** - Update templates
+- **DELETE /v2/templates/:id** - Delete templates
 
 ## 🎨 Preview Email Templates
 
@@ -54,6 +46,109 @@ pnpm preview:emails
 ```
 
 This creates preview files in `email-previews/` directory. Open `email-previews/index.html` to browse all templates.
+
+## 📧 **Email Template Categories**
+
+### **Application Workflow**
+- New candidate applications
+- Stage change updates with rich context
+- Application acceptance/rejection
+- Pre-screen requests and confirmations
+- AI review completion notifications
+
+### **Placement Lifecycle**  
+- Placement confirmations with fee breakdowns
+- Placement activation (start dates)
+- Placement completion celebrations
+- Guarantee expiring reminders
+
+### **Collaboration & Invitations**
+- Recruiter invitations and responses
+- Team collaboration notifications
+- Proposal management
+- Recruiter submission workflows
+
+## 🔄 **Event-Driven Processing**
+
+### **Supported RabbitMQ Events**
+```typescript
+// Application Events
+'application.created'
+'application.stage_changed'  
+'application.accepted'
+'application.withdrawn'
+
+// Placement Events  
+'placement.created'
+'placement.activated'
+'placement.completed'
+'placement.failed'
+
+// Proposal Events
+'proposal.created'
+'proposal.accepted'
+'proposal.declined'
+'proposal.timeout'
+
+// AI Review Events
+'ai_review.started'
+'ai_review.completed'
+'ai_review.failed'
+
+// Invitation Events
+'invitation.created'
+'invitation.revoked'
+
+// And 15+ more domain events...
+```
+
+### **Event Payload Structure**
+```typescript
+interface NotificationEvent {
+  recipient_user_id: string;
+  recipient_email: string;
+  data: {
+    // Event-specific data
+    application_id?: string;
+    placement_id?: string;
+    job_id?: string;
+    candidate_id?: string;
+  };
+  metadata: {
+    // Display data for templates
+    company_name?: string;
+    job_title?: string;
+    candidate_name?: string;
+  };
+}
+```
+
+## 🎨 **Email Templates**
+
+### **Brand-Consistent Design**
+- **Colors**: Splits Network blue (#233876 primary, #0f9d8a secondary)
+- **Responsive HTML**: Optimized for Gmail, Outlook, Apple Mail
+- **Rich Components**: Info cards, alerts, buttons, formatted data
+- **Template Preview**: Generate HTML previews for testing
+
+See [TEMPLATES.md](./TEMPLATES.md) for complete template documentation.
+
+## 🎯 **Future: User Notification Preferences**
+
+Planned architecture for granular user control:
+
+```sql
+-- notifications.user_notification_preferences
+user_id UUID,
+notification_type VARCHAR, -- 'application_created', 'placement_completed'
+email_enabled BOOLEAN DEFAULT true,
+in_app_enabled BOOLEAN DEFAULT true
+```
+
+**Preference APIs (Planned)**:
+- `GET /v2/notification-preferences`
+- `PATCH /v2/notification-preferences`
+- `POST /v2/notification-preferences/reset-defaults`
 
 ## 🧪 Testing Notifications
 

@@ -2,7 +2,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { createClient } from '@supabase/supabase-js';
 import { NotificationServiceV2 } from './service';
 import { NotificationRepositoryV2 } from './repository';
-import { NotificationCreateInput, NotificationUpdate } from './types';
+import { NotificationUpdate } from './types';
 import { requireUserContext, validatePaginationParams } from '../shared/helpers';
 import { EventPublisher } from '../shared/events';
 import { resolveAccessContext } from '../shared/access';
@@ -64,26 +64,6 @@ export async function registerNotificationRoutes(
         } catch (error: any) {
             return reply.code(404).send({
                 error: { message: error.message || 'Notification not found' },
-            });
-        }
-    });
-
-    app.post('/v2/notifications', async (request: FastifyRequest, reply: FastifyReply) => {
-        try {
-            const { clerkUserId } = requireUserContext(request);
-            const body = request.body as NotificationCreateInput;
-
-            if (!body?.recipient_email || !body.subject || !body.event_type) {
-                return reply.code(400).send({
-                    error: { message: 'recipient_email, subject, and event_type are required' },
-                });
-            }
-
-            const notification = await notificationService.createNotification(clerkUserId, body);
-            return reply.code(201).send({ data: notification });
-        } catch (error: any) {
-            return reply.code(400).send({
-                error: { message: error.message || 'Failed to create notification' },
             });
         }
     });

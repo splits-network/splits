@@ -12,11 +12,14 @@ import { InvitationRepository } from './invitations/repository';
 import { InvitationServiceV2 } from './invitations/service';
 import { ConsentRepository } from './consent/repository';
 import { ConsentServiceV2 } from './consent/service';
+import { WebhookRepositoryV2 } from './webhooks/repository';
+import { WebhooksServiceV2 } from './webhooks/service';
 import { registerUserRoutes } from './users/routes';
 import { registerOrganizationRoutes } from './organizations/routes';
 import { registerMembershipRoutes } from './memberships/routes';
 import { registerInvitationRoutes } from './invitations/routes';
 import { registerConsentRoutes } from './consent/routes';
+import { webhooksRoutesV2 } from './webhooks/routes';
 import { resolveAccessContext } from './shared/access';
 
 interface IdentityV2Config {
@@ -38,6 +41,7 @@ export async function registerV2Routes(
     const membershipRepository = new MembershipRepository(supabaseUrl, supabaseKey);
     const invitationRepository = new InvitationRepository(supabaseUrl, supabaseKey);
     const consentRepository = new ConsentRepository(supabaseUrl, supabaseKey);
+    const webhookRepository = new WebhookRepositoryV2(supabaseUrl, supabaseKey);
 
     const userService = new UserServiceV2(userRepository, eventPublisher, logger, accessResolver);
     const orgService = new OrganizationServiceV2(orgRepository, eventPublisher, logger, accessResolver);
@@ -54,6 +58,7 @@ export async function registerV2Routes(
         accessResolver
     );
     const consentService = new ConsentServiceV2(consentRepository, accessResolver);
+    const webhookService = new WebhooksServiceV2(webhookRepository, eventPublisher);
     const logError = (message: string, error: unknown) => logger.error({ err: error }, message);
 
     registerUserRoutes(app, { userService, logError });
@@ -61,4 +66,5 @@ export async function registerV2Routes(
     registerMembershipRoutes(app, { membershipService, logError });
     registerInvitationRoutes(app, { invitationService, logError });
     registerConsentRoutes(app, { consentService, logError });
+    await webhooksRoutesV2(app, webhookService);
 }

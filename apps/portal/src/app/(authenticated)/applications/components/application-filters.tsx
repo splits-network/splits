@@ -38,7 +38,8 @@ export const ApplicationFilters = forwardRef<HTMLInputElement, ApplicationFilter
                             >
                                 <option value="">All Stages</option>
                                 <option value="draft">Draft</option>
-                                <option value="recruiter_proposed">Proposed</option>
+                                <option value="recruiter_proposed">Recruiter Proposed</option>
+                                <option value="recruiter_request">Recruiter Request</option>
                                 <option value="ai_review">AI Review</option>
                                 <option value="submitted">Submitted</option>
                                 <option value="screen">Screen</option>

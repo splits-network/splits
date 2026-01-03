@@ -9,6 +9,8 @@ export const getStatusColor = (stage: string) => {
             return 'badge-info';
         case 'recruiter_proposed':
             return 'badge-secondary';
+        case 'recruiter_request':
+            return 'badge-info';
         case 'interviewing':
             return 'badge-primary';
         case 'offer':
@@ -31,6 +33,8 @@ export const formatStage = (stage: string) => {
             return 'Recruiter Review';
         case 'recruiter_proposed':
             return 'Recruiter Proposed';
+        case 'recruiter_request':
+            return 'Recruiter Request';
         case 'submitted':
             return 'Submitted';
         case 'interviewing':

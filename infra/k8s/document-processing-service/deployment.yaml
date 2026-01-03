@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: document-processing-service
+  namespace: splits-network
+  labels:
+    app: document-processing-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: document-processing-service
+  template:
+    metadata:
+      labels:
+        app: document-processing-service
+    spec:
+      containers:
+      - name: document-processing-service
+        image: splits-network/document-processing-service:latest
+        ports:
+        - containerPort: 3006
+        env:
+        - name: PORT
+          value: "3006"
+        - name: LOG_LEVEL
+          value: "info"
+        - name: SUPABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: supabase-config
+              key: url
+        - name: SUPABASE_SERVICE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: supabase-config
+              key: service-key
+        - name: RABBITMQ_URL
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-config
+              key: url
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3006
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3006
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+      restartPolicy: Always

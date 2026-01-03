@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { getJob, getPreScreenQuestions, getMyDocuments, submitApplication } from '@/lib/api-client';
+import { getJob, getPreScreenQuestions, getMyDocuments, submitApplication, updateApplication } from '@/lib/api-client';
 import StepIndicator from '@/components/application-wizard/step-indicator';
 import StepDocuments from '@/components/application-wizard/step-documents';
 import StepQuestions from '@/components/application-wizard/step-questions';
@@ -15,6 +15,7 @@ interface ApplicationWizardModalProps {
     companyName: string;
     onClose: () => void;
     onSuccess?: (applicationId: string) => void;
+    existingApplication?: any; // Pre-populate wizard with existing draft application
 }
 
 export default function ApplicationWizardModal({
@@ -23,6 +24,7 @@ export default function ApplicationWizardModal({
     companyName,
     onClose,
     onSuccess,
+    existingApplication,
 }: ApplicationWizardModalProps) {
     const router = useRouter();
     const { getToken } = useAuth();
@@ -34,11 +36,11 @@ export default function ApplicationWizardModal({
     const [localDocuments, setLocalDocuments] = useState<any[]>([]);
     const [formData, setFormData] = useState({
         documents: {
-            selected: [] as string[],
-            primary_resume_id: null as string | null,
+            selected: existingApplication?.documents?.map((d: any) => d.id) || [] as string[],
+            primary_resume_id: existingApplication?.documents?.find((d: any) => d.is_primary_for_entity)?.id || null as string | null,
         },
-        pre_screen_answers: [] as Array<{ question_id: string; answer: string | string[] | boolean }>,
-        notes: '',
+        pre_screen_answers: existingApplication?.pre_screen_answers || [] as Array<{ question_id: string; answer: string | string[] | boolean }>,
+        notes: existingApplication?.notes || existingApplication?.candidate_notes || '',
     });
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -72,9 +74,36 @@ export default function ApplicationWizardModal({
 
                 const jobData = (jobResponse as any).data;
                 const questionsData = (questionsResponse as any).data || [];
-                const documentsData = Array.isArray(documentsResponse)
+                let documentsData = Array.isArray(documentsResponse)
                     ? documentsResponse
                     : ((documentsResponse as any).data || []);
+
+                // If editing an existing application, merge its documents and remove duplicates by original_document_id
+                if (existingApplication?.documents?.length > 0) {
+                    // Create a set of document IDs that are already attached to the application
+                    const appDocIds = new Set(
+                        existingApplication.documents.map((doc: any) => doc.id)
+                    );
+
+                    // Create a set of original_document_id values from application documents
+                    const appOriginalDocIds = new Set(
+                        existingApplication.documents
+                            .map((doc: any) => doc.metadata?.original_document_id)
+                            .filter(Boolean)
+                    );
+
+                    // Filter out library documents that are already attached (by ID or original_document_id match)
+                    documentsData = documentsData.filter(
+                        (doc: any) =>
+                            // Keep if not already attached by direct ID match
+                            !appDocIds.has(doc.id) &&
+                            // Keep if this library doc isn't referenced by an app doc's original_document_id
+                            !appOriginalDocIds.has(doc.id)
+                    );
+
+                    // Add all application documents to the list
+                    documentsData = [...documentsData, ...existingApplication.documents];
+                }
 
                 setJob(jobData);
                 setQuestions(questionsData);
@@ -111,20 +140,39 @@ export default function ApplicationWizardModal({
                 throw new Error('Authentication required');
             }
 
-            const result = await submitApplication(
-                {
-                    job_id: jobId,
-                    document_ids: formData.documents.selected,
-                    primary_resume_id: formData.documents.primary_resume_id!,
-                    pre_screen_answers: formData.pre_screen_answers,
-                    notes: formData.notes,
-                    stage: 'ai_review',
-                },
-                token
-            );
+            let result;
+            let applicationId;
 
-            // V2 API returns { data: <application> } directly
-            const applicationId = (result as any).data.id;
+            if (existingApplication) {
+                // Update existing draft application and move to ai_review
+                const { updateApplication } = await import('@/lib/api-client');
+                result = await updateApplication(
+                    existingApplication.id,
+                    {
+                        document_ids: formData.documents.selected,
+                        primary_resume_id: formData.documents.primary_resume_id!,
+                        notes: formData.notes,
+                        stage: 'ai_review',
+                    },
+                    token
+                );
+                applicationId = existingApplication.id;
+            } else {
+                // Create new application
+                result = await submitApplication(
+                    {
+                        job_id: jobId,
+                        document_ids: formData.documents.selected,
+                        primary_resume_id: formData.documents.primary_resume_id!,
+                        pre_screen_answers: formData.pre_screen_answers,
+                        notes: formData.notes,
+                        stage: 'ai_review',
+                    },
+                    token
+                );
+                // V2 API returns { data: <application> } directly
+                applicationId = (result as any).data.id;
+            }
 
             // Call success callback if provided
             if (onSuccess) {
@@ -137,6 +185,65 @@ export default function ApplicationWizardModal({
         } catch (err: any) {
             console.error('Failed to submit application:', err);
             setError(err.message || 'Failed to submit application');
+            setSubmitting(false);
+        }
+    };
+
+    const handleSaveAsDraft = async () => {
+        setSubmitting(true);
+        setError(null);
+
+        try {
+            const token = await getToken();
+            if (!token) {
+                throw new Error('Authentication required');
+            }
+
+            let result;
+            let applicationId;
+
+            if (existingApplication) {
+                // Update existing draft application (keep as draft)
+                const { updateApplication } = await import('@/lib/api-client');
+                result = await updateApplication(
+                    existingApplication.id,
+                    {
+                        document_ids: formData.documents.selected,
+                        primary_resume_id: formData.documents.primary_resume_id!,
+                        notes: formData.notes,
+                        stage: 'draft',
+                    },
+                    token
+                );
+                applicationId = existingApplication.id;
+            } else {
+                // Create new application as draft
+                result = await submitApplication(
+                    {
+                        job_id: jobId,
+                        document_ids: formData.documents.selected,
+                        primary_resume_id: formData.documents.primary_resume_id!,
+                        pre_screen_answers: formData.pre_screen_answers,
+                        notes: formData.notes,
+                        stage: 'draft',
+                    },
+                    token
+                );
+                // V2 API returns { data: <application> } directly
+                applicationId = (result as any).data.id;
+            }
+
+            // Call success callback if provided
+            if (onSuccess) {
+                onSuccess(applicationId);
+            }
+
+            // Close modal and navigate
+            onClose();
+            router.push(`/applications?draft=true&application=${applicationId}`);
+        } catch (err: any) {
+            console.error('Failed to save draft:', err);
+            setError(err.message || 'Failed to save draft');
             setSubmitting(false);
         }
     };
@@ -178,6 +285,7 @@ export default function ApplicationWizardModal({
                             answers={formData.pre_screen_answers}
                             additionalNotes={formData.notes}
                             onSubmit={handleSubmit}
+                            onSaveAsDraft={handleSaveAsDraft}
                             onBack={handleBack}
                         />
                     );
@@ -193,6 +301,7 @@ export default function ApplicationWizardModal({
                         answers={formData.pre_screen_answers}
                         additionalNotes={formData.notes}
                         onSubmit={handleSubmit}
+                        onSaveAsDraft={handleSaveAsDraft}
                         onBack={handleBack}
                     />
                 );
@@ -207,7 +316,9 @@ export default function ApplicationWizardModal({
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 border-b border-base-300">
                     <div>
-                        <h2 className="text-2xl font-bold">Apply to {jobTitle}</h2>
+                        <h2 className="text-2xl font-bold">
+                            {existingApplication ? 'Edit Application' : 'Apply to'} {existingApplication ? 'for' : ''} {jobTitle}
+                        </h2>
                         <p className="text-base-content/70 mt-1">at {companyName}</p>
                     </div>
                     <button

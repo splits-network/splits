@@ -1,0 +1,35 @@
+{
+  "name": "@splits-network/document-processing-service",
+  "version": "1.0.0",
+  "description": "Document processing service for text extraction and AI analysis",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@splits-network/shared-access-context": "workspace:*",
+    "@splits-network/shared-types": "workspace:*",
+    "@splits-network/shared-config": "workspace:*",
+    "@splits-network/shared-logging": "workspace:*",
+    "@splits-network/shared-job-queue": "workspace:*",
+    "@supabase/supabase-js": "^2.39.0",
+    "fastify": "^4.24.3",
+    "amqplib": "^0.10.3",
+    "pdf-parse": "^1.1.1",
+    "mammoth": "^1.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.4",
+    "@types/pdf-parse": "^1.1.1",
+    "@types/amqplib": "^0.10.1",
+    "tsx": "^4.6.2",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

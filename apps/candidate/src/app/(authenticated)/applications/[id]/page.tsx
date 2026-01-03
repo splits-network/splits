@@ -3,13 +3,19 @@ import { notFound, redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { formatDate } from '@/lib/utils';
 import WithdrawButton from '@/components/withdraw-button';
+import BackToDraftButton from '@/components/back-to-draft-button';
 import AIReviewPanel from '@/components/ai-review-panel';
 import { ApplicationDetailClient } from './components/application-detail-client';
+import EditDraftButton from './components/edit-draft-button';
 
 const getStatusColor = (stage: string) => {
     switch (stage) {
         case 'draft':
             return 'badge-ghost';
+        case 'recruiter_proposed':
+            return 'badge-primary';
+        case 'recruiter_request':
+            return 'badge-info';
         case 'ai_review':
             return 'badge-warning';
         case 'screen':
@@ -31,6 +37,10 @@ const formatStage = (stage: string) => {
     switch (stage) {
         case 'draft':
             return 'Draft';
+        case 'recruiter_proposed':
+            return 'Proposed by Recruiter';
+        case 'recruiter_request':
+            return 'Recruiter Request';
         case 'ai_review':
             return 'AI Review';
         case 'screen':
@@ -434,6 +444,23 @@ export default async function ApplicationDetailPage({
                             </h2>
 
                             <div className="space-y-2">
+                                {/* Edit & Submit - for draft applications */}
+                                {application.stage === 'draft' && (
+                                    <EditDraftButton
+                                        application={application}
+                                        job={job}
+                                    />
+                                )}
+
+                                {/* Back to Draft - for stages where candidate can edit */}
+                                {['ai_review', 'screen', 'recruiter_request', 'rejected'].includes(application.stage) && (
+                                    <BackToDraftButton
+                                        applicationId={application.id}
+                                        jobTitle={job.title || 'this position'}
+                                    />
+                                )}
+
+                                {/* Withdraw - for any non-terminal stage */}
                                 {application.stage !== 'withdrawn' && application.stage !== 'rejected' && (
                                     <WithdrawButton
                                         applicationId={application.id}
@@ -479,6 +506,7 @@ export default async function ApplicationDetailPage({
 
                     {/* AI Review Panel - Show if ai_review stage or later */}
                     {(application.stage === 'ai_review' ||
+                        application.stage === 'recruiter_request' ||
                         application.stage === 'screen' ||
                         application.stage === 'submitted' ||
                         application.stage === 'interviewing' ||
@@ -486,7 +514,6 @@ export default async function ApplicationDetailPage({
                         application.ai_reviewed) && (
                             <AIReviewPanel
                                 applicationId={application.id}
-                                token={token || ''}
                             />
                         )}
 

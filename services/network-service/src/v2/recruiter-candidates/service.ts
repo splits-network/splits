@@ -6,16 +6,14 @@ import { EventPublisherV2 } from '../shared/events';
 import { RecruiterCandidateRepository } from './repository';
 import { buildPaginationResponse, PaginationResponse } from '../shared/pagination';
 import { RecruiterCandidateFilters, RecruiterCandidateUpdate } from './types';
-import { AtsClient } from '../../clients';
 
 export class RecruiterCandidateServiceV2 {
-    private atsClient: AtsClient;
 
     constructor(
         private repository: RecruiterCandidateRepository,
         private eventPublisher: EventPublisherV2
     ) {
-        this.atsClient = new AtsClient();
+        // V2 services use direct database queries, not HTTP clients
     }
 
     async getRecruiterCandidates(
@@ -180,33 +178,21 @@ export class RecruiterCandidateServiceV2 {
             consent_user_agent: metadata.user_agent || null,
         });
 
+        // V2: Use events for cross-service communication
         if (metadata.userId && relationship.candidate_id) {
-            try {
-                await this.atsClient.linkCandidateToUser(relationship.candidate_id, metadata.userId);
-            } catch (error) {
-                console.error('Failed to link candidate to user:', (error as Error).message);
-            }
+            await this.eventPublisher.publish('candidate.link_requested', {
+                candidate_id: relationship.candidate_id,
+                user_id: metadata.userId,
+                recruiter_id: relationship.recruiter_id,
+            });
         }
 
         if (relationship.candidate_id && relationship.recruiter_id) {
-            try {
-                const candidateResponse: any = await this.atsClient.get(`/candidates/${relationship.candidate_id}`);
-                const candidate = candidateResponse.data || candidateResponse;
-                if (!candidate.recruiter_id) {
-                    await this.atsClient.patch(`/candidates/${relationship.candidate_id}`, {
-                        recruiter_id: relationship.recruiter_id,
-                    });
-                    await this.eventPublisher.publish('candidate.sourced', {
-                        candidate_id: relationship.candidate_id,
-                        candidate_email: candidate.email,
-                        candidate_name: candidate.full_name,
-                        sourcer_recruiter_id: relationship.recruiter_id,
-                        source_method: 'invitation_accepted',
-                    });
-                }
-            } catch (error) {
-                console.error('Failed to update candidate sourcer:', (error as Error).message);
-            }
+            await this.eventPublisher.publish('candidate.sourcer_assignment_requested', {
+                candidate_id: relationship.candidate_id,
+                recruiter_id: relationship.recruiter_id,
+                source_method: 'invitation_accepted',
+            });
         }
 
         await this.eventPublisher.publish('candidate.consent_given', {

@@ -73,8 +73,9 @@ export class DocumentRepositoryV2 {
         const limit = filters.limit ?? 25;
         const offset = (page - 1) * limit;
 
-        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-
+        // For internal service calls, skip access context and return all documents
+        const isInternalService = clerkUserId === 'internal-service';
+        
         let query = this.supabase
             .schema('documents')
             .from('documents')
@@ -99,13 +100,18 @@ export class DocumentRepositoryV2 {
             query = query.ilike('filename', `%${filters.search}%`);
         }
 
-        if (!accessContext.isPlatformAdmin) {
-            if (accessContext.candidateId) {
-                query = query.eq('entity_type', 'candidate').eq('entity_id', accessContext.candidateId);
-            } else if (accessContext.organizationIds.length > 0) {
-                query = query.eq('entity_type', 'company').in('entity_id', accessContext.organizationIds);
-            } else {
-                return { data: [], total: 0 };
+        // For internal services, no access filtering
+        if (!isInternalService) {
+            const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+
+            if (!accessContext.isPlatformAdmin) {
+                if (accessContext.candidateId) {
+                    query = query.eq('entity_type', 'candidate').eq('entity_id', accessContext.candidateId);
+                } else if (accessContext.organizationIds.length > 0) {
+                    query = query.eq('entity_type', 'company').in('entity_id', accessContext.organizationIds);
+                } else {
+                    return { data: [], total: 0 };
+                }
             }
         }
 
@@ -118,9 +124,27 @@ export class DocumentRepositoryV2 {
         }
 
         const rows = data || [];
+        
+        // For internal services, skip access filtering
+        if (isInternalService) {
+            return {
+                data: rows.map((doc) => this.mapRow(doc)),
+                total: count || rows.length,
+            };
+        }
+        
+        // Filter rows based on access control for regular users
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
         const filteredRows = accessContext.isPlatformAdmin
             ? rows
-            : rows.filter((row) => this.canAccessDocument(row, accessContext));
+            : (await Promise.all(
+                rows.map(async (row) => ({
+                    row,
+                    canAccess: await this.canAccessDocument(row, accessContext),
+                }))
+            ))
+                .filter(({ canAccess }) => canAccess)
+                .map(({ row }) => row);
 
         return {
             data: filteredRows.map((doc) => this.mapRow(doc)),
@@ -129,13 +153,14 @@ export class DocumentRepositoryV2 {
     }
 
     async findDocument(id: string, clerkUserId: string): Promise<Document | null> {
-        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+        const isInternalService = clerkUserId === 'internal-service';
 
         const { data, error } = await this.supabase
             .schema('documents')
             .from('documents')
             .select('*')
             .eq('id', id)
+            .is('deleted_at', null)
             .single();
 
         if (error) {
@@ -145,7 +170,14 @@ export class DocumentRepositoryV2 {
             throw error;
         }
 
-        if (!data || !this.canAccessDocument(data as DocumentRow, accessContext)) {
+        // For internal services, skip access check
+        if (isInternalService) {
+            return data ? this.mapRow(data as DocumentRow) : null;
+        }
+
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+
+        if (!data || !(await this.canAccessDocument(data as DocumentRow, accessContext))) {
             return null;
         }
 
@@ -247,7 +279,7 @@ export class DocumentRepositoryV2 {
         }
     }
 
-    private canAccessDocument(row: DocumentRow, context: AccessContext): boolean {
+    private async canAccessDocument(row: DocumentRow, context: AccessContext): Promise<boolean> {
         if (context.isPlatformAdmin) {
             return true;
         }
@@ -255,6 +287,20 @@ export class DocumentRepositoryV2 {
         // Candidates can see their own documents
         if (context.candidateId && row.entity_type === 'candidate' && row.entity_id === context.candidateId) {
             return true;
+        }
+
+        // Candidates can see documents attached to their applications
+        if (context.candidateId && row.entity_type === 'application') {
+            const { data: application } = await this.supabase
+                .schema('ats')
+                .from('applications')
+                .select('candidate_id')
+                .eq('id', row.entity_id)
+                .maybeSingle();
+            
+            if (application && application.candidate_id === context.candidateId) {
+                return true;
+            }
         }
 
         // Company users can see company documents (not candidate documents)

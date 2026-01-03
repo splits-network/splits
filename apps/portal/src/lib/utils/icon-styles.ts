@@ -11,6 +11,8 @@
 export function getApplicationStageIcon(stage: string): string {
     const icons: Record<string, string> = {
         draft: 'fa-file',
+        recruiter_proposed: 'fa-handshake',
+        recruiter_request: 'fa-user-clock',
         ai_review: 'fa-robot',
         screen: 'fa-eye',
         submitted: 'fa-paper-plane',

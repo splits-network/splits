@@ -5,6 +5,9 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { EventPublisher } from './v2/shared/events';
 import { registerV2Routes } from './v2/routes';
+import { DomainEventConsumer } from './domain-consumer';
+import { AIReviewRepository } from './v2/reviews/repository';
+import { AIReviewServiceV2 } from './v2/reviews/service';
 import * as Sentry from '@sentry/node';
 
 async function main() {
@@ -47,7 +50,7 @@ async function main() {
     }
 
     // Register Swagger
-    await app.register(swagger, {
+    await app.register(swagger as any, {
         openapi: {
             info: {
                 title: 'AI Service API',
@@ -64,7 +67,7 @@ async function main() {
         },
     });
 
-    await app.register(swaggerUi, {
+    await app.register(swaggerUi as any, {
         routePrefix: '/docs',
         uiConfig: {
             docExpansion: 'list',
@@ -81,13 +84,28 @@ async function main() {
         logger.error({ err: error }, 'Failed to connect event publisher');
     }
 
-    // Register V2 routes
+    // Initialize AI review service (needed for domain consumer)
+    const reviewRepository = new AIReviewRepository(dbConfig.supabaseUrl, dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey);
+    const aiReviewService = new AIReviewServiceV2(reviewRepository, eventPublisher || undefined, logger);
+
+    // Register V2 routes (passing the same service instance)
     registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
         eventPublisher: eventPublisher || undefined,
         logger,
+        aiReviewService, // Pass the service instance so routes use the same one
     });
+
+    // Initialize domain event consumer (listens for application events)
+    let domainConsumer: DomainEventConsumer | null = null;
+    try {
+        domainConsumer = new DomainEventConsumer(rabbitConfig.url, aiReviewService, logger);
+        await domainConsumer.connect();
+        logger.info('Domain event consumer connected and listening for events');
+    } catch (error) {
+        logger.error({ err: error }, 'Failed to connect domain event consumer');
+    }
 
     // Health check
     app.get('/health', async (request, reply) => {
@@ -114,6 +132,9 @@ async function main() {
         logger.info('SIGTERM received, shutting down ai-service gracefully');
         try {
             await app.close();
+            if (domainConsumer) {
+                await domainConsumer.close();
+            }
             if (eventPublisher) {
                 await eventPublisher.close();
             }

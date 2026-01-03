@@ -5,7 +5,7 @@
 
 import { FastifyInstance } from 'fastify';
 import { AIReviewServiceV2 } from './service';
-import { requireUserContext, validateUUID } from '../shared/helpers';
+import { requireUserContext, validateUUID, validateInternalService } from '../shared/helpers';
 
 interface RouteConfig {
     service: AIReviewServiceV2;
@@ -34,8 +34,12 @@ export function registerAIReviewRoutes(app: FastifyInstance, config: RouteConfig
             auto_transition?: boolean;
         };
     }>('/v2/ai-reviews', async (request, reply) => {
-        const clerkUserId = request.headers['x-clerk-user-id'] as string | undefined;
-        if (!requireUserContext(clerkUserId, reply, request)) return;
+        // Check for internal service auth first
+        if (!validateInternalService(request)) {
+            // If not internal service, require clerk user ID
+            const clerkUserId = request.headers['x-clerk-user-id'] as string | undefined;
+            if (!requireUserContext(clerkUserId, reply, request)) return;
+        }
 
         try {
             // If minimal data provided, fetch full application details

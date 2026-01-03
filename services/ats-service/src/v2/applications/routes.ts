@@ -54,9 +54,11 @@ export function registerApplicationRoutes(
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as any;
             const updates = request.body as ApplicationUpdate;
+            request.log.info({ id, updates, clerkUserId }, 'Updating application');
             const application = await config.applicationService.updateApplication(id, updates, clerkUserId);
             return reply.send({ data: application });
         } catch (error: any) {
+            request.log.error({ error: error.message, stack: error.stack, id: request.params, updates: request.body }, 'Failed to update application');
             return reply.code(400).send({ error: { message: error.message } });
         }
     });

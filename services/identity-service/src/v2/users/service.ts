@@ -28,6 +28,83 @@ export class UserServiceV2 {
     }
 
     /**
+     * Sync Clerk user data with internal database
+     * Used by webhook events and other sync operations
+     */
+    async syncClerkUser(clerkUserId: string, email: string, name?: string): Promise<void> {
+        try {
+            // Check if user exists
+            const existingUser = await this.repository.findUserByClerkId(clerkUserId);
+
+            if (existingUser) {
+                // Update existing user
+                const updates: any = { updated_at: new Date().toISOString() };
+                let hasChanges = false;
+
+                if (email && existingUser.email !== email) {
+                    updates.email = email;
+                    hasChanges = true;
+                }
+
+                if (name && existingUser.name !== name) {
+                    updates.name = name;
+                    hasChanges = true;
+                }
+
+                if (hasChanges) {
+                    await this.repository.updateUser(existingUser.id, updates);
+                    
+                    // Publish user updated event
+                    await this.eventPublisher.publish('user.updated', {
+                        userId: existingUser.id,
+                        clerkUserId,
+                        changes: Object.keys(updates).filter(key => key !== 'updated_at')
+                    });
+
+                    this.logger.info({
+                        userId: existingUser.id,
+                        clerkUserId,
+                        changes: Object.keys(updates)
+                    }, 'User updated from Clerk sync');
+                }
+            } else {
+                // Create new user
+                const userData = {
+                    id: uuidv4(),
+                    clerk_user_id: clerkUserId,
+                    email,
+                    name: name || null,
+                    status: 'active' as const,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                };
+
+                const newUser = await this.repository.createUser(userData);
+
+                // Publish user created event
+                await this.eventPublisher.publish('user.created', {
+                    userId: newUser.id,
+                    clerkUserId: newUser.clerk_user_id,
+                    email: newUser.email,
+                    name: newUser.name
+                });
+
+                this.logger.info({
+                    userId: newUser.id,
+                    clerkUserId
+                }, 'User created from Clerk sync');
+            }
+        } catch (error) {
+            this.logger.error({
+                clerkUserId,
+                email,
+                error: error instanceof Error ? error.message : 'Unknown error'
+            }, 'Failed to sync Clerk user');
+            throw error;
+        }
+    }
+
+    /**
      * Find all users with pagination and filters
      */
     async findUsers(clerkUserId: string, filters: any) {

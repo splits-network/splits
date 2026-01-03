@@ -3,15 +3,10 @@ import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import { AtsRepository } from './repository';
-import { AtsService } from './service';
-import { EventPublisher as OldEventPublisher } from './events';
 import { EventPublisher as V2EventPublisher } from './v2/shared/events';
-import { registerRoutes } from './routes';
+import { DomainEventConsumer } from './v2/shared/domain-consumer';
+import { ApplicationRepository } from './v2/applications/repository';
 import { registerV2Routes } from './v2/routes';
-import { CandidateOwnershipService } from './services/candidates/ownership-service';
-import { PlacementCollaborationService } from './services/placements/collaboration-service';
-import { PlacementLifecycleService } from './services/placements/lifecycle-service';
 import * as Sentry from '@sentry/node';
 
 async function main() {
@@ -54,7 +49,7 @@ async function main() {
     }
 
     // Register Swagger
-    await app.register(swagger, {
+    await app.register(swagger as any, {
         openapi: {
             info: {
                 title: 'ATS Service API',
@@ -79,7 +74,7 @@ async function main() {
         },
     });
 
-    await app.register(swaggerUi, {
+    await app.register(swaggerUi as any, {
         routePrefix: '/docs',
         uiConfig: {
             docExpansion: 'list',
@@ -87,11 +82,7 @@ async function main() {
         },
     });
 
-    // Initialize OLD event publisher for Phase 1/2 routes
-    const eventPublisher = new OldEventPublisher(rabbitConfig.url, logger);
-    await eventPublisher.connect();
-
-    // Initialize NEW V2 event publisher for V2 routes
+    // Initialize V2 event publisher
     const v2EventPublisher = new V2EventPublisher(
         rabbitConfig.url,
         logger,
@@ -99,22 +90,19 @@ async function main() {
     );
     await v2EventPublisher.connect();
 
-    // Initialize repository and service
-    const repository = new AtsRepository(
+    // Initialize V2 domain event consumer to sync events from other services
+    const applicationRepository = new ApplicationRepository(
         dbConfig.supabaseUrl,
         dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
     );
-    const service = new AtsService(repository, eventPublisher);
-    
-    // Phase 2 services
-    const ownershipService = new CandidateOwnershipService(repository, eventPublisher);
-    const collaborationService = new PlacementCollaborationService(repository, eventPublisher);
-    const lifecycleService = new PlacementLifecycleService(repository, eventPublisher);
+    const domainConsumer = new DomainEventConsumer(
+        rabbitConfig.url,
+        applicationRepository,
+        logger
+    );
+    await domainConsumer.connect();
 
-    // Register all routes (Phase 1, Phase 1.5, and Phase 2)
-    registerRoutes(app, service, ownershipService, collaborationService, lifecycleService, repository, eventPublisher);
-
-    // Register V2 routes (simplified architecture)
+    // Register V2 routes (V2-only architecture)
     registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
@@ -124,16 +112,24 @@ async function main() {
     // Health check endpoint
     app.get('/health', async (request, reply) => {
         try {
-            // Check database connectivity
-            await repository.healthCheck();
-            // Check RabbitMQ connectivity (using old event publisher)
-            const rabbitHealthy = eventPublisher.isConnected();
+            // Check database connectivity using V2 repository
+            const healthRepo = new ApplicationRepository(
+                dbConfig.supabaseUrl, 
+                dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+            );
+            
+            // Test database connectivity by doing a simple query
+            await healthRepo.findApplications('internal-service', { limit: 1 });
+            
+            // Check RabbitMQ connectivity
+            const rabbitHealthy = v2EventPublisher.isConnected();
             if (!rabbitHealthy) {
                 logger.warn('RabbitMQ not connected');
             }
             return reply.status(200).send({
                 status: 'healthy',
                 service: 'ats-service',
+                version: 'v2-only',
                 timestamp: new Date().toISOString(),
             });
         } catch (error) {
@@ -150,7 +146,7 @@ async function main() {
     // Graceful shutdown
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down gracefully');
-        await eventPublisher.close();
+        await domainConsumer.disconnect();
         await v2EventPublisher.close();
         await app.close();
         process.exit(0);
@@ -166,7 +162,8 @@ async function main() {
             Sentry.captureException(err as Error);
             await Sentry.flush(2000);
         }
-        await eventPublisher.close();
+        await domainConsumer.disconnect();
+        await v2EventPublisher.close();
         process.exit(1);
     }
 }

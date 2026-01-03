@@ -140,6 +140,10 @@ export async function withdrawApplication(applicationId: string, reason: string 
   }, token);
 }
 
+export async function updateApplication(applicationId: string, updates: any, token: string) {
+  return apiClient.patch(`/v2/applications/${applicationId}`, updates, token);
+}
+
 // Job API methods
 export async function getJob(jobId: string, token: string) {
   return apiClient.get(`/v2/jobs/${jobId}`, token);

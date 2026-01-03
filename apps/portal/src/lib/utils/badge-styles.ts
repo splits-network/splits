@@ -12,6 +12,7 @@ export function getApplicationStageBadge(stage: string): string {
     const colors: Record<string, string> = {
         draft: 'badge-neutral',
         recruiter_proposed: 'badge-primary',
+        recruiter_request: 'badge-info',
         ai_review: 'badge-warning',
         screen: 'badge-info',
         submitted: 'badge-primary',
@@ -29,6 +30,8 @@ export function getApplicationStageBadge(stage: string): string {
 export function getApplicationStageLabel(stage: string): string {
     const labels: Record<string, string> = {
         draft: 'Draft',
+        recruiter_proposed: 'Proposed by Recruiter',
+        recruiter_request: 'Recruiter Request',
         ai_review: 'AI Review',
         screen: 'Screening',
         submitted: 'Submitted',

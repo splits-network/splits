@@ -70,10 +70,32 @@ export class ApplicationsEventConsumer {
 
     async handleApplicationStageChanged(event: DomainEvent): Promise<void> {
         try {
-            const { application_id, old_stage, new_stage, job_id, candidate_id, recruiter_id } = event.payload;
+            const { application_id, old_stage, new_stage, job_id, candidate_id, recruiter_id, fit_score, recommendation } = event.payload;
 
             console.log('[APPLICATIONS-CONSUMER] 🔄 Stage changed:', { application_id, old_stage, new_stage });
             this.logger.info({ application_id, old_stage, new_stage }, 'Processing stage changed notification');
+
+            // Special handling for AI review completion
+            if (old_stage === 'ai_review' && (new_stage === 'screen' || new_stage === 'submitted')) {
+                this.logger.info({ 
+                    application_id, 
+                    fit_score, 
+                    recommendation,
+                    next_stage: new_stage
+                }, 'AI review completed, handling notifications');
+                
+                // Let the AI review completed handler deal with it
+                // This includes the fit score and recommendation
+                await this.handleAIReviewCompleted({
+                    ...event,
+                    payload: {
+                        ...event.payload,
+                        ai_review_completed: true,
+                    }
+                });
+                
+                // Continue with normal stage change notification
+            }
 
             // Fetch application details
             const applicationResponse = await this.services.getAtsService().get<any>(`/applications/${application_id}`);

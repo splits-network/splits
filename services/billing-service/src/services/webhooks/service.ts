@@ -1,14 +1,13 @@
 import Stripe from 'stripe';
 import { Logger } from '@splits-network/shared-logging';
-import { SubscriptionService } from '../subscriptions/service';
 
 /**
  * Webhook Service
  * Handles Stripe webhook events
+ * TODO: Migrate to V2 architecture with proper event publishing
  */
 export class WebhookService {
     constructor(
-        private subscriptionService: SubscriptionService,
         private logger: Logger
     ) {}
 
@@ -18,11 +17,13 @@ export class WebhookService {
         switch (event.type) {
             case 'customer.subscription.created':
             case 'customer.subscription.updated':
-                await this.subscriptionService.handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
+                // TODO: Replace with V2 event publishing when webhooks are migrated
+                this.logger.info({ event_type: event.type }, 'Subscription webhook received - needs V2 migration');
                 break;
 
             case 'customer.subscription.deleted':
-                await this.subscriptionService.handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
+                // TODO: Replace with V2 event publishing when webhooks are migrated
+                this.logger.info({ event_type: event.type }, 'Subscription deletion webhook received - needs V2 migration');
                 break;
 
             default:

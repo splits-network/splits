@@ -32,6 +32,17 @@ export class AIReviewServiceV2 {
      * Enrich minimal application data by fetching full details from ATS service
      */
     async enrichApplicationData(input: Partial<AIReviewInput>): Promise<AIReviewInput> {
+        return this.enrichInputIfNeeded(input);
+    }
+
+    /**
+     * Fetch application data for stage transition logic
+     * Returns: { recruiter_id, candidate_id, job_id, company_id }
+     */
+    /**
+     * Enrich minimal input with full application data if needed
+     */
+    private async enrichInputIfNeeded(input: Partial<AIReviewInput>): Promise<AIReviewInput> {
         // If all required fields provided, return as-is
         if (
             input.job_title &&
@@ -42,9 +53,9 @@ export class AIReviewServiceV2 {
             return input as AIReviewInput;
         }
 
-        // Fetch full application with job requirements
+        // Fetch full application with job requirements, documents, AND pre-screen answers
         const response = await fetch(
-            `${this.atsServiceUrl}/api/v2/applications/${input.application_id}?include=job,candidate,job_requirements`,
+            `${this.atsServiceUrl}/api/v2/applications/${input.application_id}?include=job,candidate,job_requirements,documents,pre_screen_answers`,
             {
                 headers: {
                     'x-internal-service-key': process.env.INTERNAL_SERVICE_KEY || '',
@@ -68,12 +79,69 @@ export class AIReviewServiceV2 {
             application.job_requirements
                 ?.filter((req: any) => req.requirement_type === 'preferred')
                 .map((req: any) => req.description) || [];
+// Extract resume text from ALL documents (combine them)
+        let resumeText = input.resume_text || '';
+        if (!resumeText && application.documents && Array.isArray(application.documents)) {
+            const documentsWithText: string[] = [];
+            const documentsWithoutText: any[] = [];
+            
+            // Process ALL documents, not just one
+            for (const doc of application.documents) {
+                // CRITICAL: Resume text is stored in metadata.extracted_text (JSONB field)
+                if (doc.metadata?.extracted_text) {
+                    documentsWithText.push(doc.metadata.extracted_text);
+                    this.logger.info({ 
+                        application_id: input.application_id, 
+                        document_id: doc.id,
+                        filename: doc.filename,
+                        text_length: doc.metadata.extracted_text.length
+                    }, '✅ Found extracted text in document');
+                } else {
+                    documentsWithoutText.push({
+                        id: doc.id,
+                        filename: doc.filename,
+                        processing_status: doc.processing_status,
+                        has_metadata: !!doc.metadata,
+                        metadata_keys: doc.metadata ? Object.keys(doc.metadata) : []
+                    });
+                }
+            }
+            
+            // Combine all document text
+            if (documentsWithText.length > 0) {
+                resumeText = documentsWithText.join('\n\n=== NEXT DOCUMENT ===\n\n');
+                this.logger.info({ 
+                    application_id: input.application_id, 
+                    documents_processed: documentsWithText.length,
+                    total_text_length: resumeText.length
+                }, '✅ Combined text from multiple documents');
+            }
+            
+            // Log warning for documents without text
+            if (documentsWithoutText.length > 0) {
+                this.logger.error({ 
+                    application_id: input.application_id, 
+                    documents_without_text: documentsWithoutText.length,
+                    total_documents: application.documents.length,
+                    details: documentsWithoutText
+                }, '❌ CRITICAL: Documents found but NO extracted_text in metadata - document text extraction is not running!');
+            }
+            
+            // Log overall status
+            if (!resumeText) {
+                this.logger.error({ 
+                    application_id: input.application_id,
+                    total_documents: application.documents.length
+                }, '❌ CRITICAL: NO resume text available for AI review - all documents have processing_status=pending');
+            }
+        }
 
         return {
             application_id: input.application_id!,
             candidate_id: input.candidate_id || application.candidate_id,
             job_id: input.job_id || application.job_id,
-            resume_text: input.resume_text || '',
+            resume_text: resumeText,
+            documents_count: application.documents?.length || 0,
             job_description: input.job_description || application.job?.recruiter_description || application.job?.description || '',
             job_title: input.job_title || application.job?.title || 'Unknown Position',
             required_skills: input.required_skills || mandatoryRequirements,
@@ -82,6 +150,15 @@ export class AIReviewServiceV2 {
             candidate_location: input.candidate_location || application.candidate?.location,
             job_location: input.job_location || application.job?.location,
             auto_transition: input.auto_transition,
+            job_requirements: application.job_requirements?.map((req: any) => ({
+                requirement_text: req.description || req.requirement_text,
+                is_required: req.requirement_type === 'mandatory' || req.is_required,
+                category: req.category,
+            })),
+            pre_screen_answers: application.pre_screen_answers?.map((ans: any) => ({
+                question_text: ans.question?.question_text || ans.question_text || '',
+                answer_text: typeof ans.answer === 'string' ? ans.answer : JSON.stringify(ans.answer),
+            })),
         };
     }
 
@@ -107,7 +184,7 @@ export class AIReviewServiceV2 {
 
             const processingTimeMs = Date.now() - startTime;
 
-            // Save review to database
+            // Save review to database (creates new record for history tracking)
             const review = await this.repository.create({
                 application_id: input.application_id,
                 fit_score: result.fit_score,
@@ -127,7 +204,8 @@ export class AIReviewServiceV2 {
                 processing_time_ms: processingTimeMs,
             });
 
-            // Publish completed event
+            // Publish ai_review.completed event
+            // ATS service will listen to this and decide whether to auto-transition stage
             if (this.eventPublisher) {
                 await this.eventPublisher.publish('ai_review.completed', {
                     application_id: input.application_id,
@@ -136,9 +214,22 @@ export class AIReviewServiceV2 {
                     ai_review_id: review.id,
                     fit_score: review.fit_score,
                     recommendation: review.recommendation,
+                    confidence_level: review.confidence_level,
+                    auto_transition: input.auto_transition,
                     processing_time_ms: processingTimeMs,
                     timestamp: new Date().toISOString(),
                 });
+
+                this.logger.info(
+                    {
+                        application_id: input.application_id,
+                        ai_review_id: review.id,
+                        fit_score: review.fit_score,
+                        recommendation: review.recommendation,
+                        auto_transition: input.auto_transition,
+                    },
+                    'Published ai_review.completed event'
+                );
             }
 
             this.logger.info(
@@ -230,6 +321,49 @@ export class AIReviewServiceV2 {
     }
 
     private buildPrompt(input: AIReviewInput): string {
+        // Build job requirements section
+        let requirementsSection = '';
+        if (input.job_requirements && input.job_requirements.length > 0) {
+            const required = input.job_requirements.filter(r => r.is_required);
+            const preferred = input.job_requirements.filter(r => !r.is_required);
+            
+            if (required.length > 0) {
+                requirementsSection += '\n**Required Qualifications:**\n';
+                required.forEach((req, i) => {
+                    requirementsSection += `${i + 1}. ${req.requirement_text}${req.category ? ` (${req.category})` : ''}\n`;
+                });
+            }
+            
+            if (preferred.length > 0) {
+                requirementsSection += '\n**Preferred Qualifications:**\n';
+                preferred.forEach((req, i) => {
+                    requirementsSection += `${i + 1}. ${req.requirement_text}${req.category ? ` (${req.category})` : ''}\n`;
+                });
+            }
+        }
+        
+        // Build pre-screen answers section
+        let preScreenSection = '';
+        if (input.pre_screen_answers && input.pre_screen_answers.length > 0) {
+            preScreenSection = '\n**Candidate Pre-Screen Responses:**\n';
+            input.pre_screen_answers.forEach((answer, i) => {
+                preScreenSection += `Q${i + 1}: ${answer.question_text}\nA: ${answer.answer_text}\n\n`;
+            });
+        }
+        
+        // Build resume text section with better context
+        let resumeSection = '';
+        if (input.resume_text) {
+            // Truncate to 4000 chars to stay within token limits
+            resumeSection = `- Resume/Profile: ${input.resume_text.substring(0, 4000)}`;
+        } else if (input.documents_count && input.documents_count > 0) {
+            // Documents exist but text extraction failed/pending
+            resumeSection = `- Resume: ${input.documents_count} document(s) attached but text extraction is pending. Analysis is limited to pre-screen answers and basic profile information.`;
+        } else {
+            // No documents uploaded
+            resumeSection = '- Resume: Not provided';
+        }
+        
         return `Analyze the following candidate-job match and provide a detailed assessment.
 
 **Job Information:**
@@ -238,11 +372,11 @@ export class AIReviewServiceV2 {
 - Required Skills: ${input.required_skills?.length ? input.required_skills.join(', ') : 'None specified'}
 - Preferred Skills: ${input.preferred_skills?.length ? input.preferred_skills.join(', ') : 'None specified'}
 - Required Experience: ${input.required_years ? `${input.required_years} years` : 'Not specified'}
-- Location: ${input.job_location || 'Not specified'}
+- Location: ${input.job_location || 'Not specified'}${requirementsSection}
 
 **Candidate Information:**
-${input.resume_text ? `- Resume/Profile: ${input.resume_text.substring(0, 4000)}` : '- Resume: Not provided'}
-- Location: ${input.candidate_location || 'Not specified'}
+${resumeSection}
+- Location: ${input.candidate_location || 'Not specified'}${preScreenSection}
 
 **Instructions:**
 Analyze this candidate's fit for the role and provide your assessment in the following JSON format:

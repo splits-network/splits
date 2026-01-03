@@ -407,8 +407,6 @@ export async function getMyRecruiters(authToken: string): Promise<MyRecruitersRe
         authToken
     );
 
-    console.log('Raw recruiter relationships response:', response);
-
     const relationships = Array.isArray(response) ? response : response?.data || [];
 
     const mapped: RecruiterRelationship[] = relationships.map((rel: any) => {
@@ -519,4 +517,53 @@ export async function updateMyProfile(authToken: string, updates: Partial<Candid
         method: 'PATCH',
         body: JSON.stringify(updates),
     }, authToken);
+}
+
+// AI Review API
+export interface AIReview {
+    id: string;
+    application_id: string;
+    fit_score: number;
+    recommendation: 'strong_fit' | 'good_fit' | 'fair_fit' | 'poor_fit';
+    overall_summary: string;
+    confidence_level: number;
+    strengths: string[];
+    concerns: string[];
+    matched_skills: string[];
+    missing_skills: string[];
+    skills_match_percentage: number;
+    required_years?: number;
+    candidate_years?: number;
+    meets_experience_requirement?: boolean;
+    location_compatibility: 'perfect' | 'good' | 'challenging' | 'mismatch';
+    model_version: string;
+    processing_time_ms: number;
+    analyzed_at: string;
+    created_at: string;
+}
+
+export async function getAIReview(applicationId: string, authToken: string): Promise<AIReview | null> {
+    try {
+        return await fetchApi<AIReview>(`/api/v2/ai-reviews?application_id=${encodeURIComponent(applicationId)}`, {
+            method: 'GET',
+        }, authToken);
+    } catch (error) {
+        if (error instanceof ApiError && error.status === 404) {
+            // No AI review found - this is expected for new applications
+            return null;
+        }
+        throw error;
+    }
+}
+
+export async function requestNewAIReview(applicationId: string, authToken: string): Promise<AIReview | null> {
+    // Trigger new AI review by setting stage to ai_review (will republish event even if already ai_review)
+    await fetchApi(`/api/v2/applications/${applicationId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ stage: 'ai_review' }),
+    }, authToken);
+    
+    // Wait a moment for the event to process, then fetch the new review
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    return getAIReview(applicationId, authToken);
 }

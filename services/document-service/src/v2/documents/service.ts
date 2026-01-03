@@ -135,11 +135,15 @@ export class DocumentServiceV2 {
         });
 
         if (this.eventPublisher) {
-            await this.eventPublisher.publish('documents.created', {
+            await this.eventPublisher.publish('document.uploaded', {
                 document_id: document.id,
                 entity_type: document.entity_type,
                 entity_id: document.entity_id,
-                document_type: document.document_type,
+                file_path: document.file_path,
+                mime_type: document.mime_type,
+                file_size: document.file_size,
+                uploaded_at: document.created_at,
+                uploaded_by: clerkUserId,
             });
         }
 

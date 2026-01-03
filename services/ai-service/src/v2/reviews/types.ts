@@ -17,6 +17,7 @@ export interface AIReviewInput {
     candidate_id: string;
     job_id: string;
     resume_text?: string;
+    documents_count?: number; // Number of documents attached (for prompt context)
     job_description: string;
     job_title: string;
     required_skills: string[];
@@ -25,6 +26,15 @@ export interface AIReviewInput {
     candidate_location?: string;
     job_location?: string;
     auto_transition?: boolean;
+    job_requirements?: Array<{
+        requirement_text: string;
+        is_required: boolean;
+        category?: string;
+    }>;
+    pre_screen_answers?: Array<{
+        question_text: string;
+        answer_text: string;
+    }>;
 }
 
 export interface AIReviewResult {

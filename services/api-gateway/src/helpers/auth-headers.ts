@@ -41,6 +41,14 @@ declare module 'fastify' {
  * @returns Object with auth headers to pass to backend services (empty if no auth)
  */
 export function buildAuthHeaders(request: FastifyRequest): Record<string, string> {
+  // Check for internal service authentication first
+  const internalServiceKey = request.headers['x-internal-service-key'] as string;
+  if (internalServiceKey) {
+    return {
+      'x-internal-service-key': internalServiceKey,
+    };
+  }
+
   const auth = request.auth;
 
   if (!auth) {

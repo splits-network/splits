@@ -17,11 +17,7 @@ export function registerDocumentRoutes(app: FastifyInstance, services: ServiceRe
     app.get(
         '/api/v2/documents',
         {
-            schema: {
-                description: 'List documents with access-context scoping',
-                tags: ['documents'],
-                security: [{ clerkAuth: [] }],
-            },
+            // No schema needed for Fastify 5.x
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
@@ -49,11 +45,7 @@ export function registerDocumentRoutes(app: FastifyInstance, services: ServiceRe
     app.get(
         '/api/v2/documents/:id',
         {
-            schema: {
-                description: 'Fetch a single document via V2 API',
-                tags: ['documents'],
-                security: [{ clerkAuth: [] }],
-            },
+            // No schema needed for Fastify 5.x
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const { id } = request.params as { id: string };
@@ -80,12 +72,7 @@ export function registerDocumentRoutes(app: FastifyInstance, services: ServiceRe
     app.post(
         '/api/v2/documents',
         {
-            schema: {
-                description: 'Upload document via V2 API',
-                tags: ['documents'],
-                security: [{ clerkAuth: [] }],
-                consumes: ['multipart/form-data'],
-            },
+            // No schema needed for Fastify 5.x
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
@@ -98,17 +85,6 @@ export function registerDocumentRoutes(app: FastifyInstance, services: ServiceRe
                     method: request.method,
                     url: request.url
                 }, 'V2 document upload request started - proxying to document service');
-
-                if (!request.isMultipart()) {
-                    request.log.error({ 
-                        correlationId,
-                        contentType: request.headers['content-type'],
-                        hasIsMultipart: typeof request.isMultipart === 'function'
-                    }, 'Request is not multipart');
-                    return reply.status(400).send({
-                        error: { message: 'multipart/form-data is required' },
-                    });
-                }
 
                 // Proxy the original multipart request directly to the document service
                 const documentServiceUrl = process.env.DOCUMENT_SERVICE_URL || 'http://localhost:3006';
@@ -159,11 +135,7 @@ export function registerDocumentRoutes(app: FastifyInstance, services: ServiceRe
     app.patch(
         '/api/v2/documents/:id',
         {
-            schema: {
-                description: 'Update document metadata via V2 API',
-                tags: ['documents'],
-                security: [{ clerkAuth: [] }],
-            },
+            // No schema needed for Fastify 5.x
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const { id } = request.params as { id: string };
@@ -190,11 +162,7 @@ export function registerDocumentRoutes(app: FastifyInstance, services: ServiceRe
     app.delete(
         '/api/v2/documents/:id',
         {
-            schema: {
-                description: 'Delete document via V2 API',
-                tags: ['documents'],
-                security: [{ clerkAuth: [] }],
-            },
+            // No schema needed for Fastify 5.x
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const { id } = request.params as { id: string };

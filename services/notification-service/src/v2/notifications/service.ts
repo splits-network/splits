@@ -1,4 +1,4 @@
-import { NotificationCreateInput, NotificationFilters, NotificationUpdate, Notification } from './types';
+import { NotificationFilters, NotificationUpdate, Notification } from './types';
 import { buildPaginationResponse } from '../shared/helpers';
 import { NotificationRepositoryV2 } from './repository';
 import { EventPublisher } from '../shared/events';
@@ -63,22 +63,6 @@ export class NotificationServiceV2 {
             throw new Error('Notification not found');
         }
         this.ensureRecipientAccess(notification, access);
-        return notification;
-    }
-
-    async createNotification(clerkUserId: string, input: NotificationCreateInput) {
-        await this.requirePlatformAdmin(clerkUserId);
-        const notification = await this.repository.createNotification(input);
-
-        if (this.eventPublisher) {
-            await this.eventPublisher.publish('notifications.created', {
-                notification_id: notification.id,
-                event_type: notification.event_type,
-                channel: notification.channel,
-                recipient: notification.recipient_email,
-            });
-        }
-
         return notification;
     }
 

@@ -71,7 +71,7 @@ export class JobRepository {
                         .from('applications')
                         .select('job_id, stage, candidate_id')
                         .eq('recruiter_id', accessContext.recruiterId)
-                        .in('stage', ['recruiter_proposed', 'draft', 'ai_review', 'screen', 'submitted', 'interview', 'offer']);
+                        .in('stage', ['recruiter_proposed', 'draft', 'recruiter_request', 'ai_review', 'screen', 'submitted', 'interview', 'offer']);
                                         
                     // Get job IDs from placements
                     const { data: placements, error: placementsError } = await this.supabase

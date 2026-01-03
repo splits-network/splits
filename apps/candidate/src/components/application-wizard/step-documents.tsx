@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
-import { getMyDocuments, getMyCandidateProfile, getCurrentUser } from '@/lib/api';
+import { getMyDocuments, getMyCandidateProfile, getCurrentUser, deleteDocument } from '@/lib/api';
 import UploadDocumentModal from '@/components/upload-document-modal';
+import { useToast } from '@/lib/toast-context';
 
 interface StepDocumentsProps {
     documents: any[];
@@ -24,10 +25,13 @@ export default function StepDocuments({
     onDocumentsUpdated,
 }: StepDocumentsProps) {
     const { getToken } = useAuth();
+    const { success, error: showError } = useToast();
     const [error, setError] = useState<string | null>(null);
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [candidateId, setCandidateId] = useState<string | null>(null);
     const [localDocuments, setLocalDocuments] = useState(documents);
+    const [deletingDocId, setDeletingDocId] = useState<string | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState<{ id: string; name: string } | null>(null);
 
     const handleToggleDocument = (docId: string) => {
         const newSelected = selected.includes(docId)
@@ -107,6 +111,45 @@ export default function StepDocuments({
         } catch (err: any) {
             console.error('Failed to reload documents:', err);
             setError(err.message || 'Failed to reload documents');
+        }
+    };
+
+    const handleDeleteDocument = async () => {
+        if (!confirmDelete) return;
+
+        const { id: docId, name: fileName } = confirmDelete;
+        setDeletingDocId(docId);
+        setError(null);
+        setConfirmDelete(null);
+
+        try {
+            const token = await getToken();
+            if (!token) {
+                throw new Error('Authentication required');
+            }
+
+            await deleteDocument(docId, token);
+
+            // Remove from local state
+            const updatedDocs = localDocuments.filter(d => d.id !== docId);
+            setLocalDocuments(updatedDocs);
+            if (onDocumentsUpdated) {
+                onDocumentsUpdated(updatedDocs);
+            }
+
+            // Remove from selected if it was selected
+            if (selected.includes(docId)) {
+                const newSelected = selected.filter(id => id !== docId);
+                const newPrimary = primaryResumeId === docId ? null : primaryResumeId;
+                onChange({ selected: newSelected, primary_resume_id: newPrimary });
+            }
+
+            success(`"${fileName}" has been deleted`);
+        } catch (err: any) {
+            console.error('Failed to delete document:', err);
+            showError(err.message || 'Failed to delete document');
+        } finally {
+            setDeletingDocId(null);
         }
     };
 
@@ -234,6 +277,7 @@ export default function StepDocuments({
                                                 className="checkbox checkbox-primary"
                                                 checked={selected.includes(doc.id)}
                                                 onChange={() => handleToggleDocument(doc.id)}
+                                                disabled={deletingDocId === doc.id}
                                             />
                                             <div className="flex-1">
                                                 <div className="font-medium">{doc.file_name}</div>
@@ -242,22 +286,38 @@ export default function StepDocuments({
                                                     {doc.created_at && ` • Uploaded ${new Date(doc.created_at).toLocaleDateString()}`}
                                                 </div>
                                             </div>
-                                            {selected.includes(doc.id) && (
+                                            <div className="flex gap-2">
+                                                {selected.includes(doc.id) && (
+                                                    <button
+                                                        type="button"
+                                                        className={`btn btn-sm ${primaryResumeId === doc.id ? 'btn-primary' : 'btn-ghost'}`}
+                                                        onClick={() => handleSetPrimary(doc.id)}
+                                                        disabled={deletingDocId === doc.id}
+                                                    >
+                                                        {primaryResumeId === doc.id ? (
+                                                            <>
+                                                                <i className="fa-solid fa-star"></i>
+                                                                Primary
+                                                            </>
+                                                        ) : (
+                                                            'Set as Primary'
+                                                        )}
+                                                    </button>
+                                                )}
                                                 <button
                                                     type="button"
-                                                    className={`btn btn-sm ${primaryResumeId === doc.id ? 'btn-primary' : 'btn-ghost'}`}
-                                                    onClick={() => handleSetPrimary(doc.id)}
+                                                    className="btn btn-sm btn-ghost btn-square text-error"
+                                                    onClick={() => setConfirmDelete({ id: doc.id, name: doc.file_name })}
+                                                    disabled={deletingDocId === doc.id}
+                                                    title="Delete document"
                                                 >
-                                                    {primaryResumeId === doc.id ? (
-                                                        <>
-                                                            <i className="fa-solid fa-star"></i>
-                                                            Primary
-                                                        </>
+                                                    {deletingDocId === doc.id ? (
+                                                        <span className="loading loading-spinner loading-xs"></span>
                                                     ) : (
-                                                        'Set as Primary'
+                                                        <i className="fa-solid fa-trash"></i>
                                                     )}
                                                 </button>
-                                            )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -280,6 +340,7 @@ export default function StepDocuments({
                                                 className="checkbox checkbox-primary"
                                                 checked={selected.includes(doc.id)}
                                                 onChange={() => handleToggleDocument(doc.id)}
+                                                disabled={deletingDocId === doc.id}
                                             />
                                             <div className="flex-1">
                                                 <div className="font-medium">{doc.file_name}</div>
@@ -288,6 +349,19 @@ export default function StepDocuments({
                                                     {doc.file_size && ` • ${(doc.file_size / 1024).toFixed(1)} KB`}
                                                 </div>
                                             </div>
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-ghost btn-square text-error"
+                                                onClick={() => setConfirmDelete({ id: doc.id, name: doc.file_name })}
+                                                disabled={deletingDocId === doc.id}
+                                                title="Delete document"
+                                            >
+                                                {deletingDocId === doc.id ? (
+                                                    <span className="loading loading-spinner loading-xs"></span>
+                                                ) : (
+                                                    <i className="fa-solid fa-trash"></i>
+                                                )}
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -317,6 +391,49 @@ export default function StepDocuments({
                     onClose={() => setShowUploadModal(false)}
                     onSuccess={handleUploadSuccess}
                 />
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {confirmDelete && (
+                <dialog open className="modal modal-open">
+                    <div className="modal-box">
+                        <h3 className="font-bold text-lg">Delete Document</h3>
+                        <p className="py-4">
+                            Are you sure you want to delete <strong>"{confirmDelete.name}"</strong>? This action cannot be undone.
+                        </p>
+                        <div className="modal-action">
+                            <button
+                                type="button"
+                                className="btn"
+                                onClick={() => setConfirmDelete(null)}
+                                disabled={deletingDocId === confirmDelete.id}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-error"
+                                onClick={handleDeleteDocument}
+                                disabled={deletingDocId === confirmDelete.id}
+                            >
+                                {deletingDocId === confirmDelete.id ? (
+                                    <>
+                                        <span className="loading loading-spinner loading-sm"></span>
+                                        Deleting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <i className="fa-solid fa-trash"></i>
+                                        Delete
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="modal-backdrop" onClick={() => setConfirmDelete(null)}>
+                        <button type="button">close</button>
+                    </div>
+                </dialog>
             )}
         </>
     );

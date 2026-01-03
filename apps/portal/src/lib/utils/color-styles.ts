@@ -24,6 +24,7 @@ export function getApplicationStageBorderColor(stage: string): string {
     const borders: Record<string, string> = {
         draft: 'border-neutral',
         recruiter_proposed: 'border-primary',
+        recruiter_request: 'border-info',
         ai_review: 'border-warning',
         screen: 'border-primary',
         submitted: 'border-info',
@@ -39,6 +40,7 @@ export function getApplicationStageBgColor(stage: string): string {
     const borders: Record<string, string> = {
         draft: 'border-neutral',
         recruiter_proposed: 'border-primary',
+        recruiter_request: 'border-info',
         ai_review: 'border-warning',
         screen: 'border-primary',
         submitted: 'border-info',
