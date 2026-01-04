@@ -38,7 +38,7 @@ export default function StatusPage() {
         if (isLoading) {
             return {
                 title: 'Checking every service…',
-                color: 'from-base-200 via-base-300 to-base-200 text-base-content',
+                color: 'bg-base-300 text-base-content',
                 message: 'Hang tight while we run the latest health checks.',
                 icon: 'fa-solid fa-stethoscope',
             };
@@ -47,7 +47,7 @@ export default function StatusPage() {
         if (allHealthy) {
             return {
                 title: 'All Systems Operational',
-                color: 'from-success via-secondary to-success text-success-content',
+                color: 'bg-success text-success-content',
                 message: 'Realtime updates confirm recruiters, automation, and AI reviews are all online.',
                 icon: 'fa-solid fa-circle-check',
             };
@@ -56,7 +56,7 @@ export default function StatusPage() {
         if (someUnhealthy) {
             return {
                 title: 'Degraded Performance',
-                color: 'from-warning via-error to-warning text-error-content',
+                color: 'bg-error text-error-content',
                 message: 'We detected a hiccup and our on-call team is investigating.',
                 icon: 'fa-solid fa-triangle-exclamation',
             };
@@ -64,7 +64,7 @@ export default function StatusPage() {
 
         return {
             title: 'Monitoring in Progress',
-            color: 'from-warning to-secondary text-warning-content',
+            color: 'bg-warning text-warning-content',
             message: 'One or more services are warming up. We will update this card in a moment.',
             icon: 'fa-solid fa-wave-square',
         };
@@ -142,7 +142,7 @@ export default function StatusPage() {
 
                 <div className="grid gap-8 lg:grid-cols-3">
                     <div className="space-y-8 lg:col-span-2">
-                        <div className={`card bg-gradient-to-r ${overallState.color} shadow-xl text-base-100`}>
+                        <div className={`card ${overallState.color} shadow-xl`}>
                             <div className="card-body">
                                 <div className="flex flex-col gap-6 md:flex-row md:justify-between">
                                     <div>
@@ -307,20 +307,20 @@ export default function StatusPage() {
                                 )}
 
                                 <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
-                                    <div className="form-control">
-                                        <label className="label text-sm font-semibold">Full name</label>
+                                    <div className="fieldset">
+                                        <label className="label">Full name</label>
                                         <input
-                                            className="input input-bordered input-sm w-full"
+                                            className="input w-full"
                                             required
                                             value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             placeholder="Taylor Candidate"
                                         />
                                     </div>
-                                    <div className="form-control">
-                                        <label className="label text-sm font-semibold">Email</label>
+                                    <div className="fieldset">
+                                        <label className="label">Email</label>
                                         <input
-                                            className="input input-bordered input-sm w-full"
+                                            className="input w-full"
                                             type="email"
                                             required
                                             value={formData.email}
@@ -329,10 +329,10 @@ export default function StatusPage() {
                                         />
                                     </div>
                                     <div className="grid gap-4 md:grid-cols-2">
-                                        <div className="form-control">
-                                            <label className="label text-sm font-semibold">Topic</label>
+                                        <div className="fieldset">
+                                            <label className="label">Topic</label>
                                             <select
-                                                className="select select-bordered select-sm w-full"
+                                                className="select w-full"
                                                 value={formData.topic}
                                                 onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
                                             >
@@ -343,10 +343,10 @@ export default function StatusPage() {
                                                 <option value="other">Other</option>
                                             </select>
                                         </div>
-                                        <div className="form-control">
-                                            <label className="label text-sm font-semibold">Urgency</label>
+                                        <div className="fieldset">
+                                            <label className="label">Urgency</label>
                                             <select
-                                                className="select select-bordered select-sm w-full"
+                                                className="select w-full"
                                                 value={formData.urgency}
                                                 onChange={(e) => setFormData({ ...formData, urgency: e.target.value })}
                                             >
@@ -356,10 +356,10 @@ export default function StatusPage() {
                                             </select>
                                         </div>
                                     </div>
-                                    <div className="form-control">
-                                        <label className="label text-sm font-semibold">Message</label>
+                                    <div className="fieldset">
+                                        <label className="label">Message</label>
                                         <textarea
-                                            className="textarea textarea-bordered h-24 text-sm w-full"
+                                            className="textarea h-24 w-full"
                                             required
                                             value={formData.message}
                                             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
