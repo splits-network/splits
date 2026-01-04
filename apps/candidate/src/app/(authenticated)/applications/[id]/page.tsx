@@ -99,7 +99,7 @@ export default async function ApplicationDetailPage({
         application = responseData || response;
         job = application?.job || {};
         recruiter = application?.recruiter || null;
-        
+
         console.log('Extracted recruiter:', recruiter);
     } catch (err) {
         console.error('Error fetching application:', err);
