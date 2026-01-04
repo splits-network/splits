@@ -1,156 +1,400 @@
 'use client';
 
 import { useServiceHealth } from '@/hooks/useServiceHealth';
-import { useEffect } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+
+const corporateFormDefaults = {
+    name: '',
+    email: '',
+    topic: 'operations',
+    urgency: 'normal',
+    message: '',
+};
 
 export default function StatusPage() {
     const {
         serviceStatuses,
         lastChecked,
+        healthyCount,
+        totalCount,
         allHealthy,
-        isLoading
+        someUnhealthy,
+        isLoading,
+        unhealthyServices,
+        refresh,
     } = useServiceHealth({ autoRefresh: true });
 
-    // Set page title
+    const [formData, setFormData] = useState(corporateFormDefaults);
+    const [formFeedback, setFormFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    const [submitting, setSubmitting] = useState(false);
+
     useEffect(() => {
         document.title = allHealthy
             ? 'All Systems Operational - Employment Networks'
             : 'Service Status - Employment Networks';
     }, [allHealthy]);
 
-    const getStatusBadge = (status: string) => {
+    const overallState = useMemo(() => {
+        if (isLoading) {
+            return {
+                title: 'Validating services…',
+                color: 'from-base-200 via-base-300 to-base-200 text-base-content',
+                message: 'We run health checks on every corporate surface before publishing results.',
+                icon: 'fa-solid fa-stethoscope',
+            };
+        }
+
+        if (allHealthy) {
+            return {
+                title: 'All Systems Operational',
+                color: 'from-primary via-secondary to-primary text-primary-content',
+                message: 'Partner dashboards, lead forms, and analytics are ready for your next campaign.',
+                icon: 'fa-solid fa-circle-check',
+            };
+        }
+
+        if (someUnhealthy) {
+            return {
+                title: 'Investigating anomalies',
+                color: 'from-warning via-error to-warning text-error-content',
+                message: 'Our reliability team is mitigating an issue. Track the impacted services below.',
+                icon: 'fa-solid fa-triangle-exclamation',
+            };
+        }
+
+        return {
+            title: 'Degraded Performance',
+            color: 'from-warning to-warning text-warning-content',
+            message: 'Some upstream dependencies are warming up; we will post updates shortly.',
+            icon: 'fa-solid fa-wave-square',
+        };
+    }, [allHealthy, isLoading, someUnhealthy]);
+
+    const statusBadge = (status: string) => {
         switch (status) {
             case 'healthy':
                 return 'badge badge-success';
-            case 'degraded':
-                return 'badge badge-warning';
-            case 'down':
+            case 'unhealthy':
                 return 'badge badge-error';
             default:
-                return 'badge';
+                return 'badge badge-warning';
         }
     };
 
-    const getOverallStatus = () => {
-        if (isLoading) return { text: 'Checking...', color: 'bg-base-300' };
-        if (allHealthy) return { text: 'All Systems Operational', color: 'bg-success' };
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setSubmitting(true);
+        setFormFeedback(null);
 
-        const hasDown = serviceStatuses.some(s => s?.status === 'unhealthy');
-        if (hasDown) return { text: 'Partial System Outage', color: 'bg-error' };
+        try {
+            const response = await fetch('/api/status-contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData),
+            });
 
-        return { text: 'Degraded Performance', color: 'bg-warning' };
+            const responseBody = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                throw new Error(responseBody.error || 'Unable to send feedback.');
+            }
+
+            setFormFeedback({
+                type: 'success',
+                message: 'Message received — watch your inbox for a follow-up from our success team.',
+            });
+            setFormData(corporateFormDefaults);
+        } catch (error) {
+            setFormFeedback({
+                type: 'error',
+                message:
+                    error instanceof Error
+                        ? error.message
+                        : 'Unable to send feedback. Email help@employmentnetworks.com and we will jump in.',
+            });
+        } finally {
+            setSubmitting(false);
+        }
     };
 
-    const overallStatus = getOverallStatus();
-
     return (
-        <div className="min-h-screen bg-base-200 py-12">
+        <div className="min-h-screen bg-gradient-to-b from-base-200 via-base-100 to-base-200 py-12">
             <div className="container mx-auto px-4">
-                {/* Header with Navigation */}
-                <div className="mb-8">
-                    <Link href="/" className="btn btn-ghost mb-4">
-                        <i className="fa-solid fa-arrow-left"></i>
-                        Back to Home
-                    </Link>
-                    <h1 className="text-4xl font-bold mb-2">System Status</h1>
-                    <p className="text-base-content/70">
-                        Current operational status of Employment Networks services
-                    </p>
-                </div>
-
-                {/* Overall Status Card */}
-                <div className={`card ${overallStatus.color} text-white mb-8`}>
-                    <div className="card-body">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h2 className="text-2xl font-bold mb-2">{overallStatus.text}</h2>
-                                <p className="opacity-90">
-                                    {isLoading ? (
-                                        'Checking service health...'
-                                    ) : allHealthy ? (
-                                        'All services are running smoothly'
-                                    ) : (
-                                        'Some services are experiencing issues'
-                                    )}
-                                </p>
-                            </div>
-                            <div>
-                                {isLoading ? (
-                                    <span className="loading loading-spinner loading-lg"></span>
-                                ) : allHealthy ? (
-                                    <i className="fa-solid fa-circle-check text-5xl"></i>
-                                ) : (
-                                    <i className="fa-solid fa-circle-exclamation text-5xl"></i>
-                                )}
-                            </div>
-                        </div>
-                        {lastChecked && (
-                            <p className="text-sm opacity-75 mt-4">
-                                Last checked: {new Date(lastChecked).toLocaleString()}
-                            </p>
-                        )}
+                <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <p className="text-sm uppercase tracking-wide text-secondary font-semibold">
+                            Employment Networks Status
+                        </p>
+                        <h1 className="text-4xl font-bold mt-2">Realtime service visibility</h1>
+                        <p className="text-base-content/70 mt-2 max-w-2xl">
+                            Keep marketing sites, partner funnels, and recruiter handoffs humming. Monitor gateway,
+                            automation, billing, document, and AI services in one place.
+                        </p>
+                        <Link href="/" className="btn btn-link btn-xs px-0 mt-2 text-primary">
+                            ← Back to employmentnetworks.com
+                        </Link>
+                    </div>
+                    <div className="text-sm text-base-content/70 flex flex-col gap-2 items-start">
+                        <button className="btn btn-outline btn-sm" onClick={refresh}>
+                            <i className="fa-solid fa-arrow-rotate-right mr-2" />
+                            Refresh now
+                        </button>
+                        <span className="text-xs">
+                            Last checked {lastChecked.toLocaleTimeString()} · Auto-refresh every 30s
+                        </span>
                     </div>
                 </div>
 
-                {/* Service Status List */}
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body">
-                        <h2 className="card-title mb-4">
-                            <i className="fa-solid fa-server"></i>
-                            Service Status
-                        </h2>
-
-                        <div className="space-y-3">
-                            {serviceStatuses.map((service) => (
-                                <div
-                                    key={service.name}
-                                    className="flex items-center justify-between p-4 bg-base-200 rounded-lg hover:bg-base-300 transition-colors"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <i className="fa-solid fa-server text-xl text-base-content/60"></i>
-                                        <div>
-                                            <div className="font-medium">
-                                                {service.name}
-                                            </div>
-                                            {service.error && (
-                                                <div className="text-sm text-error mt-1">
-                                                    {service.error}
-                                                </div>
-                                            )}
-                                            {service.responseTime && (
-                                                <div className="text-xs text-base-content/60 mt-1">
-                                                    Response time: {service.responseTime}ms
-                                                </div>
-                                            )}
+                <div className="grid gap-8 lg:grid-cols-3">
+                    <div className="space-y-8 lg:col-span-2">
+                        <div className={`card bg-gradient-to-r ${overallState.color} shadow-xl`}>
+                            <div className="card-body text-base-100">
+                                <div className="flex flex-col gap-6 md:flex-row md:justify-between">
+                                    <div>
+                                        <p className="text-sm uppercase">Corporate health summary</p>
+                                        <h2 className="text-3xl font-bold flex items-center gap-3 mt-2">
+                                            <i className={`${overallState.icon} text-2xl`} />
+                                            {overallState.title}
+                                        </h2>
+                                        <p className="mt-2 opacity-90">{overallState.message}</p>
+                                    </div>
+                                    <div className="grid gap-3 text-sm">
+                                        <div className="bg-base-100/20 rounded-xl p-3">
+                                            <p className="font-semibold text-lg">{healthyCount}/{totalCount}</p>
+                                            <p className="opacity-80">Services online</p>
+                                        </div>
+                                        <div className="bg-base-100/20 rounded-xl p-3">
+                                            <p className="font-semibold text-lg">
+                                                {someUnhealthy ? 'Action required' : 'Everything green'}
+                                            </p>
+                                            <p className="opacity-80">Gateway, document, AI, automation coverage</p>
                                         </div>
                                     </div>
-                                    <div>
-                                        {service.status === 'checking' ? (
-                                            <span className="loading loading-spinner loading-sm"></span>
-                                        ) : (
-                                            <span className={getStatusBadge(service.status)}>
-                                                {service.status}
-                                            </span>
-                                        )}
-                                    </div>
                                 </div>
-                            ))}
+                            </div>
+                        </div>
+
+                        <div className="card bg-base-100 shadow">
+                            <div className="card-body">
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                    <h2 className="card-title">
+                                        <i className="fa-solid fa-server" />
+                                        Service-by-service health
+                                    </h2>
+                                    <span className="text-xs text-base-content/60">Monitoring 24/7/365</span>
+                                </div>
+                                <div className="space-y-3 mt-4">
+                                    {serviceStatuses.map((service) => (
+                                        <div
+                                            key={service.name}
+                                            className="flex flex-col gap-3 rounded-xl border border-base-200 p-4 md:flex-row md:items-center md:justify-between"
+                                        >
+                                            <div>
+                                                <p className="font-semibold">{service.name}</p>
+                                                <p className="text-xs text-base-content/60">
+                                                    {service.responseTime
+                                                        ? `Response ${service.responseTime}ms`
+                                                        : 'Awaiting heartbeat'}
+                                                </p>
+                                                {service.error && (
+                                                    <p className="mt-1 text-xs text-error">
+                                                        <i className="fa-solid fa-circle-exclamation mr-1" />
+                                                        {service.error}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                {service.timestamp && (
+                                                    <span className="text-xs text-base-content/50">
+                                                        {new Date(service.timestamp).toLocaleTimeString()}
+                                                    </span>
+                                                )}
+                                                <span className={statusBadge(service.status)}>
+                                                    {service.status === 'healthy'
+                                                        ? 'Operational'
+                                                        : service.status === 'unhealthy'
+                                                            ? 'Investigating'
+                                                            : 'Checking'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="card bg-base-100 shadow">
+                            <div className="card-body">
+                                <h2 className="card-title">
+                                    <i className="fa-solid fa-bullhorn" />
+                                    Live incident feed
+                                </h2>
+                                {unhealthyServices.length > 0 ? (
+                                    <div className="mt-4 space-y-4">
+                                        {unhealthyServices.map((service) => (
+                                            <div key={service.name} className="alert alert-error">
+                                                <i className="fa-solid fa-triangle-exclamation" />
+                                                <div>
+                                                    <p className="font-semibold">{service.name}</p>
+                                                    <p className="text-sm">
+                                                        {service.error ||
+                                                            'We are mitigating the issue and will update this feed shortly.'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-base-content/70 mt-4">
+                                        No active incidents. If you are seeing unexpected behavior, drop us a note via
+                                        the contact form and we will open a ticket immediately.
+                                    </p>
+                                )}
+                                <div className="divider" />
+                                <p className="text-xs text-base-content/60">
+                                    Maintenance is scheduled during low-traffic windows and announced here plus via
+                                    email.
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Footer Info */}
-                <div className="mt-8 text-center text-sm text-base-content/60">
-                    <p className="mb-2">
-                        This page automatically refreshes every 30 seconds
-                    </p>
-                    <p>
-                        For support inquiries, please contact{' '}
-                        <a href="mailto:support@employmentnetworks.com" className="link link-primary">
-                            support@employmentnetworks.com
-                        </a>
-                    </p>
+                    <aside className="space-y-6">
+                        <div className="card bg-base-100 shadow-lg">
+                            <div className="card-body">
+                                <h2 className="card-title text-2xl">
+                                    <i className="fa-solid fa-headset text-primary" />
+                                    Contact success team
+                                </h2>
+                                <p className="text-sm text-base-content/70">
+                                    Let us know if a status change is impacting a launch, event, or executive review.
+                                </p>
+
+                                {formFeedback && (
+                                    <div
+                                        className={`alert mt-4 ${formFeedback.type === 'success' ? 'alert-success' : 'alert-error'
+                                            }`}
+                                    >
+                                        <span>{formFeedback.message}</span>
+                                    </div>
+                                )}
+
+                                <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
+                                    <div className="form-control">
+                                        <label className="label text-sm font-semibold">Full name</label>
+                                        <input
+                                            className="input input-bordered input-sm w-full"
+                                            required
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                            placeholder="Jordan Recruiter"
+                                        />
+                                    </div>
+                                    <div className="form-control">
+                                        <label className="label text-sm font-semibold">Email</label>
+                                        <input
+                                            className="input input-bordered input-sm w-full"
+                                            type="email"
+                                            required
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            placeholder="you@company.com"
+                                        />
+                                    </div>
+                                    <div className="grid gap-4 md:grid-cols-2">
+                                        <div className="form-control">
+                                            <label className="label text-sm font-semibold">Topic</label>
+                                            <select
+                                                className="select select-bordered select-sm w-full"
+                                                value={formData.topic}
+                                                onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
+                                            >
+                                                <option value="operations">Operations</option>
+                                                <option value="marketing">Marketing site</option>
+                                                <option value="automation">Automation</option>
+                                                <option value="ai">AI review</option>
+                                                <option value="documents">Document workflows</option>
+                                            </select>
+                                        </div>
+                                        <div className="form-control">
+                                            <label className="label text-sm font-semibold">Urgency</label>
+                                            <select
+                                                className="select select-bordered select-sm w-full"
+                                                value={formData.urgency}
+                                                onChange={(e) => setFormData({ ...formData, urgency: e.target.value })}
+                                            >
+                                                <option value="normal">Normal</option>
+                                                <option value="high">High - launch blocking</option>
+                                                <option value="low">Low - FYI</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div className="form-control">
+                                        <label className="label text-sm font-semibold">Message</label>
+                                        <textarea
+                                            className="textarea textarea-bordered h-24 text-sm w-full"
+                                            required
+                                            value={formData.message}
+                                            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                            placeholder="Share impact, timeline expectations, and stakeholders."
+                                        />
+                                    </div>
+                                    <button className="btn btn-primary w-full" disabled={submitting} type="submit">
+                                        {submitting ? (
+                                            <>
+                                                <span className="loading loading-spinner loading-sm mr-2" />
+                                                Sending…
+                                            </>
+                                        ) : (
+                                            <>
+                                                <i className="fa-solid fa-paper-plane mr-2" />
+                                                Send message
+                                            </>
+                                        )}
+                                    </button>
+                                </form>
+
+                                <p className="text-xs text-base-content/60 mt-4">
+                                    Prefer email?{' '}
+                                    <a className="link link-primary" href="mailto:help@employmentnetworks.com">
+                                        help@employmentnetworks.com
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="card bg-base-100 shadow">
+                            <div className="card-body">
+                                <h3 className="card-title text-lg">
+                                    <i className="fa-solid fa-clock text-secondary" />
+                                    Enterprise support hours
+                                </h3>
+                                <ul className="text-sm text-base-content/70 space-y-1 mt-2">
+                                    <li>Weekdays: 8am – 8pm ET</li>
+                                    <li>Weekends: On-call response for severity 1 incidents</li>
+                                </ul>
+                                <p className="text-xs text-base-content/60 mt-3">
+                                    Severity definitions follow your MSA. Mention the severity tier in your note for the
+                                    fastest escalation.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="card bg-base-100 shadow">
+                            <div className="card-body">
+                                <h3 className="card-title text-lg">
+                                    <i className="fa-solid fa-circle-info text-accent" />
+                                    Quick references
+                                </h3>
+                                <ul className="text-sm text-base-content/70 space-y-2">
+                                    <li>• Partner portal: portal.splits.network</li>
+                                    <li>• Incident playbook (PDF) — request via support</li>
+                                    <li>• Subscribe to RSS: /status.rss</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </aside>
                 </div>
             </div>
         </div>

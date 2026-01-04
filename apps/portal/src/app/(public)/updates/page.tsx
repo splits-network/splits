@@ -328,7 +328,7 @@ export default function UpdatesPage() {
                                         <i className="fa-solid fa-comment"></i>
                                         Submit Feedback
                                     </a>
-                                    <a href="mailto:support@splits.network" className="btn btn-lg btn-outline btn-neutral">
+                                    <a href="mailto:help@splits.network" className="btn btn-lg btn-outline btn-neutral">
                                         <i className="fa-solid fa-heart"></i>
                                         Request a Feature
                                     </a>

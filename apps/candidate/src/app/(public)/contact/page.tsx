@@ -173,7 +173,7 @@ export default function ContactPage() {
                                     <strong>General:</strong> <a href="mailto:hello@applicant.network" className="link link-primary">hello@applicant.network</a>
                                 </p>
                                 <p className="text-base-content/80">
-                                    <strong>Support:</strong> <a href="mailto:support@applicant.network" className="link link-primary">support@applicant.network</a>
+                                    <strong>Support:</strong> <a href="mailto:help@applicant.network" className="link link-primary">help@applicant.network</a>
                                 </p>
                                 <p className="text-base-content/80">
                                     <strong>Recruiters:</strong> <a href="mailto:hello@splits.network" className="link link-primary">hello@splits.network</a>

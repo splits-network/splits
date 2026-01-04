@@ -20,6 +20,8 @@ const services: Omit<ServiceHealth, 'status' | 'timestamp' | 'error' | 'response
     { name: 'Notification Service', url: '/api-health/notification' },
     { name: 'Automation Service', url: '/api-health/automation' },
     { name: 'Document Service', url: '/api-health/document' },
+    { name: 'Document Processing Service', url: '/api-health/document-processing' },
+    { name: 'AI Review Service', url: '/api-health/ai' },
 ];
 
 const checkServiceHealth = async (service: typeof services[0]): Promise<ServiceHealth> => {

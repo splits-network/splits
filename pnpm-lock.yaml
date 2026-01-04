@@ -391,6 +391,9 @@ importers:
       '@splits-network/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
+      amqplib:
+        specifier: ^0.10.3
+        version: 0.10.9
       fastify:
         specifier: ^5.6.2
         version: 5.6.2

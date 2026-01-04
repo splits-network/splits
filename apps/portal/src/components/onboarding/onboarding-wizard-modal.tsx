@@ -69,7 +69,7 @@ export function OnboardingWizardModal() {
                     {/* Help Text */}
                     <div className="mt-6 pt-4 border-t border-base-300">
                         <p className="text-xs text-center text-base-content/60">
-                            Need help? Contact support at <a href="mailto:support@splits.network" className="link link-primary">support@splits.network</a>
+                            Need help? Contact support at <a href="mailto:help@splits.network" className="link link-primary">help@splits.network</a>
                         </p>
                     </div>
                 </div>

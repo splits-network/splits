@@ -1,4 +1,4 @@
-import { loadBaseConfig, loadClerkConfig, loadRedisConfig } from '@splits-network/shared-config';
+import { loadBaseConfig, loadClerkConfig, loadRabbitMQConfig, loadRedisConfig } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler } from '@splits-network/shared-fastify';
 import rateLimit from '@fastify/rate-limit';
@@ -11,11 +11,13 @@ import { AuthMiddleware } from './auth';
 import { ServiceRegistry } from './clients';
 import { registerV2GatewayRoutes } from './routes/v2/routes';
 import * as Sentry from '@sentry/node';
+import { EventPublisher } from './events/event-publisher';
 
 async function main() {
     const baseConfig = loadBaseConfig('api-gateway');
     const clerkConfig = loadClerkConfig();
     const redisConfig = loadRedisConfig();
+    const rabbitConfig = loadRabbitMQConfig();
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
@@ -128,6 +130,7 @@ async function main() {
                 { name: 'dashboards', description: 'Dashboard stats and insights' },
                 { name: 'admin', description: 'Platform admin and automation' },
                 { name: 'automation', description: 'Automation rules, matches, fraud signals, marketplace metrics' },
+                { name: 'status', description: 'System status and support contact' },
             ],
         },
     });
@@ -196,6 +199,15 @@ async function main() {
 
     // Initialize auth middleware
     const authMiddleware = new AuthMiddleware(clerkConfig.secretKey);
+    let eventPublisher: EventPublisher | null = null;
+
+    try {
+        eventPublisher = new EventPublisher(rabbitConfig.url, logger, baseConfig.serviceName);
+        await eventPublisher.connect();
+    } catch (error) {
+        eventPublisher = null;
+        logger.error({ err: error }, 'Failed to initialize event publisher');
+    }
 
 
 
@@ -234,6 +246,10 @@ async function main() {
             return;
         }
         
+        if (request.url.startsWith('/api/v2/status-contact')) {
+            return;
+        }
+
         if (request.url.startsWith('/api/')) {
             await authMiddleware.createMiddleware()(request, reply);
         }
@@ -252,7 +268,7 @@ async function main() {
     services.register('automation', process.env.AUTOMATION_SERVICE_URL || 'http://localhost:3007');
 
     // Register V2 proxy routes only
-    registerV2GatewayRoutes(app, services);
+    registerV2GatewayRoutes(app, services, { eventPublisher });
 
     // Health check endpoint (no auth required)
     app.get('/health', async (request, reply) => {
@@ -284,6 +300,9 @@ async function main() {
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down gracefully');
         await redis.quit();
+        if (eventPublisher) {
+            await eventPublisher.close();
+        }
         await app.close();
         process.exit(0);
     });
@@ -299,6 +318,9 @@ async function main() {
             await Sentry.flush(2000);
         }
         await redis.quit();
+        if (eventPublisher) {
+            await eventPublisher.close();
+        }
         process.exit(1);
     }
 }

@@ -191,7 +191,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-    '<strong>Questions?</strong> If you did not expect this or have concerns, please contact us at support@splits.network'
+    '<strong>Questions?</strong> If you did not expect this or have concerns, please contact us at help@splits.network'
 )}
     `.trim();
 

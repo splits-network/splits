@@ -927,5 +927,5 @@ X-RateLimit-Reset: 1702562400
 
 For API support or questions:
 - Documentation: https://docs.splits.network
-- Email: api-support@splits.network
+- Email: api-help@splits.network
 - GitHub Issues: https://github.com/splits-network/splits/issues

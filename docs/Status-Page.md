@@ -23,6 +23,12 @@ A public-facing status page has been added to the Splits Network portal to provi
 - **Red (Unhealthy):** Service is down or experiencing issues
 - **Yellow (Checking):** Health check in progress
 
+### Embedded Support Contact
+- Contact panel lives on every /status page so customers can reach support without leaving the dashboard
+- Form captures name, email, topic/severity, and a free-form message
+- Client-side confirmation keeps users informed while the support team follows up via email or ticketing
+- Submissions hit `/api/status-contact` in each Next.js app, proxy to `/api/v2/status-contact`, and publish a `status.contact_submitted` event that the Notification Service turns into emails to `help@applicant.network`, `help@splits.network`, and `help@employment-networks.com`
+
 ### Service Coverage
 1. **API Gateway** - Main entry point for all API requests
 2. **Identity Service** - User authentication and organization management
@@ -30,6 +36,10 @@ A public-facing status page has been added to the Splits Network portal to provi
 4. **Network Service** - Recruiter profiles and role assignments
 5. **Billing Service** - Subscription management
 6. **Notification Service** - Email notifications
+7. **Automation Service** - Workflow automation for recruiters/candidates
+8. **Document Service** - Secure uploads, storage, and metadata management
+9. **Document Processing Service** - Text extraction and AI enrichment
+10. **AI Review Service** - Candidate/job fit scoring and recommendations
 
 ### Overall System Status
 - Summary banner showing overall health
@@ -52,12 +62,16 @@ A public-facing status page has been added to the Splits Network portal to provi
 ### API Routes
 Health check proxy routes to avoid CORS issues:
 
-- `/api-health/gateway` → API Gateway
-- `/api-health/identity` → Identity Service
-- `/api-health/ats` → ATS Service
-- `/api-health/network` → Network Service
-- `/api-health/billing` → Billing Service
-- `/api-health/notification` → Notification Service
+- `/api-health/gateway` -> API Gateway
+- `/api-health/identity` -> Identity Service
+- `/api-health/ats` -> ATS Service
+- `/api-health/network` -> Network Service
+- `/api-health/billing` -> Billing Service
+- `/api-health/notification` -> Notification Service
+- `/api-health/automation` -> Automation Service
+- `/api-health/document` -> Document Service
+- `/api-health/document-processing` -> Document Processing Service
+- `/api-health/ai` -> AI Review Service
 
 ### Environment Variables
 
@@ -71,6 +85,13 @@ ATS_SERVICE_URL=http://localhost:3002
 NETWORK_SERVICE_URL=http://localhost:3003
 BILLING_SERVICE_URL=http://localhost:3004
 NOTIFICATION_SERVICE_URL=http://localhost:3005
+AUTOMATION_SERVICE_URL=http://localhost:3007
+DOCUMENT_SERVICE_URL=http://localhost:3006
+DOCUMENT_PROCESSING_SERVICE_URL=http://localhost:3006
+AI_SERVICE_URL=http://localhost:3009
+
+# Notification routing for status contact form
+STATUS_CONTACT_RECIPIENTS=help@applicant.network,help@splits.network,help@employment-networks.com
 ```
 
 In Docker Compose, these are configured as:
@@ -83,6 +104,10 @@ portal:
     NETWORK_SERVICE_URL: http://network-service:3003
     BILLING_SERVICE_URL: http://billing-service:3004
     NOTIFICATION_SERVICE_URL: http://notification-service:3005
+    AUTOMATION_SERVICE_URL: http://automation-service:3007
+    DOCUMENT_SERVICE_URL: http://document-service:3006
+    DOCUMENT_PROCESSING_SERVICE_URL: http://document-processing-service:3006
+    AI_SERVICE_URL: http://ai-service:3009
 ```
 
 ## User Experience
@@ -125,6 +150,10 @@ curl http://localhost:3100/api-health/ats
 curl http://localhost:3100/api-health/network
 curl http://localhost:3100/api-health/billing
 curl http://localhost:3100/api-health/notification
+curl http://localhost:3100/api-health/automation
+curl http://localhost:3100/api-health/document
+curl http://localhost:3100/api-health/document-processing
+curl http://localhost:3100/api-health/ai
 ```
 
 ### Expected Responses

@@ -168,11 +168,11 @@ export default function HelpPage() {
             faqs: [
                 {
                     question: 'I\'m having trouble logging in. What should I do?',
-                    answer: 'First, try resetting your password using the "Forgot Password" link on the login page. If that doesn\'t work, clear your browser cache and cookies, or try a different browser. Still having issues? Contact our support team at support@applicant.network.'
+                    answer: 'First, try resetting your password using the "Forgot Password" link on the login page. If that doesn\'t work, clear your browser cache and cookies, or try a different browser. Still having issues? Contact our support team at help@applicant.network.'
                 },
                 {
                     question: 'My resume upload isn\'t working. Help!',
-                    answer: 'Ensure your resume is in PDF, DOC, or DOCX format and under 5MB. Try using a different browser or device. If the problem persists, email your resume to support@applicant.network with your account email, and we\'ll upload it for you.'
+                    answer: 'Ensure your resume is in PDF, DOC, or DOCX format and under 5MB. Try using a different browser or device. If the problem persists, email your resume to help@applicant.network with your account email, and we\'ll upload it for you.'
                 },
                 {
                     question: 'I\'m not receiving email notifications.',
@@ -295,7 +295,7 @@ export default function HelpPage() {
                         <i className="fa-solid fa-envelope mr-2"></i>
                         Contact Support
                     </Link>
-                    <a href="mailto:support@applicant.network" className="btn btn-outline btn-lg">
+                    <a href="mailto:help@applicant.network" className="btn btn-outline btn-lg">
                         <i className="fa-solid fa-at mr-2"></i>
                         Email Us
                     </a>

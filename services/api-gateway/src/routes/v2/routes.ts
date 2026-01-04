@@ -7,8 +7,14 @@ import { registerBillingRoutes } from './billing';
 import { registerNotificationRoutes } from './notification';
 import { registerDocumentRoutes } from './documents';
 import { registerAutomationRoutes } from './automation';
+import { registerStatusRoutes } from './status';
+import { EventPublisher } from '../../events/event-publisher';
 
-export function registerV2GatewayRoutes(app: FastifyInstance, services: ServiceRegistry) {
+export function registerV2GatewayRoutes(
+    app: FastifyInstance,
+    services: ServiceRegistry,
+    options?: { eventPublisher?: EventPublisher | null }
+) {
     registerAtsRoutes(app, services);
     registerAutomationRoutes(app, services);
     registerBillingRoutes(app, services);
@@ -16,4 +22,5 @@ export function registerV2GatewayRoutes(app: FastifyInstance, services: ServiceR
     registerIdentityRoutes(app, services);
     registerNetworkRoutes(app, services);
     registerNotificationRoutes(app, services);
+    registerStatusRoutes(app, options?.eventPublisher || null);
 }

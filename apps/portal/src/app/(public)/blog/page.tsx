@@ -180,7 +180,7 @@ export default function BlogPage() {
                                     </p>
                                 </div>
                             </Link>
-                            <a href="mailto:support@splits.network" className="card bg-base-100 text-base-content shadow hover:shadow-2xl transition-shadow">
+                            <a href="mailto:help@splits.network" className="card bg-base-100 text-base-content shadow hover:shadow-2xl transition-shadow">
                                 <div className="card-body text-center">
                                     <i className="fa-solid fa-headset text-4xl text-accent mb-4"></i>
                                     <h3 className="card-title justify-center">Contact Support</h3>

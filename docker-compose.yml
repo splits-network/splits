@@ -186,6 +186,7 @@ services:
       ATS_SERVICE_URL: http://ats-service:3002
       NETWORK_SERVICE_URL: http://network-service:3003
       CANDIDATE_WEBSITE_URL: http://candidate:3101
+      STATUS_CONTACT_RECIPIENTS: ${STATUS_CONTACT_RECIPIENTS:-help@applicant.network,help@splits.network,help@employment-networks.com}
     volumes:
       - ./services/notification-service/src:/app/services/notification-service/src
       - ./packages:/app/packages
@@ -274,7 +275,37 @@ services:
       - /app/node_modules
     networks:
       - splits-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     command: ["pnpm", "--filter", "@splits-network/document-service", "dev"]
+
+  document-processing-service:
+    build:
+      context: .
+      dockerfile: services/document-processing-service/Dockerfile
+      target: development
+    container_name: splits-document-processing-service
+    ports:
+      - "3008:3008"
+    environment:
+      NODE_ENV: development
+      PORT: 3008
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+    volumes:
+      - ./services/document-processing-service/src:/app/services/document-processing-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    command:
+      ["pnpm", "--filter", "@splits-network/document-processing-service", "dev"]
 
   api-gateway:
     build:

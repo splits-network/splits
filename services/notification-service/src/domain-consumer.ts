@@ -11,6 +11,7 @@ import { CandidatesEventConsumer } from './consumers/candidates/consumer';
 import { CollaborationEventConsumer } from './consumers/collaboration/consumer';
 import { InvitationsConsumer } from './consumers/invitations/consumer';
 import { RecruiterSubmissionEventConsumer } from './consumers/recruiter-submission/consumer';
+import { SupportEventConsumer } from './consumers/support/consumer';
 import { EmailLookupHelper } from './helpers/email-lookup';
 
 export class DomainEventConsumer {
@@ -26,6 +27,7 @@ export class DomainEventConsumer {
     private collaborationConsumer: CollaborationEventConsumer;
     private invitationsConsumer: InvitationsConsumer;
     private recruiterSubmissionConsumer: RecruiterSubmissionEventConsumer;
+    private supportConsumer: SupportEventConsumer;
 
     constructor(
         private rabbitMqUrl: string,
@@ -78,6 +80,7 @@ export class DomainEventConsumer {
             logger,
             portalUrl
         );
+        this.supportConsumer = new SupportEventConsumer(notificationService.support, logger);
     }
 
     async connect(): Promise<void> {
@@ -140,6 +143,9 @@ export class DomainEventConsumer {
             // Invitation events
             await this.channel.bindQueue(this.queue, this.exchange, 'invitation.created');
             await this.channel.bindQueue(this.queue, this.exchange, 'invitation.revoked');
+
+            // Status page contact submissions
+            await this.channel.bindQueue(this.queue, this.exchange, 'status.contact_submitted');
 
             this.logger.info('Connected to RabbitMQ and bound to events');
 
@@ -293,6 +299,9 @@ export class DomainEventConsumer {
                 break;
             case 'invitation.revoked':
                 await this.invitationsConsumer.handleInvitationRevoked(event);
+                break;
+            case 'status.contact_submitted':
+                await this.supportConsumer.handleStatusContact(event);
                 break;
 
             default:

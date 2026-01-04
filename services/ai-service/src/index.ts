@@ -110,7 +110,7 @@ async function main() {
     // Health check
     app.get('/health', async (request, reply) => {
         return reply.send({
-            status: 'ok',
+            status: 'healthy',
             service: 'ai-service',
             timestamp: new Date().toISOString(),
         });
