@@ -39,7 +39,7 @@ export default async function CompanySettingsPage() {
     if (organizationId) {
         try {
             console.log('[Company Settings] Fetching companies for org:', organizationId);
-            const companiesResponse: any = await apiClient.get('/v2/companies');
+            const companiesResponse: any = await apiClient.get('/companies');
             console.log('[Company Settings] Companies response:', JSON.stringify(companiesResponse, null, 2));
             const companies = companiesResponse?.data || [];
             console.log('[Company Settings] Found companies:', companies.length);

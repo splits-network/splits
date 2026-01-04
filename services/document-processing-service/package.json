@@ -2,12 +2,13 @@
   "name": "@splits-network/document-processing-service",
   "version": "1.0.0",
   "description": "Document processing service for text extraction and AI analysis",
-  "main": "src/index.ts",
+  "main": "./dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "tsc -b",
     "start": "node dist/index.js",
-    "test": "vitest"
+    "test": "vitest",
+    "clean": "rm -rf dist *.tsbuildinfo"
   },
   "dependencies": {
     "@splits-network/shared-access-context": "workspace:*",

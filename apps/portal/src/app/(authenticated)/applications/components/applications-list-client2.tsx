@@ -351,7 +351,7 @@ export default function ApplicationsListClient({
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            await client.patch(`/v2/applications/${applicationId}`, {
+            await client.patch(`/applications/${applicationId}`, {
                 accepted_by_company: true
             });
 

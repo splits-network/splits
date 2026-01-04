@@ -110,7 +110,7 @@ export default function RecruiterDashboard({ token, profile }: RecruiterDashboar
             );
 
             // Load recent activity from latest applications
-            const activityResponse: any = await api.get('/v2/applications', {
+            const activityResponse: any = await api.get('/applications', {
                 params: {
                     limit: 8,
                     sort_by: 'updated_at',

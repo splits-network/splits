@@ -39,7 +39,7 @@ export default function DocumentList({
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response = await client.get('/v2/documents');
+            const response = await client.get('/documents');
             setDocuments(response.data || []);
         } catch (error) {
             console.error('Failed to fetch documents:', error);
@@ -55,7 +55,7 @@ export default function DocumentList({
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response = await client.get(`/v2/documents/${doc.id}`);
+            const response = await client.get(`/documents/${doc.id}`);
             const url = response.data?.url;
 
             // Open signed URL in new tab
@@ -78,7 +78,7 @@ export default function DocumentList({
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            await client.delete(`/v2/documents/${docId}`);
+            await client.delete(`/documents/${docId}`);
             await fetchDocuments();
         } catch (error) {
             console.error('Failed to delete document:', error);

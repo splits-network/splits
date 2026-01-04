@@ -9,7 +9,7 @@ import { DocumentServiceV2 } from './v2/documents/service';
 import { registerV2Routes } from './v2/routes';
 
 // Processing imports (to be updated to use V2)
-import { DomainConsumer } from './domain-consumer.js';
+import { DomainConsumer } from './domain-consumer';
 
 const logger = createLogger('document-processing-service');
 

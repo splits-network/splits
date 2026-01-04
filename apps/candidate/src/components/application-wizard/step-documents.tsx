@@ -98,7 +98,7 @@ export default function StepDocuments({
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response = await client.get('/v2/documents');
+            const response = await client.get('/documents');
             const updatedDocs = response.data || [];
             setLocalDocuments(updatedDocs);
             if (onDocumentsUpdated) {
@@ -125,7 +125,7 @@ export default function StepDocuments({
             }
 
             const client = createAuthenticatedClient(token);
-            await client.delete(`/v2/documents/${docId}`);
+            await client.delete(`/documents/${docId}`);
 
             // Remove from local state
             const updatedDocs = localDocuments.filter(d => d.id !== docId);

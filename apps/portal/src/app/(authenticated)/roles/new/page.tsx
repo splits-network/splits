@@ -63,7 +63,7 @@ export default function NewRolePage() {
 
                 // Get user profile to check role and company
                 console.log('Fetching user profile...');
-                const profileResponse = await client.get<{ data: UserProfile[] }>('/v2/users?limit=1');
+                const profileResponse = await client.get<{ data: UserProfile[] }>('/users?limit=1');
                 console.log('Profile response:', profileResponse);
                 const profile = profileResponse.data?.[0] || profileResponse.data;
 
@@ -76,7 +76,7 @@ export default function NewRolePage() {
                     // Platform admin: fetch all companies for dropdown
                     try {
                         console.log('Fetching companies...');
-                        const companiesResponse = await client.get<{ data: Company[] }>('/v2/companies');
+                        const companiesResponse = await client.get<{ data: Company[] }>('/companies');
                         console.log('Companies response:', companiesResponse);
                         setCompanies(companiesResponse.data || []);
                     } catch (err) {
