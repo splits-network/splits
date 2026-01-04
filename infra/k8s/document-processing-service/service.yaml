@@ -10,7 +10,7 @@ spec:
     app: document-processing-service
   ports:
   - name: http
-    port: 80
-    targetPort: 3006
+    port: 3008
+    targetPort: 3008
     protocol: TCP
   type: ClusterIP

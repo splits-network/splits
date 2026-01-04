@@ -131,9 +131,6 @@ export default function StatusPage() {
                             Keep marketing sites, partner funnels, and recruiter handoffs humming. Monitor gateway,
                             automation, billing, document, and AI services in one place.
                         </p>
-                        <Link href="/" className="btn btn-link btn-xs px-0 mt-2 text-primary">
-                            ← Back to employmentnetworks.com
-                        </Link>
                     </div>
                     <div className="text-sm text-base-content/70 flex flex-col gap-2 items-start">
                         <span className="text-xs">
