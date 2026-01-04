@@ -29,6 +29,10 @@ jobs:
                       path: services/automation-service
                     - name: document-service
                       path: services/document-service
+                    - name: ai-service
+                      path: services/ai-service
+                    - name: document-processing-service
+                      path: services/document-processing-service
                     - name: portal
                       path: apps/portal
                     - name: candidate
@@ -115,7 +119,7 @@ jobs:
                   docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.service.name }}:latest
 
             - name: Create Sentry release
-              if: matrix.service.name == 'portal' || matrix.service.name == 'candidate' || matrix.service.name == 'corporate' || matrix.service.name == 'api-gateway' || matrix.service.name == 'identity-service' || matrix.service.name == 'ats-service' || matrix.service.name == 'network-service' || matrix.service.name == 'billing-service' || matrix.service.name == 'notification-service'
+              if: matrix.service.name == 'portal' || matrix.service.name == 'candidate' || matrix.service.name == 'corporate' || matrix.service.name == 'api-gateway' || matrix.service.name == 'identity-service' || matrix.service.name == 'ats-service' || matrix.service.name == 'network-service' || matrix.service.name == 'billing-service' || matrix.service.name == 'notification-service' || matrix.service.name == 'ai-service'
               continue-on-error: true
               env:
                   SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -229,6 +233,8 @@ jobs:
                   kubectl apply -f infra/k8s/notification-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/automation-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/document-service/ --namespace=splits-network
+                  kubectl apply -f infra/k8s/ai-service/ --namespace=splits-network
+                  kubectl apply -f infra/k8s/document-processing-service/ --namespace=splits-network
 
             - name: Wait for services to be ready
               run: |
@@ -239,6 +245,8 @@ jobs:
                   kubectl rollout status deployment/notification-service --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/automation-service --timeout=180s --namespace=splits-network
                   kubectl rollout status deployment/document-service --timeout=180s --namespace=splits-network
+                  kubectl rollout status deployment/ai-service --timeout=180s --namespace=splits-network
+                  kubectl rollout status deployment/document-processing-service --timeout=180s --namespace=splits-network
 
             - name: Deploy API Gateway
               run: |
