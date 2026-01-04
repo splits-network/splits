@@ -3,7 +3,7 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-import { apiClient } from '@/lib/api-client';
+import { createAuthenticatedClient } from '@/lib/api-client';
 
 interface MarketplaceRecruiter {
     id: string;
@@ -56,7 +56,8 @@ export default function RecruiterDetailPage() {
                 return;
             }
 
-            const result = await apiClient.get<any>(`/marketplace/recruiters/${recruiterId}`, token);
+            const client = createAuthenticatedClient(token);
+            const result = await client.get<any>(`/recruiters/${recruiterId}`);
             setRecruiter(result.data);
         } catch (err) {
             console.error('Failed to load recruiter:', err);
@@ -79,10 +80,12 @@ export default function RecruiterDetailPage() {
                 return;
             }
 
-            await apiClient.post('/marketplace/connections', {
+            const client = createAuthenticatedClient(token);
+
+            await client.post('/marketplace/connections', {
                 recruiter_id: recruiterId,
                 message: connectionMessage,
-            }, token);
+            });
 
             setSuccess('Connection request sent successfully!');
             setShowConnectModal(false);

@@ -48,7 +48,7 @@ export default function RootLayout({
     }
     return (
         <ClerkProvider publishableKey={publishableKey} afterSignOutUrl="/">
-            <html lang="en">
+            <html lang="en" suppressHydrationWarning >
                 <head>
                     <script
                         dangerouslySetInnerHTML={{

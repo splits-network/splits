@@ -6,7 +6,9 @@
  * portal code while using the standardized shared client internally.
  */
 
-import { SplitsApiClient, type ApiResponse, type DashboardStats, type ApplicationStage } from '@splits-network/shared-api-client';
+import { SplitsApiClient, type ApiResponse } from '@splits-network/shared-api-client';
+import type { ApplicationStage } from '@splits-network/shared-types';
+type DashboardStats = Record<string, any>;
 
 /**
  * Portal API client - wrapper around shared client for compatibility
@@ -66,6 +68,34 @@ export class ApiClient {
         return this.client.getCurrentUser();
     }
 
+    async getUserRoles(): Promise<{
+        isRecruiter: boolean;
+        isCompanyAdmin: boolean;
+        isHiringManager: boolean;
+        isPlatformAdmin: boolean;
+    }> {
+        const response: any = await this.getCurrentUser();
+        const payload = response?.data ?? response;
+        const user = Array.isArray(payload) ? payload[0] : payload;
+        const memberships: Array<{ role?: string }> = user?.memberships ?? [];
+        const roles = memberships.map((m) => m.role).filter(Boolean);
+
+        const isRecruiter =
+            Boolean(user?.recruiter_id) ||
+            roles.includes('recruiter');
+
+        return {
+            isRecruiter,
+            isCompanyAdmin: roles.includes('company_admin'),
+            isHiringManager: roles.includes('hiring_manager'),
+            isPlatformAdmin: roles.includes('platform_admin'),
+        };
+    }
+
+    async updateUser(id: string, data: Record<string, any>) {
+        return this.client.updateUser(id, data);
+    }
+
     /**
      * Get companies
      */
@@ -104,6 +134,10 @@ export class ApiClient {
         return this.client.get('/recruiters');
     }
 
+    async getRecruiterProfile() {
+        return this.client.get('/recruiters', { params: { limit: 1 } });
+    }
+
     async getRecruiter(id: string) {
         return this.client.get(`/recruiters/${id}`);
     }
@@ -121,6 +155,10 @@ export class ApiClient {
         bio?: string;
         status?: string;
     }) {
+        return this.client.patch(`/recruiters/${id}`, data);
+    }
+
+    async updateRecruiterProfile(id: string, data: Record<string, any>) {
         return this.client.patch(`/recruiters/${id}`, data);
     }
 
@@ -144,6 +182,16 @@ export class ApiClient {
         if (recruiterId) params.recruiter_id = recruiterId;
         if (candidateId) params.candidate_id = candidateId;
         return this.client.get('/recruiter-candidates', { params });
+    }
+
+    async getRecruiterCandidateRelationship(recruiterId: string, candidateId: string) {
+        return this.client.get('/recruiter-candidates', {
+            params: {
+                recruiter_id: recruiterId,
+                candidate_id: candidateId,
+                limit: 1,
+            },
+        });
     }
 
     async resendInvitation(relationshipId: string) {
@@ -222,7 +270,7 @@ export class ApiClient {
         return this.client.createApplication(data);
     }
 
-    async updateApplicationStage(id: string, stage: string, notes?: string) {
+    async updateApplicationStage(id: string, stage: ApplicationStage, notes?: string) {
         return this.client.updateApplication(id, { stage, notes });
     }
 

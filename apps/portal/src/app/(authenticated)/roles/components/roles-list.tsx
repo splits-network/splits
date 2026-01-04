@@ -25,7 +25,7 @@ interface Job {
     salary_max?: number;
     fee_percentage: number;
     status: string;
-    created_at: string;
+    created_at: string | Date;
     application_count?: number;
 }
 

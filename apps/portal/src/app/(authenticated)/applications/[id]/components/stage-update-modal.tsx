@@ -1,15 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import type { ApplicationStage } from '@splits-network/shared-types';
 
 interface StageUpdateModalProps {
-    currentStage: string;
+    currentStage: ApplicationStage;
     onClose: () => void;
-    onUpdate: (newStage: string, notes?: string) => Promise<void>;
+    onUpdate: (newStage: ApplicationStage, notes?: string) => Promise<void>;
     loading: boolean;
 }
 
-const STAGES = [
+const STAGES: Array<{ value: ApplicationStage; label: string; icon: string }> = [
     { value: 'draft', label: 'Draft', icon: 'fa-file-lines' },
     { value: 'screen', label: 'Screening', icon: 'fa-magnifying-glass' },
     { value: 'submitted', label: 'Submitted', icon: 'fa-paper-plane' },
@@ -25,7 +26,7 @@ export default function StageUpdateModal({
     onUpdate,
     loading,
 }: StageUpdateModalProps) {
-    const [selectedStage, setSelectedStage] = useState(currentStage);
+    const [selectedStage, setSelectedStage] = useState<ApplicationStage>(currentStage);
     const [notes, setNotes] = useState('');
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -60,7 +61,7 @@ export default function StageUpdateModal({
                             <select
                                 className="select w-full"
                                 value={selectedStage}
-                                onChange={(e) => setSelectedStage(e.target.value)}
+                                onChange={(e) => setSelectedStage(e.target.value as ApplicationStage)}
                                 required
                             >
                                 {STAGES.map((stage) => (

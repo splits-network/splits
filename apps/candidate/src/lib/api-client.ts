@@ -1,188 +1,206 @@
 /**
  * Candidate App API Client
- * 
- * This module provides a convenient wrapper around the shared API client
- * for candidate-specific operations. It handles authentication and provides
- * typed methods for candidate-related API calls.
+ *
+ * Mirrors the portal client's structure so both apps share the same
+ * SplitsApiClient-powered surface area.
  */
 
 import { SplitsApiClient, type ApiResponse } from '@splits-network/shared-api-client';
+import type { ApplicationStage } from '@splits-network/shared-types';
 import { normalizeDocuments } from './document-utils';
 
-// Get the API base URL from environment
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_GATEWAY_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+type SubmitApplicationPayload = {
+    job_id: string;
+    document_ids: string[];
+    primary_resume_id: string;
+    pre_screen_answers?: Array<{ question_id: string; answer: any }>;
+    notes?: string;
+    stage?: ApplicationStage;
+};
+
+type RecruiterRelationship = {
+    id: string;
+    candidate_id: string;
+    recruiter_user_id: string;
+    status: string;
+    invitation_status?: string;
+    recruiter_name?: string;
+    recruiter_email?: string;
+    recruiter_bio?: string;
+    recruiter_status?: string;
+    created_at: string;
+    updated_at: string;
+};
 
 /**
- * Make public API requests without authentication
+ * Candidate API client - wrapper around the shared Splits client
  */
-async function publicFetch<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
-  
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  });
-  
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`HTTP ${response.status}: ${errorText}`);
-  }
-  
-  return response.json();
+export class ApiClient {
+    private client: SplitsApiClient;
+
+    constructor(token?: string) {
+        this.client = new SplitsApiClient();
+        if (token) {
+            this.client.setAuthToken(token);
+        }
+    }
+
+    /**
+     * Set authentication token
+     */
+    setToken(token: string): void {
+        this.client.setAuthToken(token);
+    }
+
+    /**
+     * Clear authentication token
+     */
+    clearToken(): void {
+        this.client.clearAuthToken();
+    }
+
+    // ===== GENERIC HTTP METHODS =====
+
+    async get<T = any>(endpoint: string, options?: { params?: Record<string, any> }): Promise<T> {
+        const response = await this.client.get(endpoint, options?.params);
+        return response as T;
+    }
+
+    async post<T = any>(endpoint: string, data?: any): Promise<T> {
+        const response = await this.client.post(endpoint, data);
+        return response as T;
+    }
+
+    async patch<T = any>(endpoint: string, data?: any): Promise<T> {
+        const response = await this.client.patch(endpoint, data);
+        return response as T;
+    }
+
+    async delete<T = any>(endpoint: string): Promise<T> {
+        const response = await this.client.delete(endpoint);
+        return response as T;
+    }
+
+    // ===== CANDIDATE METHODS =====
+
+    async submitApplication(data: SubmitApplicationPayload) {
+        return this.client.createApplication(data);
+    }
+
+    async getMyApplications() {
+        return this.client.getApplications();
+    }
+
+    async getApplicationById(applicationId: string) {
+        return this.client.getApplication(applicationId);
+    }
+
+    async getApplicationDetails(applicationId: string, include?: string[]) {
+        const includes = include?.length ? include : ['job', 'documents', 'ai_review'];
+        return this.client.getApplication(applicationId, includes as any);
+    }
+
+    async withdrawApplication(applicationId: string, reason?: string) {
+        return this.client.updateApplication(applicationId, {
+            stage: 'withdrawn',
+            notes: reason || 'Candidate withdrew application',
+        });
+    }
+
+    async updateApplication(applicationId: string, updates: Record<string, any>) {
+        return this.client.updateApplication(applicationId, updates);
+    }
+
+    async getJob(jobId: string, include?: string[]) {
+        if (include?.length) {
+            return this.client.get(`/jobs/${jobId}`, { include: include.join(',') });
+        }
+        return this.client.getJob(jobId);
+    }
+
+    async getPreScreenQuestions(jobId: string) {
+        return this.client.getJobPreScreenQuestions(jobId);
+    }
+
+    async getMyDocuments() {
+        const response = await this.client.getMyDocuments();
+        const docs = response.data || [];
+        return normalizeDocuments(docs);
+    }
+
+    async getMyProfile() {
+        return this.client.getMyCandidateProfile();
+    }
+
+    async getMyRecruiters(options?: Record<string, any>): Promise<ApiResponse<RecruiterRelationship[]>> {
+        return this.client.getMyRecruiterRelationships(options);
+    }
+
+    async getJobs(filters?: {
+        search?: string;
+        location?: string;
+        employment_type?: string;
+        limit?: number;
+        page?: number;
+    }) {
+        return this.client.getJobs(filters);
+    }
 }
 
-let globalApiClient: SplitsApiClient;
+// ===== EXPORTS =====
 
-/**
- * Get the shared API client instance
- */
-function getApiClient(): SplitsApiClient {
-  if (!globalApiClient) {
-    globalApiClient = new SplitsApiClient();
-  }
-  return globalApiClient;
+export const apiClient = new ApiClient();
+
+export function createAuthenticatedClient(token: string): ApiClient {
+    return new ApiClient(token);
 }
 
-/**
- * Create an authenticated API client with the provided token
- */
-export function createAuthenticatedClient(token: string): SplitsApiClient {
-  const client = new SplitsApiClient();
-  client.setAuthToken(token);
-  return client;
+function withToken<T>(token: string, handler: (client: ApiClient) => Promise<T>): Promise<T> {
+    return handler(createAuthenticatedClient(token));
 }
 
-// === CANDIDATE-SPECIFIC API METHODS ===
+// ===== TOKENED HELPERS (BACKWARDS COMPATIBILITY) =====
 
-export async function submitApplication(data: {
-  job_id: string;
-  document_ids: string[];
-  primary_resume_id: string;
-  pre_screen_answers?: Array<{ question_id: string; answer: any }>;
-  notes?: string;
-  stage?: string;
-}, token: string) {
-  const client = createAuthenticatedClient(token);
-  const response = await client.createApplication(data);
-  return response.data;
+export async function submitApplication(data: SubmitApplicationPayload, token: string) {
+    return withToken(token, (client) => client.submitApplication(data));
 }
 
 export async function getMyApplications(token: string) {
-  const client = createAuthenticatedClient(token);
-  const response = await client.getApplications();
-  return response.data;
+    return withToken(token, (client) => client.getMyApplications());
 }
 
 export async function getApplicationById(applicationId: string, token: string) {
-  const client = createAuthenticatedClient(token);
-  const response = await client.getApplication(applicationId);
-  return response.data;
+    return withToken(token, (client) => client.getApplicationById(applicationId));
 }
 
-export async function getApplicationDetails(applicationId: string, token: string) {
-  const client = createAuthenticatedClient(token);
-  const response = await client.getApplication(applicationId, ['job', 'documents', 'ai_review']);
-  return response.data;
+export async function getApplicationDetails(applicationId: string, token: string, include?: string[]) {
+    return withToken(token, (client) => client.getApplicationDetails(applicationId, include));
 }
 
 export async function withdrawApplication(applicationId: string, reason: string | undefined, token: string) {
-  const client = createAuthenticatedClient(token);
-  const response = await client.updateApplication(applicationId, {
-    stage: 'withdrawn',
-    notes: reason || 'Candidate withdrew application',
-  });
-  return response.data;
+    return withToken(token, (client) => client.withdrawApplication(applicationId, reason));
 }
 
-export async function updateApplication(applicationId: string, updates: any, token: string) {
-  const client = createAuthenticatedClient(token);
-  const response = await client.updateApplication(applicationId, updates);
-  return response.data;
+export async function updateApplication(applicationId: string, updates: Record<string, any>, token: string) {
+    return withToken(token, (client) => client.updateApplication(applicationId, updates));
 }
 
 export async function getJob(jobId: string, token: string) {
-  const client = createAuthenticatedClient(token);
-  const response = await client.getJob(jobId);
-  return response.data;
+    return withToken(token, (client) => client.getJob(jobId));
 }
 
 export async function getPreScreenQuestions(jobId: string, token: string) {
-  const client = createAuthenticatedClient(token);
-  const response = await client.getJobPreScreenQuestions(jobId);
-  return response.data;
+    return withToken(token, (client) => client.getPreScreenQuestions(jobId));
 }
 
 export async function getMyDocuments(token: string) {
-  const client = createAuthenticatedClient(token);
-  const response = await client.getMyDocuments();
-  const docs = response.data || [];
-  return normalizeDocuments(docs);
+    return withToken(token, (client) => client.getMyDocuments());
 }
 
 export async function getMyProfile(token: string) {
-  const client = createAuthenticatedClient(token);
-  const response = await client.getMyCandidate();
-  return response.data;
+    return withToken(token, (client) => client.getMyProfile());
 }
 
 export async function getMyRecruiters(token: string) {
-  const client = createAuthenticatedClient(token);
-  const response = await client.getMyRecruiterCandidates();
-  return response.data;
+    return withToken(token, (client) => client.getMyRecruiters());
 }
-
-// === PUBLIC JOB METHODS ===
-
-export async function getJobs(filters?: {
-  search?: string;
-  location?: string;
-  employment_type?: string;
-  limit?: number;
-  offset?: number;
-  page?: number;
-}) {
-        return this.client.getJobs(filters);
-}
-
-// === MODERN API (use these in new code) ===
-
-/**
- * Get the shared API client (for use in modern code)
- */
-export { getApiClient };
-
-/**
- * API client instance for jobs list and other public endpoints
- */
-export const apiClient = {
-  async get<T = any>(endpoint: string, options?: { params?: Record<string, any> }): Promise<T> {
-    // Handle jobs endpoints as public requests
-    if (endpoint.includes('/v2/jobs')) {
-      // Extract query params from endpoint URL if present
-      const url = new URL(endpoint, 'http://example.com');
-      const urlParams = Object.fromEntries(url.searchParams.entries());
-      
-      // Merge URL params with provided params
-      const allParams = { ...urlParams, ...options?.params };
-      
-      // Convert offset to page for pagination
-      if (allParams.offset && allParams.limit) {
-        const offset = parseInt(allParams.offset);
-        const limit = parseInt(allParams.limit);
-        allParams.page = Math.floor(offset / limit) + 1;
-        delete allParams.offset;
-      }
-      
-      const response = await getJobs(allParams);
-      return response as T;
-    }
-    
-    // For other endpoints, use authenticated client
-    const client = getApiClient();
-    const response = await client.get(endpoint, options?.params);
-    return response as T;
-  }
-};

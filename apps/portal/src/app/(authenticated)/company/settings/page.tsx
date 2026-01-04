@@ -17,7 +17,7 @@ export default async function CompanySettingsPage() {
 
     // Fetch user profile
     const apiClient = new ApiClient(token);
-    const profileResponse: any = await apiClient.get('/v2/users', { params: { limit: 1 } });
+    const profileResponse: any = await apiClient.get('/users', { params: { limit: 1 } });
     const profileArray = Array.isArray(profileResponse?.data)
         ? profileResponse.data
         : Array.isArray(profileResponse)

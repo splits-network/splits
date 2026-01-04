@@ -18,7 +18,7 @@ export interface RoleBadge {
 
 export interface RoleWithApplicationCount {
     id: string;
-    created_at: string;
+    created_at: string | Date;
     application_count?: number;
 }
 

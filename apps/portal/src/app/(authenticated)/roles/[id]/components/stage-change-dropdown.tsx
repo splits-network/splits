@@ -1,15 +1,17 @@
 'use client';
 
+import type { ApplicationStage } from '@splits-network/shared-types';
+
 interface Stage {
-    key: string;
+    key: ApplicationStage;
     label: string;
     color: string;
 }
 
 interface StageChangeDropdownProps {
-    currentStage: string;
+    currentStage: ApplicationStage;
     stages: Stage[];
-    onStageChange: (newStage: string) => void;
+    onStageChange: (newStage: ApplicationStage) => void;
 }
 
 export default function StageChangeDropdown({ currentStage, stages, onStageChange }: StageChangeDropdownProps) {

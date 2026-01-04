@@ -62,9 +62,9 @@ export function formatTime(date: string | Date): string {
 /**
  * Format a relative time (e.g., "2 minutes ago", "1 hour ago")
  */
-export function formatRelativeTime(timestamp: string): string {
+export function formatRelativeTime(timestamp: string | Date): string {
     const now = new Date();
-    const time = new Date(timestamp);
+    const time = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
     const seconds = Math.floor((now.getTime() - time.getTime()) / 1000);
 
     if (seconds < 60) return 'Just now';

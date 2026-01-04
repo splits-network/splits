@@ -12,13 +12,14 @@ import { PaginationControls } from './pagination-controls';
 import BulkActionModal from './bulk-action-modal';
 import { formatDate } from '@/lib/utils';
 import { getApplicationStageBadge } from '@/lib/utils/badge-styles';
+import type { ApplicationStage } from '@splits-network/shared-types';
 
 interface Application {
     id: string;
     job_id: string;
     candidate_id: string;
     recruiter_id?: string;
-    stage: string;
+    stage: ApplicationStage;
     accepted_by_company: boolean;
     accepted_at?: string;
     ai_reviewed: boolean;
@@ -393,7 +394,7 @@ export default function ApplicationsListClient({
         setBulkAction(null);
     };
 
-    const handleBulkConfirm = async (data: { newStage?: string; reason?: string; notes?: string }) => {
+    const handleBulkConfirm = async (data: { newStage?: ApplicationStage; reason?: string; notes?: string }) => {
         setBulkLoading(true);
         try {
             const token = await getToken();
@@ -403,9 +404,10 @@ export default function ApplicationsListClient({
             const idsArray = Array.from(selectedIds);
 
             if (bulkAction === 'stage' && data.newStage) {
+                const nextStage: ApplicationStage = data.newStage;
                 await Promise.all(
                     idsArray.map(id =>
-                        client.updateApplicationStage(id, data.newStage!, data.notes)
+                        client.updateApplicationStage(id, nextStage, data.notes)
                     )
                 );
             } else if (bulkAction === 'reject') {

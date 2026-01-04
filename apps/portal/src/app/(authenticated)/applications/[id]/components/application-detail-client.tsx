@@ -11,6 +11,7 @@ import AddNoteModal from './add-note-modal';
 import ApplicationTimeline from './application-timeline';
 import AIReviewPanel from '@/components/ai-review-panel';
 import { getApplicationStageBadge, getApplicationStageLabel } from '@/lib/utils/badge-styles';
+import type { ApplicationStage } from '@splits-network/shared-types';
 
 interface ApplicationDetailClientProps {
     application: any;
@@ -81,7 +82,7 @@ export default function ApplicationDetailClient({
         });
     };
 
-    const handleStageUpdate = async (newStage: string, notes?: string) => {
+    const handleStageUpdate = async (newStage: ApplicationStage, notes?: string) => {
         setLoading(true);
         try {
             const token = await getToken();

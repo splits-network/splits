@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { apiClient } from '@/lib/api-client';
+import { apiClient, createAuthenticatedClient } from '@/lib/api-client';
 import RecruiterCard from './components/recruiter-card';
 
 interface MarketplaceRecruiter {
@@ -53,6 +53,7 @@ export default function MarketplacePage() {
 
             // Token is optional for public marketplace browsing
             const token = await getToken().catch(() => null);
+            const client = token ? createAuthenticatedClient(token) : apiClient;
 
             const params = new URLSearchParams({
                 page: pagination.page.toString(),
@@ -72,7 +73,7 @@ export default function MarketplacePage() {
                 params.set('search', filters.search);
             }
 
-            const result = await apiClient.get<{
+            const result = await client.get<{
                 data: MarketplaceRecruiter[];
                 pagination: {
                     total: number;
@@ -80,7 +81,7 @@ export default function MarketplacePage() {
                     limit: number;
                     total_pages: number;
                 };
-            }>(`/marketplace/recruiters?${params}`, token || undefined);
+            }>(`/recruiters?${params.toString()}`);
 
             console.log('API Response:', result);
             console.log('Recruiters data:', result.data);

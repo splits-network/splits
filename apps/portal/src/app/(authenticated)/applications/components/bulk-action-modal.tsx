@@ -2,16 +2,17 @@
 
 import { useState } from 'react';
 import { useToast } from '@/lib/toast-context';
+import type { ApplicationStage } from '@splits-network/shared-types';
 
 interface BulkActionModalProps {
     action: 'stage' | 'reject';
     selectedCount: number;
     onClose: () => void;
-    onConfirm: (data: { newStage?: string; reason?: string; notes?: string }) => Promise<void>;
+    onConfirm: (data: { newStage?: ApplicationStage; reason?: string; notes?: string }) => Promise<void>;
     loading: boolean;
 }
 
-const STAGE_OPTIONS = [
+const STAGE_OPTIONS: Array<{ value: ApplicationStage; label: string }> = [
     { value: 'screen', label: 'Screening' },
     { value: 'submitted', label: 'Submitted' },
     { value: 'interview', label: 'Interview' },
@@ -28,7 +29,7 @@ export default function BulkActionModal({
     loading,
 }: BulkActionModalProps) {
     const toast = useToast();
-    const [newStage, setNewStage] = useState('');
+    const [newStage, setNewStage] = useState<ApplicationStage | ''>('');
     const [notes, setNotes] = useState('');
     const [reason, setReason] = useState('');
 
@@ -45,8 +46,11 @@ export default function BulkActionModal({
             return;
         }
 
+        const stagePayload: ApplicationStage | undefined =
+            action === 'stage' && newStage ? newStage : undefined;
+
         await onConfirm({
-            newStage: action === 'stage' ? newStage : undefined,
+            newStage: stagePayload,
             reason: action === 'reject' ? reason : undefined,
             notes: notes || undefined,
         });
@@ -87,7 +91,7 @@ export default function BulkActionModal({
                                 <select
                                     className="select w-full"
                                     value={newStage}
-                                    onChange={(e) => setNewStage(e.target.value)}
+                                    onChange={(e) => setNewStage(e.target.value as ApplicationStage)}
                                     required
                                 >
                                     <option value="">Select stage...</option>

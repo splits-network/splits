@@ -6,20 +6,21 @@ import { createAuthenticatedClient } from '@/lib/api-client'; import { useToast 
 import HireModal from './hire-modal';
 import PreScreenRequestModal from './pre-screen-request-modal';
 import DocumentList from '@/components/document-list';
+import type { ApplicationStage } from '@splits-network/shared-types';
 
 interface Application {
     id: string;
     candidate_id: string;
     job_id: string;
     recruiter_id?: string | null;
-    stage: string;
+    stage: ApplicationStage;
     status: string;
     notes?: string;
     created_at: string;
     candidate?: any;
 }
 
-const stages = [
+const stages: Array<{ key: ApplicationStage; label: string; color: string }> = [
     { key: 'recruiter_proposed', label: 'Proposed', color: 'badge-secondary' },
     { key: 'recruiter_request', label: 'Recruiter Request', color: 'badge-info' },
     { key: 'draft', label: 'Draft', color: 'badge-accent' },
@@ -41,7 +42,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
     const toast = useToast();
     const [applications, setApplications] = useState<Application[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedStage, setSelectedStage] = useState<string | null>(null);
+    const [selectedStage, setSelectedStage] = useState<ApplicationStage | null>(null);
     const [showNeedsPreScreen, setShowNeedsPreScreen] = useState(false);
     const [hireApplication, setHireApplication] = useState<Application | null>(null);
     const [preScreenApplication, setPreScreenApplication] = useState<Application | null>(null);
@@ -79,7 +80,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
         }
     };
 
-    const handleStageChange = async (applicationId: string, newStage: string) => {
+    const handleStageChange = async (applicationId: string, newStage: ApplicationStage) => {
         try {
             const token = await getToken();
             if (!token) {

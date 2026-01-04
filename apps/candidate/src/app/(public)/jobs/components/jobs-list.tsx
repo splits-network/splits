@@ -22,10 +22,10 @@ interface Job {
     salary_max?: number;
     employment_type?: string;
     open_to_relocation?: boolean;
-    posted_at?: string;
+    posted_at?: string | Date;
     description?: string;
     application_count?: number;
-    created_at: string;
+    created_at: string | Date;
 }
 
 interface JobsResponse {
@@ -141,17 +141,14 @@ export default function JobsListClient({
             setLoading(true);
             setStatsLoading(true);
 
-            const params = new URLSearchParams();
-            if (searchQuery) params.set('search', searchQuery);
-            if (locationQuery) params.set('location', locationQuery);
-            if (typeFilter) params.set('employment_type', typeFilter);
-
-            const offset = (currentPage - 1) * JOBS_PER_PAGE;
-            params.set('limit', JOBS_PER_PAGE.toString());
-            params.set('offset', offset.toString());
-
-            const response = await apiClient.get<JobsResponse>(`/v2/jobs?${params.toString()}`);
-            const fetchedJobs = response.data || [];
+            const response = await apiClient.getJobs({
+                search: searchQuery || undefined,
+                location: locationQuery || undefined,
+                employment_type: typeFilter || undefined,
+                limit: JOBS_PER_PAGE,
+                page: currentPage,
+            });
+            const fetchedJobs = response.data || [] as Job[];
             const pagination = response.pagination;
             const totalCount = pagination?.total ?? fetchedJobs.length;
             const limitFromResponse = pagination?.limit ?? JOBS_PER_PAGE;

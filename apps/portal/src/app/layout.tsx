@@ -49,7 +49,7 @@ export default async function RootLayout({
 
     return (
         <ClerkProvider publishableKey={publishableKey}>
-            <html lang="en">
+            <html lang="en" suppressHydrationWarning >
                 <head>
                     <script
                         dangerouslySetInnerHTML={{
