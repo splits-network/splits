@@ -37,15 +37,21 @@ export class DocumentService {
         .download(filePath);
       
       if (error) {
+        // Log comprehensive error details to debug Supabase Storage issues
         logger.error(`Supabase storage error details:`, {
           bucket,
           filePath,
+          errorObject: error,
+          errorType: typeof error,
+          errorKeys: Object.keys(error),
           errorMessage: error.message,
           errorName: error.name,
-          errorStack: error.stack,
-          fullError: JSON.stringify(error)
+          stringified: JSON.stringify(error, null, 2),
+          // Check for Supabase-specific error properties
+          statusCode: (error as any).statusCode,
+          error_description: (error as any).error_description
         });
-        throw new Error(`Failed to download document: ${error.message || 'Unknown storage error'}`);
+        throw new Error(`Failed to download document: ${error.message || JSON.stringify(error) || 'Unknown storage error'}`);
       }
       
       if (!data) {
