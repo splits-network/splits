@@ -69,7 +69,12 @@ RUN rm -rf node_modules && mv /tmp/pruned/node_modules ./node_modules
 
 # Create non-root user
 RUN groupadd -r docprocessor && useradd -r -g docprocessor docprocessor
-RUN chown -R docprocessor:docprocessor /app
+
+# Create pnpm cache directory with proper permissions before switching user
+RUN mkdir -p /home/docprocessor/.local/share/pnpm && \
+    chown -R docprocessor:docprocessor /home/docprocessor && \
+    chown -R docprocessor:docprocessor /app
+
 USER docprocessor
 
 # Health check
@@ -79,5 +84,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # Expose port
 EXPOSE 3008
 
-# Start the service
-CMD ["pnpm", "--filter", "@splits-network/document-processing-service", "start"]
+# Start the service directly with node
+CMD ["node", "services/document-processing-service/dist/index.js"]
