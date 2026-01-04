@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { formatDate } from '@/lib/utils';
 import UploadDocumentModal from '@/components/upload-document-modal';
+import type { Document } from '@/lib/document-utils';
+import { createAuthenticatedClient } from '@/lib/api-client';
 
 export default function DocumentsPage() {
     const { getToken } = useAuth();
-    const [documents, setDocuments] = useState<ApiDocument[]>([]);
+    const [documents, setDocuments] = useState<Document[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [deleting, setDeleting] = useState<string | null>(null);
@@ -29,8 +31,9 @@ export default function DocumentsPage() {
                 return;
             }
 
-            const docs = await getMyDocuments(token);
-            setDocuments(docs);
+            const client = createAuthenticatedClient(token);
+            const response = await client.get('/v2/documents');
+            setDocuments(response.data);
         } catch (err: any) {
             console.error('Failed to load documents:', err);
             setError(err.message || 'Failed to load documents');
@@ -72,21 +75,15 @@ export default function DocumentsPage() {
                 return null;
             }
 
-            const user = await getCurrentUser(token);
-            if (user.candidate_id) {
-                setCandidateId(user.candidate_id);
-                return user.candidate_id;
+            const client = createAuthenticatedClient(token);
+            const profile = await client.getMyProfile();
+            if (profile?.id) {
+                setCandidateId(profile.id);
+                return profile.id;
             }
 
-            const profile = await getMyCandidateProfile(token);
-            if (!profile?.id) {
-                console.error('No candidate profile found');
-                return null;
-            }
-
-            const id = profile.id;
-            setCandidateId(id);
-            return id;
+            console.error('No candidate profile found');
+            return null;
         } catch (err) {
             console.error('Failed to get candidate ID:', err);
             return null;
@@ -117,7 +114,8 @@ export default function DocumentsPage() {
                 return;
             }
 
-            await deleteDocument(documentId, token);
+            const client = createAuthenticatedClient(token);
+            await client.delete(`/v2/documents/${documentId}`);
             await loadDocuments();
         } catch (err: any) {
             console.error('Failed to delete document:', err);
@@ -127,7 +125,7 @@ export default function DocumentsPage() {
         }
     };
 
-    const handleDownload = async (doc: ApiDocument) => {
+    const handleDownload = async (doc: Document) => {
         try {
             const token = await getToken();
             if (!token) {
@@ -135,8 +133,13 @@ export default function DocumentsPage() {
                 return;
             }
 
-            const url = await getDocumentUrl(doc.id, token);
-            window.open(url, '_blank');
+            const client = createAuthenticatedClient(token);
+            const response = await client.get(`/v2/documents/${doc.id}`);
+            if (response.data?.download_url) {
+                window.open(response.data.download_url, '_blank');
+            } else {
+                setError('Download URL not available');
+            }
         } catch (err: any) {
             console.error('Failed to get download URL:', err);
             setError(err.message || 'Failed to download document');
@@ -170,7 +173,7 @@ export default function DocumentsPage() {
             )}
 
             {/* Upload Section */}
-            <div className="card bg-gradient-to-r from-primary to-secondary text-white shadow mb-8">
+            <div className="card bg-linear-to-r from-primary to-secondary text-white shadow mb-8">
                 <div className="card-body">
                     <h2 className="card-title text-2xl mb-4">
                         <i className="fa-solid fa-cloud-arrow-up"></i>

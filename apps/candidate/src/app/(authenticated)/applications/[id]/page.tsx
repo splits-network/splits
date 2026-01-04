@@ -4,7 +4,7 @@ import { auth } from '@clerk/nextjs/server';
 import { formatDate } from '@/lib/utils';
 import WithdrawButton from '@/components/withdraw-button';
 import BackToDraftButton from '@/components/back-to-draft-button';
-import AIReviewPanel from '@/components/ai-review-panel';
+import AIReviewPanel from './components/ai-review-panel';
 import { ApplicationDetailClient } from './components/application-detail-client';
 import EditDraftButton from './components/edit-draft-button';
 import { createAuthenticatedClient } from '@/lib/api-client';
@@ -240,7 +240,7 @@ export default async function ApplicationDetailPage({
                                                         .sort((a: any, b: any) => a.sort_order - b.sort_order)
                                                         .map((req: any) => (
                                                             <li key={req.id} className="flex items-start gap-2">
-                                                                <i className="fa-solid fa-circle-check text-error mt-1 flex-shrink-0"></i>
+                                                                <i className="fa-solid fa-circle-check text-error mt-1 shrink-0"></i>
                                                                 <span>{req.description}</span>
                                                             </li>
                                                         ))}
@@ -258,7 +258,7 @@ export default async function ApplicationDetailPage({
                                                         .sort((a: any, b: any) => a.sort_order - b.sort_order)
                                                         .map((req: any) => (
                                                             <li key={req.id} className="flex items-start gap-2">
-                                                                <i className="fa-solid fa-circle-plus text-info mt-1 flex-shrink-0"></i>
+                                                                <i className="fa-solid fa-circle-plus text-info mt-1 shrink-0"></i>
                                                                 <span>{req.description}</span>
                                                             </li>
                                                         ))}

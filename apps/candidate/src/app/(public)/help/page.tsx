@@ -198,7 +198,7 @@ export default function HelpPage() {
             {/* Hero Section */}
             <section className="text-center mb-12">
                 <h1 className="text-5xl md:text-6xl font-bold mb-6">
-                    How Can We <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Help?</span>
+                    How Can We <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-secondary">Help?</span>
                 </h1>
                 <p className="text-xl text-base-content/80 max-w-2xl mx-auto mb-8">
                     Find answers to common questions about using Applicant Network.
@@ -285,7 +285,7 @@ export default function HelpPage() {
             )}
 
             {/* Still Need Help Section */}
-            <section className="mt-16 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-12 text-center">
+            <section className="mt-16 bg-linear-to-r from-primary/10 to-secondary/10 rounded-2xl p-12 text-center">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">Still Need Help?</h2>
                 <p className="text-xl text-base-content/80 mb-8 max-w-2xl mx-auto">
                     Can't find what you're looking for? Our support team is here to help you.

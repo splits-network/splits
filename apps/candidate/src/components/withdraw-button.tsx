@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-import { withdrawApplication } from '@/lib/api-client';
+import ApiClient from '@/lib/api-client';
 
 interface WithdrawButtonProps {
     applicationId: string;
@@ -16,7 +16,6 @@ export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = 
     const [showConfirm, setShowConfirm] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const { getToken } = useAuth();
 
     // Prevent withdrawal if job is closed
     if (isJobClosed) {
@@ -37,13 +36,7 @@ export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = 
         setError(null);
 
         try {
-            const token = await getToken();
-
-            if (!token) {
-                throw new Error('Not authenticated');
-            }
-
-            await withdrawApplication(applicationId, 'Candidate withdrew application', token);
+            await ApiClient.withdrawApplication(applicationId, 'Candidate withdrew application');
 
             // Success - redirect to applications list with success message
             router.push('/applications?withdrawn=true');

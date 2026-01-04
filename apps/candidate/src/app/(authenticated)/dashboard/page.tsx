@@ -1,12 +1,24 @@
 import { currentUser } from '@clerk/nextjs/server';
-import { auth } from '@clerk/nextjs/server';
 import Link from 'next/link';
-import { getDashboardStats, getRecentApplications, DashboardStats, RecentApplication } from '@/lib/api';
+import ApiClient from '@/lib/api-client';
+
+interface DashboardStats {
+    applications: number;
+    interviews: number;
+    offers: number;
+    active_relationships: number;
+}
+
+interface RecentApplication {
+    id: string;
+    job_title: string;
+    company: string;
+    status: string;
+    applied_at: string;
+}
 
 export default async function DashboardPage() {
     const user = await currentUser();
-    const { getToken } = await auth();
-    const token = await getToken();
 
     // Fetch real data from API
     let stats: DashboardStats = {
@@ -17,15 +29,13 @@ export default async function DashboardPage() {
     };
     let recentApplications: RecentApplication[] = [];
 
-    if (token) {
-        try {
-            [stats, recentApplications] = await Promise.all([
-                getDashboardStats(token),
-                getRecentApplications(token),
-            ]);
-        } catch (error) {
-            console.error('Failed to load dashboard data:', error);
-        }
+    try {
+        [stats, recentApplications] = await Promise.all([
+            ApiClient.getDashboardStats(),
+            ApiClient.getRecentApplications(),
+        ]);
+    } catch (error) {
+        console.error('Failed to load dashboard data:', error);
     }
 
     return (

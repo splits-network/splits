@@ -1,12 +1,11 @@
 'use client';
 
 import { useState, useEffect, FormEvent } from 'react';
-import { useAuth, useUser } from '@clerk/nextjs';
+import { useUser } from '@clerk/nextjs';
 import { MyRecruitersSection } from '@/components/recruiters/my-recruiters-section';
-import { getMyProfile, updateMyProfile, CandidateProfile } from '@/lib/api';
+import ApiClient from '@/lib/api-client';
 
 export default function ProfilePage() {
-    const { getToken } = useAuth();
     const { user } = useUser();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -34,12 +33,8 @@ export default function ProfilePage() {
             try {
                 setLoading(true);
                 setError(null);
-                const token = await getToken();
-                if (!token) {
-                    throw new Error('Not authenticated');
-                }
 
-                const profile = await getMyProfile(token);
+                const profile = await ApiClient.getMyProfile();
                 if (profile) {
                     setCandidateId(profile.id);
                     setFormData({
@@ -77,7 +72,7 @@ export default function ProfilePage() {
         }
 
         loadProfile();
-    }, [user, getToken]);
+    }, [user]);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -87,12 +82,7 @@ export default function ProfilePage() {
         setSaveSuccess(false);
 
         try {
-            const token = await getToken();
-            if (!token) {
-                throw new Error('Not authenticated');
-            }
-
-            await updateMyProfile(token, formData);
+            await ApiClient.updateMyProfile(formData);
             setSaveSuccess(true);
             setTimeout(() => setSaveSuccess(false), 3000);
         } catch (err: any) {

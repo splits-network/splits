@@ -28,7 +28,7 @@ export default function HomePage() {
             </header>
 
             {/* Hero Section */}
-            <section className="hero min-h-[600px] bg-gradient-to-br from-primary/5 to-secondary/5">
+            <section className="hero min-h-[600px] bg-linear-to-br from-primary/5 to-secondary/5">
                 <div className="hero-content text-center max-w-4xl px-6">
                     <div>
                         <h1 className="text-5xl lg:text-6xl font-bold text-base-content mb-6">

@@ -1,12 +1,32 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/nextjs';
-import { getMyRecruiters, MyRecruitersResponse } from '@/lib/api';
+import ApiClient from '@/lib/api-client';
 import { RecruiterCard } from './recruiter-card';
 
+interface RecruiterRelationship {
+    id: string;
+    recruiter_name: string;
+    recruiter_email: string;
+    recruiter_bio?: string;
+    recruiter_status: string;
+    relationship_status: string;
+    status: string;  // Overall status: 'active' | 'expired' | 'terminated'
+    valid_until?: string;
+    created_at: string;
+    days_until_expiry?: number;
+    relationship_start_date: string;
+    relationship_end_date: string;
+    consent_given?: boolean;
+}
+
+interface MyRecruitersResponse {
+    active: RecruiterRelationship[];
+    expired: RecruiterRelationship[];
+    terminated: RecruiterRelationship[];
+}
+
 export function MyRecruitersSection() {
-    const { getToken } = useAuth();
     const [recruiters, setRecruiters] = useState<MyRecruitersResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -17,11 +37,7 @@ export function MyRecruitersSection() {
             try {
                 setLoading(true);
                 setError(null);
-                const token = await getToken();
-                if (!token) {
-                    throw new Error('Not authenticated');
-                }
-                const data = await getMyRecruiters(token);
+                const data = await ApiClient.getMyRecruiters();
                 setRecruiters(data);
             } catch (err: any) {
                 console.error('Failed to fetch recruiters:', err);
@@ -32,7 +48,7 @@ export function MyRecruitersSection() {
         }
 
         fetchRecruiters();
-    }, [getToken]);
+    }, []);
 
     if (loading) {
         return (

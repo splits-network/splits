@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { getMyDocuments, deleteDocument, getDocumentUrl } from '@/lib/api';
+import { createAuthenticatedClient } from '@/lib/api-client';
 import type { Document as ApiDocument } from '@/lib/document-utils';
 import UploadDocumentModal from './upload-document-modal';
 
@@ -14,12 +14,12 @@ interface DocumentListProps {
     initialDocuments?: ApiDocument[];
 }
 
-export default function DocumentList({ 
-    entityType, 
-    entityId, 
-    showUpload = false, 
+export default function DocumentList({
+    entityType,
+    entityId,
+    showUpload = false,
     onUpload,
-    initialDocuments 
+    initialDocuments
 }: DocumentListProps) {
     const { getToken } = useAuth();
     const [documents, setDocuments] = useState<ApiDocument[]>(initialDocuments || []);
@@ -38,8 +38,9 @@ export default function DocumentList({
             const token = await getToken();
             if (!token) return;
 
-            const docs = await getMyDocuments(token);
-            setDocuments(docs);
+            const client = createAuthenticatedClient(token);
+            const response = await client.get('/v2/documents');
+            setDocuments(response.data || []);
         } catch (error) {
             console.error('Failed to fetch documents:', error);
         } finally {
@@ -53,8 +54,10 @@ export default function DocumentList({
             const token = await getToken();
             if (!token) return;
 
-            const url = await getDocumentUrl(doc.id, token);
-            
+            const client = createAuthenticatedClient(token);
+            const response = await client.get(`/v2/documents/${doc.id}`);
+            const url = response.data?.url;
+
             // Open signed URL in new tab
             if (url) {
                 window.open(url, '_blank');
@@ -74,7 +77,8 @@ export default function DocumentList({
             const token = await getToken();
             if (!token) return;
 
-            await deleteDocument(docId, token);
+            const client = createAuthenticatedClient(token);
+            await client.delete(`/v2/documents/${docId}`);
             await fetchDocuments();
         } catch (error) {
             console.error('Failed to delete document:', error);
@@ -113,8 +117,8 @@ export default function DocumentList({
                     <i className="fa-solid fa-folder-open text-3xl mb-2"></i>
                     <p className="text-sm">No documents uploaded</p>
                     {showUpload && (
-                        <button 
-                            className="btn btn-sm btn-ghost mt-2" 
+                        <button
+                            className="btn btn-sm btn-ghost mt-2"
                             onClick={() => {
                                 if (onUpload) onUpload();
                                 setShowUploadModal(true);

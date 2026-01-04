@@ -3,20 +3,38 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-import {
-    getInvitationDetails,
-    getRecruiterDetails,
-    getCandidateDetails,
-    acceptInvitation,
-    declineInvitation,
-    ApiError,
-    type InvitationDetails,
-    type RecruiterDetails,
-    type CandidateDetails,
-} from '@/lib/api';
+import ApiClient from '@/lib/api-client';
 
 interface InvitationPageClientProps {
     token: string;
+}
+
+// Define types inline
+interface Invitation {
+    id: string;
+    token: string;
+    recruiter_id: string;
+    candidate_id: string;
+    job_id?: string;
+    status: string;
+    message?: string;
+    expires_at: string;
+    created_at: string;
+}
+
+interface Recruiter {
+    id: string;
+    name: string;
+    email: string;
+    bio?: string;
+    status: string;
+}
+
+interface Candidate {
+    id: string;
+    name: string;
+    email: string;
+    full_name?: string;
 }
 
 export default function InvitationPageClient({ token }: InvitationPageClientProps) {
@@ -24,9 +42,9 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
     const { getToken, isSignedIn, isLoaded } = useAuth();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [invitation, setInvitation] = useState<InvitationDetails | null>(null);
-    const [recruiter, setRecruiter] = useState<RecruiterDetails | null>(null);
-    const [candidate, setCandidate] = useState<CandidateDetails | null>(null);
+    const [invitation, setInvitation] = useState<Invitation | null>(null);
+    const [recruiter, setRecruiter] = useState<Recruiter | null>(null);
+    const [candidate, setCandidate] = useState<Candidate | null>(null);
     const [processing, setProcessing] = useState(false);
     const [declineReason, setDeclineReason] = useState('');
     const [showDeclineForm, setShowDeclineForm] = useState(false);
@@ -53,18 +71,14 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             setLoading(true);
             setError(null);
 
-            // Get auth token (we know user is signed in at this point)
-            const authToken = await getToken();
-
             // Fetch invitation details (includes enriched recruiter info)
-            const invitationData = await getInvitationDetails(token, authToken);
+            const invitationData = await ApiClient.getInvitationByToken(token);
             setInvitation(invitationData);
 
             // Set recruiter from invitation data
             if (invitationData.recruiter_name || invitationData.recruiter_email) {
                 setRecruiter({
                     id: invitationData.recruiter_id,
-                    user_id: '', // Not needed
                     name: invitationData.recruiter_name,
                     email: invitationData.recruiter_email,
                     bio: invitationData.recruiter_bio,
@@ -73,19 +87,21 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             }
 
             // Fetch candidate details
-            const candidateData = await getCandidateDetails(invitationData.candidate_id, authToken);
+            const candidateData = await ApiClient.getCandidateById(invitationData.candidate_id);
             setCandidate(candidateData);
 
         } catch (err) {
-            if (err instanceof ApiError) {
+            if (err instanceof Response) {
                 if (err.status === 404) {
                     setError('This invitation does not exist or has been revoked.');
                 } else if (err.status === 410) {
                     setError('This invitation has expired. Please contact your recruiter for a new invitation.');
                 } else if (err.status === 409) {
-                    setError(err.message);
+                    const data = await err.json();
+                    setError(data.error?.message || 'Conflict occurred.');
                 } else {
-                    setError(err.message || 'Failed to load invitation details.');
+                    const data = await err.json();
+                    setError(data.error?.message || 'Failed to load invitation details.');
                 }
             } else {
                 setError('An unexpected error occurred.');
@@ -102,14 +118,14 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             setProcessing(true);
             setError(null);
 
-            const authToken = await getToken();
-            await acceptInvitation(token, authToken);
+            await ApiClient.acceptInvitation(token);
 
             // Redirect to success page
             router.push(`/invitation/${token}/accepted`);
         } catch (err) {
-            if (err instanceof ApiError) {
-                setError(err.message || 'Failed to accept invitation.');
+            if (err instanceof Response) {
+                const data = await err.json();
+                setError(data.error?.message || 'Failed to accept invitation.');
             } else {
                 setError('An unexpected error occurred.');
             }
@@ -124,14 +140,14 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             setProcessing(true);
             setError(null);
 
-            const authToken = await getToken();
-            await declineInvitation(token, declineReason || undefined, authToken);
+            await ApiClient.declineInvitation(token, declineReason || undefined);
 
             // Redirect to declined page
             router.push(`/invitation/${token}/declined`);
         } catch (err) {
-            if (err instanceof ApiError) {
-                setError(err.message || 'Failed to decline invitation.');
+            if (err instanceof Response) {
+                const data = await err.json();
+                setError(data.error?.message || 'Failed to decline invitation.');
             } else {
                 setError('An unexpected error occurred.');
             }
@@ -267,7 +283,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                             <div className="avatar avatar-placeholder">
                                 <div className="bg-primary text-primary-content rounded-full w-16 h-16">
                                     <span className="text-2xl">
-                                        {recruiter?.name?.split(' ').map(part => part[0]).join('').slice(0, 2) || ''}
+                                        {recruiter?.name?.split(' ').map((part: string) => part[0]).join('').slice(0, 2) || ''}
                                     </span>
                                 </div>
                             </div>

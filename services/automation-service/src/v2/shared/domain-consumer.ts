@@ -12,14 +12,12 @@ export class DomainEventConsumer {
     private channel: amqp.Channel | null = null;
     private readonly exchange = 'splits-network-events';
     private readonly queue = 'automation-service-v2-queue';
-    private aiReviewService: AIReviewService;
 
     constructor(
         private rabbitMqUrl: string,
         private aiServiceUrl: string,
         private logger: Logger
     ) {
-        this.aiReviewService = new AIReviewService(aiServiceUrl, logger);
     }
 
     async connect(): Promise<void> {

@@ -1,4 +1,19 @@
-import { RecruiterRelationship } from '@/lib/api';
+// Type definition from my-recruiters-section (extended with additional fields)
+interface RecruiterRelationship {
+    id: string;
+    recruiter_name: string;
+    recruiter_email: string;
+    recruiter_bio?: string;
+    recruiter_status: string;
+    relationship_status: string;
+    status: string;  // Overall status: 'active' | 'expired' | 'terminated'
+    valid_until?: string;
+    created_at: string;
+    days_until_expiry?: number;
+    relationship_start_date: string;
+    relationship_end_date: string;
+    consent_given?: boolean;
+}
 
 interface RecruiterCardProps {
     relationship: RecruiterRelationship;
@@ -8,10 +23,10 @@ interface RecruiterCardProps {
 export function RecruiterCard({ relationship, showActions = true }: RecruiterCardProps) {
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric' 
+        return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
         });
     };
 
@@ -28,9 +43,9 @@ export function RecruiterCard({ relationship, showActions = true }: RecruiterCar
         return <span className="badge badge-error badge-outline">Terminated</span>;
     };
 
-    const showExpiryWarning = relationship.status === 'active' && 
-                               relationship.days_until_expiry !== undefined && 
-                               relationship.days_until_expiry <= 30;
+    const showExpiryWarning = relationship.status === 'active' &&
+        relationship.days_until_expiry !== undefined &&
+        relationship.days_until_expiry <= 30;
 
     return (
         <div className="card bg-base-100 border border-base-300">
@@ -99,7 +114,7 @@ export function RecruiterCard({ relationship, showActions = true }: RecruiterCar
                 {/* Actions */}
                 {showActions && relationship.status === 'active' && (
                     <div className="card-actions justify-end mt-4">
-                        <a 
+                        <a
                             href={`mailto:${relationship.recruiter_email}`}
                             className="btn btn-sm btn-ghost"
                         >

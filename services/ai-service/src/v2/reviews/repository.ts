@@ -6,6 +6,39 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { AIReviewFilters } from './types';
 
+/**
+ * Transform flat database structure to nested API structure
+ * Database stores: skills_match_percentage, matched_skills, missing_skills, candidate_years, required_years, meets_experience_requirement
+ * API expects: skills_match: { match_percentage, matched_skills, missing_skills }, experience_analysis: { candidate_years, required_years, meets_requirement }
+ */
+function transformAIReviewFromDB(dbRow: any): any {
+    if (!dbRow) return null;
+    
+    const {
+        skills_match_percentage,
+        matched_skills,
+        missing_skills,
+        candidate_years,
+        required_years,
+        meets_experience_requirement,
+        ...rest
+    } = dbRow;
+    
+    return {
+        ...rest,
+        skills_match: {
+            match_percentage: skills_match_percentage ?? 0,
+            matched_skills: matched_skills ?? [],
+            missing_skills: missing_skills ?? [],
+        },
+        experience_analysis: {
+            candidate_years: candidate_years ? Number(candidate_years) : 0,
+            required_years: required_years ?? 0,
+            meets_requirement: meets_experience_requirement ?? false,
+        },
+    };
+}
+
 export class AIReviewRepository {
     private supabase: SupabaseClient;
 
@@ -88,7 +121,7 @@ export class AIReviewRepository {
             .single();
 
         if (error && error.code !== 'PGRST116') throw error;
-        return data || null;
+        return transformAIReviewFromDB(data);
     }
 
     async findByApplicationId(applicationId: string): Promise<any | null> {
@@ -102,7 +135,7 @@ export class AIReviewRepository {
             .single();
 
         if (error && error.code !== 'PGRST116') throw error;
-        return data || null;
+        return transformAIReviewFromDB(data);
     }
 
     async findReviews(filters: AIReviewFilters): Promise<{ data: any[]; total: number }> {
@@ -132,7 +165,7 @@ export class AIReviewRepository {
         if (error) throw error;
 
         return {
-            data: data || [],
+            data: (data || []).map(transformAIReviewFromDB),
             total: count || 0,
         };
     }

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { createAuthenticatedClient } from '@/lib/api-client';
 
 interface UploadDocumentModalProps {
     entityType: string;
@@ -77,7 +78,8 @@ export default function UploadDocumentModal({
             formData.append('document_type', selectedDocType);
 
             console.log('Calling uploadDocument...');
-            await uploadDocument(formData, token);
+            const client = createAuthenticatedClient(token);
+            await client.uploadDocument(formData);
             console.log('Upload successful!');
             onSuccess();
         } catch (err: any) {

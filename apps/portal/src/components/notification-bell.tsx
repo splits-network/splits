@@ -231,7 +231,7 @@ export default function NotificationBell() {
 
                                     {/* Unread indicator */}
                                     {!notification.read && (
-                                        <div className="flex-shrink-0">
+                                        <div className="shrink-0">
                                             <div className="w-2 h-2 rounded-full bg-primary"></div>
                                         </div>
                                     )}

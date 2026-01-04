@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import UploadDocumentModal from '@/components/upload-document-modal';
 import { useToast } from '@/lib/toast-context';
+import { createAuthenticatedClient } from '@/lib/api-client';
 
 interface StepDocumentsProps {
     documents: any[];
@@ -66,21 +67,15 @@ export default function StepDocuments({
                 return null;
             }
 
-            const user = await getCurrentUser(token);
-            if (user.candidate_id) {
-                setCandidateId(user.candidate_id);
-                return user.candidate_id;
-            }
-
-            const profile = await getMyCandidateProfile(token);
+            const client = createAuthenticatedClient(token);
+            const profile = await client.getMyProfile();
             if (!profile?.id) {
                 console.error('No candidate profile found');
                 return null;
             }
 
-            const id = profile.id;
-            setCandidateId(id);
-            return id;
+            setCandidateId(profile.id);
+            return profile.id;
         } catch (err) {
             console.error('Failed to get candidate ID:', err);
             return null;
@@ -102,7 +97,9 @@ export default function StepDocuments({
             const token = await getToken();
             if (!token) return;
 
-            const updatedDocs = await getMyDocuments(token);
+            const client = createAuthenticatedClient(token);
+            const response = await client.get('/v2/documents');
+            const updatedDocs = response.data || [];
             setLocalDocuments(updatedDocs);
             if (onDocumentsUpdated) {
                 onDocumentsUpdated(updatedDocs);
@@ -127,7 +124,8 @@ export default function StepDocuments({
                 throw new Error('Authentication required');
             }
 
-            await deleteDocument(docId, token);
+            const client = createAuthenticatedClient(token);
+            await client.delete(`/v2/documents/${docId}`);
 
             // Remove from local state
             const updatedDocs = localDocuments.filter(d => d.id !== docId);

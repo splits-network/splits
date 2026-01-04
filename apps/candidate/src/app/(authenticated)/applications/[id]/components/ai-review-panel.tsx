@@ -221,22 +221,26 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                 </h2>
 
                 {/* Fit Score */}
-                <div className="stats shadow">
-                    <div className="stat">
-                        <div className="stat-title">Match Score</div>
-                        <div className={`stat-value ${getFitScoreColor(aiReview.fit_score)}`}>
-                            {aiReview.fit_score}/100
-                        </div>
-                        <div className="stat-desc">
-                            <span className={`badge ${getRecommendationColor(aiReview.recommendation)}`}>
-                                {getRecommendationLabel(aiReview.recommendation)}
-                            </span>
+                <div className='flex flex-row gap-4'>
+                    <div className="stats shadow bg-base-200">
+                        <div className="stat overflow-clip">
+                            <div className="stat-title">Match Score</div>
+                            <div className={`stat-value ${getFitScoreColor(aiReview.fit_score)}`}>
+                                {aiReview.fit_score}/100
+                            </div>
+                            <div className="stat-desc">
+                                <span className={`badge badge-sm ${getRecommendationColor(aiReview.recommendation)}`}>
+                                    {getRecommendationLabel(aiReview.recommendation)}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    <div className="stat">
-                        <div className="stat-title">Confidence Level</div>
-                        <div className="stat-value text-primary">{aiReview.confidence_level}%</div>
-                        <div className="stat-desc">AI confidence in analysis</div>
+                    <div className="stats shadow bg-base-200">
+                        <div className="stat">
+                            <div className="stat-title">Confidence Level</div>
+                            <div className="stat-value text-primary">{aiReview.confidence_level}%</div>
+                            <div className="stat-desc">AI confidence in analysis</div>
+                        </div>
                     </div>
                 </div>
 
@@ -277,58 +281,65 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                 )}
 
                 {/* Skills Match */}
-                {aiReview.skills_match_percentage !== null && aiReview.skills_match_percentage !== undefined && (
+                {aiReview.skills_match && (
                     <div className="mt-4">
                         <h3 className="font-semibold text-lg mb-2">Skills Analysis</h3>
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="text-sm">Skills Match:</span>
-                            <div className="flex-1">
-                                <progress
-                                    className="progress progress-success w-full"
-                                    value={aiReview.skills_match_percentage}
-                                    max="100"
-                                ></progress>
+
+                        {aiReview.skills_match.match_percentage !== null && aiReview.skills_match.match_percentage !== undefined && (
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-sm">Skills Match:</span>
+                                <div className="flex-1">
+                                    <progress
+                                        className="progress progress-success w-full"
+                                        value={aiReview.skills_match.match_percentage}
+                                        max="100"
+                                    ></progress>
+                                </div>
+                                <span className="text-sm font-semibold">{aiReview.skills_match.match_percentage}%</span>
                             </div>
-                            <span className="text-sm font-semibold">{aiReview.skills_match_percentage}%</span>
+                        )}
+
+                        <div className="mb-2">
+                            <span className="text-sm font-medium">Matched Skills:</span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                                {aiReview.skills_match.matched_skills && aiReview.skills_match.matched_skills.length > 0 ? (
+                                    aiReview.skills_match.matched_skills.map((skill, index) => (
+                                        <span key={index} className="badge badge-success badge-sm">{skill}</span>
+                                    ))
+                                ) : (
+                                    <span className="text-sm text-base-content/60 italic">No matched skills identified</span>
+                                )}
+                            </div>
                         </div>
 
-                        {aiReview.matched_skills && aiReview.matched_skills.length > 0 && (
-                            <div className="mb-2">
-                                <span className="text-sm font-medium">Matched Skills:</span>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                    {aiReview.matched_skills.map((skill, index) => (
-                                        <span key={index} className="badge badge-success badge-sm">{skill}</span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {aiReview.missing_skills && aiReview.missing_skills.length > 0 && (
-                            <div>
-                                <span className="text-sm font-medium">Skills to Develop:</span>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                    {aiReview.missing_skills.map((skill, index) => (
+                        <div>
+                            <span className="text-sm font-medium">Skills to Develop:</span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                                {aiReview.skills_match.missing_skills && aiReview.skills_match.missing_skills.length > 0 ? (
+                                    aiReview.skills_match.missing_skills.map((skill, index) => (
                                         <span key={index} className="badge badge-warning badge-sm">{skill}</span>
-                                    ))}
-                                </div>
+                                    ))
+                                ) : (
+                                    <span className="text-sm text-base-content/60 italic">You have all required skills!</span>
+                                )}
                             </div>
-                        )}
+                        </div>
                     </div>
                 )}
 
                 {/* Experience & Location */}
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {aiReview.candidate_years !== null && aiReview.candidate_years !== undefined && aiReview.required_years !== null && aiReview.required_years !== undefined && (
+                    {aiReview.experience_analysis && aiReview.experience_analysis.candidate_years !== null && aiReview.experience_analysis.candidate_years !== undefined && aiReview.experience_analysis.required_years !== null && aiReview.experience_analysis.required_years !== undefined && (
                         <div>
                             <h4 className="font-medium text-sm mb-1">Experience</h4>
                             <div className="flex items-center gap-2">
-                                {aiReview.meets_experience_requirement ? (
+                                {aiReview.experience_analysis.meets_requirement ? (
                                     <i className="fa-solid fa-circle-check text-success"></i>
                                 ) : (
                                     <i className="fa-solid fa-circle-xmark text-warning"></i>
                                 )}
                                 <span className="text-sm">
-                                    {aiReview.candidate_years} years (Required: {aiReview.required_years})
+                                    {aiReview.experience_analysis.candidate_years} years (Required: {aiReview.experience_analysis.required_years})
                                 </span>
                             </div>
                         </div>
@@ -347,6 +358,6 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                     <p>Analyzed by {aiReview.model_version} on {new Date(aiReview.analyzed_at).toLocaleString()}</p>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

@@ -326,8 +326,8 @@ export default function Header() {
 
                 {isSignedIn ? (
                     <>
-                        <Link href="/dashboard" className="btn btn-ghost btn-circle" title='Dashboard'>
-                            <i className="fa-solid fa-gauge text-xl"></i>
+                        <Link href="/dashboard" className="btn btn-ghost xs:btn-circle" title='Dashboard'>
+                            <i className="fa-solid fa-gauge text-xl"></i> <span className='hidden md:inline-block'>Dashboard</span>
                         </Link>
                         <NotificationBell />
                         <UserDropdown />

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-import { updateApplication } from '@/lib/api-client';
+import ApiClient from '@/lib/api-client';
 
 interface BackToDraftButtonProps {
     applicationId: string;
@@ -15,23 +15,16 @@ export default function BackToDraftButton({ applicationId, jobTitle }: BackToDra
     const [showConfirm, setShowConfirm] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const { getToken } = useAuth();
 
     const handleBackToDraft = async () => {
         setIsMoving(true);
         setError(null);
 
         try {
-            const token = await getToken();
-
-            if (!token) {
-                throw new Error('Not authenticated');
-            }
-
-            await updateApplication(applicationId, {
+            await ApiClient.updateApplication(applicationId, {
                 stage: 'draft',
                 notes: 'Candidate moved application back to draft for edits',
-            }, token);
+            });
 
             // Success - refresh page to show updated state
             router.refresh();

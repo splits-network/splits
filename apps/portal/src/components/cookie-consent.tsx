@@ -135,12 +135,12 @@ export default function CookieConsent() {
     }
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-[100] p-4 bg-base-100 shadow border-t-4 border-primary animate-slide-up">
+        <div className="fixed bottom-0 left-0 right-0 z-100 p-4 bg-base-100 shadow border-t-4 border-primary animate-slide-up">
             <div className="container mx-auto max-w-6xl">
                 <div className="flex flex-col md:flex-row gap-4 items-center">
                     <div className="flex-1">
                         <div className="flex items-start gap-3 mb-2">
-                            <i className="fa-solid fa-cookie-bite text-3xl text-primary flex-shrink-0 mt-1"></i>
+                            <i className="fa-solid fa-cookie-bite text-3xl text-primary shrink-0 mt-1"></i>
                             <div>
                                 <h3 className="font-bold text-lg mb-1">We Value Your Privacy</h3>
                                 <p className="text-sm text-base-content/80">
@@ -192,7 +192,7 @@ function CookiePreferences({ onSave, onClose }: { onSave: (prefs: any) => void; 
     };
 
     return (
-        <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-100 bg-black/50 flex items-center justify-center p-4">
             <div className="card bg-base-100 shadow max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 <div className="card-body">
                     <div className="flex items-center justify-between mb-4">
