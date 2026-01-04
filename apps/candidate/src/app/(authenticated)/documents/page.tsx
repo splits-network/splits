@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { formatDate } from '@/lib/utils';
-import { getMyDocuments, deleteDocument, getDocumentUrl, Document as ApiDocument, getMyCandidateProfile, getCurrentUser } from '@/lib/api';
 import UploadDocumentModal from '@/components/upload-document-modal';
 
 export default function DocumentsPage() {

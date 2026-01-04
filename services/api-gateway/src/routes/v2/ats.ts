@@ -364,7 +364,7 @@ function registerStatsRoutes(app: FastifyInstance, services: ServiceRegistry) {
 }
 
 function registerAiReviewRoutes(app: FastifyInstance, services: ServiceRegistry) {
-    const atsService = () => services.get('ats');
+    const aiService = () => services.get('ai');
 
     app.get(
         '/api/v2/ai-reviews',
@@ -379,7 +379,7 @@ function registerAiReviewRoutes(app: FastifyInstance, services: ServiceRegistry)
             const path = queryString ? `/api/v2/ai-reviews?${queryString}` : '/api/v2/ai-reviews';
 
             try {
-                const data = await atsService().get(path, undefined, correlationId, authHeaders);
+                const data = await aiService().get(path, undefined, correlationId, authHeaders);
                 return reply.send(data);
             } catch (error: any) {
                 request.log.error({ error, correlationId }, 'Failed to fetch AI review');
@@ -402,7 +402,7 @@ function registerAiReviewRoutes(app: FastifyInstance, services: ServiceRegistry)
             const authHeaders = buildAuthHeaders(request);
 
             try {
-                const data = await atsService().get(
+                const data = await aiService().get(
                     `/api/v2/ai-reviews/${id}`,
                     undefined,
                     correlationId,
@@ -429,7 +429,7 @@ function registerAiReviewRoutes(app: FastifyInstance, services: ServiceRegistry)
             const authHeaders = buildAuthHeaders(request);
 
             try {
-                const data = await atsService().post(
+                const data = await aiService().post(
                     '/api/v2/ai-reviews',
                     request.body,
                     correlationId,

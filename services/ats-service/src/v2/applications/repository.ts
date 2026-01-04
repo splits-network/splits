@@ -152,10 +152,26 @@ export class ApplicationRepository {
     async createApplication(application: any, clerkUserId?: string): Promise<any> {
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
         
+        // If candidate is submitting (not recruiter), lookup their active recruiter
+        let recruiterId = accessContext.recruiterId || null;
+        if (!recruiterId && application.candidate_id) {
+            const { data: recruiterRelationship } = await this.supabase
+                .schema('network')
+                .from('recruiter_candidates')
+                .select('recruiter_id')
+                .eq('candidate_id', application.candidate_id)
+                .eq('status', 'active')
+                .single();
+            
+            if (recruiterRelationship) {
+                recruiterId = recruiterRelationship.recruiter_id;
+            }
+        }
+        
         const { data, error } = await this.supabase
             .schema('ats')
             .from('applications')
-            .insert({...application, recruiter_id: accessContext.recruiterId || null })
+            .insert({...application, recruiter_id: recruiterId })
             .select()
             .single();
 
@@ -440,6 +456,9 @@ export class ApplicationRepository {
                 file_size: originalDoc.file_size,
                 uploaded_by_user_id: originalDoc.uploaded_by_user_id,
                 processing_status: originalDoc.processing_status,
+                processing_started_at: originalDoc.processing_started_at,
+                processing_completed_at: originalDoc.processing_completed_at,
+                processing_error: originalDoc.processing_error,
                 metadata: {
                     ...originalDoc.metadata,
                     is_primary: isPrimary,

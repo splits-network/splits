@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { getAIReview, requestNewAIReview, type AIReview } from '@/lib/api';
+import { createAuthenticatedClient } from '@/lib/api-client';
+import type { AIReview } from '@splits-network/shared-types';
 
 interface AIReviewPanelProps {
     applicationId: string;
@@ -76,9 +77,17 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                     setLoading(false);
                     return;
                 }
-                const review = await getAIReview(applicationId, token);
-                setAIReview(review);
-                setError(null);
+                const client = createAuthenticatedClient(token);
+                const response = await client.get<{ data: AIReview[] }>('/ai-reviews', { params: { application_id: applicationId } });
+                // V2 API returns { data: [...] } envelope, get first review
+                const reviews = response.data;
+                if (reviews && reviews.length > 0) {
+                    setAIReview(reviews[0]);
+                    setError(null);
+                } else {
+                    setAIReview(null);
+                    setError(null);
+                }
             } catch (err) {
                 // Network errors or other API errors
                 console.error('Error fetching AI review:', err);
@@ -100,8 +109,10 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                 setError('Authentication required');
                 return;
             }
-            const newReview = await requestNewAIReview(applicationId, token);
-            setAIReview(newReview);
+            const client = createAuthenticatedClient(token);
+            const response = await client.post<{ data: AIReview }>('/ai-reviews', { application_id: applicationId });
+            // V2 API returns { data: {...} } envelope
+            setAIReview(response.data);
         } catch (err) {
             console.error('Error requesting new AI review:', err);
             setError(err instanceof Error ? err.message : 'Failed to request new review');
@@ -236,7 +247,7 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                 </div>
 
                 {/* Strengths */}
-                {aiReview.strengths.length > 0 && (
+                {aiReview.strengths && aiReview.strengths.length > 0 && (
                     <div className="mt-4">
                         <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
                             <i className="fa-solid fa-circle-check text-success"></i>
@@ -251,7 +262,7 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                 )}
 
                 {/* Concerns */}
-                {aiReview.concerns.length > 0 && (
+                {aiReview.concerns && aiReview.concerns.length > 0 && (
                     <div className="mt-4">
                         <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
                             <i className="fa-solid fa-circle-exclamation text-warning"></i>
@@ -266,46 +277,48 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                 )}
 
                 {/* Skills Match */}
-                <div className="mt-4">
-                    <h3 className="font-semibold text-lg mb-2">Skills Analysis</h3>
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="text-sm">Skills Match:</span>
-                        <div className="flex-1">
-                            <progress
-                                className="progress progress-success w-full"
-                                value={aiReview.skills_match_percentage}
-                                max="100"
-                            ></progress>
+                {aiReview.skills_match_percentage !== null && aiReview.skills_match_percentage !== undefined && (
+                    <div className="mt-4">
+                        <h3 className="font-semibold text-lg mb-2">Skills Analysis</h3>
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="text-sm">Skills Match:</span>
+                            <div className="flex-1">
+                                <progress
+                                    className="progress progress-success w-full"
+                                    value={aiReview.skills_match_percentage}
+                                    max="100"
+                                ></progress>
+                            </div>
+                            <span className="text-sm font-semibold">{aiReview.skills_match_percentage}%</span>
                         </div>
-                        <span className="text-sm font-semibold">{aiReview.skills_match_percentage}%</span>
+
+                        {aiReview.matched_skills && aiReview.matched_skills.length > 0 && (
+                            <div className="mb-2">
+                                <span className="text-sm font-medium">Matched Skills:</span>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                    {aiReview.matched_skills.map((skill, index) => (
+                                        <span key={index} className="badge badge-success badge-sm">{skill}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {aiReview.missing_skills && aiReview.missing_skills.length > 0 && (
+                            <div>
+                                <span className="text-sm font-medium">Skills to Develop:</span>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                    {aiReview.missing_skills.map((skill, index) => (
+                                        <span key={index} className="badge badge-warning badge-sm">{skill}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
-
-                    {aiReview.matched_skills.length > 0 && (
-                        <div className="mb-2">
-                            <span className="text-sm font-medium">Matched Skills:</span>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                                {aiReview.matched_skills.map((skill, index) => (
-                                    <span key={index} className="badge badge-success badge-sm">{skill}</span>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {aiReview.missing_skills.length > 0 && (
-                        <div>
-                            <span className="text-sm font-medium">Skills to Develop:</span>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                                {aiReview.missing_skills.map((skill, index) => (
-                                    <span key={index} className="badge badge-warning badge-sm">{skill}</span>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
+                )}
 
                 {/* Experience & Location */}
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {aiReview.candidate_years !== undefined && aiReview.required_years !== undefined && (
+                    {aiReview.candidate_years !== null && aiReview.candidate_years !== undefined && aiReview.required_years !== null && aiReview.required_years !== undefined && (
                         <div>
                             <h4 className="font-medium text-sm mb-1">Experience</h4>
                             <div className="flex items-center gap-2">
@@ -321,10 +334,12 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                         </div>
                     )}
 
-                    <div>
-                        <h4 className="font-medium text-sm mb-1">Location</h4>
-                        <span className="text-sm">{getLocationLabel(aiReview.location_compatibility)}</span>
-                    </div>
+                    {aiReview.location_compatibility && (
+                        <div>
+                            <h4 className="font-medium text-sm mb-1">Location</h4>
+                            <span className="text-sm">{getLocationLabel(aiReview.location_compatibility)}</span>
+                        </div>
+                    )}
                 </div>
 
                 {/* Analysis Info */}

@@ -36,7 +36,7 @@ async function main() {
         openapi: {
             info: {
                 title: 'Splits Network Automation API',
-                description: 'AI matching, fraud detection, and automation rules',
+                description: 'Fraud detection, and automation rules',
                 version: '1.0.0',
             },
             servers: [{ url: 'http://localhost:3007' }],

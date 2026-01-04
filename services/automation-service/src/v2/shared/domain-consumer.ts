@@ -6,7 +6,6 @@
 import * as amqp from 'amqplib';
 import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
-import { AIReviewService } from '../ai-review/service';
 
 export class DomainEventConsumer {
     private connection: amqp.ChannelModel | null = null;

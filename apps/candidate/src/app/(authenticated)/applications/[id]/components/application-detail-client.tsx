@@ -2,15 +2,11 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
+import { createAuthenticatedClient } from '@/lib/api-client';
 import { ProposalAlert } from './proposal-alert';
 import { DeclineModal } from './decline-modal';
 import { ProposalResponseWizard, type WizardData } from './proposal-response-wizard';
-import {
-    uploadDocument,
-    getJobPreScreenQuestions,
-    saveJobPreScreenAnswers,
-    updateApplication,
-} from '@/lib/api';
 
 interface ApplicationDetailClientProps {
     application: any;
@@ -20,6 +16,7 @@ interface ApplicationDetailClientProps {
 
 export function ApplicationDetailClient({ application, job, token }: ApplicationDetailClientProps) {
     const router = useRouter();
+    const { getToken } = useAuth();
     const [showDeclineModal, setShowDeclineModal] = useState(false);
     const [showWizard, setShowWizard] = useState(false);
     const [preScreenQuestions, setPreScreenQuestions] = useState<any[] | null>(null);
@@ -33,7 +30,11 @@ export function ApplicationDetailClient({ application, job, token }: Application
         try {
             setError(null);
 
-            const questions = await getJobPreScreenQuestions(application.job_id, token);
+            const client = createAuthenticatedClient(token);
+            const response = await client.get(`/job-pre-screen-questions`, {
+                params: { job_id: application.job_id }
+            });
+            const questions = response.data || response;
             setPreScreenQuestions(Array.isArray(questions) ? questions : []);
             setShowWizard(true);
         } catch (err) {
@@ -45,16 +46,13 @@ export function ApplicationDetailClient({ application, job, token }: Application
         try {
             setError(null);
 
-            await updateApplication(
-                application.id,
-                {
-                    stage: 'rejected',
-                    decline_reason: reason,
-                    decline_details: details,
-                    candidate_notes: details,
-                },
-                token
-            );
+            const client = createAuthenticatedClient(token);
+            await client.patch(`/applications/${application.id}`, {
+                stage: 'rejected',
+                decline_reason: reason,
+                decline_details: details,
+                candidate_notes: details,
+            });
 
             // Refresh page to show updated state
             router.refresh();
@@ -72,17 +70,27 @@ export function ApplicationDetailClient({ application, job, token }: Application
                 throw new Error('Missing candidate profile for this application');
             }
 
+            // Get a fresh token for API calls
+            const freshToken = await getToken();
+            if (!freshToken) {
+                throw new Error('Authentication required. Please sign in again.');
+            }
+
+            const client = createAuthenticatedClient(freshToken);
+
             // Step 1: Upload new documents (if any)
             const newDocumentIds: string[] = [];
             for (const file of wizardData.documents) {
                 const formData = new FormData();
                 formData.append('file', file);
-                formData.append('document_type', file.name.toLowerCase().includes('resume') ? 'resume' : 'other');
                 formData.append('entity_type', 'candidate');
                 formData.append('entity_id', candidateId);
+                const docType = file.name.toLowerCase().includes('resume') ? 'resume' : 'other';
+                formData.append('document_type', docType);
 
-                const uploaded = await uploadDocument(formData, token);
-                newDocumentIds.push(uploaded.id);
+                const uploaded = await client.uploadDocument(formData);
+                const doc = uploaded.data || uploaded;
+                newDocumentIds.push(doc.id);
             }
 
             // Combine existing and newly uploaded document IDs
@@ -102,24 +110,41 @@ export function ApplicationDetailClient({ application, job, token }: Application
             }
 
             // Step 2: Save pre-screen answers via V2 endpoint
-            await saveJobPreScreenAnswers(application.id, wizardData.preScreenAnswers, token);
+            // Transform answers from { questionId: answer } to array format
+            const answersArray = Object.entries(wizardData.preScreenAnswers).map(
+                ([question_id, answer]) => ({
+                    application_id: application.id,
+                    question_id,
+                    answer,
+                })
+            );
+
+            await client.post('/job-pre-screen-answers', {
+                answers: answersArray,
+            });
 
             // Step 3: Update application via V2 PATCH
-            await updateApplication(
-                application.id,
-                {
-                    stage: 'ai_review',
-                    document_ids: allDocumentIds,
-                    primary_resume_id: primaryResumeId,
-                    candidate_notes: wizardData.notes || undefined,
-                },
-                token
-            );
+            await client.patch(`/applications/${application.id}`, {
+                stage: 'ai_review',
+                document_ids: allDocumentIds,
+                primary_resume_id: primaryResumeId,
+                candidate_notes: wizardData.notes || undefined,
+            });
 
             // Success - refresh page
             router.refresh();
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to complete application');
+        } catch (err: any) {
+            console.error('Error completing application:', err);
+            if (err instanceof Error) {
+                console.error('Error message:', err.message);
+                console.error('Error stack:', err.stack);
+            }
+            // Extract more specific error message if available
+            const errorMessage = err?.response?.data?.error?.message
+                || err?.message
+                || 'Failed to complete application';
+            console.error('Detailed error:', errorMessage);
+            setError(errorMessage);
             throw err; // Re-throw so wizard can handle it
         }
     };

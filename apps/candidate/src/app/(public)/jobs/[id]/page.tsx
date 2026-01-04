@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
-import { apiClient, getMyApplications } from '@/lib/api-client';
-import { getMyRecruiters } from '@/lib/api';
+import { apiClient, createAuthenticatedClient } from '@/lib/api-client';
 import JobDetailClient from './components/job-detail-client';
 
 interface JobRequirement {
@@ -48,7 +47,7 @@ export default async function JobDetailPage({ params }: PageProps) {
     let existingApplication: any = null;
 
     try {
-        const response = await apiClient.getJob(id);
+        const response = await apiClient.get<{ data: Job }>(`/jobs/${id}`);
         job = response.data;
     } catch (error) {
         console.error('Failed to fetch job:', error);
@@ -64,15 +63,16 @@ export default async function JobDetailPage({ params }: PageProps) {
         try {
             const token = await getToken();
             if (token) {
+                const authClient = createAuthenticatedClient(token);
                 const [recruitersResponse, applicationsResponse] = await Promise.all([
-                    getMyRecruiters(token),
-                    getMyApplications(token),
+                    authClient.get<{ data: any[] }>('/recruiter-candidates'),
+                    authClient.get<{ data: any[] }>('/applications'),
                 ]);
 
-                hasActiveRecruiter = recruitersResponse.active && recruitersResponse.active.length > 0;
+                hasActiveRecruiter = recruitersResponse.data && recruitersResponse.data.length > 0;
 
                 // Check for existing application to this job
-                const applications = (applicationsResponse as any).data || applicationsResponse || [];
+                const applications = applicationsResponse.data || [];
                 existingApplication = applications.find(
                     (app: any) => app.job_id === id && !['rejected', 'withdrawn'].includes(app.stage)
                 );

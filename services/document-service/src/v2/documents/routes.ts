@@ -126,6 +126,7 @@ export async function registerDocumentRoutes(
 
             return reply.code(201).send({ data: document });
         } catch (error: any) {
+            request.log.error({ error: error.message, stack: error.stack }, 'Document upload failed');
             return reply.code(400).send({
                 error: { message: error.message || 'Failed to upload document' },
             });

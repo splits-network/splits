@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { uploadDocument } from '@/lib/api';
 
 interface UploadDocumentModalProps {
     entityType: string;
@@ -63,14 +62,14 @@ export default function UploadDocumentModal({
 
         try {
             console.log('Starting upload...', { file: file.name, entityType, entityId, selectedDocType });
-            
+
             const token = await getToken();
             if (!token) {
                 throw new Error('No auth token available');
             }
 
             console.log('Got auth token, creating FormData...');
-            
+
             const formData = new FormData();
             formData.append('file', file);
             formData.append('entity_type', entityType);

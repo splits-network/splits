@@ -252,7 +252,7 @@ export class DomainConsumer {
             entity_type: doc.entity_type,
             entity_id: doc.entity_id,
             file_path: doc.storage_path,
-            bucket_name: doc.bucket_name,
+            bucket_name: 'documents', // Hard-coded bucket name used by document-service
             filename: doc.filename,
             mime_type: (doc as any).content_type, // Database field is content_type
             file_size: doc.file_size,

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
-import { getMyDocuments, getMyCandidateProfile, getCurrentUser, deleteDocument } from '@/lib/api';
 import UploadDocumentModal from '@/components/upload-document-modal';
 import { useToast } from '@/lib/toast-context';
 

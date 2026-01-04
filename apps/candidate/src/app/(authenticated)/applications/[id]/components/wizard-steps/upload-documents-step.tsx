@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { getMyDocuments } from '@/lib/api-client';
+import { createAuthenticatedClient } from '@/lib/api-client';
 import type { Document } from '@/lib/document-utils';
 
 interface UploadDocumentsStepProps {
@@ -53,7 +53,9 @@ export function UploadDocumentsStep({
                 return;
             }
 
-            const docs = await getMyDocuments(token);
+            const client = createAuthenticatedClient(token);
+            const response = await client.get('/documents');
+            const docs = response.data || response;
             setExistingDocs(docs);
         } catch (err) {
             console.error('Failed to load existing documents:', err);

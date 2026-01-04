@@ -141,13 +141,15 @@ export default function JobsListClient({
             setLoading(true);
             setStatsLoading(true);
 
-            const response = await apiClient.getJobs({
-                search: searchQuery || undefined,
-                location: locationQuery || undefined,
-                employment_type: typeFilter || undefined,
+            const params: Record<string, any> = {
                 limit: JOBS_PER_PAGE,
                 page: currentPage,
-            });
+            };
+            if (searchQuery) params.search = searchQuery;
+            if (locationQuery) params.location = locationQuery;
+            if (typeFilter) params.employment_type = typeFilter;
+
+            const response = await apiClient.get<JobsResponse>('/jobs', { params });
             const fetchedJobs = response.data || [] as Job[];
             const pagination = response.pagination;
             const totalCount = pagination?.total ?? fetchedJobs.length;

@@ -182,21 +182,23 @@ export class DomainEventConsumer {
      */
     async handleAIReviewCompleted(event: any): Promise<void> {
         try {
+            const payload = event.payload;
+
             this.logger.info(
                 { 
-                    application_id: event.application_id,
-                    ai_review_id: event.ai_review_id,
-                    fit_score: event.fit_score,
-                    recommendation: event.recommendation 
+                    application_id: payload.application_id,
+                    ai_review_id: payload.ai_review_id,
+                    fit_score: payload.fit_score,
+                    recommendation: payload.recommendation 
                 },
                 'Processing ai_review.completed event'
             );
 
             // Fetch the application to get current state and check recruiter assignment
-            const application = await this.applicationRepository.findApplication(event.application_id, 'internal-service');
+            const application = await this.applicationRepository.findApplication(payload.application_id, 'internal-service');
             if (!application) {
                 this.logger.warn(
-                    { application_id: event.application_id },
+                    { application_id: payload.application_id },
                     'Application not found for AI review completion'
                 );
                 return;
@@ -229,44 +231,40 @@ export class DomainEventConsumer {
 
             // Only update stage if it's different from current stage
             if (application.stage !== nextStage) {
-                // TODO: Update the application stage in the database
-                // ApplicationRepository doesn't have update method - need to implement
-                this.logger.info(
-                    {
-                        application_id: application.id,
-                        previous_stage: application.stage,
-                        new_stage: nextStage
-                    },
-                    'Would update application stage after AI review (update method not implemented)'
-                );
-
-                const updatedApplication = application; // Temp: use existing application
+                // Update the application stage in the database
+                const updatedApplication = await this.applicationRepository.updateApplication(application.id, {
+                    stage: nextStage
+                });
 
                 this.logger.info(
                     {
                         application_id: updatedApplication.id,
                         previous_stage: application.stage,
                         new_stage: nextStage,
-                        ai_review_id: event.ai_review_id
+                        ai_review_id: payload.ai_review_id
                     },
                     'Updated application stage after AI review'
                 );
 
                 // Publish application.stage_changed event for other services
+                // CRITICAL: Use old_stage to match ApplicationStageChangedEvent interface
                 const stageChangeEvent = {
-                    application_id: updatedApplication.id,
-                    candidate_id: updatedApplication.candidate_id,
-                    job_id: updatedApplication.job_id,
-                    recruiter_id: updatedApplication.recruiter_id,
-                    previous_stage: application.stage,
-                    new_stage: nextStage,
-                    changed_by: 'ai-service',
-                    reason: 'ai_review_completed',
+                    event_id: `evt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    event_type: 'application.stage_changed',
                     timestamp: new Date().toISOString(),
+                    source_service: 'ats-service',
+                    payload: {
+                        application_id: updatedApplication.id,
+                        candidate_id: updatedApplication.candidate_id,
+                        job_id: updatedApplication.job_id,
+                        recruiter_id: updatedApplication.recruiter_id,
+                        old_stage: application.stage,
+                        new_stage: nextStage,
+                    },
                     metadata: {
-                        ai_review_id: event.ai_review_id,
-                        fit_score: event.fit_score,
-                        recommendation: event.recommendation
+                        ai_review_id: payload.ai_review_id,
+                        fit_score: payload.fit_score,
+                        recommendation: payload.recommendation
                     }
                 };
 

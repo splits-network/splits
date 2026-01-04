@@ -7,6 +7,7 @@ import BackToDraftButton from '@/components/back-to-draft-button';
 import AIReviewPanel from '@/components/ai-review-panel';
 import { ApplicationDetailClient } from './components/application-detail-client';
 import EditDraftButton from './components/edit-draft-button';
+import { createAuthenticatedClient } from '@/lib/api-client';
 
 const getStatusColor = (stage: string) => {
     switch (stage) {
@@ -78,33 +79,22 @@ export default async function ApplicationDetailPage({
 
     // Await params in Next.js 15+
     const { id } = await params;
-    // Fetch application data server-side
+
+    // Fetch application data using api-client
     let application: any = null;
     let job: any = {};
     let recruiter: any = null;
 
     try {
-        const apiBase = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
-        const response = await fetch(`${apiBase}/api/v2/applications/${id}?include=job,recruiter,documents,pre_screen_answers`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            cache: 'no-store',
+        const includes = ['job', 'recruiter', 'documents', 'pre_screen_answers'];
+        const client = createAuthenticatedClient(token);
+        const response = await client.get(`/applications/${id}`, {
+            params: { include: includes.join(',') }
         });
 
-        if (!response.ok) {
-            if (response.status === 404) {
-                notFound();
-            }
-            throw new Error(`Failed to fetch application: ${response.status}`);
-        }
-
-        const payload = await response.json();
-        const data = payload.data || payload;
-        application = data;
-        job = data.job || {};
-        recruiter = (data as any).recruiter || null;
+        application = response.data || response;
+        job = application.job || {};
+        recruiter = application.recruiter || null;
     } catch (err) {
         console.error('Error fetching application:', err);
         notFound();

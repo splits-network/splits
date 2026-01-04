@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { getJob, getPreScreenQuestions, getMyDocuments, submitApplication, updateApplication } from '@/lib/api-client';
+import { createAuthenticatedClient } from '@/lib/api-client';
 import StepIndicator from '@/components/application-wizard/step-indicator';
 import StepDocuments from '@/components/application-wizard/step-documents';
 import StepQuestions from '@/components/application-wizard/step-questions';
@@ -66,17 +66,16 @@ export default function ApplicationWizardModal({
                     throw new Error('Authentication required');
                 }
 
+                const authClient = createAuthenticatedClient(token);
                 const [jobResponse, questionsResponse, documentsResponse] = await Promise.all([
-                    getJob(jobId, token),
-                    getPreScreenQuestions(jobId, token),
-                    getMyDocuments(token),
+                    authClient.get<{ data: any }>(`/jobs/${jobId}`),
+                    authClient.get<{ data: any[] }>(`/job-pre-screen-questions?job_id=${jobId}`),
+                    authClient.get<{ data: any[] }>('/documents'),
                 ]);
 
-                const jobData = (jobResponse as any).data;
-                const questionsData = (questionsResponse as any).data || [];
-                let documentsData = Array.isArray(documentsResponse)
-                    ? documentsResponse
-                    : ((documentsResponse as any).data || []);
+                const jobData = jobResponse.data;
+                const questionsData = questionsResponse.data || [];
+                let documentsData = documentsResponse.data || [];
 
                 // If editing an existing application, merge its documents and remove duplicates by original_document_id
                 if (existingApplication?.documents?.length > 0) {
@@ -140,26 +139,25 @@ export default function ApplicationWizardModal({
                 throw new Error('Authentication required');
             }
 
-            let result;
             let applicationId;
+            const authClient = createAuthenticatedClient(token);
 
             if (existingApplication) {
                 // Update existing draft application and move to ai_review
-                const { updateApplication } = await import('@/lib/api-client');
-                result = await updateApplication(
-                    existingApplication.id,
+                const result = await authClient.patch<{ data: any }>(
+                    `/applications/${existingApplication.id}`,
                     {
                         document_ids: formData.documents.selected,
                         primary_resume_id: formData.documents.primary_resume_id!,
                         notes: formData.notes,
                         stage: 'ai_review',
-                    },
-                    token
+                    }
                 );
                 applicationId = existingApplication.id;
             } else {
                 // Create new application
-                result = await submitApplication(
+                const result = await authClient.post<{ data: any }>(
+                    '/applications',
                     {
                         job_id: jobId,
                         document_ids: formData.documents.selected,
@@ -167,11 +165,10 @@ export default function ApplicationWizardModal({
                         pre_screen_answers: formData.pre_screen_answers,
                         notes: formData.notes,
                         stage: 'ai_review',
-                    },
-                    token
+                    }
                 );
                 // V2 API returns { data: <application> } directly
-                applicationId = (result as any).data.id;
+                applicationId = result.data.id;
             }
 
             // Call success callback if provided
@@ -199,26 +196,25 @@ export default function ApplicationWizardModal({
                 throw new Error('Authentication required');
             }
 
-            let result;
             let applicationId;
+            const authClient = createAuthenticatedClient(token);
 
             if (existingApplication) {
                 // Update existing draft application (keep as draft)
-                const { updateApplication } = await import('@/lib/api-client');
-                result = await updateApplication(
-                    existingApplication.id,
+                const result = await authClient.patch<{ data: any }>(
+                    `/applications/${existingApplication.id}`,
                     {
                         document_ids: formData.documents.selected,
                         primary_resume_id: formData.documents.primary_resume_id!,
                         notes: formData.notes,
                         stage: 'draft',
-                    },
-                    token
+                    }
                 );
                 applicationId = existingApplication.id;
             } else {
                 // Create new application as draft
-                result = await submitApplication(
+                const result = await authClient.post<{ data: any }>(
+                    '/applications',
                     {
                         job_id: jobId,
                         document_ids: formData.documents.selected,
@@ -226,11 +222,10 @@ export default function ApplicationWizardModal({
                         pre_screen_answers: formData.pre_screen_answers,
                         notes: formData.notes,
                         stage: 'draft',
-                    },
-                    token
+                    }
                 );
                 // V2 API returns { data: <application> } directly
-                applicationId = (result as any).data.id;
+                applicationId = result.data.id;
             }
 
             // Call success callback if provided

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
 import { useAuth } from '@clerk/nextjs';
 import { redirect } from 'next/navigation';
-import { getMyApplications } from '@/lib/api-client';
+import { createAuthenticatedClient } from '@/lib/api-client';
 import { useViewMode } from '@/hooks/useViewMode';
 import { useToast } from '@/lib/toast-context';
 import ApplicationCard from './components/application-card';
@@ -42,7 +42,8 @@ export default function ApplicationsPage({
             }
 
             try {
-                const data = await getMyApplications(token);
+                const client = createAuthenticatedClient(token);
+                const data = await client.get('/applications');
                 setApplications((data as any).data || data || []);
             } catch (err) {
                 console.error('Error fetching applications:', err);

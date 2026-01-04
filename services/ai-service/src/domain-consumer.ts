@@ -87,8 +87,12 @@ export class DomainEventConsumer {
                     }, 'Event processed successfully');
                     
                 } catch (error) {
+                    const errorDetails = error instanceof Error 
+                        ? { message: error.message, stack: error.stack }
+                        : { error: String(error) };
+                    
                     this.logger.error({
-                        error,
+                        ...errorDetails,
                         message: msg.content.toString()
                     }, 'Error processing event');
                     
@@ -167,7 +171,9 @@ export class DomainEventConsumer {
      * Trigger AI review when application transitions TO ai_review stage
      */
     private async handleApplicationStageChanged(event: DomainEvent): Promise<void> {
-        const { application_id, old_stage, new_stage, candidate_id, job_id } = event.payload;
+        // Support both old_stage (standard) and previous_stage (ATS domain consumer publishes with this)
+        const { application_id, new_stage, candidate_id, job_id } = event.payload;
+        const old_stage = event.payload.old_stage || event.payload.previous_stage;
 
         // Only process when transitioning TO ai_review
         if (new_stage !== 'ai_review') {
