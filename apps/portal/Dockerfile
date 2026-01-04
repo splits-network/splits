@@ -42,10 +42,10 @@ COPY packages/shared-api-client ./packages/shared-api-client
 COPY packages/shared-config ./packages/shared-config
 COPY packages/shared-types ./packages/shared-types
 COPY apps/portal ./apps/portal
-# Build shared packages first (creates dist/ for other services)
-RUN pnpm --filter @splits-network/shared-api-client build
-RUN pnpm --filter @splits-network/shared-config build
+# Build shared packages first (in dependency order - types/config first, then api-client which depends on them)
 RUN pnpm --filter @splits-network/shared-types build
+RUN pnpm --filter @splits-network/shared-config build
+RUN pnpm --filter @splits-network/shared-api-client build
 # Then build portal (will transpile packages from source)
 RUN pnpm --filter @splits-network/portal build
 
