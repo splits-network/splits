@@ -257,27 +257,32 @@ export class ApplicationRepository {
             const { data: identityUser } = await this.supabase
                 .schema('identity')
                 .from('users')
-                .select('id, name, email, phone')
+                .select('id, name, email')
                 .eq('id', data.user_id)
                 .maybeSingle();
-
+                
             if (identityUser) {
                 userInfo = identityUser;
             }
         }
 
         // Flatten structure for easy access in UI
-        const name = userInfo?.name || data.name || '';
-        const nameParts = name.split(' ');
+        // Try to get name from: identity user > recruiter.name > first_name/last_name > empty
+        let name = userInfo?.name || data.name || '';
+        if (!name && (data.first_name || data.last_name)) {
+            name = `${data.first_name || ''} ${data.last_name || ''}`.trim();
+        }
+        const nameParts = name.split(' ').filter(Boolean);
         
         return {
             ...data,
             user: userInfo,
             // Flatten user info for direct access
-            first_name: nameParts[0] || '',
-            last_name: nameParts.slice(1).join(' ') || '',
+            first_name: nameParts[0] || data.first_name || '',
+            last_name: nameParts.slice(1).join(' ') || data.last_name || '',
             email: userInfo?.email || data.email || null,
             phone: userInfo?.phone || data.phone || null,
+            recruiter_name: name || `Recruiter ${recruiterId.substring(0, 8)}`,
         };
     }
 

@@ -92,22 +92,14 @@ export default async function ApplicationDetailPage({
             params: { include: includes.join(',') }
         });
 
-        console.log('Application response:', JSON.stringify(response, null, 2));
-
         // Response from V2 API is wrapped in { data: { ... } }
         const responseData = (response as any).data;
         application = responseData || response;
         job = application?.job || {};
         recruiter = application?.recruiter || null;
-
-        console.log('Extracted recruiter:', recruiter);
-    } catch (err) {
-        console.error('Error fetching application:', err);
-        notFound();
-    }
-
-    if (!application) {
-        notFound();
+    } catch (error) {
+        console.error('Error fetching application data:', error);
+        return notFound();
     }
 
     const company = job.company || {};
@@ -523,12 +515,44 @@ export default async function ApplicationDetailPage({
                                 </h2>
 
                                 <div className="space-y-3">
-                                    <div>
-                                        <div className="text-sm text-base-content/60">Name</div>
-                                        <div className="font-medium">
-                                            {recruiter.first_name} {recruiter.last_name}
+                                    {(recruiter.recruiter_name || recruiter.tagline) && (
+                                        <div>
+                                            <div className="text-sm text-base-content/60">Recruiter</div>
+                                            <div className="font-semibold text-lg">{recruiter.recruiter_name || recruiter.tagline}</div>
                                         </div>
-                                    </div>
+                                    )}
+
+                                    {recruiter.tagline && recruiter.recruiter_name && (
+                                        <div>
+                                            <div className="text-sm text-base-content/60">Tagline</div>
+                                            <div className="font-medium">{recruiter.tagline}</div>
+                                        </div>
+                                    )}
+
+                                    {recruiter.bio && (
+                                        <div>
+                                            <div className="text-sm text-base-content/60">Bio</div>
+                                            <p className="text-sm">{recruiter.bio}</p>
+                                        </div>
+                                    )}
+
+                                    {recruiter.years_experience && (
+                                        <div>
+                                            <div className="text-sm text-base-content/60">Years of Experience</div>
+                                            <div className="font-medium">{recruiter.years_experience} years</div>
+                                        </div>
+                                    )}
+
+                                    {recruiter.specialties && recruiter.specialties.length > 0 && (
+                                        <div>
+                                            <div className="text-sm text-base-content/60">Specialties</div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {recruiter.specialties.map((specialty: string) => (
+                                                    <span key={specialty} className="badge badge-sm">{specialty}</span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {recruiter.email && (
                                         <div>
