@@ -49,11 +49,17 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
 COPY services/document-processing-service/ ./services/document-processing-service/
 COPY packages/ ./packages/
 
-# Install dependencies (production only)
-RUN pnpm install --frozen-lockfile --prod
+# Install all dependencies (including devDependencies for build)
+RUN pnpm install --frozen-lockfile
 
 # Build the application
 RUN pnpm --filter @splits-network/document-processing-service build
+
+# Prune to production dependencies after build
+RUN pnpm --filter @splits-network/document-processing-service --prod deploy /tmp/pruned
+
+# Copy pruned production files back
+RUN rm -rf node_modules && mv /tmp/pruned/node_modules ./node_modules
 
 # Create non-root user
 RUN groupadd -r docprocessor && useradd -r -g docprocessor docprocessor
