@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ApiClient } from '@/lib/api-client';
+import { ApiClient, createAuthenticatedClient } from '@/lib/api-client';
 import { getActivityIcon, getJobStatusBadge } from '@/lib/utils';
 
 interface CompanyStats {
@@ -54,10 +54,10 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
     const loadDashboardData = async () => {
         setLoading(true);
         try {
-            const api = new ApiClient();
+            const api = createAuthenticatedClient(token);
 
             // Load company stats using V2 endpoint
-            const statsResponse = await api.get(`/stats?scope=company`);
+            const statsResponse = await api.get('/stats?scope=company');
             setStats(statsResponse.data);
 
             // Load role breakdown using V2 API

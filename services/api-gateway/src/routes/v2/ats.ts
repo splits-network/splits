@@ -349,7 +349,7 @@ function registerStatsRoutes(app: FastifyInstance, services: ServiceRegistry) {
             const correlationId = getCorrelationId(request);
             const authHeaders = buildAuthHeaders(request);
             const queryString = buildQueryString(request.query as Record<string, any>);
-            const path = queryString ? `/v2/stats?${queryString}` : '/v2/stats';
+            const path = queryString ? `/api/v2/stats?${queryString}` : '/api/v2/stats';
             try {
                 const data = await atsService().get(path, undefined, correlationId, authHeaders);
                 return reply.send(data);
