@@ -251,23 +251,33 @@ export class ApplicationRepository {
         if (error) throw error;
         if (!data) return null;
 
-        let user: { id: string; name?: string; email?: string } | undefined = undefined;
+        // Fetch associated identity user for contact info
+        let userInfo: { name?: string; email?: string; phone?: string } | undefined = undefined;
         if (data.user_id) {
             const { data: identityUser } = await this.supabase
                 .schema('identity')
                 .from('users')
-                .select('id, name, email')
+                .select('id, name, email, phone')
                 .eq('id', data.user_id)
                 .maybeSingle();
 
             if (identityUser) {
-                user = identityUser;
+                userInfo = identityUser;
             }
         }
 
+        // Flatten structure for easy access in UI
+        const name = userInfo?.name || data.name || '';
+        const nameParts = name.split(' ');
+        
         return {
             ...data,
-            user,
+            user: userInfo,
+            // Flatten user info for direct access
+            first_name: nameParts[0] || '',
+            last_name: nameParts.slice(1).join(' ') || '',
+            email: userInfo?.email || data.email || null,
+            phone: userInfo?.phone || data.phone || null,
         };
     }
 

@@ -108,15 +108,21 @@ export class DocumentRepositoryV2 {
       // Get existing metadata first
       const existing = await this.getMetadata(id);
       
+      // Only merge defined metadata values (filter out undefined)
+      const cleanMetadata = updates.metadata ? 
+        Object.fromEntries(
+          Object.entries(updates.metadata).filter(([_, v]) => v !== undefined)
+        ) : {};
+      
       updateData.metadata = {
         ...existing,
-        ...updates.metadata,
+        ...cleanMetadata,
       };
       
       // Handle extracted_text as a convenience field
       if (updates.extracted_text !== undefined) {
         updateData.metadata.extracted_text = updates.extracted_text;
-        updateData.text_length = updates.extracted_text?.length || 0;
+        updateData.metadata.text_length = updates.extracted_text?.length || 0;
       }
     }
     
@@ -168,14 +174,20 @@ export class DocumentRepositoryV2 {
     if (updates.metadata || updates.extracted_text) {
       const existing = await this.getMetadata(id);
       
+      // Only merge defined metadata values (filter out undefined)
+      const cleanMetadata = updates.metadata ? 
+        Object.fromEntries(
+          Object.entries(updates.metadata).filter(([_, v]) => v !== undefined)
+        ) : {};
+      
       updateData.metadata = {
         ...existing,
-        ...updates.metadata,
+        ...cleanMetadata,
       };
       
       if (updates.extracted_text !== undefined) {
         updateData.metadata.extracted_text = updates.extracted_text;
-        updateData.text_length = updates.extracted_text?.length || 0;
+        updateData.metadata.text_length = updates.extracted_text?.length || 0;
       }
     }
     
