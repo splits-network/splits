@@ -14,7 +14,7 @@ export class RecruiterServiceV2 {
     ) {}
 
     async getRecruiters(
-        clerkUserId: string,
+        clerkUserId: string | undefined,
         filters: RecruiterFilters
     ): Promise<PaginationResponse<any>> {
         const result = await this.repository.findRecruiters(clerkUserId, filters);
@@ -27,8 +27,8 @@ export class RecruiterServiceV2 {
         );
     }
 
-    async getRecruiter(id: string): Promise<any> {
-        const recruiter = await this.repository.findRecruiter(id);
+    async getRecruiter(id: string, clerkUserId: string | undefined): Promise<any> {
+        const recruiter = await this.repository.findRecruiter(id, clerkUserId);
         if (!recruiter) {
             throw { statusCode: 404, message: 'Recruiter not found' };
         }

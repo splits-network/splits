@@ -246,6 +246,25 @@ async function main() {
             return;
         }
         
+        // Skip auth for public V2 recruiters endpoints (marketplace browsing)
+        // GET /api/v2/recruiters - list all recruiters for marketplace browsing
+        // GET /api/v2/recruiters/:id - view recruiter details for marketplace
+        // Note: Other recruiter endpoints (POST, PATCH, DELETE) require authentication
+        if (request.method === 'GET' && (
+            request.url === '/api/v2/recruiters' ||
+            request.url.startsWith('/api/v2/recruiters?') ||
+            request.url.match(/^\/api\/v2\/recruiters\/[^/?]+(?:\?.*)?$/)
+        )) {
+            // Try to authenticate if token is present, but don't fail if missing
+            try {
+                await authMiddleware.createMiddleware()(request, reply);
+            } catch (error) {
+                // Ignore auth errors for public marketplace endpoint
+                request.log.debug('No valid auth token for public marketplace endpoint, continuing as anonymous');
+            }
+            return;
+        }
+        
         if (request.url.startsWith('/api/v2/status-contact')) {
             return;
         }

@@ -3,7 +3,7 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
+import { apiClient, createAuthenticatedClient } from '@/lib/api-client';
 
 interface MarketplaceRecruiter {
     id: string;
@@ -49,14 +49,10 @@ export default function RecruiterDetailPage() {
             setLoading(true);
             setError('');
 
-            const token = await getToken();
-            if (!token) {
-                setError('Please sign in to view this recruiter.');
-                setLoading(false);
-                return;
-            }
+            // Try to get token, but allow unauthenticated access
+            const token = await getToken().catch(() => null);
+            const client = token ? createAuthenticatedClient(token) : apiClient;
 
-            const client = createAuthenticatedClient(token);
             const result = await client.get<any>(`/recruiters/${recruiterId}`);
             setRecruiter(result.data);
         } catch (err) {

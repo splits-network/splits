@@ -1,6 +1,6 @@
-import { currentUser } from '@clerk/nextjs/server';
+import { currentUser, auth } from '@clerk/nextjs/server';
 import Link from 'next/link';
-import ApiClient from '@/lib/api-client';
+import { createAuthenticatedClient } from '@/lib/api-client';
 
 interface DashboardStats {
     applications: number;
@@ -19,6 +19,7 @@ interface RecentApplication {
 
 export default async function DashboardPage() {
     const user = await currentUser();
+    const { getToken } = await auth();
 
     // Fetch real data from API
     let stats: DashboardStats = {
@@ -30,10 +31,48 @@ export default async function DashboardPage() {
     let recentApplications: RecentApplication[] = [];
 
     try {
-        [stats, recentApplications] = await Promise.all([
-            ApiClient.getDashboardStats(),
-            ApiClient.getRecentApplications(),
-        ]);
+        const token = await getToken();
+        if (token) {
+            const client = createAuthenticatedClient(token);
+
+            // Fetch applications and calculate stats from them
+            const applicationsResponse = await client.get('/applications');
+            const allApplications = applicationsResponse.data || [];
+
+            // Calculate stats from applications
+            stats.applications = allApplications.length;
+            stats.interviews = allApplications.filter((app: any) =>
+                app.stage === 'interview' || app.stage === 'final_interview'
+            ).length;
+            stats.offers = allApplications.filter((app: any) =>
+                app.stage === 'offer'
+            ).length;
+
+            // Fetch recruiter relationships to get active count
+            try {
+                const recruitersResponse = await client.get('/recruiter-candidates');
+                const relationships = recruitersResponse.data || [];
+                stats.active_relationships = relationships.filter((rel: any) =>
+                    rel.status === 'active'
+                ).length;
+            } catch (err) {
+                console.error('Failed to load recruiter relationships:', err);
+            }
+
+            // Get recent applications (last 5)
+            recentApplications = allApplications
+                .sort((a: any, b: any) =>
+                    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                )
+                .slice(0, 5)
+                .map((app: any) => ({
+                    id: app.id,
+                    job_title: app.job?.title || 'Unknown Position',
+                    company: app.job?.company_name || 'Unknown Company',
+                    status: app.stage || 'applied',
+                    applied_at: app.created_at,
+                }));
+        }
     } catch (error) {
         console.error('Failed to load dashboard data:', error);
     }

@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { ServiceRegistry } from '../../clients';
-import { requireAuth } from '../../middleware/auth';
+import { requireAuth, optionalAuth } from '../../middleware/auth';
 import { buildAuthHeaders } from '../../helpers/auth-headers';
 import {
     ResourceDefinition,
@@ -42,13 +42,18 @@ const NETWORK_RESOURCES: ResourceDefinition[] = [
 ];
 
 export function registerNetworkRoutes(app: FastifyInstance, services: ServiceRegistry) {
-    // Register invitation routes FIRST before generic CRUD routes
-    // This ensures /invitations/:token matches before /:id
+    // Register custom routes FIRST before generic CRUD routes
     registerRecruiterCandidateInvitationRoutes(app, services);
     registerTeamRoutes(app, services);
+    registerPublicRecruitersListRoute(app, services);
     
-    // Register generic CRUD routes LAST
-    NETWORK_RESOURCES.forEach(resource => registerResourceRoutes(app, services, resource));
+    // Register generic CRUD routes LAST (skip recruiters as we have custom routes)
+    NETWORK_RESOURCES.filter(r => r.name !== 'recruiters').forEach(resource => 
+        registerResourceRoutes(app, services, resource)
+    );
+    
+    // Register authenticated recruiter routes (POST, PATCH, DELETE, GET by ID)
+    registerAuthenticatedRecruiterRoutes(app, services);
 }
 
 function registerRecruiterCandidateInvitationRoutes(
@@ -292,6 +297,155 @@ function registerTeamRoutes(app: FastifyInstance, services: ServiceRegistry) {
                 return reply.status(204).send();
             } catch (error: any) {
                 return handleNetworkError(request, reply, error, 'Failed to remove member');
+            }
+        }
+    );
+}
+
+/**
+ * Register public recruiters LIST endpoint - allows unauthenticated browsing
+ * This enables the marketplace page to be viewed without authentication
+ */
+function registerPublicRecruitersListRoute(
+    app: FastifyInstance,
+    services: ServiceRegistry
+) {
+    const networkService = () => services.get('network');
+
+    app.get(
+        '/api/v2/recruiters',
+        {
+            preHandler: optionalAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            console.log(`[Gateway V2] /api/v2/recruiters - Request received`);
+            console.log(`[Gateway V2] Query:`, request.query);
+            console.log(`[Gateway V2] Auth:`, request.auth);
+            const correlationId = getCorrelationId(request);
+            
+            try {
+                const data = await networkService().get(
+                    '/api/v2/recruiters',
+                    request.query as Record<string, any>,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to list recruiters');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to list recruiters' });
+            }
+        }
+    );
+
+    // Public recruiter GET by ID endpoint - no auth required (marketplace profile viewing)
+    app.get(
+        '/api/v2/recruiters/:id',
+        {
+            preHandler: optionalAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            
+            try {
+                const data = await networkService().get(
+                    `/api/v2/recruiters/${id}`,
+                    request.query as Record<string, any>,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to get recruiter');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to get recruiter' });
+            }
+        }
+    );
+}
+
+/**
+ * Register authenticated recruiter routes (POST, PATCH, DELETE)
+ * These require authentication as they involve creating/modifying recruiter profiles
+ * Note: GET by ID is now in public routes to allow marketplace profile viewing
+ */
+function registerAuthenticatedRecruiterRoutes(
+    app: FastifyInstance,
+    services: ServiceRegistry
+) {
+    const networkService = () => services.get('network');
+    const routeOptions = (description: string) => ({ preHandler: requireAuth() });
+
+    app.post(
+        '/api/v2/recruiters',
+        routeOptions('Create recruiter'),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            
+            try {
+                const data = await networkService().post(
+                    '/api/v2/recruiters',
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.code(201).send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to create recruiter');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to create recruiter' });
+            }
+        }
+    );
+
+    app.patch(
+        '/api/v2/recruiters/:id',
+        routeOptions('Update recruiter'),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            
+            try {
+                const data = await networkService().patch(
+                    `/api/v2/recruiters/${id}`,
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to update recruiter');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to update recruiter' });
+            }
+        }
+    );
+
+    app.delete(
+        '/api/v2/recruiters/:id',
+        routeOptions('Delete recruiter'),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            
+            try {
+                const data = await networkService().delete(
+                    `/api/v2/recruiters/${id}`,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to delete recruiter');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to delete recruiter' });
             }
         }
     );

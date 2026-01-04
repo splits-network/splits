@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { RecruiterServiceV2 } from './service';
-import { requireUserContext } from '../shared/helpers';
+import { requireUserContext, getOptionalUserContext } from '../shared/helpers';
 import { validatePaginationParams } from '../shared/pagination';
 
 interface RegisterRecruiterRoutesConfig {
@@ -13,7 +13,8 @@ export function registerRecruiterRoutes(
 ) {
     app.get('/api/v2/recruiters', async (request, reply) => {
         try {
-            const { clerkUserId } = requireUserContext(request);
+            // Allow both authenticated and unauthenticated access for marketplace browsing
+            const { clerkUserId } = getOptionalUserContext(request);
             const query = request.query as any;
 
             const pagination = validatePaginationParams(query.page, query.limit);
@@ -37,8 +38,9 @@ export function registerRecruiterRoutes(
 
     app.get('/api/v2/recruiters/:id', async (request, reply) => {
         try {
+            const { clerkUserId } = getOptionalUserContext(request);
             const { id } = request.params as { id: string };
-            const recruiter = await config.recruiterService.getRecruiter(id);
+            const recruiter = await config.recruiterService.getRecruiter(id, clerkUserId);
             return reply.send({ data: recruiter });
         } catch (error: any) {
             return reply

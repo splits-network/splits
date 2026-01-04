@@ -21,3 +21,15 @@ export function requireUserContext(request: FastifyRequest): {
 
     return { clerkUserId };
 }
+
+/**
+ * Extract optional user context from request headers
+ * Used for public endpoints that enhance functionality when authenticated
+ * @returns clerkUserId if present, undefined otherwise
+ */
+export function getOptionalUserContext(request: FastifyRequest): {
+    clerkUserId?: string;
+} {
+    const clerkUserId = request.headers['x-clerk-user-id'] as string | undefined;
+    return { clerkUserId };
+}

@@ -15,31 +15,34 @@ export class RecruiterRepository {
     }
 
     async findRecruiters(
-        clerkUserId: string,
+        clerkUserId: string | undefined,
         filters: RecruiterFilters = {}
     ): Promise<RepositoryListResponse<any>> {
         const page = filters.page || 1;
         const limit = filters.limit || 25;
         const offset = (page - 1) * limit;
 
-        const context = await resolveAccessContext(this.supabase, clerkUserId);
-
         // Build query
         let query = this.supabase
             .schema('network')
             .from('recruiters')
             .select('*', { count: 'exact' });
+
+        // If user is authenticated, apply role-based filtering
+        if (clerkUserId) {
+            const context = await resolveAccessContext(this.supabase, clerkUserId);
             
-        // Apply role-based filtering from access context
-        if (context.recruiterId) {
-            // Recruiters can only see their own profile
-            query = query.eq('user_id', context.identityUserId);
-        } else if (context.organizationIds.length > 0) {
-            // Company users can see recruiters working on their jobs (future enhancement)
-            // For now, no access to recruiter profiles
-            return { data: [], total: 0 };
+            if (context.recruiterId) {
+                // Recruiters can only see their own profile
+                query = query.eq('user_id', context.identityUserId);
+            } else if (context.organizationIds.length > 0) {
+                // Company users can see recruiters working on their jobs (future enhancement)
+                // For now, no access to recruiter profiles
+                return { data: [], total: 0 };
+            }
+            // Platform admins see all recruiters (no filter)
         }
-        // Platform admins see all recruiters (no filter)
+        // Unauthenticated users see all active recruiters (public marketplace)
 
         // Apply filters
         if (filters.search) {
@@ -70,7 +73,13 @@ export class RecruiterRepository {
         };
     }
 
-    async findRecruiter(id: string): Promise<any | null> {
+    async findRecruiter(id: string, clerkUserId: string | undefined): Promise<any | null> {
+        // If no user context, allow viewing active public recruiter profiles
+        let context: AccessContext | null = null;
+        if (clerkUserId) {
+            context = await resolveAccessContext(clerkUserId, this.supabase);
+        }
+
         const { data, error } = await this.supabase
             .schema('network')
             .from('recruiters')
@@ -82,6 +91,14 @@ export class RecruiterRepository {
             if (error.code === 'PGRST116') return null;
             throw error;
         }
+
+        // Apply role-based filtering
+        if (context && context.role === 'recruiter' && context.userId !== data.user_id) {
+            // Recruiters can only see their own full profile details
+            // Other recruiters are visible but with limited info
+            return null;
+        }
+
         return data;
     }
 
