@@ -7,6 +7,7 @@ WORKDIR /app
 FROM base AS dependencies
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY tsconfig.base.json ./
+COPY packages/shared-api-client/package.json ./packages/shared-api-client/
 COPY packages/shared-config/package.json ./packages/shared-config/
 COPY packages/shared-types/package.json ./packages/shared-types/
 COPY apps/candidate/package.json ./apps/candidate/
