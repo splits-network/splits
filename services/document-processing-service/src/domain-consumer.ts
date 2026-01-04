@@ -18,6 +18,8 @@ export interface DocumentUploadedEvent {
   entity_type: 'application' | 'candidate' | 'job' | 'company';
   entity_id: string;
   file_path: string;
+  bucket_name: string;
+  filename: string;
   mime_type: string;
   file_size: number;
   uploaded_at: string;
@@ -128,7 +130,7 @@ export class DomainConsumer {
       });
 
       // 2. Download document from storage
-      const downloadResult = await this.documentService.downloadDocument(event.file_path);
+      const downloadResult = await this.documentService.downloadDocument(event.bucket_name, event.file_path);
       
       logger.debug(`Document downloaded: ${event.document_id} (${downloadResult.size} bytes, ${downloadResult.downloadTimeMs}ms)`);
 
@@ -136,7 +138,7 @@ export class DomainConsumer {
       const extractionResult = await this.textExtractor.extractText(
         downloadResult.buffer,
         event.mime_type,
-        event.document_id
+        event.filename
       );
 
       // 4. Validate extraction quality
@@ -244,12 +246,15 @@ export class DomainConsumer {
       for (const doc of pendingDocs) {
         try {
           // Create synthetic upload event for processing
+          // Note: Database has content_type but our code expects mime_type
           const syntheticEvent: DocumentUploadedEvent = {
             document_id: doc.id,
             entity_type: doc.entity_type,
             entity_id: doc.entity_id,
             file_path: doc.storage_path,
-            mime_type: doc.mime_type,
+            bucket_name: doc.bucket_name,
+            filename: doc.filename,
+            mime_type: (doc as any).content_type, // Database field is content_type
             file_size: doc.file_size,
             uploaded_at: doc.created_at,
             uploaded_by: 'system-retroactive-processing'

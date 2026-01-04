@@ -140,6 +140,8 @@ export class DocumentServiceV2 {
                 entity_type: document.entity_type,
                 entity_id: document.entity_id,
                 file_path: document.file_path,
+                bucket_name: document.storage_bucket,
+                filename: document.file_name,
                 mime_type: document.mime_type,
                 file_size: document.file_size,
                 uploaded_at: document.created_at,
