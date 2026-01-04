@@ -69,23 +69,64 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
 
             const rolesData = rolesResponse.data || [];
 
-            // Transform jobs into role breakdown format with calculated metrics
-            const breakdown: RoleBreakdown[] = rolesData.map((job: any) => {
-                const createdDate = new Date(job.created_at);
-                const now = new Date();
-                const daysOpen = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+            // Fetch applications for all roles to calculate counts
+            const breakdown: RoleBreakdown[] = await Promise.all(
+                rolesData.map(async (job: any) => {
+                    const createdDate = new Date(job.created_at);
+                    const now = new Date();
+                    const daysOpen = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
 
-                return {
-                    id: job.id,
-                    title: job.title,
-                    location: job.location || 'Remote',
-                    status: job.status,
-                    applications_count: job.application_count || 0,
-                    interview_count: job.interview_count || 0,
-                    offer_count: job.offer_count || 0,
-                    days_open: daysOpen
-                };
-            });
+                    // Get applications for this job to calculate stage counts
+                    let applicationsCount = 0;
+                    let interviewCount = 0;
+                    let offerCount = 0;
+
+                    try {
+                        // Fetch all applications with pagination
+                        const allApplications: any[] = [];
+                        let page = 1;
+                        let hasMore = true;
+                        const visibleStages = ['submitted', 'interview', 'offer', 'accepted', 'hired'];
+
+                        while (hasMore) {
+                            const response: any = await api.get('/applications', {
+                                params: {
+                                    job_id: job.id,
+                                    page,
+                                    limit: 100
+                                }
+                            });
+
+                            const pageData = response.data || [];
+                            // Filter to only applications in visible stages
+                            const filtered = pageData.filter((app: any) => visibleStages.includes(app.stage));
+                            allApplications.push(...filtered);
+
+                            // Check if there are more pages
+                            const pagination = response.pagination;
+                            hasMore = pagination && page < pagination.total_pages;
+                            page++;
+                        }
+
+                        applicationsCount = allApplications.length;
+                        interviewCount = allApplications.filter((app: any) => app.stage === 'interview').length;
+                        offerCount = allApplications.filter((app: any) => app.stage === 'offer').length;
+                    } catch (err) {
+                        console.warn(`Failed to fetch applications for job ${job.id}:`, err);
+                    }
+
+                    return {
+                        id: job.id,
+                        title: job.title,
+                        location: job.location || 'Remote',
+                        status: job.status,
+                        applications_count: applicationsCount,
+                        interview_count: interviewCount,
+                        offer_count: offerCount,
+                        days_open: daysOpen
+                    };
+                })
+            );
 
             setRoleBreakdown(breakdown);
 

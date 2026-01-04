@@ -25,8 +25,8 @@ const stages: Array<{ key: ApplicationStage; label: string; color: string }> = [
     { key: 'recruiter_request', label: 'Recruiter Request', color: 'badge-info' },
     { key: 'draft', label: 'Draft', color: 'badge-accent' },
     { key: 'ai_review', label: 'AI Review', color: 'badge-info' },
-    { key: 'submitted', label: 'Submitted', color: 'badge-neutral' },
     { key: 'screen', label: 'Screen', color: 'badge-info' },
+    { key: 'submitted', label: 'Submitted', color: 'badge-neutral' },
     { key: 'interview', label: 'Interview', color: 'badge-primary' },
     { key: 'offer', label: 'Offer', color: 'badge-warning' },
     { key: 'hired', label: 'Hired', color: 'badge-success' },
@@ -63,14 +63,16 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
             }
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.getApplicationsByJob(roleId);
+            const response: any = await client.get('/applications', {
+                params: { job_id: roleId }
+            });
             // V2 API returns { data: [...] }
             const applicationsData = response.data || [];
             setApplications(applicationsData);
 
             // Get company ID from first application (if any)
             if (applicationsData.length > 0) {
-                const jobResponse: any = await client.getJob(roleId);
+                const jobResponse: any = await client.get(`/jobs/${roleId}`);
                 setCompanyId(jobResponse.data?.company_id || '');
             }
         } catch (error) {

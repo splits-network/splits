@@ -51,6 +51,8 @@ export class ApplicationRepository {
         } else if (!accessContext.isPlatformAdmin) {
             if (accessContext.organizationIds.length > 0) {
                 query = query.in('job.company.identity_organization_id', accessContext.organizationIds);
+                // Company admins and hiring managers only see applications in company-relevant stages
+                query = query.in('stage', ['submitted', 'interview', 'offer', 'hired', 'rejected']);
             } else {
                 return {
                     data: [],

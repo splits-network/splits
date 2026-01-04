@@ -139,6 +139,7 @@ export interface MaskedCandidate {
 }
 
 export type ApplicationStage = 
+    | 'withdrawn'  // Candidate withdrew
     | 'recruiter_proposed'  // Recruiter sent job opportunity, awaiting candidate decision
     | 'recruiter_request' // Recruiter requsts candidate to update or change something in the application
     | 'draft'       // Application not yet complete
@@ -149,8 +150,7 @@ export type ApplicationStage =
     | 'offer'       // Offer extended
     | 'hired'       // Candidate accepted offer
     | 'rejected'    // Rejected by recruiter or company
-    | 'withdrawn';  // Candidate withdrew
-
+;
 // Audit log for tracking application actions
 export interface ApplicationAuditLog {
     id: string;
