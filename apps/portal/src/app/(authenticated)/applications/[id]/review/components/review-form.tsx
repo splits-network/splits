@@ -81,7 +81,7 @@ export default function ReviewForm({
             }
 
             const client = createAuthenticatedClient(token);
-            await client.patch(`/v2/applications/${application.id}`, {
+            await client.patch(`/applications/${application.id}`, {
                 stage: 'submitted',
                 recruiter_notes: recruiterNotes || undefined,
             });

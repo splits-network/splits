@@ -120,7 +120,15 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                 if (err instanceof Error && err.message.includes('404')) {
                     setAIReview(null);
                 } else {
-                    setError(err instanceof Error ? err.message : 'Failed to load AI review');
+                    // AI service may be temporarily unavailable - show friendly message instead of error
+                    const errorMsg = err instanceof Error ? err.message : 'Failed to load AI review';
+                    if (errorMsg.includes('500') || errorMsg.includes('fetch failed') || errorMsg.includes('Service call failed')) {
+                        // Service unavailable - silently set to null to hide the panel
+                        console.warn('AI review service temporarily unavailable');
+                        setAIReview(null);
+                    } else {
+                        setError(errorMsg);
+                    }
                 }
             } finally {
                 setLoading(false);
@@ -149,7 +157,13 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
             setAIReview(response.data);
         } catch (err) {
             console.error('Error requesting new AI review:', err);
-            setError(err instanceof Error ? err.message : 'Failed to request new review');
+            const errorMsg = err instanceof Error ? err.message : 'Failed to request new review';
+            // Check if it's a service unavailability error
+            if (errorMsg.includes('500') || errorMsg.includes('fetch failed') || errorMsg.includes('Service call failed')) {
+                setError('AI review service is temporarily unavailable. Please try again later.');
+            } else {
+                setError(errorMsg);
+            }
         } finally {
             setRequesting(false);
         }

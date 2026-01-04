@@ -140,7 +140,16 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
             } catch (err) {
                 // Network errors or other API errors
                 console.error('Error fetching AI review:', err);
-                setError('Unable to load AI review at this time');
+                const errorMsg = err instanceof Error ? err.message : 'Unable to load AI review';
+                // Check if it's a service unavailability error
+                if (errorMsg.includes('500') || errorMsg.includes('fetch failed') || errorMsg.includes('Service call failed')) {
+                    // Service unavailable - silently set to null to hide the panel
+                    console.warn('AI review service temporarily unavailable');
+                    setAIReview(null);
+                    setError(null);
+                } else {
+                    setError('Unable to load AI review at this time');
+                }
             } finally {
                 setLoading(false);
             }
