@@ -33,8 +33,8 @@ export default async function ApplicationDetailPage({
 
     try {
         // Get user profile to determine role
-        const profileResponse: any = await client.getCurrentUser();
-        const profile = profileResponse.data || profileResponse;
+        const profileResponse: any = await client.get('/users?limit=1');
+        const profile = profileResponse.data?.[0] || profileResponse.data || profileResponse;
         const memberships = profile?.memberships || [];
 
         // Determine user role
@@ -50,8 +50,9 @@ export default async function ApplicationDetailPage({
         } else {
             // Try to determine if user is a recruiter by checking if they have a recruiter profile
             try {
-                const recruiterCheckResponse: any = await client.getRecruiterProfile();
-                if (recruiterCheckResponse.data || recruiterCheckResponse) {
+                const recruiterCheckResponse: any = await client.get('/recruiters?limit=1');
+                const recruiters = recruiterCheckResponse.data || [];
+                if (recruiters.length > 0) {
                     userRole = 'recruiter';
                 }
             } catch (err) {
@@ -60,28 +61,22 @@ export default async function ApplicationDetailPage({
             }
         }
 
-        console.log('User role:', userRole, 'Memberships:', memberships);
+        // Get application full details with includes
+        const appResponse: any = await client.get(`/applications/${applicationId}?include=candidate,job,documents,pre_screen_answers,job_requirements`);
+        application = appResponse.data || appResponse;
 
-        // Get application full details
-        const appResponse: any = await client.getApplicationFullDetails(applicationId);
-        const appData = appResponse.data || appResponse;
 
-        console.log('Application response:', appData);
+        job = application.job;
+        candidate = application.candidate;
+        documents = application.documents || [];
+        preScreenAnswers = application.pre_screen_answers || [];
+        questions = application.job_requirements || [];
 
-        application = appData.application || appData;
-        job = appData.job || application.job;
-        candidate = appData.candidate || application.candidate;
-        documents = appData.documents || [];
-        preScreenAnswers = appData.pre_screen_answers || [];
-        questions = appData.questions || [];
-
-        console.log('Parsed application:', application);
 
         // Get audit log for timeline
         try {
-            const auditLogResponse: any = await client.get(`/applications/${applicationId}/audit-log`);
-            auditLogs = auditLogResponse.data || [];
-            console.log('Audit logs:', auditLogs);
+            const auditLogResponse: any = await client.get(`/applications/${applicationId}?include=audit_log`);
+            auditLogs = auditLogResponse.data?.audit_log || [];
         } catch (err) {
             console.warn('Could not fetch audit log:', err);
         }
@@ -90,23 +85,17 @@ export default async function ApplicationDetailPage({
         if (userRole === 'recruiter') {
             // For recruiters: get recruiter profile and check permissions
             try {
-                const recruiterResponse: any = await client.getRecruiterProfile();
-                recruiter = recruiterResponse.data || recruiterResponse;
-                console.log('Recruiter profile:', recruiter);
-                console.log('Application recruiter_id:', application.recruiter_id);
-                console.log('Recruiter id:', recruiter.id);
+                const recruiterResponse: any = await client.get('/recruiters?limit=1');
+                const recruiters = recruiterResponse.data || [];
+                recruiter = recruiters[0] || null;
 
                 // Check recruiter-candidate relationship status
                 if (candidate && recruiter) {
                     try {
-                        const relationshipResponse: any = await client.getRecruiterCandidateRelationship(
-                            recruiter.id,
-                            candidate.id
-                        );
-                        relationship = relationshipResponse.data || relationshipResponse;
-                        console.log('Recruiter-candidate relationship:', relationship);
+                        const relationshipResponse: any = await client.get(`/recruiter-candidates?recruiter_id=${recruiter.id}&candidate_id=${candidate.id}&limit=1`);
+                        const relationships = relationshipResponse.data || [];
+                        relationship = relationships[0] || null;
                     } catch (err) {
-                        console.warn('Could not fetch recruiter-candidate relationship:', err);
                     }
                 }
 
@@ -134,17 +123,11 @@ export default async function ApplicationDetailPage({
             if (companyMembership) {
                 try {
                     // Get company for this organization
-                    const companiesRes: any = await client.get('/companies', {
-                        params: {
-                            identity_organization_id: companyMembership.organization_id,
-                            limit: 1,
-                        },
-                    });
+                    const companiesRes: any = await client.get(`/companies?identity_organization_id=${companyMembership.organization_id}&limit=1`);
                     const companies = companiesRes.data || [];
 
                     if (companies.length > 0) {
                         const userCompanyId = companies[0].id;
-                        console.log('User company ID:', userCompanyId, 'Job company ID:', job?.company_id);
 
                         // Check if application's job belongs to user's company
                         if (job?.company_id !== userCompanyId) {

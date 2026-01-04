@@ -76,14 +76,6 @@ export default function SignUpPage() {
                 code,
             });
 
-            console.log('Verification response:', {
-                status: completeSignUp.status,
-                createdSessionId: completeSignUp.createdSessionId,
-                emailVerification: completeSignUp.verifications?.emailAddress,
-                unverifiedFields: completeSignUp.unverifiedFields,
-                missingFields: completeSignUp.missingFields,
-            });
-
             // Try to complete sign up regardless of status if we have a session
             if (completeSignUp.createdSessionId) {
                 await setActive({ session: completeSignUp.createdSessionId });

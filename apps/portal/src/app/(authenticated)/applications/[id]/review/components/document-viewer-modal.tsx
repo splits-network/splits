@@ -34,8 +34,8 @@ export default function DocumentViewerModal({ document, isOpen, onClose }: Docum
                 }
 
                 const client = createAuthenticatedClient(token);
-                const response: any = await client.getDocument(document.id);
-                const url = response.data?.downloadUrl || response.downloadUrl;
+                const response: any = await client.get(`/v2/documents/${document.id}`);
+                const url = response.data?.signed_url || response.signed_url;
 
                 if (!url) {
                     throw new Error('No download URL available');
@@ -66,8 +66,8 @@ export default function DocumentViewerModal({ document, isOpen, onClose }: Docum
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.getDocument(document.id);
-            const signedUrl = response.data?.downloadUrl || response.downloadUrl;
+            const response: any = await client.get(`/v2/documents/${document.id}`);
+            const signedUrl = response.data?.signed_url || response.signed_url;
 
             if (signedUrl) {
                 window.open(signedUrl, '_blank');

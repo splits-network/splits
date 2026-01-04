@@ -30,19 +30,19 @@ export default async function ApplicationReviewPage({
 
     try {
         // Get recruiter profile first
-        const recruiterResponse: any = await client.getRecruiterProfile();
-        recruiter = recruiterResponse.data || recruiterResponse;
+        const recruiterResponse: any = await client.get('/recruiters?limit=1');
+        const recruiters = recruiterResponse.data || [];
+        recruiter = recruiters[0] || null;
 
-        // Get application full details
-        const appResponse: any = await client.getApplicationFullDetails(applicationId);
-        const appData = appResponse.data || appResponse;
+        // Get application full details with includes
+        const appResponse: any = await client.get(`/applications/${applicationId}?include=candidate,job,documents,pre_screen_answers,job_requirements`);
+        application = appResponse.data || appResponse;
 
-        application = appData.application || appData;
-        job = appData.job || application.job;
-        candidate = appData.candidate || application.candidate;
-        documents = appData.documents || [];
-        preScreenAnswers = appData.pre_screen_answers || [];
-        questions = appData.questions || [];
+        job = application.job;
+        candidate = application.candidate;
+        documents = application.documents || [];
+        preScreenAnswers = application.pre_screen_answers || [];
+        questions = application.job_requirements || [];
 
         // Verify recruiter owns this application
         if (application.recruiter_id !== recruiter.id) {

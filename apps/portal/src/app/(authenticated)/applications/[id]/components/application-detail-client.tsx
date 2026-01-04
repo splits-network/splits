@@ -57,7 +57,7 @@ export default function ApplicationDetailClient({
             if (authToken) {
                 try {
                     const client = createAuthenticatedClient(authToken);
-                    const response: any = await client.getCurrentUser();
+                    const response: any = await client.get('/users?limit=1');
                     const profile = response.data?.[0] || response.data;
 
                     // Get user's role from first membership
@@ -91,7 +91,10 @@ export default function ApplicationDetailClient({
             }
 
             const client = createAuthenticatedClient(token);
-            await client.updateApplicationStage(application.id, newStage, notes);
+            await client.patch(`/applications/${application.id}`, {
+                stage: newStage,
+                ...(notes && { notes })
+            });
 
             setShowStageModal(false);
             router.refresh();
@@ -112,7 +115,9 @@ export default function ApplicationDetailClient({
             }
 
             const client = createAuthenticatedClient(token);
-            await client.addApplicationNote(application.id, note);
+            await client.patch(`/applications/${application.id}`, {
+                notes: note
+            });
 
             setShowNoteModal(false);
             router.refresh();
@@ -431,7 +436,6 @@ export default function ApplicationDetailClient({
                         ['screen', 'submitted', 'interview', 'offer', 'hired'].includes(application.stage)) && (
                             <AIReviewPanel
                                 applicationId={application.id}
-                                token={token}
                                 compact={true}
                             />
                         )}

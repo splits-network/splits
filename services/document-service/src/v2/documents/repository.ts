@@ -103,7 +103,6 @@ export class DocumentRepositoryV2 {
         // For internal services, no access filtering
         if (!isInternalService) {
             const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-            console.log('Access context for document fetch:', accessContext);
             
             if (!accessContext.isPlatformAdmin) {
                 // If requesting documents for a specific entity, check access to that entity
@@ -135,13 +134,11 @@ export class DocumentRepositoryV2 {
         const { data, error, count } = await query
             .order('created_at', { ascending: false })
             .range(offset, offset + limit - 1);
-console.log('status', data, error, count);
         if (error) {
             throw error;
         }
 
         const rows = data || [];
-        console.log(`Fetched ${rows.length} documents from DB`);
         // For internal services, skip access filtering
         if (isInternalService) {
             return {
