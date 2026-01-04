@@ -93,7 +93,7 @@ export class RecruiterServiceV2 {
 
         // Status transition validation
         if (updates.status) {
-            const current = await this.repository.findRecruiter(id);
+            const current = await this.repository.findRecruiter(id, clerkUserId);
             if (!current) {
                 throw { statusCode: 404, message: 'Recruiter not found' };
             }

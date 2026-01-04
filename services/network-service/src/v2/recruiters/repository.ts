@@ -4,7 +4,7 @@
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { resolveAccessContext } from '@splits-network/shared-access-context';
+import { resolveAccessContext, AccessContext } from '@splits-network/shared-access-context';
 import { RecruiterFilters, RecruiterUpdate, RepositoryListResponse } from './types';
 
 export class RecruiterRepository {
@@ -77,7 +77,7 @@ export class RecruiterRepository {
         // If no user context, allow viewing active public recruiter profiles
         let context: AccessContext | null = null;
         if (clerkUserId) {
-            context = await resolveAccessContext(clerkUserId, this.supabase);
+            context = await resolveAccessContext(this.supabase, clerkUserId);
         }
 
         const { data, error } = await this.supabase
@@ -92,8 +92,9 @@ export class RecruiterRepository {
             throw error;
         }
 
-        // Apply role-based filtering
-        if (context && context.role === 'recruiter' && context.userId !== data.user_id) {
+        // Apply role-based filtering - only for authenticated requests
+        // For public requests (context is null), allow viewing active recruiter profiles
+        if (context && context.roles.includes('recruiter') && context.identityUserId !== data.user_id) {
             // Recruiters can only see their own full profile details
             // Other recruiters are visible but with limited info
             return null;
