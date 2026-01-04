@@ -34,7 +34,7 @@ export default function DocumentViewerModal({ document, isOpen, onClose }: Docum
                 }
 
                 const client = createAuthenticatedClient(token);
-                const response: any = await client.get(`/v2/documents/${document.id}`);
+                const response: any = await client.get(`/documents/${document.id}`);
                 const url = response.data?.signed_url || response.signed_url;
 
                 if (!url) {
@@ -43,9 +43,16 @@ export default function DocumentViewerModal({ document, isOpen, onClose }: Docum
 
                 setSignedUrl(url);
                 setLoading(false);
-            } catch (err) {
+            } catch (err: any) {
                 console.error('Error loading document:', err);
-                setError(err instanceof Error ? err.message : 'Failed to load document');
+
+                // Check if this is a "file not found in storage" error
+                if (err?.response?.status === 404 || err?.message?.includes('Object not found')) {
+                    setError('This document file is missing from storage. The candidate may need to re-upload it.');
+                } else {
+                    setError(err instanceof Error ? err.message : 'Failed to load document');
+                }
+
                 setLoading(false);
             }
         };
@@ -66,14 +73,19 @@ export default function DocumentViewerModal({ document, isOpen, onClose }: Docum
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.get(`/v2/documents/${document.id}`);
+            const response: any = await client.get(`/documents/${document.id}`);
             const signedUrl = response.data?.signed_url || response.signed_url;
 
             if (signedUrl) {
                 window.open(signedUrl, '_blank');
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Download failed:', err);
+            if (err?.response?.status === 404 || err?.message?.includes('Object not found')) {
+                alert('This document file is missing from storage. The candidate may need to re-upload it.');
+            } else {
+                alert('Failed to download document. Please try again.');
+            }
         }
     };
 
@@ -103,10 +115,10 @@ export default function DocumentViewerModal({ document, isOpen, onClose }: Docum
                     <div className="flex items-center gap-2 flex-shrink-0">
                         <button
                             onClick={handleDownloadClick}
-                            className="btn btn-sm btn-ghost"
+                            className="btn btn-ghost"
                             title="Download"
                         >
-                            <i className="fa-solid fa-download"></i>
+                            <i className="fa-solid fa-download fa-lg"></i>
                         </button>
                         <button onClick={onClose} className="btn btn-sm btn-circle btn-ghost">
                             <i className="fa-solid fa-xmark text-xl"></i>

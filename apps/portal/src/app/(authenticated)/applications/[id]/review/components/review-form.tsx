@@ -44,7 +44,7 @@ export default function ReviewForm({
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.get(`/v2/documents/${doc.id}`);
+            const response: any = await client.get(`/documents/${doc.id}`);
             const signedUrl = response.data?.signed_url || response.signed_url;
 
             if (signedUrl) {
@@ -177,6 +177,70 @@ export default function ReviewForm({
                             </button>
                         </div>
                     </div>
+
+                    {/* Pre-Screen Answers */}
+                    {preScreenAnswers.length > 0 && (
+                        <div className="card bg-base-100 shadow">
+                            <div className="card-body">
+                                <h2 className="card-title text-xl">
+                                    <i className="fa-solid fa-clipboard-question text-info mr-2"></i>
+                                    Pre-Screening Answers
+                                </h2>
+                                <div className="divider my-2"></div>
+                                <div className="space-y-4">
+                                    {preScreenAnswers.map((answer: any, index: number) => (
+                                        <div key={answer.question_id} className="p-4 bg-base-200/50 rounded-lg">
+                                            <div className="font-semibold mb-3 flex items-start gap-2">
+                                                <span className="badge badge-primary badge-sm mt-0.5">{index + 1}</span>
+                                                <span className="flex-1">{getQuestionText(answer.question_id)}</span>
+                                            </div>
+                                            <div className="text-base-content/80 pl-7">
+                                                {formatAnswer(answer.answer)}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {/* Important Info & Actions */}
+                    <div className="card bg-base-100 shadow">
+                        <div className="card-body">
+                            <div className="alert alert-info">
+                                <i className="fa-solid fa-circle-info"></i>
+                                <div>
+                                    <div className="font-semibold">Ready to submit?</div>
+                                    <p className="text-sm mt-1">
+                                        Once you submit this application to the company, they will be able to review it and
+                                        proceed with their hiring process. You can track the application status in your dashboard.
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="card-actions justify-end mt-6">
+                                <button
+                                    type="button"
+                                    className="btn btn-primary btn-lg"
+                                    onClick={handleSubmit}
+                                    disabled={submitting}
+                                >
+                                    {submitting ? (
+                                        <>
+                                            <span className="loading loading-spinner loading-sm"></span>
+                                            Submitting to Company...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="fa-solid fa-paper-plane"></i>
+                                            Submit to Company
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
                 <div className='basis-1/3 space-y-4'>
                     {/* Documents */}
@@ -243,32 +307,6 @@ export default function ReviewForm({
                         </div>
                     </div>
 
-                    {/* Pre-Screen Answers */}
-                    {preScreenAnswers.length > 0 && (
-                        <div className="card bg-base-100 shadow">
-                            <div className="card-body">
-                                <h2 className="card-title text-xl">
-                                    <i className="fa-solid fa-clipboard-question text-info mr-2"></i>
-                                    Pre-Screening Answers
-                                </h2>
-                                <div className="divider my-2"></div>
-                                <div className="space-y-4">
-                                    {preScreenAnswers.map((answer: any, index: number) => (
-                                        <div key={answer.question_id} className="p-4 bg-base-200/50 rounded-lg">
-                                            <div className="font-semibold mb-3 flex items-start gap-2">
-                                                <span className="badge badge-primary badge-sm mt-0.5">{index + 1}</span>
-                                                <span className="flex-1">{getQuestionText(answer.question_id)}</span>
-                                            </div>
-                                            <div className="text-base-content/80 pl-7">
-                                                {formatAnswer(answer.answer)}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
                     {/* Candidate Notes */}
                     {application.notes && (
                         <div className="card bg-base-100 shadow">
@@ -307,53 +345,6 @@ export default function ReviewForm({
                                     onChange={(e) => setRecruiterNotes(e.target.value)}
                                     placeholder="Example: Candidate has 5+ years experience with React and led a team of 3 engineers. Strong communication skills demonstrated in our call. Highly recommend for this role."
                                 />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Important Info & Actions */}
-                    <div className="card bg-base-100 shadow">
-                        <div className="card-body">
-                            <div className="alert alert-info">
-                                <i className="fa-solid fa-circle-info"></i>
-                                <div>
-                                    <div className="font-semibold">Ready to submit?</div>
-                                    <p className="text-sm mt-1">
-                                        Once you submit this application to the company, they will be able to review it and
-                                        proceed with their hiring process. You can track the application status in your dashboard.
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="card-actions justify-between mt-6">
-                                <button
-                                    type="button"
-                                    className="btn btn-ghost"
-                                    onClick={() => router.back()}
-                                    disabled={submitting}
-                                >
-                                    <i className="fa-solid fa-arrow-left"></i>
-                                    Back
-                                </button>
-                                <button
-                                    type="button"
-                                    className="btn btn-primary btn-lg"
-                                    onClick={handleSubmit}
-                                    disabled={submitting}
-                                >
-                                    {submitting ? (
-                                        <>
-                                            <span className="loading loading-spinner loading-sm"></span>
-                                            Submitting to Company...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <i className="fa-solid fa-paper-plane"></i>
-                                            Submit to Company
-                                        </>
-                                    )}
-                                </button>
                             </div>
                         </div>
                     </div>
