@@ -6,7 +6,7 @@
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import { Webhook } from 'svix';
 import { createLogger } from '@splits-network/shared-logging';
-import type { Logger } from 'pino';
+import type { Logger } from '@splits-network/shared-logging';
 import { WebhooksServiceV2 } from './service';
 import { ClerkWebhookEvent, WebhookHeaders } from './types';
 

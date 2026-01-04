@@ -5,7 +5,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { createLogger } from '@splits-network/shared-logging';
-import type { Logger } from 'pino';
+import type { Logger } from '@splits-network/shared-logging';
 import { EventPublisherV2 } from '../shared/events';
 import { WebhookRepositoryV2 } from './repository';
 import { ClerkWebhookEvent, ClerkUserData } from './types';
