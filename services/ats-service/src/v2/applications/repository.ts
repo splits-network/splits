@@ -273,7 +273,7 @@ export class ApplicationRepository {
             name = `${data.first_name || ''} ${data.last_name || ''}`.trim();
         }
         const nameParts = name.split(' ').filter(Boolean);
-        
+        console.log('data', data);
         return {
             ...data,
             user: userInfo,
