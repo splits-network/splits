@@ -52,7 +52,13 @@ COPY packages/ ./packages/
 # Install all dependencies (including devDependencies for build)
 RUN pnpm install --frozen-lockfile
 
-# Build the application
+# Build shared packages first
+RUN pnpm --filter @splits-network/shared-config build
+RUN pnpm --filter @splits-network/shared-types build
+RUN pnpm --filter @splits-network/shared-logging build
+RUN pnpm --filter @splits-network/shared-access-context build
+
+# Then build the service
 RUN pnpm --filter @splits-network/document-processing-service build
 
 # Prune to production dependencies after build
