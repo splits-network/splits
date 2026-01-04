@@ -12,17 +12,52 @@
 
 import type {
     Application,
-    ApplicationCreate,
-    ApplicationUpdate,
-    Candidate,
-    CandidateCreate,
-    CandidateUpdate,
+    ApplicationDTO,
+    SubmitCandidateDTO,
+    CandidateDTO,
     Job,
-    Document,
-    RecruiterRelationship,
-    AIReview,
-    DashboardStats
+    AIReview
 } from '@splits-network/shared-types';
+
+// Document type from document service V2
+interface Document {
+    id: string;
+    entity_type: string;
+    entity_id: string;
+    document_type?: string | null;
+    file_name: string;
+    file_path: string;
+    file_size: number;
+    mime_type: string;
+    storage_bucket: string;
+    uploaded_by?: string | null;
+    status?: string;
+    processing_status?: string;
+    metadata?: Record<string, any> | null;
+    created_at: string;
+    updated_at: string;
+    download_url?: string;
+}
+
+// RecruiterRelationship type from network service V2
+interface RecruiterRelationship {
+    id: string;
+    candidate_id: string;
+    recruiter_user_id: string;
+    status: string;
+    invitation_status?: string;
+    recruiter_name?: string;
+    recruiter_email?: string;
+    recruiter_bio?: string;
+    recruiter_status?: string;
+    created_at: string;
+    updated_at: string;
+}
+
+// Dashboard stats type
+interface DashboardStats {
+    [key: string]: any;
+}
 
 export interface ApiClientConfig {
     /** Auth token for API requests */
@@ -171,13 +206,13 @@ export class SplitsApiClient {
         let errorCode: string | undefined;
         
         try {
-            const errorData = await response.json();
-            if (errorData.error && typeof errorData.error === 'object') {
+            const errorData: any = await response.json();
+            if (errorData?.error && typeof errorData.error === 'object') {
                 errorMessage = errorData.error.message || errorData.error.code || errorMessage;
                 errorCode = errorData.error.code;
             } else {
-                errorMessage = errorData.message || errorData.error || errorMessage;
-                errorCode = typeof errorData.error === 'string' ? errorData.error : undefined;
+                errorMessage = errorData?.message || errorData?.error || errorMessage;
+                errorCode = typeof errorData?.error === 'string' ? errorData.error : undefined;
             }
         } catch {
             errorMessage = response.statusText || errorMessage;
@@ -241,28 +276,28 @@ export class SplitsApiClient {
     /**
      * Get current user's candidate profile
      */
-    async getMyCandidateProfile(): Promise<ApiResponse<Candidate[]>> {
+    async getMyCandidateProfile(): Promise<ApiResponse<CandidateDTO[]>> {
         return this.get('/candidates', { limit: 1 });
     }
 
     /**
      * Create candidate profile
      */
-    async createCandidateProfile(data: CandidateCreate): Promise<ApiResponse<Candidate>> {
+    async createCandidateProfile(data: SubmitCandidateDTO): Promise<ApiResponse<CandidateDTO>> {
         return this.post('/candidates', data);
     }
 
     /**
      * Update candidate profile
      */
-    async updateCandidateProfile(id: string, data: CandidateUpdate): Promise<ApiResponse<Candidate>> {
+    async updateCandidateProfile(id: string, data: Partial<CandidateDTO>): Promise<ApiResponse<CandidateDTO>> {
         return this.patch(`/candidates/${id}`, data);
     }
 
     /**
      * Get candidate by ID
      */
-    async getCandidate(id: string): Promise<ApiResponse<Candidate>> {
+    async getCandidate(id: string): Promise<ApiResponse<CandidateDTO>> {
         return this.get(`/candidates/${id}`);
     }
 
@@ -289,14 +324,14 @@ export class SplitsApiClient {
     /**
      * Create application
      */
-    async createApplication(data: ApplicationCreate): Promise<ApiResponse<Application>> {
+    async createApplication(data: Partial<Application>): Promise<ApiResponse<Application>> {
         return this.post('/applications', data);
     }
 
     /**
      * Update application
      */
-    async updateApplication(id: string, data: ApplicationUpdate): Promise<ApiResponse<Application>> {
+    async updateApplication(id: string, data: Partial<Application>): Promise<ApiResponse<Application>> {
         return this.patch(`/applications/${id}`, data);
     }
 

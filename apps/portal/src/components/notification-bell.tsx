@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 import {
     fetchNotifications,
     fetchUnreadCount,
@@ -16,6 +17,7 @@ import {
 
 export default function NotificationBell() {
     const router = useRouter();
+    const { getToken } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [notifications, setNotifications] = useState<InAppNotification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
@@ -24,25 +26,34 @@ export default function NotificationBell() {
     // Fetch unread count every 30 seconds
     const loadUnreadCount = useCallback(async () => {
         try {
-            const count = await fetchUnreadCount();
+            const token = await getToken();
+            if (!token) return;
+
+            const count = await fetchUnreadCount(token);
             setUnreadCount(count);
         } catch (error) {
             console.error('Failed to fetch unread count:', error);
         }
-    }, []);
+    }, [getToken]);
 
     // Fetch recent notifications when dropdown opens
     const loadNotifications = useCallback(async () => {
         setLoading(true);
         try {
-            const data = await fetchNotifications({ limit: 10 });
+            const token = await getToken();
+            if (!token) {
+                setLoading(false);
+                return;
+            }
+
+            const data = await fetchNotifications(token, { limit: 10 });
             setNotifications(data);
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
         } finally {
             setLoading(false);
         }
-    }, []); // Remove 'loading' from dependencies
+    }, [getToken]); // Remove 'loading' from dependencies
 
     // Initial load and polling
     useEffect(() => {
@@ -62,7 +73,10 @@ export default function NotificationBell() {
         // Mark as read if unread
         if (!notification.read) {
             try {
-                await markAsRead(notification.id);
+                const token = await getToken();
+                if (!token) return;
+
+                await markAsRead(token, notification.id);
                 setUnreadCount((prev) => Math.max(0, prev - 1));
                 setNotifications((prev) =>
                     prev.map((n) =>
@@ -83,7 +97,10 @@ export default function NotificationBell() {
 
     const handleMarkAllRead = async () => {
         try {
-            await markAllAsRead();
+            const token = await getToken();
+            if (!token) return;
+
+            await markAllAsRead(token);
             setUnreadCount(0);
             setNotifications((prev) =>
                 prev.map((n) => ({ ...n, read: true }))
@@ -96,7 +113,10 @@ export default function NotificationBell() {
     const handleDismiss = async (notificationId: string, event: React.MouseEvent) => {
         event.stopPropagation();
         try {
-            await dismissNotification(notificationId);
+            const token = await getToken();
+            if (!token) return;
+
+            await dismissNotification(token, notificationId);
             setNotifications((prev) =>
                 prev.filter((n) => n.id !== notificationId)
             );

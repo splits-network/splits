@@ -103,14 +103,31 @@ export class DocumentRepositoryV2 {
         // For internal services, no access filtering
         if (!isInternalService) {
             const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-
+            console.log('Access context for document fetch:', accessContext);
+            
             if (!accessContext.isPlatformAdmin) {
-                if (accessContext.candidateId) {
-                    query = query.eq('entity_type', 'candidate').eq('entity_id', accessContext.candidateId);
-                } else if (accessContext.organizationIds.length > 0) {
-                    query = query.eq('entity_type', 'company').in('entity_id', accessContext.organizationIds);
+                // If requesting documents for a specific entity, check access to that entity
+                if (filters.entity_type && filters.entity_id) {
+                    const hasAccess = await this.canAccessEntity(
+                        filters.entity_type, 
+                        filters.entity_id, 
+                        accessContext
+                    );
+                    if (!hasAccess) {
+                        return { data: [], total: 0 };
+                    }
                 } else {
-                    return { data: [], total: 0 };
+                    // When no specific entity requested, apply role-based filtering
+                    if (accessContext.candidateId) {
+                        query = query.eq('entity_type', 'candidate').eq('entity_id', accessContext.candidateId);
+                    } else if (accessContext.organizationIds.length > 0) {
+                        query = query.eq('entity_type', 'company').in('entity_id', accessContext.organizationIds);
+                    } else if (accessContext.recruiterId) {
+                        // Recruiters can see primary resumes of candidates they have access to
+                        query = query.eq('entity_type', 'candidate').eq('document_type', 'resume').eq('metadata->>is_primary', 'true');
+                    } else {
+                        return { data: [], total: 0 };
+                    }
                 }
             }
         }
@@ -118,13 +135,13 @@ export class DocumentRepositoryV2 {
         const { data, error, count } = await query
             .order('created_at', { ascending: false })
             .range(offset, offset + limit - 1);
-
+console.log('status', data, error, count);
         if (error) {
             throw error;
         }
 
         const rows = data || [];
-        
+        console.log(`Fetched ${rows.length} documents from DB`);
         // For internal services, skip access filtering
         if (isInternalService) {
             return {
@@ -277,6 +294,112 @@ export class DocumentRepositoryV2 {
         if (error) {
             throw error;
         }
+    }
+
+    private async canAccessEntity(entityType: string, entityId: string, context: AccessContext): Promise<boolean> {
+        if (context.isPlatformAdmin) {
+            return true;
+        }
+
+        // Candidates can access their own documents
+        if (context.candidateId && entityType === 'candidate' && entityId === context.candidateId) {
+            return true;
+        }
+
+        // Company users can access company documents
+        if (context.organizationIds.length > 0 && entityType === 'company') {
+            return context.organizationIds.includes(entityId);
+        }
+
+        // Recruiters can access documents for candidates they have access to
+        if (context.recruiterId && entityType === 'candidate') {
+            // Check if recruiter has access to this candidate via assignments
+            const { data: assignment } = await this.supabase
+                .schema('network')
+                .from('recruiter_candidates')
+                .select('id')
+                .eq('recruiter_user_id', context.recruiterId)
+                .eq('candidate_id', entityId)
+                .eq('status', 'active')
+                .maybeSingle();
+            
+            if (assignment) {
+                return true;
+            }
+            
+            // Also check if recruiter has access via job assignments
+            const { data: roleAssignments } = await this.supabase
+                .schema('network')
+                .from('role_assignments')
+                .select('job_id')
+                .eq('recruiter_user_id', context.recruiterId)
+                .eq('status', 'active');
+            
+            if (roleAssignments && roleAssignments.length > 0) {
+                // Check if candidate has applications to any of recruiter's assigned jobs
+                const jobIds = roleAssignments.map(ra => ra.job_id);
+                const { data: candidateApplications } = await this.supabase
+                    .schema('ats')
+                    .from('applications')
+                    .select('id')
+                    .eq('candidate_id', entityId)
+                    .in('job_id', jobIds)
+                    .limit(1);
+                
+                if (candidateApplications && candidateApplications.length > 0) {
+                    return true;
+                }
+            }
+        }
+
+        // Check application access for both company users and recruiters
+        if (entityType === 'application') {
+            const { data: application } = await this.supabase
+                .schema('ats')
+                .from('applications')
+                .select('candidate_id, job_id')
+                .eq('id', entityId)
+                .maybeSingle();
+
+            if (application) {
+                // Candidates can access documents for their own applications
+                if (context.candidateId && application.candidate_id === context.candidateId) {
+                    return true;
+                }
+
+                // Company users can access application documents for their company jobs
+                if (context.organizationIds.length > 0) {
+                    const { data: job } = await this.supabase
+                        .schema('ats')
+                        .from('jobs')
+                        .select('company_id')
+                        .eq('id', application.job_id)
+                        .maybeSingle();
+
+                    if (job && context.organizationIds.includes(job.company_id)) {
+                        return true;
+                    }
+                }
+
+                // Recruiters can access application documents if they have access to the candidate
+                if (context.recruiterId) {
+                    const { data: assignment } = await this.supabase
+                        .schema('network')
+                        .from('recruiter_candidates')
+                        .select('id')
+                        .eq('recruiter_user_id', context.recruiterId)
+                        .eq('candidate_id', application.candidate_id)
+                        .eq('status', 'active')
+                        .maybeSingle();
+                    
+                    if (assignment) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private async canAccessDocument(row: DocumentRow, context: AccessContext): Promise<boolean> {

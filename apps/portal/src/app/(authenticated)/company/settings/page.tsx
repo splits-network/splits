@@ -1,25 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import CompanySettingsForm from './components/settings-form';
-
-async function fetchFromGateway(endpoint: string, token: string) {
-    const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}${endpoint}`, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-        cache: 'no-store',
-    });
-
-    if (!response.ok) {
-        if (response.status === 404) {
-            return null;
-        }
-        throw new Error(`API call failed: ${response.statusText}`);
-    }
-
-    return response.json();
-}
+import { ApiClient } from '@/lib/api-client';
 
 export default async function CompanySettingsPage() {
     const { userId, getToken } = await auth();
@@ -34,7 +16,8 @@ export default async function CompanySettingsPage() {
     }
 
     // Fetch user profile
-    const profileResponse: any = await fetchFromGateway('/users?limit=1', token);
+    const apiClient = new ApiClient(token);
+    const profileResponse: any = await apiClient.get('/v2/users', { params: { limit: 1 } });
     const profileArray = Array.isArray(profileResponse?.data)
         ? profileResponse.data
         : Array.isArray(profileResponse)
@@ -56,7 +39,7 @@ export default async function CompanySettingsPage() {
     if (organizationId) {
         try {
             console.log('[Company Settings] Fetching companies for org:', organizationId);
-            const companiesResponse: any = await fetchFromGateway('/companies', token);
+            const companiesResponse: any = await apiClient.get('/v2/companies');
             console.log('[Company Settings] Companies response:', JSON.stringify(companiesResponse, null, 2));
             const companies = companiesResponse?.data || [];
             console.log('[Company Settings] Found companies:', companies.length);

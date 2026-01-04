@@ -1,22 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import TeamManagementContent from './components/team-content';
-
-async function fetchFromGateway(endpoint: string, token: string) {
-    const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}${endpoint}`, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-        cache: 'no-store',
-    });
-
-    if (!response.ok) {
-        throw new Error(`API call failed: ${response.statusText}`);
-    }
-
-    return response.json();
-}
+import { ApiClient } from '@/lib/api-client';
 
 export default async function CompanyTeamPage() {
     const { userId, getToken } = await auth();
@@ -31,7 +16,8 @@ export default async function CompanyTeamPage() {
     }
 
     // Fetch user profile
-    const profileResponse: any = await fetchFromGateway('/users?limit=1', token);
+    const apiClient = new ApiClient(token);
+    const profileResponse: any = await apiClient.get('/v2/users?limit=1');
     const profileArray = Array.isArray(profileResponse?.data)
         ? profileResponse.data
         : Array.isArray(profileResponse)

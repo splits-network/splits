@@ -36,7 +36,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 const apiClient = new ApiClient(token);
 
                 // Get current user data using V2 API
-                const response = await apiClient.getCurrentUser();
+                const response = await apiClient.get('/users', { params: { limit: 1 } });
                 if (!response?.data) throw new Error('No user data found');
 
                 // Handle both array and single object responses
@@ -88,7 +88,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 const apiClient = new ApiClient(token);
 
                 // Get current user data using V2 API
-                const response = await apiClient.getCurrentUser();
+                const response = await apiClient.get('/users', { params: { limit: 1 } });
                 if (!response?.data) return;
 
                 // Handle both array and single object responses
@@ -96,7 +96,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 if (!userData) return;
 
                 // Update onboarding step using API client
-                await apiClient.updateUser(userData.id, { onboarding_step: step });
+                await apiClient.patch(`/users/${userData.id}`, { onboarding_step: step });
             } catch (error) {
                 console.error('Failed to update onboarding step:', error);
             }
@@ -143,27 +143,15 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 const apiClient = new ApiClient(token);
 
                 // Get current user data using V2 API
-                const userResponse = await apiClient.getCurrentUser();
+                const userResponse = await apiClient.get('/users', { params: { limit: 1 } });
                 if (!userResponse?.data) throw new Error('No user data found');
 
                 // Handle both array and single object responses
                 const userData = Array.isArray(userResponse.data) ? userResponse.data[0] : userResponse.data;
                 if (!userData) throw new Error('No user data found');
 
-                // Call completion endpoint - use legacy path for now
-                const completionResponse = await fetch(`http://localhost:3000/api/users/${userData.id}/complete-onboarding`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload),
-                });
-
-                if (!completionResponse.ok) {
-                    const error = await completionResponse.json();
-                    throw new Error(error.error?.message || 'Failed to complete onboarding');
-                }
+                // Call completion endpoint using ApiClient
+                await apiClient.post(`/users/${userData.id}/complete-onboarding`, payload);
 
                 // Move to completion step
                 setState(prev => ({

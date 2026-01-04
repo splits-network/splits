@@ -33,9 +33,9 @@ Required:
 ## API Endpoints
 
 ### V2 AI Review
-- `POST /v2/ai-reviews` - Create new AI review for application
-- `GET /v2/ai-reviews/:id` - Get AI review by ID
-- `GET /v2/ai-reviews` - List AI reviews with filters
+- `POST /api/v2/ai-reviews` - Create new AI review for application
+- `GET /api/v2/ai-reviews/:id` - Get AI review by ID
+- `GET /api/v2/ai-reviews` - List AI reviews with filters
 
 ## Events
 

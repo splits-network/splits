@@ -51,7 +51,9 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
 
             const client = createAuthenticatedClient(token);
             const response: any = await client.getDocumentsByEntity(entityType, entityId);
+            console.log('Fetching documents for', entityType, entityId);
             const docs = (response?.data ?? response?.documents ?? []) as Document[];
+            console.log('Fetched documents:', docs);
             setDocuments(docs);
         } catch (error) {
             console.error('Failed to fetch documents:', error);

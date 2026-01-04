@@ -86,7 +86,7 @@ async function main() {
     );
 
     // Initialize domain event consumer
-    const consumer = new DomainEventConsumer(rabbitConfig.url, notificationService, services, logger);
+    const consumer = new DomainEventConsumer(rabbitConfig.url, notificationService, services, repository, logger);
     await consumer.connect();
 
     const v2EventPublisher = new V2EventPublisher(

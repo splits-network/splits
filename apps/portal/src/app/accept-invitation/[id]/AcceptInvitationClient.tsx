@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
+import { ApiClient } from '@/lib/api-client';
 
 interface Invitation {
     id: string;
@@ -44,18 +45,14 @@ export default function AcceptInvitationClient({ invitation, userId }: Props) {
         async function fetchOrganization() {
             try {
                 const token = await getToken();
-                const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-
-                const res = await fetch(`${apiBaseUrl}/v1/organizations/${invitation.organization_id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-
-                if (res.ok) {
-                    const result = await res.json();
-                    setOrganization(result.data);
+                if (!token) {
+                    console.error('No auth token available');
+                    return;
                 }
+                const apiClient = new ApiClient(token);
+
+                const result = await apiClient.get(`/v1/organizations/${invitation.organization_id}`);
+                setOrganization(result.data);
             } catch (err) {
                 console.error('Failed to fetch organization:', err);
             } finally {
@@ -72,23 +69,14 @@ export default function AcceptInvitationClient({ invitation, userId }: Props) {
 
         try {
             const token = await getToken();
-            const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-
-            const res = await fetch(`${apiBaseUrl}/v1/invitations/${invitation.id}/accept`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    user_id: userId,
-                }),
-            });
-
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.error?.message || 'Failed to accept invitation');
+            if (!token) {
+                throw new Error('Authentication token not available');
             }
+            const apiClient = new ApiClient(token);
+
+            await apiClient.post(`/v1/invitations/${invitation.id}/accept`, {
+                user_id: userId,
+            });
 
             // Success! Redirect to dashboard or organization page
             router.push('/dashboard');

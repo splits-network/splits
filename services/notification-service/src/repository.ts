@@ -10,6 +10,11 @@ export class NotificationRepository {
         });
     }
 
+    // Expose Supabase client for cross-schema queries
+    get supabaseClient(): SupabaseClient {
+        return this.supabase;
+    }
+
     // Health check
     async healthCheck(): Promise<void> {
         // Simple query to verify database connectivity

@@ -3,23 +3,7 @@ import { redirect } from 'next/navigation';
 import RecruiterDashboard from './components/recruiter-dashboard';
 import CompanyDashboard from './components/company-dashboard';
 import AdminDashboard from './components/admin-dashboard';
-
-// API client helper
-async function fetchFromGateway(endpoint: string, token: string) {
-    const baseUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}${endpoint}`, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-        cache: 'no-store',
-    });
-
-    if (!response.ok) {
-        throw new Error(`API call failed: ${response.statusText}`);
-    }
-
-    return response.json();
-}
+import { ApiClient } from '@/lib/api-client';
 
 export default async function DashboardPage() {
     const { userId, getToken } = await auth();
@@ -34,9 +18,10 @@ export default async function DashboardPage() {
     }
 
     // Fetch user profile to determine persona
+    const apiClient = new ApiClient(token);
     let profileData: any = {};
     try {
-        const profileResponse = await fetchFromGateway('/users?limit=1', token);
+        const profileResponse = await apiClient.get('/users', { params: { limit: 1 } });
         const profileArray = Array.isArray(profileResponse?.data)
             ? profileResponse.data
             : Array.isArray(profileResponse)
@@ -68,9 +53,8 @@ export default async function DashboardPage() {
     let recruiterProfile = null;
     if (profileData.recruiter_id) {
         try {
-            const recruiterResponse = await fetchFromGateway(
-                `/recruiters/${profileData.recruiter_id}`,
-                token
+            const recruiterResponse = await apiClient.get(
+                `/recruiters/${profileData.recruiter_id}`
             );
             if (recruiterResponse?.data) {
                 isRecruiter = true;

@@ -42,7 +42,6 @@ export class RecruiterCandidateServiceV2 {
         data: {
             recruiter_id: string;
             candidate_id: string;
-            relationship_type?: string;
             status?: string;
             notes?: string;
         },
@@ -53,22 +52,44 @@ export class RecruiterCandidateServiceV2 {
             throw { statusCode: 400, message: 'recruiter_id and candidate_id are required' };
         }
 
+        // Generate invitation token and expiry
+        const invitationToken = this.generateInvitationToken();
+        const invitationExpiresAt = new Date();
+        invitationExpiresAt.setDate(invitationExpiresAt.getDate() + 7); // 7 days from now
+
         const relationship = await this.repository.createRecruiterCandidate({
-            ...data,
-            relationship_type: data.relationship_type || 'represented',
+            recruiter_id: data.recruiter_id,
+            candidate_id: data.candidate_id,
             status: data.status || 'active',
+            invitation_token: invitationToken,
+            invitation_expires_at: invitationExpiresAt.toISOString(),
+            invited_at: new Date().toISOString(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         });
 
-        // Publish event
+        // Publish recruiter_candidate.created event
         await this.eventPublisher.publish('recruiter_candidate.created', {
             relationship_id: relationship.id,
             recruiter_id: relationship.recruiter_id,
             candidate_id: relationship.candidate_id,
         });
 
+        // Publish candidate.invited event for notification service
+        await this.eventPublisher.publish('candidate.invited', {
+            relationship_id: relationship.id,
+            recruiter_id: relationship.recruiter_id,
+            candidate_id: relationship.candidate_id,
+            invitation_token: invitationToken,
+            invitation_expires_at: invitationExpiresAt.toISOString(),
+        });
+
         return relationship;
+    }
+
+    private generateInvitationToken(): string {
+        const crypto = require('crypto');
+        return crypto.randomBytes(32).toString('hex');
     }
 
     async updateRecruiterCandidate(

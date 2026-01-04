@@ -128,7 +128,12 @@ export default function JobsListClient({
         if (currentPage > 1) params.set('page', currentPage.toString());
 
         const newUrl = params.toString() ? `/jobs?${params.toString()}` : '/jobs';
-        router.replace(newUrl, { scroll: false });
+
+        // Only update URL if it's different from current URL to prevent infinite loop
+        const currentUrl = window.location.pathname + (window.location.search || '');
+        if (currentUrl !== newUrl) {
+            router.replace(newUrl, { scroll: false });
+        }
     }, [searchQuery, locationQuery, typeFilter, currentPage, router]);
 
     const fetchJobs = useCallback(async () => {
@@ -150,15 +155,11 @@ export default function JobsListClient({
             const pagination = response.pagination;
             const totalCount = pagination?.total ?? fetchedJobs.length;
             const limitFromResponse = pagination?.limit ?? JOBS_PER_PAGE;
-            const activePage = pagination?.page ?? currentPage;
 
             setJobs(fetchedJobs);
             setTotal(totalCount);
             setPageSize(limitFromResponse);
             setStats(buildStats(fetchedJobs, totalCount));
-            if (activePage !== currentPage) {
-                setCurrentPage(activePage);
-            }
             setError(null);
         } catch (err) {
             console.error('Failed to fetch jobs:', err);
@@ -169,6 +170,7 @@ export default function JobsListClient({
         }
     }, [currentPage, locationQuery, searchQuery, typeFilter]);
 
+    // Initial load and when filters change
     useEffect(() => {
         fetchJobs();
     }, [fetchJobs]);

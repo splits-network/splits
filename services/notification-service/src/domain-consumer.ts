@@ -3,6 +3,7 @@ import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
 import { ServiceRegistry } from './clients';
 import { NotificationService } from './service';
+import { NotificationRepository } from './repository';
 import { ApplicationsEventConsumer } from './consumers/applications/consumer';
 import { PlacementsEventConsumer } from './consumers/placements/consumer';
 import { ProposalsEventConsumer } from './consumers/proposals/consumer';
@@ -30,6 +31,7 @@ export class DomainEventConsumer {
         private rabbitMqUrl: string,
         notificationService: NotificationService,
         services: ServiceRegistry,
+        private repository: NotificationRepository,
         private logger: Logger
     ) {
         const portalUrl = process.env.PORTAL_URL || 'http://localhost:3001';
@@ -56,6 +58,7 @@ export class DomainEventConsumer {
         this.candidatesConsumer = new CandidatesEventConsumer(
             notificationService.candidates,
             services,
+            this.repository,
             logger
         );
         this.collaborationConsumer = new CollaborationEventConsumer(

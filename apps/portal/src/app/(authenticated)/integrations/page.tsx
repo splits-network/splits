@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getPlatformIcon } from '@/lib/utils/icon-styles';
 import { getPlatformBadge } from '@/lib/utils/badge-styles';
+import { ApiClient } from '@/lib/api-client';
 
 interface ATSIntegration {
     id: string;
@@ -46,13 +47,8 @@ export default function IntegrationsPage() {
                 throw new Error('No company selected');
             }
 
-            const response = await fetch(`/api/companies/${companyId}/integrations`);
-
-            if (!response.ok) {
-                throw new Error('Failed to load integrations');
-            }
-
-            const data = await response.json();
+            const apiClient = new ApiClient();
+            const data = await apiClient.get(`/api/companies/${companyId}/integrations`);
             setIntegrations(data.integrations || []);
         } catch (err: any) {
             console.error('Failed to load integrations:', err);
@@ -64,17 +60,10 @@ export default function IntegrationsPage() {
 
     const toggleSync = async (integration: ATSIntegration) => {
         try {
-            const response = await fetch(`/api/integrations/${integration.id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    sync_enabled: !integration.sync_enabled,
-                }),
+            const apiClient = new ApiClient();
+            await apiClient.patch(`/api/integrations/${integration.id}`, {
+                sync_enabled: !integration.sync_enabled,
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to update integration');
-            }
 
             await loadIntegrations();
         } catch (err: any) {
@@ -85,15 +74,10 @@ export default function IntegrationsPage() {
 
     const triggerSync = async (integrationId: string) => {
         try {
-            const response = await fetch(`/api/integrations/${integrationId}/sync`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ direction: 'inbound' }),
+            const apiClient = new ApiClient();
+            await apiClient.post(`/api/integrations/${integrationId}/sync`, {
+                direction: 'inbound'
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to trigger sync');
-            }
 
             alert('Sync triggered successfully');
             await loadIntegrations();

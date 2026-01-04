@@ -9,6 +9,7 @@ const NOTIFICATION_RESOURCES: ResourceDefinition[] = [
         name: 'notifications',
         service: 'notification',
         basePath: '/notifications',
+        serviceBasePath: '/v2/notifications',
         tag: 'notifications',
     },
 ];

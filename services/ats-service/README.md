@@ -80,7 +80,6 @@ All endpoints follow V2 standardized patterns:
 - **Job Requirements**: `/v2/job-requirements` - Job skill/experience requirements
 - **Pre-Screen Questions**: `/v2/job-pre-screen-questions` - Job-specific questionnaires
 - **Pre-Screen Answers**: `/v2/job-pre-screen-answers` - Candidate responses
-- **AI Reviews**: `/v2/ai-reviews` - AI-powered candidate-job fit analysis
 - **Statistics**: `/v2/stats` - Dashboard metrics and analytics
 
 ## Database Schema

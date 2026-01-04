@@ -1,216 +1,170 @@
-// Portal API Client - Direct V2 Implementation
-// Temporary solution while shared package types are being fixed
+/**
+ * Portal App API Client
+ * 
+ * This module provides a comprehensive wrapper around the shared API client
+ * for portal-specific operations. It maintains compatibility with existing
+ * portal code while using the standardized shared client internally.
+ */
 
-const getApiBaseUrl = () => {
-    // Server-side (inside Docker container or during build)
-    if (typeof window === 'undefined') {
-        // If NEXT_PUBLIC_API_GATEWAY_URL is set, use it (for server-side rendering)
-        if (process.env.NEXT_PUBLIC_API_GATEWAY_URL) {
-            // Strip any trailing /api or /api/v* paths to prevent double /api
-            const cleanUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL
-                .replace(/\/api(?:\/v\d+)?\/?\s*$/, '')
-                .replace(/\/+$/, '');
-            return cleanUrl + '/api/v2';
-        }
-
-        // Check if we're inside a Docker container
-        const isInDocker = process.env.RUNNING_IN_DOCKER === 'true';
-
-        if (isInDocker) {
-            return 'http://api-gateway:3000/api/v2';
-        } else {
-            return 'http://localhost:3000/api/v2';
-        }
-    }
-
-    // Client-side (browser)
-    const publicApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    // Strip any trailing /api or /api/v* paths to prevent double /api
-    const cleanUrl = publicApiUrl
-        .replace(/\/api(?:\/v\d+)?\/?\s*$/, '')
-        .replace(/\/+$/, '');
-    return cleanUrl + '/api/v2';
-};
-
-const API_BASE_URL = getApiBaseUrl();
+import { SplitsApiClient, type ApiResponse, type DashboardStats, type ApplicationStage } from '@splits-network/shared-api-client';
 
 /**
- * Portal API client - Direct V2 implementation
+ * Portal API client - wrapper around shared client for compatibility
  */
 export class ApiClient {
-    private baseUrl: string;
-    private token?: string;
+    private client: SplitsApiClient;
 
     constructor(token?: string) {
-        this.baseUrl = API_BASE_URL;
-        this.token = token;
+        this.client = new SplitsApiClient();
+        if (token) {
+            this.client.setAuthToken(token);
+        }
     }
 
     /**
      * Set authentication token
      */
     setToken(token: string): void {
-        this.token = token;
+        this.client.setAuthToken(token);
     }
 
     /**
      * Remove authentication token
      */
     clearToken(): void {
-        this.token = undefined;
+        this.client.clearAuthToken();
     }
 
-    private async request<T>(
-        endpoint: string,
-        options: RequestInit = {}
-    ): Promise<T> {
-        const url = `${this.baseUrl}${endpoint}`;
-
-        const headers: Record<string, string> = {
-            ...options.headers as Record<string, string>,
-        };
-
-        // Only set Content-Type for requests that have a body
-        if (options.body) {
-            headers['Content-Type'] = 'application/json';
-        }
-
-        // Add authorization header if token is available
-        if (this.token) {
-            headers['Authorization'] = `Bearer ${this.token}`;
-        }
-        
-        const response = await fetch(url, {
-            ...options,
-            headers,
-        });
-
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({ message: 'Request failed' }));
-            throw new Error(error.message || `HTTP ${response.status}`);
-        }
-
-        // Handle 204 No Content responses
-        if (response.status === 204) {
-            return undefined as any;
-        }
-
-        const result = await response.json();
-        
-        // Return the full result (V2 APIs return {data, pagination} envelope)
-        return result;
-    }
-
-    // Generic HTTP methods
+    // ===== GENERIC HTTP METHODS =====
+    
     async get<T = any>(endpoint: string, options?: { params?: Record<string, any> }): Promise<T> {
-        let url = endpoint;
-        if (options?.params) {
-            const params = new URLSearchParams();
-            Object.entries(options.params).forEach(([key, value]) => {
-                if (value !== undefined && value !== null) {
-                    params.append(key, String(value));
-                }
-            });
-            const query = params.toString();
-            if (query) {
-                url = `${endpoint}?${query}`;
-            }
-        }
-        return this.request<T>(url, { method: 'GET' });
+        const response = await this.client.get(endpoint, options?.params);
+        return response as T;
     }
 
     async post<T = any>(endpoint: string, data?: any): Promise<T> {
-        return this.request<T>(endpoint, {
-            method: 'POST',
-            body: data ? JSON.stringify(data) : undefined,
-        });
+        const response = await this.client.post(endpoint, data);
+        return response as T;
     }
 
     async patch<T = any>(endpoint: string, data?: any): Promise<T> {
-        return this.request<T>(endpoint, {
-            method: 'PATCH',
-            body: data ? JSON.stringify(data) : undefined,
-        });
+        const response = await this.client.patch(endpoint, data);
+        return response as T;
     }
 
     async delete<T = any>(endpoint: string): Promise<T> {
-        return this.request<T>(endpoint, { method: 'DELETE' });
+        const response = await this.client.delete(endpoint);
+        return response as T;
     }
 
-    // ===== ROLE AND USER METHODS =====
+    // ===== USER AND ROLE METHODS =====
     
     /**
      * Get current user information
      */
     async getCurrentUser() {
-        return this.request('/users?limit=1');
+        return this.client.getCurrentUser();
     }
 
     /**
-     * Get user roles with recruiter status checking
+     * Get companies
      */
-    async getUserRoles() {
-        // Get basic user info from identity service
-        const userResponse = await this.getCurrentUser();
-        let user: any = {};
-        
-        if (userResponse && typeof userResponse === 'object' && userResponse !== null) {
-            if ('data' in userResponse) {
-                const responseData = (userResponse as any).data;
-                user = Array.isArray(responseData) ? responseData[0] || {} : responseData || {};
-            } else {
-                user = userResponse;
-            }
-        }
-        
-        const roles: string[] = Array.isArray(user.roles) ? user.roles : [];
-
-        // Check if user is a recruiter using V2 network service
-        let isRecruiter = false;
-        try {
-            const recruitersResponse = await this.get('/recruiters?limit=1');
-            console.log('API Client - recruitersResponse:', recruitersResponse);
-            isRecruiter = Boolean(recruitersResponse?.data && recruitersResponse.data.length > 0);
-            console.log('API Client - isRecruiter:', isRecruiter, 'data length:', recruitersResponse?.data?.length);
-        } catch (error) {
-            console.error('API Client - recruiter check error:', error);
-            isRecruiter = false;
-        }
-
-        return {
-            isRecruiter,
-            isCompanyAdmin: roles.includes('company_admin'),
-            isHiringManager: roles.includes('hiring_manager'),
-            isPlatformAdmin: Boolean(user.is_platform_admin || roles.includes('platform_admin')),
-            user
-        };
+    async getCompanies() {
+        // Use generic get method for companies endpoint
+        return this.client.get('/companies');
     }
 
-    async updateUser(userId: string, payload: Record<string, any>) {
-        if (!userId) {
-            throw new Error('User ID is required to update user profile');
-        }
-        return this.patch(`/users/${userId}`, payload);
+    // ===== COMPANY METHODS =====
+    
+    async getCompany(id: string) {
+        return this.client.get(`/companies/${id}`);
     }
 
-    // ===== JOB/ROLE METHODS =====
+    async createCompany(data: {
+        name: string;
+        website?: string;
+        description?: string;
+        location?: string;
+    }) {
+        return this.client.post('/companies', data);
+    }
+
+    async updateCompany(id: string, data: {
+        name?: string;
+        website?: string;
+        description?: string;
+        location?: string;
+    }) {
+        return this.client.patch(`/companies/${id}`, data);
+    }
+
+    // ===== RECRUITER METHODS =====
+
+    async getRecruiters() {
+        return this.client.get('/recruiters');
+    }
+
+    async getRecruiter(id: string) {
+        return this.client.get(`/recruiters/${id}`);
+    }
+
+    async createRecruiter(data: {
+        name: string;
+        email: string;
+        phone?: string;
+        bio?: string;
+    }) {
+        return this.client.post('/recruiters', data);
+    }
+
+    async updateRecruiter(id: string, data: {
+        bio?: string;
+        status?: string;
+    }) {
+        return this.client.patch(`/recruiters/${id}`, data);
+    }
+
+    async getAssignments(filters?: { recruiter_id?: string; job_id?: string }) {
+        return this.client.get('/assignments', { params: filters });
+    }
+
+    async createAssignment(data: {
+        job_id: string;
+        recruiter_id: string;
+    }) {
+        return this.client.post('/assignments', data);
+    }
+
+    async deleteAssignment(id: string) {
+        return this.client.delete(`/assignments/${id}`);
+    }
+
+    async getRecruiterCandidates(recruiterId?: string, candidateId?: string) {
+        const params: any = {};
+        if (recruiterId) params.recruiter_id = recruiterId;
+        if (candidateId) params.candidate_id = candidateId;
+        return this.client.get('/recruiter-candidates', { params });
+    }
+
+    async resendInvitation(relationshipId: string) {
+        return this.client.post(`/recruiter-candidates/${relationshipId}/resend-invitation`);
+    }
+
+    async cancelInvitation(relationshipId: string) {
+        return this.client.post(`/recruiter-candidates/${relationshipId}/cancel-invitation`);
+    }
+
+    // ===== JOB METHODS =====
     
     /**
-     * Get jobs (unfiltered - admin access)
+     * Get jobs with optional filters
      */
     async getJobs(filters?: { status?: string; search?: string }) {
-        const params: any = {};
-        if (filters?.status && filters.status !== 'all') {
-            params.status = filters.status;
-        }
-        if (filters?.search) {
-            params.search = filters.search;
-        }
-        return this.get('/jobs', { params });
+        return this.client.getJobs(filters);
     }
 
     /**
-     * Get roles (filtered by user context)
+     * Get roles (filtered by user context) - alias for getJobs for portal compatibility
      */
     async getRoles(filters?: { 
         status?: string; 
@@ -219,60 +173,39 @@ export class ApiClient {
         page?: number; 
         job_owner_filter?: 'all' | 'assigned' 
     }) {
-        const params: any = {};
-        if (filters?.status && filters.status !== 'all') {
-            params.status = filters.status;
-        }
-        if (filters?.search) {
-            params.search = filters.search;
-        }
-        if (filters?.limit) {
-            params.limit = filters.limit;
-        }
-        if (filters?.page) {
-            params.page = filters.page;
-        }
-        if (filters?.job_owner_filter) {
-            params.job_owner_filter = filters.job_owner_filter;
-        }
-        return this.get('/jobs', { params });
+        return this.client.getJobs(filters);
     }
 
     async getJob(id: string, include?: string[]) {
-        const params: any = {};
         if (include && include.length > 0) {
-            params.include = include.join(',');
+            const params = { include: include.join(',') };
+            return this.client.get(`/jobs/${id}`, { params });
         }
-        return this.get(`/jobs/${id}`, { params });
+        return this.client.getJob(id);
     }
 
     async createJob(data: any) {
-        return this.post('/jobs', data);
+        return this.client.post('/jobs', data);
     }
 
     async updateJob(id: string, data: any) {
-        return this.patch(`/jobs/${id}`, data);
+        return this.client.patch(`/jobs/${id}`, data);
     }
 
     async getRecruiterJobs(recruiterId: string) {
-        return this.get('/jobs', { params: { recruiter_id: recruiterId } });
+        return this.client.getJobs({ recruiter_id: recruiterId });
     }
 
     // ===== CANDIDATE METHODS =====
     
     async getCandidates(filters?: { search?: string }) {
-        const params: any = {};
-        if (filters?.search) {
-            params.search = filters.search;
-        }
-        console.log('getCandidates - query params:', params);
-        return this.get('/candidates', { params });
+        return this.client.get('/candidates', { params: filters });
     }
 
     // ===== APPLICATION METHODS =====
     
     async getApplicationsByJob(jobId: string) {
-        return this.get('/applications', { params: { job_id: jobId } });
+        return this.client.getApplications({ job_id: jobId });
     }
 
     async submitCandidate(data: {
@@ -286,25 +219,23 @@ export class ApiClient {
         linkedin_url?: string;
         notes?: string;
     }) {
-        return this.post('/applications', data);
+        return this.client.createApplication(data);
     }
 
     async updateApplicationStage(id: string, stage: string, notes?: string) {
-        return this.patch(`/applications/${id}`, { stage, notes });
+        return this.client.updateApplication(id, { stage, notes });
     }
 
     async addApplicationNote(id: string, note: string) {
-        return this.patch(`/applications/${id}`, { notes: note });
+        return this.client.updateApplication(id, { notes: note });
     }
 
     async getPendingApplications(options?: { limit?: number }) {
-        return this.get('/applications', {
-            params: {
-                stage: 'screen',
-                limit: options?.limit,
-                sort_by: 'created_at',
-                sort_order: 'desc'
-            }
+        return this.client.getApplications({
+            stage: 'screen',
+            limit: options?.limit,
+            sort_by: 'created_at',
+            sort_order: 'desc'
         });
     }
 
@@ -313,13 +244,11 @@ export class ApiClient {
             ? include
             : ['candidate', 'job', 'recruiter', 'documents', 'pre_screen_answers', 'audit_log', 'job_requirements'];
 
-        return this.get(`/applications/${applicationId}`, {
-            params: includes.length > 0 ? { include: includes.join(',') } : undefined
-        });
+        return this.client.getApplication(applicationId, includes as any);
     }
 
     async recruiterSubmitApplication(applicationId: string, data: { recruiterNotes?: string }) {
-        return this.patch(`/applications/${applicationId}`, {
+        return this.client.updateApplication(applicationId, {
             stage: 'submitted',
             recruiter_notes: data.recruiterNotes
         });
@@ -333,118 +262,57 @@ export class ApiClient {
             message?: string;
         }
     ) {
-        return this.patch(`/applications/${applicationId}`, {
-            pre_screen_request: data
-        });
+        return this.client.post(`/applications/${applicationId}/pre-screen-request`, data);
     }
 
     // ===== PLACEMENT METHODS =====
     
     async getPlacements(filters?: { recruiter_id?: string; company_id?: string }) {
-        return this.get('/placements', { params: filters });
+        return this.client.get('/placements', { params: filters });
     }
 
     async createPlacement(data: {
         application_id: string;
         salary: number;
         hired_at?: string;
+        fee_percentage?: number;
     }) {
-        return this.post('/placements', data);
+        return this.client.post('/placements', data);
     }
 
-    // ===== RECRUITER METHODS =====
-    
-    async getRecruiterProfile(recruiterId?: string) {
-        if (recruiterId) {
-            return this.get(`/recruiters/${recruiterId}`);
-        }
-
-        // For current user, get their recruiter profile via filtered query
-        const recruiters = await this.get('/recruiters?limit=1');
-        console.log('getRecruiterProfile - recruiters response:', recruiters);
-        if (!recruiters?.data || recruiters.data.length === 0) {
-            throw new Error('No recruiter profile found for current user');
-        }
-
-        return { data: recruiters.data[0] };
+    async getPlacement(id: string) {
+        return this.client.get(`/placements/${id}`);
     }
 
-    async updateRecruiterProfile(recruiterId: string, payload: Record<string, any>) {
-        if (!recruiterId) {
-            throw new Error('Recruiter ID is required to update recruiter profile');
+    async getAiReviews(applicationId?: string) {
+        if (applicationId) {
+            return this.client.getAIReview(applicationId);
         }
-        return this.patch(`/recruiters/${recruiterId}`, payload);
-    }
-
-    // ===== RECRUITER-CANDIDATE RELATIONSHIP METHODS =====
-    
-    async getRecruiterCandidateRelationship(recruiterId: string, candidateId: string) {
-        const response = await this.get('/recruiter-candidates', {
-            params: {
-                recruiter_id: recruiterId,
-                candidate_id: candidateId,
-                limit: 1
-            }
-        });
-        console.log('getRecruiterCandidateRelationship - response:', response);
-        if (Array.isArray(response?.data) && response.data.length > 0) {
-            return { data: response.data[0] };
-        }
-        return { data: null };
-    }
-
-    // ===== SUBSCRIPTION METHODS =====
-    
-    async getMySubscription() {
-        const response = await this.get('/subscriptions', { params: { limit: 1 } });
-        if (Array.isArray(response?.data)) {
-            return response;
-        }
-        return response;
+        return this.client.get('/ai-reviews');
     }
 
     // ===== DOCUMENT METHODS =====
     
-    async uploadDocument(formData: FormData) {
-        const url = `${this.baseUrl}/documents`;
-        const headers: Record<string, string> = {};
-
-        if (this.token) {
-            headers['Authorization'] = `Bearer ${this.token}`;
-        }
-
-        const response = await fetch(url, {
-            method: 'POST',
-            headers,
-            body: formData,
-        });
-
-        if (!response.ok) {
-            const error = await response.json().catch(() => ({ message: 'Upload failed' }));
-            throw new Error(error.message || `HTTP ${response.status}`);
-        }
-
-        return response.json();
+    async uploadDocument(formData: FormData): Promise<any> {
+        return this.client.uploadDocument(formData);
     }
 
-    async getDocument(id: string) {
-        return this.get(`/documents/${id}`);
+    async getDocument(id: string): Promise<any> {
+        return this.client.getDocument(id);
     }
 
     async getDocumentsByEntity(entityType: string, entityId: string) {
-        return this.get('/documents', {
-            params: { entity_type: entityType, entity_id: entityId }
-        });
+        return this.client.get('/documents', { params: { entity_type: entityType, entity_id: entityId } });
     }
 
     async deleteDocument(id: string) {
-        return this.delete(`/documents/${id}`);
+        return this.client.deleteDocument(id);
     }
 
     // ===== STATS METHODS =====
     
-    async getStats(params?: { scope?: string; type?: string; range?: string }) {
-        return this.get('/stats', { params });
+    async getStats(params?: { scope?: string; type?: string; range?: string }): Promise<DashboardStats> {
+        return this.client.getDashboardStats(params?.scope);
     }
 }
 

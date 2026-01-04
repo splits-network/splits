@@ -13,6 +13,8 @@ IMPORTANT: DO NOT MAKE ASSUMPTIONS, YOU MUST INVESTIGATE THE CURRENT CODEBASE AN
 
 **Current State:** This project is actively under development with functional services and frontends. The core architecture is established and several services are operational. When generating code, follow the existing patterns in the codebase and reference `docs/guidance/` for standards.
 
+File nameing conventions: kebab-case for files and folders, PascalCase for React components, camelCase for variables and functions.
+
 ---
 
 ## 1. Monorepo Layout & Mental Model

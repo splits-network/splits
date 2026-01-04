@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ApiClient } from '@/lib/api-client';
 
 interface ProposeJobModalProps {
     applicationId: string;
@@ -35,22 +36,10 @@ export default function ProposeJobModal({
             setLoading(true);
             setError(null);
 
-            const response = await fetch(`/api/applications/${applicationId}/propose`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    recruiter_pitch: pitch.trim(),
-                }),
+            const apiClient = new ApiClient();
+            await apiClient.post(`/api/applications/${applicationId}/propose`, {
+                recruiter_pitch: pitch.trim(),
             });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(
-                    errorData.error?.message || 'Failed to propose opportunity'
-                );
-            }
 
             // Success
             setPitch('');

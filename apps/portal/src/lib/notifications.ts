@@ -3,6 +3,8 @@
  * Typed utilities for fetching and managing in-app notifications
  */
 
+import { ApiClient } from './api-client';
+
 export interface InAppNotification {
     id: string;
     event_type: string;
@@ -34,88 +36,55 @@ export interface UnreadCountResponse {
 /**
  * Fetch notifications for the current user
  */
-const API_PATH = '/api/v2/notifications';
+const API_PATH = '/notifications';
 
-export async function fetchNotifications(options?: {
-    unreadOnly?: boolean;
-    limit?: number;
-}): Promise<InAppNotification[]> {
+export async function fetchNotifications(
+    token: string,
+    options?: {
+        unreadOnly?: boolean;
+        limit?: number;
+    }
+): Promise<InAppNotification[]> {
+    const apiClient = new ApiClient(token);
     const params = new URLSearchParams();
     if (options?.unreadOnly) params.set('unreadOnly', 'true');
     if (options?.limit) params.set('limit', options.limit.toString());
 
-    const response = await fetch(`${API_PATH}?${params.toString()}`, {
-        credentials: 'include',
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to fetch notifications: ${response.statusText}`);
-    }
-
-    const json: NotificationListResponse = await response.json();
-    return json.data;
+    const response: NotificationListResponse = await apiClient.get(`${API_PATH}?${params.toString()}`);
+    return response.data;
 }
 
 /**
  * Get unread notification count (for badge)
  */
-export async function fetchUnreadCount(): Promise<number> {
-    const response = await fetch(`${API_PATH}/unread-count`, {
-        credentials: 'include',
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to fetch unread count: ${response.statusText}`);
-    }
-
-    const json: UnreadCountResponse = await response.json();
-    return json.data.count;
+export async function fetchUnreadCount(token: string): Promise<number> {
+    const apiClient = new ApiClient(token);
+    const response: UnreadCountResponse = await apiClient.get(`${API_PATH}/unread-count`);
+    return response.data.count;
 }
 
 /**
  * Mark a notification as read
  */
-export async function markAsRead(notificationId: string): Promise<void> {
-    const response = await fetch(`${API_PATH}/${notificationId}`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ read: true }),
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to mark notification as read: ${response.statusText}`);
-    }
+export async function markAsRead(token: string, notificationId: string): Promise<void> {
+    const apiClient = new ApiClient(token);
+    await apiClient.patch(`${API_PATH}/${notificationId}`, { read: true });
 }
 
 /**
  * Mark all notifications as read
  */
-export async function markAllAsRead(): Promise<void> {
-    const response = await fetch(`${API_PATH}/mark-all-read`, {
-        method: 'POST',
-        credentials: 'include',
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to mark all as read: ${response.statusText}`);
-    }
+export async function markAllAsRead(token: string): Promise<void> {
+    const apiClient = new ApiClient(token);
+    await apiClient.post(`${API_PATH}/mark-all-read`, {});
 }
 
 /**
  * Dismiss a notification (hide from UI)
  */
-export async function dismissNotification(notificationId: string): Promise<void> {
-    const response = await fetch(`${API_PATH}/${notificationId}`, {
-        method: 'DELETE',
-        credentials: 'include',
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to dismiss notification: ${response.statusText}`);
-    }
+export async function dismissNotification(token: string, notificationId: string): Promise<void> {
+    const apiClient = new ApiClient(token);
+    await apiClient.delete(`${API_PATH}/${notificationId}`);
 }
 
 /**

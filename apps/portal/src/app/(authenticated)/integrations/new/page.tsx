@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { ApiClient } from '@/lib/api-client';
 
 type ATSPlatform = 'greenhouse' | 'lever' | 'workable' | 'ashby' | 'generic';
 
@@ -188,19 +189,10 @@ export default function NewIntegrationPage() {
                 config: Object.keys(config).length > 0 ? config : undefined,
             };
 
-            const response = await fetch(`/api/companies/${companyId}/integrations`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            });
+            const apiClient = new ApiClient();
+            const response = await apiClient.post(`/api/companies/${companyId}/integrations`, payload);
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to create integration');
-            }
-
-            const integration = await response.json();
-            router.push(`/integrations/${integration.id}`);
+            router.push(`/integrations/${response.id}`);
         } catch (err: any) {
             console.error('Failed to create integration:', err);
             setError(err.message);

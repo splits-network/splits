@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
+import { ApiClient } from '@/lib/api-client';
 
 export default function CookieConsent() {
     const [showBanner, setShowBanner] = useState(false);
@@ -32,31 +33,25 @@ export default function CookieConsent() {
             try {
                 const consentData = JSON.parse(consentStr);
                 const token = await getToken();
-                // Use NEXT_PUBLIC_API_URL (without /api suffix) to match .env.local configuration
-                const apiUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
 
-                const response = await fetch(`${apiUrl}/api/v2/consent`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        preferences: {
-                            functional: consentData.functional ?? false,
-                            analytics: consentData.analytics ?? false,
-                            marketing: consentData.marketing ?? false
-                        }
-                    })
+                if (!token) {
+                    console.warn('No auth token available for syncing consent');
+                    return;
+                }
+
+                const apiClient = new ApiClient(token);
+
+                await apiClient.post('/consent', {
+                    preferences: {
+                        functional: consentData.functional ?? false,
+                        analytics: consentData.analytics ?? false,
+                        marketing: consentData.marketing ?? false
+                    }
                 });
 
-                if (response.ok) {
-                    // Mark as synced to avoid re-syncing
-                    localStorage.setItem('cookie-consent-synced', 'true');
-                    console.log('Consent synced to database');
-                } else {
-                    console.error('Failed to sync consent to database:', response.status);
-                }
+                // Mark as synced to avoid re-syncing
+                localStorage.setItem('cookie-consent-synced', 'true');
+                console.log('Consent synced to database');
             } catch (error) {
                 console.error('Error syncing consent to database:', error);
             }
@@ -83,28 +78,23 @@ export default function CookieConsent() {
         if (isSignedIn) {
             try {
                 const token = await getToken();
-                const apiUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'https://api.splits.network';
-                const response = await fetch(`${apiUrl}/api/v2/consent`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        preferences: {
-                            functional: consentData.functional,
-                            analytics: consentData.analytics,
-                            marketing: consentData.marketing
-                        }
-                    })
+
+                if (!token) {
+                    console.warn('No auth token available for syncing consent immediately');
+                    return;
+                }
+
+                const apiClient = new ApiClient(token);
+                await apiClient.post('/consent', {
+                    preferences: {
+                        functional: consentData.functional,
+                        analytics: consentData.analytics,
+                        marketing: consentData.marketing
+                    }
                 });
 
-                if (response.ok) {
-                    // Mark as synced
-                    localStorage.setItem('cookie-consent-synced', 'true');
-                } else {
-                    console.error('Failed to sync consent to database');
-                }
+                // Mark as synced
+                localStorage.setItem('cookie-consent-synced', 'true');
             } catch (error) {
                 console.error('Error syncing consent:', error);
             }

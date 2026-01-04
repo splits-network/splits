@@ -15,7 +15,7 @@ export function registerAIReviewRoutes(app: FastifyInstance, config: RouteConfig
     const { service } = config;
 
     /**
-     * POST /v2/ai-reviews
+     * POST /api/v2/ai-reviews
      * Create new AI review for an application
      */
     app.post<{
@@ -33,7 +33,7 @@ export function registerAIReviewRoutes(app: FastifyInstance, config: RouteConfig
             job_location?: string;
             auto_transition?: boolean;
         };
-    }>('/v2/ai-reviews', async (request, reply) => {
+    }>('/api/v2/ai-reviews', async (request, reply) => {
         // Check for internal service auth first
         if (!validateInternalService(request)) {
             // If not internal service, require clerk user ID
@@ -58,12 +58,12 @@ export function registerAIReviewRoutes(app: FastifyInstance, config: RouteConfig
     });
 
     /**
-     * GET /v2/ai-reviews/:id
+     * GET /api/v2/ai-reviews/:id
      * Get AI review by ID
      */
     app.get<{
         Params: { id: string };
-    }>('/v2/ai-reviews/:id', async (request, reply) => {
+    }>('/api/v2/ai-reviews/:id', async (request, reply) => {
         const clerkUserId = request.headers['x-clerk-user-id'] as string | undefined;
         if (!requireUserContext(clerkUserId, reply, request)) return;
 
@@ -93,7 +93,7 @@ export function registerAIReviewRoutes(app: FastifyInstance, config: RouteConfig
     });
 
     /**
-     * GET /v2/ai-reviews
+     * GET /api/v2/ai-reviews
      * List AI reviews with filters
      */
     app.get<{
@@ -106,7 +106,7 @@ export function registerAIReviewRoutes(app: FastifyInstance, config: RouteConfig
             page?: string;
             limit?: string;
         };
-    }>('/v2/ai-reviews', async (request, reply) => {
+    }>('/api/v2/ai-reviews', async (request, reply) => {
         const clerkUserId = request.headers['x-clerk-user-id'] as string | undefined;
         if (!requireUserContext(clerkUserId, reply)) return;
 
@@ -134,12 +134,12 @@ export function registerAIReviewRoutes(app: FastifyInstance, config: RouteConfig
     });
 
     /**
-     * GET /v2/ai-reviews/stats/:jobId
+     * GET /api/v2/ai-reviews/stats/:jobId
      * Get AI review statistics for a job
      */
     app.get<{
         Params: { jobId: string };
-    }>('/v2/ai-reviews/stats/:jobId', async (request, reply) => {
+    }>('/api/v2/ai-reviews/stats/:jobId', async (request, reply) => {
         const clerkUserId = request.headers['x-clerk-user-id'] as string | undefined;
         if (!requireUserContext(clerkUserId, reply)) return;
 

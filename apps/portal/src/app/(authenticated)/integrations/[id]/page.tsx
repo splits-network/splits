@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getSyncStatusBadge } from '@/lib/utils/badge-styles';
+import { ApiClient } from '@/lib/api-client';
 
 interface ATSIntegration {
     id: string;
@@ -79,13 +80,8 @@ export default function IntegrationDetailPage() {
             setLoading(true);
             setError(null);
 
-            const response = await fetch(`/api/integrations/${integrationId}`);
-
-            if (!response.ok) {
-                throw new Error('Failed to load integration');
-            }
-
-            const data = await response.json();
+            const apiClient = new ApiClient();
+            const data = await apiClient.get(`/api/integrations/${integrationId}`);
             setIntegration(data);
         } catch (err: any) {
             console.error('Failed to load integration:', err);
@@ -97,13 +93,8 @@ export default function IntegrationDetailPage() {
 
     const loadLogs = async () => {
         try {
-            const response = await fetch(`/api/integrations/${integrationId}/logs?limit=100`);
-
-            if (!response.ok) {
-                throw new Error('Failed to load logs');
-            }
-
-            const data = await response.json();
+            const apiClient = new ApiClient();
+            const data = await apiClient.get(`/api/integrations/${integrationId}/logs?limit=100`);
             setLogs(data.logs || []);
         } catch (err: any) {
             console.error('Failed to load logs:', err);
@@ -117,17 +108,8 @@ export default function IntegrationDetailPage() {
             setSaving(true);
             setError(null);
 
-            const response = await fetch(`/api/integrations/${integrationId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to update integration');
-            }
-
-            const updated = await response.json();
+            const apiClient = new ApiClient();
+            const updated = await apiClient.patch(`/api/integrations/${integrationId}`, formData);
             setIntegration(updated);
             alert('Settings saved successfully');
         } catch (err: any) {
@@ -140,15 +122,8 @@ export default function IntegrationDetailPage() {
 
     const triggerSync = async (direction: 'inbound' | 'outbound') => {
         try {
-            const response = await fetch(`/api/integrations/${integrationId}/sync`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ direction }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to trigger sync');
-            }
+            const apiClient = new ApiClient();
+            await apiClient.post(`/api/integrations/${integrationId}/sync`, { direction });
 
             alert(`${direction === 'inbound' ? 'Import' : 'Export'} sync triggered`);
             await loadLogs();
@@ -160,11 +135,8 @@ export default function IntegrationDetailPage() {
 
     const testConnection = async () => {
         try {
-            const response = await fetch(`/api/integrations/${integrationId}/test`, {
-                method: 'POST',
-            });
-
-            const result = await response.json();
+            const apiClient = new ApiClient();
+            const result = await apiClient.post(`/api/integrations/${integrationId}/test`);
 
             if (result.success) {
                 alert('Connection test successful!');
@@ -183,13 +155,8 @@ export default function IntegrationDetailPage() {
         }
 
         try {
-            const response = await fetch(`/api/integrations/${integrationId}`, {
-                method: 'DELETE',
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to delete integration');
-            }
+            const apiClient = new ApiClient();
+            await apiClient.delete(`/api/integrations/${integrationId}`);
 
             router.push('/integrations');
         } catch (err: any) {

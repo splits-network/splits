@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ApiClient } from '../lib/api-client';
 
 interface AIReview {
     id: string;
@@ -91,28 +92,21 @@ export default function AIReviewPanel({ applicationId, token, compact = false }:
     useEffect(() => {
         async function fetchAIReview() {
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
-                const query = new URLSearchParams({ application_id: applicationId });
-                const response = await fetch(`${apiUrl}/api/v2/ai-reviews?${query.toString()}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
+                const apiClient = new ApiClient(token);
+                const response = await apiClient.get('/ai-reviews', {
+                    params: { application_id: applicationId }
                 });
 
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        setAIReview(null);
-                        return;
-                    }
-                    throw new Error('Failed to fetch AI review');
-                }
-
-                const data = await response.json();
+                // V2 APIs return {data} envelope, but for single items it might return data directly
+                const data = response.data || response;
                 setAIReview(data);
             } catch (err) {
                 console.error('Error fetching AI review:', err);
-                setError(err instanceof Error ? err.message : 'Failed to load AI review');
+                if (err instanceof Error && err.message.includes('404')) {
+                    setAIReview(null);
+                } else {
+                    setError(err instanceof Error ? err.message : 'Failed to load AI review');
+                }
             } finally {
                 setLoading(false);
             }
@@ -125,19 +119,10 @@ export default function AIReviewPanel({ applicationId, token, compact = false }:
         setRequesting(true);
         setError(null);
         try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
-            const response = await fetch(`${apiUrl}/api/v2/applications/${applicationId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ stage: 'ai_review' }),
+            const apiClient = new ApiClient(token);
+            await apiClient.patch(`/applications/${applicationId}`, {
+                stage: 'ai_review'
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to request new AI review');
-            }
 
             // Wait for event to process, then reload the review
             setTimeout(() => {

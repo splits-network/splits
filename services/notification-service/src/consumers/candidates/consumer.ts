@@ -2,11 +2,13 @@ import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
 import { CandidatesEmailService } from '../../services/candidates/service';
 import { ServiceRegistry } from '../../clients';
+import { NotificationRepository } from '../../repository';
 
 export class CandidatesEventConsumer {
     constructor(
         private emailService: CandidatesEmailService,
         private services: ServiceRegistry,
+        private repository: NotificationRepository, // Repository with Supabase client
         private logger: Logger
     ) {}
 
@@ -116,10 +118,24 @@ export class CandidatesEventConsumer {
 
             this.logger.info({ relationship_id, recruiter_id, candidate_id }, 'Handling candidate invited notification');
 
-            // Fetch candidate details
-            this.logger.debug({ candidate_id }, 'Fetching candidate details from ATS service');
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            // Fetch candidate details from database
+            this.logger.debug({ candidate_id }, 'Fetching candidate details from database');
+            const { data: candidates, error: candidateError } = await this.repository.supabaseClient
+                .schema('ats')
+                .from('candidates')
+                .select('*')
+                .eq('id', candidate_id)
+                .maybeSingle();
+            
+            if (candidateError) {
+                throw new Error(`Failed to fetch candidate: ${candidateError.message}`);
+            }
+            
+            if (!candidates) {
+                throw new Error(`Candidate with id ${candidate_id} not found in ats.candidates`);
+            }
+            
+            const candidate = candidates;
             
             this.logger.debug({ 
                 candidate_id, 
@@ -137,10 +153,42 @@ export class CandidatesEventConsumer {
                 throw new Error(`Candidate ${candidate_id} has no full_name`);
             }
 
-            // Fetch recruiter details with user information (network-service now JOINs with identity.users)
-            this.logger.debug({ recruiter_id }, 'Fetching recruiter details from network service');
-            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
-            const recruiter = recruiterResponse.data || recruiterResponse;
+            // Fetch recruiter details from database
+            this.logger.debug({ recruiter_id }, 'Fetching recruiter details from database');
+            const { data: recruiter, error: recruiterError } = await this.repository.supabaseClient
+                .schema('network')
+                .from('recruiters')
+                .select('*')
+                .eq('id', recruiter_id)
+                .maybeSingle();
+            
+            if (recruiterError) {
+                throw new Error(`Failed to fetch recruiter: ${recruiterError.message}`);
+            }
+            
+            if (!recruiter) {
+                throw new Error(`Recruiter with id ${recruiter_id} not found in network.recruiters`);
+            }
+
+            // Fetch user details for recruiter
+            this.logger.debug({ user_id: recruiter.user_id }, 'Fetching recruiter user details from database');
+            const { data: recruiterUser, error: userError } = await this.repository.supabaseClient
+                .schema('identity')
+                .from('users')
+                .select('id, email, name')
+                .eq('id', recruiter.user_id)
+                .maybeSingle();
+            
+            if (userError) {
+                throw new Error(`Failed to fetch recruiter user: ${userError.message}`);
+            }
+            
+            if (!recruiterUser) {
+                throw new Error(`User with id ${recruiter.user_id} not found in identity.users`);
+            }
+
+            // Combine recruiter and user data
+            recruiter.user = recruiterUser;
             
             this.logger.debug({
                 recruiter_id,
@@ -148,18 +196,15 @@ export class CandidatesEventConsumer {
                 has_bio: !!recruiter.bio,
                 recruiter_keys: Object.keys(recruiter)
             }, 'Recruiter details fetched');
-
-            // Extract user info from enriched recruiter response
-            const recruiterUser = recruiter.user || {};
             
             // Validate recruiter email
-            if (!recruiterUser.email) {
+            if (!recruiter.user.email) {
                 throw new Error(`Recruiter ${recruiter_id} user has no email address`);
             }
 
             this.logger.info({ 
                 candidate_email: candidate.email,
-                recruiter_email: recruiterUser.email,
+                recruiter_email: recruiter.user.email,
                 invitation_token
             }, 'Sending candidate invitation email');
 
@@ -167,8 +212,8 @@ export class CandidatesEventConsumer {
             await this.emailService.sendCandidateInvitation(candidate.email, {
                 candidate_name: candidate.full_name,
                 candidate_email: candidate.email,
-                recruiter_name: recruiterUser.name || 'A recruiter',
-                recruiter_email: recruiterUser.email,
+                recruiter_name: recruiter.user.name || 'A recruiter',
+                recruiter_email: recruiter.user.email,
                 recruiter_bio: recruiter.bio || 'A professional recruiter',
                 invitation_token: invitation_token,
                 invitation_expires_at: invitation_expires_at,
@@ -178,7 +223,7 @@ export class CandidatesEventConsumer {
             this.logger.info({ 
                 candidate_email: candidate.email, 
                 recruiter_id,
-                recruiter_email: recruiterUser.email
+                recruiter_email: recruiter.user.email
             }, 'Candidate invitation email sent successfully');
 
         } catch (error) {

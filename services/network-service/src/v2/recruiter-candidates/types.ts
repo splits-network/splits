@@ -12,7 +12,6 @@ export interface RecruiterCandidateFilters extends PaginationParams, SortParams 
 
 export interface RecruiterCandidateUpdate {
     status?: string;
-    relationship_type?: string;
     notes?: string;
     [key: string]: any;
 }
