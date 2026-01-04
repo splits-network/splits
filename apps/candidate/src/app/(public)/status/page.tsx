@@ -130,10 +130,6 @@ export default function StatusPage() {
                         </p>
                     </div>
                     <div className="text-sm text-base-content/70 flex flex-col items-start gap-2">
-                        <button className="btn btn-outline btn-sm" onClick={refresh}>
-                            <i className="fa-solid fa-rotate mr-2" />
-                            Refresh now
-                        </button>
                         <span className="text-xs">
                             Last checked {lastChecked.toLocaleTimeString()} · Auto-refresh every 30s
                         </span>
