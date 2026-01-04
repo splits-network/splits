@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-import ApiClient from '@/lib/api-client';
+import { createAuthenticatedClient } from '@/lib/api-client';
 
 interface SubmitForReviewButtonProps {
     applicationId: string;
@@ -14,13 +14,20 @@ export default function SubmitForReviewButton({ applicationId, jobTitle }: Submi
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
+    const { getToken } = useAuth();
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
         setError(null);
 
         try {
-            await ApiClient.updateApplication(applicationId, {
+            const token = await getToken();
+            if (!token) {
+                throw new Error('Authentication token not available');
+            }
+
+            const client = createAuthenticatedClient(token);
+            await client.updateApplication(applicationId, {
                 stage: 'ai_review',
                 notes: 'Candidate submitted application for review',
             });

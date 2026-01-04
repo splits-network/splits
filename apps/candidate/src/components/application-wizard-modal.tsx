@@ -171,12 +171,9 @@ export default function ApplicationWizardModal({
                 applicationId = result.data.id;
             }
 
-            // Call success callback if provided
-            if (onSuccess) {
-                onSuccess(applicationId);
-            }
-
             // Close modal and navigate
+            // Note: onSuccess callback is NOT called here to avoid double toasts
+            // The applications page will show a success toast based on URL param
             onClose();
             router.push(`/applications?success=true&application=${applicationId}`);
         } catch (err: any) {
@@ -228,12 +225,9 @@ export default function ApplicationWizardModal({
                 applicationId = result.data.id;
             }
 
-            // Call success callback if provided
-            if (onSuccess) {
-                onSuccess(applicationId);
-            }
-
             // Close modal and navigate
+            // Note: onSuccess callback is NOT called here to avoid double toasts
+            // The applications page will show an info toast based on URL param
             onClose();
             router.push(`/applications?draft=true&application=${applicationId}`);
         } catch (err: any) {

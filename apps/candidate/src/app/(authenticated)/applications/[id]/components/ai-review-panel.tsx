@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth, useUser } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import type { AIReview } from '@splits-network/shared-types';
 
@@ -46,6 +46,27 @@ const getFitScoreColor = (score: number) => {
     return 'text-error';
 };
 
+const getFitScoreIcon = (score: number) => {
+    if (score >= 90) return 'fa-solid fa-trophy';
+    if (score >= 70) return 'fa-solid fa-chart-line';
+    if (score >= 50) return 'fa-solid fa-chart-simple';
+    return 'fa-solid fa-triangle-exclamation';
+};
+
+const getConfidenceIcon = (confidence: number) => {
+    if (confidence >= 90) return 'fa-solid fa-shield-check';
+    if (confidence >= 70) return 'fa-solid fa-shield-halved';
+    if (confidence >= 50) return 'fa-solid fa-shield';
+    return 'fa-solid fa-shield-exclamation';
+};
+
+const getConfidenceColor = (confidence: number) => {
+    if (confidence >= 90) return 'text-success';
+    if (confidence >= 70) return 'text-info';
+    if (confidence >= 50) return 'text-warning';
+    return 'text-error';
+};
+
 const getLocationLabel = (compatibility: string) => {
     switch (compatibility) {
         case 'perfect':
@@ -63,10 +84,38 @@ const getLocationLabel = (compatibility: string) => {
 
 export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
     const { getToken } = useAuth();
+    const { user } = useUser();
     const [loading, setLoading] = useState(true);
     const [aiReview, setAIReview] = useState<AIReview | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [requesting, setRequesting] = useState(false);
+    const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
+
+    // Check if user is platform admin
+    useEffect(() => {
+        async function checkAdminStatus() {
+            try {
+                const token = await getToken();
+                if (!token) return;
+
+                const client = createAuthenticatedClient(token);
+                const profileResponse = await client.get<{ data: any[] }>('/users?limit=1');
+                const profile = profileResponse.data?.[0] || profileResponse.data;
+
+                // Check if user has platform_admin role
+                const isAdmin = profile?.memberships?.some(
+                    (m: any) => m.role === 'platform_admin'
+                ) || profile?.is_platform_admin;
+
+                setIsPlatformAdmin(isAdmin || false);
+            } catch (err) {
+                console.error('Error checking admin status:', err);
+                setIsPlatformAdmin(false);
+            }
+        }
+
+        checkAdminStatus();
+    }, [getToken]);
 
     useEffect(() => {
         async function fetchAIReview() {
@@ -195,35 +244,40 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
     return (
         <div className="card bg-base-100 shadow">
             <div className="card-body">
-                <h2 className="card-title justify-between">
-                    <div>
+                <div className='flex justify-between'>
+                    <h2 className="card-title mb-4">
                         <i className="fa-solid fa-robot"></i>
                         AI Analysis
-                    </div>
+                    </h2>
 
-                    <button
-                        onClick={handleRequestNewReview}
-                        disabled={requesting}
-                        className="btn btn-primary btn-sm"
-                    >
-                        {requesting ? (
-                            <>
-                                <span className="loading loading-spinner loading-xs"></span>
-                                Requesting Review...
-                            </>
-                        ) : (
-                            <>
-                                <i className="fa-solid fa-rotate"></i>
-                                Request New Review
-                            </>
-                        )}
-                    </button>
-                </h2>
+                    {isPlatformAdmin && (
+                        <button
+                            onClick={handleRequestNewReview}
+                            disabled={requesting}
+                            className="btn btn-primary btn-sm"
+                        >
+                            {requesting ? (
+                                <>
+                                    <span className="loading loading-spinner loading-xs"></span>
+                                    Requesting Review...
+                                </>
+                            ) : (
+                                <>
+                                    <i className="fa-solid fa-rotate"></i>
+                                    Request New Review
+                                </>
+                            )}
+                        </button>
+                    )}
+                </div>
 
                 {/* Fit Score */}
-                <div className='flex flex-row gap-4'>
+                <div className='flex flex-col gap-4'>
                     <div className="stats shadow bg-base-200">
                         <div className="stat overflow-clip">
+                            <div className="stat-figure">
+                                <i className={`${getFitScoreIcon(aiReview.fit_score)} fa-2x ${getFitScoreColor(aiReview.fit_score)}`}></i>
+                            </div>
                             <div className="stat-title">Match Score</div>
                             <div className={`stat-value ${getFitScoreColor(aiReview.fit_score)}`}>
                                 {aiReview.fit_score}/100
@@ -237,8 +291,11 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                     </div>
                     <div className="stats shadow bg-base-200">
                         <div className="stat">
+                            <div className="stat-figure">
+                                <i className={`${getConfidenceIcon(aiReview.confidence_level)} fa-2x ${getConfidenceColor(aiReview.confidence_level)}`}></i>
+                            </div>
                             <div className="stat-title">Confidence Level</div>
-                            <div className="stat-value text-primary">{aiReview.confidence_level}%</div>
+                            <div className={`stat-value ${getConfidenceColor(aiReview.confidence_level)}`}>{aiReview.confidence_level}%</div>
                             <div className="stat-desc">AI confidence in analysis</div>
                         </div>
                     </div>
