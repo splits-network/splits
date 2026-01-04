@@ -34,10 +34,12 @@ ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
 COPY --from=dependencies /app ./
 # Copy package source files (needed for Next.js transpilePackages)
+COPY packages/shared-api-client ./packages/shared-api-client
 COPY packages/shared-config ./packages/shared-config
 COPY packages/shared-types ./packages/shared-types
 COPY apps/candidate ./apps/candidate
 # Build shared packages first (creates dist/ for other services)
+RUN pnpm --filter @splits-network/shared-api-client build
 RUN pnpm --filter @splits-network/shared-config build
 RUN pnpm --filter @splits-network/shared-types build
 # Then build candidate (will transpile packages from source)
@@ -51,6 +53,7 @@ ENV NODE_ENV=production
 
 # Copy package files for production install
 COPY --from=build /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
+COPY --from=build /app/packages/shared-api-client/package.json ./packages/shared-api-client/
 COPY --from=build /app/packages/shared-config/package.json ./packages/shared-config/
 COPY --from=build /app/packages/shared-types/package.json ./packages/shared-types/
 COPY --from=build /app/apps/candidate/package.json ./apps/candidate/
@@ -59,6 +62,7 @@ COPY --from=build /app/apps/candidate/package.json ./apps/candidate/
 RUN pnpm install --prod --frozen-lockfile
 
 # Copy built artifacts
+COPY --from=build /app/packages/shared-api-client/dist ./packages/shared-api-client/dist
 COPY --from=build /app/packages/shared-config/dist ./packages/shared-config/dist
 COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
 COPY --from=build /app/apps/candidate/.next ./apps/candidate/.next
