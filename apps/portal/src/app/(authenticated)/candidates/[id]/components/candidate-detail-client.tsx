@@ -80,8 +80,10 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
 
                 setUserContext(userContext);
 
+                // Only platform_admin can upload documents for candidates
+                // Candidates manage their own documents via the candidate portal
                 const canEditCandidate = userContext && (
-                    userContext.roles?.some((role: string) => ['platform_admin', 'recruiter'].includes(role))
+                    userContext.roles?.some((role: string) => role === 'platform_admin')
                 );
 
                 setCanEdit(canEditCandidate);
