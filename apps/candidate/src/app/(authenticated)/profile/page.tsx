@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect, FormEvent } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 import { MyRecruitersSection } from '@/components/recruiters/my-recruiters-section';
-import ApiClient from '@/lib/api-client';
+import { createAuthenticatedClient } from '@/lib/api-client';
 
 export default function ProfilePage() {
-    const { user } = useUser();
+    const { getToken } = useAuth();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -28,13 +28,20 @@ export default function ProfilePage() {
 
     useEffect(() => {
         async function loadProfile() {
-            if (!user?.primaryEmailAddress?.emailAddress) return;
-
             try {
                 setLoading(true);
                 setError(null);
 
-                const profile = await ApiClient.getMyProfile();
+                const token = await getToken();
+                if (!token) {
+                    setError('Please sign in to view your profile');
+                    return;
+                }
+
+                const client = createAuthenticatedClient(token);
+                const response = await client.get('/candidates?limit=1');
+                const profile = response.data?.[0];
+
                 if (profile) {
                     setCandidateId(profile.id);
                     setFormData({
@@ -54,17 +61,13 @@ export default function ProfilePage() {
             } catch (err: any) {
                 console.error('Failed to load profile:', err);
                 // Handle 404 as "no profile yet" - not an error
-                if (err.name === 'ApiError' && err.status === 404) {
+                if (err.status === 404) {
                     // No profile exists yet - show empty form
                     console.log('No candidate profile found - showing empty form');
                     setError(null);
                 } else {
                     // Real error - show it
-                    if (err.name === 'ApiError') {
-                        setError(`${err.message} (Status: ${err.status}${err.code ? `, Code: ${err.code}` : ''})`);
-                    } else {
-                        setError(err.message || 'Failed to load profile');
-                    }
+                    setError(err.message || 'Failed to load profile');
                 }
             } finally {
                 setLoading(false);
@@ -72,7 +75,7 @@ export default function ProfilePage() {
         }
 
         loadProfile();
-    }, [user]);
+    }, [getToken]);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -82,7 +85,23 @@ export default function ProfilePage() {
         setSaveSuccess(false);
 
         try {
-            await ApiClient.updateMyProfile(formData);
+            const token = await getToken();
+            if (!token) {
+                setError('Please sign in to save your profile');
+                return;
+            }
+
+            const client = createAuthenticatedClient(token);
+
+            if (candidateId) {
+                // Update existing profile
+                await client.patch(`/candidates/${candidateId}`, formData);
+            } else {
+                // Create new profile
+                const response = await client.post('/candidates', formData);
+                setCandidateId(response.data.id);
+            }
+
             setSaveSuccess(true);
             setTimeout(() => setSaveSuccess(false), 3000);
         } catch (err: any) {

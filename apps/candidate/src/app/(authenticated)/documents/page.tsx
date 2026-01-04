@@ -32,7 +32,7 @@ export default function DocumentsPage() {
             }
 
             const client = createAuthenticatedClient(token);
-            const response = await client.get('/v2/documents');
+            const response = await client.get('/documents');
             setDocuments(response.data);
         } catch (err: any) {
             console.error('Failed to load documents:', err);
@@ -115,7 +115,7 @@ export default function DocumentsPage() {
             }
 
             const client = createAuthenticatedClient(token);
-            await client.delete(`/v2/documents/${documentId}`);
+            await client.delete(`/documents/${documentId}`);
             await loadDocuments();
         } catch (err: any) {
             console.error('Failed to delete document:', err);
@@ -134,7 +134,7 @@ export default function DocumentsPage() {
             }
 
             const client = createAuthenticatedClient(token);
-            const response = await client.get(`/v2/documents/${doc.id}`);
+            const response = await client.get(`/documents/${doc.id}`);
             if (response.data?.download_url) {
                 window.open(response.data.download_url, '_blank');
             } else {

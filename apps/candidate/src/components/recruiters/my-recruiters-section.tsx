@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import ApiClient from '@/lib/api-client';
+import { useAuth } from '@clerk/nextjs';
+import { createAuthenticatedClient } from '@/lib/api-client';
 import { RecruiterCard } from './recruiter-card';
 
 interface RecruiterRelationship {
@@ -27,6 +28,7 @@ interface MyRecruitersResponse {
 }
 
 export function MyRecruitersSection() {
+    const { getToken } = useAuth();
     const [recruiters, setRecruiters] = useState<MyRecruitersResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -37,8 +39,35 @@ export function MyRecruitersSection() {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await ApiClient.getMyRecruiters();
-                setRecruiters(data);
+
+                const token = await getToken();
+                if (!token) {
+                    setError('Please sign in to view recruiter relationships');
+                    return;
+                }
+
+                const client = createAuthenticatedClient(token);
+                const response = await client.get('/recruiter-candidates');
+                const allRelationships = response.data || [];
+
+                // Group relationships by status
+                const grouped: MyRecruitersResponse = {
+                    active: [],
+                    expired: [],
+                    terminated: []
+                };
+
+                allRelationships.forEach((rel: RecruiterRelationship) => {
+                    if (rel.status === 'active') {
+                        grouped.active.push(rel);
+                    } else if (rel.status === 'expired') {
+                        grouped.expired.push(rel);
+                    } else if (rel.status === 'terminated') {
+                        grouped.terminated.push(rel);
+                    }
+                });
+
+                setRecruiters(grouped);
             } catch (err: any) {
                 console.error('Failed to fetch recruiters:', err);
                 setError(err.message || 'Failed to load recruiter relationships');
@@ -48,7 +77,7 @@ export function MyRecruitersSection() {
         }
 
         fetchRecruiters();
-    }, []);
+    }, [getToken]);
 
     if (loading) {
         return (
