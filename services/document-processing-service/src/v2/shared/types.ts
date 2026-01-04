@@ -38,6 +38,7 @@ export interface DocumentUpdate {
 
 export interface DocumentRecord {
   id: string;
+  bucket_name: string;
   filename: string;
   storage_path: string;
   mime_type: string;

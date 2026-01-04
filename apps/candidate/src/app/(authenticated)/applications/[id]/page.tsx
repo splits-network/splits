@@ -92,9 +92,15 @@ export default async function ApplicationDetailPage({
             params: { include: includes.join(',') }
         });
 
-        application = response.data || response;
-        job = application.job || {};
-        recruiter = application.recruiter || null;
+        console.log('Application response:', JSON.stringify(response, null, 2));
+
+        // Response from V2 API is wrapped in { data: { ... } }
+        const responseData = (response as any).data;
+        application = responseData || response;
+        job = application?.job || {};
+        recruiter = application?.recruiter || null;
+        
+        console.log('Extracted recruiter:', recruiter);
     } catch (err) {
         console.error('Error fetching application:', err);
         notFound();
