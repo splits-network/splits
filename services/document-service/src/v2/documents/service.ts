@@ -171,7 +171,8 @@ export class DocumentServiceV2 {
             throw new Error('Document not found');
         }
 
-        await this.storage.deleteFile(existing.storage_bucket, existing.file_path);
+        // Only soft delete the database record - DO NOT delete the file from storage
+        // Files may be attached to applications/entities that need to remain accessible
         await this.repository.softDeleteDocument(id, clerkUserId);
 
         if (this.eventPublisher) {

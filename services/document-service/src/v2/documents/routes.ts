@@ -29,7 +29,7 @@ export async function registerDocumentRoutes(
     const repository = new DocumentRepositoryV2(config.supabaseUrl, config.supabaseKey);
     const service = new DocumentServiceV2(repository, config.storage, config.eventPublisher);
 
-    app.get('/v2/documents', async (request, reply) => {
+    app.get('/api/v2/documents', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const query = request.query as Record<string, any>;
@@ -54,7 +54,7 @@ export async function registerDocumentRoutes(
         }
     });
 
-    app.get('/v2/documents/:id', async (request, reply) => {
+    app.get('/api/v2/documents/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -67,7 +67,7 @@ export async function registerDocumentRoutes(
         }
     });
 
-    app.post('/v2/documents', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.post('/api/v2/documents', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
 
@@ -133,7 +133,7 @@ export async function registerDocumentRoutes(
         }
     });
 
-    app.patch('/v2/documents/:id', async (request, reply) => {
+    app.patch('/api/v2/documents/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -147,7 +147,7 @@ export async function registerDocumentRoutes(
         }
     });
 
-    app.delete('/v2/documents/:id', async (request, reply) => {
+    app.delete('/api/v2/documents/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };

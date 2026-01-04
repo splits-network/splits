@@ -23,7 +23,7 @@ export function registerDocumentRoutes(app: FastifyInstance, services: ServiceRe
             const correlationId = getCorrelationId(request);
             const authHeaders = buildAuthHeaders(request);
             const queryString = buildQueryString(request.query as Record<string, any>);
-            const path = queryString ? `/v2/documents?${queryString}` : '/v2/documents';
+            const path = queryString ? `/api/v2/documents?${queryString}` : '/api/v2/documents';
 
             try {
                 const data = await documentService().get(
@@ -54,7 +54,7 @@ export function registerDocumentRoutes(app: FastifyInstance, services: ServiceRe
 
             try {
                 const data = await documentService().get(
-                    `/v2/documents/${id}`,
+                    `/api/v2/documents/${id}`,
                     undefined,
                     correlationId,
                     authHeaders
@@ -102,7 +102,7 @@ export function registerDocumentRoutes(app: FastifyInstance, services: ServiceRe
                     headers: Object.keys(proxyHeaders)
                 }, 'Proxying multipart request to document service');
 
-                const response = await fetch(`${documentServiceUrl}/v2/documents`, {
+                const response = await fetch(`${documentServiceUrl}/api/v2/documents`, {
                     method: 'POST',
                     body: request.raw,
                     headers: proxyHeaders,
@@ -144,7 +144,7 @@ export function registerDocumentRoutes(app: FastifyInstance, services: ServiceRe
 
             try {
                 const data = await documentService().patch(
-                    `/v2/documents/${id}`,
+                    `/api/v2/documents/${id}`,
                     request.body,
                     correlationId,
                     authHeaders
@@ -170,7 +170,7 @@ export function registerDocumentRoutes(app: FastifyInstance, services: ServiceRe
             const authHeaders = buildAuthHeaders(request);
 
             try {
-                await documentService().delete(`/v2/documents/${id}`, correlationId, authHeaders);
+                await documentService().delete(`/api/v2/documents/${id}`, correlationId, authHeaders);
                 return reply.status(204).send();
             } catch (error: any) {
                 request.log.error({ error, id, correlationId }, 'Failed to delete V2 document');

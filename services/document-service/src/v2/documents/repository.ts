@@ -118,6 +118,8 @@ export class DocumentRepositoryV2 {
                 } else {
                     // When no specific entity requested, apply role-based filtering
                     if (accessContext.candidateId) {
+                        // Candidates see:
+                        // 1. Documents where entity_type='candidate' AND entity_id=candidate_id
                         query = query.eq('entity_type', 'candidate').eq('entity_id', accessContext.candidateId);
                     } else if (accessContext.organizationIds.length > 0) {
                         query = query.eq('entity_type', 'company').in('entity_id', accessContext.organizationIds);
@@ -130,10 +132,11 @@ export class DocumentRepositoryV2 {
                 }
             }
         }
-
+        
         const { data, error, count } = await query
             .order('created_at', { ascending: false })
             .range(offset, offset + limit - 1);
+
         if (error) {
             throw error;
         }

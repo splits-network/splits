@@ -43,7 +43,12 @@ export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = 
             }
 
             const client = createAuthenticatedClient(token);
-            await client.withdrawApplication(applicationId, 'Candidate withdrew application');
+
+            // Use standard V2 PATCH endpoint to update application status
+            await client.patch(`/applications/${applicationId}`, {
+                stage: 'withdrawn',
+                notes: 'Candidate withdrew application'
+            });
 
             // Success - redirect to applications list with success message
             router.push('/applications?withdrawn=true');
