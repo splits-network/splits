@@ -77,6 +77,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             }
 
             const client = createAuthenticatedClient(authToken);
+            console.log()
 
             // Fetch invitation details (includes enriched recruiter info)
             // Use the non-authenticated endpoint for invitations
