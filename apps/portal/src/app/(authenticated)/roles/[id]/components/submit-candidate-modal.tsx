@@ -154,7 +154,7 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                     applicationResponse.id;
             } else {
                 // Create new candidate first, then create an application for the proposal
-                const createResponse: any = await client.submitCandidate({
+                const createResponse: any = await client.post('/applications', {
                     job_id: roleId,
                     ...formData,
                 });
@@ -200,7 +200,7 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                 uploadFormData.append('entity_id', candidateId);
                 uploadFormData.append('document_type', 'resume');
 
-                await client.uploadDocument(uploadFormData);
+                await client.post('/documents', uploadFormData);
             }
 
             // Success - close modal and refresh

@@ -35,7 +35,7 @@ export default function HireModal({ application, onClose, onSuccess }: HireModal
             }
 
             const client = createAuthenticatedClient(token);
-            await client.createPlacement({
+            await client.post('/placements', {
                 application_id: application.id,
                 salary: parseFloat(salary),
                 hired_at: startDate || new Date().toISOString().split('T')[0],

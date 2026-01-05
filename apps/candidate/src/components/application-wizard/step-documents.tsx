@@ -68,7 +68,8 @@ export default function StepDocuments({
             }
 
             const client = createAuthenticatedClient(token);
-            const profile = await client.getMyProfile();
+            const response = await client.get('/candidates', { params: { limit: 1 } });
+            const profile = response.data?.[0];
             if (!profile?.id) {
                 console.error('No candidate profile found');
                 return null;

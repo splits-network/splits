@@ -76,7 +76,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.getCurrentUser();
+            const response: any = await client.get('/v2/users', { params: { limit: 1 } });
             const profile: UserProfile = response.data;
 
             // Get the first membership role (Phase 1: users have one membership)
@@ -98,7 +98,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
             }
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.getJob(roleId);
+            const response: any = await client.get(`/jobs/${roleId}`);
             setJob(response.data);
         } catch (error) {
             console.error('Failed to fetch job:', error);

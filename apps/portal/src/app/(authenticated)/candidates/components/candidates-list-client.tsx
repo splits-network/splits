@@ -35,7 +35,7 @@ export default function CandidatesListClient() {
                 const client = createAuthenticatedClient(token);
 
                 // Get user profile to check role
-                const profileRes: any = await client.getCurrentUser();
+                const profileRes: any = await client.get('/v2/users', { params: { limit: 1 } });
                 const profile = profileRes?.data?.[0] || profileRes?.data || profileRes || {};
                 const roles: string[] = Array.isArray(profile.roles) ? profile.roles : [];
                 const isRecruiter = Boolean(profile.recruiter_id || roles.includes('recruiter'));

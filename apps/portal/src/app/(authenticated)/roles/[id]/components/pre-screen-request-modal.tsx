@@ -61,7 +61,7 @@ export default function PreScreenRequestModal({
             }
 
             const client = createAuthenticatedClient(token);
-            await client.requestPreScreen(application.id, {
+            await client.post(`/applications/${application.id}/request-prescreen`, {
                 company_id: companyId,
                 recruiter_id: selectedRecruiterId === 'auto' ? undefined : selectedRecruiterId,
                 message: message.trim() || undefined,

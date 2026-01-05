@@ -113,7 +113,7 @@ export default function ProposalScreenClient({
 
                 const client = createAuthenticatedClient(token);
                 // Get documents for this specific application, not the candidate's general documents
-                const response: any = await client.getDocumentsByEntity('application', proposal.id);
+                const response: any = await client.get(`/documents?entity_type=application&entity_id=${proposal.id}`);
                 const docsData = response.data || response || [];
                 setDocuments(Array.isArray(docsData) ? docsData : []);
                 setDocumentsLoading(false);

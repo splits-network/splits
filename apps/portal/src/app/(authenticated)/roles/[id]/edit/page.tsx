@@ -69,7 +69,7 @@ export default function EditRolePage() {
             }
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.getJob(roleId);
+            const response: any = await client.get(`/jobs/${roleId}`);
             const jobData = response.data;
 
             setJob(jobData);

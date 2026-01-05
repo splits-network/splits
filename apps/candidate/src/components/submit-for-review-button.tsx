@@ -27,7 +27,7 @@ export default function SubmitForReviewButton({ applicationId, jobTitle }: Submi
             }
 
             const client = createAuthenticatedClient(token);
-            await client.updateApplication(applicationId, {
+            await client.patch(`/applications/${applicationId}`, {
                 stage: 'ai_review',
                 notes: 'Candidate submitted application for review',
             });

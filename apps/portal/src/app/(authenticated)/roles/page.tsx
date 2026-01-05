@@ -15,9 +15,9 @@ interface UserProfile {
 async function getUserRole(token: string): Promise<string | null> {
     try {
         const client = createAuthenticatedClient(token);
-        const response: any = await client.getCurrentUser();
+        const response: any = await client.get('/v2/users', { params: { limit: 1 } });
         const profile: UserProfile = response.data;
-        
+
         // Return the first membership role (in Phase 1, users have one membership)
         if (profile.memberships && profile.memberships.length > 0) {
             return profile.memberships[0].role;

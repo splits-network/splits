@@ -51,16 +51,22 @@ export function UserProfileSettings() {
             console.log('[PORTAL USER PROFILE DEBUG] Making request to /users?limit=1');
             const response: any = await apiClient.get('/users?limit=1');
             console.log('[PORTAL USER PROFILE DEBUG] Response received:', JSON.stringify(response, null, 2));
-            const userProfile = response?.data?.[0] || response?.data || response;
 
-            if (userProfile) {
-                setProfile({
-                    id: userProfile.id,
-                    email: userProfile.email,
-                    name: userProfile.full_name || '',
-                });
-                setName(userProfile.full_name || '');
+            // Handle array response from V2 API
+            const dataArray = response?.data || response;
+            const userProfile = Array.isArray(dataArray) ? dataArray[0] : dataArray;
+            console.log('[PORTAL USER PROFILE DEBUG] Processed user profile:', JSON.stringify(userProfile, null, 2));
+
+            if (!userProfile?.id) {
+                throw new Error('User profile not found');
             }
+
+            setProfile({
+                id: userProfile.id,
+                email: userProfile.email,
+                name: userProfile.name || '', // Use 'name' field, not 'full_name'
+            });
+            setName(userProfile.name || '');
         } catch (err: any) {
             console.error('Failed to load profile:', err);
             setError('Failed to load profile. Please try again.');
@@ -95,16 +101,16 @@ export function UserProfileSettings() {
             }
 
             const apiClient = createAuthenticatedClient(token);
-            const response: any = await apiClient.updateUser(profile.id, { full_name: name.trim() });
+            const response: any = await apiClient.patch(`/users/${profile.id}`, { name: name.trim() });
             const updated = response?.data || response;
 
             if (updated) {
                 setProfile({
                     id: updated.id,
                     email: updated.email,
-                    name: updated.full_name || updated.name || '',
+                    name: updated.name || '',
                 });
-                setName(updated.full_name || updated.name || '');
+                setName(updated.name || '');
                 setSuccess('Profile updated successfully!');
 
                 // Clear success message after 3 seconds

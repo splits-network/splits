@@ -91,7 +91,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
             }
 
             const client = createAuthenticatedClient(token);
-            await client.updateApplicationStage(applicationId, newStage);
+            await client.patch(`/applications/${applicationId}`, { stage: newStage });
             // Refresh applications
             await fetchApplications();
         } catch (error) {

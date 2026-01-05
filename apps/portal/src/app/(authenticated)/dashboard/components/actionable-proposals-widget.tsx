@@ -44,8 +44,13 @@ export default function ActionableProposalsWidget({ compact = true }: Actionable
             }
 
             const apiClient = createAuthenticatedClient(token);
-            const response: any = await apiClient.getPendingApplications({
-                limit: compact ? 5 : undefined,
+            const response: any = await apiClient.get('/applications', {
+                params: {
+                    stage: 'screen',
+                    limit: compact ? 5 : undefined,
+                    sort_by: 'created_at',
+                    sort_order: 'desc'
+                }
             });
             const list = Array.isArray(response?.data)
                 ? response.data

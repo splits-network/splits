@@ -28,7 +28,7 @@ export default function BackToDraftButton({ applicationId, jobTitle }: BackToDra
             }
 
             const client = createAuthenticatedClient(token);
-            await client.updateApplication(applicationId, {
+            await client.patch(`/applications/${applicationId}`, {
                 stage: 'draft',
                 notes: 'Candidate moved application back to draft for edits',
             });

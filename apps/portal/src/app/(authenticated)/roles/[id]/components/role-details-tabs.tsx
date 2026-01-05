@@ -40,7 +40,9 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
             }
 
             const client = createAuthenticatedClient(token);
-            const response = await client.getJob(roleId, ['requirements,applications']) as { data: Job };
+            const response = await client.get(`/jobs/${roleId}`, {
+                params: { include: 'requirements,applications' }
+            }) as { data: Job };
             const jobData = response.data;
 
             setJob(jobData);

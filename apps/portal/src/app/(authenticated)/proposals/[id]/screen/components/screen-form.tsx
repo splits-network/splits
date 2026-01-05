@@ -47,7 +47,7 @@ export default function ScreenForm({
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.getDocument(doc.id);
+            const response: any = await client.get(`/documents/${doc.id}`);
             const signedUrl = response.data?.downloadUrl || response.downloadUrl;
 
             if (signedUrl) {

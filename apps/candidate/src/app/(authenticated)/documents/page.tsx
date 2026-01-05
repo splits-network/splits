@@ -76,7 +76,8 @@ export default function DocumentsPage() {
             }
 
             const client = createAuthenticatedClient(token);
-            const profile = await client.getMyProfile();
+            const response = await client.get('/candidates', { params: { limit: 1 } });
+            const profile = response.data?.[0];
             if (profile?.id) {
                 setCandidateId(profile.id);
                 return profile.id;

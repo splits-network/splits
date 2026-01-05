@@ -243,7 +243,7 @@ export default function ApplicationsListClient({
                     return;
                 }
                 const client = createAuthenticatedClient(token);
-                const response: any = await client.getCurrentUser();
+                const response = await client.get('/users', { params: { limit: 1 } });
                 const profile = response?.data?.[0] || response?.data || response || {};
                 const roles: string[] = Array.isArray(profile.roles) ? profile.roles : [];
                 const membershipRole =
@@ -407,13 +407,13 @@ export default function ApplicationsListClient({
                 const nextStage: ApplicationStage = data.newStage;
                 await Promise.all(
                     idsArray.map(id =>
-                        client.updateApplicationStage(id, nextStage, data.notes)
+                        client.patch(`/applications/${id}`, { stage: nextStage, notes: data.notes })
                     )
                 );
             } else if (bulkAction === 'reject') {
                 await Promise.all(
                     idsArray.map(id =>
-                        client.updateApplicationStage(id, 'rejected', data.reason || data.notes)
+                        client.patch(`/applications/${id}`, { stage: 'rejected', notes: data.reason || data.notes })
                     )
                 );
             }

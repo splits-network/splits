@@ -48,7 +48,7 @@ export default function PlacementsPage() {
                 const client = createAuthenticatedClient(token);
 
                 // Fetch placements
-                const placementsResponse = await client.getPlacements() as any;
+                const placementsResponse = await client.get('/placements') as any;
                 const placementsData = (placementsResponse.data || []) as Placement[];
 
                 const enrichedPlacements = placementsData.map((placement: any) => ({

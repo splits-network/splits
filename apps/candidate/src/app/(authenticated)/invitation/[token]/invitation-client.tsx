@@ -72,7 +72,8 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             setError(null);
 
             // Fetch invitation details (includes enriched recruiter info)
-            const invitationData = await ApiClient.getInvitationByToken(token);
+            const response = await ApiClient.get(`/recruiter-candidates/by-token/${token}`);
+            const invitationData = response.data;
             setInvitation(invitationData);
 
             // Set recruiter from invitation data
@@ -87,8 +88,8 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             }
 
             // Fetch candidate details
-            const candidateData = await ApiClient.getCandidateById(invitationData.candidate_id);
-            setCandidate(candidateData);
+            const candidateResponse = await ApiClient.get(`/candidates/${invitationData.candidate_id}`);
+            setCandidate(candidateResponse.data);
 
         } catch (err) {
             if (err instanceof Response) {
@@ -118,7 +119,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             setProcessing(true);
             setError(null);
 
-            await ApiClient.acceptInvitation(token);
+            await ApiClient.post(`/recruiter-candidates/${token}/accept`);
 
             // Redirect to success page
             router.push(`/invitation/${token}/accepted`);
@@ -140,7 +141,9 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             setProcessing(true);
             setError(null);
 
-            await ApiClient.declineInvitation(token, declineReason || undefined);
+            await ApiClient.post(`/recruiter-candidates/${token}/decline`, {
+                decline_reason: declineReason || undefined
+            });
 
             // Redirect to declined page
             router.push(`/invitation/${token}/declined`);

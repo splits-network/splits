@@ -88,7 +88,7 @@ export function ApplicationDetailClient({ application, job, token }: Application
                 const docType = file.name.toLowerCase().includes('resume') ? 'resume' : 'other';
                 formData.append('document_type', docType);
 
-                const uploaded = await client.uploadDocument(formData);
+                const uploaded = await client.post('/v2/documents', formData);
                 const doc = uploaded.data || uploaded;
                 newDocumentIds.push(doc.id);
             }

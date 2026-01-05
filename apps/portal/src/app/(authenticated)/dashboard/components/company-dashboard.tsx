@@ -62,9 +62,11 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
 
             // Load role breakdown using V2 API
             // This will automatically filter to company's roles based on access context
-            const rolesResponse: any = await api.getRoles({
-                status: 'active',
-                limit: 100 // Get top 100 active roles
+            const rolesResponse: any = await api.get('/jobs', {
+                params: {
+                    status: 'active',
+                    limit: 100 // Get top 100 active roles
+                }
             });
 
             const rolesData = rolesResponse.data || [];

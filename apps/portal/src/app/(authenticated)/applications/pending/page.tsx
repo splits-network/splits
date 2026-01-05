@@ -23,7 +23,13 @@ export default async function PendingApplicationsPage({
     const showSuccess = params.success === 'true';
 
     try {
-        const appsResponse: any = await client.getPendingApplications();
+        const appsResponse: any = await client.get('/applications', {
+            params: {
+                stage: 'screen',
+                sort_by: 'created_at',
+                sort_order: 'desc'
+            }
+        });
         applications = (appsResponse.data || appsResponse) || [];
     } catch (err: any) {
         console.error('Error loading pending applications:', err);

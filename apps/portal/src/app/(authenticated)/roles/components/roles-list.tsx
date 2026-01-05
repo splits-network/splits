@@ -117,7 +117,7 @@ export default function RolesList() {
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.getCurrentUser();
+            const response: any = await client.get('/v2/users', { params: { limit: 1 } });
             const profile: UserProfile = response.data?.[0] || response.data;
             const role = resolveUserRole(profile);
             setUserRole(role);
@@ -142,9 +142,11 @@ export default function RolesList() {
 
             const client = createAuthenticatedClient(token);
             // Use V2 getRoles() which shows all active jobs to recruiters, org jobs to company users
-            const response: any = await client.getRoles({
-                status: statusFilter === 'all' ? undefined : statusFilter,
-                job_owner_filter: ownershipFilter,
+            const response: any = await client.get('/jobs', {
+                params: {
+                    status: statusFilter === 'all' ? undefined : statusFilter,
+                    job_owner_filter: ownershipFilter,
+                },
             });
             // V2 returns { data, pagination }
             setJobs(response.data || []);
@@ -170,7 +172,9 @@ export default function RolesList() {
             if (userRole === 'platform_admin') {
                 // Platform admin sees system-wide stats
                 const [rolesRes, companiesRes] = await Promise.all([
-                    client.getRoles({ status: statusFilter === 'all' ? undefined : statusFilter }) as Promise<{ data: Job[] }>,
+                    client.get('/jobs', {
+                        params: { status: statusFilter === 'all' ? undefined : statusFilter }
+                    }) as Promise<{ data: Job[] }>,
                     client.get('/companies') as Promise<{ data: any[] }>,
                 ]);
 
@@ -183,8 +187,10 @@ export default function RolesList() {
                 });
             } else if (userRole === 'recruiter') {
                 // Recruiter sees their assigned roles and activities
-                const rolesRes = await client.getRoles({
-                    status: statusFilter === 'all' ? undefined : statusFilter
+                const rolesRes = await client.get('/jobs', {
+                    params: {
+                        status: statusFilter === 'all' ? undefined : statusFilter
+                    }
                 }) as { data: Job[] };
                 const allRoles = rolesRes.data || [];
 
@@ -196,8 +202,10 @@ export default function RolesList() {
                 });
             } else if (userRole === 'company_admin' || userRole === 'hiring_manager') {
                 // Company users see their company's roles
-                const rolesRes = await client.getRoles({
-                    status: statusFilter === 'all' ? undefined : statusFilter
+                const rolesRes = await client.get('/jobs', {
+                    params: {
+                        status: statusFilter === 'all' ? undefined : statusFilter
+                    }
                 }) as { data: Job[] };
                 const allRoles = rolesRes.data || [];
 

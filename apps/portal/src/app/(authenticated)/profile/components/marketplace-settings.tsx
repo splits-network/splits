@@ -86,7 +86,7 @@ export function MarketplaceSettings() {
             }
 
             const client = createAuthenticatedClient(token);
-            await client.updateRecruiterProfile(recruiterId, settings);
+            await client.patch(`/recruiters/${recruiterId}`, settings);
 
             setSuccess('Marketplace settings updated successfully!');
             setTimeout(() => setSuccess(''), 3000);

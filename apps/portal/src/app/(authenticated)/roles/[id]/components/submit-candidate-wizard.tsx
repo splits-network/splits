@@ -212,7 +212,7 @@ export default function SubmitCandidateWizard({
                 candidateId = selectedCandidate.id;
             } else {
                 // Create new candidate first
-                const createResponse: any = await client.submitCandidate({
+                const createResponse: any = await client.post('/applications', {
                     job_id: roleId,
                     ...formData,
                 });
@@ -249,7 +249,7 @@ export default function SubmitCandidateWizard({
                 uploadFormData.append('entity_id', candidateId);
                 uploadFormData.append('document_type', 'resume');
 
-                await client.uploadDocument(uploadFormData);
+                await client.post('/documents', uploadFormData);
             }
 
             // Success

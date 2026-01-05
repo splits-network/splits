@@ -79,7 +79,7 @@ export default function UploadDocumentModal({
 
             console.log('Calling uploadDocument...');
             const client = createAuthenticatedClient(token);
-            await client.uploadDocument(formData);
+            await client.post('/v2/documents', formData);
             console.log('Upload successful!');
             onSuccess();
         } catch (err: any) {

@@ -74,7 +74,7 @@ export default function UploadDocumentModal({
             formData.append('entity_id', entityId);
             formData.append('document_type', selectedDocType);
 
-            await client.uploadDocument(formData);
+            await client.post('/documents', formData);
             onSuccess();
         } catch (err: any) {
             setError(err.message || 'Upload failed');

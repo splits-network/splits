@@ -83,7 +83,7 @@ export default function NewCandidatePage() {
                 uploadFormData.append('entity_id', candidateId);
                 uploadFormData.append('document_type', 'resume');
 
-                await client.uploadDocument(uploadFormData);
+                await client.post('/documents', uploadFormData);
             }
 
             // Redirect to candidate detail page

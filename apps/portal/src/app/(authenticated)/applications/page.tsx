@@ -11,7 +11,7 @@ interface MembershipSummary {
 async function getPrimaryMembership(token: string): Promise<MembershipSummary | null> {
     try {
         const client = createAuthenticatedClient(token);
-        const response: any = await client.getCurrentUser();
+        const response: any = await client.get('/v2/users', { params: { limit: 1 } });
         const profile = response?.data?.[0] || response?.data || response;
         if (profile?.memberships?.length) {
             return profile.memberships[0];

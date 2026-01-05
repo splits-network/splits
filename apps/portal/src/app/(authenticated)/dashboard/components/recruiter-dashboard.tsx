@@ -88,9 +88,11 @@ export default function RecruiterDashboard({ token, profile }: RecruiterDashboar
         try {
             const api = createAuthenticatedClient(token);
 
-            const statsResponse: any = await api.getStats({
-                scope: 'recruiter',
-                range: 'ytd',
+            const statsResponse: any = await api.get('/stats', {
+                params: {
+                    scope: 'recruiter',
+                    range: 'ytd',
+                }
             });
             const recruiterStats =
                 statsResponse?.data?.metrics ||
@@ -125,9 +127,11 @@ export default function RecruiterDashboard({ token, profile }: RecruiterDashboar
             );
 
             // Load top active roles
-            const rolesResponse: any = await api.getRoles({
-                status: 'active',
-                limit: 5,
+            const rolesResponse: any = await api.get('/jobs', {
+                params: {
+                    status: 'active',
+                    limit: 5,
+                }
             });
             setTopRoles(rolesResponse.data || rolesResponse || []);
         } catch (error) {

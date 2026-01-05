@@ -123,7 +123,7 @@ export function ProfileSettings() {
                 setSubmitting(false);
                 return;
             }
-            await client.updateRecruiterProfile(recruiterId, profile);
+            await client.patch(`/recruiters/${recruiterId}`, profile);
 
             setSuccess('Profile updated successfully!');
             setTimeout(() => setSuccess(''), 3000);

@@ -50,7 +50,7 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.getDocumentsByEntity(entityType, entityId);
+            const response: any = await client.get(`/documents?entity_type=${entityType}&entity_id=${entityId}`);
             console.log('Fetching documents for', entityType, entityId);
             const docs = (response?.data ?? response?.documents ?? []) as Document[];
             console.log('Fetched documents:', docs);
@@ -71,7 +71,7 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.getDocument(doc.id);
+            const response: any = await client.get(`/documents/${doc.id}`);
             const document = response?.data ?? response;
             const downloadUrl = document?.download_url || document?.signed_url;
 
@@ -96,7 +96,7 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            await client.deleteDocument(docId);
+            await client.delete(`/documents/${docId}`);
             await fetchDocuments();
         } catch (error) {
             console.error('Failed to delete document:', error);

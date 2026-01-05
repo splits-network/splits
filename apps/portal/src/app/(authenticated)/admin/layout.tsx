@@ -21,7 +21,7 @@ export default async function AdminLayout({
         }
 
         const apiClient = createAuthenticatedClient(token);
-        const profileResponse: any = await apiClient.getCurrentUser();
+        const profileResponse: any = await apiClient.get('/v2/users', { params: { limit: 1 } });
         const profile = profileResponse?.data || profileResponse || {};
         const roles: string[] = Array.isArray(profile.roles) ? profile.roles : [];
 
