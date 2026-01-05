@@ -11,7 +11,6 @@ interface UserProfile {
 }
 
 export function UserProfileSettings() {
-    console.log('[PORTAL USER PROFILE DEBUG] Component mounted/rendered');
     const { getToken } = useAuth();
     const { user: clerkUser } = useUser();
     const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -31,35 +30,26 @@ export function UserProfileSettings() {
     const [changingPassword, setChangingPassword] = useState(false);
 
     useEffect(() => {
-        console.log('[PORTAL USER PROFILE DEBUG] useEffect triggered - calling loadProfile');
         loadProfile();
     }, []);
 
     const loadProfile = async () => {
         try {
-            console.log('[PORTAL USER PROFILE DEBUG] Starting loadProfile...');
             setLoading(true);
             setError('');
             const token = await getToken();
             if (!token) {
-                console.log('[PORTAL USER PROFILE DEBUG] No token available');
                 setError('Please sign in to manage your profile.');
                 setLoading(false);
                 return;
             }
 
-            console.log('[PORTAL USER PROFILE DEBUG] Creating API client with token');
             const apiClient = createAuthenticatedClient(token);
-            console.log('[PORTAL USER PROFILE DEBUG] Making request to /users?limit=1');
             const response: any = await apiClient.get('/users?limit=1');
-            console.log('[PORTAL USER PROFILE DEBUG] Response received:', JSON.stringify(response, null, 2));
 
             // Handle array response from V2 API
-            console.log('[PORTAL USER PROFILE DEBUG] Processing user profile data...');
             const dataArray = response?.data || response;
-            console.log('[PORTAL USER PROFILE DEBUG] Data array:', JSON.stringify(dataArray, null, 2));
             const userProfile = Array.isArray(dataArray) ? dataArray[0] : dataArray;
-            console.log('[PORTAL USER PROFILE DEBUG] Processed user profile:', JSON.stringify(userProfile, null, 2));
 
             if (!userProfile?.id) {
                 throw new Error('User profile not found');
