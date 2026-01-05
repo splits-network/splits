@@ -285,6 +285,7 @@ async function main() {
     services.register('notification', process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3005');
     services.register('document', process.env.DOCUMENT_SERVICE_URL || 'http://localhost:3006');
     services.register('automation', process.env.AUTOMATION_SERVICE_URL || 'http://localhost:3007');
+    services.register('document-processing', process.env.DOCUMENT_PROCESSING_SERVICE_URL || 'http://localhost:3008');
     services.register('ai', process.env.AI_SERVICE_URL || 'http://localhost:3009');
 
     // Register V2 proxy routes only

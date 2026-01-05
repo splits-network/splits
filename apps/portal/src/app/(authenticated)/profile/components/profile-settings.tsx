@@ -70,7 +70,7 @@ export function ProfileSettings() {
             }
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.getRecruiterProfile();
+            const response: any = await client.get('/recruiters?limit=1');
             const data = response?.data || response;
 
             if (!data?.id) {

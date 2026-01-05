@@ -45,7 +45,7 @@ export function UserProfileSettings() {
             }
 
             const apiClient = createAuthenticatedClient(token);
-            const response: any = await apiClient.getCurrentUser();
+            const response: any = await apiClient.get('/users?limit=1');
             const userProfile = response?.data?.[0] || response?.data || response;
 
             if (userProfile) {
