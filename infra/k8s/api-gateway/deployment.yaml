@@ -76,6 +76,8 @@ spec:
               value: "http://automation-service:3007"
             - name: DOCUMENT_SERVICE_URL
               value: "http://document-service:3006"
+            - name: DOCUMENT_PROCESSING_SERVICE_URL
+              value: "http://document-processing-service:3008"
             - name: AI_SERVICE_URL
               value: "http://ai-service:3009"
           resources:
