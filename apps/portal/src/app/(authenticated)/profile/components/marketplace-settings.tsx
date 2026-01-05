@@ -40,7 +40,7 @@ export function MarketplaceSettings() {
             }
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.getRecruiterProfile();
+            const response: any = await client.get('/recruiters?limit=1');
 
             // Handle array response from V2 API
             const dataArray = response?.data || response;
