@@ -219,10 +219,9 @@ async function main() {
         // Log auth headers for debugging
         const authHeader = request.headers.authorization;
         const clerkUserId = (request as any).auth?.clerkUserId;
-        const userRole = (request as any).auth?.userRole;
         
         if (authHeader || clerkUserId) {
-            console.log(`[API Auth] User: ${clerkUserId || 'anonymous'} - Role: ${userRole || 'none'} - Auth: ${authHeader ? 'present' : 'missing'}`);
+            console.log(`[API Auth] User: ${clerkUserId || 'anonymous'} - Auth: ${authHeader ? 'present' : 'missing'} - Role resolved by service`);
         }
 
         // Log any errors for non-2xx responses
