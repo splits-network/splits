@@ -31,16 +31,20 @@ export class RecruiterRepository {
         // If user is authenticated, apply role-based filtering
         if (clerkUserId) {
             const context = await resolveAccessContext(this.supabase, clerkUserId);
+            console.log('[NETWORK RECRUITERS DEBUG] Access context:', JSON.stringify(context, null, 2));
             
             if (context.recruiterId) {
                 // Recruiters can only see their own profile
+                console.log('[NETWORK RECRUITERS DEBUG] Filtering by user_id:', context.identityUserId);
                 query = query.eq('user_id', context.identityUserId);
             } else if (context.organizationIds.length > 0) {
                 // Company users can see recruiters working on their jobs (future enhancement)
                 // For now, no access to recruiter profiles
+                console.log('[NETWORK RECRUITERS DEBUG] Company user - no access to recruiter profiles');
                 return { data: [], total: 0 };
             }
             // Platform admins see all recruiters (no filter)
+            console.log('[NETWORK RECRUITERS DEBUG] Platform admin or no filtering applied');
         }
         // Unauthenticated users see all active recruiters (public marketplace)
 
@@ -64,6 +68,7 @@ export class RecruiterRepository {
         query = query.range(offset, offset + limit - 1);
 
         const { data, error, count } = await query;
+        console.log('[NETWORK RECRUITERS DEBUG] Query result:', { data, error, count });
         
         if (error) throw error;
 
