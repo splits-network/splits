@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
+import { createAuthenticatedClient } from '@/lib/api-client';
 
 export default function CookieConsent() {
     const [showBanner, setShowBanner] = useState(false);
@@ -32,22 +33,20 @@ export default function CookieConsent() {
             try {
                 const consentData = JSON.parse(consentStr);
                 const token = await getToken();
+                if (!token) {
+                    console.error('No auth token available for syncing consent');
+                    return;
+                }
                 // Use NEXT_PUBLIC_API_URL (without /api suffix) to match .env.local configuration
                 const apiUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
 
-                const response = await fetch(`${apiUrl}/api/v2/consent`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        preferences: {
-                            functional: consentData.functional ?? false,
-                            analytics: consentData.analytics ?? false,
-                            marketing: consentData.marketing ?? false
-                        }
-                    })
+                const client = createAuthenticatedClient(token);
+                const response = await client.post('/consent', {
+                    preferences: {
+                        functional: consentData.functional ?? false,
+                        analytics: consentData.analytics ?? false,
+                        marketing: consentData.marketing ?? false
+                    }
                 });
 
                 if (response.ok) {
@@ -83,21 +82,19 @@ export default function CookieConsent() {
         if (isSignedIn) {
             try {
                 const token = await getToken();
-                // Use NEXT_PUBLIC_API_URL (without /api suffix) to match .env.local configuration
-                const apiUrl = process.env.NEXT_PUBLIC_API_GATEWAY_URL || 'http://localhost:3000';
-                const response = await fetch(`${apiUrl}/api/v2/consent`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        preferences: {
-                            functional: consentData.functional,
-                            analytics: consentData.analytics,
-                            marketing: consentData.marketing
-                        }
-                    })
+                if (!token) {
+                    console.error('No auth token available for syncing consent');
+                    return;
+                }
+
+                const client = createAuthenticatedClient(token);
+
+                const response = await client.post('/consent', {
+                    preferences: {
+                        functional: consentData.functional,
+                        analytics: consentData.analytics,
+                        marketing: consentData.marketing
+                    }
                 });
 
                 if (response.ok) {

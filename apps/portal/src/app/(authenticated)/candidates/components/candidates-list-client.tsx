@@ -7,6 +7,7 @@ import { createAuthenticatedClient } from '@/lib/api-client';
 import { useViewMode } from '@/hooks/use-view-mode';
 import { formatDate, getVerificationStatusBadge, getVerificationStatusIcon } from '@/lib/utils';
 import CandidateCard from './candidate-card';
+import AddCandidateModal from './add-candidate-modal';
 
 export default function CandidatesListClient() {
     const { getToken } = useAuth();
@@ -19,6 +20,7 @@ export default function CandidatesListClient() {
     const [userRole, setUserRole] = useState<string | null>(null);
     const [scope, setScope] = useState<'mine' | 'all'>('mine');
     const [recruiterId, setRecruiterId] = useState<string | null>(null);
+    const [showAddModal, setShowAddModal] = useState(false);
 
     useEffect(() => {
         async function loadCandidates() {
@@ -71,6 +73,11 @@ export default function CandidatesListClient() {
         candidate.email.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    const handleAddCandidateSuccess = (newCandidate: any) => {
+        // Add the new candidate to the beginning of the list
+        setCandidates(prev => [newCandidate, ...prev]);
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
@@ -100,10 +107,13 @@ export default function CandidatesListClient() {
                         View and manage all your submitted candidates
                     </p>
                 </div>
-                <Link href="/candidates/new" className="btn btn-primary gap-2">
+                <button
+                    className="btn btn-primary gap-2"
+                    onClick={() => setShowAddModal(true)}
+                >
                     <i className="fa-solid fa-plus"></i>
                     New Candidate
-                </Link>
+                </button>
             </div>
 
             {/* Filters and View Toggle */}
@@ -306,6 +316,13 @@ export default function CandidatesListClient() {
                     </div>
                 </div>
             )}
+
+            {/* Add Candidate Modal */}
+            <AddCandidateModal
+                isOpen={showAddModal}
+                onClose={() => setShowAddModal(false)}
+                onSuccess={handleAddCandidateSuccess}
+            />
         </div>
     );
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-import ApiClient from '@/lib/api-client';
+import { createAuthenticatedClient } from '@/lib/api-client';
 
 interface InvitationPageClientProps {
     token: string;
@@ -71,8 +71,16 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             setLoading(true);
             setError(null);
 
+            const authToken = await getToken();
+            if (!authToken) {
+                throw new Error('Not authenticated');
+            }
+
+            const client = createAuthenticatedClient(authToken);
+
             // Fetch invitation details (includes enriched recruiter info)
-            const response = await ApiClient.get(`/recruiter-candidates/by-token/${token}`);
+            // Use the non-authenticated endpoint for invitations
+            const response = await client.get(`/recruiter-candidates/invitations/${token}`);
             const invitationData = response.data;
             setInvitation(invitationData);
 
@@ -88,7 +96,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             }
 
             // Fetch candidate details
-            const candidateResponse = await ApiClient.get(`/candidates/${invitationData.candidate_id}`);
+            const candidateResponse = await client.get(`/candidates/${invitationData.candidate_id}`);
             setCandidate(candidateResponse.data);
 
         } catch (err) {
@@ -119,7 +127,14 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             setProcessing(true);
             setError(null);
 
-            await ApiClient.post(`/recruiter-candidates/${token}/accept`);
+            const authToken = await getToken();
+            if (!authToken) {
+                throw new Error('Not authenticated');
+            }
+
+            const client = createAuthenticatedClient(authToken);
+
+            await client.post(`/recruiter-candidates/invitations/${token}/accept`);
 
             // Redirect to success page
             router.push(`/invitation/${token}/accepted`);
@@ -141,7 +156,14 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             setProcessing(true);
             setError(null);
 
-            await ApiClient.post(`/recruiter-candidates/${token}/decline`, {
+            const authToken = await getToken();
+            if (!authToken) {
+                throw new Error('Not authenticated');
+            }
+
+            const client = createAuthenticatedClient(authToken);
+
+            await client.post(`/recruiter-candidates/invitations/${token}/decline`, {
                 decline_reason: declineReason || undefined
             });
 

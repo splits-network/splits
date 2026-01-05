@@ -27,7 +27,7 @@ export default function NotificationBell() {
             const count = await fetchUnreadCount();
             setUnreadCount(count);
         } catch (error) {
-            console.error('Failed to fetch unread count:', error);
+            // Fail silently - notification bell should continue working
         }
     }, []);
 
@@ -38,7 +38,7 @@ export default function NotificationBell() {
             const data = await fetchNotifications({ limit: 10 });
             setNotifications(data);
         } catch (error) {
-            console.error('Failed to fetch notifications:', error);
+            // Fail silently - show empty state if notifications can't load
         } finally {
             setLoading(false);
         }
@@ -70,7 +70,7 @@ export default function NotificationBell() {
                     )
                 );
             } catch (error) {
-                console.error('Failed to mark as read:', error);
+                // Fail silently - user can still navigate to the notification
             }
         }
 
@@ -89,7 +89,7 @@ export default function NotificationBell() {
                 prev.map((n) => ({ ...n, read: true }))
             );
         } catch (error) {
-            console.error('Failed to mark all as read:', error);
+            // Fail silently - UI will update optimistically
         }
     };
 
@@ -103,7 +103,7 @@ export default function NotificationBell() {
             // Refresh unread count
             loadUnreadCount();
         } catch (error) {
-            console.error('Failed to dismiss notification:', error);
+            // Fail silently - notification will appear dismissed in UI
         }
     };
 

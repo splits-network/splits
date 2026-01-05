@@ -15,8 +15,9 @@ export default function SignInPage() {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    // Get redirect parameter
-    const redirect = searchParams.get('redirect');
+    // Get redirect parameter (from invitation or other flow) and store in state
+    // so it persists through the entire sign-in flow even if URL changes
+    const [redirectUrl] = useState(() => searchParams.get('redirect_url'));
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -33,7 +34,7 @@ export default function SignInPage() {
 
             if (signInAttempt.status === 'complete') {
                 await setActive({ session: signInAttempt.createdSessionId });
-                router.push(redirect || '/dashboard');
+                router.push(redirectUrl || '/dashboard');
             } else {
                 setError('Sign in incomplete. Please try again.');
             }
@@ -50,7 +51,7 @@ export default function SignInPage() {
         signIn.authenticateWithRedirect({
             strategy: provider,
             redirectUrl: '/sso-callback',
-            redirectUrlComplete: redirect || '/dashboard',
+            redirectUrlComplete: redirectUrl || '/dashboard',
         });
     };
 
@@ -154,7 +155,7 @@ export default function SignInPage() {
                     <p className="text-center text-sm mt-4">
                         Don't have an account?{' '}
                         <Link
-                            href={redirect ? `/sign-up?redirect=${encodeURIComponent(redirect)}` : '/sign-up'}
+                            href={redirectUrl ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}` : '/sign-up'}
                             className="link link-primary"
                         >
                             Create free account

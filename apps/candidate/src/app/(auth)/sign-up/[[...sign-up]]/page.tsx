@@ -21,7 +21,7 @@ export default function SignUpPage() {
 
     // Get redirect parameter (from invitation or other flow) and store in state
     // so it persists through the entire sign-up flow even if URL changes
-    const [redirectUrl] = useState(() => searchParams.get('redirect'));
+    const [redirectUrl] = useState(() => searchParams.get('redirect_url'));
     const isFromInvitation = redirectUrl?.includes('/invitation/');
 
     const handleSubmit = async (e: FormEvent) => {
@@ -181,6 +181,9 @@ export default function SignUpPage() {
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-4">
+                        {/* Clerk CAPTCHA widget container - required for bot protection */}
+                        <div id="clerk-captcha"></div>
+
                         <div className="grid grid-cols-2 gap-4">
                             <div className="fieldset">
                                 <label className="label">First Name</label>
@@ -286,7 +289,7 @@ export default function SignUpPage() {
                     <p className="text-center text-sm mt-4">
                         Already have an account?{' '}
                         <Link
-                            href={redirectUrl ? `/sign-in?redirect=${encodeURIComponent(redirectUrl)}` : '/sign-in'}
+                            href={redirectUrl ? `/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}` : '/sign-in'}
                             className="link link-primary"
                         >
                             Sign in
