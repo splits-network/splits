@@ -29,15 +29,20 @@ export default function SettingsPage() {
             if (!isLoaded) return;
 
             try {
+                console.log('[PORTAL PROFILE PAGE DEBUG] Starting checkUserRole...');
                 const token = await getToken();
                 if (!token) {
+                    console.log('[PORTAL PROFILE PAGE DEBUG] No token available');
                     setLoading(false);
                     return;
                 }
 
+                console.log('[PORTAL PROFILE PAGE DEBUG] Creating API client with token');
                 const apiClient = createAuthenticatedClient(token);
+                console.log('[PORTAL PROFILE PAGE DEBUG] Calling getUserRoles...');
                 const roleData = await apiClient.getUserRoles();
-                
+                console.log('[PORTAL PROFILE PAGE DEBUG] Role data received:', JSON.stringify(roleData, null, 2));
+
                 console.log('Profile page - roleData:', roleData);
                 setUserRoles(roleData);
                 setLoading(false);
@@ -61,7 +66,7 @@ export default function SettingsPage() {
     return (
         <div className="p-6">
             <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
-            
+
             <div className="space-y-4">
                 {/* Profile & Account Card - Available to ALL users */}
                 <UserProfileSettings />

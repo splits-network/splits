@@ -35,17 +35,22 @@ export function UserProfileSettings() {
 
     const loadProfile = async () => {
         try {
+            console.log('[PORTAL USER PROFILE DEBUG] Starting loadProfile...');
             setLoading(true);
             setError('');
             const token = await getToken();
             if (!token) {
+                console.log('[PORTAL USER PROFILE DEBUG] No token available');
                 setError('Please sign in to manage your profile.');
                 setLoading(false);
                 return;
             }
 
+            console.log('[PORTAL USER PROFILE DEBUG] Creating API client with token');
             const apiClient = createAuthenticatedClient(token);
+            console.log('[PORTAL USER PROFILE DEBUG] Making request to /users?limit=1');
             const response: any = await apiClient.get('/users?limit=1');
+            console.log('[PORTAL USER PROFILE DEBUG] Response received:', JSON.stringify(response, null, 2));
             const userProfile = response?.data?.[0] || response?.data || response;
 
             if (userProfile) {

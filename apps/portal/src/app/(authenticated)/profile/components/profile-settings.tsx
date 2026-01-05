@@ -61,16 +61,21 @@ export function ProfileSettings() {
 
     const loadProfile = async () => {
         try {
+            console.log('[PORTAL RECRUITER PROFILE DEBUG] Starting loadProfile...');
             setLoading(true);
             const token = await getToken();
             if (!token) {
+                console.log('[PORTAL RECRUITER PROFILE DEBUG] No token available');
                 setError('Please sign in to manage your profile.');
                 setLoading(false);
                 return;
             }
 
+            console.log('[PORTAL RECRUITER PROFILE DEBUG] Creating API client with token');
             const client = createAuthenticatedClient(token);
+            console.log('[PORTAL RECRUITER PROFILE DEBUG] Making request to /recruiters?limit=1');
             const response: any = await client.get('/recruiters?limit=1');
+            console.log('[PORTAL RECRUITER PROFILE DEBUG] Response received:', JSON.stringify(response, null, 2));
             const data = response?.data || response;
 
             if (!data?.id) {
