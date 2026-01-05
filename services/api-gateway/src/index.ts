@@ -197,6 +197,40 @@ async function main() {
         }, 'Request completed');
     });
 
+    // Add enhanced debug logging for profile-related API calls (exclude notification polling noise)
+    app.addHook('onResponse', async (request, reply) => {
+        // Skip notification calls to reduce log noise
+        if (request.url.includes('/notifications/unread-count') || request.url.includes('/notifications?')) {
+            return;
+        }
+
+        // Skip health checks
+        if (request.url === '/health' || request.url.includes('/docs')) {
+            return;
+        }
+
+        const correlationId = (request as any).correlationId;
+        const startTime = (request as any).startTime;
+        const responseTime = Date.now() - startTime;
+        
+        // Enhanced logging for API calls
+        console.log(`[API Debug] ${request.method} ${request.url} - ${reply.statusCode} (${responseTime}ms) - IP: ${request.ip} - User-Agent: ${request.headers['user-agent']?.substring(0, 50)}...`);
+        
+        // Log auth headers for debugging
+        const authHeader = request.headers.authorization;
+        const clerkUserId = (request as any).auth?.clerkUserId;
+        const userRole = (request as any).auth?.userRole;
+        
+        if (authHeader || clerkUserId) {
+            console.log(`[API Auth] User: ${clerkUserId || 'anonymous'} - Role: ${userRole || 'none'} - Auth: ${authHeader ? 'present' : 'missing'}`);
+        }
+
+        // Log any errors for non-2xx responses
+        if (reply.statusCode >= 400) {
+            console.log(`[API Error] ${request.method} ${request.url} - ${reply.statusCode} - Correlation: ${correlationId}`);
+        }
+    });
+
     // Initialize auth middleware
     const authMiddleware = new AuthMiddleware(clerkConfig.secretKey);
     let eventPublisher: EventPublisher | null = null;
