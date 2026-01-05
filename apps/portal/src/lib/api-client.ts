@@ -162,6 +162,10 @@ export class ApiClient {
         return this.client.patch(`/recruiters/${id}`, data);
     }
 
+    async getRecruiterProfile() {
+        return this.client.get('/recruiters?limit=1');
+    }
+
     async getAssignments(filters?: { recruiter_id?: string; job_id?: string }) {
         return this.client.get('/assignments', { params: filters });
     }

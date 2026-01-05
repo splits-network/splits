@@ -76,7 +76,11 @@ export function ProfileSettings() {
             console.log('[PORTAL RECRUITER PROFILE DEBUG] Making request to /recruiters?limit=1');
             const response: any = await client.get('/recruiters?limit=1');
             console.log('[PORTAL RECRUITER PROFILE DEBUG] Response received:', JSON.stringify(response, null, 2));
-            const data = response?.data || response;
+
+            // Handle array response from V2 API
+            const dataArray = response?.data || response;
+            const data = Array.isArray(dataArray) ? dataArray[0] : dataArray;
+            console.log('[PORTAL RECRUITER PROFILE DEBUG] Processed data:', JSON.stringify(data, null, 2));
 
             if (!data?.id) {
                 throw new Error('Recruiter profile not found');

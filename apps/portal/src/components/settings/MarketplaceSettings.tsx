@@ -80,7 +80,11 @@ export function MarketplaceSettings() {
 
             const client = createAuthenticatedClient(token);
             const result = await client.getRecruiterProfile();
-            const data = result.data || result;
+
+            // Handle array response from V2 API
+            const dataArray = result.data || result;
+            const data = Array.isArray(dataArray) ? dataArray[0] : dataArray;
+
             setRecruiterId(data.id);
             setSettings({
                 marketplace_enabled: data.marketplace_enabled ?? false,
@@ -260,8 +264,8 @@ export function MarketplaceSettings() {
                                     className="input w-full"
                                     placeholder="e.g., Specialized in Tech Executive Placements"
                                     maxLength={255}
-                                value={settings.tagline}
-                                onChange={(e) => updateSettings({ tagline: e.target.value })}
+                                    value={settings.tagline}
+                                    onChange={(e) => updateSettings({ tagline: e.target.value })}
                                 />
                                 <label className="label">
                                     <span className="label-text-alt">Short description shown in search results</span>
@@ -274,8 +278,8 @@ export function MarketplaceSettings() {
                                     type="text"
                                     className="input w-full"
                                     placeholder="e.g., New York, NY"
-                                value={settings.location}
-                                onChange={(e) => updateSettings({ location: e.target.value })}
+                                    value={settings.location}
+                                    onChange={(e) => updateSettings({ location: e.target.value })}
                                 />
                             </div>
 
@@ -285,8 +289,8 @@ export function MarketplaceSettings() {
                                     type="number"
                                     className="input w-full"
                                     min="0"
-                                value={settings.years_experience}
-                                onChange={(e) => updateSettings({ years_experience: parseInt(e.target.value) || 0 })}
+                                    value={settings.years_experience}
+                                    onChange={(e) => updateSettings({ years_experience: parseInt(e.target.value) || 0 })}
                                 />
                             </div>
                         </div>

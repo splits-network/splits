@@ -41,8 +41,11 @@ export function MarketplaceSettings() {
 
             const client = createAuthenticatedClient(token);
             const response: any = await client.getRecruiterProfile();
-            const recruiter = response?.data || response;
-            
+
+            // Handle array response from V2 API
+            const dataArray = response?.data || response;
+            const recruiter = Array.isArray(dataArray) ? dataArray[0] : dataArray;
+
             if (!recruiter?.id) {
                 throw new Error('Recruiter profile not found');
             }
