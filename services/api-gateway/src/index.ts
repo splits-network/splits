@@ -214,7 +214,6 @@ async function main() {
         const responseTime = Date.now() - startTime;
         
         // Enhanced logging for API calls
-        console.log(`[API Debug] ${request.method} ${request.url} - ${reply.statusCode} (${responseTime}ms) - IP: ${request.ip} - User-Agent: ${request.headers['user-agent']?.substring(0, 50)}...`);
         
         // Log auth headers for debugging
         const authHeader = request.headers.authorization;

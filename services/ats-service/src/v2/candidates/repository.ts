@@ -29,37 +29,21 @@ export class CandidateRepository {
         clerkUserId: string,
         filters: CandidateFilters = {}
     ): Promise<RepositoryListResponse<any>> {
-        console.log('[ATS CANDIDATES DEBUG] findCandidates called with:', {
-            clerkUserId,
-            filters
-        });
         
         const page = filters.page || 1;
         const limit = filters.limit || 25;
         const offset = (page - 1) * limit;
 
-        console.log('[ATS CANDIDATES DEBUG] Resolving access context for user:', clerkUserId);
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-        console.log('[ATS CANDIDATES DEBUG] Access context resolved:', JSON.stringify(accessContext, null, 2));
         
         const organizationIds = accessContext.organizationIds;
         const restrictToOrganizations = !accessContext.isPlatformAdmin && !accessContext.candidateId && !accessContext.recruiterId;
 
-        console.log('[ATS CANDIDATES DEBUG] Access control:', {
-            organizationIds,
-            restrictToOrganizations,
-            isPlatformAdmin: accessContext.isPlatformAdmin,
-            candidateId: accessContext.candidateId,
-            recruiterId: accessContext.recruiterId
-        });
-
         if (restrictToOrganizations && organizationIds.length === 0) {
-            console.log('[ATS CANDIDATES DEBUG] No access - returning empty result');
             return { data: [], total: 0 };
         }
 
         // Build query based on user role and scope
-        console.log('[ATS CANDIDATES DEBUG] Building Supabase query');
         let query = this.supabase
             .schema('ats')
             .from('candidates')
@@ -170,18 +154,9 @@ export class CandidateRepository {
         // Apply pagination
         query = query.range(offset, offset + limit - 1);
 
-        console.log('[ATS CANDIDATES DEBUG] Executing database query');
         const { data, error, count } = await query;
         
-        console.log('[ATS CANDIDATES DEBUG] Query result:', {
-            dataLength: data?.length || 0,
-            count,
-            error: error ? error.message : null,
-            firstItem: data?.[0] || null
-        });
-        
         if (error) {
-            console.log('[ATS CANDIDATES DEBUG] Database error:', error);
             throw error;
         }
 
@@ -191,26 +166,17 @@ export class CandidateRepository {
         // For recruiters with scope != 'mine', we already filtered in the query above
         // For other users, apply organization filtering
         if (!accessContext.recruiterId && restrictToOrganizations && organizationIds.length > 0) {
-            console.log('[ATS CANDIDATES DEBUG] Applying organization filtering');
             filteredData = filteredData.filter((candidate: any) => {
                 return candidate.applications?.some((app: any) => {
                     return organizationIds.includes(app.job?.company?.identity_organization_id);
                 });
             });
-            console.log('[ATS CANDIDATES DEBUG] After organization filtering:', filteredData.length);
         }
 
         // Enrich with recruiter relationship data
         if (filteredData.length > 0) {
-            console.log('[ATS CANDIDATES DEBUG] Enriching with recruiter relationships');
             filteredData = await this.enrichWithRecruiterRelationships(filteredData, accessContext.recruiterId ?? undefined);
         }
-
-        console.log('[ATS CANDIDATES DEBUG] Final result:', {
-            dataLength: filteredData.length,
-            total: count || 0,
-            firstItem: filteredData[0] || null
-        });
 
         return {
             data: filteredData,

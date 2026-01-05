@@ -26,8 +26,6 @@ interface RecruiterCardProps {
 export default function RecruiterCard({ recruiter }: RecruiterCardProps) {
     const router = useRouter();
 
-    // Debug logging
-    console.log('RecruiterCard received:', recruiter);
 
     const viewRecruiter = () => {
         router.push(`/marketplace/${recruiter.id}`);

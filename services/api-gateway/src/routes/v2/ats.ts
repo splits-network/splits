@@ -191,17 +191,8 @@ function registerCandidateRoutes(app: FastifyInstance, services: ServiceRegistry
         apiBase,
         { preHandler: requireAuth() },
         async (request: FastifyRequest, reply: FastifyReply) => {
-            console.log(`[DEBUG CANDIDATES] ${apiBase} - Route handler called`);
-            console.log(`[DEBUG CANDIDATES] Query:`, request.query);
-            console.log(`[DEBUG CANDIDATES] Auth context:`, request.auth);
-            
             const correlationId = getCorrelationId(request);
             const authHeaders = buildAuthHeaders(request);
-            
-            console.log(`[DEBUG CANDIDATES] Correlation ID:`, correlationId);
-            console.log(`[DEBUG CANDIDATES] Auth headers:`, authHeaders);
-            console.log(`[DEBUG CANDIDATES] Service base path:`, serviceBase);
-            console.log(`[DEBUG CANDIDATES] About to call atsService().get()`);
             
             try {
                 const data = await atsService().get(
@@ -210,9 +201,6 @@ function registerCandidateRoutes(app: FastifyInstance, services: ServiceRegistry
                     correlationId,
                     authHeaders
                 );
-                
-                console.log(`[DEBUG CANDIDATES] ServiceClient returned:`, typeof data, JSON.stringify(data).substring(0, 200));
-                console.log(`[DEBUG CANDIDATES] Sending response`);
                 
                 return reply.send(data);
             } catch (error) {

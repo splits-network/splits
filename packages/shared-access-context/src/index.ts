@@ -17,10 +17,8 @@ export async function resolveAccessContext(
     supabase: SupabaseClient,
     clerkUserId?: string
 ): Promise<AccessContext> {
-    console.log('[ACCESS CONTEXT DEBUG] Resolving access context for Clerk user:', clerkUserId);
     
     if (!clerkUserId) {
-        console.log('[ACCESS CONTEXT DEBUG] No Clerk user ID provided - returning empty context');
         return {
             identityUserId: null,
             candidateId: null,
@@ -31,7 +29,6 @@ export async function resolveAccessContext(
         };
     }
 
-    console.log('[ACCESS CONTEXT DEBUG] Looking up identity user for Clerk ID:', clerkUserId);
     const identityUserResult = await supabase
         .schema('identity')
         .from('users')
@@ -39,15 +36,9 @@ export async function resolveAccessContext(
         .eq('clerk_user_id', clerkUserId)
         .maybeSingle();
 
-    console.log('[ACCESS CONTEXT DEBUG] Identity user lookup result:', {
-        data: identityUserResult.data,
-        error: identityUserResult.error
-    });
-
     const identityUserId = identityUserResult.data?.id || null;
 
     if (!identityUserId) {
-        console.log('[ACCESS CONTEXT DEBUG] No identity user found for Clerk ID - returning empty context');
         return {
             identityUserId: null,
             candidateId: null,
@@ -58,7 +49,6 @@ export async function resolveAccessContext(
         };
     }
 
-    console.log('[ACCESS CONTEXT DEBUG] Looking up candidate, recruiter, and memberships for identity user:', identityUserId);
     const [candidateResult, recruiterResult, membershipsResult] = await Promise.all([
         supabase
             .schema('ats')
@@ -80,15 +70,6 @@ export async function resolveAccessContext(
             .eq('user_id', identityUserId),
     ]);
 
-    console.log('[ACCESS CONTEXT DEBUG] Database lookups completed:', {
-        candidate: candidateResult.data,
-        candidateError: candidateResult.error,
-        recruiter: recruiterResult.data, 
-        recruiterError: recruiterResult.error,
-        memberships: membershipsResult.data,
-        membershipsError: membershipsResult.error
-    });
-
     const memberships = membershipsResult.data || [];
     const organizationIds = memberships
         .map((m) => m.organization_id)
@@ -106,8 +87,6 @@ export async function resolveAccessContext(
         roles,
         isPlatformAdmin,
     };
-
-    console.log('[ACCESS CONTEXT DEBUG] Final access context:', finalContext);
 
     return finalContext;
 }
