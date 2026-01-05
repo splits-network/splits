@@ -11,6 +11,7 @@ interface UserProfile {
 }
 
 export function UserProfileSettings() {
+    console.log('[PORTAL USER PROFILE DEBUG] Component mounted/rendered');
     const { getToken } = useAuth();
     const { user: clerkUser } = useUser();
     const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -30,6 +31,7 @@ export function UserProfileSettings() {
     const [changingPassword, setChangingPassword] = useState(false);
 
     useEffect(() => {
+        console.log('[PORTAL USER PROFILE DEBUG] useEffect triggered - calling loadProfile');
         loadProfile();
     }, []);
 
@@ -53,7 +55,9 @@ export function UserProfileSettings() {
             console.log('[PORTAL USER PROFILE DEBUG] Response received:', JSON.stringify(response, null, 2));
 
             // Handle array response from V2 API
+            console.log('[PORTAL USER PROFILE DEBUG] Processing user profile data...');
             const dataArray = response?.data || response;
+            console.log('[PORTAL USER PROFILE DEBUG] Data array:', JSON.stringify(dataArray, null, 2));
             const userProfile = Array.isArray(dataArray) ? dataArray[0] : dataArray;
             console.log('[PORTAL USER PROFILE DEBUG] Processed user profile:', JSON.stringify(userProfile, null, 2));
 
