@@ -70,7 +70,7 @@ export class ApiClient {
         isHiringManager: boolean;
         isPlatformAdmin: boolean;
     }> {
-        const response: any = await this.get('/v2/users', { params: { limit: 1 } });
+        const response: any = await this.get('/users', { params: { limit: 1 } });
         const payload = response?.data ?? response;
         const user = Array.isArray(payload) ? payload[0] : payload;
         const memberships: Array<{ role?: string }> = user?.memberships ?? [];

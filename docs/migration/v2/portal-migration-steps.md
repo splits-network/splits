@@ -28,7 +28,7 @@ Most methods default to V2 version parameter but call legacy endpoint paths:
 
 | Method | Current Path | V2 Path | Impact |
 |--------|-------------|---------|--------|
-| `getCurrentUser()` | `/users/me` | `/v2/users/me` | User authentication |
+| `getCurrentUser()` | `/users/me` | `/users` | User authentication |
 | `getJobs()` | `/jobs` | `/v2/jobs` | Job listings |
 | `getRoles()` | `/jobs` | `/v2/jobs` | Role management |
 | `getJob(id)` | `/jobs/${id}` | `/v2/jobs/${id}` | Job details |
@@ -62,7 +62,7 @@ Most methods default to V2 version parameter but call legacy endpoint paths:
 | `deleteDocument()` | `/documents/${id}` | `/v2/documents/${id}` | Document deletion |
 | `getRecruiterCandidateRelationship()` | `/recruiter-candidates` | `/v2/recruiter-candidates` | Relationship mgmt |
 | `getStats()` | `/stats` | `/v2/stats` | Dashboard stats |
-| `updateUser()` | `/users/${id}` | `/v2/users/${id}` | User management |
+| `updateUser()` | `/users/${id}` | `/users/${id}` | User management |
 
 ### Phase 4: Explicit V1 Calls (Requires Backend Check)
 **Target**: Methods already marked as V1 - verify if V2 routes exist
@@ -120,7 +120,7 @@ async getCurrentUser(): Promise<User> {
 
 // ✅ After (use filtered query)
 async getCurrentUser(): Promise<{ data: User[] }> {
-  return this.request('/v2/users?limit=1'); // Backend filters by access context
+  return this.request('/users?limit=1'); // Backend filters by access context
 }
 ```
 

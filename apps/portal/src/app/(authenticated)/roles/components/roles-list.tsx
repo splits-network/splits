@@ -117,7 +117,7 @@ export default function RolesList() {
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.get('/v2/users', { params: { limit: 1 } });
+            const response: any = await client.get('/users', { params: { limit: 1 } });
             const profile: UserProfile = response.data?.[0] || response.data;
             const role = resolveUserRole(profile);
             setUserRole(role);

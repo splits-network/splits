@@ -480,7 +480,7 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 4. In-app notifications proxy through `/api/v2/notifications*`, leveraging the shared `resolveAccessContext` helper for per-user scoping (list/read/dismiss/unread-count)
 5. Recruiter relationships page now queries `/api/v2/recruiter-candidates`, with candidate-scoped access enforced in `services/network-service/src/v2/recruiter-candidates/repository.ts`
 6. Candidate dashboard stats + recent applications panels now read from `/api/v2/candidate-dashboard/*`, backed by ATS V2 routes that scope entirely via the shared `resolveAccessContext` helper (no `/candidates/me` dependency)
-7. Current-user lookups now use `/api/v2/users?limit=1`, which leverages the shared `resolveAccessContext` helper so the UI never calls the legacy `/api/me` endpoint.
+7. Current-user lookups now use `/users?limit=1`, which leverages the shared `resolveAccessContext` helper so the UI never calls the legacy `/api/me` endpoint.
 8. Document uploads and metadata updates now flow through `/api/v2/documents` (gateway proxies multipart payloads straight to the document service), so the candidate UI no longer depends on `/api/documents/upload`.
 9. Cookie consent flows hit `/api/v2/consent`, backed by the identity service’s V2 consent domain (shared access context determines the identity user instead of `/api/consent`).
 10. Recruiter invitation acceptance/decline now uses `/api/v2/recruiter-candidates/invitations/*`, with the network service handling token validation + candidate linking inside its V2 service, so the invitation UI no longer depends on `/api/network/recruiter-candidates/invitation/*`.

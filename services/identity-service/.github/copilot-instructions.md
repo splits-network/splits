@@ -25,7 +25,7 @@ The Identity Service manages user authentication and organization data with a **
 
 ## Current Domains
 
-### Users (`src/v2/users/`)
+### Users (`src/users/`)
 - **Repository**: `UserRepository` - Direct Supabase queries with access context
 - **Service**: `UserServiceV2` - Business logic, validation, event publishing
 - **Routes**: Standard 5-route pattern with role-based filtering
