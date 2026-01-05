@@ -29,20 +29,29 @@ export default function ProfilePage() {
     useEffect(() => {
         async function loadProfile() {
             try {
+                console.log('[CANDIDATE PROFILE DEBUG] Starting profile load');
                 setLoading(true);
                 setError(null);
 
                 const token = await getToken();
+                console.log('[CANDIDATE PROFILE DEBUG] Token obtained:', token ? 'present' : 'missing');
                 if (!token) {
                     setError('Please sign in to view your profile');
                     return;
                 }
 
+                console.log('[CANDIDATE PROFILE DEBUG] Creating authenticated client');
                 const client = createAuthenticatedClient(token);
+                console.log('[CANDIDATE PROFILE DEBUG] Making API call to /candidates?limit=1');
+
                 const response = await client.get('/candidates?limit=1');
+                console.log('[CANDIDATE PROFILE DEBUG] API response received:', JSON.stringify(response, null, 2));
+
                 const profile = response.data?.[0];
+                console.log('[CANDIDATE PROFILE DEBUG] Extracted profile:', JSON.stringify(profile, null, 2));
 
                 if (profile) {
+                    console.log('[CANDIDATE PROFILE DEBUG] Profile found, setting form data');
                     setCandidateId(profile.id);
                     setFormData({
                         full_name: profile.full_name || '',
@@ -57,16 +66,24 @@ export default function ProfilePage() {
                         bio: profile.bio || '',
                         skills: profile.skills || '',
                     });
+                } else {
+                    console.log('[CANDIDATE PROFILE DEBUG] No profile found in response data');
                 }
             } catch (err: any) {
-                console.error('Failed to load profile:', err);
+                console.error('[CANDIDATE PROFILE DEBUG] Error loading profile:', err);
+                console.error('[CANDIDATE PROFILE DEBUG] Error details:', {
+                    message: err.message,
+                    status: err.status,
+                    stack: err.stack
+                });
                 // Handle 404 as "no profile yet" - not an error
                 if (err.status === 404) {
                     // No profile exists yet - show empty form
-                    console.log('No candidate profile found - showing empty form');
+                    console.log('[CANDIDATE PROFILE DEBUG] 404 - No profile found, showing empty form');
                     setError(null);
                 } else {
                     // Real error - show it
+                    console.log('[CANDIDATE PROFILE DEBUG] Setting error:', err.message);
                     setError(err.message || 'Failed to load profile');
                 }
             } finally {
