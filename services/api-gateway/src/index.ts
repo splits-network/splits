@@ -243,8 +243,19 @@ async function main() {
 
 
 
-    // Register auth hook for all /api routes (except webhooks and public routes)
+    // Register auth hook for all /api routes (except webhooks, health, docs, and public routes)
     app.addHook('onRequest', async (request, reply) => {
+        // Skip auth for health check endpoint (used by Kubernetes probes and monitoring)
+        // This is checked first as it's the most common non-authenticated request
+        if (request.url === '/health' || request.url.startsWith('/health?')) {
+            return;
+        }
+        
+        // Skip auth for swagger docs endpoints
+        if (request.url.startsWith('/docs')) {
+            return;
+        }
+        
         // Skip auth for webhook endpoints (verified by signature)
         if (request.url.includes('/webhooks/')) {
             return;
