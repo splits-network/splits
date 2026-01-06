@@ -8,6 +8,7 @@ export interface UserFilters {
     role?: string;
     page?: number;
     limit?: number;
+    clerk_user_id?: string;
 }
 
 export interface UserUpdate {

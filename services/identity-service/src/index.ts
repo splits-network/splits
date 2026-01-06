@@ -84,8 +84,10 @@ async function main() {
     const eventPublisher = new EventPublisherV2(rabbitMqUrl, logger);
     try {
         await eventPublisher.connect();
+        logger.info('Successfully connected to RabbitMQ for event publishing');
     } catch (error) {
-        logger.warn({ error }, 'Failed to connect to RabbitMQ - events will not be published');
+        logger.warn({ err: error }, 'Failed to connect to RabbitMQ - events will not be published. Service will continue without event publishing.');
+        // Don't throw - service should continue without RabbitMQ
     }
 
     // Register V2 routes only

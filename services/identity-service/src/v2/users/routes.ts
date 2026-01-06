@@ -69,6 +69,26 @@ export function registerUserRoutes(
         }
     });
 
+    // Self-registration endpoint for new user sign-ups
+    app.post('/api/v2/users/register', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const body = request.body as any;
+            
+            // Security: User can only register themselves
+            if (body.clerk_user_id && body.clerk_user_id !== clerkUserId) {
+                reply.code(403).send({ error: { message: 'Can only register your own account' } });
+                return;
+            }
+
+            const user = await userService.registerUser(clerkUserId, body);
+            reply.code(201).send({ data: user });
+        } catch (error) {
+            logError('POST /api/v2/users/register failed', error);
+            reply.code(400).send({ error: { message: (error as Error).message } });
+        }
+    });
+
     app.patch('/api/v2/users/:id', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);

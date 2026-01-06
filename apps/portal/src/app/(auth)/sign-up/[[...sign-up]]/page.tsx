@@ -4,6 +4,7 @@ import { useSignUp, useAuth, useClerk } from '@clerk/nextjs';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useState, useEffect } from 'react';
 import Link from 'next/link';
+import { createAuthenticatedClient } from '@/lib/api-client';
 
 export default function SignUpPage() {
     const { isLoaded, signUp, setActive } = useSignUp();
@@ -79,6 +80,29 @@ export default function SignUpPage() {
             // Try to complete sign up regardless of status if we have a session
             if (completeSignUp.createdSessionId) {
                 await setActive({ session: completeSignUp.createdSessionId });
+
+                // Create user in our database immediately using Clerk data
+                try {
+                    const session = completeSignUp.createdSession;
+                    const user = session?.user;
+
+                    if (user) {
+                        // Create authenticated API client with session token
+                        const apiClient = createAuthenticatedClient(await session.getToken());
+
+                        // Create user record in our identity service using registration endpoint
+                        await apiClient.post('/users/register', {
+                            clerk_user_id: user.id,
+                            email: user.primaryEmailAddress?.emailAddress || email,
+                            name: `${user.firstName || firstName} ${user.lastName || lastName}`.trim(),
+                        });
+
+                        console.log('User created successfully in database');
+                    }
+                } catch (userCreationError) {
+                    // Log error but don't block the flow - webhook will catch this later
+                    console.error('Failed to create user in database (webhook will handle):', userCreationError);
+                }
 
                 // If user signed up via invitation, redirect to acceptance page
                 if (invitationId) {

@@ -74,7 +74,7 @@ export class UserServiceV2 {
                     clerk_user_id: clerkUserId,
                     email,
                     name: name || null,
-                    status: 'active' as const,
+                    onboarding_status: 'pending' as const,
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                 };
@@ -156,7 +156,7 @@ export class UserServiceV2 {
     async createUser(clerkUserId: string, userData: any) {
         await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ email: userData.email }, 'UserService.createUser');
-
+        
         if (!userData.email) {
             throw new Error('Email is required');
         }
@@ -164,17 +164,18 @@ export class UserServiceV2 {
         if (!userData.clerk_user_id) {
             throw new Error('Clerk user ID is required');
         }
-
+        
         const user = await this.repository.createUser({
             id: uuidv4(),
             email: userData.email,
             clerk_user_id: userData.clerk_user_id,
-            full_name: userData.full_name || null,
-            avatar_url: userData.avatar_url || null,
-            status: 'active',
+            name: userData.name || null,
+            //avatar_url: userData.avatar_url || null,
+            onboarding_status: 'pending',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         });
+        
 
         await this.eventPublisher.publish('user.created', {
             user_id: user.id,
@@ -183,6 +184,57 @@ export class UserServiceV2 {
         });
 
         this.logger.info({ id: user.id }, 'UserService.createUser - user created');
+        return user;
+    }
+
+    /**
+     * Register user (self-registration during sign-up)
+     * Allows users to create their own account without admin permissions
+     */
+    async registerUser(clerkUserId: string, userData: any) {
+        this.logger.info({ clerkUserId }, 'UserService.registerUser');
+
+        // Security check: Ensure user can only register themselves
+        if (userData.clerk_user_id !== clerkUserId) {
+            throw new Error('Users can only register themselves');
+        }
+
+        // Validate required fields
+        if (!userData.email) {
+            throw new Error('Email is required for user registration');
+        }
+
+        // Check if user already exists
+        const result = await this.repository.findUsers(
+            { clerk_user_id: clerkUserId, page: 1, limit: 1 },
+            {}
+        );
+        
+        if (result.data && result.data.length > 0) {
+            throw new Error('User already registered');
+        }
+
+        // Create user data
+        const createData: any = {
+            clerk_user_id: clerkUserId,
+            email: userData.email,
+            name: userData.name || '',
+            //image_url: userData.image_url,
+            onboarding_status: 'pending',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        };
+
+        const user = await this.repository.create(clerkUserId, createData);
+        
+        // Publish event for other services
+        await this.eventPublisher?.publish('user.registered', {
+            userId: user.id,
+            clerkUserId,
+            email: user.email,
+        });
+
+        this.logger.info({ id: user.id }, 'UserService.registerUser - user registered');
         return user;
     }
 

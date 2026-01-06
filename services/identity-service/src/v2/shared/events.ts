@@ -30,7 +30,10 @@ export class EventPublisherV2 {
             this.logger.info('Connected to RabbitMQ for event publishing');
         } catch (error) {
             this.logger.error({ err: error }, 'Failed to connect to RabbitMQ');
-            throw error;
+            // Keep connection and channel as null so service knows events can't be published
+            this.connection = null;
+            this.channel = null;
+            throw error; // Let caller handle the error
         }
     }
 

@@ -49,6 +49,7 @@ services:
       SUPABASE_URL: ${SUPABASE_URL}
       SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
     volumes:
       - ./services/identity-service/src:/app/services/identity-service/src
       - ./packages:/app/packages
@@ -56,7 +57,10 @@ services:
     networks:
       - splits-network
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   ats-service:
     build:

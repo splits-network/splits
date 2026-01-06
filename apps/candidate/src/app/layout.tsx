@@ -73,7 +73,7 @@ export default function RootLayout({
                             {children}
                         </main>
                         <Footer />
-                        <CookieConsent />
+                        {/* <CookieConsent /> */}
                     </ToastProvider>
                 </body>
             </html>

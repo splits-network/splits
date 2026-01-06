@@ -65,7 +65,7 @@ function registerRecruiterCandidateInvitationRoutes(
     app.get(
         '/api/v2/recruiter-candidates/invitations/:token',
         {
-            preHandler: requireAuth,
+            preHandler: optionalAuth(),
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
 

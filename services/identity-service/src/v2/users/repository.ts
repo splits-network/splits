@@ -21,11 +21,15 @@ export class UserRepository {
         let query = this.supabase.schema('identity').from('users').select('*', { count: 'exact' });
 
         if (filters.search) {
-            query = query.or(`email.ilike.%${filters.search}%,full_name.ilike.%${filters.search}%`);
+            query = query.or(`email.ilike.%${filters.search}%,name.ilike.%${filters.search}%`);
         }
 
         if (filters.status) {
             query = query.eq('status', filters.status);
+        }
+
+        if (filters.clerk_user_id) {
+            query = query.eq('clerk_user_id', filters.clerk_user_id);
         }
 
         if (accessibleUserIds && accessibleUserIds.length > 0) {
@@ -89,6 +93,18 @@ export class UserRepository {
             .from('users')
             .update(updates)
             .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    async create(clerkUserId: string, userData: any): Promise<any> {
+        const { data, error } = await this.supabase
+            .schema('identity')
+            .from('users')
+            .insert(userData)
             .select()
             .single();
 

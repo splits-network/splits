@@ -1,11 +1,13 @@
 'use client';
 
-import { useSignUp } from '@clerk/nextjs';
+import { useSignUp, useAuth } from '@clerk/nextjs';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
+import { createAuthenticatedClient } from '@/lib/api-client';
 
 export default function SignUpPage() {
+    const { getToken } = useAuth();
     const { isLoaded, signUp, setActive } = useSignUp();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -64,6 +66,97 @@ export default function SignUpPage() {
 
             if (completeSignUp.status === 'complete') {
                 await setActive({ session: completeSignUp.createdSessionId });
+
+                // Create user in our database immediately using Clerk data
+                try {
+                    const user = {
+                        id: completeSignUp.createdUserId,
+                        email: completeSignUp.emailAddress,
+                        firstName: completeSignUp.firstName,
+                        lastName: completeSignUp.lastName,
+                    }
+
+                    if (user) {
+
+                        const token = await getToken();
+                        if (!token) {
+                            throw new Error('Failed to get auth token');
+                        }
+                        // Create authenticated API client with session token
+                        const apiClient = createAuthenticatedClient(token);
+
+                        // Create user record in our identity service using V2 registration endpoint
+                        const newUser = await apiClient.post('/users/register', {
+                            clerk_user_id: user.id,
+                            email: user.email,
+                            name: `${user.firstName || firstName} ${user.lastName || lastName}`.trim(),
+                        });
+
+                        console.log('User created successfully in identity service', newUser);
+
+                        // During signup, we need to check for existing candidate by email
+                        // We can't use the normal V2 endpoint because access context would filter it
+                        // Instead, we'll check if candidate creation returns a unique constraint error
+                        let candidateExists = false;
+                        let existingCandidateId = null;
+
+                        try {
+                            // Try to create the candidate first
+                            await apiClient.post('/candidates', {
+                                user_id: newUser.data.id,
+                                email: user.email,
+                                full_name: `${user.firstName || firstName} ${user.lastName || lastName}`.trim(),
+                                created_by_user_id: newUser.data.id,
+                            });
+                            console.log('New candidate profile created successfully');
+                        } catch (createError: any) {
+                            // Check if it's a unique constraint error (email already exists)
+                            if (createError.message?.includes('duplicate') ||
+                                createError.message?.includes('unique') ||
+                                createError.status === 409) {
+                                console.log('Candidate with this email already exists, will attempt to update');
+                                candidateExists = true;
+
+                                // Try to find the existing candidate using search
+                                // Note: This may not work perfectly due to access context, but it's worth trying
+                                try {
+                                    const searchResponse = await apiClient.get(`/candidates?search=${encodeURIComponent(email)}&limit=1`);
+                                    console.log('Candidate search response:', searchResponse);
+
+                                    if (searchResponse.data && searchResponse.data.length > 0) {
+                                        existingCandidateId = searchResponse.data[0].id;
+                                    }
+                                } catch (searchError) {
+                                    console.warn('Could not search for existing candidate:', searchError);
+                                    // If we can't find them, the webhook will handle this later
+                                }
+                            } else {
+                                // Some other error, re-throw it
+                                throw createError;
+                            }
+                        }
+
+                        // If candidate exists and we found their ID, update the user_id
+                        if (candidateExists && existingCandidateId) {
+                            try {
+                                await apiClient.patch(`/candidates/${existingCandidateId}`, {
+                                    user_id: newUser.data.id,
+                                });
+                                console.log('Existing candidate updated with user_id');
+                            } catch (updateError) {
+                                console.warn('Could not update existing candidate, webhook will handle:', updateError);
+                            }
+                        } else if (candidateExists && !existingCandidateId) {
+                            console.log('Candidate exists but could not find ID - webhook will handle the connection');
+                        }
+
+                        console.log('Candidate profile setup completed');
+                    }
+                } catch (userCreationError) {
+                    // Log error but don't block the flow - webhook will catch this later
+                    console.error('Failed to create user in database (webhook will handle):', userCreationError);
+                }
+
                 router.push(redirectUrl || '/dashboard');
             } else {
                 setError('Verification incomplete. Please try again.');

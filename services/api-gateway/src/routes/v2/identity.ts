@@ -16,6 +16,7 @@ const IDENTITY_RESOURCES: ResourceDefinition[] = [
 export function registerIdentityRoutes(app: FastifyInstance, services: ServiceRegistry) {
     IDENTITY_RESOURCES.forEach(resource => registerResourceRoutes(app, services, resource));
     registerConsentRoutes(app, services);
+    registerUserRegistrationRoute(app, services);
 }
 
 function registerConsentRoutes(app: FastifyInstance, services: ServiceRegistry) {
@@ -67,6 +68,28 @@ function registerConsentRoutes(app: FastifyInstance, services: ServiceRegistry) 
             const authHeaders = buildAuthHeaders(request);
             await identityService().delete('/api/v2/consent', correlationId, authHeaders);
             return reply.status(204).send();
+        }
+    );
+}
+
+function registerUserRegistrationRoute(app: FastifyInstance, services: ServiceRegistry) {
+    const identityService = () => services.get('identity');
+
+    app.post(
+        '/api/v2/users/register',
+        {
+            // No authentication required for registration - it's for new users
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const data = await identityService().post(
+                '/api/v2/users/register',
+                request.body,
+                correlationId,
+                authHeaders
+            );
+            return reply.status(201).send(data);
         }
     );
 }
