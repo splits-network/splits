@@ -53,6 +53,17 @@ export function registerUserRoutes(
         }
     });
 
+    app.get('/api/v2/users/me', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const user = await userService.findUserByClerkId(clerkUserId);
+            reply.send({ data: user });
+        } catch (error) {
+            logError('GET /api/v2/users/me failed', error);
+            reply.code(500).send({ error: { message: 'Failed to fetch current user' } });
+        }
+    });
+
     app.post('/api/v2/users', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);

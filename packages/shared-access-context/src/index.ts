@@ -19,7 +19,6 @@ export async function resolveAccessContext(
     supabase: SupabaseClient,
     clerkUserId?: string
 ): Promise<AccessContext> {
-    console.log('[DEBUG] resolveAccessContext called with clerkUserId:', { clerkUserId });
     try{
     if (!clerkUserId) {
         return {
@@ -44,9 +43,9 @@ export async function resolveAccessContext(
         )
         .eq('clerk_user_id', clerkUserId)
         .maybeSingle();
-console.log('[DEBUG] resolveAccessContext - identityUserResult:', { identityUserResult });
+        
     const identityUserId = identityUserResult.data?.id || null;
-
+console.log('[DEBUG] resolveAccessContext - identityUserResult:', { clerkUserId, identityUserResult });
     if (!identityUserId) {
         return {
             identityUserId: null,
@@ -62,11 +61,22 @@ console.log('[DEBUG] resolveAccessContext - identityUserResult:', { identityUser
     const memberships = identityUserResult.data?.memberships || [];
     const organizationIds = memberships.map(m => m.organization_id).filter(Boolean);
     const roles = memberships.map(m => m.role).filter(Boolean);
-    const activeRecruiter = identityUserResult.data?.recruiters?.find(r => r.status === 'active');
+    
+    // Handle both array and single object cases for recruiters (Supabase returns object for 1:1, array for 1:many)
+    const recruitersData = identityUserResult.data?.recruiters as { id: string; status: string }[] | { id: string; status: string } | null;
+    const activeRecruiter = Array.isArray(recruitersData) 
+        ? recruitersData.find(r => r.status === 'active')
+        : (recruitersData?.status === 'active' ? recruitersData : null);
+    
+    // Handle both array and single object cases for candidates
+    const candidatesData = identityUserResult.data?.candidates as { id: string }[] | { id: string } | null;
+    const candidateId = Array.isArray(candidatesData) 
+        ? candidatesData[0]?.id 
+        : candidatesData?.id || null;
 
     const finalContext = {
         identityUserId,
-        candidateId: identityUserResult.data?.candidates?.[0]?.id || null,
+        candidateId,
         recruiterId: activeRecruiter?.id || null,
         organizationIds,
         roles,

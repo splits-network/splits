@@ -122,6 +122,33 @@ export class UserServiceV2 {
     }
 
     /**
+     * Find user by Clerk ID with enriched access context
+     * Returns user data plus roles, recruiter_id, candidate_id, organization_ids
+     * Used by /api/v2/users/me for frontend access control
+     */
+    async findUserByClerkId(clerkUserId: string) {
+        this.logger.info({ clerkUserId }, 'UserService.findUserByClerkId');
+        const user = await this.repository.findUserByClerkId(clerkUserId);
+        if (!user) {
+            throw new Error(`User not found for Clerk ID: ${clerkUserId}`);
+        }
+
+        // Get access context for role information
+        const accessContext = await this.resolveAccessContext(clerkUserId);
+
+        // Return enriched user object with access control data
+        return {
+            ...user,
+            // Access control fields for frontend
+            roles: accessContext.roles,
+            is_platform_admin: accessContext.isPlatformAdmin,
+            recruiter_id: accessContext.recruiterId,
+            candidate_id: accessContext.candidateId,
+            organization_ids: accessContext.organizationIds,
+        };
+    }
+
+    /**
      * Create a new user
      */
     async createUser(clerkUserId: string, userData: any) {

@@ -40,10 +40,10 @@ export function Sidebar() {
                 if (!token) return;
 
                 const apiClient = createAuthenticatedClient(token);
-                const profileResponse: any = await apiClient.get('/users', {
-                    params: { limit: 1 }
-                });
-                const profile = profileResponse?.data?.[0] || profileResponse?.data || profileResponse || {};
+                const response: any = await apiClient.get('/users/me');
+
+                // The /users/me endpoint returns { data: { ...user, roles, is_platform_admin, recruiter_id, ... } }
+                const profile = response?.data || {};
                 const roleList: string[] = Array.isArray(profile.roles) ? profile.roles : [];
 
                 const hasAdminRole = Boolean(profile.is_platform_admin || roleList.includes('platform_admin'));
@@ -51,7 +51,7 @@ export function Sidebar() {
                     role === 'company_admin' || role === 'hiring_manager'
                 );
                 const hasRecruiterRole = Boolean(profile.recruiter_id);
-
+                console.log('[DEBUG] Sidebar - user roles:', { profile, roleList, hasAdminRole, hasCompanyRole, hasRecruiterRole });
                 setIsAdmin(hasAdminRole);
                 setIsCompanyUser(hasCompanyRole);
                 setIsRecruiter(hasRecruiterRole);

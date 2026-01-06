@@ -33,8 +33,6 @@ export class UserRepository {
             }
         }
 
-        console.log('[DEBUG] UserRepository.findUsers - constructed query with params:', {accessContext, params, filters});
-
         // if (params.search) {
         //     query = query.or(`email.ilike.%${params.search}%,name.ilike.%${params.search}%`);
         // }
@@ -58,12 +56,7 @@ export class UserRepository {
         query = query.range(offset, offset + limit - 1);
 
         const { data, count, error } = await query;
-console.log('[DEBUG] UserRepository.findUsers - query result:', {
-    params,
-    data,
-    count,
-    error
-});
+        
         if (error) throw error;
 
         return {
