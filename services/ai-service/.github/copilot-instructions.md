@@ -11,6 +11,7 @@ The AI Service is a **V2-only service** that provides AI-powered features includ
 ### ✅ V2 Patterns ONLY
 - All implementations use V2 standardized patterns
 - Domain-based folder structure under `src/v2/`
+- **shared-api-client automatically prepends `/api/v2` to all requests** - frontend calls use simple paths like `/reviews`, not `/api/v2/reviews`
 - 5-route CRUD pattern where applicable
 - Repository pattern with Supabase
 - Event-driven architecture with RabbitMQ
@@ -48,6 +49,18 @@ The AI Service is a **V2-only service** that provides AI-powered features includ
 3. **Follow 5-route pattern** for CRUD operations
 4. **Use access context** from `@splits-network/shared-access-context`
 5. **Publish events** for significant state changes
+
+### Standardized List Functionality
+- **Use shared types** from `@splits-network/shared-types`:
+  - `StandardListParams` for query parameters: `{ page?: number; limit?: number; search?: string; filters?: Record<string, any>; include?: string; sort_by?: string; sort_order?: 'asc' | 'desc' }`
+  - `StandardListResponse<T>` for responses: `{ data: T[]; pagination: PaginationResponse }`
+- **Repository pattern** for list methods:
+  ```typescript
+  async list(clerkUserId: string, params: StandardListParams): Promise<StandardListResponse<T>>
+  ```
+- **Server-side filtering** - never rely on client-side filtering for performance
+- **Enriched data** - use JOINs to include related data in single queries
+- **Consistent pagination** - always return total count and page information
 
 ### Integration Points
 - **Database**: `ai.ai_reviews` table (V2 schema)

@@ -61,9 +61,9 @@ The Network Service manages recruiter marketplace data with a **V2-only architec
 6. **Never make HTTP calls** to other services - use database queries
 
 ### Database Integration
-- **Schema**: All tables in `network.*` schema
+- **Schema**: All tables in `*` schema
 - **Access Control**: Role-based filtering in repository methods
-- **Cross-Schema Queries**: Allowed for data enrichment (e.g., JOIN with `identity.*`, `ats.*`)
+- **Cross-Schema Queries**: Allowed for data enrichment (e.g., JOIN with `*`, `*`)
 - **Event Publishing**: Use V2 EventPublisher for domain events
 
 ### File Structure

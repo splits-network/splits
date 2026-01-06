@@ -10,22 +10,22 @@
 -- These indexes enable fast lookups when resolving user roles
 
 CREATE INDEX IF NOT EXISTS idx_users_clerk_user_id 
-ON identity.users(clerk_user_id);
+ON users(clerk_user_id);
 
 CREATE INDEX IF NOT EXISTS idx_recruiters_user_id 
-ON network.recruiters(user_id);
+ON recruiters(user_id);
 
 CREATE INDEX IF NOT EXISTS idx_recruiters_status 
-ON network.recruiters(status);
+ON recruiters(status);
 
 CREATE INDEX IF NOT EXISTS idx_memberships_user_id 
-ON identity.memberships(user_id);
+ON memberships(user_id);
 
 CREATE INDEX IF NOT EXISTS idx_memberships_role 
-ON identity.memberships(role);
+ON memberships(role);
 
 CREATE INDEX IF NOT EXISTS idx_candidates_user_id 
-ON ats.candidates(user_id);
+ON candidates(user_id);
 
 -- ============================================================================
 -- Foreign Key Indexes for JOINs
@@ -34,21 +34,21 @@ ON ats.candidates(user_id);
 
 -- Applications table
 CREATE INDEX IF NOT EXISTS idx_applications_recruiter_id 
-ON ats.applications(recruiter_id);
+ON applications(recruiter_id);
 
 CREATE INDEX IF NOT EXISTS idx_applications_candidate_id 
-ON ats.applications(candidate_id);
+ON applications(candidate_id);
 
 CREATE INDEX IF NOT EXISTS idx_applications_job_id 
-ON ats.applications(job_id);
+ON applications(job_id);
 
 -- Jobs table
 CREATE INDEX IF NOT EXISTS idx_jobs_company_id 
-ON ats.jobs(company_id);
+ON jobs(company_id);
 
 -- Companies table
 CREATE INDEX IF NOT EXISTS idx_companies_identity_organization_id 
-ON ats.companies(identity_organization_id);
+ON companies(identity_organization_id);
 
 -- ============================================================================
 -- Filtering and Searching Indexes
@@ -57,20 +57,20 @@ ON ats.companies(identity_organization_id);
 
 -- Applications filtering (using 'stage' not 'status')
 CREATE INDEX IF NOT EXISTS idx_applications_stage 
-ON ats.applications(stage);
+ON applications(stage);
 
 CREATE INDEX IF NOT EXISTS idx_applications_created_at 
-ON ats.applications(created_at DESC);
+ON applications(created_at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_applications_updated_at 
-ON ats.applications(updated_at DESC);
+ON applications(updated_at DESC);
 
 -- Jobs filtering
 CREATE INDEX IF NOT EXISTS idx_jobs_status 
-ON ats.jobs(status);
+ON jobs(status);
 
 CREATE INDEX IF NOT EXISTS idx_jobs_created_at 
-ON ats.jobs(created_at DESC);
+ON jobs(created_at DESC);
 
 -- ============================================================================
 -- Composite Indexes for Common Query Patterns
@@ -78,15 +78,15 @@ ON ats.jobs(created_at DESC);
 
 -- Recruiter viewing their active applications
 CREATE INDEX IF NOT EXISTS idx_applications_recruiter_stage 
-ON ats.applications(recruiter_id, stage);
+ON applications(recruiter_id, stage);
 
 -- Candidate viewing their applications
 CREATE INDEX IF NOT EXISTS idx_applications_candidate_stage 
-ON ats.applications(candidate_id, stage);
+ON applications(candidate_id, stage);
 
 -- Job-specific applications
 CREATE INDEX IF NOT EXISTS idx_applications_job_stage 
-ON ats.applications(job_id, stage);
+ON applications(job_id, stage);
 
 -- ============================================================================
 -- Full-Text Search Indexes (Optional - Enable if using text search)
@@ -94,11 +94,11 @@ ON ats.applications(job_id, stage);
 
 -- Uncomment if using full-text search on job titles
 -- CREATE INDEX IF NOT EXISTS idx_jobs_title_gin 
--- ON ats.jobs USING gin(to_tsvector('english', title));
+-- ON jobs USING gin(to_tsvector('english', title));
 
 -- Uncomment if using full-text search on candidate names
 -- CREATE INDEX IF NOT EXISTS idx_candidates_name_gin 
--- ON ats.candidates USING gin(to_tsvector('english', full_name));
+-- ON candidates USING gin(to_tsvector('english', full_name));
 
 -- ============================================================================
 -- Notes
@@ -108,12 +108,12 @@ ON ats.applications(job_id, stage);
 -- 
 -- Query 1: Resolve user role context
 --   SELECT id, recruiter, memberships, candidate
---   FROM identity.users
+--   FROM users
 --   WHERE clerk_user_id = $1;
 -- 
 -- Query 2: Get proposals with role-based filtering
 --   SELECT a.*, job, candidate, company, stage
---   FROM ats.applications a
+--   FROM applications a
 --   LEFT JOIN ... (enriched data)
 --   WHERE (recruiter condition OR company condition OR candidate condition OR admin)
 --   AND (additional filters)

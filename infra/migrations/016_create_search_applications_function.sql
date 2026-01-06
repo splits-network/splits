@@ -1,7 +1,7 @@
 -- Migration: Create search_applications_paginated function for fast, ranked search
 -- This function provides server-side pagination with multi-term search and relevance scoring
 
-CREATE OR REPLACE FUNCTION ats.search_applications_paginated(
+CREATE OR REPLACE FUNCTION search_applications_paginated(
     search_terms TEXT[] DEFAULT NULL,
     filter_recruiter_id UUID DEFAULT NULL,
     filter_job_id UUID DEFAULT NULL,
@@ -76,11 +76,11 @@ BEGIN
                     FROM unnest(search_terms) AS term
                 )
             END::INT as relevance_score
-        FROM ats.applications a
-        LEFT JOIN ats.candidates c ON a.candidate_id = c.id
-        LEFT JOIN ats.jobs j ON a.job_id = j.id
-        LEFT JOIN ats.companies comp ON j.company_id = comp.id
-        LEFT JOIN identity.users u ON a.recruiter_id = u.id
+        FROM applications a
+        LEFT JOIN candidates c ON a.candidate_id = c.id
+        LEFT JOIN jobs j ON a.job_id = j.id
+        LEFT JOIN companies comp ON j.company_id = comp.id
+        LEFT JOIN users u ON a.recruiter_id = u.id
         WHERE 
             -- Apply all filters
             (filter_recruiter_id IS NULL OR a.recruiter_id = filter_recruiter_id)
@@ -122,15 +122,15 @@ END;
 $$ LANGUAGE plpgsql STABLE;
 
 -- Create indexes for optimal performance
-CREATE INDEX IF NOT EXISTS idx_applications_recruiter_id ON ats.applications (recruiter_id);
-CREATE INDEX IF NOT EXISTS idx_applications_stage ON ats.applications (stage);
-CREATE INDEX IF NOT EXISTS idx_applications_created_at ON ats.applications (created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_applications_candidate_id ON ats.applications (candidate_id);
-CREATE INDEX IF NOT EXISTS idx_applications_job_id ON ats.applications (job_id);
+CREATE INDEX IF NOT EXISTS idx_applications_recruiter_id ON applications (recruiter_id);
+CREATE INDEX IF NOT EXISTS idx_applications_stage ON applications (stage);
+CREATE INDEX IF NOT EXISTS idx_applications_created_at ON applications (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_applications_candidate_id ON applications (candidate_id);
+CREATE INDEX IF NOT EXISTS idx_applications_job_id ON applications (job_id);
 
 -- Trigram indexes for fuzzy text search (requires pg_trgm extension)
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
-CREATE INDEX IF NOT EXISTS idx_candidates_name_trgm ON ats.candidates USING gin (full_name gin_trgm_ops);
-CREATE INDEX IF NOT EXISTS idx_candidates_email_trgm ON ats.candidates USING gin (email gin_trgm_ops);
-CREATE INDEX IF NOT EXISTS idx_jobs_title_trgm ON ats.jobs USING gin (title gin_trgm_ops);
-CREATE INDEX IF NOT EXISTS idx_companies_name_trgm ON ats.companies USING gin (name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_candidates_name_trgm ON candidates USING gin (full_name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_candidates_email_trgm ON candidates USING gin (email gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_jobs_title_trgm ON jobs USING gin (title gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_companies_name_trgm ON companies USING gin (name gin_trgm_ops);

@@ -10,7 +10,9 @@ export class PlanRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     async listPlans(filters: PlanListFilters = {}): Promise<RepositoryListResult<Plan>> {
@@ -19,7 +21,7 @@ export class PlanRepository {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            .schema('billing')
+            
             .from('plans')
             .select('*', { count: 'exact' });
 
@@ -51,7 +53,7 @@ export class PlanRepository {
 
     async findPlan(id: string): Promise<Plan | null> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('plans')
             .select('*')
             .eq('id', id)
@@ -66,7 +68,7 @@ export class PlanRepository {
 
     async createPlan(payload: PlanCreateInput): Promise<Plan> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('plans')
             .insert(payload)
             .select('*')
@@ -78,7 +80,7 @@ export class PlanRepository {
 
     async updatePlan(id: string, updates: PlanUpdateInput): Promise<Plan> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('plans')
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id)

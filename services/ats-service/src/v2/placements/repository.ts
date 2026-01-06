@@ -15,7 +15,9 @@ export class PlacementRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     async findPlacements(
@@ -35,7 +37,7 @@ export class PlacementRepository {
 
         // Build query with enriched data
         let query = this.supabase
-            .schema('ats')
+            
             .from('placements')
             .select(`
                 *,
@@ -89,7 +91,7 @@ export class PlacementRepository {
 
     async findPlacement(id: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('placements')
             .select(`
                 *,
@@ -113,7 +115,7 @@ export class PlacementRepository {
 
     async createPlacement(placement: any): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('placements')
             .insert(placement)
             .select()
@@ -125,7 +127,7 @@ export class PlacementRepository {
 
     async updatePlacement(id: string, updates: PlacementUpdate): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('placements')
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id)
@@ -139,7 +141,7 @@ export class PlacementRepository {
     async deletePlacement(id: string): Promise<void> {
         // Soft delete
         const { error } = await this.supabase
-            .schema('ats')
+            
             .from('placements')
             .update({ status: 'cancelled', updated_at: new Date().toISOString() })
             .eq('id', id);

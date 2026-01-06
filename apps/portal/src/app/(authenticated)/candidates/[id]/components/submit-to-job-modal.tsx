@@ -114,7 +114,7 @@ export default function SubmitToJobModal({
                     </div>
 
                     {/* Document Selection */}
-                    {documents.length > 0 && (
+                    {length > 0 && (
                         <div className="fieldset">
                             <label className="label">Attach Documents</label>
                             <div className="space-y-2 max-h-48 overflow-y-auto border border-base-300 rounded-lg p-3">

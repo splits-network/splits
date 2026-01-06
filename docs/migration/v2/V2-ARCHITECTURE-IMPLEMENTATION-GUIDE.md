@@ -16,10 +16,10 @@ This document provides complete guidance for implementing the V2 architecture - 
 2. **Single-Method Services** - One update method with smart validation
 3. **Direct Supabase Queries** - No service-to-service calls, no SQL functions
 4. **Role-Based Scoping** - Backend determines data access via database JOINs  
-   - Always start from `identity.users` using the Clerk user ID passed from API Gateway  
-   - Join `identity.memberships` for company roles (company_admin, hiring_manager, platform_admin)  
-   - Join `network.recruiters` for recruiter identities  
-   - Join `ats.candidates` for candidate identities  
+   - Always start from `users` using the Clerk user ID passed from API Gateway  
+   - Join `memberships` for company roles (company_admin, hiring_manager, platform_admin)  
+   - Join `recruiters` for recruiter identities  
+   - Join `candidates` for candidate identities  
    - Apply filters based on the roles discovered so `/api/v2/*` returns only records the caller owns (candidates see their own applications, recruiters see their placements, company users see org data, platform admins see everything)
 5. **Incremental Migration** - v2/ folder approach, route-by-route rollout
 
@@ -286,20 +286,20 @@ export class RepositoryV2 {
         // Role resolution via parallel queries
         const [recruiterResult, membershipResult, adminResult] = await Promise.all([
             this.supabase
-                .schema('network')
+                
                 .from('recruiters')
                 .select('id, status')
                 .eq('clerk_user_id', clerkUserId)
                 .eq('status', 'active')
                 .maybeSingle(),
             this.supabase
-                .schema('identity')
+                
                 .from('memberships')
                 .select('organization_id, role')
                 .eq('clerk_user_id', clerkUserId)
                 .maybeSingle(),
             this.supabase
-                .schema('identity')
+                
                 .from('memberships')
                 .select('role')
                 .eq('clerk_user_id', clerkUserId)
@@ -309,7 +309,7 @@ export class RepositoryV2 {
 
         // Build query with role-based filtering
         let query = this.supabase
-            .schema('ats')
+            
             .from('jobs')
             .select('*, company:companies(*)');
 
@@ -351,7 +351,7 @@ export class RepositoryV2 {
 
         // Count query (same filters, no pagination)
         let countQuery = this.supabase
-            .schema('ats')
+            
             .from('jobs')
             .select('*', { count: 'exact', head: true });
 
@@ -395,7 +395,7 @@ export class RepositoryV2 {
 
     async findJob(id: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('jobs')
             .select('*, company:companies(*)')
             .eq('id', id)
@@ -410,7 +410,7 @@ export class RepositoryV2 {
 
     async createJob(job: any): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('jobs')
             .insert(job)
             .select('*, company:companies(*)')
@@ -422,7 +422,7 @@ export class RepositoryV2 {
 
     async updateJob(id: string, updates: any): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('jobs')
             .update(updates)
             .eq('id', id)
@@ -436,7 +436,7 @@ export class RepositoryV2 {
     async deleteJob(id: string): Promise<void> {
         // Soft delete by default
         const { error } = await this.supabase
-            .schema('ats')
+            
             .from('jobs')
             .update({ status: 'deleted', deleted_at: new Date().toISOString() })
             .eq('id', id);

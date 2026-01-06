@@ -370,7 +370,7 @@ No past relationships
 ### Existing Services
 - ✅ Network Service: `/recruiter-candidates/candidate/:candidateId` endpoint exists
 - ✅ Identity Service: User profile lookup exists
-- ✅ Database: `network.recruiter_candidates` table exists
+- ✅ Database: `recruiter_candidates` table exists
 
 ### New Components
 - ❌ API Gateway: New `/api/candidates/me/recruiters` endpoint

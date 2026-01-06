@@ -93,7 +93,7 @@ function registerRecruiterCandidateInvitationRoutes(
     app.post(
         '/api/v2/recruiter-candidates/invitations/:token/accept',
         {
-            preHandler: requireAuth,
+            preHandler: requireAuth(),
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
 
@@ -109,9 +109,12 @@ function registerRecruiterCandidateInvitationRoutes(
                 const data = await networkService().post(
                     `/api/v2/recruiter-candidates/invitations/${token}/accept`,
                     {
-                        userId: (request as any).auth.userId,
+                        userId: (request as any).auth.clerkUserId,
                         ip_address: forwardedIp,
                         user_agent: userAgent,
+                        relationship_start_date: new Date().toISOString(),
+                        relationship_end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
+                        status: "active",
                         ...body,
                     },
                     correlationId,
@@ -130,7 +133,7 @@ function registerRecruiterCandidateInvitationRoutes(
     app.post(
         '/api/v2/recruiter-candidates/invitations/:token/decline',
         {
-            preHandler: requireAuth,
+            preHandler: requireAuth(),
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const { token } = request.params as { token: string };
@@ -145,7 +148,7 @@ function registerRecruiterCandidateInvitationRoutes(
                 const data = await networkService().post(
                     `/api/v2/recruiter-candidates/invitations/${token}/decline`,
                     {
-                        userId: (request as any).auth.userId,
+                        userId: (request as any).auth.clerkUserId,
                         ip_address: forwardedIp,
                         user_agent: userAgent,
                         ...body,

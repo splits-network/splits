@@ -11,6 +11,7 @@ The Automation Service manages AI-powered automation and marketplace intelligenc
 ### ✅ V2 Patterns ONLY
 - All implementations use V2 standardized patterns
 - Domain-based folder structure under `src/v2/`
+- **shared-api-client automatically prepends `/api/v2` to all requests** - frontend calls use simple paths like `/matches`, not `/api/v2/matches`
 - 5-route CRUD pattern for all resources
 - Repository pattern with direct Supabase access
 - Service layer with business logic and validation
@@ -66,10 +67,22 @@ The Automation Service manages AI-powered automation and marketplace intelligenc
 5. **Publish events** for significant state changes
 6. **Never make HTTP calls** to other services - use database queries
 
+### Standardized List Functionality
+- **Use shared types** from `@splits-network/shared-types`:
+  - `StandardListParams` for query parameters: `{ page?: number; limit?: number; search?: string; filters?: Record<string, any>; include?: string; sort_by?: string; sort_order?: 'asc' | 'desc' }`
+  - `StandardListResponse<T>` for responses: `{ data: T[]; pagination: PaginationResponse }`
+- **Repository pattern** for list methods:
+  ```typescript
+  async list(clerkUserId: string, params: StandardListParams): Promise<StandardListResponse<T>>
+  ```
+- **Server-side filtering** - never rely on client-side filtering for performance
+- **Enriched data** - use JOINs to include related data in single queries
+- **Consistent pagination** - always return total count and page information
+
 ### Database Integration
 - **Schema**: All tables in `automation.*` schema
 - **Access Control**: Role-based filtering in repository methods
-- **Cross-Schema Queries**: Allowed for data enrichment (e.g., JOIN with `identity.*`, `ats.*`)
+- **Cross-Schema Queries**: Allowed for data enrichment (e.g., JOIN with `*`, `*`)
 - **Event Publishing**: Use V2 EventPublisher for domain events
 
 ### File Structure
@@ -115,7 +128,7 @@ async list(clerkUserId: string, filters: MatchFilters) {
     const context = await resolveAccessContext(clerkUserId, this.supabase);
     
     const query = this.supabase
-        .schema('automation')
+        
         .from('candidate_matches')
         .select('*');
         

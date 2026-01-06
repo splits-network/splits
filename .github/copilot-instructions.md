@@ -75,11 +75,14 @@ The repo is organized by **responsibility**, not by technology.
    - Direct Supabase queries with role-based scoping
 4. **ALWAYS use server-side filtering, searching, pagination, and sorting for list views.**
    - Client-side filtering does NOT scale and will cause performance issues with large datasets.
+   - **Use standardized types** from `@splits-network/shared-types`:
+     - `StandardListParams` for query parameters: `{ page?: number; limit?: number; search?: string; filters?: Record<string, any>; include?: string; sort_by?: string; sort_order?: 'asc' | 'desc' }`
+     - `StandardListResponse<T>` for responses: `{ data: T[]; pagination: PaginationResponse }`
    - Backend endpoints MUST support query parameters: `?page=1&limit=25&search=query&sort_by=field&sort_order=asc`
    - Backend should return enriched data with JOINs (e.g., applications with candidate, job, company data)
    - Frontend should use pagination controls and pass all filters to the server
    - Search should be debounced (300ms delay) to avoid excessive API calls
-   - Example pagination response format:
+   - Example response format using `StandardListResponse<T>`:
      ```json
      {
        "data": [...],
@@ -112,7 +115,7 @@ Copilot should assume and suggest the following stack:
 
 - **Data & Infra**
   - **Single Supabase Postgres database** shared across all services:
-    - Services use **schema-per-service** pattern: `identity.*`, `ats.*`, `network.*`, `billing.*`, `notifications.*`, `documents.*`
+    - Services use **schema-per-service** pattern: `*`, `*`, `*`, `*`, `*`, `*`
     - Each service owns its schema and migrations but can query other schemas directly
     - Cross-schema JOINs are allowed and encouraged for data enrichment
     - Supabase project-ref: `einhgkqmxbkgdohwfayv`
@@ -122,8 +125,8 @@ Copilot should assume and suggest the following stack:
     - ✅ **RabbitMQ events**: Asynchronous coordination and notifications between services
     - ❌ **HTTP service-to-service calls**: Avoid at all costs - creates coupling and reliability issues
   - **Database Schema Pattern for User Access (V2)**:
-    - `identity.users` table contains `clerk_user_id` (text) column - the source of truth for Clerk IDs
-    - Other tables (e.g., `ats.candidates`, `network.recruiters`) have `user_id` (UUID) which is a foreign key to `identity.users.id`
+    - `users` table contains `clerk_user_id` (text) column - the source of truth for Clerk IDs
+    - Other tables (e.g., `candidates`, `recruiters`) have `user_id` (UUID) which is a foreign key to `users.id`
     - **V2 Services use shared access context** from `@splits-network/shared-access-context`:
       - Import `resolveAccessContext(clerkUserId, supabase)` to get user context with roles
       - Access context includes internal UUID, memberships, and scoped filtering logic
@@ -139,7 +142,7 @@ Copilot should assume and suggest the following stack:
         
         // Access context handles role-based filtering automatically
         const query = this.supabase
-          .schema('ats')
+          
           .from('candidates')
           .select('*');
           
@@ -168,8 +171,8 @@ Copilot should assume and suggest the following stack:
   - Each service has its own `package.json` and can be built independently.
 
 - **3rd Parties**
-  - Clerk – authentication and user identity.
-  - Stripe – recruiter subscription billing.
+  - Clerk – authentication and user 
+  - Stripe – recruiter subscription 
   - Resend – transactional email, used by `notification-service`.
 
 Copilot should **prefer these tools by default** when generating new code.
@@ -195,9 +198,9 @@ No domain-specific business logic here. It should mostly proxy and enforce auth/
 ### 3.2 `services/identity-service`
 
 - Owns:
-  - `identity.users`
-  - `identity.organizations`
-  - `identity.memberships`
+  - `users`
+  - `organizations`
+  - `memberships`
 - Syncs users from Clerk (`clerk_user_id`).
 - **V1**: Returns `/me` and memberships (legacy)
 - **V2**: Not yet implemented - still uses legacy endpoints
@@ -207,7 +210,7 @@ Copilot: keep this service focused on identity, not ATS or billing concerns.
 ### 3.3 `services/ats-service`
 
 - Owns ATS domain:
-  - Companies (optionally linked to `identity.organizations`)
+  - Companies (optionally linked to `organizations`)
   - Jobs / roles
   - Candidates
   - Applications (candidate ↔ job)
@@ -225,9 +228,9 @@ Copilot:
 ### 3.4 `services/network-service`
 
 - Owns recruiter-centric data:
-  - `network.recruiters`
-  - `network.role_assignments`
-  - `network.candidate_role_assignments` (proposals)
+  - `recruiters`
+  - `role_assignments`
+  - `candidate_role_assignments` (proposals)
 - **V2 Implementation Complete**: Uses standardized 5-route pattern
   - `/v2/recruiters`, `/v2/assignments`, `/v2/recruiter-candidates`, `/v2/reputation`, `/v2/proposals`
   - Domain-based folder structure under `src/v2/`
@@ -243,9 +246,9 @@ Copilot:
 ### 3.5 `services/billing-service`
 
 - Owns Stripe integration and subscription state:
-  - `billing.plans`
-  - `billing.subscriptions`
-  - `billing.payouts` - recruiter payment tracking
+  - `plans`
+  - `subscriptions`
+  - `payouts` - recruiter payment tracking
 - **V2 Implementation Complete**: Uses standardized 5-route pattern
   - `/v2/plans`, `/v2/subscriptions`, `/v2/payouts`
   - Role-aware access (recruiters see their own, billing admins see all)
@@ -344,6 +347,7 @@ When Copilot generates React/Next.js code:
 
 2. **Data Fetching & Performance** ⚠️ **CRITICAL FOR PAGE SPEED**
    - Use fetch / Axios to call **`/api/v2/*`** routes through `api-gateway`, not individual services
+   - **shared-api-client automatically prepends `/api/v2` to all requests** - frontend calls use simple paths like `/candidates`, not `/api/v2/candidates`
    - Handle auth via Clerk (session, tokens) and send bearer token to gateway
    - **V2 API Response Format**: All V2 endpoints return `{ data: <payload>, pagination?: <pagination> }`
    - **No `/me` endpoints**: Use filtered queries (e.g., `/api/v2/candidates?limit=1` for current user)
@@ -499,7 +503,7 @@ export class CandidateRepositoryV2 {
     const context = await resolveAccessContext(clerkUserId, this.supabase);
     
     const query = this.supabase
-      .schema('ats')
+      
       .from('candidates')
       .select('*');
       
@@ -507,9 +511,9 @@ export class CandidateRepositoryV2 {
     if (context.role === 'candidate') {
       query.eq('user_id', context.userId);
     } else if (context.role === 'recruiter') {
-      // Filter to assigned candidates via network.recruiter_candidates
+      // Filter to assigned candidates via recruiter_candidates
       const { data: assignments } = await this.supabase
-        .schema('network')
+        
         .from('recruiter_candidates')
         .select('candidate_id')
         .eq('recruiter_user_id', context.userId);
@@ -531,7 +535,7 @@ export class CandidateRepositoryV2 {
     const context = await resolveAccessContext(clerkUserId, this.supabase);
     
     const query = this.supabase
-      .schema('ats')
+      
       .from('candidates')
       .update(updates)
       .eq('id', id);
@@ -628,7 +632,7 @@ Copilot should follow these patterns for V1 services:
    - Use Supabase migration tools or SQL migration files.
    - Never create hard foreign keys across schemas unless absolutely necessary.
    - Prefer referencing by ID and resolving via service calls.
-   - Example: `ats.companies.identity_organization_id` references `identity.organizations.id` logically, not via DB FK.
+   - Example: `companies.identity_organization_id` references `organizations.id` logically, not via DB FK.
 
 8. **User Identification Standards** ⚠️ **CRITICAL**
    - **Frontend apps** (Portal, Candidate): 
@@ -709,7 +713,7 @@ export class CandidateRepositoryV2 {
   async list(clerkUserId: string, filters: CandidateFilters) {
     const context = await resolveAccessContext(clerkUserId, this.supabase);
     
-    const query = this.supabase.schema('ats').from('candidates').select('*');
+    const query = this.supabase.from('candidates').select('*');
     
     // Access context handles role-based filtering
     if (context.role === 'candidate') {
@@ -839,14 +843,14 @@ if (isCompanyAdmin(userMemberships, orgId)) {
 
 Independent recruiters are users without company affiliations (no memberships).
 
-**Storage**: `network.recruiters` table
+**Storage**: `recruiters` table
 **Identification**: `GET /recruiters/by-user/:userId` returns recruiter with `status: 'active'`
 **Authorization**: Network service check in `requireRoles()` grants access
 
 **Why Network Service Check**:
 - Recruiters can exist without company memberships
 - They need access to marketplace jobs and candidates
-- `identity.memberships` won't include them
+- `memberships` won't include them
 - Must query network service to verify recruiter status
 
 **Pattern**:
@@ -870,14 +874,14 @@ app.get('/api/jobs', {
 
 Candidates are authenticated users with profiles in the ATS service but no memberships.
 
-**Storage**: `ats.candidates` table
+**Storage**: `candidates` table
 **Identification**: `GET /candidates?email={email}` returns candidate profile
 **Authorization**: ATS service check in `requireRoles()` grants access
 
 **Why ATS Service Check**:
 - Candidates don't have company affiliations (no memberships)
 - They need access to their profile and recruiter relationships
-- `identity.memberships` won't include them
+- `memberships` won't include them
 - Must query ATS service to verify candidate profile exists
 
 **Pattern**:
@@ -1122,8 +1126,8 @@ AI service expects `document.extracted_text` as a direct property, but the datab
 
 **Database Schema:**
 ```sql
--- documents.documents table
-CREATE TABLE documents.documents (
+-- documents table
+CREATE TABLE documents (
     id UUID PRIMARY KEY,
     filename VARCHAR,
     storage_path TEXT,
@@ -1170,4 +1174,4 @@ See `docs/guidance/document-processing-service.md` for complete implementation g
 - `services/ai-service/src/v2/reviews/service.ts` - needs immediate fix
 - `services/ats-service/src/v2/applications/repository.ts` - correctly returns metadata field
 - `services/document-service/` - needs text extraction implementation
-- `documents.documents` table - JSONB metadata structure
+- `documents` table - JSONB metadata structure

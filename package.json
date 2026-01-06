@@ -11,7 +11,7 @@
         "clean": "pnpm --filter \"./packages/**\" --filter \"./services/**\" --filter \"./apps/**\" clean",
         "vault:setup": "psql $DATABASE_URL -f infra/migrations/001_setup_vault.sql -f infra/migrations/002_vault_helpers.sql",
         "vault:populate": "node scripts/populate-vault.js",
-        "test:notifications": "tsx scripts/test-notifications.ts",
+        "test:notifications": "tsx scripts/test-ts",
         "test:notifications:e2e": "tsx scripts/test-notification-e2e.ts"
     },
     "devDependencies": {

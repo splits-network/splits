@@ -148,7 +148,7 @@ import { formatDate, getApplicationStageBadge } from '@/lib/utils';
 
 ## Notes
 
-- The `notifications.ts` file still contains duplicate implementations - consider fully migrating it
+- The `ts` file still contains duplicate implementations - consider fully migrating it
 - Consider adding a linting rule to prevent inline utility function definitions
 - Some components may need custom utilities - add them to appropriate utility files
 

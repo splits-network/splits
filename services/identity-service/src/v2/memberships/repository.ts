@@ -5,14 +5,15 @@ export class MembershipRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     async findMemberships(
         filters: MembershipFilters & { page: number; limit: number }
     ): Promise<{ data: any[]; total: number }> {
         let query = this.supabase
-            .schema('identity')
             .from('memberships')
             .select('*, organizations(*), users(*)', { count: 'exact' });
 
@@ -42,7 +43,6 @@ export class MembershipRepository {
 
     async findMembershipById(id: string): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('identity')
             .from('memberships')
             .select('*, organizations(*), users(*)')
             .eq('id', id)
@@ -54,7 +54,6 @@ export class MembershipRepository {
 
     async createMembership(data: any): Promise<any> {
         const { data: membership, error } = await this.supabase
-            .schema('identity')
             .from('memberships')
             .insert([data])
             .select('*, organizations(*), users(*)')
@@ -66,7 +65,6 @@ export class MembershipRepository {
 
     async updateMembership(id: string, updates: any): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('identity')
             .from('memberships')
             .update(updates)
             .eq('id', id)
@@ -79,7 +77,6 @@ export class MembershipRepository {
 
     async deleteMembership(id: string): Promise<void> {
         const { error } = await this.supabase
-            .schema('identity')
             .from('memberships')
             .update({ deleted_at: new Date().toISOString() })
             .eq('id', id);

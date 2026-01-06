@@ -1163,7 +1163,7 @@ export default function ProposalResponseWizard({
             await axios.patch(
                 `${apiUrl}/applications/${applicationId}/complete`,
                 {
-                    document_ids: documents.map(d => d.id),
+                    document_ids: map(d => d.id),
                     primary_resume_id: primaryResumeId,
                     pre_screen_answers: Object.entries(answers).map(([questionId, answer]) => ({
                         question_id: questionId,

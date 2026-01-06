@@ -9,7 +9,9 @@ export class NotificationRepositoryV2 {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     private mapRow(row: any): Notification {
@@ -47,7 +49,7 @@ export class NotificationRepositoryV2 {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            .schema('notifications')
+            
             .from('notification_log')
             .select('*', { count: 'exact' });
 
@@ -92,7 +94,7 @@ export class NotificationRepositoryV2 {
 
     async findNotification(id: string): Promise<Notification | null> {
         const { data, error } = await this.supabase
-            .schema('notifications')
+            
             .from('notification_log')
             .select('*')
             .eq('id', id)
@@ -162,7 +164,7 @@ export class NotificationRepositoryV2 {
         }
 
         const { data, error } = await this.supabase
-            .schema('notifications')
+            
             .from('notification_log')
             .update(payload)
             .eq('id', id)
@@ -178,7 +180,7 @@ export class NotificationRepositoryV2 {
 
     async dismissNotification(id: string): Promise<void> {
         const { error } = await this.supabase
-            .schema('notifications')
+            
             .from('notification_log')
             .update({
                 dismissed: true,
@@ -193,7 +195,7 @@ export class NotificationRepositoryV2 {
 
     async markAllAsRead(recipientUserId: string): Promise<void> {
         const { error } = await this.supabase
-            .schema('notifications')
+            
             .from('notification_log')
             .update({
                 read: true,
@@ -210,7 +212,7 @@ export class NotificationRepositoryV2 {
 
     async countUnread(recipientUserId: string): Promise<number> {
         const { count, error } = await this.supabase
-            .schema('notifications')
+            
             .from('notification_log')
             .select('id', { count: 'exact', head: true })
             .eq('recipient_user_id', recipientUserId)

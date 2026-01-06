@@ -27,7 +27,7 @@ The Splits Network supports **two types of candidates** based on their represent
 - ✅ Platform may charge nominal candidate fee or company posting fee
 
 **Database State:**
-- No record in `network.recruiter_candidates` with `status = 'active'`
+- No record in `recruiter_candidates` with `status = 'active'`
 - Applications have `recruiter_id = NULL`
 - Applications have `application_source = 'direct'`
 
@@ -51,7 +51,7 @@ The Splits Network supports **two types of candidates** based on their represent
 - ✅ Professional representation and advocacy
 
 **Database State:**
-- Active record in `network.recruiter_candidates`:
+- Active record in `recruiter_candidates`:
   - `status = 'active'`
   - `consent_given = true`
   - `relationship_end_date` > current date
@@ -226,7 +226,7 @@ When an application is submitted (either by candidate or recruiter), it automati
 Before a recruiter can submit applications for a candidate, an **exclusive 12-month agreement** must exist:
 
 **Agreement Process:**
-1. Recruiter invites candidate (`network.recruiter_candidates` created)
+1. Recruiter invites candidate (`recruiter_candidates` created)
 2. Invitation email sent with magic link token
 3. Candidate clicks link, reviews agreement terms
 4. Candidate explicitly accepts (`consent_given = true`)
@@ -351,7 +351,7 @@ Company posts job (with 20% placement fee) → Recruiter submits candidate → H
 - **Direct:** Fee split between platform and sourcer (no active recruiter)
 - **Represented:** Fee split between recruiter, platform, and sourcer (active recruiter relationship)
 
-**Tracked in:** `billing.placements` table with fee calculations and splits
+**Tracked in:** `placements` table with fee calculations and splits
 
 ---
 
@@ -369,7 +369,7 @@ Company posts job (with 20% placement fee) → Recruiter submits candidate → H
 5. Existing direct applications unaffected (grandfathered)
 
 **Database:**
-- `network.recruiter_candidates` record created with `status = 'active'`
+- `recruiter_candidates` record created with `status = 'active'`
 - Future applications will have `recruiter_id` populated
 
 ---
@@ -380,19 +380,19 @@ Company posts job (with 20% placement fee) → Recruiter submits candidate → H
 
 **Process:**
 1. 12-month period ends (or early termination)
-2. `network.recruiter_candidates.status` → `'expired'` or `'terminated'`
+2. `recruiter_candidates.status` → `'expired'` or `'terminated'`
 3. Candidate can now apply directly again
 4. Historical recruiter applications remain attributed to recruiter
 
 **Database:**
-- `network.recruiter_candidates.status` updated
+- `recruiter_candidates.status` updated
 - Candidate can create new applications with `recruiter_id = NULL`
 
 ---
 
 ## Database Schema
 
-### Applications Table (`ats.applications`)
+### Applications Table (`applications`)
 
 **Key Fields:**
 ```sql
@@ -413,7 +413,7 @@ recruiter_notes TEXT -- Only for represented applications
 
 ---
 
-### Recruiter-Candidate Relationships (`network.recruiter_candidates`)
+### Recruiter-Candidate Relationships (`recruiter_candidates`)
 
 **Key Fields:**
 ```sql

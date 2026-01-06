@@ -21,7 +21,7 @@ async function testNotification() {
     
     // Get a test job
     const { data: jobs, error: jobError } = await supabase
-        .schema('ats')
+        
         .from('jobs')
         .select('*')
         .limit(1);
@@ -36,7 +36,7 @@ async function testNotification() {
     
     // Get a test recruiter
     const { data: recruiters, error: recruiterError } = await supabase
-        .schema('network')
+        
         .from('recruiters')
         .select('*')
         .eq('status', 'active')
@@ -90,7 +90,7 @@ async function testNotification() {
         
         // Check notification logs
         const { data: logs, error: logError } = await supabase
-            .schema('notifications')
+            
             .from('notification_logs')
             .select('*')
             .order('created_at', { ascending: false })

@@ -1,6 +1,6 @@
 # Onboarding System
 
-Complete implementation of the two-phase user onboarding system for Splits Network.
+Complete implementation of the two-phase user onboarding system for Splits 
 
 ## Overview
 
@@ -9,7 +9,7 @@ The onboarding system consists of two phases:
 1. **Phase 1: Account Creation** (Already Implemented)
    - Sign up with Clerk (email/password or OAuth)
    - Email verification
-   - Creates basic user record in `identity.users`
+   - Creates basic user record in `users`
 
 2. **Phase 2: Onboarding Wizard** (This Implementation)
    - Mandatory modal wizard on first dashboard visit
@@ -22,13 +22,13 @@ The onboarding system consists of two phases:
 ### Migration: `005_add_onboarding_tracking.sql`
 
 ```sql
-ALTER TABLE identity.users 
+ALTER TABLE users 
     ADD COLUMN IF NOT EXISTS onboarding_status VARCHAR(50) DEFAULT 'pending',
     ADD COLUMN IF NOT EXISTS onboarding_step INTEGER DEFAULT 1,
     ADD COLUMN IF NOT EXISTS onboarding_completed_at TIMESTAMP;
 
 CREATE INDEX IF NOT EXISTS idx_users_onboarding_status 
-    ON identity.users(onboarding_status);
+    ON users(onboarding_status);
 ```
 
 **Fields:**
@@ -258,7 +258,7 @@ This method handles the final onboarding submission:
 
 ### Database
 - [ ] Run migration on identity database
-- [ ] Verify columns added to identity.users
+- [ ] Verify columns added to users
 - [ ] Check index creation
 
 ### Backend

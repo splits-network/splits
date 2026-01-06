@@ -8,10 +8,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
     title: "Applicant Network - Find Your Next Career Opportunity",
-    description: "Browse thousands of job opportunities and manage your job search on Applicant Network. Track applications, verify credentials, and connect with recruiters.",
+    description: "Browse thousands of job opportunities and manage your job search on Applicant  Track applications, verify credentials, and connect with recruiters.",
     openGraph: {
         title: 'Applicant Network - Find Your Next Career Opportunity',
-        description: 'Browse thousands of job opportunities and manage your job search on Applicant Network. Track applications, verify credentials, and connect with recruiters.',
+        description: 'Browse thousands of job opportunities and manage your job search on Applicant  Track applications, verify credentials, and connect with recruiters.',
         url: 'https://applicant.network',
         siteName: 'Applicant Network',
         images: [
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     twitter: {
         card: 'summary_large_image',
         title: 'Applicant Network - Find Your Next Career Opportunity',
-        description: 'Browse thousands of job opportunities and manage your job search on Applicant Network.',
+        description: 'Browse thousands of job opportunities and manage your job search on Applicant ',
         images: ['https://applicant.network/og-image.png'],
     },
 };

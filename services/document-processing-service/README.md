@@ -83,7 +83,7 @@ A microservice for processing uploaded documents, extracting text, and enabling 
 ⚠️ **Known Issue**: This service addresses the [document text extraction bug](../../docs/implementation-plans/ai-flow-gap-analysis.md#21-document-text-extraction-bug) that was blocking AI reviews.
 
 **Key Fix**: 
-- Extracts text from documents and stores in `documents.metadata.extracted_text`
+- Extracts text from documents and stores in `metadata.extracted_text`
 - AI service can now access resume text for quality reviews
 - Processes 99+ existing pending documents on startup
 

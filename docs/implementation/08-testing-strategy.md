@@ -282,14 +282,14 @@ describe('Application Submission Integration', () => {
 
   it('should complete full submission flow for candidate without recruiter', async () => {
     // 1. Create test candidate (no recruiter relationship)
-    const candidate = await db.from('ats.candidates').insert({ ... }).select().single();
+    const candidate = await db.from('candidates').insert({ ... }).select().single();
 
     // 2. Create test job with pre-screen questions
-    const job = await db.from('ats.jobs').insert({ ... }).select().single();
-    const questions = await db.from('ats.job_pre_screen_questions').insert([...]).select();
+    const job = await db.from('jobs').insert({ ... }).select().single();
+    const questions = await db.from('job_pre_screen_questions').insert([...]).select();
 
     // 3. Upload test documents
-    const resume = await db.from('ats.candidate_documents').insert({ ... }).select().single();
+    const resume = await db.from('candidate_documents').insert({ ... }).select().single();
 
     // 4. Submit application via API
     const response = await app.inject({
@@ -312,13 +312,13 @@ describe('Application Submission Integration', () => {
     expect(response.json().data.application.stage).toBe('applied');
 
     // 6. Verify database records
-    const application = await db.from('ats.applications')
+    const application = await db.from('applications')
       .select('*')
       .eq('id', response.json().data.application.id)
       .single();
     expect(application.stage).toBe('applied');
 
-    const answers = await db.from('ats.job_pre_screen_answers')
+    const answers = await db.from('job_pre_screen_answers')
       .select('*')
       .eq('application_id', application.id);
     expect(answers.length).toBe(1);
@@ -327,7 +327,7 @@ describe('Application Submission Integration', () => {
       .select('*')
       .eq('entity_type', 'application')
       .eq('entity_id', application.id);
-    expect(documents.length).toBe(1);
+    expect(length).toBe(1);
     expect(documents[0].is_primary_resume).toBe(true);
 
     // 7. Verify event emitted (check RabbitMQ or mock)
@@ -343,9 +343,9 @@ describe('Application Submission Integration', () => {
 ```typescript
 it('should route application to recruiter when active relationship exists', async () => {
   // 1. Create candidate with active recruiter relationship
-  const candidate = await db.from('ats.candidates').insert({ ... }).select().single();
-  const recruiter = await db.from('network.recruiters').insert({ ... }).select().single();
-  await db.from('network.recruiter_candidates').insert({
+  const candidate = await db.from('candidates').insert({ ... }).select().single();
+  const recruiter = await db.from('recruiters').insert({ ... }).select().single();
+  await db.from('recruiter_candidates').insert({
     recruiter_id: recruiter.id,
     candidate_id: candidate.id,
     start_date: new Date().toISOString(),
@@ -353,7 +353,7 @@ it('should route application to recruiter when active relationship exists', asyn
   });
 
   // 2. Create job
-  const job = await db.from('ats.jobs').insert({ ... }).select().single();
+  const job = await db.from('jobs').insert({ ... }).select().single();
 
   // 3. Submit application
   const response = await app.inject({
@@ -367,7 +367,7 @@ it('should route application to recruiter when active relationship exists', asyn
   expect(response.json().data.application.recruiter_id).toBe(recruiter.id);
   expect(response.json().data.application.stage).toBe('recruiter_review');
   // Verify submitted_to_recruiter audit log entry exists
-  const auditEntry = await db.from('ats.application_audit_log')
+  const auditEntry = await db.from('application_audit_log')
     .select('*')
     .eq('application_id', response.json().data.application.id)
     .eq('action', 'submitted_to_recruiter')
@@ -385,7 +385,7 @@ it('should route application to recruiter when active relationship exists', asyn
 ```typescript
 it('should allow recruiter to approve and submit application', async () => {
   // 1. Create application in 'recruiter_review' stage
-  const application = await db.from('ats.applications').insert({
+  const application = await db.from('applications').insert({
     recruiter_id: recruiterId,
     stage: 'recruiter_review',
     ...
@@ -403,13 +403,13 @@ it('should allow recruiter to approve and submit application', async () => {
 
   // 3. Assert update
   expect(response.statusCode).toBe(200);
-  const updated = await db.from('ats.applications')
+  const updated = await db.from('applications')
     .select('*')
     .eq('id', application.id)
     .single();
   expect(updated.stage).toBe('applied');
   // Verify submitted_to_company audit log entry exists
-  const auditEntry = await db.from('ats.application_audit_log')
+  const auditEntry = await db.from('application_audit_log')
     .select('*')
     .eq('application_id', application.id)
     .eq('action', 'submitted_to_company')
@@ -417,7 +417,7 @@ it('should allow recruiter to approve and submit application', async () => {
   expect(auditEntry).toBeTruthy();
 
   // 4. Verify candidate_role_assignment created
-  const assignment = await db.from('network.candidate_role_assignments')
+  const assignment = await db.from('candidate_role_assignments')
     .select('*')
     .eq('application_id', application.id)
     .single();
@@ -455,7 +455,7 @@ it('should save and load draft application', async () => {
   expect(loadResponse.statusCode).toBe(200);
   const draft = loadResponse.json().data;
   expect(draft.draft_data.step).toBe(1);
-  expect(draft.draft_data.documents.selected).toEqual([doc1, doc2]);
+  expect(draft.draft_data.selected).toEqual([doc1, doc2]);
 });
 ```
 
@@ -654,28 +654,28 @@ export const testPreScreenQuestions = [
 
 ```sql
 -- Seed test candidates
-INSERT INTO ats.candidates (id, email, first_name, last_name)
+INSERT INTO candidates (id, email, first_name, last_name)
 VALUES 
   ('test-cand-1', 'candidate1@test.com', 'Alice', 'Johnson'),
   ('test-cand-2', 'candidate2@test.com', 'Bob', 'Williams');
 
 -- Seed test recruiters
-INSERT INTO network.recruiters (id, email, first_name, last_name)
+INSERT INTO recruiters (id, email, first_name, last_name)
 VALUES 
   ('test-rec-1', 'recruiter1@test.com', 'Carol', 'Davis');
 
 -- Seed recruiter-candidate relationship
-INSERT INTO network.recruiter_candidates (recruiter_id, candidate_id, start_date, end_date)
+INSERT INTO recruiter_candidates (recruiter_id, candidate_id, start_date, end_date)
 VALUES 
   ('test-rec-1', 'test-cand-1', NOW(), NOW() + INTERVAL '12 months');
 
 -- Seed test jobs
-INSERT INTO ats.jobs (id, title, company_id, status)
+INSERT INTO jobs (id, title, company_id, status)
 VALUES 
   ('test-job-1', 'Software Engineer', 'test-company-1', 'open');
 
 -- Seed pre-screen questions
-INSERT INTO ats.job_pre_screen_questions (job_id, question, question_type, is_required)
+INSERT INTO job_pre_screen_questions (job_id, question, question_type, is_required)
 VALUES 
   ('test-job-1', 'Years of experience?', 'text', true),
   ('test-job-1', 'Willing to relocate?', 'yes_no', false);
@@ -688,10 +688,10 @@ VALUES
 ```typescript
 afterEach(async () => {
   // Delete test applications
-  await db.from('ats.applications').delete().ilike('candidate_id', 'test-%');
+  await db.from('applications').delete().ilike('candidate_id', 'test-%');
   await db.from('documents').delete().eq('entity_type', 'application').ilike('entity_id', 'test-%');
-  await db.from('ats.job_pre_screen_answers').delete().ilike('application_id', 'test-%');
-  await db.from('ats.application_audit_log').delete().ilike('application_id', 'test-%');
+  await db.from('job_pre_screen_answers').delete().ilike('application_id', 'test-%');
+  await db.from('application_audit_log').delete().ilike('application_id', 'test-%');
 });
 ```
 

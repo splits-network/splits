@@ -11,26 +11,26 @@
 -- - 'rejected': Verification failed (e.g., fake LinkedIn, incorrect info)
 -- ============================================================================
 
--- Add verification_status column to ats.candidates
-ALTER TABLE ats.candidates
+-- Add verification_status column to candidates
+ALTER TABLE candidates
 ADD COLUMN IF NOT EXISTS verification_status TEXT NOT NULL DEFAULT 'unverified'
 CHECK (verification_status IN ('unverified', 'pending', 'verified', 'rejected'));
 
 -- Add index for filtering by verification status
-CREATE INDEX IF NOT EXISTS idx_candidates_verification_status ON ats.candidates(verification_status);
+CREATE INDEX IF NOT EXISTS idx_candidates_verification_status ON candidates(verification_status);
 
 -- Add verification metadata column for storing verification details
-ALTER TABLE ats.candidates
+ALTER TABLE candidates
 ADD COLUMN IF NOT EXISTS verification_metadata JSONB DEFAULT '{}'::jsonb;
 
 -- Comments
-COMMENT ON COLUMN ats.candidates.verification_status IS 'Verification status: unverified (default), pending, verified, rejected';
-COMMENT ON COLUMN ats.candidates.verification_metadata IS 'Additional verification details: verified_by, verified_at, verification_method, rejection_reason, etc.';
+COMMENT ON COLUMN candidates.verification_status IS 'Verification status: unverified (default), pending, verified, rejected';
+COMMENT ON COLUMN candidates.verification_metadata IS 'Additional verification details: verified_by, verified_at, verification_method, rejection_reason, etc.';
 
 -- Add verified_at and verified_by for tracking
-ALTER TABLE ats.candidates
+ALTER TABLE candidates
 ADD COLUMN IF NOT EXISTS verified_at TIMESTAMPTZ,
-ADD COLUMN IF NOT EXISTS verified_by_user_id UUID REFERENCES identity.users(id) ON DELETE SET NULL;
+ADD COLUMN IF NOT EXISTS verified_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL;
 
-COMMENT ON COLUMN ats.candidates.verified_at IS 'Timestamp when candidate was verified';
-COMMENT ON COLUMN ats.candidates.verified_by_user_id IS 'User who verified the candidate (typically platform admin or senior recruiter)';
+COMMENT ON COLUMN candidates.verified_at IS 'Timestamp when candidate was verified';
+COMMENT ON COLUMN candidates.verified_by_user_id IS 'User who verified the candidate (typically platform admin or senior recruiter)';

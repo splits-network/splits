@@ -5,9 +5,9 @@
  * 
  * CRITICAL: Roles are determined by DATABASE RECORDS, not Clerk or these headers.
  * Backend services use SQL JOINs to resolve user roles from:
- *   - network.recruiters (recruiter role)
- *   - identity.memberships (company_admin, hiring_manager, platform_admin)
- *   - ats.candidates (candidate role)
+ *   - recruiters (recruiter role)
+ *   - memberships (company_admin, hiring_manager, platform_admin)
+ *   - candidates (candidate role)
  * 
  * We only pass clerk_user_id. Backend resolves role + filters data in single query.
  */

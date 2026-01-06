@@ -265,7 +265,7 @@ function registerCandidateRoutes(app: FastifyInstance, services: ServiceRegistry
                     ) as { data?: any[] };
                     const recruiters = (recruiterResponse.data || []);
                     if (recruiters.length > 0) {
-                        recruiterId = recruiters[0].id; // Use the network.recruiters.id
+                        recruiterId = recruiters[0].id; // Use the recruiters.id
                     }
                 } catch (recruiterError) {
                     // User might not be a recruiter, that's okay

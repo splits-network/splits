@@ -7,17 +7,20 @@ export interface AccessContext {
     organizationIds: string[];
     roles: string[];
     isPlatformAdmin: boolean;
+    error: string;
+    
 }
 
 /**
  * Resolve role/access context starting from the Clerk user ID.
- * Converts Clerk -> identity.users -> memberships/recruiters/candidates.
+ * Converts Clerk -> users -> memberships/recruiters/candidates.
  */
 export async function resolveAccessContext(
     supabase: SupabaseClient,
     clerkUserId?: string
 ): Promise<AccessContext> {
-    
+    console.log('[DEBUG] resolveAccessContext called with clerkUserId:', { clerkUserId });
+    try{
     if (!clerkUserId) {
         return {
             identityUserId: null,
@@ -26,16 +29,22 @@ export async function resolveAccessContext(
             organizationIds: [],
             roles: [],
             isPlatformAdmin: false,
+            error: 'No clerkUserId provided',
         };
     }
-
     const identityUserResult = await supabase
-        .schema('identity')
         .from('users')
-        .select('id')
+        .select(
+            `
+                id,
+                candidates!candidates_user_id_fkey ( id ),
+                recruiters!recruiters_user_id_fkey ( id, status ),
+                memberships!memberships_user_id_fkey ( organization_id, role )
+            `
+        )
         .eq('clerk_user_id', clerkUserId)
         .maybeSingle();
-
+console.log('[DEBUG] resolveAccessContext - identityUserResult:', { identityUserResult });
     const identityUserId = identityUserResult.data?.id || null;
 
     if (!identityUserId) {
@@ -46,47 +55,36 @@ export async function resolveAccessContext(
             organizationIds: [],
             roles: [],
             isPlatformAdmin: false,
+            error: 'Identity user not found',
         };
     }
 
-    const [candidateResult, recruiterResult, membershipsResult] = await Promise.all([
-        supabase
-            .schema('ats')
-            .from('candidates')
-            .select('id')
-            .eq('user_id', identityUserId)
-            .maybeSingle(),
-        supabase
-            .schema('network')
-            .from('recruiters')
-            .select('id')
-            .eq('user_id', identityUserId)
-            .eq('status', 'active')
-            .maybeSingle(),
-        supabase
-            .schema('identity')
-            .from('memberships')
-            .select('organization_id, role')
-            .eq('user_id', identityUserId),
-    ]);
-
-    const memberships = membershipsResult.data || [];
-    const organizationIds = memberships
-        .map((m) => m.organization_id)
-        .filter((orgId): orgId is string => Boolean(orgId));
-    const roles = memberships
-        .map((m) => m.role)
-        .filter((role): role is string => Boolean(role));
-    const isPlatformAdmin = roles.includes('platform_admin');
+    const memberships = identityUserResult.data?.memberships || [];
+    const organizationIds = memberships.map(m => m.organization_id).filter(Boolean);
+    const roles = memberships.map(m => m.role).filter(Boolean);
+    const activeRecruiter = identityUserResult.data?.recruiters?.find(r => r.status === 'active');
 
     const finalContext = {
         identityUserId,
-        candidateId: candidateResult.data?.id || null,
-        recruiterId: recruiterResult.data?.id || null,
+        candidateId: identityUserResult.data?.candidates?.[0]?.id || null,
+        recruiterId: activeRecruiter?.id || null,
         organizationIds,
         roles,
-        isPlatformAdmin,
+        isPlatformAdmin: roles.includes('platform_admin'),
+        error: '',
     };
 
     return finalContext;
+} catch (error) {
+    console.error('Error in resolveAccessContext:', error);
+    return {
+        error: error instanceof Error ? error.message : String(error),
+        identityUserId: null,
+        candidateId: null,
+        recruiterId: null,
+        organizationIds: [],
+        roles: [],
+        isPlatformAdmin: false,
+    };
+}
 }

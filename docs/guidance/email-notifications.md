@@ -417,7 +417,7 @@ docker exec splits-ats-service env | grep RABBITMQ
 
 **Solution:**
 - Ensure API Gateway passes `candidate_user_id` from Clerk auth token
-- Verify user exists in `identity.users` table
+- Verify user exists in `users` table
 - Check event payload includes required user ID fields
 
 ---

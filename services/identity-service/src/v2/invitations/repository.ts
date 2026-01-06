@@ -5,14 +5,15 @@ export class InvitationRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     async findInvitations(
         filters: InvitationFilters & { page: number; limit: number }
     ): Promise<{ data: any[]; total: number }> {
         let query = this.supabase
-            .schema('identity')
             .from('invitations')
             .select('*, organizations(*)', { count: 'exact' });
 
@@ -38,7 +39,6 @@ export class InvitationRepository {
 
     async findInvitationById(id: string): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('identity')
             .from('invitations')
             .select('*, organizations(*)')
             .eq('id', id)
@@ -50,7 +50,6 @@ export class InvitationRepository {
 
     async createInvitation(data: any): Promise<any> {
         const { data: invitation, error } = await this.supabase
-            .schema('identity')
             .from('invitations')
             .insert([data])
             .select('*, organizations(*)')
@@ -62,7 +61,6 @@ export class InvitationRepository {
 
     async updateInvitation(id: string, updates: any): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('identity')
             .from('invitations')
             .update(updates)
             .eq('id', id)
@@ -75,7 +73,6 @@ export class InvitationRepository {
 
     async deleteInvitation(id: string): Promise<void> {
         const { error } = await this.supabase
-            .schema('identity')
             .from('invitations')
             .update({ deleted_at: new Date().toISOString() })
             .eq('id', id);

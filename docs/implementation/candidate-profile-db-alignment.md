@@ -7,7 +7,7 @@
 
 ## Current State Analysis
 
-### Database Schema (`ats.candidates`)
+### Database Schema (`candidates`)
 
 The database table has these fields:
 
@@ -80,7 +80,7 @@ interface Candidate {
 If we want to add the extra fields later, add to database:
 
 ```sql
-ALTER TABLE ats.candidates 
+ALTER TABLE candidates 
 ADD COLUMN IF NOT EXISTS github_url TEXT,
 ADD COLUMN IF NOT EXISTS portfolio_url TEXT,
 ADD COLUMN IF NOT EXISTS bio TEXT,

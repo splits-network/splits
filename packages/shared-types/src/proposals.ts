@@ -85,7 +85,7 @@ export interface UnifiedProposal {
     // Core identifiers
     id: string;
     type: ProposalType;
-    stage: string;  // Application stage from ats.applications
+    stage: string;  // Application stage from applications
     
     // Parties involved
     candidate: ProposalParty;

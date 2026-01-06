@@ -84,16 +84,16 @@ All endpoints follow V2 standardized patterns:
 
 ## Database Schema
 
-Uses `ats.*` schema in shared Supabase database:
+Uses `*` schema in shared Supabase database:
 
-- `ats.companies` - Company profiles
-- `ats.jobs` - Job postings and details
-- `ats.candidates` - Candidate profiles  
-- `ats.applications` - Application records and stages
-- `ats.placements` - Successful placement records
-- `ats.job_requirements` - Job skill requirements
-- `ats.job_pre_screen_questions` - Pre-screening questionnaires
-- `ats.job_pre_screen_answers` - Candidate questionnaire responses
+- `companies` - Company profiles
+- `jobs` - Job postings and details
+- `candidates` - Candidate profiles  
+- `applications` - Application records and stages
+- `placements` - Successful placement records
+- `job_requirements` - Job skill requirements
+- `job_pre_screen_questions` - Pre-screening questionnaires
+- `job_pre_screen_answers` - Candidate questionnaire responses
 
 ## Events Published
 

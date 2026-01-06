@@ -47,7 +47,7 @@ export class CandidatesEventConsumer {
             await this.emailService.sendCandidateAddedToNetwork(candidateEmail, {
                 candidateName: candidateName,
                 recruiterName: recruiterUser.name || recruiterUser.email,
-                userId: candidateUserId, // ✅ Use candidate.user_id (identity.users.id), not candidate_id
+                userId: candidateUserId, // ✅ Use candidate.user_id (users.id), not candidate_id
             });
             
             this.logger.info({ candidate_id, recipient: candidateEmail }, 'Candidate sourced notification sent to candidate');
@@ -57,7 +57,7 @@ export class CandidatesEventConsumer {
                 candidateName: candidateName,
                 sourceMethod: source_method || 'direct',
                 protectionPeriod: '365 days',
-                userId: recruiter.user_id, // ✅ Use recruiter.user_id (identity.users.id)
+                userId: recruiter.user_id, // ✅ Use recruiter.user_id (users.id)
             });
             
             this.logger.info({ candidate_id, sourcer_recruiter_id, recipient: recruiterUser.email }, 'Candidate sourced confirmation sent to recruiter');
@@ -121,7 +121,7 @@ export class CandidatesEventConsumer {
             // Fetch candidate details from database
             this.logger.debug({ candidate_id }, 'Fetching candidate details from database');
             const { data: candidates, error: candidateError } = await this.repository.supabaseClient
-                .schema('ats')
+                
                 .from('candidates')
                 .select('*')
                 .eq('id', candidate_id)
@@ -132,7 +132,7 @@ export class CandidatesEventConsumer {
             }
             
             if (!candidates) {
-                throw new Error(`Candidate with id ${candidate_id} not found in ats.candidates`);
+                throw new Error(`Candidate with id ${candidate_id} not found in candidates`);
             }
             
             const candidate = candidates;
@@ -156,7 +156,7 @@ export class CandidatesEventConsumer {
             // Fetch recruiter details from database
             this.logger.debug({ recruiter_id }, 'Fetching recruiter details from database');
             const { data: recruiter, error: recruiterError } = await this.repository.supabaseClient
-                .schema('network')
+                
                 .from('recruiters')
                 .select('*')
                 .eq('id', recruiter_id)
@@ -167,13 +167,13 @@ export class CandidatesEventConsumer {
             }
             
             if (!recruiter) {
-                throw new Error(`Recruiter with id ${recruiter_id} not found in network.recruiters`);
+                throw new Error(`Recruiter with id ${recruiter_id} not found in recruiters`);
             }
 
             // Fetch user details for recruiter
             this.logger.debug({ user_id: recruiter.user_id }, 'Fetching recruiter user details from database');
             const { data: recruiterUser, error: userError } = await this.repository.supabaseClient
-                .schema('identity')
+                
                 .from('users')
                 .select('id, email, name')
                 .eq('id', recruiter.user_id)
@@ -184,7 +184,7 @@ export class CandidatesEventConsumer {
             }
             
             if (!recruiterUser) {
-                throw new Error(`User with id ${recruiter.user_id} not found in identity.users`);
+                throw new Error(`User with id ${recruiter.user_id} not found in users`);
             }
 
             // Combine recruiter and user data
@@ -248,7 +248,7 @@ export class CandidatesEventConsumer {
             const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
             const candidate = candidateResponse.data || candidateResponse;
 
-            // Fetch recruiter details with user information (network-service now JOINs with identity.users)
+            // Fetch recruiter details with user information (network-service now JOINs with users)
             const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
             const recruiter = recruiterResponse.data || recruiterResponse;
 
@@ -259,7 +259,7 @@ export class CandidatesEventConsumer {
             await this.emailService.sendCandidateAddedToNetwork(candidate.email, {
                 candidateName: candidate.full_name,
                 recruiterName: recruiterUser.name || recruiterUser.email,
-                userId: candidate.user_id, // Use candidate.user_id (identity.users.id)
+                userId: candidate.user_id, // Use candidate.user_id (users.id)
             });
 
             this.logger.info({ 

@@ -44,7 +44,7 @@ export class MarketplaceMetricsRepository {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            .schema('platform')
+            
             .from('marketplace_metrics_daily')
             .select('*', { count: 'exact' });
 
@@ -71,7 +71,7 @@ export class MarketplaceMetricsRepository {
 
     async findMetric(id: string): Promise<MarketplaceMetric | null> {
         const { data, error } = await this.supabase
-            .schema('platform')
+            
             .from('marketplace_metrics_daily')
             .select('*')
             .eq('id', id)
@@ -89,7 +89,7 @@ export class MarketplaceMetricsRepository {
 
     async createMetric(input: CreateMetricInput): Promise<MarketplaceMetric> {
         const { data, error } = await this.supabase
-            .schema('platform')
+            
             .from('marketplace_metrics_daily')
             .insert({
                 metric_date: input.date,
@@ -139,7 +139,7 @@ export class MarketplaceMetricsRepository {
         }
 
         const { data, error } = await this.supabase
-            .schema('platform')
+            
             .from('marketplace_metrics_daily')
             .update(payload)
             .eq('id', id)
@@ -155,7 +155,7 @@ export class MarketplaceMetricsRepository {
 
     async deleteMetric(id: string): Promise<void> {
         const { error } = await this.supabase
-            .schema('platform')
+            
             .from('marketplace_metrics_daily')
             .delete()
             .eq('id', id);

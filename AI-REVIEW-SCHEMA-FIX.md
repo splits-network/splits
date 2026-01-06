@@ -5,7 +5,7 @@
 The AI review data wasn't loading in the frontend because of a schema mismatch between the database and TypeScript interfaces.
 
 ### Database Schema (Flat Structure)
-The `ats.ai_reviews` table stores data in a flat structure:
+The `ai_reviews` table stores data in a flat structure:
 ```sql
 - matched_skills: text[]
 - missing_skills: text[]
@@ -117,7 +117,7 @@ To verify the fix works:
 - **AI Service Repository**: `services/ai-service/src/v2/reviews/repository.ts`
 - **Shared Types**: `packages/shared-types/src/models.ts`
 - **Frontend Component**: `apps/candidate/src/app/(authenticated)/applications/[id]/components/ai-review-panel.tsx`
-- **Database Table**: `ats.ai_reviews`
+- **Database Table**: `ai_reviews`
 
 ## Notes
 

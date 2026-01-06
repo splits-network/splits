@@ -34,7 +34,7 @@
 --   - 'withdrawn'          - Candidate withdrew
 
 -- Add comment to applications table about new stage
-COMMENT ON COLUMN ats.applications.stage IS 
+COMMENT ON COLUMN applications.stage IS 
 'Application stage in workflow. Valid values: recruiter_proposed, draft, ai_review, screen, submitted, interview, offer, hired, rejected, withdrawn. 
 recruiter_proposed = Recruiter sent job to candidate, awaiting their decision. 
 draft = Candidate is completing application. 
@@ -54,7 +54,7 @@ Other stages represent progression through hiring pipeline.';
 --
 -- All use existing columns:
 --   - action: VARCHAR(100) - stores action name
---   - performed_by_user_id: UUID - identity.users.id
+--   - performed_by_user_id: UUID - users.id
 --   - performed_by_role: VARCHAR(50) - 'recruiter', 'candidate', 'system', etc.
 --   - timestamp: TIMESTAMPTZ - when action occurred
 --   - old_value: JSONB - previous state
@@ -62,7 +62,7 @@ Other stages represent progression through hiring pipeline.';
 --   - notes: TEXT - additional context
 
 -- Add comment documenting the new actions
-COMMENT ON TABLE ats.application_audit_log IS 
+COMMENT ON TABLE application_audit_log IS 
 'Audit log for all application state changes and events. Tracks all actions with actor, timestamp, and state changes.
 New recruiter submission flow actions:
 - recruiter_proposed_job: Recruiter sent job opportunity to candidate
@@ -77,9 +77,9 @@ Use new_value.decline_reason for decline actions to categorize reason.';
 
 -- Verify the table exists (should already exist from earlier migrations)
 -- If it doesn''t exist, create it here
-CREATE TABLE IF NOT EXISTS ats.application_audit_log (
+CREATE TABLE IF NOT EXISTS application_audit_log (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    application_id UUID NOT NULL REFERENCES ats.applications(id) ON DELETE CASCADE,
+    application_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
     action VARCHAR(100) NOT NULL,
     performed_by_user_id UUID, -- NULL for system actions
     performed_by_role VARCHAR(50), -- 'recruiter', 'candidate', 'company', 'system', etc.
@@ -93,21 +93,21 @@ CREATE TABLE IF NOT EXISTS ats.application_audit_log (
 
 -- Ensure indexes exist for query performance
 CREATE INDEX IF NOT EXISTS idx_application_audit_log_application_id 
-    ON ats.application_audit_log(application_id);
+    ON application_audit_log(application_id);
 CREATE INDEX IF NOT EXISTS idx_application_audit_log_action 
-    ON ats.application_audit_log(action);
+    ON application_audit_log(action);
 CREATE INDEX IF NOT EXISTS idx_application_audit_log_timestamp 
-    ON ats.application_audit_log(timestamp);
+    ON application_audit_log(timestamp);
 CREATE INDEX IF NOT EXISTS idx_application_audit_log_performed_by_user_id 
-    ON ats.application_audit_log(performed_by_user_id);
+    ON application_audit_log(performed_by_user_id);
 CREATE INDEX IF NOT EXISTS idx_application_audit_log_performed_by_role 
-    ON ats.application_audit_log(performed_by_role);
+    ON application_audit_log(performed_by_role);
 
 -- ============================================================================
 -- Part 4: Add helper function to get application stage transitions
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION ats.get_application_stage_history(p_application_id UUID)
+CREATE OR REPLACE FUNCTION get_application_stage_history(p_application_id UUID)
 RETURNS TABLE (
     action VARCHAR,
     from_stage VARCHAR,
@@ -123,7 +123,7 @@ BEGIN
         (al.new_value->>'stage')::VARCHAR AS to_stage,
         al.performed_by_role,
         al.timestamp
-    FROM ats.application_audit_log al
+    FROM application_audit_log al
     WHERE al.application_id = p_application_id
         AND (al.old_value->>'stage' IS NOT NULL OR al.new_value->>'stage' IS NOT NULL)
     ORDER BY al.timestamp ASC;
@@ -134,14 +134,14 @@ $$ LANGUAGE plpgsql;
 -- Part 5: Add helper function to check if application is from recruiter proposal
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION ats.is_recruiter_proposed_application(p_application_id UUID)
+CREATE OR REPLACE FUNCTION is_recruiter_proposed_application(p_application_id UUID)
 RETURNS BOOLEAN AS $$
 DECLARE
     v_has_proposal_action BOOLEAN;
 BEGIN
     SELECT EXISTS(
         SELECT 1
-        FROM ats.application_audit_log
+        FROM application_audit_log
         WHERE application_id = p_application_id
             AND action = 'recruiter_proposed_job'
         LIMIT 1
@@ -156,18 +156,18 @@ $$ LANGUAGE plpgsql;
 -- ============================================================================
 
 -- Grant permissions on new functions
--- GRANT EXECUTE ON FUNCTION ats.get_application_stage_history TO ats_service_role;
--- GRANT EXECUTE ON FUNCTION ats.is_recruiter_proposed_application TO ats_service_role;
+-- GRANT EXECUTE ON FUNCTION get_application_stage_history TO ats_service_role;
+-- GRANT EXECUTE ON FUNCTION is_recruiter_proposed_application TO ats_service_role;
 
 -- ============================================================================
 -- Part 7: Data Verification (optional - run after migration)
 -- ============================================================================
 
 -- Query to check current stage distribution (should not include recruiter_proposed yet)
--- SELECT stage, COUNT(*) as count FROM ats.applications GROUP BY stage;
+-- SELECT stage, COUNT(*) as count FROM applications GROUP BY stage;
 
 -- Query to check audit log is working
--- SELECT DISTINCT action FROM ats.application_audit_log ORDER BY action;
+-- SELECT DISTINCT action FROM application_audit_log ORDER BY action;
 
 -- ============================================================================
 -- Rollback Script
@@ -176,11 +176,11 @@ $$ LANGUAGE plpgsql;
 /*
 -- To rollback this migration:
 -- 1. Drop the new functions (they can be safely dropped as they're new)
-DROP FUNCTION IF EXISTS ats.is_recruiter_proposed_application(UUID);
-DROP FUNCTION IF EXISTS ats.get_application_stage_history(UUID);
+DROP FUNCTION IF EXISTS is_recruiter_proposed_application(UUID);
+DROP FUNCTION IF EXISTS get_application_stage_history(UUID);
 
 -- 2. Update column comment (optional)
-COMMENT ON COLUMN ats.applications.stage IS 'Application stage in workflow';
+COMMENT ON COLUMN applications.stage IS 'Application stage in workflow';
 
 -- 3. That's it - no data or indexes to remove as we didn't add any columns
 */

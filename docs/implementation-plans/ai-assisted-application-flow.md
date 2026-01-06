@@ -238,12 +238,12 @@ interface AIReviewResult {
 
 ## Database Changes
 
-### New Table: `ats.ai_reviews`
+### New Table: `ai_reviews`
 
 ```sql
-CREATE TABLE ats.ai_reviews (
+CREATE TABLE ai_reviews (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    application_id UUID NOT NULL REFERENCES ats.applications(id) ON DELETE CASCADE,
+    application_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
     
     -- AI Analysis Results
     fit_score INTEGER NOT NULL CHECK (fit_score >= 0 AND fit_score <= 100),
@@ -276,19 +276,19 @@ CREATE TABLE ats.ai_reviews (
     UNIQUE(application_id)
 );
 
-CREATE INDEX idx_ai_reviews_application_id ON ats.ai_reviews(application_id);
-CREATE INDEX idx_ai_reviews_fit_score ON ats.ai_reviews(fit_score);
-CREATE INDEX idx_ai_reviews_recommendation ON ats.ai_reviews(recommendation);
-CREATE INDEX idx_ai_reviews_analyzed_at ON ats.ai_reviews(analyzed_at);
+CREATE INDEX idx_ai_reviews_application_id ON ai_reviews(application_id);
+CREATE INDEX idx_ai_reviews_fit_score ON ai_reviews(fit_score);
+CREATE INDEX idx_ai_reviews_recommendation ON ai_reviews(recommendation);
+CREATE INDEX idx_ai_reviews_analyzed_at ON ai_reviews(analyzed_at);
 ```
 
-### New Table: `ats.ai_review_config` (Future - Phase 3)
+### New Table: `ai_review_config` (Future - Phase 3)
 
 ```sql
-CREATE TABLE ats.ai_review_config (
+CREATE TABLE ai_review_config (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    job_id UUID NOT NULL REFERENCES ats.jobs(id) ON DELETE CASCADE,
-    company_id UUID NOT NULL REFERENCES ats.companies(id),
+    job_id UUID NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+    company_id UUID NOT NULL REFERENCES companies(id),
     
     -- Gatekeeper Settings
     mode VARCHAR(50) NOT NULL DEFAULT 'advisory' CHECK (mode IN ('advisory', 'gatekeeper')),
@@ -306,14 +306,14 @@ CREATE TABLE ats.ai_review_config (
 );
 ```
 
-### Update: `ats.applications`
+### Update: `applications`
 
 **Add column:**
 ```sql
-ALTER TABLE ats.applications 
+ALTER TABLE applications 
 ADD COLUMN ai_reviewed BOOLEAN NOT NULL DEFAULT FALSE;
 
-CREATE INDEX idx_applications_ai_reviewed ON ats.applications(ai_reviewed);
+CREATE INDEX idx_applications_ai_reviewed ON applications(ai_reviewed);
 ```
 
 ### Update: `ApplicationStage` Type
@@ -375,7 +375,7 @@ export type ApplicationStage =
 1. Fetch application + candidate + job data
 2. Call AI service (OpenAI/Anthropic/custom)
 3. Parse AI response
-4. Save to `ats.ai_reviews`
+4. Save to `ai_reviews`
 5. Update application stage: `ai_review` → next stage
 6. Trigger notifications
 
@@ -909,7 +909,7 @@ Next Steps:
 **Timeline:** 6-8 weeks
 
 **Week 1-2: Database & Types**
-- [x] Create `ats.ai_reviews` table migration
+- [x] Create `ai_reviews` table migration
 - [x] Update `ApplicationStage` type in shared-types
 - [ ] Add `ai_reviewed` column to applications table
 - [ ] Create indexes
@@ -951,7 +951,7 @@ Next Steps:
 **Timeline:** 4-6 weeks
 
 **Features:**
-- [ ] Create `ats.ai_review_config` table
+- [ ] Create `ai_review_config` table
 - [ ] Add company settings page for AI config
 - [ ] Implement auto-reject logic based on threshold
 - [ ] Add billing integration for paid feature
@@ -1068,7 +1068,7 @@ describe('Application Flow with AI Review', () => {
     
     // Check notification sent
     const notifications = await getNotifications({ application_id: application.id });
-    expect(notifications.length).toBeGreaterThan(0);
+    expect(length).toBeGreaterThan(0);
     expect(notifications[0].type).toBe('ai_review_completed');
   });
 });

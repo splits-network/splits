@@ -10,7 +10,9 @@ export class WebhookRepositoryV2 {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     /**
@@ -18,7 +20,6 @@ export class WebhookRepositoryV2 {
      */
     async findUserByClerkId(clerkUserId: string): Promise<User | null> {
         const { data, error } = await this.supabase
-            .schema('identity')
             .from('users')
             .select('*')
             .eq('clerk_user_id', clerkUserId)
@@ -36,7 +37,6 @@ export class WebhookRepositoryV2 {
      */
     async createUser(userData: Omit<User, 'id' | 'created_at' | 'updated_at'>): Promise<User> {
         const { data, error } = await this.supabase
-            .schema('identity')
             .from('users')
             .insert(userData)
             .select()
@@ -51,7 +51,6 @@ export class WebhookRepositoryV2 {
      */
     async updateUser(id: string, updates: Partial<User>): Promise<User> {
         const { data, error } = await this.supabase
-            .schema('identity')
             .from('users')
             .update(updates)
             .eq('id', id)
@@ -67,7 +66,6 @@ export class WebhookRepositoryV2 {
      */
     async deleteUser(clerkUserId: string): Promise<void> {
         const { error } = await this.supabase
-            .schema('identity')
             .from('users')
             .update({ 
                 status: 'deleted',

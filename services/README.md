@@ -147,11 +147,11 @@ notification-service
 
 Each service owns its own schema in the Supabase Postgres database:
 
-- **identity**: `identity.*`
-- **ats-service**: `ats.*`
-- **network-service**: `network.*`
-- **billing-service**: `billing.*`
-- **notification-service**: `notifications.*`
+- **identity**: `*`
+- **ats-service**: `*`
+- **network-service**: `*`
+- **billing-service**: `*`
+- **notification-service**: `*`
 
 ## API Endpoints
 

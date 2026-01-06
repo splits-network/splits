@@ -6,6 +6,7 @@ This document outlines the standard patterns for implementing server-side pagina
 
 - **Database**: PostgreSQL with PL/pgSQL functions
 - **Backend**: Fastify services with Supabase client
+- **Shared Types**: `StandardListParams` and `StandardListResponse<T>` from `@splits-network/shared-types`
 - **Gateway**: API Gateway (proxies pagination parameters)
 - **Frontend**: Next.js App Router with URL state persistence
 
@@ -15,11 +16,63 @@ This document outlines the standard patterns for implementing server-side pagina
 
 **ALWAYS use server-side pagination, filtering, and sorting.**
 
-Client-side filtering/pagination does NOT scale and will cause performance issues with large datasets. All list views must support:
-- Server-side pagination (`page`, `limit`, `offset`)
-- Server-side filtering (e.g., `stage`, `status`, `company_id`)
-- Server-side search (`search` query parameter)
-- Server-side sorting (`sort_by`, `sort_order`)
+All V2 APIs must use the standardized types from `@splits-network/shared-types`:
+- **Request Parameters**: `StandardListParams` interface
+- **Response Format**: `StandardListResponse<T>` interface with data and pagination
+
+Client-side filtering/pagination does NOT scale and will cause performance issues with large datasets.
+
+---
+
+## Standard Types (REQUIRED for all V2 APIs)
+
+All V2 services must use the standardized interfaces from `@splits-network/shared-types`:
+
+### Request Parameters: `StandardListParams`
+
+```typescript
+import { StandardListParams } from '@splits-network/shared-types';
+
+interface StandardListParams {
+    page?: number;           // Default: 1
+    limit?: number;          // Default: 25
+    search?: string;         // Search query
+    filters?: Record<string, any>; // Resource-specific filters
+    include?: string;        // Comma-separated related resources
+    sort_by?: string;        // Column to sort by
+    sort_order?: 'asc' | 'desc'; // Sort direction
+}
+```
+
+### Response Format: `StandardListResponse<T>`
+
+```typescript
+import { StandardListResponse, PaginationResponse } from '@splits-network/shared-types';
+
+interface StandardListResponse<T> {
+    data: T[];                    // Array of resources
+    pagination: PaginationResponse; // Pagination metadata
+}
+
+interface PaginationResponse {
+    total: number;        // Total number of resources
+    page: number;         // Current page number
+    limit: number;        // Items per page
+    total_pages: number;  // Total pages available
+}
+```
+
+### Helper Functions
+
+```typescript
+import { buildPaginationResponse, parseFilters } from '@splits-network/shared-types';
+
+// Build pagination response object
+const pagination = buildPaginationResponse(page, limit, totalCount);
+
+// Parse filters from query string
+const filters = parseFilters(request.query.filters);
+```
 
 ---
 
@@ -32,7 +85,7 @@ Always return `total_count` alongside paginated results using `COUNT(*) OVER()` 
 ### Example: Paginated Search Function
 
 ```sql
-CREATE OR REPLACE FUNCTION ats.search_applications_paginated(
+CREATE OR REPLACE FUNCTION search_applications_paginated(
     search_terms text[] DEFAULT NULL,
     filter_recruiter_id uuid DEFAULT NULL,
     filter_job_id uuid DEFAULT NULL,
@@ -83,10 +136,10 @@ BEGIN
                     (CASE WHEN j.title ILIKE '%' || search_terms[1] || '%' THEN 3 ELSE 0 END) +
                     (CASE WHEN comp.name ILIKE '%' || search_terms[1] || '%' THEN 2 ELSE 0 END)
             END::INT as relevance_score
-        FROM ats.applications a
-        LEFT JOIN ats.candidates c ON a.candidate_id = c.id
-        LEFT JOIN ats.jobs j ON a.job_id = j.id
-        LEFT JOIN ats.companies comp ON j.company_id = comp.id
+        FROM applications a
+        LEFT JOIN candidates c ON a.candidate_id = c.id
+        LEFT JOIN jobs j ON a.job_id = j.id
+        LEFT JOIN companies comp ON j.company_id = comp.id
         WHERE 
             -- Apply all filters
             (filter_recruiter_id IS NULL OR a.recruiter_id = filter_recruiter_id)
@@ -137,44 +190,35 @@ $$ LANGUAGE plpgsql STABLE;
 ```sql
 -- Covering index for recruiter queries (most common filter)
 CREATE INDEX idx_applications_enriched_recruiter 
-ON ats.applications (recruiter_id) 
+ON applications (recruiter_id) 
 INCLUDE (id, candidate_id, job_id, stage, created_at);
 
 -- Stage filtering
-CREATE INDEX idx_applications_stage ON ats.applications (stage);
+CREATE INDEX idx_applications_stage ON applications (stage);
 
 -- Created date sorting
-CREATE INDEX idx_applications_created_at ON ats.applications (created_at DESC);
+CREATE INDEX idx_applications_created_at ON applications (created_at DESC);
 
 -- Foreign key indexes for JOINs
-CREATE INDEX idx_applications_candidate_id ON ats.applications (candidate_id);
-CREATE INDEX idx_applications_job_id ON ats.applications (job_id);
+CREATE INDEX idx_applications_candidate_id ON applications (candidate_id);
+CREATE INDEX idx_applications_job_id ON applications (job_id);
 
 -- Text search indexes (trigram for fuzzy matching)
-CREATE INDEX idx_candidates_name_trgm ON ats.candidates USING gin (full_name gin_trgm_ops);
-CREATE INDEX idx_candidates_email_trgm ON ats.candidates USING gin (email gin_trgm_ops);
-CREATE INDEX idx_jobs_title_trgm ON ats.jobs USING gin (title gin_trgm_ops);
+CREATE INDEX idx_candidates_name_trgm ON candidates USING gin (full_name gin_trgm_ops);
+CREATE INDEX idx_candidates_email_trgm ON candidates USING gin (email gin_trgm_ops);
+CREATE INDEX idx_jobs_title_trgm ON jobs USING gin (title gin_trgm_ops);
 ```
 
 ---
 
 ## 2. Service/Repository Layer
 
-### Repository Method
+### Repository Method (V2 Standard)
 
 ```typescript
-async findApplicationsPaginated(params: {
-    search?: string;
-    recruiter_id?: string;
-    job_id?: string;
-    candidate_id?: string;
-    stage?: string;
-    company_id?: string;
-    sort_by?: string;
-    sort_order?: 'asc' | 'desc';
-    page?: number;
-    limit?: number;
-}): Promise<{ data: Application[]; pagination: PaginationInfo }> {
+import { StandardListParams, StandardListResponse, buildPaginationResponse } from '@splits-network/shared-types';
+
+async findApplicationsPaginated(params: StandardListParams): Promise<StandardListResponse<Application>> {
     const page = params.page || 1;
     const limit = params.limit || 25;
     const offset = (page - 1) * limit;
@@ -184,16 +228,19 @@ async findApplicationsPaginated(params: {
         ? params.search.trim().split(/\s+/).filter(term => term.length > 0)
         : null;
 
+    // Extract filters for type safety
+    const filters = params.filters || {};
+    
     // Call PostgreSQL function
     const { data, error } = await this.supabase
-        .schema('ats')
+        
         .rpc('search_applications_paginated', {
             search_terms: searchTerms,
-            filter_recruiter_id: params.recruiter_id || null,
-            filter_job_id: params.job_id || null,
-            filter_candidate_id: params.candidate_id || null,
-            filter_stage: params.stage || null,
-            filter_company_id: params.company_id || null,
+            filter_recruiter_id: filters.recruiter_id || null,
+            filter_job_id: filters.job_id || null,
+            filter_candidate_id: filters.candidate_id || null,
+            filter_stage: filters.stage || null,
+            filter_company_id: filters.company_id || null,
             sort_column: params.sort_by || 'created_at',
             sort_direction: params.sort_order || 'desc',
             result_limit: limit,
@@ -204,7 +251,6 @@ async findApplicationsPaginated(params: {
 
     // Extract total from first row (all rows have same total due to window function)
     const total = data && data.length > 0 ? data[0].total_count : 0;
-    const total_pages = Math.ceil(total / limit);
 
     // Map database results to domain objects
     const applications: Application[] = (data || []).map((row: any) => ({
@@ -239,12 +285,7 @@ async findApplicationsPaginated(params: {
 
     return {
         data: applications,
-        pagination: {
-            total,
-            page,
-            limit,
-            total_pages,
-        },
+        pagination: buildPaginationResponse(page, limit, total),
     };
 }
 ```
@@ -252,18 +293,9 @@ async findApplicationsPaginated(params: {
 ### Service Method
 
 ```typescript
-async getApplicationsPaginated(params: {
-    search?: string;
-    recruiter_id?: string;
-    job_id?: string;
-    candidate_id?: string;
-    stage?: string;
-    company_id?: string;
-    sort_by?: string;
-    sort_order?: 'asc' | 'desc';
-    page?: number;
-    limit?: number;
-}): Promise<{ data: Application[]; pagination: PaginationInfo }> {
+import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
+
+async getApplicationsPaginated(params: StandardListParams): Promise<StandardListResponse<Application>> {
     return await this.repository.findApplicationsPaginated(params);
 }
 ```
@@ -271,35 +303,36 @@ async getApplicationsPaginated(params: {
 ### Route Handler
 
 ```typescript
+import { StandardListParams, parseFilters } from '@splits-network/shared-types';
+
 app.get(
-    '/applications/paginated',
+    '/v2/applications',
     async (request: FastifyRequest<{ 
         Querystring: { 
             search?: string;
-            recruiter_id?: string;
-            job_id?: string;
-            candidate_id?: string;
-            stage?: string;
-            company_id?: string;
+            filters?: string; // JSON string of filters
+            include?: string;
             sort_by?: string;
             sort_order?: 'asc' | 'desc';
             page?: string;
             limit?: string;
         } 
     }>, reply: FastifyReply) => {
-        const params = {
-            ...request.query,
+        // Parse query parameters to StandardListParams
+        const params: StandardListParams = {
+            search: request.query.search,
+            filters: parseFilters(request.query.filters),
+            include: request.query.include,
+            sort_by: request.query.sort_by,
+            sort_order: request.query.sort_order,
             page: request.query.page ? parseInt(request.query.page) : undefined,
             limit: request.query.limit ? parseInt(request.query.limit) : undefined,
         };
 
         const result = await service.getApplicationsPaginated(params);
         
-        // Standard response format
-        return reply.send({ 
-            data: result.data,
-            pagination: result.pagination,
-        });
+        // Standard V2 response format - already matches StandardListResponse<T>
+        return reply.send(result);
     }
 );
 ```
@@ -374,13 +407,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-
-interface PaginationInfo {
-    total: number;
-    page: number;
-    limit: number;
-    total_pages: number;
-}
+import type { StandardListResponse, PaginationResponse } from '@splits-network/shared-types';
 
 export default function ApplicationsListClient() {
     const { getToken } = useAuth();
@@ -389,7 +416,7 @@ export default function ApplicationsListClient() {
     
     // Initialize state from URL params
     const [applications, setApplications] = useState<Application[]>([]);
-    const [pagination, setPagination] = useState<PaginationInfo>({
+    const [pagination, setPagination] = useState<PaginationResponse>({
         total: 0,
         page: parseInt(searchParams.get('page') || '1'),
         limit: 25,
@@ -446,7 +473,13 @@ export default function ApplicationsListClient() {
             });
 
             if (searchQuery) params.append('search', searchQuery);
-            if (stageFilter) params.append('stage', stageFilter);
+            
+            // Use filters parameter for complex filtering
+            const filters: Record<string, any> = {};
+            if (stageFilter) filters.stage = stageFilter;
+            if (Object.keys(filters).length > 0) {
+                params.append('filters', JSON.stringify(filters));
+            }
 
             // Call API with all params
             const response = await client.get(`/applications/paginated?${params.toString()}`);
@@ -644,29 +677,29 @@ When query performance degrades (>200-300ms consistently):
 Add snapshot columns to avoid JOINs:
 
 ```sql
-ALTER TABLE ats.applications 
+ALTER TABLE applications 
 ADD COLUMN candidate_name_snapshot TEXT,
 ADD COLUMN job_title_snapshot TEXT,
 ADD COLUMN company_name_snapshot TEXT;
 
 -- Update on INSERT/UPDATE via triggers
 CREATE TRIGGER trg_application_snapshots
-BEFORE INSERT OR UPDATE ON ats.applications
+BEFORE INSERT OR UPDATE ON applications
 FOR EACH ROW EXECUTE FUNCTION update_application_snapshots();
 ```
 
 ### Option B: Materialized View
 
 ```sql
-CREATE MATERIALIZED VIEW ats.applications_enriched AS
+CREATE MATERIALIZED VIEW applications_enriched AS
 SELECT a.*, c.full_name, j.title, comp.name as company_name
-FROM ats.applications a
-LEFT JOIN ats.candidates c ON a.candidate_id = c.id
-LEFT JOIN ats.jobs j ON a.job_id = j.id  
-LEFT JOIN ats.companies comp ON j.company_id = comp.id;
+FROM applications a
+LEFT JOIN candidates c ON a.candidate_id = c.id
+LEFT JOIN jobs j ON a.job_id = j.id  
+LEFT JOIN companies comp ON j.company_id = comp.id;
 
 -- Refresh every 5 minutes (concurrently to avoid locks)
-REFRESH MATERIALIZED VIEW CONCURRENTLY ats.applications_enriched;
+REFRESH MATERIALIZED VIEW CONCURRENTLY applications_enriched;
 ```
 
 ### Option C: Search Service

@@ -11,7 +11,9 @@ export class NotificationTemplateRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     private mapRow(row: any): EmailTemplate {
@@ -37,7 +39,7 @@ export class NotificationTemplateRepository {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            .schema('notifications')
+            
             .from('email_templates')
             .select('*', { count: 'exact' });
 
@@ -67,7 +69,7 @@ export class NotificationTemplateRepository {
 
     async findTemplate(id: string): Promise<EmailTemplate | null> {
         const { data, error } = await this.supabase
-            .schema('notifications')
+            
             .from('email_templates')
             .select('*')
             .eq('id', id)
@@ -85,7 +87,7 @@ export class NotificationTemplateRepository {
 
     async createTemplate(input: TemplateCreateInput): Promise<EmailTemplate> {
         const { data, error } = await this.supabase
-            .schema('notifications')
+            
             .from('email_templates')
             .insert({
                 name: input.name,
@@ -127,7 +129,7 @@ export class NotificationTemplateRepository {
         }
 
         const { data, error } = await this.supabase
-            .schema('notifications')
+            
             .from('email_templates')
             .update(payload)
             .eq('id', id)
@@ -143,7 +145,7 @@ export class NotificationTemplateRepository {
 
     async archiveTemplate(id: string): Promise<void> {
         const { error } = await this.supabase
-            .schema('notifications')
+            
             .from('email_templates')
             .update({
                 status: 'archived',

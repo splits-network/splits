@@ -9,6 +9,7 @@ import { UserUpdate } from './types';
 import { UserRepository } from './repository';
 import { v4 as uuidv4 } from 'uuid';
 import type { AccessContext } from '../shared/access';
+import { StandardListParams } from '@splits-network/shared-types';
 
 export class UserServiceV2 {
     constructor(
@@ -17,15 +18,6 @@ export class UserServiceV2 {
         private logger: Logger,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>
     ) {}
-
-    private async requirePlatformAdmin(clerkUserId: string): Promise<AccessContext> {
-        const access = await this.resolveAccessContext(clerkUserId);
-        if (!access.isPlatformAdmin) {
-            this.logger.warn({ clerkUserId }, 'UserService - unauthorized access attempt');
-            throw new Error('Platform admin permissions required');
-        }
-        return access;
-    }
 
     /**
      * Sync Clerk user data with internal database
@@ -107,41 +99,20 @@ export class UserServiceV2 {
     /**
      * Find all users with pagination and filters
      */
-    async findUsers(clerkUserId: string, filters: any) {
-        const access = await this.resolveAccessContext(clerkUserId);
-        this.logger.info({ filters }, 'UserService.findUsers');
+    async findUsers(clerkUserId: string, params: StandardListParams = {}) {
 
-        if (!access.isPlatformAdmin) {
-            if (!access.identityUserId) {
-                this.logger.warn({ clerkUserId }, 'UserService.findUsers - no identity user in context');
-                throw new Error('User not found');
-            }
+        const result = await this.repository.findUsers(clerkUserId, params);
 
-            const result = await this.repository.findUsers(filters, {
-                accessibleUserIds: [access.identityUserId],
-            });
-
-            return {
-                data: result.data.map(user => ({
-                    ...user,
-                    roles: access.roles,
-                    organization_ids: access.organizationIds,
-                    candidate_id: access.candidateId,
-                    recruiter_id: access.recruiterId,
-                    is_platform_admin: access.isPlatformAdmin,
-                })),
-                total: result.total,
-            };
-        }
-
-        return this.repository.findUsers(filters);
+        return {
+            data: result.data,
+            pagination: result.pagination,
+        };
     }
 
     /**
      * Find user by ID
      */
     async findUserById(clerkUserId: string, id: string) {
-        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id }, 'UserService.findUserById');
         const user = await this.repository.findUserById(id);
         if (!user) {
@@ -154,7 +125,6 @@ export class UserServiceV2 {
      * Create a new user
      */
     async createUser(clerkUserId: string, userData: any) {
-        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ email: userData.email }, 'UserService.createUser');
         
         if (!userData.email) {
@@ -205,12 +175,9 @@ export class UserServiceV2 {
         }
 
         // Check if user already exists
-        const result = await this.repository.findUsers(
-            { clerk_user_id: clerkUserId, page: 1, limit: 1 },
-            {}
-        );
+        const existingUser = await this.repository.findUserByClerkId(clerkUserId);
         
-        if (result.data && result.data.length > 0) {
+        if (existingUser) {
             throw new Error('User already registered');
         }
 
@@ -242,7 +209,6 @@ export class UserServiceV2 {
      * Update user
      */
     async updateUser(clerkUserId: string, id: string, updates: UserUpdate) {
-        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id, updates }, 'UserService.updateUser');
 
         const user = await this.findUserById(clerkUserId, id);
@@ -267,7 +233,6 @@ export class UserServiceV2 {
      * Delete user (soft delete)
      */
     async deleteUser(clerkUserId: string, id: string) {
-        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id }, 'UserService.deleteUser');
 
         await this.findUserById(clerkUserId, id);

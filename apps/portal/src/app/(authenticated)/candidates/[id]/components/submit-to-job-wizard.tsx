@@ -130,7 +130,7 @@ export default function SubmitToJobWizard({
 
     // Load documents when moving to Step 2
     useEffect(() => {
-        if (currentStep !== 2 || documents.length > 0) return;
+        if (currentStep !== 2 || length > 0) return;
 
         async function loadDocuments() {
             try {
@@ -153,7 +153,7 @@ export default function SubmitToJobWizard({
         }
 
         loadDocuments();
-    }, [currentStep, candidateId, getToken, documents.length]);
+    }, [currentStep, candidateId, getToken, length]);
 
     const toggleDocument = (docId: string) => {
         const newSet = new Set(selectedDocIds);
@@ -446,7 +446,7 @@ export default function SubmitToJobWizard({
                                     <div className="flex justify-center py-8">
                                         <span className="loading loading-spinner"></span>
                                     </div>
-                                ) : documents.length === 0 ? (
+                                ) : length === 0 ? (
                                     <div className="alert">
                                         <i className="fa-solid fa-info-circle"></i>
                                         <span>No documents available for this candidate.</span>

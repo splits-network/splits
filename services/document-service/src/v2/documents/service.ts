@@ -156,7 +156,7 @@ export class DocumentServiceV2 {
         const updated = await this.repository.updateDocument(id, clerkUserId, updates);
 
         if (this.eventPublisher) {
-            await this.eventPublisher.publish('documents.updated', {
+            await this.eventPublisher.publish('updated', {
                 document_id: id,
                 updates,
             });
@@ -176,7 +176,7 @@ export class DocumentServiceV2 {
         await this.repository.softDeleteDocument(id, clerkUserId);
 
         if (this.eventPublisher) {
-            await this.eventPublisher.publish('documents.deleted', {
+            await this.eventPublisher.publish('deleted', {
                 document_id: id,
                 entity_type: existing.entity_type,
                 entity_id: existing.entity_id,

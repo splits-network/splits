@@ -7,7 +7,7 @@ The Notification Service handles all notification delivery for the Splits Networ
 ## Architecture Overview
 
 ### 🎯 **Core Principle: Event-Driven Only**
-All notification creation happens via RabbitMQ events. **No HTTP endpoints for creating notifications.**
+All notification creation happens via RabbitMQ events. **No HTTP endpoints for creating **
 
 ```
 Service Event → RabbitMQ → Notification Service → Email/In-App Created
@@ -138,7 +138,7 @@ See [TEMPLATES.md](./TEMPLATES.md) for complete template documentation.
 Planned architecture for granular user control:
 
 ```sql
--- notifications.user_notification_preferences
+-- user_notification_preferences
 user_id UUID,
 notification_type VARCHAR, -- 'application_created', 'placement_completed'
 email_enabled BOOLEAN DEFAULT true,
@@ -209,7 +209,7 @@ SELECT
   resend_message_id,
   error_message,
   created_at
-FROM notifications.notification_logs
+FROM notification_logs
 ORDER BY created_at DESC
 LIMIT 10;
 ```
@@ -332,7 +332,7 @@ Body:
 4. **Check Notification Logs**
    ```sql
    SELECT status, error_message 
-   FROM notifications.notification_logs 
+   FROM notification_logs 
    WHERE status = 'failed' 
    ORDER BY created_at DESC;
    ```
@@ -346,7 +346,7 @@ Body:
 **Solution**: Verify Resend API key and that sender email is verified
 
 **Issue**: `User not found`  
-**Solution**: Ensure recruiter has a valid user_id linking to identity.users
+**Solution**: Ensure recruiter has a valid user_id linking to users
 
 ## 🚀 Next Steps
 

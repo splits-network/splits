@@ -130,7 +130,7 @@ export default function HelpPage() {
                 },
                 {
                     question: 'How do I manage email notifications?',
-                    answer: 'In your Account Settings, go to Notifications. You can control which emails you receive, including job recommendations, application updates, recruiter messages, and promotional emails.'
+                    answer: 'In your Account Settings, go to  You can control which emails you receive, including job recommendations, application updates, recruiter messages, and promotional emails.'
                 },
                 {
                     question: 'Can I pause my job search temporarily?',
@@ -168,14 +168,14 @@ export default function HelpPage() {
             faqs: [
                 {
                     question: 'I\'m having trouble logging in. What should I do?',
-                    answer: 'First, try resetting your password using the "Forgot Password" link on the login page. If that doesn\'t work, clear your browser cache and cookies, or try a different browser. Still having issues? Contact our support team at help@applicant.network.'
+                    answer: 'First, try resetting your password using the "Forgot Password" link on the login page. If that doesn\'t work, clear your browser cache and cookies, or try a different browser. Still having issues? Contact our support team at help@applicant.'
                 },
                 {
                     question: 'My resume upload isn\'t working. Help!',
                     answer: 'Ensure your resume is in PDF, DOC, or DOCX format and under 5MB. Try using a different browser or device. If the problem persists, email your resume to help@applicant.network with your account email, and we\'ll upload it for you.'
                 },
                 {
-                    question: 'I\'m not receiving email notifications.',
+                    question: 'I\'m not receiving email ',
                     answer: 'Check your spam/junk folder first. Add notifications@applicant.network to your contacts. Verify your notification settings in Account Settings. If you still don\'t receive emails, contact support.'
                 },
             ]
@@ -201,7 +201,7 @@ export default function HelpPage() {
                     How Can We <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-secondary">Help?</span>
                 </h1>
                 <p className="text-xl text-base-content/80 max-w-2xl mx-auto mb-8">
-                    Find answers to common questions about using Applicant Network.
+                    Find answers to common questions about using Applicant 
                 </p>
 
                 {/* Search Bar */}

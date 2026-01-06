@@ -8,30 +8,30 @@ BEGIN;
 -- 1. Make recruiter_id nullable in applications table
 -- =============================================================================
 
-ALTER TABLE ats.applications 
+ALTER TABLE applications 
     ALTER COLUMN recruiter_id DROP NOT NULL;
 
-COMMENT ON COLUMN ats.applications.recruiter_id IS 'Recruiter who submitted the application (NULL for direct candidate applications)';
+COMMENT ON COLUMN applications.recruiter_id IS 'Recruiter who submitted the application (NULL for direct candidate applications)';
 
 -- =============================================================================
 -- 2. Add application_source column to track origin
 -- =============================================================================
 
-ALTER TABLE ats.applications 
+ALTER TABLE applications 
     ADD COLUMN IF NOT EXISTS application_source VARCHAR(50) DEFAULT 'direct' 
     CHECK (application_source IN ('direct', 'recruiter'));
 
-COMMENT ON COLUMN ats.applications.application_source IS 'Source of application: direct (candidate self-service) or recruiter (submitted by recruiter)';
+COMMENT ON COLUMN applications.application_source IS 'Source of application: direct (candidate self-service) or recruiter (submitted by recruiter)';
 
 -- Update existing applications to have 'recruiter' source (they all have recruiters)
-UPDATE ats.applications SET application_source = 'recruiter' WHERE recruiter_id IS NOT NULL;
+UPDATE applications SET application_source = 'recruiter' WHERE recruiter_id IS NOT NULL;
 
 -- =============================================================================
 -- 3. Add index for direct applications
 -- =============================================================================
 
 CREATE INDEX IF NOT EXISTS idx_applications_direct 
-    ON ats.applications(candidate_id, stage) 
+    ON applications(candidate_id, stage) 
     WHERE recruiter_id IS NULL;
 
 COMMIT;

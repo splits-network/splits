@@ -103,7 +103,7 @@ Based on analysis of `services/api-gateway/src/routes.ts`, the following route m
 - ⏳ `network/public-routes.ts` - Public network data (consolidate into main routes.ts)
 - ⏳ `marketplace/routes.ts` - Public marketplace browsing (consolidate into main routes.ts)
 
-**Note**: Public routes don't need role-based scoping or authentication middleware, but they MUST follow the standardized route pattern and be consolidated into the main `routes.ts` file per service for consistency. Public endpoints should be clearly marked and use consistent response formats.
+**Note**: Public routes don't need role-based scoping or authentication middleware, but they MUST follow the standardized route pattern and be consolidated into the main `routes.ts` file per service for consistency. Public endpoints should be clearly marked and use consistent response form
 
 ---
 
@@ -294,7 +294,7 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
    -- Uses JOINs to resolve user role from database tables
    -- 10-50ms vs 200-500ms with service calls!
    
-   CREATE OR REPLACE FUNCTION ats.get_proposals_for_user(
+   CREATE OR REPLACE FUNCTION get_proposals_for_user(
      p_clerk_user_id TEXT,
      p_organization_id UUID DEFAULT NULL,
      p_limit INT DEFAULT 25,
@@ -349,18 +349,18 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
        c.name as company_name,
        cand.full_name as candidate_name,
        u_rec.name as recruiter_name
-     FROM network.candidate_role_assignments p
-     JOIN ats.jobs j ON j.id = p.job_id
-     JOIN ats.companies c ON c.id = j.company_id
-     JOIN ats.candidates cand ON cand.id = p.candidate_id
-     JOIN network.recruiters rec ON rec.id = p.recruiter_id
-     JOIN identity.users u_rec ON u_rec.id = rec.user_id
+     FROM candidate_role_assignments p
+     JOIN jobs j ON j.id = p.job_id
+     JOIN companies c ON c.id = j.company_id
+     JOIN candidates cand ON cand.id = p.candidate_id
+     JOIN recruiters rec ON rec.id = p.recruiter_id
+     JOIN users u_rec ON u_rec.id = rec.user_id
      
      -- JOINs to resolve requesting user's role (NO HTTP calls!)
-     LEFT JOIN identity.users u ON u.clerk_user_id = p_clerk_user_id
-     LEFT JOIN network.recruiters req_r ON req_r.user_id = u.id AND req_r.status = 'active'
-     LEFT JOIN identity.memberships m ON m.user_id = u.id
-     LEFT JOIN ats.companies user_company ON user_company.identity_organization_id = m.organization_id
+     LEFT JOIN users u ON u.clerk_user_id = p_clerk_user_id
+     LEFT JOIN recruiters req_r ON req_r.user_id = u.id AND req_r.status = 'active'
+     LEFT JOIN memberships m ON m.user_id = u.id
+     LEFT JOIN companies user_company ON user_company.identity_organization_id = m.organization_id
      
      WHERE 
        -- Recruiter: see proposals they're assigned to
@@ -402,11 +402,11 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
    $$;
    
    -- Ensure indexes exist for performance
-   CREATE INDEX IF NOT EXISTS idx_users_clerk_user_id ON identity.users(clerk_user_id);
-   CREATE INDEX IF NOT EXISTS idx_recruiters_user_id ON network.recruiters(user_id);
-   CREATE INDEX IF NOT EXISTS idx_memberships_user_id ON identity.memberships(user_id);
-   CREATE INDEX IF NOT EXISTS idx_proposals_recruiter_id ON network.candidate_role_assignments(recruiter_id);
-   CREATE INDEX IF NOT EXISTS idx_jobs_company_id ON ats.jobs(company_id);
+   CREATE INDEX IF NOT EXISTS idx_users_clerk_user_id ON users(clerk_user_id);
+   CREATE INDEX IF NOT EXISTS idx_recruiters_user_id ON recruiters(user_id);
+   CREATE INDEX IF NOT EXISTS idx_memberships_user_id ON memberships(user_id);
+   CREATE INDEX IF NOT EXISTS idx_proposals_recruiter_id ON candidate_role_assignments(recruiter_id);
+   CREATE INDEX IF NOT EXISTS idx_jobs_company_id ON jobs(company_id);
    ```
 
 2. Update Repository to use function:
@@ -451,9 +451,9 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
 - [ ] Performance tested (query < 50ms)
 - [ ] All role cases handled in WHERE clause
 - [ ] Role determined by presence in database tables:
-  - `network.recruiters` → recruiter role
-  - `identity.memberships` → company_admin, hiring_manager, platform_admin
-  - `ats.candidates` → candidate role
+  - `recruiters` → recruiter role
+  - `memberships` → company_admin, hiring_manager, platform_admin
+  - `candidates` → candidate role
 
 ---
 
@@ -481,9 +481,9 @@ async findProposalsForUser(
         .from('applications')
         .select('*, candidate:candidates(*), job:jobs(*), company:companies(*), recruiter:recruiters(*)')
         .or(`
-            recruiter_id.in.(select id from network.recruiters where user_id=(select id from identity.users where clerk_user_id='${clerkUserId}')),
-            company_id.in.(select organization_id from identity.memberships where user_id=(select id from identity.users where clerk_user_id='${clerkUserId}')),
-            candidate_id.in.(select id from ats.candidates where user_id=(select id from identity.users where clerk_user_id='${clerkUserId}'))
+            recruiter_id.in.(select id from recruiters where user_id=(select id from users where clerk_user_id='${clerkUserId}')),
+            company_id.in.(select organization_id from memberships where user_id=(select id from users where clerk_user_id='${clerkUserId}')),
+            candidate_id.in.(select id from candidates where user_id=(select id from users where clerk_user_id='${clerkUserId}'))
         `);
     
     // Apply filters...
@@ -689,7 +689,7 @@ async findProposalsForUser(
      const headers = buildAuthHeaders(request);
      
      // Proxy to ATS service with all query params
-     const response = await services.ats.get('/proposals', {
+     const response = await services.get('/proposals', {
        headers,
        params: request.query,
      });
@@ -901,7 +901,7 @@ Follow same pattern as proposals:
      ),
    }, async (request, reply) => {
      const headers = buildAuthHeaders(request);
-     const response = await services.ats.get('/applications', {
+     const response = await services.get('/applications', {
        headers,
        params: request.query,
      });
@@ -915,7 +915,7 @@ Follow same pattern as proposals:
      ),
    }, async (request, reply) => {
      const headers = buildAuthHeaders(request);
-     const response = await services.ats.get(`/applications/${request.params.id}`, {
+     const response = await services.get(`/applications/${request.params.id}`, {
        headers,
      });
      return reply.send(response.data);

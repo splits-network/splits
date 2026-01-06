@@ -13,16 +13,16 @@ This document defines all database schema changes required to support the candid
 
 ## 1. New Tables
 
-### 1.1 `ats.job_pre_screen_answers`
+### 1.1 `job_pre_screen_answers`
 
 **Purpose:** Store candidate responses to job pre-screening questions.
 
 **Schema:**
 ```sql
-CREATE TABLE IF NOT EXISTS ats.job_pre_screen_answers (
+CREATE TABLE IF NOT EXISTS job_pre_screen_answers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    application_id UUID NOT NULL REFERENCES ats.applications(id) ON DELETE CASCADE,
-    question_id UUID NOT NULL REFERENCES ats.job_pre_screen_questions(id) ON DELETE CASCADE,
+    application_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
+    question_id UUID NOT NULL REFERENCES job_pre_screen_questions(id) ON DELETE CASCADE,
     
     -- Generic answer storage (aligns with question_type pattern)
     answer JSONB NOT NULL,               -- Stores answer based on question_type
@@ -35,12 +35,12 @@ CREATE TABLE IF NOT EXISTS ats.job_pre_screen_answers (
 );
 
 -- Indexes
-CREATE INDEX idx_pre_screen_answers_application ON ats.job_pre_screen_answers(application_id);
-CREATE INDEX idx_pre_screen_answers_question ON ats.job_pre_screen_answers(question_id);
+CREATE INDEX idx_pre_screen_answers_application ON job_pre_screen_answers(application_id);
+CREATE INDEX idx_pre_screen_answers_question ON job_pre_screen_answers(question_id);
 
 -- Comments
-COMMENT ON TABLE ats.job_pre_screen_answers IS 'Candidate responses to job pre-screening questions';
-COMMENT ON COLUMN ats.job_pre_screen_answers.answer IS 'JSONB answer matching question_type format from job_pre_screen_questions';
+COMMENT ON TABLE job_pre_screen_answers IS 'Candidate responses to job pre-screening questions';
+COMMENT ON COLUMN job_pre_screen_answers.answer IS 'JSONB answer matching question_type format from job_pre_screen_questions';
 ```
 
 **Answer Structure (aligns with `question_type`):**
@@ -155,7 +155,7 @@ WHERE entity_type = 'application'
 **Cleanup Strategy:**
 ```sql
 -- Delete stale drafts (older than 30 days)
-DELETE FROM ats.applications
+DELETE FROM applications
 WHERE stage = 'draft'
   AND created_at < NOW() - INTERVAL '30 days';
 ```
@@ -164,22 +164,22 @@ WHERE stage = 'draft'
 
 ## 2. Modifications to Existing Tables
 
-### 2.1 `ats.applications` - Add `'draft'` Stage
+### 2.1 `applications` - Add `'draft'` Stage
 
 ```sql
 -- Add 'draft' to existing stage values
 -- No schema change needed if stage is TEXT without constraint
 -- If stage has CHECK constraint, update it:
 
-ALTER TABLE ats.applications DROP CONSTRAINT IF EXISTS applications_stage_check;
-ALTER TABLE ats.applications ADD CONSTRAINT applications_stage_check
+ALTER TABLE applications DROP CONSTRAINT IF EXISTS applications_stage_check;
+ALTER TABLE applications ADD CONSTRAINT applications_stage_check
     CHECK (stage IN ('draft', 'screen', 'submitted', 'interview', 'offer', 'hired', 'rejected'));
 
 -- Add recruiter notes field if it doesn't exist
-ALTER TABLE ats.applications ADD COLUMN IF NOT EXISTS recruiter_notes TEXT;
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS recruiter_notes TEXT;
 
 -- Comments
-COMMENT ON COLUMN ats.applications.recruiter_notes IS 'Recruiter insights/pitch added during review';
+COMMENT ON COLUMN applications.recruiter_notes IS 'Recruiter insights/pitch added during review';
 ```
 
 **Updated Stage Flow:**
@@ -249,17 +249,17 @@ ORDER BY created_at ASC;
 
 ---
 
-### 2.3 `ats.applications` - Add Indexes
+### 2.3 `applications` - Add Indexes
 
 ```sql
 -- Add index for draft queries
 CREATE INDEX IF NOT EXISTS idx_applications_draft 
-    ON ats.applications(candidate_id, stage) 
+    ON applications(candidate_id, stage) 
     WHERE stage = 'draft';
 
 -- Add index for recruiter review queries
 CREATE INDEX IF NOT EXISTS idx_applications_recruiter_review 
-    ON ats.applications(recruiter_id, stage) 
+    ON applications(recruiter_id, stage) 
     WHERE stage = 'screen';
 ```
 
@@ -276,39 +276,39 @@ CREATE INDEX IF NOT EXISTS idx_applications_recruiter_review
 BEGIN;
 
 -- 1. Create job_pre_screen_answers table
-CREATE TABLE IF NOT EXISTS ats.job_pre_screen_answers (
+CREATE TABLE IF NOT EXISTS job_pre_screen_answers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    application_id UUID NOT NULL REFERENCES ats.applications(id) ON DELETE CASCADE,
-    question_id UUID NOT NULL REFERENCES ats.job_pre_screen_questions(id) ON DELETE CASCADE,
+    application_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
+    question_id UUID NOT NULL REFERENCES job_pre_screen_questions(id) ON DELETE CASCADE,
     answer JSONB NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE(application_id, question_id)
 );
 
-CREATE INDEX idx_pre_screen_answers_application ON ats.job_pre_screen_answers(application_id);
-CREATE INDEX idx_pre_screen_answers_question ON ats.job_pre_screen_answers(question_id);
+CREATE INDEX idx_pre_screen_answers_application ON job_pre_screen_answers(application_id);
+CREATE INDEX idx_pre_screen_answers_question ON job_pre_screen_answers(question_id);
 
-COMMENT ON TABLE ats.job_pre_screen_answers IS 'Candidate responses to job pre-screening questions';
-COMMENT ON COLUMN ats.job_pre_screen_answers.answer IS 'JSONB answer matching question_type format';
+COMMENT ON TABLE job_pre_screen_answers IS 'Candidate responses to job pre-screening questions';
+COMMENT ON COLUMN job_pre_screen_answers.answer IS 'JSONB answer matching question_type format';
 
 -- 2. Add 'draft' stage to applications
-ALTER TABLE ats.applications DROP CONSTRAINT IF EXISTS applications_stage_check;
-ALTER TABLE ats.applications ADD CONSTRAINT applications_stage_check
+ALTER TABLE applications DROP CONSTRAINT IF EXISTS applications_stage_check;
+ALTER TABLE applications ADD CONSTRAINT applications_stage_check
     CHECK (stage IN ('draft', 'screen', 'submitted', 'interview', 'offer', 'hired', 'rejected'));
 
 -- 3. Add recruiter_notes column if it doesn't exist
-ALTER TABLE ats.applications ADD COLUMN IF NOT EXISTS recruiter_notes TEXT;
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS recruiter_notes TEXT;
 
-COMMENT ON COLUMN ats.applications.recruiter_notes IS 'Recruiter insights/pitch added during review';
+COMMENT ON COLUMN applications.recruiter_notes IS 'Recruiter insights/pitch added during review';
 
 -- 4. Add indexes
 CREATE INDEX IF NOT EXISTS idx_applications_draft 
-    ON ats.applications(candidate_id, stage) 
+    ON applications(candidate_id, stage) 
     WHERE stage = 'draft';
 
 CREATE INDEX IF NOT EXISTS idx_applications_recruiter_review 
-    ON ats.applications(recruiter_id, stage) 
+    ON applications(recruiter_id, stage) 
     WHERE stage = 'screen';
 
 COMMIT;
@@ -326,19 +326,19 @@ COMMIT;
 BEGIN;
 
 -- 1. Drop indexes
-DROP INDEX IF EXISTS ats.idx_applications_recruiter_review;
-DROP INDEX IF EXISTS ats.idx_applications_draft;
+DROP INDEX IF EXISTS idx_applications_recruiter_review;
+DROP INDEX IF EXISTS idx_applications_draft;
 
 -- 2. Remove recruiter_notes column
-ALTER TABLE ats.applications DROP COLUMN IF EXISTS recruiter_notes;
+ALTER TABLE applications DROP COLUMN IF EXISTS recruiter_notes;
 
 -- 3. Restore original stage constraint
-ALTER TABLE ats.applications DROP CONSTRAINT IF EXISTS applications_stage_check;
-ALTER TABLE ats.applications ADD CONSTRAINT applications_stage_check
+ALTER TABLE applications DROP CONSTRAINT IF EXISTS applications_stage_check;
+ALTER TABLE applications ADD CONSTRAINT applications_stage_check
     CHECK (stage IN ('screen', 'submitted', 'interview', 'offer', 'hired', 'rejected'));
 
 -- 4. Drop job_pre_screen_answers table
-DROP TABLE IF EXISTS ats.job_pre_screen_answers CASCADE;
+DROP TABLE IF EXISTS job_pre_screen_answers CASCADE;
 
 COMMIT;
 ```
@@ -385,9 +385,9 @@ SELECT
     a.stage,
     c.email as candidate_email,
     j.title as job_title
-FROM ats.applications a
-JOIN ats.candidates c ON c.id = a.candidate_id
-JOIN ats.jobs j ON j.id = a.job_id
+FROM applications a
+JOIN candidates c ON c.id = a.candidate_id
+JOIN jobs j ON j.id = a.job_id
 WHERE a.stage = 'draft'
 ORDER BY a.updated_at DESC
 LIMIT 10;
@@ -404,7 +404,7 @@ SELECT
 FROM documents d
 WHERE d.entity_type = 'application'
   AND d.entity_id IN (
-    SELECT id FROM ats.applications WHERE stage = 'draft' LIMIT 5
+    SELECT id FROM applications WHERE stage = 'draft' LIMIT 5
   )
 ORDER BY d.entity_id, d.is_primary DESC, d.uploaded_at DESC;
 
@@ -416,8 +416,8 @@ SELECT
     q.question_type,
     a.answer,
     a.created_at
-FROM ats.job_pre_screen_answers a
-JOIN ats.job_pre_screen_questions q ON q.id = a.question_id
+FROM job_pre_screen_answers a
+JOIN job_pre_screen_questions q ON q.id = a.question_id
 ORDER BY a.created_at DESC
 LIMIT 10;
 
@@ -429,20 +429,20 @@ SELECT
     al.performed_by_user_id,
     al.metadata,
     al.created_at
-FROM ats.application_audit_log al
+FROM application_audit_log al
 WHERE al.action IN ('draft_saved', 'submitted_to_recruiter', 'recruiter_reviewed', 'submitted_to_company')
 ORDER BY al.created_at DESC
 LIMIT 20;
 
 -- Check for orphaned pre-screen answers (questions deleted)
 SELECT psa.* 
-FROM ats.job_pre_screen_answers psa
-LEFT JOIN ats.job_pre_screen_questions q ON psa.question_id = q.id
+FROM job_pre_screen_answers psa
+LEFT JOIN job_pre_screen_questions q ON psa.question_id = q.id
 WHERE q.id IS NULL;
 
 -- Check for applications without documents (submitted applications only)
 SELECT a.id, a.job_id, a.candidate_id
-FROM ats.applications a
+FROM applications a
 WHERE a.stage IN ('submitted', 'interview', 'offer', 'hired')
   AND NOT EXISTS (
     SELECT 1 FROM documents d 
@@ -452,7 +452,7 @@ WHERE a.stage IN ('submitted', 'interview', 'offer', 'hired')
 
 -- Check for applications without primary resume (submitted applications only)
 SELECT a.id, a.job_id, a.candidate_id
-FROM ats.applications a
+FROM applications a
 WHERE a.stage IN ('submitted', 'interview', 'offer', 'hired')
   AND NOT EXISTS (
     SELECT 1 FROM documents d 
@@ -464,7 +464,7 @@ WHERE a.stage IN ('submitted', 'interview', 'offer', 'hired')
 
 -- Check for stale drafts (older than 30 days)
 SELECT a.* 
-FROM ats.applications a
+FROM applications a
 WHERE a.stage = 'draft'
   AND a.updated_at < NOW() - INTERVAL '30 days';
 ```
@@ -500,7 +500,7 @@ Use the `applications` table with `stage = 'draft'`:
 
 ```sql
 -- Create draft application
-INSERT INTO ats.applications (
+INSERT INTO applications (
     candidate_id,
     job_id,
     stage,
@@ -516,7 +516,7 @@ INSERT INTO ats.applications (
 RETURNING *;
 
 -- Track draft saved event
-INSERT INTO ats.application_audit_log (
+INSERT INTO application_audit_log (
     application_id,
     action,
     performed_by_user_id,
@@ -570,7 +570,7 @@ Use `application_audit_log` for all temporal tracking:
 
 ```sql
 -- When candidate submits to recruiter
-INSERT INTO ats.application_audit_log (
+INSERT INTO application_audit_log (
     application_id,
     action,
     performed_by_user_id,
@@ -583,7 +583,7 @@ INSERT INTO ats.application_audit_log (
 );
 
 -- When recruiter reviews and approves
-INSERT INTO ats.application_audit_log (
+INSERT INTO application_audit_log (
     application_id,
     action,
     performed_by_user_id,
@@ -596,7 +596,7 @@ INSERT INTO ats.application_audit_log (
 );
 
 -- When recruiter submits to company
-INSERT INTO ats.application_audit_log (
+INSERT INTO application_audit_log (
     application_id,
     action,
     performed_by_user_id,
@@ -614,7 +614,7 @@ SELECT
     performed_by_user_id,
     metadata,
     created_at
-FROM ats.application_audit_log
+FROM application_audit_log
 WHERE application_id = '...'
   AND action IN ('draft_saved', 'submitted_to_recruiter', 'recruiter_reviewed', 'submitted_to_company')
 ORDER BY created_at ASC;
@@ -625,23 +625,23 @@ Store answers in a format matching the question type:
 
 ```sql
 -- Text answer
-INSERT INTO ats.job_pre_screen_answers (application_id, question_id, answer)
+INSERT INTO job_pre_screen_answers (application_id, question_id, answer)
 VALUES ('...', '...', '{"text": "5 years of experience with React and Node.js"}'::jsonb);
 
 -- Boolean answer
-INSERT INTO ats.job_pre_screen_answers (application_id, question_id, answer)
+INSERT INTO job_pre_screen_answers (application_id, question_id, answer)
 VALUES ('...', '...', '{"boolean": true}'::jsonb);
 
 -- Single choice answer
-INSERT INTO ats.job_pre_screen_answers (application_id, question_id, answer)
+INSERT INTO job_pre_screen_answers (application_id, question_id, answer)
 VALUES ('...', '...', '{"choice": "Bachelor''s Degree"}'::jsonb);
 
 -- Multiple choice answer
-INSERT INTO ats.job_pre_screen_answers (application_id, question_id, answer)
+INSERT INTO job_pre_screen_answers (application_id, question_id, answer)
 VALUES ('...', '...', '{"choices": ["JavaScript", "TypeScript", "Python"]}'::jsonb);
 
 -- File upload answer
-INSERT INTO ats.job_pre_screen_answers (application_id, question_id, answer)
+INSERT INTO job_pre_screen_answers (application_id, question_id, answer)
 VALUES ('...', '...', '{"file_url": "https://...", "file_name": "portfolio.pdf"}'::jsonb);
 
 -- Query answers with question context
@@ -651,8 +651,8 @@ SELECT
     q.options,
     a.answer,
     a.created_at
-FROM ats.job_pre_screen_answers a
-JOIN ats.job_pre_screen_questions q ON q.id = a.question_id
+FROM job_pre_screen_answers a
+JOIN job_pre_screen_questions q ON q.id = a.question_id
 WHERE a.application_id = '...'
 ORDER BY q.order_index, q.created_at;
 ```

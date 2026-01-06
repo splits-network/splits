@@ -14,7 +14,7 @@ export class BillingRepository {
 
     constructor(supabaseUrl: string, supabaseKey: string) {
         this.supabase = createClient(supabaseUrl, supabaseKey, {
-            
+            db: { schema: 'public' }
         });
     }
 
@@ -22,7 +22,7 @@ export class BillingRepository {
     async healthCheck(): Promise<void> {
         // Simple query to verify database connectivity
         const { error } = await this.supabase
-            .schema('billing')
+            
             .from('plans')
             .select('id')
             .limit(1);
@@ -35,7 +35,7 @@ export class BillingRepository {
     // Plan methods
     async findPlanById(id: string): Promise<Plan | null> {
         const { data, error } = await this.supabase
-            .schema('billing').from('plans')
+            .from('plans')
             .select('*')
             .eq('id', id)
             .single();
@@ -49,7 +49,7 @@ export class BillingRepository {
 
     async findAllPlans(): Promise<Plan[]> {
         const { data, error } = await this.supabase
-            .schema('billing').from('plans')
+            .from('plans')
             .select('*')
             .order('price_monthly', { ascending: true });
 
@@ -59,7 +59,7 @@ export class BillingRepository {
 
     async createPlan(plan: Omit<Plan, 'id' | 'created_at' | 'updated_at'>): Promise<Plan> {
         const { data, error } = await this.supabase
-            .schema('billing').from('plans')
+            .from('plans')
             .insert(plan)
             .select()
             .single();
@@ -71,7 +71,7 @@ export class BillingRepository {
     // Subscription methods
     async findSubscriptionById(id: string): Promise<Subscription | null> {
         const { data, error } = await this.supabase
-            .schema('billing').from('subscriptions')
+            .from('subscriptions')
             .select('*')
             .eq('id', id)
             .single();
@@ -85,7 +85,7 @@ export class BillingRepository {
 
     async findSubscriptionByRecruiterId(recruiterId: string): Promise<Subscription | null> {
         const { data, error } = await this.supabase
-            .schema('billing').from('subscriptions')
+            .from('subscriptions')
             .select('*')
             .eq('recruiter_id', recruiterId)
             .order('created_at', { ascending: false })
@@ -101,7 +101,7 @@ export class BillingRepository {
 
     async findSubscriptionByStripeId(stripeSubscriptionId: string): Promise<Subscription | null> {
         const { data, error } = await this.supabase
-            .schema('billing').from('subscriptions')
+            .from('subscriptions')
             .select('*')
             .eq('stripe_subscription_id', stripeSubscriptionId)
             .single();
@@ -117,7 +117,7 @@ export class BillingRepository {
         subscription: Omit<Subscription, 'id' | 'created_at' | 'updated_at'>
     ): Promise<Subscription> {
         const { data, error } = await this.supabase
-            .schema('billing').from('subscriptions')
+            .from('subscriptions')
             .insert(subscription)
             .select()
             .single();
@@ -128,7 +128,7 @@ export class BillingRepository {
 
     async updateSubscription(id: string, updates: Partial<Subscription>): Promise<Subscription> {
         const { data, error } = await this.supabase
-            .schema('billing').from('subscriptions')
+            .from('subscriptions')
             .update(updates)
             .eq('id', id)
             .select()
@@ -144,7 +144,7 @@ export class BillingRepository {
 
     async findPayoutById(id: string): Promise<Payout | null> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('payouts')
             .select('*')
             .eq('id', id)
@@ -159,7 +159,7 @@ export class BillingRepository {
 
     async findPayoutsByPlacementId(placementId: string): Promise<Payout[]> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('payouts')
             .select('*')
             .eq('placement_id', placementId)
@@ -171,7 +171,7 @@ export class BillingRepository {
 
     async findPayoutsByRecruiterId(recruiterId: string): Promise<Payout[]> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('payouts')
             .select('*')
             .eq('recruiter_id', recruiterId)
@@ -183,7 +183,7 @@ export class BillingRepository {
 
     async createPayout(payout: Omit<Payout, 'id' | 'created_at' | 'updated_at'>): Promise<Payout> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('payouts')
             .insert(payout)
             .select()
@@ -195,7 +195,7 @@ export class BillingRepository {
 
     async updatePayout(id: string, updates: Partial<Payout>): Promise<Payout> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('payouts')
             .update({ ...updates, updated_at: new Date() })
             .eq('id', id)
@@ -221,7 +221,7 @@ export class BillingRepository {
         }
 
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('payouts')
             .update(updates)
             .eq('id', id)
@@ -235,7 +235,7 @@ export class BillingRepository {
     // Payout schedules
     async findScheduledPayoutsDue(): Promise<PayoutSchedule[]> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('payout_schedules')
             .select('*')
             .eq('status', 'scheduled')
@@ -250,7 +250,7 @@ export class BillingRepository {
         schedule: Omit<PayoutSchedule, 'id' | 'created_at' | 'updated_at'>
     ): Promise<PayoutSchedule> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('payout_schedules')
             .insert(schedule)
             .select()
@@ -265,7 +265,7 @@ export class BillingRepository {
         updates: Partial<PayoutSchedule>
     ): Promise<PayoutSchedule> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('payout_schedules')
             .update({ ...updates, updated_at: new Date() })
             .eq('id', id)
@@ -281,7 +281,7 @@ export class BillingRepository {
         split: Omit<PayoutSplit, 'id' | 'created_at' | 'updated_at'>
     ): Promise<PayoutSplit> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('payout_splits')
             .insert(split)
             .select()
@@ -293,7 +293,7 @@ export class BillingRepository {
 
     async findPayoutSplitsByPayoutId(payoutId: string): Promise<PayoutSplit[]> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('payout_splits')
             .select('*')
             .eq('payout_id', payoutId);
@@ -307,7 +307,7 @@ export class BillingRepository {
         hold: Omit<EscrowHold, 'id' | 'created_at' | 'updated_at'>
     ): Promise<EscrowHold> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('escrow_holds')
             .insert(hold)
             .select()
@@ -319,7 +319,7 @@ export class BillingRepository {
 
     async updateEscrowHold(id: string, updates: Partial<EscrowHold>): Promise<EscrowHold> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('escrow_holds')
             .update({ ...updates, updated_at: new Date() })
             .eq('id', id)
@@ -332,7 +332,7 @@ export class BillingRepository {
 
     async findActiveEscrowHoldsDue(): Promise<EscrowHold[]> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('escrow_holds')
             .select('*')
             .eq('status', 'active')
@@ -348,7 +348,7 @@ export class BillingRepository {
         log: Omit<PayoutAuditLog, 'id' | 'created_at'>
     ): Promise<PayoutAuditLog> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('payout_audit_log')
             .insert(log)
             .select()
@@ -360,7 +360,7 @@ export class BillingRepository {
 
     async findPayoutAuditLog(payoutId: string): Promise<PayoutAuditLog[]> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('payout_audit_log')
             .select('*')
             .eq('payout_id', payoutId)

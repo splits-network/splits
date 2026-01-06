@@ -2,10 +2,10 @@
 -- Creates tables for automated payouts after guarantee completion
 
 -- Payout records (immutable after creation)
-CREATE TABLE IF NOT EXISTS billing.payouts (
+CREATE TABLE IF NOT EXISTS payouts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    placement_id UUID NOT NULL REFERENCES ats.placements(id),
-    recruiter_id UUID NOT NULL REFERENCES network.recruiters(id),
+    placement_id UUID NOT NULL REFERENCES placements(id),
+    recruiter_id UUID NOT NULL REFERENCES recruiters(id),
     
     -- Amounts
     placement_fee DECIMAL(12, 2) NOT NULL, -- Total fee for this placement
@@ -39,9 +39,9 @@ CREATE TABLE IF NOT EXISTS billing.payouts (
 );
 
 -- Payout schedule (when payouts should be triggered)
-CREATE TABLE IF NOT EXISTS billing.payout_schedules (
+CREATE TABLE IF NOT EXISTS payout_schedules (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    placement_id UUID NOT NULL REFERENCES ats.placements(id),
+    placement_id UUID NOT NULL REFERENCES placements(id),
     
     scheduled_date DATE NOT NULL, -- When payout should be processed
     trigger_event TEXT NOT NULL, -- guarantee_complete, replacement_cleared, manual
@@ -58,10 +58,10 @@ CREATE TABLE IF NOT EXISTS billing.payout_schedules (
 );
 
 -- Payout splits (for multi-recruiter placements in Phase 2+)
-CREATE TABLE IF NOT EXISTS billing.payout_splits (
+CREATE TABLE IF NOT EXISTS payout_splits (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    payout_id UUID NOT NULL REFERENCES billing.payouts(id),
-    collaborator_recruiter_id UUID NOT NULL REFERENCES network.recruiters(id),
+    payout_id UUID NOT NULL REFERENCES payouts(id),
+    collaborator_recruiter_id UUID NOT NULL REFERENCES recruiters(id),
     
     -- Split calculation
     split_percentage DECIMAL(5, 2) NOT NULL, -- e.g., 50.00 for 50/50 split
@@ -80,10 +80,10 @@ CREATE TABLE IF NOT EXISTS billing.payout_splits (
 );
 
 -- Escrow holds (amounts held pending guarantee completion)
-CREATE TABLE IF NOT EXISTS billing.escrow_holds (
+CREATE TABLE IF NOT EXISTS escrow_holds (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    placement_id UUID NOT NULL REFERENCES ats.placements(id),
-    payout_id UUID REFERENCES billing.payouts(id), -- Linked when payout is created
+    placement_id UUID NOT NULL REFERENCES placements(id),
+    payout_id UUID REFERENCES payouts(id), -- Linked when payout is created
     
     hold_amount DECIMAL(12, 2) NOT NULL,
     hold_reason TEXT NOT NULL, -- guarantee_period, dispute_pending, compliance_review
@@ -103,9 +103,9 @@ CREATE TABLE IF NOT EXISTS billing.escrow_holds (
 );
 
 -- Payout audit log (all state changes)
-CREATE TABLE IF NOT EXISTS billing.payout_audit_log (
+CREATE TABLE IF NOT EXISTS payout_audit_log (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    payout_id UUID NOT NULL REFERENCES billing.payouts(id),
+    payout_id UUID NOT NULL REFERENCES payouts(id),
     
     event_type TEXT NOT NULL, -- created, status_changed, amount_adjusted, stripe_transfer_created, etc.
     old_status TEXT,
@@ -121,20 +121,20 @@ CREATE TABLE IF NOT EXISTS billing.payout_audit_log (
 );
 
 -- Indexes for performance
-CREATE INDEX IF NOT EXISTS idx_payouts_placement ON billing.payouts(placement_id);
-CREATE INDEX IF NOT EXISTS idx_payouts_recruiter ON billing.payouts(recruiter_id);
-CREATE INDEX IF NOT EXISTS idx_payouts_status ON billing.payouts(status);
-CREATE INDEX IF NOT EXISTS idx_payouts_created_at ON billing.payouts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_payouts_placement ON payouts(placement_id);
+CREATE INDEX IF NOT EXISTS idx_payouts_recruiter ON payouts(recruiter_id);
+CREATE INDEX IF NOT EXISTS idx_payouts_status ON payouts(status);
+CREATE INDEX IF NOT EXISTS idx_payouts_created_at ON payouts(created_at DESC);
 
-CREATE INDEX IF NOT EXISTS idx_payout_schedules_date ON billing.payout_schedules(scheduled_date) WHERE status = 'scheduled';
-CREATE INDEX IF NOT EXISTS idx_payout_schedules_placement ON billing.payout_schedules(placement_id);
+CREATE INDEX IF NOT EXISTS idx_payout_schedules_date ON payout_schedules(scheduled_date) WHERE status = 'scheduled';
+CREATE INDEX IF NOT EXISTS idx_payout_schedules_placement ON payout_schedules(placement_id);
 
-CREATE INDEX IF NOT EXISTS idx_payout_splits_payout ON billing.payout_splits(payout_id);
-CREATE INDEX IF NOT EXISTS idx_payout_splits_recruiter ON billing.payout_splits(collaborator_recruiter_id);
+CREATE INDEX IF NOT EXISTS idx_payout_splits_payout ON payout_splits(payout_id);
+CREATE INDEX IF NOT EXISTS idx_payout_splits_recruiter ON payout_splits(collaborator_recruiter_id);
 
-CREATE INDEX IF NOT EXISTS idx_escrow_holds_placement ON billing.escrow_holds(placement_id);
-CREATE INDEX IF NOT EXISTS idx_escrow_holds_status ON billing.escrow_holds(status) WHERE status = 'active';
-CREATE INDEX IF NOT EXISTS idx_escrow_holds_release_date ON billing.escrow_holds(release_scheduled_date) WHERE status = 'active';
+CREATE INDEX IF NOT EXISTS idx_escrow_holds_placement ON escrow_holds(placement_id);
+CREATE INDEX IF NOT EXISTS idx_escrow_holds_status ON escrow_holds(status) WHERE status = 'active';
+CREATE INDEX IF NOT EXISTS idx_escrow_holds_release_date ON escrow_holds(release_scheduled_date) WHERE status = 'active';
 
-CREATE INDEX IF NOT EXISTS idx_payout_audit_payout ON billing.payout_audit_log(payout_id);
-CREATE INDEX IF NOT EXISTS idx_payout_audit_created_at ON billing.payout_audit_log(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_payout_audit_payout ON payout_audit_log(payout_id);
+CREATE INDEX IF NOT EXISTS idx_payout_audit_created_at ON payout_audit_log(created_at DESC);

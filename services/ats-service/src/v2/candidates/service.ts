@@ -23,7 +23,7 @@ export class CandidateServiceV2 {
     }> {
         const { page, limit } = validatePaginationParams(filters.page, filters.limit);
 
-        const { data, total } = await this.repository.findCandidates(clerkUserId, {
+        const { data, pagination: {total} } = await this.repository.findCandidates(clerkUserId, {
             ...filters,
             page,
             limit,
@@ -109,9 +109,9 @@ export class CandidateServiceV2 {
                 
                 // Smart verification handling: set verified_by and verified_at when status changes
                 if (!updates.verified_by_user_id) {
-                    // Get the internal user_id from identity.users for verified_by_user_id
+                    // Get the internal user_id from users for verified_by_user_id
                     const { data: verifierUser } = await this.repository['supabase']
-                        .schema('identity')
+                        
                         .from('users')
                         .select('id')
                         .eq('clerk_user_id', clerkUserId)

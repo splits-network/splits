@@ -25,7 +25,7 @@ export default function PartnersPage() {
                         <p className="text-lg text-base-content/70 max-w-3xl mx-auto">
                             We're building more than a platform—we're creating an ecosystem. Whether you're a
                             recruiting firm, technology provider, or industry association, there's a place for you
-                            in our partner network.
+                            in our partner 
                         </p>
                     </div>
 
@@ -188,7 +188,7 @@ export default function PartnersPage() {
                                     </h3>
                                     <p className="text-base-content/70 mb-4">
                                         Perfect for established recruiting firms who want to offer split placement
-                                        capabilities to their recruiters while maintaining their brand identity.
+                                        capabilities to their recruiters while maintaining their brand 
                                     </p>
                                     <div className="grid md:grid-cols-3 gap-4">
                                         <div className="bg-base-100 p-4 rounded-lg">
@@ -296,7 +296,7 @@ export default function PartnersPage() {
                         <div className="alert alert-info">
                             <i className="fa-solid fa-info-circle"></i>
                             <span>
-                                We're actively building our partner network. Be among our founding partners and help
+                                We're actively building our partner  Be among our founding partners and help
                                 shape the future of collaborative recruiting.
                             </span>
                         </div>

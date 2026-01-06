@@ -97,7 +97,7 @@ const [stats, setStats] = useState({
 });
 
 // Count-up animation component
-<CountUp end={stats.activeJobs} duration={2} separator="," />
+<CountUp end={stactiveJobs} duration={2} separator="," />
 ```
 
 #### C. Single Primary CTA with Secondary Link
@@ -307,7 +307,7 @@ const [stats, setStats] = useState({
         <div className="flex items-center justify-between">
             <div>
                 <p className="text-sm text-base-content/70 mb-1">Applications</p>
-                <p className="text-3xl font-bold">{stats.applications}</p>
+                <p className="text-3xl font-bold">{stapplications}</p>
                 <p className="text-xs text-success flex items-center gap-1 mt-1">
                     <i className="fa-solid fa-arrow-up"></i>
                     +3 this week

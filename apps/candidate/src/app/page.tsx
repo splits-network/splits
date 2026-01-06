@@ -167,7 +167,7 @@ export default async function CandidateHomePage() {
                                     <div>
                                         <h3 className="card-title text-lg mb-2">One-Click Apply</h3>
                                         <p className="text-sm text-base-content/70">
-                                            Apply to multiple jobs instantly with your saved profile and documents.
+                                            Apply to multiple jobs instantly with your saved profile and 
                                         </p>
                                     </div>
                                 </div>

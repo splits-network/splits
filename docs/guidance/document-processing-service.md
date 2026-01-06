@@ -84,7 +84,7 @@ This document outlines the architecture and implementation plan for the **Docume
 ### Documents Table (existing)
 ```sql
 -- services/document-service/migrations/
-ALTER TABLE documents.documents 
+ALTER TABLE documents 
 ADD COLUMN IF NOT EXISTS processing_started_at TIMESTAMPTZ,
 ADD COLUMN IF NOT EXISTS processing_completed_at TIMESTAMPTZ,
 ADD COLUMN IF NOT EXISTS processing_error TEXT,
@@ -376,7 +376,7 @@ async function processDocument(event: DocumentUploadedEvent) {
 ```sql
 -- Find all pending documents
 SELECT id, file_path, mime_type 
-FROM documents.documents 
+FROM documents 
 WHERE processing_status = 'pending'
 ORDER BY created_at ASC;
 ```

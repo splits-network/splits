@@ -49,11 +49,11 @@ const query = `
     r.id as recruiter_id,
     c.identity_organization_id as company_id,
     m.role as membership_role
-  FROM ats.proposals p
-  LEFT JOIN identity.users u ON u.clerk_user_id = $1
-  LEFT JOIN network.recruiters r ON r.user_id = u.id
-  LEFT JOIN identity.memberships m ON m.user_id = u.id
-  LEFT JOIN ats.companies c ON c.identity_organization_id = m.organization_id
+  FROM proposals p
+  LEFT JOIN users u ON u.clerk_user_id = $1
+  LEFT JOIN recruiters r ON r.user_id = u.id
+  LEFT JOIN memberships m ON m.user_id = u.id
+  LEFT JOIN companies c ON c.identity_organization_id = m.organization_id
   WHERE 
     (r.id IS NOT NULL AND p.recruiter_id = r.id)  -- Recruiter: see their proposals
     OR (m.role IN ('company_admin', 'hiring_manager') AND p.company_id = c.id)  -- Company: see company proposals
@@ -72,11 +72,11 @@ Roles are **NOT** stored in Clerk. They are determined by database records:
 
 | Role | Database Record | Table | Condition |
 |------|----------------|-------|------------|
-| `recruiter` | ✅ Exists | `network.recruiters` | `user_id` matches, `status = 'active'` |
-| `company_admin` | ✅ Exists | `identity.memberships` | `user_id` matches, `role = 'company_admin'` |
-| `hiring_manager` | ✅ Exists | `identity.memberships` | `user_id` matches, `role = 'hiring_manager'` |
-| `platform_admin` | ✅ Exists | `identity.memberships` | `user_id` matches, `role = 'platform_admin'` |
-| `candidate` | ✅ Exists | `ats.candidates` | `user_id` matches |
+| `recruiter` | ✅ Exists | `recruiters` | `user_id` matches, `status = 'active'` |
+| `company_admin` | ✅ Exists | `memberships` | `user_id` matches, `role = 'company_admin'` |
+| `hiring_manager` | ✅ Exists | `memberships` | `user_id` matches, `role = 'hiring_manager'` |
+| `platform_admin` | ✅ Exists | `memberships` | `user_id` matches, `role = 'platform_admin'` |
+| `candidate` | ✅ Exists | `candidates` | `user_id` matches |
 
 **A user can have multiple roles** (e.g., both recruiter and company_admin).
 
@@ -85,11 +85,11 @@ Roles are **NOT** stored in Clerk. They are determined by database records:
 Every backend query that needs role-based filtering should:
 
 1. **Start with the resource table** (proposals, applications, jobs, candidates)
-2. **JOIN to identity.users** using `clerk_user_id` from headers
+2. **JOIN to users** using `clerk_user_id` from headers
 3. **LEFT JOIN to role tables**:
-   - `network.recruiters` (determines recruiter role)
-   - `identity.memberships` (determines company_admin, hiring_manager, platform_admin)
-   - `ats.candidates` (determines candidate role)
+   - `recruiters` (determines recruiter role)
+   - `memberships` (determines company_admin, hiring_manager, platform_admin)
+   - `candidates` (determines candidate role)
 4. **Apply WHERE clause** with role-based conditions
 
 **Example** (proposals query):
@@ -100,11 +100,11 @@ SELECT
   r.id as user_recruiter_id,
   c.id as user_company_id,
   m.role as user_membership_role
-FROM ats.proposals p
-LEFT JOIN identity.users u ON u.clerk_user_id = $1  -- From x-clerk-user-id header
-LEFT JOIN network.recruiters r ON r.user_id = u.id AND r.status = 'active'
-LEFT JOIN identity.memberships m ON m.user_id = u.id
-LEFT JOIN ats.companies c ON c.identity_organization_id = m.organization_id
+FROM proposals p
+LEFT JOIN users u ON u.clerk_user_id = $1  -- From x-clerk-user-id header
+LEFT JOIN recruiters r ON r.user_id = u.id AND r.status = 'active'
+LEFT JOIN memberships m ON m.user_id = u.id
+LEFT JOIN companies c ON c.identity_organization_id = m.organization_id
 WHERE 
   -- Recruiter: see proposals they're assigned to
   (r.id IS NOT NULL AND p.recruiter_id = r.id)
@@ -1217,7 +1217,7 @@ describe('Proposals Page', () => {
 // No authentication middleware
 app.get('/api/jobs', async (request, reply) => {
   // No auth headers needed - public access
-  const response = await services.ats.get('/jobs/public', {
+  const response = await services.get('/jobs/public', {
     params: request.query,
   });
   return reply.send(response.data);
@@ -1225,7 +1225,7 @@ app.get('/api/jobs', async (request, reply) => {
 
 app.get('/api/jobs/:id', async (request, reply) => {
   // Public job detail
-  const response = await services.ats.get(`/jobs/public/${request.params.id}`);
+  const response = await services.get(`/jobs/public/${request.params.id}`);
   return reply.send(response.data);
 });
 ```
@@ -1258,7 +1258,7 @@ app.get('/api/jobs/my-jobs', {
   ),
 }, async (request, reply) => {
   const headers = buildAuthHeaders(request);
-  const response = await services.ats.get('/jobs/for-user', {
+  const response = await services.get('/jobs/for-user', {
     headers,
     params: request.query,
   });

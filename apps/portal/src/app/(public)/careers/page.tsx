@@ -229,7 +229,7 @@ export default function CareersPage() {
                 <div className="container mx-auto px-4 text-center">
                     <h2 className="text-4xl font-bold mb-6">Interested in Joining?</h2>
                     <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
-                        Send your resume and tell us what excites you about Splits Network.
+                        Send your resume and tell us what excites you about Splits 
                     </p>
                     <a href="mailto:careers@splits.network" className="btn btn-lg btn-neutral">
                         <i className="fa-solid fa-envelope"></i>

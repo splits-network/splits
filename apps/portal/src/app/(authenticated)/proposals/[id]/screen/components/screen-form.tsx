@@ -297,7 +297,7 @@ export default function ScreenForm({
                     {documentsLoading ? (
                         <div className="flex items-center justify-center p-8">
                             <span className="loading loading-spinner loading-md"></span>
-                            <span className="ml-3 text-base-content/60">Loading documents...</span>
+                            <span className="ml-3 text-base-content/60">Loading ..</span>
                         </div>
                     ) : documentsList.length > 0 ? (
                         <div className="space-y-3">

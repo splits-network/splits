@@ -11,7 +11,11 @@ export class RecruiterRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: {
+                schema: 'public'
+            }
+        });
     }
 
     async findRecruiters(
@@ -24,7 +28,7 @@ export class RecruiterRepository {
 
         // Build query
         let query = this.supabase
-            .schema('network')
+            
             .from('recruiters')
             .select('*', { count: 'exact' });
 
@@ -81,7 +85,7 @@ export class RecruiterRepository {
         }
 
         const { data, error } = await this.supabase
-            .schema('network')
+            
             .from('recruiters')
             .select('*')
             .eq('id', id)
@@ -105,7 +109,7 @@ export class RecruiterRepository {
 
     async findRecruiterByUserId(userId: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            .schema('network')
+            
             .from('recruiters')
             .select('*')
             .eq('user_id', userId)
@@ -120,7 +124,7 @@ export class RecruiterRepository {
 
     async createRecruiter(recruiter: any): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('network')
+            
             .from('recruiters')
             .insert(recruiter)
             .select()
@@ -132,7 +136,7 @@ export class RecruiterRepository {
 
     async updateRecruiter(id: string, updates: RecruiterUpdate): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('network')
+            
             .from('recruiters')
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id)
@@ -146,7 +150,7 @@ export class RecruiterRepository {
     async deleteRecruiter(id: string): Promise<void> {
         // Soft delete
         const { error } = await this.supabase
-            .schema('network')
+            
             .from('recruiters')
             .update({ status: 'inactive', updated_at: new Date().toISOString() })
             .eq('id', id);

@@ -16,7 +16,9 @@ export class ApplicationRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     async findApplications(
@@ -31,7 +33,7 @@ export class ApplicationRepository {
 
         // Build query with enriched data
         let query = this.supabase
-            .schema('ats')
+            
             .from('applications')
             .select(`
                 *,
@@ -100,7 +102,7 @@ export class ApplicationRepository {
 
     async findApplication(id: string, clerkUserId?: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('applications')
             .select(`
                 *,
@@ -158,7 +160,7 @@ export class ApplicationRepository {
         let recruiterId = accessContext.recruiterId || null;
         if (!recruiterId && application.candidate_id) {
             const { data: recruiterRelationship } = await this.supabase
-                .schema('network')
+                
                 .from('recruiter_candidates')
                 .select('recruiter_id')
                 .eq('candidate_id', application.candidate_id)
@@ -171,7 +173,7 @@ export class ApplicationRepository {
         }
         
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('applications')
             .insert({...application, recruiter_id: recruiterId })
             .select()
@@ -183,7 +185,7 @@ export class ApplicationRepository {
 
     async updateApplication(id: string, updates: ApplicationUpdate): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('applications')
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id)
@@ -197,7 +199,7 @@ export class ApplicationRepository {
     async deleteApplication(id: string): Promise<void> {
         // Soft delete - move to withdrawn stage
         const { error } = await this.supabase
-            .schema('ats')
+            
             .from('applications')
             .update({ stage: 'withdrawn', updated_at: new Date().toISOString() })
             .eq('id', id);
@@ -211,7 +213,7 @@ export class ApplicationRepository {
         }
 
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('candidates')
             .select('*')
             .eq('id', candidateId)
@@ -225,7 +227,7 @@ export class ApplicationRepository {
         if (!jobId) return null;
 
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('jobs')
             .select(
                 `
@@ -244,7 +246,7 @@ export class ApplicationRepository {
         if (!recruiterId) return null;
 
         const { data, error } = await this.supabase
-            .schema('network')
+            
             .from('recruiters')
             .select('*')
             .eq('id', recruiterId)
@@ -257,7 +259,7 @@ export class ApplicationRepository {
         let userInfo: { name?: string; email?: string; phone?: string } | undefined = undefined;
         if (data.user_id) {
             const { data: identityUser } = await this.supabase
-                .schema('identity')
+                
                 .from('users')
                 .select('id, name, email')
                 .eq('id', data.user_id)
@@ -290,7 +292,7 @@ export class ApplicationRepository {
 
     async getDocumentsForApplication(applicationId: string): Promise<any[]> {
         const { data, error } = await this.supabase
-            .schema('documents')
+            
             .from('documents')
             .select('*')
             .eq('entity_type', 'application')
@@ -312,7 +314,7 @@ export class ApplicationRepository {
 
     async getPreScreenAnswersForApplication(applicationId: string): Promise<any[]> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('job_pre_screen_answers')
             .select(
                 `
@@ -333,7 +335,7 @@ export class ApplicationRepository {
     }): Promise<any> {
         // Use UPSERT to handle resubmissions - update answer if it exists
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('job_pre_screen_answers')
             .upsert(answer, {
                 onConflict: 'application_id,question_id',
@@ -349,7 +351,7 @@ export class ApplicationRepository {
         if (!jobId) return [];
 
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('job_requirements')
             .select('*')
             .eq('job_id', jobId)
@@ -365,7 +367,7 @@ export class ApplicationRepository {
         }
 
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('ai_reviews')
             .select('*')
             .eq('application_id', applicationId)
@@ -377,7 +379,7 @@ export class ApplicationRepository {
 
     async getAuditLogsForApplication(applicationId: string): Promise<any[]> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('application_audit_log')
             .select('*')
             .eq('application_id', applicationId)
@@ -397,7 +399,7 @@ export class ApplicationRepository {
         }
 
         const { data: identityUser, error: identityError } = await this.supabase
-            .schema('identity')
+            
             .from('users')
             .select('id')
             .eq('clerk_user_id', clerkUserId)
@@ -409,7 +411,7 @@ export class ApplicationRepository {
         }
 
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('candidates')
             .select('*')
             .eq('user_id', identityUser.id)
@@ -421,7 +423,7 @@ export class ApplicationRepository {
 
     async findUserByClerkUserId(clerkUserId: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            .schema('identity')
+            
             .from('users')
             .select('id, email, name')
             .eq('clerk_user_id', clerkUserId)
@@ -433,7 +435,7 @@ export class ApplicationRepository {
 
     async findApplicationById(id: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('applications')
             .select('*')
             .eq('id', id)
@@ -449,7 +451,7 @@ export class ApplicationRepository {
         isPrimary: boolean
     ): Promise<void> {
         const { data: originalDoc, error: fetchError } = await this.supabase
-            .schema('documents')
+            
             .from('documents')
             .select('*')
             .eq('id', documentId)
@@ -460,7 +462,7 @@ export class ApplicationRepository {
         }
 
         const { error: insertError } = await this.supabase
-            .schema('documents')
+            
             .from('documents')
             .insert({
                 entity_type: 'application',
@@ -489,7 +491,7 @@ export class ApplicationRepository {
     async unlinkApplicationDocuments(applicationId: string): Promise<void> {
         // Soft delete all documents linked to this application
         const { error } = await this.supabase
-            .schema('documents')
+            
             .from('documents')
             .update({ deleted_at: new Date().toISOString() })
             .eq('entity_type', 'application')
@@ -509,7 +511,7 @@ export class ApplicationRepository {
         metadata?: any;
     }): Promise<void> {
         const { error } = await this.supabase
-            .schema('ats')
+            
             .from('application_audit_log')
             .insert({
                 application_id: log.application_id,

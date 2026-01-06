@@ -181,7 +181,7 @@ export default function DocumentsPage() {
                         Upload Documents
                     </h2>
                     <p className="mb-6">
-                        Upload your resume, cover letters, portfolio, or other documents.
+                        Upload your resume, cover letters, portfolio, or other
                         Supported formats: PDF, DOC, DOCX (Max 10MB)
                     </p>
 

@@ -5,13 +5,13 @@
 BEGIN;
 
 -- Drop existing stage constraint
-ALTER TABLE ats.applications DROP CONSTRAINT IF EXISTS applications_stage_check;
+ALTER TABLE applications DROP CONSTRAINT IF EXISTS applications_stage_check;
 
 -- Add new constraint with 'withdrawn' stage
-ALTER TABLE ats.applications ADD CONSTRAINT applications_stage_check
+ALTER TABLE applications ADD CONSTRAINT applications_stage_check
     CHECK (stage IN ('draft', 'screen', 'submitted', 'interview', 'offer', 'hired', 'rejected', 'withdrawn'));
 
-COMMENT ON CONSTRAINT applications_stage_check ON ats.applications IS 
+COMMENT ON CONSTRAINT applications_stage_check ON applications IS 
     'Valid application stages including withdrawn for candidate self-service';
 
 COMMIT;
@@ -27,4 +27,4 @@ COMMIT;
 --    WHERE conname = 'applications_stage_check';
 --
 -- 2. Test withdrawal:
---    UPDATE ats.applications SET stage = 'withdrawn' WHERE id = '<test-id>';
+--    UPDATE applications SET stage = 'withdrawn' WHERE id = '<test-id>';

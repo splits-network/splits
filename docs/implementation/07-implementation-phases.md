@@ -342,7 +342,7 @@ Build candidate-facing application wizard.
 - [ ] Create `apps/candidate/src/app/(authenticated)/jobs/[id]/apply/page.tsx`
 - [ ] Create `application-wizard.tsx` (main orchestrator)
 - [ ] Create `components/step-indicator.tsx`
-- [ ] Create `components/step-documents.tsx`
+- [ ] Create `components/step-tsx`
 - [ ] Create `components/step-questions.tsx`
 - [ ] Create `components/step-review.tsx`
 

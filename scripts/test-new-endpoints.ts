@@ -43,7 +43,7 @@ async function testEndpoints() {
     }
 
     // Test 4: GET /api/recruiters/:id/stats
-    console.log('\n4️⃣ Testing GET /api/recruiters/:id/stats...');
+    console.log('\n4️⃣ Testing GET /api/recruiters/:id/st..');
     try {
         // Using a recruiter ID from seed data (if available)
         const response = await fetch(`${BASE_URL}/recruiters/test-recruiter-id/stats`);

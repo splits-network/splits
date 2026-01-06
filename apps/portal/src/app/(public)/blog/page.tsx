@@ -74,7 +74,7 @@ export default function BlogPage() {
                                     </div>
                                     <h3 className="card-title text-lg">Platform Updates</h3>
                                     <p className="text-sm text-base-content/70">
-                                        New features, improvements, and how to get the most out of Splits Network.
+                                        New features, improvements, and how to get the most out of Splits 
                                     </p>
                                 </div>
                             </div>

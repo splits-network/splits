@@ -96,7 +96,7 @@ Detailed step-by-step user experience flows for all actors in the application sy
 
 **Actor:** Candidate  
 **Entry Point:** Job listing page → "Apply" button  
-**Prerequisite:** Candidate has active recruiter relationship in `network.recruiter_candidates`
+**Prerequisite:** Candidate has active recruiter relationship in `recruiter_candidates`
 
 ---
 
@@ -107,7 +107,7 @@ Detailed step-by-step user experience flows for all actors in the application sy
 4. **Submit to Recruiter**
    - Candidate clicks "Submit Application"
    - System checks:
-     - Is there an active recruiter relationship? (`network.recruiter_candidates` with valid dates)
+     - Is there an active recruiter relationship? (`recruiter_candidates` with valid dates)
      - Yes → Application routed to recruiter for review
    - Application stage: `screen` (pending recruiter review)
    - Event emitted: `application.submitted_to_recruiter`
@@ -196,7 +196,7 @@ Detailed step-by-step user experience flows for all actors in the application sy
   - Email to candidate: "[Recruiter] has submitted your application to [Company]"
 
 - **Network Records:**
-  - `network.candidate_role_assignments` created:
+  - `candidate_role_assignments` created:
     - Links recruiter to candidate for this specific job
     - Used for fee tracking when placement occurs
 
@@ -354,7 +354,7 @@ Detailed step-by-step user experience flows for all actors in the application sy
 
 1. **Auto-Save on Navigation**
    - When candidate clicks "Continue" between wizard steps
-   - System saves current form state to `ats.applications` with `stage='draft'`
+   - System saves current form state to `applications` with `stage='draft'`
    - Audit log entry: action='draft_saved' with metadata
    - No loading spinner, happens in background
 

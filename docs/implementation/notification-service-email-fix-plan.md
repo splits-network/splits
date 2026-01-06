@@ -33,7 +33,7 @@ The authentication system has been standardized around **Clerk user IDs** as pri
 1. **Frontend** → sends Clerk JWT (contains Clerk user ID)
 2. **API Gateway** → extracts Clerk user ID from JWT, passes as `x-clerk-user-id` header
 3. **Backend Services** → receive Clerk user ID, must resolve to internal UUID when needed
-4. **Database** → stores both `clerk_user_id` (text) and `id` (UUID) in `identity.users` table
+4. **Database** → stores both `clerk_user_id` (text) and `id` (UUID) in `users` table
 
 ### Current Problem Pattern
 
@@ -583,9 +583,9 @@ If emails still fail after deployment:
 ### Schema Considerations
 
 Currently, the pattern requires:
-- `identity.users` table has `clerk_user_id` and `email` columns ✅
-- `network.recruiters` table has `user_id` column (internal UUID) ✅
-- `ats.candidates` table may have `user_id` column (optional) ✅
+- `users` table has `clerk_user_id` and `email` columns ✅
+- `recruiters` table has `user_id` column (internal UUID) ✅
+- `candidates` table may have `user_id` column (optional) ✅
 
 **No schema changes needed** for this fix.
 
@@ -641,7 +641,7 @@ After fixing applications consumer, audit these consumers (if they exist):
 ## Questions for Review
 
 1. ✅ **Identity Service Contract**: Confirmed that `/users/:id` and `/users/by-clerk-id/:clerkUserId` both return `{ data: { email, ... } }`?
-2. ⚠️ **Candidate Emails**: Do candidates without user accounts have emails stored in `ats.candidates.email`? Or do they always have user accounts?
+2. ⚠️ **Candidate Emails**: Do candidates without user accounts have emails stored in `candidates.email`? Or do they always have user accounts?
 3. ✅ **Company Admin Lookup**: Confirmed that `/organizations/:id/memberships` returns array with `user_id` and `role`?
 4. ❓ **Error Handling**: Should we throw errors if critical emails fail (e.g., application confirmation), or just log warnings?
 5. ❓ **Event Replay**: If an email fails, can we replay the event? Or do we need idempotency keys?

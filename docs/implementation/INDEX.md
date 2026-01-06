@@ -45,11 +45,11 @@ This implementation guide covers the complete candidate job application workflow
 
 ### Core Tables & Patterns
 
-- `ats.applications` - Main application records (including drafts with `stage='draft'`)
-- `ats.job_pre_screen_answers` - Candidate responses (single JSONB `answer` field)
+- `applications` - Main application records (including drafts with `stage='draft'`)
+- `job_pre_screen_answers` - Candidate responses (single JSONB `answer` field)
 - `documents` - Existing table, links via `entity_type='application'`, `entity_id`
-- `ats.application_audit_log` - Existing table, tracks all workflow events (no timestamp columns needed)
-- `network.recruiter_candidates` - 12-month recruiter-candidate relationships
+- `application_audit_log` - Existing table, tracks all workflow events (no timestamp columns needed)
+- `recruiter_candidates` - 12-month recruiter-candidate relationships
 
 ### Key Services
 
@@ -97,9 +97,9 @@ Phase 7: Testing & Refinement
 ## Key Decisions
 
 ### Recruiter Assignment Model
-- **Candidate-wide:** `network.recruiter_candidates` (12-month relationships)
-- **Job-specific:** `network.candidate_role_assignments` (fiscal tracking)
-- **Application-specific:** `ats.applications.recruiter_id` (who manages this submission)
+- **Candidate-wide:** `recruiter_candidates` (12-month relationships)
+- **Job-specific:** `candidate_role_assignments` (fiscal tracking)
+- **Application-specific:** `applications.recruiter_id` (who manages this submission)
 
 ### Application Stages
 - `draft` - **NEW** - Incomplete application, candidate still editing
@@ -118,8 +118,8 @@ Phase 7: Testing & Refinement
 - **Storage:** Linked via existing `documents` table with `entity_type='application'`, `entity_id=<application_id>`
 
 ### Pre-Screen Questions
-- Fetched from `ats.job_pre_screen_questions`
-- Answers stored in `ats.job_pre_screen_answers` with single JSONB `answer` field
+- Fetched from `job_pre_screen_questions`
+- Answers stored in `job_pre_screen_answers` with single JSONB `answer` field
 - Support types: text, yes/no, select, multi-select
 - Answer format matches `question_type`: `{text: "..."}`, `{boolean: true}`, `{choice: "..."}`, `{choices: ["..."]}`
 - Must be answered before submission if `is_required = true`

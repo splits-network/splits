@@ -7,7 +7,7 @@
  * - All services running (docker-compose up)
  * - Seed data loaded (test user, recruiter, company, job)
  * 
- * Usage: pnpm tsx scripts/test-notifications.ts
+ * Usage: pnpm tsx scripts/test-ts
  */
 
 import amqp from 'amqplib';
@@ -88,7 +88,7 @@ async function main() {
         console.log('   - Events were received');
         console.log('   - Data was fetched from services');
         console.log('   - Emails were sent via Resend');
-        console.log('\n💾 Check the notifications.notification_logs table to verify status');
+        console.log('\n💾 Check the notification_logs table to verify status');
         
     } catch (error) {
         console.error('❌ Test failed:', error);

@@ -21,7 +21,7 @@ This document tracks the implementation of the **Recruiter Submission Flow** - a
 #### 2.1.1 Database Schema
 - **File**: `infra/migrations/021_add_recruiter_proposed_stage.sql`
 - **Changes**:
-  - ✅ Added `recruiter_proposed` stage documentation to `ats.applications` table
+  - ✅ Added `recruiter_proposed` stage documentation to `applications` table
   - ✅ Updated stage validation to include `recruiter_proposed`
   - ✅ Documented new audit log actions:
     - `recruiter_proposed_job` - Recruiter sends job to candidate

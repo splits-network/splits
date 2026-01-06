@@ -40,7 +40,9 @@ export function Sidebar() {
                 if (!token) return;
 
                 const apiClient = createAuthenticatedClient(token);
-                const profileResponse: any = await apiClient.get('/users', { params: { limit: 1 } });
+                const profileResponse: any = await apiClient.get('/users', {
+                    params: { limit: 1 }
+                });
                 const profile = profileResponse?.data?.[0] || profileResponse?.data || profileResponse || {};
                 const roleList: string[] = Array.isArray(profile.roles) ? profile.roles : [];
 

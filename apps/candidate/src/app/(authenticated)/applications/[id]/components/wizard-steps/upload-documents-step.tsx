@@ -71,7 +71,7 @@ export function UploadDocumentsStep({
         // Validate files
         for (const file of files) {
             if (!ALLOWED_TYPES.includes(file.type)) {
-                setError(`${file.name} is not a supported file type. Please upload PDF or Word documents.`);
+                setError(`${file.name} is not a supported file type. Please upload PDF or Word `);
                 return;
             }
             if (file.size > MAX_FILE_SIZE) {
@@ -146,9 +146,9 @@ export function UploadDocumentsStep({
     };
 
     const handleNext = () => {
-        const totalDocCount = documents.length + existingDocumentIds.length;
+        const totalDocCount = length + existingDocumentIds.length;
         if (totalDocCount === 0) {
-            setError('Please upload at least one document or select from your existing documents.');
+            setError('Please upload at least one document or select from your existing ');
             return;
         }
         if (primaryResumeIndex === null && primaryExistingDocId === null) {
@@ -159,7 +159,7 @@ export function UploadDocumentsStep({
         onNext();
     };
 
-    const totalDocCount = documents.length + existingDocumentIds.length;
+    const totalDocCount = length + existingDocumentIds.length;
     const hasPrimary = primaryResumeIndex !== null || primaryExistingDocId !== null;
 
     return (
@@ -236,7 +236,7 @@ export function UploadDocumentsStep({
             ) : (
                 <div className="alert">
                     <i className="fa-solid fa-info-circle"></i>
-                    <span>You don't have any existing documents. Upload your first documents below.</span>
+                    <span>You don't have any existing  Upload your first documents below.</span>
                 </div>
             )}
 
@@ -259,9 +259,9 @@ export function UploadDocumentsStep({
             </div>
 
             {/* Newly Uploaded Documents */}
-            {documents.length > 0 && (
+            {length > 0 && (
                 <div className="space-y-3">
-                    <h5 className="font-semibold">Newly Uploaded Documents ({documents.length})</h5>
+                    <h5 className="font-semibold">Newly Uploaded Documents ({length})</h5>
                     <div className="space-y-2">
                         {documents.map((doc, index) => {
                             const isPrimary = primaryResumeIndex === index;

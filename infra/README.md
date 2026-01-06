@@ -51,7 +51,7 @@ infra/
    # Azure Infrastructure
    AZURE_CREDENTIALS          # Azure service principal JSON
    ACR_NAME                   # Azure Container Registry name (e.g., "splitsnetwork")
-   ACR_LOGIN_SERVER           # ACR FQDN (e.g., "splitsnetwork.azurecr.io")
+   ACR_LOGIN_SERVER           # ACR FQDN (e.g., "splitsazurecr.io")
    AKS_CLUSTER_NAME           # AKS cluster name (e.g., "splits-network-aks")
    AKS_RESOURCE_GROUP         # Azure resource group (e.g., "splits-network-rg")
    
@@ -320,7 +320,7 @@ kubectl describe pod <pod-name> -n splits-network
 Create image pull secret if needed:
 ```powershell
 kubectl create secret docker-registry acr-secret \
-    --docker-server=splitsnetwork.azurecr.io \
+    --docker-server=splitsazurecr.io \
     --docker-username=<username> \
     --docker-password=<password> \
     --namespace=splits-network

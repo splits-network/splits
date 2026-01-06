@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useEffect, useState, useRef } from 'react';
 import UserDropdown from './user-dropdown';
-import NotificationBell from './NotificationBell';
+import NotificationBell from './notification-bell';
 
 export default function Header() {
     const { isSignedIn } = useAuth();

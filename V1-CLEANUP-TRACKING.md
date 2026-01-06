@@ -191,7 +191,7 @@ These services still use V1 patterns and need V2 migration first:
 - ✅ Gateway builds and starts successfully
 
 **Architecture Results**:
-- Clean V2-only routes: `/src/routes/v2/` contains: ats.ts, automation.ts, billing.ts, documents.ts, identity.ts, network.ts, notification.ts, roles.ts
+- Clean V2-only routes: `/src/routes/v2/` contains: ts, automation.ts, ts, ts, ts, ts, notification.ts, roles.ts
 - Simplified authentication flow: Frontend sends JWT → Gateway verifies → Backend services handle authorization
 - Service proxy pattern: Gateway forwards requests to V2 backend APIs with proper headers
 - Backend services use shared access context for role-based data filtering

@@ -77,7 +77,7 @@ export class DocumentRepositoryV2 {
         const isInternalService = clerkUserId === 'internal-service';
         
         let query = this.supabase
-            .schema('documents')
+            
             .from('documents')
             .select('*', { count: 'exact' });
 
@@ -173,7 +173,7 @@ export class DocumentRepositoryV2 {
         const isInternalService = clerkUserId === 'internal-service';
 
         const { data, error } = await this.supabase
-            .schema('documents')
+            
             .from('documents')
             .select('*')
             .eq('id', id)
@@ -213,7 +213,7 @@ export class DocumentRepositoryV2 {
         }
 
         const { data, error } = await this.supabase
-            .schema('documents')
+            
             .from('documents')
             .insert({
                 entity_type: input.entity_type,
@@ -261,7 +261,7 @@ export class DocumentRepositoryV2 {
         }
 
         const { data, error } = await this.supabase
-            .schema('documents')
+            
             .from('documents')
             .update(updateData)
             .eq('id', id)
@@ -283,7 +283,7 @@ export class DocumentRepositoryV2 {
         }
 
         const { error } = await this.supabase
-            .schema('documents')
+            
             .from('documents')
             .update({
                 deleted_at: new Date().toISOString(),
@@ -315,7 +315,7 @@ export class DocumentRepositoryV2 {
         if (context.recruiterId && entityType === 'candidate') {
             // Check if recruiter has access to this candidate via assignments
             const { data: assignment } = await this.supabase
-                .schema('network')
+                
                 .from('recruiter_candidates')
                 .select('id')
                 .eq('recruiter_user_id', context.recruiterId)
@@ -329,7 +329,7 @@ export class DocumentRepositoryV2 {
             
             // Also check if recruiter has access via job assignments
             const { data: roleAssignments } = await this.supabase
-                .schema('network')
+                
                 .from('role_assignments')
                 .select('job_id')
                 .eq('recruiter_user_id', context.recruiterId)
@@ -339,7 +339,7 @@ export class DocumentRepositoryV2 {
                 // Check if candidate has applications to any of recruiter's assigned jobs
                 const jobIds = roleAssignments.map(ra => ra.job_id);
                 const { data: candidateApplications } = await this.supabase
-                    .schema('ats')
+                    
                     .from('applications')
                     .select('id')
                     .eq('candidate_id', entityId)
@@ -355,7 +355,7 @@ export class DocumentRepositoryV2 {
         // Check application access for both company users and recruiters
         if (entityType === 'application') {
             const { data: application } = await this.supabase
-                .schema('ats')
+                
                 .from('applications')
                 .select('candidate_id, job_id')
                 .eq('id', entityId)
@@ -370,7 +370,7 @@ export class DocumentRepositoryV2 {
                 // Company users can access application documents for their company jobs
                 if (context.organizationIds.length > 0) {
                     const { data: job } = await this.supabase
-                        .schema('ats')
+                        
                         .from('jobs')
                         .select('company_id')
                         .eq('id', application.job_id)
@@ -384,7 +384,7 @@ export class DocumentRepositoryV2 {
                 // Recruiters can access application documents if they have access to the candidate
                 if (context.recruiterId) {
                     const { data: assignment } = await this.supabase
-                        .schema('network')
+                        
                         .from('recruiter_candidates')
                         .select('id')
                         .eq('recruiter_user_id', context.recruiterId)
@@ -415,7 +415,7 @@ export class DocumentRepositoryV2 {
         // Candidates can see documents attached to their applications
         if (context.candidateId && row.entity_type === 'application') {
             const { data: application } = await this.supabase
-                .schema('ats')
+                
                 .from('applications')
                 .select('candidate_id')
                 .eq('id', row.entity_id)

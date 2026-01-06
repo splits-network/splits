@@ -22,14 +22,14 @@ Successfully implemented end-to-end AI-assisted application screening for the Sp
 
 ## 1. Database Changes
 
-### New Table: `ats.ai_reviews`
+### New Table: `ai_reviews`
 
 **Migration:** `018_create_ai_reviews_table.sql`
 
 ```sql
-CREATE TABLE ats.ai_reviews (
+CREATE TABLE ai_reviews (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    application_id UUID NOT NULL UNIQUE REFERENCES ats.applications(id) ON DELETE CASCADE,
+    application_id UUID NOT NULL UNIQUE REFERENCES applications(id) ON DELETE CASCADE,
     fit_score INTEGER NOT NULL CHECK (fit_score >= 0 AND fit_score <= 100),
     recommendation VARCHAR(20) NOT NULL CHECK (recommendation IN ('strong_fit', 'good_fit', 'fair_fit', 'poor_fit')),
     overall_summary TEXT NOT NULL,
@@ -50,22 +50,22 @@ CREATE TABLE ats.ai_reviews (
 );
 
 -- Indexes for performance
-CREATE INDEX idx_ai_reviews_application_id ON ats.ai_reviews(application_id);
-CREATE INDEX idx_ai_reviews_fit_score ON ats.ai_reviews(fit_score);
-CREATE INDEX idx_ai_reviews_recommendation ON ats.ai_reviews(recommendation);
-CREATE INDEX idx_ai_reviews_analyzed_at ON ats.ai_reviews(analyzed_at);
+CREATE INDEX idx_ai_reviews_application_id ON ai_reviews(application_id);
+CREATE INDEX idx_ai_reviews_fit_score ON ai_reviews(fit_score);
+CREATE INDEX idx_ai_reviews_recommendation ON ai_reviews(recommendation);
+CREATE INDEX idx_ai_reviews_analyzed_at ON ai_reviews(analyzed_at);
 ```
 
 **Status:** ✅ Applied to production database
 
-### Updated Table: `ats.applications`
+### Updated Table: `applications`
 
 **Added column:**
 ```sql
-ALTER TABLE ats.applications 
+ALTER TABLE applications 
 ADD COLUMN ai_reviewed BOOLEAN NOT NULL DEFAULT FALSE;
 
-CREATE INDEX idx_applications_ai_reviewed ON ats.applications(ai_reviewed);
+CREATE INDEX idx_applications_ai_reviewed ON applications(ai_reviewed);
 ```
 
 **Status:** ✅ Applied to production database
@@ -114,7 +114,7 @@ async reviewApplication(applicationId: string): Promise<AIReview>
 2. Build comprehensive prompt with job requirements and candidate profile
 3. Call OpenAI API with structured output
 4. Parse and validate AI response
-5. Save to `ats.ai_reviews` table
+5. Save to `ai_reviews` table
 6. Update `applications.ai_reviewed = true`
 7. Publish `ai_review.completed` event
 8. Trigger automatic stage transition
@@ -371,7 +371,7 @@ async reviewApplication(applicationId: string): Promise<AIReview>
 ### Phase 1.5: Advisory AI Review ✅ COMPLETE
 
 **Week 1-2: Database & Types** ✅
-- [x] Create `ats.ai_reviews` table migration
+- [x] Create `ai_reviews` table migration
 - [x] Update `ApplicationStage` type in shared-types
 - [x] Add `ai_reviewed` column to applications table
 - [x] Create indexes
@@ -523,7 +523,7 @@ OPENAI_API_KEY=sk-...
 
 **Supabase Project:**
 - Project Ref: `einhgkqmxbkgdohwfayv`
-- Schema: `ats.*`
+- Schema: `*`
 
 **Deployment Steps:**
 1. Ensure `OPENAI_API_KEY` is set in all environments

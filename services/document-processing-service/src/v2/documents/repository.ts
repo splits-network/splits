@@ -9,7 +9,7 @@ export class DocumentRepositoryV2 {
     const context = await resolveAccessContext(this.supabase, clerkUserId);
     
     const query = this.supabase
-      .schema('documents')
+      
       .from('documents')
       .select('*', { count: 'exact' });
       
@@ -64,7 +64,7 @@ export class DocumentRepositoryV2 {
     const context = await resolveAccessContext(this.supabase, clerkUserId);
     
     const query = this.supabase
-      .schema('documents')
+      
       .from('documents')
       .select('*')
       .eq('id', id);
@@ -135,7 +135,7 @@ export class DocumentRepositoryV2 {
     updateData.updated_at = new Date().toISOString();
     
     const query = this.supabase
-      .schema('documents')
+      
       .from('documents')
       .update(updateData)
       .eq('id', id);
@@ -198,7 +198,7 @@ export class DocumentRepositoryV2 {
     updateData.updated_at = new Date().toISOString();
     
     const { data, error } = await this.supabase
-      .schema('documents')
+      
       .from('documents')
       .update(updateData)
       .eq('id', id)
@@ -214,7 +214,7 @@ export class DocumentRepositoryV2 {
 
   private async getMetadata(id: string) {
     const { data } = await this.supabase
-      .schema('documents')
+      
       .from('documents')
       .select('metadata')
       .eq('id', id)
@@ -226,7 +226,7 @@ export class DocumentRepositoryV2 {
   // System method for processing queue
   async getPendingDocuments(limit = 20): Promise<DocumentRecord[]> {
     const { data, error } = await this.supabase
-      .schema('documents')
+      
       .from('documents')
       .select('*')
       .eq('processing_status', 'pending')

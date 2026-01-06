@@ -11,6 +11,7 @@ The Document Service manages universal document storage with a **V2-only archite
 ### ✅ V2 Patterns ONLY
 - All implementations use V2 standardized patterns
 - Domain-based folder structure under `src/v2/`
+- **shared-api-client automatically prepends `/api/v2` to all requests** - frontend calls use simple paths like `/documents`, not `/api/v2/documents`
 - 5-route CRUD pattern for all resources
 - Repository pattern with direct Supabase access
 - Service layer with business logic and validation
@@ -40,10 +41,22 @@ The Document Service manages universal document storage with a **V2-only archite
 5. **Publish events** for significant state changes
 6. **Never make HTTP calls** to other services - use database queries
 
+### Standardized List Functionality
+- **Use shared types** from `@splits-network/shared-types`:
+  - `StandardListParams` for query parameters: `{ page?: number; limit?: number; search?: string; filters?: Record<string, any>; include?: string; sort_by?: string; sort_order?: 'asc' | 'desc' }`
+  - `StandardListResponse<T>` for responses: `{ data: T[]; pagination: PaginationResponse }`
+- **Repository pattern** for list methods:
+  ```typescript
+  async list(clerkUserId: string, params: StandardListParams): Promise<StandardListResponse<T>>
+  ```
+- **Server-side filtering** - never rely on client-side filtering for performance
+- **Enriched data** - use JOINs to include related data in single queries
+- **Consistent pagination** - always return total count and page information
+
 ### Database Integration
-- **Schema**: All tables in `documents.*` schema
+- **Schema**: All tables in `*` schema
 - **Access Control**: Role-based filtering in repository methods
-- **Cross-Schema Queries**: Allowed for data enrichment (e.g., JOIN with `identity.*`, `ats.*`)
+- **Cross-Schema Queries**: Allowed for data enrichment (e.g., JOIN with `*`, `*`)
 - **Event Publishing**: Use V2 EventPublisher for domain events
 - **Storage**: Supabase Storage for file storage with pre-signed URLs
 
@@ -92,7 +105,7 @@ async list(clerkUserId: string, filters: DocumentFilters) {
     const context = await resolveAccessContext(clerkUserId, this.supabase);
     
     const query = this.supabase
-        .schema('documents')
+        
         .from('documents')
         .select('*');
         

@@ -3,8 +3,8 @@ import { UserServiceV2 } from './service';
 import {
     requireUserContext,
     validatePaginationParams,
-    buildPaginationResponse,
 } from '../shared/helpers';
+import { StandardListParams } from '@splits-network/shared-types';
 
 interface RegisterUserRoutesConfig {
     userService: UserServiceV2;
@@ -20,23 +20,20 @@ export function registerUserRoutes(
     app.get('/api/v2/users', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
-            const query = request.query as any;
-            const paginationParams = validatePaginationParams(query.page, query.limit);
+            const params = request.query as any;
+            const paginationParams = validatePaginationParams(params.page, params.limit);
 
-            const result = await userService.findUsers(clerkUserId, {
+            const listParams: StandardListParams = {
                 ...paginationParams,
-                search: query.search,
-                status: query.status,
-            });
+                search: params.search,
+                sort_by: params.sort_by,
+                sort_order: params.sort_order,
+                filters: params.filters ??  undefined,
+            };
 
-            reply.send(
-                buildPaginationResponse(
-                    result.data,
-                    result.total,
-                    paginationParams.page,
-                    paginationParams.limit
-                )
-            );
+            const result = await userService.findUsers(clerkUserId, listParams);
+
+            reply.send(result);
         } catch (error) {
             logError('GET /api/v2/users failed', error);
             reply.code(500).send({ error: { message: 'Failed to list users' } });

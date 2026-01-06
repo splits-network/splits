@@ -270,7 +270,7 @@ export default async function ApplicationDetailPage({
                     </div>
 
                     {/* Documents */}
-                    {application.documents && application.documents.length > 0 && (
+                    {application.documents && application.length > 0 && (
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title mb-4">
@@ -279,7 +279,7 @@ export default async function ApplicationDetailPage({
                                 </h2>
 
                                 <div className="space-y-2">
-                                    {application.documents.map((doc: any) => (
+                                    {application.map((doc: any) => (
                                         <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg bg-base-200 hover:bg-base-300 transition-colors">
                                             <div className="flex items-center gap-3 flex-1 min-w-0">
                                                 <i className={`fa-solid ${doc.document_type === 'resume' ? 'fa-file-text' :

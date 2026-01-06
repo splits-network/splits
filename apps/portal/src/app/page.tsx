@@ -588,7 +588,7 @@ export default async function HomePage() {
                                     </div>
                                 </div>
                                 <p className="mb-4">
-                                    "We replaced three spreadsheets and a Slack mess with Splits Network. Finally, all my split deals in one place."
+                                    "We replaced three spreadsheets and a Slack mess with Splits  Finally, all my split deals in one place."
                                 </p>
                                 <div className="flex items-center gap-3">
                                     <div className="avatar avatar-placeholder">
@@ -717,7 +717,7 @@ export default async function HomePage() {
                             </div>
                             <div className="collapse-content">
                                 <p className="text-base-content/70">
-                                    Absolutely! You can invite your existing network to join Splits Network. Companies can post their
+                                    Absolutely! You can invite your existing network to join Splits  Companies can post their
                                     roles, and you can collaborate with recruiters you already know and trust, all within one platform.
                                 </p>
                             </div>

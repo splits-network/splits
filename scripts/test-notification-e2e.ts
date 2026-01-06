@@ -245,7 +245,7 @@ async function verifyNotificationLogs(): Promise<void> {
     console.log('\n3. Check Resend dashboard:');
     console.log('   https://resend.com/emails');
     console.log('\n4. Query notification logs in Supabase:');
-    console.log('   SELECT * FROM notifications.notification_logs ORDER BY created_at DESC LIMIT 10;');
+    console.log('   SELECT * FROM notification_logs ORDER BY created_at DESC LIMIT 10;');
 }
 
 function sleep(ms: number): Promise<void> {

@@ -78,7 +78,7 @@ Candidate → Candidate Recruiter ←→ Company Recruiter → Company → Hired
 
 ---
 
-## Proposals System (`network.candidate_role_assignments`)
+## Proposals System (`candidate_role_assignments`)
 
 ### Purpose
 Manage permission and collaboration when a company-side recruiter wants to work with a candidate who already has their own recruiter.
@@ -183,7 +183,7 @@ proposed → accepted/declined/timed_out → submitted → closed
 ## Implementation Status
 
 ### ✅ Database Schema Exists
-- `network.candidate_role_assignments` table created
+- `candidate_role_assignments` table created
 - State machine columns in place
 - Constraints enforced
 

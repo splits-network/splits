@@ -90,7 +90,7 @@ export class SubscriptionServiceV2 {
             current_period_start: payload.current_period_start || new Date().toISOString(),
         });
 
-        await this.publishEvent('billing.subscription.created', subscription);
+        await this.publishEvent('subscription.created', subscription);
         return subscription;
     }
 
@@ -117,7 +117,7 @@ export class SubscriptionServiceV2 {
         }
 
         const updated = await this.repository.updateSubscription(id, updates);
-        await this.publishEvent('billing.subscription.updated', {
+        await this.publishEvent('subscription.updated', {
             id: updated.id,
             changes: updates,
         });
@@ -146,7 +146,7 @@ export class SubscriptionServiceV2 {
             canceled_at: new Date().toISOString(),
         } as SubscriptionUpdateInput);
 
-        await this.publishEvent('billing.subscription.canceled', {
+        await this.publishEvent('subscription.canceled', {
             id: updated.id,
         });
 

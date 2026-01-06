@@ -87,7 +87,7 @@ async findProposalsForUser(
 ): Promise<{ data: any[]; total: number }> {
     // Step 1: Build enriched query with JOINs
     let query = this.supabase
-        .schema('ats')
+        
         .from('applications')
         .select(`
             *,
@@ -99,13 +99,13 @@ async findProposalsForUser(
 
     // Step 2: Resolve user's role context (what they can see)
     const { data: userContext } = await this.supabase
-        .schema('identity')
+        
         .from('users')
         .select(`
             id,
-            recruiter:network.recruiters!user_id(id, status),
-            memberships:identity.memberships!user_id(organization_id, role),
-            candidate:ats.candidates!user_id(id)
+            recruiter:recruiters!user_id(id, status),
+            memberships:memberships!user_id(organization_id, role),
+            candidate:candidates!user_id(id)
         `)
         .eq('clerk_user_id', clerkUserId)
         .single();
@@ -201,22 +201,22 @@ async findProposalsForUser(
 **Created Indexes for JOIN Performance**:
 ```sql
 -- Role resolution indexes
-CREATE INDEX IF NOT EXISTS idx_users_clerk_user_id ON identity.users(clerk_user_id);
-CREATE INDEX IF NOT EXISTS idx_recruiters_user_id ON network.recruiters(user_id);
-CREATE INDEX IF NOT EXISTS idx_memberships_user_id ON identity.memberships(user_id);
-CREATE INDEX IF NOT EXISTS idx_candidates_user_id ON ats.candidates(user_id);
+CREATE INDEX IF NOT EXISTS idx_users_clerk_user_id ON users(clerk_user_id);
+CREATE INDEX IF NOT EXISTS idx_recruiters_user_id ON recruiters(user_id);
+CREATE INDEX IF NOT EXISTS idx_memberships_user_id ON memberships(user_id);
+CREATE INDEX IF NOT EXISTS idx_candidates_user_id ON candidates(user_id);
 
 -- Foreign key indexes for JOINs
-CREATE INDEX IF NOT EXISTS idx_applications_recruiter_id ON ats.applications(recruiter_id);
-CREATE INDEX IF NOT EXISTS idx_applications_candidate_id ON ats.applications(candidate_id);
-CREATE INDEX IF NOT EXISTS idx_applications_job_id ON ats.applications(job_id);
-CREATE INDEX IF NOT EXISTS idx_applications_company_id ON ats.applications(company_id);
-CREATE INDEX IF NOT EXISTS idx_jobs_company_id ON ats.jobs(company_id);
-CREATE INDEX IF NOT EXISTS idx_companies_identity_organization_id ON ats.companies(identity_organization_id);
+CREATE INDEX IF NOT EXISTS idx_applications_recruiter_id ON applications(recruiter_id);
+CREATE INDEX IF NOT EXISTS idx_applications_candidate_id ON applications(candidate_id);
+CREATE INDEX IF NOT EXISTS idx_applications_job_id ON applications(job_id);
+CREATE INDEX IF NOT EXISTS idx_applications_company_id ON applications(company_id);
+CREATE INDEX IF NOT EXISTS idx_jobs_company_id ON jobs(company_id);
+CREATE INDEX IF NOT EXISTS idx_companies_identity_organization_id ON companies(identity_organization_id);
 
 -- Filtering/searching indexes
-CREATE INDEX IF NOT EXISTS idx_applications_status ON ats.applications(status);
-CREATE INDEX IF NOT EXISTS idx_applications_created_at ON ats.applications(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_applications_status ON applications(status);
+CREATE INDEX IF NOT EXISTS idx_applications_created_at ON applications(created_at DESC);
 ```
 
 **No SQL Functions Created**: Query logic lives in TypeScript repository layer for better maintainability.
@@ -254,9 +254,9 @@ ATS Service
     ↓ Call repository.findProposalsForUser(clerkUserId, filters)
 Repository
     ↓ Call database RPC function
-Database Function (ats.get_proposals_for_user)
-    ↓ 1. JOIN identity.users ON clerk_user_id
-    ↓ 2. LEFT JOIN network.recruiters, identity.memberships, ats.candidates
+Database Function (get_proposals_for_user)
+    ↓ 1. JOIN users ON clerk_user_id
+    ↓ 2. LEFT JOIN recruiters, memberships, candidates
     ↓ 3. WHERE clause with role-based OR conditions
     ↓ 4. Apply filters, search, sorting, pagination
     ↓ 5. Return enriched proposals

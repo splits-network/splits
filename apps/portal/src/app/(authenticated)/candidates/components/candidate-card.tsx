@@ -66,7 +66,7 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
                     <h3 className="text-xl font-bold leading-tight group-hover:text-primary transition-colors">
                         {candidate.full_name}
                     </h3>
-                    <div className="flex items-center gap-2 mt-2">
+                    <div className="flex flex-col items-start gap-2 mt-2">
                         <span
                             className="text-sm text-base-content/70 hover:text-primary transition-colors flex items-center gap-1.5 cursor-pointer"
                             onClick={(e) => {
@@ -80,7 +80,6 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
                         </span>
                         {candidate.phone && (
                             <>
-                                <span className="text-base-content/30">•</span>
                                 <span
                                     className="text-sm text-base-content/70 hover:text-primary transition-colors flex items-center gap-1.5 cursor-pointer"
                                     onClick={(e) => {

@@ -2,7 +2,7 @@
 -- This creates test data for companies, jobs, candidates, applications, and placements
 
 -- Create test companies
-INSERT INTO ats.companies (id, name, created_at, updated_at) VALUES
+INSERT INTO companies (id, name, created_at, updated_at) VALUES
 ('11111111-1111-1111-1111-111111111111', 'TechCorp Inc', NOW(), NOW()),
 ('22222222-2222-2222-2222-222222222222', 'StartupXYZ', NOW(), NOW()),
 ('33333333-3333-3333-3333-333333333333', 'CloudServices Ltd', NOW(), NOW()),
@@ -10,7 +10,7 @@ INSERT INTO ats.companies (id, name, created_at, updated_at) VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- Create test jobs
-INSERT INTO ats.jobs (id, company_id, title, department, location, salary_min, salary_max, fee_percentage, description, status, created_at, updated_at) VALUES
+INSERT INTO jobs (id, company_id, title, department, location, salary_min, salary_max, fee_percentage, description, status, created_at, updated_at) VALUES
 ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', 'Senior React Developer', 'Engineering', 'San Francisco, CA', 140000, 180000, 20, 'We are looking for an experienced React developer to join our growing team. Must have 5+ years of experience with React, TypeScript, and modern frontend tooling.', 'active', NOW() - INTERVAL '20 days', NOW()),
 ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '22222222-2222-2222-2222-222222222222', 'Product Manager', 'Product', 'Remote', 120000, 160000, 18, 'Seeking a product manager to lead our core product initiatives. Experience with B2B SaaS required.', 'active', NOW() - INTERVAL '15 days', NOW()),
 ('cccccccc-cccc-cccc-cccc-cccccccccccc', '33333333-3333-3333-3333-333333333333', 'DevOps Engineer', 'Engineering', 'New York, NY', 130000, 170000, 22, 'Join our infrastructure team to build and maintain our cloud platform. AWS and Kubernetes experience required.', 'active', NOW() - INTERVAL '8 days', NOW()),
@@ -19,7 +19,7 @@ INSERT INTO ats.jobs (id, company_id, title, department, location, salary_min, s
 ON CONFLICT (id) DO NOTHING;
 
 -- Create test candidates
-INSERT INTO ats.candidates (id, email, full_name, linkedin_url, created_at, updated_at) VALUES
+INSERT INTO candidates (id, email, full_name, linkedin_url, created_at, updated_at) VALUES
 ('c1111111-1111-1111-1111-111111111111', 'john.doe@example.com', 'John Doe', 'https://linkedin.com/in/johndoe', NOW() - INTERVAL '10 days', NOW()),
 ('c2222222-2222-2222-2222-222222222222', 'jane.smith@example.com', 'Jane Smith', 'https://linkedin.com/in/janesmith', NOW() - INTERVAL '12 days', NOW()),
 ('c3333333-3333-3333-3333-333333333333', 'bob.johnson@example.com', 'Bob Johnson', 'https://linkedin.com/in/bobjohnson', NOW() - INTERVAL '7 days', NOW()),
@@ -30,7 +30,7 @@ INSERT INTO ats.candidates (id, email, full_name, linkedin_url, created_at, upda
 ON CONFLICT (email) DO NOTHING;
 
 -- Create test applications
-INSERT INTO ats.applications (id, job_id, candidate_id, stage, notes, created_at, updated_at) VALUES
+INSERT INTO applications (id, job_id, candidate_id, stage, notes, created_at, updated_at) VALUES
 -- Senior React Developer applications
 ('a1111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'c1111111-1111-1111-1111-111111111111', 'interview', 'Strong technical skills, available immediately. Great React expertise.', NOW() - INTERVAL '9 days', NOW() - INTERVAL '2 days'),
 ('a2222222-2222-2222-2222-222222222222', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'c2222222-2222-2222-2222-222222222222', 'offer', 'Excellent culture fit. Passed all technical rounds with flying colors.', NOW() - INTERVAL '11 days', NOW() - INTERVAL '1 day'),
@@ -46,7 +46,7 @@ INSERT INTO ats.applications (id, job_id, candidate_id, stage, notes, created_at
 ON CONFLICT (id) DO NOTHING;
 
 -- Create a test placement (hired candidate)
-INSERT INTO ats.placements (
+INSERT INTO placements (
     id, 
     job_id, 
     candidate_id, 
@@ -81,8 +81,8 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Summary
 SELECT 
-    (SELECT COUNT(*) FROM ats.companies) as companies,
-    (SELECT COUNT(*) FROM ats.jobs) as jobs,
-    (SELECT COUNT(*) FROM ats.candidates) as candidates,
-    (SELECT COUNT(*) FROM ats.applications) as applications,
-    (SELECT COUNT(*) FROM ats.placements) as placements;
+    (SELECT COUNT(*) FROM companies) as companies,
+    (SELECT COUNT(*) FROM jobs) as jobs,
+    (SELECT COUNT(*) FROM candidates) as candidates,
+    (SELECT COUNT(*) FROM applications) as applications,
+    (SELECT COUNT(*) FROM placements) as placements;

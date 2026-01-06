@@ -390,9 +390,9 @@ export class CandidatesService {
     }
     
     private async resolveInternalUserId(clerkUserId: string): Promise<string> {
-        // Query identity.users table by clerk_user_id
+        // Query users table by clerk_user_id
         const user = await this.supabase
-            .from('identity.users')
+            .from('users')
             .select('id')
             .eq('clerk_user_id', clerkUserId)
             .single();

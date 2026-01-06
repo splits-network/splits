@@ -405,7 +405,7 @@ Splits Network implements a role-based access control (RBAC) system with four pr
 
 - **Candidate Sourcing & Relationships:**
   - When a recruiter submits a candidate, they become the **sourcer** (permanent credit)
-  - A 12-month **renewable relationship** is created in `network.recruiter_candidates`
+  - A 12-month **renewable relationship** is created in `recruiter_candidates`
   - Sourcing credit persists even after relationship expires
   - Can see candidate's full contact details only for their own submissions
 
@@ -484,7 +484,7 @@ For recruiting agencies and collaborative recruiting groups, additional team-lev
 
 ### 3.1 Team Owner
 
-**Role Code:** `owner` (within `network.team_members` context)
+**Role Code:** `owner` (within `team_members` context)
 
 **Purpose:** Founder/owner of a recruiting team or agency.
 
@@ -506,9 +506,9 @@ For recruiting agencies and collaborative recruiting groups, additional team-lev
 
 ### 3.2 Team Admin
 
-**Role Code:** `admin` (within `network.team_members` context)
+**Role Code:** `admin` (within `team_members` context)
 
-**Purpose:** Trusted team administrator with most owner capabilities except ownership transfer and billing.
+**Purpose:** Trusted team administrator with most owner capabilities except ownership transfer and 
 
 **Capabilities:**
 - All recruiter capabilities
@@ -527,7 +527,7 @@ For recruiting agencies and collaborative recruiting groups, additional team-lev
 
 ### 3.3 Team Member
 
-**Role Code:** `member` (within `network.team_members` context)
+**Role Code:** `member` (within `team_members` context)
 
 **Purpose:** Full team participant with shared pipeline and split earnings.
 
@@ -548,7 +548,7 @@ For recruiting agencies and collaborative recruiting groups, additional team-lev
 
 ### 3.4 Team Collaborator
 
-**Role Code:** `collaborator` (within `network.team_members` context)
+**Role Code:** `collaborator` (within `team_members` context)
 
 **Purpose:** Limited participant, typically external or temporary team member.
 
@@ -623,7 +623,7 @@ For recruiting agencies and collaborative recruiting groups, additional team-lev
 
 **Candidates - Recruiter Can View:**
 - ✅ Candidates they **sourced** (where `candidate.recruiter_id` = their ID) - permanent visibility
-- ✅ Candidates with **active relationships** (12-month renewable in `network.recruiter_candidates`)
+- ✅ Candidates with **active relationships** (12-month renewable in `recruiter_candidates`)
 - ✅ Full candidate details (contact info, LinkedIn, resume) for their sourced candidates
 - ❌ **Cannot see** candidates sourced/submitted by other recruiters
 - ❌ **Cannot see** candidate names/contact info before they source/submit them
@@ -772,11 +772,11 @@ For recruiting agencies and collaborative recruiting groups, additional team-lev
 
 **New User Onboarding:**
 1. User signs up via Clerk authentication
-2. User is synced to `identity.users` table
+2. User is synced to `users` table
 3. During onboarding flow, user selects their role intent:
    - "I'm hiring" → Creates company organization + assigns `company_admin` role
    - "I'm recruiting" → Creates personal organization + assigns `recruiter` role
-4. Membership created in `identity.memberships` table
+4. Membership created in `memberships` table
 
 **Invitation Flow:**
 1. Company admin or team owner sends invite
@@ -906,11 +906,11 @@ All role-based actions are logged:
 
 ### 9.2 Database Tables
 
-- **Users:** `identity.users`
-- **Organizations:** `identity.organizations` (with `type`: `company` or `platform`)
-- **Memberships:** `identity.memberships` (links users to organizations with roles)
-- **Teams:** `network.teams` (Phase 4+)
-- **Team Members:** `network.team_members` (Phase 4+, with team-level roles)
+- **Users:** `users`
+- **Organizations:** `organizations` (with `type`: `company` or `platform`)
+- **Memberships:** `memberships` (links users to organizations with roles)
+- **Teams:** `teams` (Phase 4+)
+- **Team Members:** `team_members` (Phase 4+, with team-level roles)
 
 ### 9.3 Type Definitions
 
@@ -918,7 +918,7 @@ All role-based actions are logged:
 // From api-gateway/src/auth.ts
 export type UserRole = 'recruiter' | 'company_admin' | 'hiring_manager' | 'platform_admin';
 
-// Team roles from network.team_members
+// Team roles from team_members
 export type TeamRole = 'owner' | 'admin' | 'member' | 'collaborator';
 ```
 
@@ -1246,7 +1246,7 @@ A: Privacy and competitive protection. Recruiters should not see competitors' ca
 **Q: What is a "sourcer" vs "active relationship"?**  
 A: 
 - **Sourcer:** The recruiter who first brought a candidate to the platform (`candidate.recruiter_id`). This is permanent credit that never expires.
-- **Active Relationship:** A 12-month renewable relationship in `network.recruiter_candidates` that tracks ongoing engagement. After 12 months, the relationship expires but sourcing credit remains.
+- **Active Relationship:** A 12-month renewable relationship in `recruiter_candidates` that tracks ongoing engagement. After 12 months, the relationship expires but sourcing credit remains.
 - Recruiters can see candidates they sourced OR have active relationships with.
 
 **Q: How does candidate visibility work for recruiters?**  

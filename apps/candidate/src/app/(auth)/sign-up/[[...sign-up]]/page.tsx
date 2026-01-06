@@ -94,60 +94,24 @@ export default function SignUpPage() {
 
                         console.log('User created successfully in identity service', newUser);
 
-                        // During signup, we need to check for existing candidate by email
-                        // We can't use the normal V2 endpoint because access context would filter it
-                        // Instead, we'll check if candidate creation returns a unique constraint error
-                        let candidateExists = false;
-                        let existingCandidateId = null;
-
-                        try {
-                            // Try to create the candidate first
+                        // Check ATS service for existing candidates with this email
+                        const candidate = await apiClient.get(`/candidates`, {
+                            params: {
+                                email: encodeURIComponent(email)
+                            }
+                        });
+                        if (candidate.data && candidate.data.length > 0) {
+                            await apiClient.patch(`/candidates/${candidate.id}`, {
+                                user_id: newUser.data.id,
+                            });
+                        } else {
                             await apiClient.post('/candidates', {
                                 user_id: newUser.data.id,
                                 email: user.email,
                                 full_name: `${user.firstName || firstName} ${user.lastName || lastName}`.trim(),
                                 created_by_user_id: newUser.data.id,
                             });
-                            console.log('New candidate profile created successfully');
-                        } catch (createError: any) {
-                            // Check if it's a unique constraint error (email already exists)
-                            if (createError.message?.includes('duplicate') ||
-                                createError.message?.includes('unique') ||
-                                createError.status === 409) {
-                                console.log('Candidate with this email already exists, will attempt to update');
-                                candidateExists = true;
 
-                                // Try to find the existing candidate using search
-                                // Note: This may not work perfectly due to access context, but it's worth trying
-                                try {
-                                    const searchResponse = await apiClient.get(`/candidates?search=${encodeURIComponent(email)}&limit=1`);
-                                    console.log('Candidate search response:', searchResponse);
-
-                                    if (searchResponse.data && searchResponse.data.length > 0) {
-                                        existingCandidateId = searchResponse.data[0].id;
-                                    }
-                                } catch (searchError) {
-                                    console.warn('Could not search for existing candidate:', searchError);
-                                    // If we can't find them, the webhook will handle this later
-                                }
-                            } else {
-                                // Some other error, re-throw it
-                                throw createError;
-                            }
-                        }
-
-                        // If candidate exists and we found their ID, update the user_id
-                        if (candidateExists && existingCandidateId) {
-                            try {
-                                await apiClient.patch(`/candidates/${existingCandidateId}`, {
-                                    user_id: newUser.data.id,
-                                });
-                                console.log('Existing candidate updated with user_id');
-                            } catch (updateError) {
-                                console.warn('Could not update existing candidate, webhook will handle:', updateError);
-                            }
-                        } else if (candidateExists && !existingCandidateId) {
-                            console.log('Candidate exists but could not find ID - webhook will handle the connection');
                         }
 
                         console.log('Candidate profile setup completed');

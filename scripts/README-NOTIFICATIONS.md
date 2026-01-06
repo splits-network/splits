@@ -29,7 +29,7 @@ Tests the RabbitMQ event publishing without full data flow:
 
 ```bash
 cd scripts
-pnpm tsx test-notifications.ts
+pnpm tsx test-ts
 ```
 
 This script:
@@ -119,7 +119,7 @@ SELECT
     resend_message_id,
     error_message,
     created_at
-FROM notifications.notification_logs
+FROM notification_logs
 ORDER BY created_at DESC
 LIMIT 10;
 ```
@@ -178,10 +178,10 @@ docker exec splits-notification-service curl http://network-service:3003/health
 ### Issue: Missing data in emails
 
 **Check:**
-1. Job has company data populated: `SELECT * FROM ats.jobs WHERE id = 'job-id'`
-2. Candidate profile exists: `SELECT * FROM ats.candidates WHERE id = 'candidate-id'`
-3. Recruiter profile exists: `SELECT * FROM network.recruiters WHERE id = 'recruiter-id'`
-4. User profile exists: `SELECT * FROM identity.users WHERE id = 'user-id'`
+1. Job has company data populated: `SELECT * FROM jobs WHERE id = 'job-id'`
+2. Candidate profile exists: `SELECT * FROM candidates WHERE id = 'candidate-id'`
+3. Recruiter profile exists: `SELECT * FROM recruiters WHERE id = 'recruiter-id'`
+4. User profile exists: `SELECT * FROM users WHERE id = 'user-id'`
 
 ---
 

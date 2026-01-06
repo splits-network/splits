@@ -17,7 +17,9 @@ export class JobRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     /**
@@ -33,7 +35,7 @@ export class JobRepository {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            .schema('ats')
+            
             .from('jobs')
             .select(
                 `
@@ -67,7 +69,7 @@ export class JobRepository {
                     
                     // Get job IDs from applications with active stages
                     const { data: applications, error: appsError } = await this.supabase
-                        .schema('ats')
+                        
                         .from('applications')
                         .select('job_id, stage, candidate_id')
                         .eq('recruiter_id', accessContext.recruiterId)
@@ -75,7 +77,7 @@ export class JobRepository {
                                         
                     // Get job IDs from placements
                     const { data: placements, error: placementsError } = await this.supabase
-                        .schema('ats')
+                        
                         .from('placements')
                         .select('job_id, candidate_id')
                         .eq('recruiter_id', accessContext.recruiterId);
@@ -154,7 +156,7 @@ export class JobRepository {
 
     async findJob(id: string, clerkUserId?: string, include: string[] = []): Promise<any | null> {
         let query = this.supabase
-            .schema('ats')
+            
             .from('jobs')
             .select(
                 `
@@ -178,7 +180,7 @@ export class JobRepository {
         // Fetch related data based on include parameter
         if (include.includes('requirements')) {
             const { data: requirements } = await this.supabase
-                .schema('ats')
+                
                 .from('job_requirements')
                 .select('*')
                 .eq('job_id', id)
@@ -189,7 +191,7 @@ export class JobRepository {
 
         if( include.includes('applications')) {
             const { data: applications } = await this.supabase
-                .schema('ats')
+                
                 .from('applications')
                 .select('*')
                 .eq('job_id', id)
@@ -202,7 +204,7 @@ export class JobRepository {
 
     async createJob(job: any): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('jobs')
             .insert(job)
             .select()
@@ -214,7 +216,7 @@ export class JobRepository {
 
     async updateJob(id: string, updates: JobUpdate): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('jobs')
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id)
@@ -228,7 +230,7 @@ export class JobRepository {
     async deleteJob(id: string): Promise<void> {
         // Soft delete by default
         const { error } = await this.supabase
-            .schema('ats')
+            
             .from('jobs')
             .update({ deleted_at: new Date().toISOString() })
             .eq('id', id);

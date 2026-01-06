@@ -5,14 +5,15 @@ export class OrganizationRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     async findOrganizations(
         filters: OrganizationFilters & { page: number; limit: number }
     ): Promise<{ data: any[]; total: number }> {
         let query = this.supabase
-            .schema('identity')
             .from('organizations')
             .select('*', { count: 'exact' });
 
@@ -34,7 +35,6 @@ export class OrganizationRepository {
 
     async findOrganizationById(id: string): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('identity')
             .from('organizations')
             .select('*')
             .eq('id', id)
@@ -46,7 +46,6 @@ export class OrganizationRepository {
 
     async createOrganization(data: any): Promise<any> {
         const { data: org, error } = await this.supabase
-            .schema('identity')
             .from('organizations')
             .insert([data])
             .select()
@@ -58,7 +57,6 @@ export class OrganizationRepository {
 
     async updateOrganization(id: string, updates: any): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('identity')
             .from('organizations')
             .update(updates)
             .eq('id', id)
@@ -71,7 +69,6 @@ export class OrganizationRepository {
 
     async deleteOrganization(id: string): Promise<void> {
         const { error } = await this.supabase
-            .schema('identity')
             .from('organizations')
             .update({ deleted_at: new Date().toISOString() })
             .eq('id', id);

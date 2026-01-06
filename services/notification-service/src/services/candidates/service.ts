@@ -426,7 +426,7 @@ export class CandidatesEmailService {
     </div>
 
     <div style="text-align: center; padding: 20px; color: #6b7280; font-size: 12px;">
-        <p>© ${new Date().getFullYear()} Splits Network. All rights reserved.</p>
+        <p>© ${new Date().getFullYear()} Splits  All rights reserved.</p>
         <p>
             <a href="https://splits.network/privacy" style="color: #667eea; text-decoration: none;">Privacy Policy</a> | 
             <a href="https://splits.network/terms" style="color: #667eea; text-decoration: none;">Terms of Service</a>
@@ -513,7 +513,7 @@ export class CandidatesEmailService {
     </div>
 
     <div style="text-align: center; padding: 20px; color: #6b7280; font-size: 12px;">
-        <p>© ${new Date().getFullYear()} Splits Network. All rights reserved.</p>
+        <p>© ${new Date().getFullYear()} Splits  All rights reserved.</p>
     </div>
 </body>
 </html>
@@ -571,7 +571,7 @@ export class CandidatesEmailService {
         <p style="font-size: 18px; margin-top: 0;">Hi ${data.recruiter_name},</p>
         
         <p style="font-size: 16px; line-height: 1.8;">
-            <strong>${data.candidate_name}</strong> has declined your invitation to work together on Applicant Network.
+            <strong>${data.candidate_name}</strong> has declined your invitation to work together on Applicant 
         </p>
 
         <div style="background: #f9fafb; border-left: 4px solid #6b7280; padding: 20px; margin: 20px 0; border-radius: 4px;">
@@ -609,7 +609,7 @@ export class CandidatesEmailService {
     </div>
 
     <div style="text-align: center; padding: 20px; color: #6b7280; font-size: 12px;">
-        <p>© ${new Date().getFullYear()} Splits Network. All rights reserved.</p>
+        <p>© ${new Date().getFullYear()} Splits  All rights reserved.</p>
     </div>
 </body>
 </html>

@@ -100,7 +100,7 @@ SELECT
   onboarding_status,
   onboarding_step,
   onboarding_completed_at
-FROM identity.users
+FROM users
 WHERE email = 'test@example.com';
 -- Expected: status='completed', step=4, completed_at=<timestamp>
 
@@ -109,8 +109,8 @@ SELECT
   id,
   name,
   type
-FROM identity.organizations
-WHERE id = (SELECT organization_id FROM identity.memberships WHERE user_id = '<user-id>');
+FROM organizations
+WHERE id = (SELECT organization_id FROM memberships WHERE user_id = '<user-id>');
 -- Expected: One row with appropriate name and type
 
 -- Check membership
@@ -119,7 +119,7 @@ SELECT
   organization_id,
   role,
   status
-FROM identity.memberships
+FROM memberships
 WHERE user_id = '<user-id>';
 -- Expected: role='recruiter' or 'company_admin', status='active'
 ```

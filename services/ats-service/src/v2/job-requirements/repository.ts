@@ -4,7 +4,9 @@ export class JobRequirementRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     async list(jobId?: string) {
@@ -13,7 +15,7 @@ export class JobRequirementRepository {
         }
 
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('job_requirements')
             .select('*')
             .eq('job_id', jobId)
@@ -25,7 +27,7 @@ export class JobRequirementRepository {
 
     async getById(id: string) {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('job_requirements')
             .select('*')
             .eq('id', id)
@@ -40,7 +42,7 @@ export class JobRequirementRepository {
 
     async createRequirement(payload: any) {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('job_requirements')
             .insert(payload)
             .select('*')
@@ -52,7 +54,7 @@ export class JobRequirementRepository {
 
     async updateRequirement(id: string, payload: any) {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('job_requirements')
             .update(payload)
             .eq('id', id)
@@ -68,7 +70,7 @@ export class JobRequirementRepository {
 
     async deleteRequirement(id: string): Promise<void> {
         const { error } = await this.supabase
-            .schema('ats')
+            
             .from('job_requirements')
             .delete()
             .eq('id', id);

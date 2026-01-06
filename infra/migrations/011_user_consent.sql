@@ -4,9 +4,9 @@
 -- Created: 2025-12-18
 
 -- Create user_consent table
-CREATE TABLE IF NOT EXISTS identity.user_consent (
+CREATE TABLE IF NOT EXISTS user_consent (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES identity.users(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     
     -- Consent categories
     necessary BOOLEAN NOT NULL DEFAULT TRUE,
@@ -28,13 +28,13 @@ CREATE TABLE IF NOT EXISTS identity.user_consent (
 );
 
 -- Index for quick user lookups
-CREATE INDEX idx_user_consent_user_id ON identity.user_consent(user_id);
+CREATE INDEX idx_user_consent_user_id ON user_consent(user_id);
 
 -- Index for compliance reporting (find consents by date)
-CREATE INDEX idx_user_consent_created_at ON identity.user_consent(created_at DESC);
+CREATE INDEX idx_user_consent_created_at ON user_consent(created_at DESC);
 
 -- Updated_at trigger
-CREATE OR REPLACE FUNCTION identity.update_user_consent_timestamp()
+CREATE OR REPLACE FUNCTION update_user_consent_timestamp()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = NOW();
@@ -43,17 +43,17 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_update_user_consent_timestamp
-    BEFORE UPDATE ON identity.user_consent
+    BEFORE UPDATE ON user_consent
     FOR EACH ROW
-    EXECUTE FUNCTION identity.update_user_consent_timestamp();
+    EXECUTE FUNCTION update_user_consent_timestamp();
 
 -- Grant permissions (adjust based on your service accounts)
-GRANT SELECT, INSERT, UPDATE ON identity.user_consent TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON user_consent TO authenticated;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA identity TO authenticated;
 
 -- Add comment for documentation
-COMMENT ON TABLE identity.user_consent IS 'Stores user cookie and privacy consent preferences for GDPR/CCPA compliance';
-COMMENT ON COLUMN identity.user_consent.necessary IS 'Always true - required for site functionality';
-COMMENT ON COLUMN identity.user_consent.functional IS 'User consent for functional/preference cookies';
-COMMENT ON COLUMN identity.user_consent.analytics IS 'User consent for analytics/performance cookies';
-COMMENT ON COLUMN identity.user_consent.marketing IS 'User consent for marketing/advertising cookies';
+COMMENT ON TABLE user_consent IS 'Stores user cookie and privacy consent preferences for GDPR/CCPA compliance';
+COMMENT ON COLUMN user_consent.necessary IS 'Always true - required for site functionality';
+COMMENT ON COLUMN user_consent.functional IS 'User consent for functional/preference cookies';
+COMMENT ON COLUMN user_consent.analytics IS 'User consent for analytics/performance cookies';
+COMMENT ON COLUMN user_consent.marketing IS 'User consent for marketing/advertising cookies';

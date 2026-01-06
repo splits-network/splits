@@ -15,12 +15,12 @@ This document audits the existing Splits Network codebase to understand what's a
 
 ### 1.1 Core Tables (from Supabase)
 
-#### **ats.applications**
+#### **applications**
 ```sql
 - id (uuid, PK)
-- job_id (uuid, FK → ats.jobs)
-- candidate_id (uuid, FK → ats.candidates)
-- recruiter_id (uuid, FK → identity.users) -- The recruiter who submitted this application
+- job_id (uuid, FK → jobs)
+- candidate_id (uuid, FK → candidates)
+- recruiter_id (uuid, FK → users) -- The recruiter who submitted this application
 - stage (text) -- 'submitted', 'screen', 'interview', 'offer', 'hired', 'rejected'
 - notes (text, nullable)
 - created_at (timestamptz)
@@ -31,7 +31,7 @@ This document audits the existing Splits Network codebase to understand what's a
 **Status:** ✅ EXISTS  
 **Purpose:** Main application record tracking candidate submissions to jobs
 
-#### **ats.candidates**
+#### **candidates**
 ```sql
 - id (uuid, PK)
 - email (text, unique)
@@ -41,9 +41,9 @@ This document audits the existing Splits Network codebase to understand what's a
 - location (varchar, nullable)
 - current_title (varchar, nullable)
 - current_company (varchar, nullable)
-- user_id (uuid, nullable, FK → identity.users) -- If candidate is self-managed
-- created_by_user_id (uuid, nullable, FK → identity.users) -- Recruiter who added them
-- recruiter_id (uuid, nullable, FK → identity.users) -- SOURCER attribution
+- user_id (uuid, nullable, FK → users) -- If candidate is self-managed
+- created_by_user_id (uuid, nullable, FK → users) -- Recruiter who added them
+- recruiter_id (uuid, nullable, FK → users) -- SOURCER attribution
 - verification_status (text, default 'unverified')
 - verification_metadata (jsonb)
 - verified_at (timestamptz, nullable)
@@ -53,10 +53,10 @@ This document audits the existing Splits Network codebase to understand what's a
 **Status:** ✅ EXISTS  
 **Purpose:** Candidate records, can be self-managed or recruiter-managed
 
-#### **ats.job_pre_screen_questions**
+#### **job_pre_screen_questions**
 ```sql
 - id (uuid, PK)
-- job_id (uuid, FK → ats.jobs)
+- job_id (uuid, FK → jobs)
 - question (text)
 - question_type (text) -- 'text', 'yes_no', 'select', 'multi_select'
 - options (jsonb, nullable)
@@ -68,13 +68,13 @@ This document audits the existing Splits Network codebase to understand what's a
 **Purpose:** Pre-screening questions defined by companies for specific jobs  
 **RLS:** Enabled
 
-⚠️ **MISSING:** `ats.job_pre_screen_answers` table for storing candidate responses
+⚠️ **MISSING:** `job_pre_screen_answers` table for storing candidate responses
 
-#### **network.recruiter_candidates**
+#### **recruiter_candidates**
 ```sql
 - id (uuid, PK)
-- recruiter_id (uuid, FK → network.recruiters)
-- candidate_id (uuid, FK → ats.candidates)
+- recruiter_id (uuid, FK → recruiters)
+- candidate_id (uuid, FK → candidates)
 - relationship_start_date (timestamptz, default now())
 - relationship_end_date (timestamptz) -- 12 months from start
 - status (text) -- 'active', 'expired', 'terminated'
@@ -92,17 +92,17 @@ This document audits the existing Splits Network codebase to understand what's a
 **Status:** ✅ EXISTS  
 **Purpose:** 12-month renewable recruiter-candidate relationships (candidate-wide, not job-specific)
 
-#### **network.candidate_role_assignments**
+#### **candidate_role_assignments**
 ```sql
 - id (uuid, PK)
-- job_id (uuid, FK → ats.jobs)
-- candidate_id (uuid, FK → ats.candidates)
-- recruiter_id (uuid, FK → network.recruiters)
+- job_id (uuid, FK → jobs)
+- candidate_id (uuid, FK → candidates)
+- recruiter_id (uuid, FK → recruiters)
 - state (text) -- 'proposed', 'accepted', 'declined', 'timed_out', 'submitted', 'closed'
 - proposed_at (timestamptz)
 - response_due_at (timestamptz)
 - accepted_at, declined_at, timed_out_at, submitted_at, closed_at (all timestamptz, nullable)
-- proposed_by (uuid, nullable, FK → identity.users)
+- proposed_by (uuid, nullable, FK → users)
 - proposal_notes (text, nullable)
 - response_notes (text, nullable)
 - created_at, updated_at
@@ -113,10 +113,10 @@ This document audits the existing Splits Network codebase to understand what's a
 
 This is the key table for tracking which recruiter is assigned to a specific role for a candidate (for fiscal tracking)!
 
-#### **ats.application_audit_log**
+#### **application_audit_log**
 ```sql
 - id (uuid, PK)
-- application_id (uuid, FK → ats.applications)
+- application_id (uuid, FK → applications)
 - action (text) -- 'accepted', 'rejected', 'stage_changed', 'viewed', etc.
 - performed_by_user_id (uuid, nullable)
 - performed_by_role (text, nullable)
@@ -240,9 +240,9 @@ Routes exist in API Gateway (`services/api-gateway/src/routes/documents/routes.t
 
 | Table | Purpose | Priority |
 |-------|---------|----------|
-| `ats.job_pre_screen_answers` | Store candidate responses to pre-screen questions | HIGH |
-| `ats.application_documents` | Link documents to specific applications | MEDIUM |
-| `ats.application_drafts` | Store draft/in-progress applications | MEDIUM |
+| `job_pre_screen_answers` | Store candidate responses to pre-screen questions | HIGH |
+| `application_documents` | Link documents to specific applications | MEDIUM |
+| `application_drafts` | Store draft/in-progress applications | MEDIUM |
 
 ### 4.2 Missing API Endpoints
 
@@ -343,15 +343,15 @@ Routes exist in API Gateway (`services/api-gateway/src/routes/documents/routes.t
 6. Company can click "Request Pre-Screen" → random recruiter assigned
 
 **Tables Involved:**
-- `ats.applications` (new record, `recruiter_id = NULL`)
-- `ats.job_pre_screen_answers` (new records)
-- `ats.application_documents` (link existing docs to application)
+- `applications` (new record, `recruiter_id = NULL`)
+- `job_pre_screen_answers` (new records)
+- `application_documents` (link existing docs to application)
 
 ### 6.2 ❌ Candidate Applies to Job (Has Recruiter)
 **Flow:**
 1. Candidate browses `/jobs/[id]`
 2. Clicks "Apply Now"
-3. System checks `network.recruiter_candidates` for active relationship
+3. System checks `recruiter_candidates` for active relationship
 4. Multi-step wizard (same as above)
 5. On submit:
    - Application created with `recruiter_id` from relationship
@@ -364,10 +364,10 @@ Routes exist in API Gateway (`services/api-gateway/src/routes/documents/routes.t
 8. Application state → 'submitted', company sees it
 
 **Tables Involved:**
-- `ats.applications` (new record, `recruiter_id` from relationship)
-- `network.recruiter_candidates` (check for active relationship)
-- `ats.job_pre_screen_answers`
-- `ats.application_documents`
+- `applications` (new record, `recruiter_id` from relationship)
+- `recruiter_candidates` (check for active relationship)
+- `job_pre_screen_answers`
+- `application_documents`
 - Notification queue
 
 ### 6.3 ❌ Company Requests Pre-Screen (Non-Represented Candidate)
@@ -378,14 +378,14 @@ Routes exist in API Gateway (`services/api-gateway/src/routes/documents/routes.t
 4. Invitation sent to candidate: "Recruiter X would like to represent you for this job"
 5. Candidate accepts or declines
 6. If accepted:
-   - `network.recruiter_candidates` relationship created (12 months)
+   - `recruiter_candidates` relationship created (12 months)
    - Application updated with `recruiter_id`
    - Recruiter takes over application
 
 **Tables Involved:**
-- `ats.applications` (update `recruiter_id`)
-- `network.recruiters` (find active recruiters)
-- `network.recruiter_candidates` (create relationship)
+- `applications` (update `recruiter_id`)
+- `recruiters` (find active recruiters)
+- `recruiter_candidates` (create relationship)
 
 ### 6.4 ❌ Draft Application (Save Progress)
 **Flow:**
@@ -395,20 +395,20 @@ Routes exist in API Gateway (`services/api-gateway/src/routes/documents/routes.t
 4. Draft persisted until submitted or deleted
 
 **Tables Involved:**
-- `ats.application_drafts` (new table)
+- `application_drafts` (new table)
 - Store: `candidate_id`, `job_id`, `draft_data` (jsonb), `last_saved_at`
 
 ---
 
 ## 7. Data Model Additions Required
 
-### 7.1 New Table: `ats.job_pre_screen_answers`
+### 7.1 New Table: `job_pre_screen_answers`
 
 ```sql
-CREATE TABLE IF NOT EXISTS ats.job_pre_screen_answers (
+CREATE TABLE IF NOT EXISTS job_pre_screen_answers (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    application_id UUID NOT NULL REFERENCES ats.applications(id) ON DELETE CASCADE,
-    question_id UUID NOT NULL REFERENCES ats.job_pre_screen_questions(id) ON DELETE CASCADE,
+    application_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
+    question_id UUID NOT NULL REFERENCES job_pre_screen_questions(id) ON DELETE CASCADE,
     answer_text TEXT,
     answer_boolean BOOLEAN,
     answer_json JSONB, -- For select/multi_select options
@@ -416,54 +416,54 @@ CREATE TABLE IF NOT EXISTS ats.job_pre_screen_answers (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_pre_screen_answers_application ON ats.job_pre_screen_answers(application_id);
-CREATE INDEX idx_pre_screen_answers_question ON ats.job_pre_screen_answers(question_id);
+CREATE INDEX idx_pre_screen_answers_application ON job_pre_screen_answers(application_id);
+CREATE INDEX idx_pre_screen_answers_question ON job_pre_screen_answers(question_id);
 ```
 
-### 7.2 New Table: `ats.application_documents`
+### 7.2 New Table: `application_documents`
 
 ```sql
-CREATE TABLE IF NOT EXISTS ats.application_documents (
+CREATE TABLE IF NOT EXISTS application_documents (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    application_id UUID NOT NULL REFERENCES ats.applications(id) ON DELETE CASCADE,
+    application_id UUID NOT NULL REFERENCES applications(id) ON DELETE CASCADE,
     document_id UUID NOT NULL, -- Reference to document-service
     document_type TEXT NOT NULL, -- 'resume', 'cover_letter', 'portfolio', 'other'
     is_primary BOOLEAN DEFAULT false, -- Primary resume for this application
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_app_docs_application ON ats.application_documents(application_id);
-CREATE UNIQUE INDEX idx_app_docs_unique ON ats.application_documents(application_id, document_id);
+CREATE INDEX idx_app_docs_application ON application_documents(application_id);
+CREATE UNIQUE INDEX idx_app_docs_unique ON application_documents(application_id, document_id);
 ```
 
-### 7.3 New Table: `ats.application_drafts` (Optional)
+### 7.3 New Table: `application_drafts` (Optional)
 
 ```sql
-CREATE TABLE IF NOT EXISTS ats.application_drafts (
+CREATE TABLE IF NOT EXISTS application_drafts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    candidate_id UUID NOT NULL REFERENCES ats.candidates(id) ON DELETE CASCADE,
-    job_id UUID NOT NULL REFERENCES ats.jobs(id) ON DELETE CASCADE,
+    candidate_id UUID NOT NULL REFERENCES candidates(id) ON DELETE CASCADE,
+    job_id UUID NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
     draft_data JSONB NOT NULL DEFAULT '{}', -- Stores form state
     last_saved_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE(candidate_id, job_id)
 );
 
-CREATE INDEX idx_app_drafts_candidate ON ats.application_drafts(candidate_id);
-CREATE INDEX idx_app_drafts_job ON ats.application_drafts(job_id);
+CREATE INDEX idx_app_drafts_candidate ON application_drafts(candidate_id);
+CREATE INDEX idx_app_drafts_job ON application_drafts(job_id);
 ```
 
-### 7.4 Extend `ats.applications` Table
+### 7.4 Extend `applications` Table
 
 Add columns:
 ```sql
-ALTER TABLE ats.applications ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'draft';
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'draft';
 -- 'draft', 'pending_recruiter_review', 'recruiter_approved', 'submitted', 'under_review', 'rejected', 'accepted'
 
-ALTER TABLE ats.applications ADD COLUMN IF NOT EXISTS submitted_by TEXT;
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS submitted_by TEXT;
 -- 'candidate', 'recruiter'
 
-ALTER TABLE ats.applications ADD COLUMN IF NOT EXISTS candidate_submitted_at TIMESTAMPTZ;
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS candidate_submitted_at TIMESTAMPTZ;
 -- When candidate originally submitted (before recruiter review)
 ```
 
@@ -473,9 +473,9 @@ ALTER TABLE ats.applications ADD COLUMN IF NOT EXISTS candidate_submitted_at TIM
 
 ### Decision 1: Recruiter Assignment Scope
 **Clarification:** 
-- `network.recruiter_candidates` = candidate-wide 12-month relationship
-- `network.candidate_role_assignments` = job-specific tracking for fiscal assignment
-- `ats.applications.recruiter_id` = who submitted/manages this specific application
+- `recruiter_candidates` = candidate-wide 12-month relationship
+- `candidate_role_assignments` = job-specific tracking for fiscal assignment
+- `applications.recruiter_id` = who submitted/manages this specific application
 
 **Implementation:**
 - When candidate with recruiter applies, use recruiter from `recruiter_candidates`
@@ -501,7 +501,7 @@ ALTER TABLE ats.applications ADD COLUMN IF NOT EXISTS candidate_submitted_at TIM
 
 ### Decision 4: Pre-Screen Answers
 **Storage:**
-- `ats.job_pre_screen_answers` table
+- `job_pre_screen_answers` table
 - One row per question per application
 - Support text, boolean, and JSON answers
 

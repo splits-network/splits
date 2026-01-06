@@ -40,7 +40,7 @@ The ATS Integration system enables Splits Network to:
 
 ### Tables
 
-#### `ats.integrations`
+#### `integrations`
 Stores ATS platform connections with encrypted credentials.
 
 | Column | Type | Description |
@@ -58,7 +58,7 @@ Stores ATS platform connections with encrypted credentials.
 | `config` | JSONB | Platform-specific configuration |
 | `last_synced_at` | TIMESTAMPTZ | Last successful sync |
 
-#### `ats.sync_logs`
+#### `sync_logs`
 Audit trail of all sync operations.
 
 | Column | Type | Description |
@@ -75,7 +75,7 @@ Audit trail of all sync operations.
 | `synced_at` | TIMESTAMPTZ | Timestamp |
 | `retry_count` | INTEGER | Number of retry attempts |
 
-#### `ats.external_entity_map`
+#### `external_entity_map`
 Bidirectional ID mapping between internal and external systems.
 
 | Column | Type | Description |
@@ -88,7 +88,7 @@ Bidirectional ID mapping between internal and external systems.
 | `last_synced_at` | TIMESTAMPTZ | Last sync timestamp |
 | `sync_version` | INTEGER | Optimistic locking version |
 
-#### `ats.sync_queue`
+#### `sync_queue`
 Async processing queue for sync operations.
 
 | Column | Type | Description |
@@ -340,23 +340,23 @@ curl http://localhost:3002/health
 
 ```sql
 -- View recent sync logs
-SELECT * FROM ats.sync_logs 
+SELECT * FROM sync_logs 
 WHERE integration_id = 'xxx' 
 ORDER BY synced_at DESC 
 LIMIT 50;
 
 -- Check queue status
 SELECT status, COUNT(*) 
-FROM ats.sync_queue 
+FROM sync_queue 
 GROUP BY status;
 
 -- Find stuck jobs
-SELECT * FROM ats.sync_queue 
+SELECT * FROM sync_queue 
 WHERE status = 'processing' 
 AND started_at < NOW() - INTERVAL '10 minutes';
 
 -- View entity mappings
-SELECT * FROM ats.external_entity_map 
+SELECT * FROM external_entity_map 
 WHERE integration_id = 'xxx';
 ```
 

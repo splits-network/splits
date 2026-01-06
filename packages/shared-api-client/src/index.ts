@@ -224,25 +224,31 @@ export class SplitsApiClient {
     /**
      * HTTP GET request with query parameters
      */
-    async get<T = any>(
-        endpoint: string, 
-        params?: Record<string, any>
-    ): Promise<T> {
-        let url = endpoint;
-        if (params) {
-            const searchParams = new URLSearchParams();
-            Object.entries(params).forEach(([key, value]) => {
-                if (value !== undefined && value !== null) {
+ async get<T = any>(
+    endpoint: string, 
+    params?: Record<string, any>
+): Promise<T> {
+    let url = endpoint;
+    if (params) {
+        const searchParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+                // JSON stringify objects (like filters) but keep primitives as strings
+                if (typeof value === 'object' && value !== null) {
+                    console.log("Adding object param to query:", key, value);
+                    searchParams.append(key, JSON.stringify(value));
+                } else {
                     searchParams.append(key, String(value));
                 }
-            });
-            const query = searchParams.toString();
-            if (query) {
-                url = `${endpoint}?${query}`;
             }
+        });
+        const query = searchParams.toString();
+        if (query) {
+            url = `${endpoint}?${query}`;
         }
-        return this.request<T>(url, { method: 'GET' });
     }
+    return this.request<T>(url, { method: 'GET' });
+}
 
     /**
      * HTTP POST request

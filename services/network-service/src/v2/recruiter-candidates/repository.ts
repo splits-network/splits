@@ -12,7 +12,9 @@ export class RecruiterCandidateRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     async findRecruiterCandidates(
@@ -37,7 +39,7 @@ export class RecruiterCandidateRepository {
 
         // Build query with enriched data
         let query = this.supabase
-            .schema('network')
+            
             .from('recruiter_candidates')
             .select('*', { count: 'exact' });
 
@@ -76,7 +78,7 @@ export class RecruiterCandidateRepository {
 
     async findRecruiterCandidate(id: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            .schema('network')
+            
             .from('recruiter_candidates')
             .select('*')
             .eq('id', id)
@@ -96,7 +98,7 @@ export class RecruiterCandidateRepository {
 
     async createRecruiterCandidate(relationship: any): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('network')
+            
             .from('recruiter_candidates')
             .insert(relationship)
             .select()
@@ -108,7 +110,7 @@ export class RecruiterCandidateRepository {
 
     async updateRecruiterCandidate(id: string, updates: RecruiterCandidateUpdate): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('network')
+            
             .from('recruiter_candidates')
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id)
@@ -122,7 +124,7 @@ export class RecruiterCandidateRepository {
     async deleteRecruiterCandidate(id: string): Promise<void> {
         // First, get the current record to check its state
         const { data: existing, error: fetchError } = await this.supabase
-            .schema('network')
+            
             .from('recruiter_candidates')
             .select('consent_given, candidate_id')
             .eq('id', id)
@@ -134,7 +136,7 @@ export class RecruiterCandidateRepository {
         // Hard delete if invitation not accepted and no candidate relationship
         if (!existing.consent_given && !existing.candidate_id) {
             const { error } = await this.supabase
-                .schema('network')
+                
                 .from('recruiter_candidates')
                 .delete()
                 .eq('id', id);
@@ -143,7 +145,7 @@ export class RecruiterCandidateRepository {
         } else {
             // Soft delete for accepted relationships or those with candidate data
             const { error } = await this.supabase
-                .schema('network')
+                
                 .from('recruiter_candidates')
                 .update({ status: 'terminated', updated_at: new Date().toISOString() })
                 .eq('id', id);
@@ -154,7 +156,7 @@ export class RecruiterCandidateRepository {
 
     async findByInvitationToken(token: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            .schema('network')
+            
             .from('recruiter_candidates')
             .select('*')
             .eq('invitation_token', token)
@@ -170,7 +172,7 @@ export class RecruiterCandidateRepository {
         invitationExpiresAt.setDate(invitationExpiresAt.getDate() + 7);
 
         const { data, error } = await this.supabase
-            .schema('network')
+            
             .from('recruiter_candidates')
             .update({
                 invitation_token: invitationToken,
@@ -216,7 +218,7 @@ export class RecruiterCandidateRepository {
         }
 
         const { data: recruiters } = await this.supabase
-            .schema('network')
+            
             .from('recruiters')
             .select('id, user_id, bio, status')
             .in('id', recruiterIds);
@@ -237,7 +239,7 @@ export class RecruiterCandidateRepository {
         const userMap = new Map<string, { id: string; name?: string; email?: string }>();
         if (userIds.size > 0) {
             const { data: users } = await this.supabase
-                .schema('identity')
+                
                 .from('users')
                 .select('id, name, email')
                 .in('id', Array.from(userIds));

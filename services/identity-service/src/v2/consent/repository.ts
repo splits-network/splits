@@ -5,12 +5,13 @@ export class ConsentRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     async findConsentByUserId(userId: string): Promise<ConsentRecord | null> {
         const { data, error } = await this.supabase
-            .schema('identity')
             .from('user_consent')
             .select('*')
             .eq('user_id', userId)
@@ -22,7 +23,6 @@ export class ConsentRepository {
 
     async upsertConsent(userId: string, request: SaveConsentRequest): Promise<ConsentRecord> {
         const { data, error } = await this.supabase
-            .schema('identity')
             .from('user_consent')
             .upsert(
                 {
@@ -47,7 +47,6 @@ export class ConsentRepository {
 
     async deleteConsent(userId: string): Promise<void> {
         const { error } = await this.supabase
-            .schema('identity')
             .from('user_consent')
             .delete()
             .eq('user_id', userId);

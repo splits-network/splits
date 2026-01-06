@@ -11,7 +11,9 @@ export class AssignmentRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     async findAssignments(
@@ -27,15 +29,15 @@ export class AssignmentRepository {
 
         // Build query with enriched data
         let query = this.supabase
-            .schema('network')
+            
             .from('role_assignments')
             .select(`
                 *,
                 recruiter:recruiters(id, name, email),
-                job:ats.jobs(
+                job:jobs(
                     id,
                     title,
-                    company:ats.companies!inner(id, name, identity_organization_id)
+                    company:companies!inner(id, name, identity_organization_id)
                 )
             `, { count: 'exact' });
 
@@ -79,15 +81,15 @@ export class AssignmentRepository {
 
     async findAssignment(id: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            .schema('network')
+            
             .from('role_assignments')
             .select(`
                 *,
                 recruiter:recruiters(id, name, email),
-                job:ats.jobs(
+                job:jobs(
                     id,
                     title,
-                    company:ats.companies(id, name)
+                    company:companies(id, name)
                 )
             `)
             .eq('id', id)
@@ -102,7 +104,7 @@ export class AssignmentRepository {
 
     async createAssignment(assignment: any): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('network')
+            
             .from('role_assignments')
             .insert(assignment)
             .select()
@@ -114,7 +116,7 @@ export class AssignmentRepository {
 
     async updateAssignment(id: string, updates: AssignmentUpdate): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('network')
+            
             .from('role_assignments')
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id)
@@ -128,7 +130,7 @@ export class AssignmentRepository {
     async deleteAssignment(id: string): Promise<void> {
         // Soft delete
         const { error } = await this.supabase
-            .schema('network')
+            
             .from('role_assignments')
             .update({ status: 'inactive', updated_at: new Date().toISOString() })
             .eq('id', id);

@@ -22,6 +22,7 @@ The Notification Service handles notification delivery using **pure event-driven
 
 ### ✅ **V2 Patterns (State Management)**
 - HTTP APIs for notification center functionality
+- **shared-api-client automatically prepends `/api/v2` to all requests** - frontend calls use simple paths like `/notifications`, not `/api/v2/notifications`
 - Role-based notification filtering
 - Template management CRUD operations
 - User preference management (future)
@@ -90,8 +91,20 @@ The Notification Service handles notification delivery using **pure event-driven
 4. **Use access context** from `@splits-network/shared-access-context`
 5. **Role-based filtering** for notification access
 
+### Standardized List Functionality
+- **Use shared types** from `@splits-network/shared-types`:
+  - `StandardListParams` for query parameters: `{ page?: number; limit?: number; search?: string; filters?: Record<string, any>; include?: string; sort_by?: string; sort_order?: 'asc' | 'desc' }`
+  - `StandardListResponse<T>` for responses: `{ data: T[]; pagination: PaginationResponse }`
+- **Repository pattern** for list methods:
+  ```typescript
+  async list(clerkUserId: string, params: StandardListParams): Promise<StandardListResponse<T>>
+  ```
+- **Server-side filtering** - never rely on client-side filtering for performance
+- **Enriched data** - use JOINs to include related data in single queries
+- **Consistent pagination** - always return total count and page information
+
 ### Database Integration
-- **Schema**: All tables in `notifications.*` schema
+- **Schema**: All tables in `*` schema
 - **Cross-Schema Queries**: Allowed for data enrichment (identity, ats, network)
 - **Event Publishing**: Minimal - mostly a consumer service
 - **Email Integration**: Resend for professional email delivery
@@ -165,7 +178,7 @@ async list(clerkUserId: string, filters: NotificationFilters) {
     const context = await resolveAccessContext(this.supabase, clerkUserId);
     
     const query = this.supabase
-        .schema('notifications')
+        
         .from('notifications')
         .select('*');
         

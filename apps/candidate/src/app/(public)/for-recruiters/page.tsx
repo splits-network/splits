@@ -374,7 +374,7 @@ export default function ForRecruitersPage() {
                                 ))}
                             </div>
                             <p className="text-base-content/80 italic mb-4">
-                                "I've tripled my placements since joining Splits Network. The candidate quality and platform features are unmatched."
+                                "I've tripled my placements since joining Splits  The candidate quality and platform features are unmatched."
                             </p>
                             <div className="flex items-center gap-3">
                                 <div className="avatar avatar-placeholder">
@@ -396,7 +396,7 @@ export default function ForRecruitersPage() {
             <section className="text-center bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-12">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Grow Your Practice?</h2>
                 <p className="text-xl text-base-content/80 mb-8 max-w-2xl mx-auto">
-                    Join hundreds of successful recruiters who are building thriving practices on Splits Network.
+                    Join hundreds of successful recruiters who are building thriving practices on Splits 
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <a href="https://splits.network" className="btn btn-primary btn-lg" target="_blank" rel="noopener noreferrer">

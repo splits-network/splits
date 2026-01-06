@@ -10,7 +10,9 @@ export class PayoutRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     async listPayouts(filters: PayoutListFilters = {}): Promise<RepositoryListResult<Payout>> {
@@ -19,7 +21,7 @@ export class PayoutRepository {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            .schema('billing')
+            
             .from('payouts')
             .select('*', { count: 'exact' });
 
@@ -47,7 +49,7 @@ export class PayoutRepository {
 
     async findPayout(id: string): Promise<Payout | null> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('payouts')
             .select('*')
             .eq('id', id)
@@ -62,7 +64,7 @@ export class PayoutRepository {
 
     async createPayout(payload: PayoutCreateInput): Promise<Payout> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('payouts')
             .insert(payload)
             .select('*')
@@ -74,7 +76,7 @@ export class PayoutRepository {
 
     async updatePayout(id: string, updates: PayoutUpdateInput): Promise<Payout> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('payouts')
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id)

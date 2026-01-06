@@ -280,7 +280,7 @@ kubectl logs deployment/notification-service -n production | grep "Cannot send e
 
 1. **Recruiter-Managed Candidates**: Candidates without `user_id` (sourced by recruiter) won't receive emails - this is expected behavior
 2. **Admin Lookups**: Requires `identity_organization_id` on companies - companies without this field won't notify admins
-3. **Email Fallback**: Candidate email fallback (checking `ats.candidates.email`) is temporary - eventually all candidates should have `user_id`
+3. **Email Fallback**: Candidate email fallback (checking `candidates.email`) is temporary - eventually all candidates should have `user_id`
 
 ---
 

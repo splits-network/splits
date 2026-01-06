@@ -87,7 +87,7 @@ Whether it's a recruiter sending a job to a candidate, a company reviewing an ap
 - **Initiator:** Company-side recruiter
 - **Pending Action By:** Candidate's recruiter
 - **Action:** Accept collaboration or Decline
-- **Data:** `network.candidate_role_assignments` in `proposed` state
+- **Data:** `candidate_role_assignments` in `proposed` state
 - **Portal:** Main Portal (both recruiters)
 - **Documentation:** `docs/business-logic/recruiter-to-recruiter-collaboration.md`
 - **Status:** Phase 2 - Future
@@ -156,7 +156,7 @@ Whether it's a recruiter sending a job to a candidate, a company reviewing an ap
 
 ### Unified Proposal Interface
 
-All proposals can be represented through the existing `ats.applications` table with enriched metadata:
+All proposals can be represented through the existing `applications` table with enriched metadata:
 
 ```typescript
 interface UnifiedProposal {
@@ -722,7 +722,7 @@ Search for and update all links to `/proposed-jobs`:
 - Documentation links
 
 ### Database Changes
-**None required** - The `ats.applications` table already stores all data needed for unified proposals. No schema changes or migrations needed.
+**None required** - The `applications` table already stores all data needed for unified proposals. No schema changes or migrations needed.
 
 ### Verification Steps
 - [ ] Search codebase for `proposed-jobs` - should return no results except in git history

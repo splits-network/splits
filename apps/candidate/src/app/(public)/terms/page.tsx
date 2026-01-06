@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Terms of Service - Applicant Network | User Agreement',
-  description: 'Read the Terms of Service for Applicant Network. Understand your rights and responsibilities when using our job search and recruiting platform.',
+  description: 'Read the Terms of Service for Applicant  Understand your rights and responsibilities when using our job search and recruiting platform.',
   robots: 'index, follow',
 };
 
@@ -19,7 +19,7 @@ export default function TermsOfServicePage() {
         <div className="alert alert-warning mb-8">
           <i className="fa-solid fa-triangle-exclamation"></i>
           <span>
-            Please read these Terms of Service carefully before using Applicant Network. By accessing or using our services, you agree to be bound by these terms.
+            Please read these Terms of Service carefully before using Applicant  By accessing or using our services, you agree to be bound by these terms.
           </span>
         </div>
 

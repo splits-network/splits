@@ -110,7 +110,7 @@ export default function StatusPage() {
                 message:
                     error instanceof Error
                         ? error.message
-                        : 'We could not save your note. Please email help@applicant.network.',
+                        : 'We could not save your note. Please email help@applicant.',
             });
         } finally {
             setSubmitting(false);

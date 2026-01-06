@@ -36,25 +36,13 @@ export default function CandidatesListClient() {
 
                 const client = createAuthenticatedClient(token);
 
-                // Get user profile to check role
-                const profileRes: any = await client.get('/users', { params: { limit: 1 } });
-                const profile = profileRes?.data?.[0] || profileRes?.data || profileRes || {};
-                const roles: string[] = Array.isArray(profile.roles) ? profile.roles : [];
-                const isRecruiter = Boolean(profile.recruiter_id || roles.includes('recruiter'));
-                const resolvedRole = isRecruiter
-                    ? 'recruiter'
-                    : roles[0] || (profile.is_platform_admin ? 'platform_admin' : 'candidate');
-
-                setUserRole(resolvedRole);
-
-                if (isRecruiter && profile.recruiter_id) {
-                    setRecruiterId(profile.recruiter_id);
-                }
-
-                // Fetch candidates with scope parameter using V2 API (includes relationship data)
-                // - scope=mine: Candidates sourced OR with active relationships (default)
-                // - scope=all: All candidates in system (talent pool discovery)
-                const response = await client.get(`/candidates?scope=${scope}`);
+                const response = await client.get('/candidates', {
+                    params: {
+                        //include: 'applications',
+                        filters: {
+                        }
+                    }
+                });
                 setCandidates(response.data || []);
             } catch (err: any) {
                 console.error('Failed to load candidates:', err);

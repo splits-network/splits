@@ -42,7 +42,7 @@ export class AutomationRuleRepository {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            .schema('platform')
+            
             .from('automation_rules')
             .select('*', { count: 'exact' });
 
@@ -69,7 +69,7 @@ export class AutomationRuleRepository {
 
     async findRule(id: string): Promise<AutomationRule | null> {
         const { data, error } = await this.supabase
-            .schema('platform')
+            
             .from('automation_rules')
             .select('*')
             .eq('id', id)
@@ -87,7 +87,7 @@ export class AutomationRuleRepository {
 
     async createRule(input: CreateRuleInput): Promise<AutomationRule> {
         const { data, error } = await this.supabase
-            .schema('platform')
+            
             .from('automation_rules')
             .insert({
                 name: input.name,
@@ -136,7 +136,7 @@ export class AutomationRuleRepository {
         }
 
         const { data, error } = await this.supabase
-            .schema('platform')
+            
             .from('automation_rules')
             .update(payload)
             .eq('id', id)
@@ -152,7 +152,7 @@ export class AutomationRuleRepository {
 
     async deleteRule(id: string): Promise<void> {
         const { error } = await this.supabase
-            .schema('platform')
+            
             .from('automation_rules')
             .delete()
             .eq('id', id);

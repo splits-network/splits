@@ -5,14 +5,14 @@
 BEGIN;
 
 -- Drop the existing constraint
-ALTER TABLE identity.organizations 
+ALTER TABLE organizations 
     DROP CONSTRAINT IF EXISTS organizations_type_check;
 
 -- Add new constraint that includes 'recruiter'
-ALTER TABLE identity.organizations 
+ALTER TABLE organizations 
     ADD CONSTRAINT organizations_type_check 
     CHECK (type = ANY (ARRAY['company'::text, 'platform'::text, 'recruiter'::text]));
 
-COMMENT ON COLUMN identity.organizations.type IS 'Organization type: company (hiring companies), platform (internal), recruiter (individual recruiter orgs)';
+COMMENT ON COLUMN organizations.type IS 'Organization type: company (hiring companies), platform (internal), recruiter (individual recruiter orgs)';
 
 COMMIT;

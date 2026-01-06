@@ -158,7 +158,7 @@ export default function NotificationBell() {
                             <div className="flex justify-center items-center py-8">
                                 <span className="loading loading-spinner loading-md"></span>
                             </div>
-                        ) : notifications.length === 0 ? (
+                        ) : length === 0 ? (
                             <div className="text-center py-8 text-base-content/60">
                                 <i className="fa-solid fa-inbox text-4xl mb-2"></i>
                                 <p>No notifications</p>
@@ -221,7 +221,7 @@ export default function NotificationBell() {
                     </div>
 
                     {/* Footer */}
-                    {notifications.length > 0 && (
+                    {length > 0 && (
                         <div className="p-2 border-t border-base-300 text-center">
                             <Link
                                 href="/notifications"

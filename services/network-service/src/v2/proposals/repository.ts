@@ -12,7 +12,9 @@ export class ProposalRepository {
     private static readonly TABLE = 'candidate_role_assignments';
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     async findProposals(
@@ -28,7 +30,7 @@ export class ProposalRepository {
 
         // Build base query (cross-schema relations resolved after initial fetch)
         let query = this.supabase
-            .schema('network')
+            
             .from(ProposalRepository.TABLE)
             .select('*', { count: 'exact' });
 
@@ -85,7 +87,7 @@ export class ProposalRepository {
 
     async findProposal(id: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            .schema('network')
+            
             .from(ProposalRepository.TABLE)
             .select('*')
             .eq('id', id)
@@ -102,7 +104,7 @@ export class ProposalRepository {
 
     async createProposal(proposal: any): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('network')
+            
             .from(ProposalRepository.TABLE)
             .insert(proposal)
             .select()
@@ -114,7 +116,7 @@ export class ProposalRepository {
 
     async updateProposal(id: string, updates: ProposalUpdate): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('network')
+            
             .from(ProposalRepository.TABLE)
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id)
@@ -128,7 +130,7 @@ export class ProposalRepository {
     async deleteProposal(id: string): Promise<void> {
         // Soft delete
         const { error } = await this.supabase
-            .schema('network')
+            
             .from(ProposalRepository.TABLE)
             .update({ state: 'cancelled', updated_at: new Date().toISOString() })
             .eq('id', id);
@@ -138,7 +140,7 @@ export class ProposalRepository {
 
     private async findJobIdsForOrganizations(organizationIds: string[]): Promise<string[]> {
         const { data: companies, error: companiesError } = await this.supabase
-            .schema('ats')
+            
             .from('companies')
             .select('id, identity_organization_id')
             .in('identity_organization_id', organizationIds);
@@ -151,7 +153,7 @@ export class ProposalRepository {
         }
 
         const { data: jobs, error: jobsError } = await this.supabase
-            .schema('ats')
+            
             .from('jobs')
             .select('id, company_id')
             .in('company_id', companyIds);
@@ -194,7 +196,7 @@ export class ProposalRepository {
         }
 
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('jobs')
             .select(
                 `
@@ -222,7 +224,7 @@ export class ProposalRepository {
         }
 
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('candidates')
             .select('id, full_name, email, phone')
             .in('id', candidateIds);
@@ -238,7 +240,7 @@ export class ProposalRepository {
         }
 
         const { data, error } = await this.supabase
-            .schema('network')
+            
             .from('recruiters')
             .select('*')
             .in('id', recruiterIds);
@@ -269,7 +271,7 @@ export class ProposalRepository {
         }
 
         const { data, error } = await this.supabase
-            .schema('identity')
+            
             .from('users')
             .select('id, name, email')
             .in('id', userIds);

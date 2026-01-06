@@ -7,7 +7,7 @@
 
 ## 1. Overview
 
-This document outlines the complete implementation of role-based user onboarding for Splits Network. The onboarding flow uses a two-phase approach:
+This document outlines the complete implementation of role-based user onboarding for Splits  The onboarding flow uses a two-phase approach:
 
 1. **Phase 1: Account Creation** - Users complete basic sign-up and email verification via Clerk
 2. **Phase 2: Onboarding Wizard** - After entering the dashboard, users complete a mandatory modal wizard to select their role, subscription plan, and provide required profile information
@@ -37,10 +37,10 @@ This approach provides lower friction for initial sign-up while ensuring all use
 
 ### 1.3 Database Schema for Onboarding Tracking
 
-The `identity.users` table tracks onboarding progress:
+The `users` table tracks onboarding progress:
 
 ```sql
-ALTER TABLE identity.users 
+ALTER TABLE users 
   ADD COLUMN IF NOT EXISTS onboarding_status VARCHAR(50) DEFAULT 'pending',
   ADD COLUMN IF NOT EXISTS onboarding_step INTEGER DEFAULT 1,
   ADD COLUMN IF NOT EXISTS onboarding_completed_at TIMESTAMP;
@@ -80,7 +80,7 @@ ALTER TABLE identity.users
 1. User lands on `/sign-up`
 2. Completes Clerk sign-up (email + password)
 3. Verifies email via Clerk
-4. System creates minimal user record in `identity.users` with:
+4. System creates minimal user record in `users` with:
    - `clerk_user_id`, `email`, `name`
    - `onboarding_status: 'pending'`
    - `onboarding_step: 1`
@@ -100,9 +100,9 @@ ALTER TABLE identity.users
     - Industries (optional)
     - Team invite code (optional)
 11. **Step 4: Complete** - System creates all entities:
-    - Personal organization in `identity.organizations`
-    - Membership in `identity.memberships` (role: `recruiter`)
-    - Recruiter profile in `network.recruiters` (status: `pending`)
+    - Personal organization in `organizations`
+    - Membership in `memberships` (role: `recruiter`)
+    - Recruiter profile in `recruiters` (status: `pending`)
     - (Optional) Team membership via invite code
     - Updates `onboarding_status: 'completed'`, `onboarding_completed_at: NOW()`
 12. Modal closes, user can now use the dashboard
@@ -167,7 +167,7 @@ POST /api/identity/users/me/complete-onboarding
 1. User lands on `/sign-up`
 2. Completes Clerk sign-up (email + password)
 3. Verifies email via Clerk
-4. System creates minimal user record in `identity.users`
+4. System creates minimal user record in `users`
 5. **Redirects to `/dashboard`**
 
 **Phase 2: Onboarding Wizard (Modal)**
@@ -181,9 +181,9 @@ POST /api/identity/users/me/complete-onboarding
     - Industry (optional)
     - Company size (optional)
 11. **Step 4: Complete** - System creates all entities:
-    - Company organization in `identity.organizations` (type: `company`)
-    - Membership in `identity.memberships` (role: `company_admin`)
-    - Company in `ats.companies` (linked to organization)
+    - Company organization in `organizations` (type: `company`)
+    - Membership in `memberships` (role: `company_admin`)
+    - Company in `companies` (linked to organization)
     - Updates `onboarding_status: 'completed'`, `onboarding_completed_at: NOW()`
 12. Modal closes, user can now use the dashboard
 
@@ -249,7 +249,7 @@ POST /api/identity/users/me/complete-onboarding  // Step 3: Complete
 10. Displays: "You've been invited to join [Company Name] as a Hiring Manager"
 11. User confirms acceptance
 12. System creates:
-    - Membership in `identity.memberships` (role: `hiring_manager`, linked to company org)
+    - Membership in `memberships` (role: `hiring_manager`, linked to company org)
     - Updates invitation status to `accepted`
     - Updates `onboarding_status: 'skipped'` (no full wizard needed)
 13. Modal closes, redirects to company dashboard
@@ -333,7 +333,7 @@ POST /api/teams/invitations/{token}/accept
 
 **Trigger Conditions:**
 - User lands on `/dashboard`
-- Check `identity.users.onboarding_status`
+- Check `users.onboarding_status`
 - If `'pending'` or `'in_progress'` → Show modal wizard
 - Modal is **mandatory** and cannot be dismissed
 - User cannot access dashboard features until wizard is completed
@@ -608,10 +608,10 @@ export function useOnboarding() {
 
 // Private metadata (server-only)
 {
-  splits_user_id?: string;      // identity.users.id
+  splits_user_id?: string;      // users.id
   splits_organization_id?: string;
-  splits_recruiter_id?: string; // network.recruiters.id
-  splits_company_id?: string;   // ats.companies.id
+  splits_recruiter_id?: string; // recruiters.id
+  splits_company_id?: string;   // companies.id
 }
 ```
 
@@ -833,10 +833,10 @@ ATS_SERVICE_URL=http://localhost:3003
 
 Ensure these migrations are applied:
 
-- ✅ `identity.invitations` table (004_create_invitations.sql)
-- ✅ `network.teams` table (004_teams_and_agencies.sql)
-- ✅ `network.team_members` table
-- ✅ `network.team_invitations` table
+- ✅ `invitations` table (004_create_invitations.sql)
+- ✅ `teams` table (004_teams_and_agencies.sql)
+- ✅ `team_members` table
+- ✅ `team_invitations` table
 
 ---
 

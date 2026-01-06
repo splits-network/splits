@@ -8,7 +8,7 @@ import { createAuthenticatedClient } from '@/lib/api-client';
 
 export default function SignUpPage() {
     const { isLoaded, signUp, setActive } = useSignUp();
-    const { isSignedIn } = useAuth();
+    const { isSignedIn, getToken } = useAuth();
     const { signOut } = useClerk();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -83,17 +83,26 @@ export default function SignUpPage() {
 
                 // Create user in our database immediately using Clerk data
                 try {
-                    const session = completeSignUp.createdSession;
-                    const user = session?.user;
+                    const user = {
+                        id: completeSignUp.createdUserId,
+                        email: completeSignUp.emailAddress,
+                        firstName: completeSignUp.firstName,
+                        lastName: completeSignUp.lastName,
+                    }
 
                     if (user) {
+
+                        const token = await getToken();
+                        if (!token) {
+                            throw new Error('Failed to get auth token');
+                        }
                         // Create authenticated API client with session token
-                        const apiClient = createAuthenticatedClient(await session.getToken());
+                        const apiClient = createAuthenticatedClient(token);
 
                         // Create user record in our identity service using registration endpoint
-                        await apiClient.post('/users/register', {
+                        const newUser = await apiClient.post('/users/register', {
                             clerk_user_id: user.id,
-                            email: user.primaryEmailAddress?.emailAddress || email,
+                            email: user.email,
                             name: `${user.firstName || firstName} ${user.lastName || lastName}`.trim(),
                         });
 

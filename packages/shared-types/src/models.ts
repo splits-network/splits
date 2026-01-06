@@ -299,8 +299,8 @@ export type MarketplaceConnectionStatus = 'pending' | 'accepted' | 'declined';
 
 export interface MarketplaceConnection {
     id: string;
-    candidate_user_id: string; // identity.users.id
-    recruiter_id: string; // network.recruiters.id
+    candidate_user_id: string; // users.id
+    recruiter_id: string; // recruiters.id
     status: MarketplaceConnectionStatus;
     message?: string;
     created_at: Date;
@@ -313,7 +313,7 @@ export type MarketplaceSenderType = 'candidate' | 'recruiter';
 export interface MarketplaceMessage {
     id: string;
     connection_id: string;
-    sender_user_id: string; // identity.users.id
+    sender_user_id: string; // users.id
     sender_type: MarketplaceSenderType;
     message: string;
     read_at?: Date;

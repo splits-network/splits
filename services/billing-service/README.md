@@ -59,7 +59,7 @@ The Billing Service manages subscription billing and Stripe integration with **m
 6. **Never make HTTP calls** to other services - use database queries
 
 ### Database Integration
-- **Schema**: All tables in `billing.*` schema
+- **Schema**: All tables in `*` schema
 - **Access Control**: Role-based filtering in repository methods
 - **Cross-Schema Queries**: Allowed for data enrichment
 - **Event Publishing**: Use V2 EventPublisher for domain events

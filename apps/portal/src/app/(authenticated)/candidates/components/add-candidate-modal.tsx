@@ -87,7 +87,7 @@ export default function AddCandidateModal({
 
                     {/* Description */}
                     <p className="text-base-content/70 mb-6">
-                        Send a candidate an invitation to join your network.
+                        Send a candidate an invitation to join your 
                     </p>
 
                     {/* Error Alert */}

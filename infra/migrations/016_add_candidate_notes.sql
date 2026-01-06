@@ -8,17 +8,17 @@ BEGIN;
 -- 1. Add candidate_notes column
 -- =============================================================================
 
-ALTER TABLE ats.applications 
+ALTER TABLE applications 
     ADD COLUMN IF NOT EXISTS candidate_notes TEXT;
 
-COMMENT ON COLUMN ats.applications.candidate_notes IS 'Notes added by the candidate when submitting their application (e.g., cover letter, additional context, reasons for interest)';
+COMMENT ON COLUMN applications.candidate_notes IS 'Notes added by the candidate when submitting their application (e.g., cover letter, additional context, reasons for interest)';
 
 -- =============================================================================
 -- 2. Add index for searching candidate notes (optional, for future full-text search)
 -- =============================================================================
 
 CREATE INDEX IF NOT EXISTS idx_applications_candidate_notes 
-    ON ats.applications USING gin(to_tsvector('english', candidate_notes))
+    ON applications USING gin(to_tsvector('english', candidate_notes))
     WHERE candidate_notes IS NOT NULL;
 
 COMMIT;

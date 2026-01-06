@@ -75,8 +75,8 @@ recruiter_proposed → draft → ai_review → screen → submitted → intervie
 **Actors:** Recruiter  
 **Prerequisites:**
 - Active recruiter-candidate relationship exists
-- `network.recruiter_candidates.status = 'active'`
-- `network.recruiter_candidates.consent_given = true`
+- `recruiter_candidates.status = 'active'`
+- `recruiter_candidates.consent_given = true`
 
 **Steps:**
 1. Recruiter identifies suitable job for candidate
@@ -214,7 +214,7 @@ recruiter_proposed → draft → ai_review → screen → submitted → intervie
 
 ## Audit Log Structure
 
-**All approval events tracked in `ats.application_audit_log`:**
+**All approval events tracked in `application_audit_log`:**
 
 ### Recruiter Proposes Job
 ```json
@@ -290,7 +290,7 @@ recruiter_proposed → draft → ai_review → screen → submitted → intervie
 
 ## Database Schema Implications
 
-### `ats.applications` Table
+### `applications` Table
 
 **No new fields needed.**
 
@@ -306,15 +306,15 @@ Existing fields suffice:
 - ~~`candidate_approval_status`~~ - Use audit log
 - ~~`candidate_approved_at`~~ - Use audit log
 
-### `ats.application_audit_log` Table
+### `application_audit_log` Table
 
 **Existing structure supports all events:**
 ```sql
-CREATE TABLE ats.application_audit_log (
+CREATE TABLE application_audit_log (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    application_id UUID NOT NULL REFERENCES ats.applications(id),
+    application_id UUID NOT NULL REFERENCES applications(id),
     action VARCHAR(100) NOT NULL, -- e.g., 'recruiter_proposed_job', 'candidate_approved_opportunity'
-    performed_by_user_id UUID, -- identity.users.id
+    performed_by_user_id UUID, -- users.id
     performed_by_role VARCHAR(50), -- 'recruiter', 'candidate', 'company', 'system'
     timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     old_value JSONB,
@@ -757,7 +757,7 @@ SELECT
     performed_by_role,
     timestamp,
     new_value
-FROM ats.application_audit_log
+FROM application_audit_log
 WHERE application_id = '[uuid]'
 ORDER BY timestamp ASC;
 ```

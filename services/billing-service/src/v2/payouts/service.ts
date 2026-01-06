@@ -54,7 +54,7 @@ export class PayoutServiceV2 {
             status: payload.status || 'pending',
         });
 
-        await this.publishEvent('billing.payout.created', payout);
+        await this.publishEvent('payout.created', payout);
         return payout;
     }
 
@@ -63,7 +63,7 @@ export class PayoutServiceV2 {
         requireBillingAdmin(access);
         await this.getPayout(id, clerkUserId);
         const updated = await this.repository.updatePayout(id, updates);
-        await this.publishEvent('billing.payout.updated', {
+        await this.publishEvent('payout.updated', {
             id: updated.id,
             changes: updates,
         });
@@ -77,7 +77,7 @@ export class PayoutServiceV2 {
         await this.repository.updatePayout(id, {
             status: 'failed',
         } as PayoutUpdateInput);
-        await this.publishEvent('billing.payout.deleted', { id });
+        await this.publishEvent('payout.deleted', { id });
     }
 
     private async publishEvent(eventType: string, payload: Record<string, any>): Promise<void> {

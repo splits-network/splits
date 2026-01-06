@@ -251,7 +251,7 @@ export default function ReviewForm({
                                 Documents
                             </h2>
                             <div className="divider my-2"></div>
-                            {documents.length === 0 ? (
+                            {length === 0 ? (
                                 <div className="text-center py-8 text-base-content/60">
                                     <i className="fa-solid fa-folder-open text-4xl mb-2"></i>
                                     <p>No documents attached</p>

@@ -765,7 +765,7 @@ interface ApplicationDocument {
   created_at: Date;
 }
 
-// Application Stage (using existing ats.applications.stage column)
+// Application Stage (using existing applications.stage column)
 type ApplicationStage =
   | 'screen'      // Pending recruiter review
   | 'submitted'   // Submitted to company

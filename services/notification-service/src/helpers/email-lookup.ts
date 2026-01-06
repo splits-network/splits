@@ -6,12 +6,12 @@ import { Logger } from '@splits-network/shared-logging';
  * 
  * Centralized utility for resolving user IDs (UUID or Clerk ID) to email addresses.
  * Handles the complexity of querying identity service, network service, and ATS service
- * to find user email addresses for sending notifications.
+ * to find user email addresses for sending 
  * 
  * This helper exists because:
  * 1. Authentication architecture uses Clerk user IDs as primary identifiers
  * 2. Different services store different ID types (internal UUID vs Clerk ID)
- * 3. Email addresses live in identity.users table
+ * 3. Email addresses live in users table
  * 4. We need consistent error handling when emails aren't found
  */
 export class EmailLookupHelper {
@@ -24,7 +24,7 @@ export class EmailLookupHelper {
      * Get email address from internal user UUID
      * Queries: GET /users/:id
      * 
-     * @param userId - Internal UUID from identity.users.id
+     * @param userId - Internal UUID from users.id
      * @returns Email address or null if not found
      */
     async getEmailByUserId(userId: string): Promise<string | null> {
@@ -89,7 +89,7 @@ export class EmailLookupHelper {
      * 2. Extract user_id from recruiter
      * 3. Fetch user email from identity service (GET /users/:id)
      * 
-     * @param recruiterId - Recruiter ID from network.recruiters.id
+     * @param recruiterId - Recruiter ID from recruiters.id
      * @returns Email address or null if not found
      */
     async getRecruiterEmail(recruiterId: string): Promise<string | null> {
@@ -123,7 +123,7 @@ export class EmailLookupHelper {
      * 2. If candidate.user_id exists, fetch user email from identity service
      * 3. Otherwise, use candidate.email directly (legacy candidates without accounts)
      * 
-     * @param candidateId - Candidate ID from ats.candidates.id
+     * @param candidateId - Candidate ID from candidates.id
      * @returns Email address or null if not found
      */
     async getCandidateEmail(candidateId: string): Promise<string | null> {
@@ -169,7 +169,7 @@ export class EmailLookupHelper {
      * 2. Filter for company_admin role
      * 3. Fetch email for each admin user
      * 
-     * @param organizationId - Organization ID from identity.organizations.id
+     * @param organizationId - Organization ID from organizations.id
      * @returns Array of email addresses (empty if none found)
      */
     async getCompanyAdminEmails(organizationId: string): Promise<string[]> {

@@ -25,7 +25,7 @@ This document analyzes the current application management flow for **recruiters 
 
 **Before applications happen**, there must be a **recruiter-candidate relationship** established:
 
-1. **Recruiter invites candidate** (creates `network.recruiter_candidates` record)
+1. **Recruiter invites candidate** (creates `recruiter_candidates` record)
 2. **Candidate reviews "Right to Represent" agreement** via invitation link
 3. **Candidate explicitly consents** (`consent_given: true`)
 4. **12-month exclusive relationship** is established
@@ -38,7 +38,7 @@ This document analyzes the current application management flow for **recruiters 
 - This is enforced by database constraint: `UNIQUE(candidate_id) WHERE status='active'`
 5. **Now candidate can apply to jobs** with that recruiter's representation
 
-This foundational agreement is tracked in `network.recruiter_candidates` and includes:
+This foundational agreement is tracked in `recruiter_candidates` and includes:
 - Authorization for recruiter to submit candidate to employers
 - Exclusive representation period (12 months)
 - Protection against duplicate submissions
@@ -507,7 +507,7 @@ POST   /api/applications/:id/recruiter-submit  - Submit to company
 ```
 
 ### Permissions
-- **Recruiter must have active relationship with candidate** (`network.recruiter_candidates.status = 'active'` AND `consent_given = true`)
+- **Recruiter must have active relationship with candidate** (`recruiter_candidates.status = 'active'` AND `consent_given = true`)
 - Recruiter must own the application (`application.recruiter_id === recruiter.id`)
 - Admin users can view all applications
 - Company users can view applications for their jobs (after submission)

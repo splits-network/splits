@@ -43,7 +43,7 @@ This document extends the main migration plan with detailed phases for all remai
 **Estimated Time**: 4 hours
 
 ### Entities
-- `ats.placements` - Placement records
+- `placements` - Placement records
 - Related: applications, candidates, jobs, companies, recruiters
 
 ### Role Scoping
@@ -73,10 +73,10 @@ async findPlacementsForUser(
 ```
 
 **Role Resolution**:
-- Check `identity.memberships` for platform_admin
-- Check `identity.memberships` + company match for company users
-- Check `network.recruiters` for recruiter role
-- Check `ats.candidates` for candidate role
+- Check `memberships` for platform_admin
+- Check `memberships` + company match for company users
+- Check `recruiters` for recruiter role
+- Check `candidates` for candidate role
 
 **Filters**:
 - Search by candidate name, job title
@@ -107,7 +107,7 @@ Update `services/api-gateway/src/routes/placements/routes.ts`:
 **Estimated Time**: 4 hours
 
 ### Entities
-- `network.recruiters` - Recruiter profiles
+- `recruiters` - Recruiter profiles
 - Related: users, stats, assignments, proposals
 
 ### Role Scoping
@@ -143,7 +143,7 @@ Update gateway with `buildAuthHeaders()` and `requireRoles()`
 **Estimated Time**: 3 hours
 
 ### Entities
-- `network.recruiter_candidate_relationships` - Relationships between recruiters and candidates
+- `recruiter_candidate_relationships` - Relationships between recruiters and candidates
 
 ### Role Scoping
 - **Recruiters**: Their own candidate relationships
@@ -158,7 +158,7 @@ Update gateway with `buildAuthHeaders()` and `requireRoles()`
 **Estimated Time**: 4 hours
 
 ### Entities
-- `network.role_assignments` - Recruiter assignments to jobs
+- `role_assignments` - Recruiter assignments to jobs
 
 ### Role Scoping
 - **Platform Admin**: All assignments
@@ -174,9 +174,9 @@ Update gateway with `buildAuthHeaders()` and `requireRoles()`
 **Estimated Time**: 2 hours
 
 ### Entities
-- `identity.users` - User profiles
-- `identity.organizations` - Organizations
-- `identity.memberships` - User-org relationships
+- `users` - User profiles
+- `organizations` - Organizations
+- `memberships` - User-org relationships
 
 ### Note
 Most identity operations are already user-scoped by Clerk.  
@@ -203,7 +203,7 @@ May be redundant after full migration.
 **Estimated Time**: 3 hours
 
 ### Entities
-- `network.reputation_scores` - Recruiter reputation
+- `reputation_scores` - Recruiter reputation
 - Related: placements, feedback, performance metrics
 
 ---
@@ -215,9 +215,9 @@ May be redundant after full migration.
 **Estimated Time**: 5 hours
 
 ### Entities
-- `billing.subscriptions` - Recruiter subscriptions
-- `billing.payouts` - Payment records
-- `billing.invoices` - Billing history
+- `subscriptions` - Recruiter subscriptions
+- `payouts` - Payment records
+- `invoices` - Billing history
 
 ### Role Scoping
 - **Platform Admin**: All billing data
@@ -233,7 +233,7 @@ May be redundant after full migration.
 **Estimated Time**: 4 hours
 
 ### Entities
-- `documents.files` - File metadata
+- `files` - File metadata
 - Storage: Supabase Storage buckets
 
 ### Role Scoping

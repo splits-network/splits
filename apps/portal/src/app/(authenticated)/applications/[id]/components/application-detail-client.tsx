@@ -441,7 +441,7 @@ export default function ApplicationDetailClient({
                         )}
 
                     {/* Documents Card */}
-                    {documents && documents.length > 0 && (
+                    {documents && length > 0 && (
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title text-lg">

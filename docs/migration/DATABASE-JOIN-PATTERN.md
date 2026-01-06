@@ -74,25 +74,25 @@ async findForUser(clerkUserId: string): Promise<Proposal[]> {
 
 | Role | Determined By | Table | Condition |
 |------|--------------|-------|-----------|
-| `recruiter` | ✅ Record exists | `network.recruiters` | `user_id` matches AND `status = 'active'` |
-| `company_admin` | ✅ Record exists | `identity.memberships` | `user_id` matches AND `role = 'company_admin'` |
-| `hiring_manager` | ✅ Record exists | `identity.memberships` | `user_id` matches AND `role = 'hiring_manager'` |
-| `platform_admin` | ✅ Record exists | `identity.memberships` | `user_id` matches AND `role = 'platform_admin'` |
-| `candidate` | ✅ Record exists | `ats.candidates` | `user_id` matches |
+| `recruiter` | ✅ Record exists | `recruiters` | `user_id` matches AND `status = 'active'` |
+| `company_admin` | ✅ Record exists | `memberships` | `user_id` matches AND `role = 'company_admin'` |
+| `hiring_manager` | ✅ Record exists | `memberships` | `user_id` matches AND `role = 'hiring_manager'` |
+| `platform_admin` | ✅ Record exists | `memberships` | `user_id` matches AND `role = 'platform_admin'` |
+| `candidate` | ✅ Record exists | `candidates` | `user_id` matches |
 
 **Important**: A user can have **multiple roles** (e.g., both recruiter and company_admin).
 
 ### Database Schema Relationships
 
 ```
-identity.users (clerk_user_id) ← Source of truth for Clerk ID
-  ├─→ network.recruiters (user_id)           → Determines recruiter role
-  ├─→ identity.memberships (user_id)         → Determines company_admin, hiring_manager, platform_admin
-  └─→ ats.candidates (user_id)               → Determines candidate role
+users (clerk_user_id) ← Source of truth for Clerk ID
+  ├─→ recruiters (user_id)           → Determines recruiter role
+  ├─→ memberships (user_id)         → Determines company_admin, hiring_manager, platform_admin
+  └─→ candidates (user_id)               → Determines candidate role
 
-identity.memberships
-  └─→ identity.organizations (organization_id)
-      └─→ ats.companies (identity_organization_id)  → Links users to companies
+memberships
+  └─→ organizations (organization_id)
+      └─→ companies (identity_organization_id)  → Links users to companies
 ```
 
 ---
@@ -110,30 +110,30 @@ SELECT
   j.title as job_title,
   c.name as company_name,
   cand.full_name as candidate_name
-FROM ats.proposals p
-JOIN ats.jobs j ON j.id = p.job_id
-JOIN ats.companies c ON c.id = p.company_id
-JOIN ats.candidates cand ON cand.id = p.candidate_id
+FROM proposals p
+JOIN jobs j ON j.id = p.job_id
+JOIN companies c ON c.id = p.company_id
+JOIN candidates cand ON cand.id = p.candidate_id
 ```
 
 ### 2. JOIN to User Identity
 
 ```sql
 -- Resolve Clerk user ID to internal user UUID
-LEFT JOIN identity.users u ON u.clerk_user_id = $1  -- From x-clerk-user-id header
+LEFT JOIN users u ON u.clerk_user_id = $1  -- From x-clerk-user-id header
 ```
 
 ### 3. JOIN to Role Tables
 
 ```sql
 -- Check if user is a recruiter
-LEFT JOIN network.recruiters r ON r.user_id = u.id AND r.status = 'active'
+LEFT JOIN recruiters r ON r.user_id = u.id AND r.status = 'active'
 
 -- Check if user is company admin/hiring manager/platform admin
-LEFT JOIN identity.memberships m ON m.user_id = u.id
+LEFT JOIN memberships m ON m.user_id = u.id
 
 -- Link user's organization to company
-LEFT JOIN ats.companies user_company ON user_company.identity_organization_id = m.organization_id
+LEFT JOIN companies user_company ON user_company.identity_organization_id = m.organization_id
 ```
 
 ### 4. Apply Role-Based WHERE Clause
@@ -223,7 +223,7 @@ GET /api/proposals?page=2&limit=25&search=engineer&status=pending&sort_by=create
 ### Database Function (Recommended Approach)
 
 ```sql
-CREATE OR REPLACE FUNCTION ats.get_proposals_for_user(
+CREATE OR REPLACE FUNCTION get_proposals_for_user(
   -- Auth context
   p_clerk_user_id TEXT,
   p_organization_id UUID DEFAULT NULL,
@@ -288,20 +288,20 @@ BEGIN
     c.name as company_name,
     cand.full_name as candidate_name,
     u_rec.name as recruiter_name
-  FROM network.candidate_role_assignments p
+  FROM candidate_role_assignments p
   
   -- JOINs for enriched data (avoid N+1)
-  JOIN ats.jobs j ON j.id = p.job_id
-  JOIN ats.companies c ON c.id = j.company_id
-  JOIN ats.candidates cand ON cand.id = p.candidate_id
-  JOIN network.recruiters rec ON rec.id = p.recruiter_id
-  JOIN identity.users u_rec ON u_rec.id = rec.user_id
+  JOIN jobs j ON j.id = p.job_id
+  JOIN companies c ON c.id = j.company_id
+  JOIN candidates cand ON cand.id = p.candidate_id
+  JOIN recruiters rec ON rec.id = p.recruiter_id
+  JOIN users u_rec ON u_rec.id = rec.user_id
   
   -- JOINs to resolve requesting user's role (NO HTTP calls!)
-  LEFT JOIN identity.users u ON u.clerk_user_id = p_clerk_user_id
-  LEFT JOIN network.recruiters req_r ON req_r.user_id = u.id AND req_r.status = 'active'
-  LEFT JOIN identity.memberships m ON m.user_id = u.id
-  LEFT JOIN ats.companies user_company ON user_company.identity_organization_id = m.organization_id
+  LEFT JOIN users u ON u.clerk_user_id = p_clerk_user_id
+  LEFT JOIN recruiters req_r ON req_r.user_id = u.id AND req_r.status = 'active'
+  LEFT JOIN memberships m ON m.user_id = u.id
+  LEFT JOIN companies user_company ON user_company.identity_organization_id = m.organization_id
   
   WHERE 
     -- Recruiter: see proposals they're assigned to
@@ -509,31 +509,31 @@ For optimal performance, ensure these indexes exist:
 ```sql
 -- User identity resolution
 CREATE INDEX IF NOT EXISTS idx_users_clerk_user_id 
-  ON identity.users(clerk_user_id);
+  ON users(clerk_user_id);
 
 -- Role table lookups
 CREATE INDEX IF NOT EXISTS idx_recruiters_user_id 
-  ON network.recruiters(user_id);
+  ON recruiters(user_id);
 
 CREATE INDEX IF NOT EXISTS idx_memberships_user_id 
-  ON identity.memberships(user_id);
+  ON memberships(user_id);
 
 CREATE INDEX IF NOT EXISTS idx_candidates_user_id 
-  ON ats.candidates(user_id);
+  ON candidates(user_id);
 
 -- Resource filtering
 CREATE INDEX IF NOT EXISTS idx_proposals_recruiter_id 
-  ON network.candidate_role_assignments(recruiter_id);
+  ON candidate_role_assignments(recruiter_id);
 
 CREATE INDEX IF NOT EXISTS idx_applications_recruiter_id 
-  ON ats.applications(recruiter_id);
+  ON applications(recruiter_id);
 
 CREATE INDEX IF NOT EXISTS idx_jobs_company_id 
-  ON ats.jobs(company_id);
+  ON jobs(company_id);
 
 -- Organization to company mapping
 CREATE INDEX IF NOT EXISTS idx_companies_identity_organization_id 
-  ON ats.companies(identity_organization_id);
+  ON companies(identity_organization_id);
 ```
 
 **Query performance without indexes**: 500-2000ms  
@@ -655,9 +655,9 @@ for (const proposal of proposals) {
 ### User sees no data (empty result)
 
 1. Check if user has role record in database:
-   - Recruiter: `SELECT * FROM network.recruiters WHERE user_id = ...`
-   - Company: `SELECT * FROM identity.memberships WHERE user_id = ...`
-2. Verify `clerk_user_id` matches in `identity.users`
+   - Recruiter: `SELECT * FROM recruiters WHERE user_id = ...`
+   - Company: `SELECT * FROM memberships WHERE user_id = ...`
+2. Verify `clerk_user_id` matches in `users`
 3. Check LEFT JOIN conditions (should allow NULL)
 4. Verify WHERE clause uses OR for multi-role users
 

@@ -19,7 +19,7 @@ export default function PrivacyPolicyPage() {
         <div className="alert alert-info mb-8">
           <i className="fa-solid fa-circle-info"></i>
           <span>
-            Your privacy is important to us. This policy explains how we collect, use, and protect your information when you use Applicant Network.
+            Your privacy is important to us. This policy explains how we collect, use, and protect your information when you use Applicant 
           </span>
         </div>
 

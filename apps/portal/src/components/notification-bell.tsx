@@ -14,6 +14,8 @@ import {
     getNotificationIcon,
     InAppNotification,
 } from '@/lib/notifications';
+import { createAuthenticatedClient } from '@/lib/api-client';
+import { create } from 'domain';
 
 export default function NotificationBell() {
     const router = useRouter();
@@ -29,7 +31,9 @@ export default function NotificationBell() {
             const token = await getToken();
             if (!token) return;
 
-            const count = await fetchUnreadCount(token);
+            const client = createAuthenticatedClient(token);
+            const count = await client.get('/notifications/unread-count').then(res => res.data.count);
+
             setUnreadCount(count);
         } catch (error) {
             console.error('Failed to fetch unread count:', error);
@@ -46,7 +50,8 @@ export default function NotificationBell() {
                 return;
             }
 
-            const data = await fetchNotifications(token, { limit: 10 });
+            const client = createAuthenticatedClient(token);
+            const data = await client.get('/notifications', { params: { limit: 10 } }).then(res => res.data);
             setNotifications(data);
         } catch (error) {
             console.error('Failed to fetch notifications:', error);
@@ -76,7 +81,9 @@ export default function NotificationBell() {
                 const token = await getToken();
                 if (!token) return;
 
-                await markAsRead(token, notification.id);
+                const client = createAuthenticatedClient(token);
+                await client.patch(`/notifications/${notification.id}`, { read: true });
+
                 setUnreadCount((prev) => Math.max(0, prev - 1));
                 setNotifications((prev) =>
                     prev.map((n) =>
@@ -178,7 +185,7 @@ export default function NotificationBell() {
                             <div className="flex justify-center items-center py-8">
                                 <span className="loading loading-spinner loading-md"></span>
                             </div>
-                        ) : notifications.length === 0 ? (
+                        ) : length === 0 ? (
                             <div className="text-center py-8 text-base-content/60">
                                 <i className="fa-solid fa-inbox text-4xl mb-2"></i>
                                 <p>No notifications</p>
@@ -241,7 +248,7 @@ export default function NotificationBell() {
                     </div>
 
                     {/* Footer */}
-                    {notifications.length > 0 && (
+                    {length > 0 && (
                         <div className="p-2 border-t border-base-300 text-center">
                             <Link
                                 href="/notifications"

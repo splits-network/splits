@@ -360,7 +360,7 @@ Applied: {{created_at}}
 {{#if recruiter_name}}
 This candidate is represented by {{recruiter_name}}, who has pre-screened and endorsed them for this role.
 {{else}}
-This candidate applied directly through Applicant Network.
+This candidate applied directly through Applicant 
 {{/if}}
 
 Quick Actions:
@@ -473,7 +473,7 @@ const EXCHANGES = {
 
 ```typescript
 const QUEUES = {
-  'notifications.applications': {
+  'applications': {
     exchange: 'splits.applications',
     routingKeys: [
       'application.submitted_to_recruiter',
@@ -495,8 +495,8 @@ const QUEUES = {
 ### 5.1 User Preferences Table (Optional Enhancement)
 
 ```sql
-CREATE TABLE IF NOT EXISTS identity.notification_preferences (
-  user_id UUID PRIMARY KEY REFERENCES identity.users(id),
+CREATE TABLE IF NOT EXISTS notification_preferences (
+  user_id UUID PRIMARY KEY REFERENCES users(id),
   email_applications BOOLEAN DEFAULT true,
   email_application_updates BOOLEAN DEFAULT true,
   email_prescreen_invitations BOOLEAN DEFAULT true,

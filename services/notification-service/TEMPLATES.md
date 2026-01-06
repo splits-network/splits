@@ -2,7 +2,7 @@
 
 ## Overview
 
-We've implemented a comprehensive professional email template system that matches the Splits Network brand identity. All transactional emails now feature:
+We've implemented a comprehensive professional email template system that matches the Splits Network brand  All transactional emails now feature:
 
 - **Brand-consistent design** matching the portal's color scheme
 - **Professional HTML layouts** with proper email client compatibility

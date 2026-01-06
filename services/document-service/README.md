@@ -1,6 +1,6 @@
 # Document Service
 
-Universal document storage and processing service for Splits Network.
+Universal document storage and processing service for Splits 
 
 ## Overview
 

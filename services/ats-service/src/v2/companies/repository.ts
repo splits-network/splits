@@ -15,7 +15,9 @@ export class CompanyRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     async findCompanies(
@@ -35,7 +37,7 @@ export class CompanyRepository {
 
         // Build query
         let query = this.supabase
-            .schema('ats')
+            
             .from('companies')
             .select('*', { count: 'exact' });
 
@@ -78,7 +80,7 @@ export class CompanyRepository {
 
     async findCompany(id: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('companies')
             .select('*')
             .eq('id', id)
@@ -93,7 +95,7 @@ export class CompanyRepository {
 
     async createCompany(company: any): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('companies')
             .insert(company)
             .select()
@@ -105,7 +107,7 @@ export class CompanyRepository {
 
     async updateCompany(id: string, updates: CompanyUpdate): Promise<any> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('companies')
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id)
@@ -119,7 +121,7 @@ export class CompanyRepository {
     async deleteCompany(id: string): Promise<void> {
         // Soft delete
         const { error } = await this.supabase
-            .schema('ats')
+            
             .from('companies')
             .update({ status: 'inactive', updated_at: new Date().toISOString() })
             .eq('id', id);

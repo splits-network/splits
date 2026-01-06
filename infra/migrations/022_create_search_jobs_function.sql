@@ -1,7 +1,7 @@
 -- Migration: Create search_jobs_with_company and count_jobs_with_company functions
 -- These functions provide fast server-side search and counting with status filtering
 
-CREATE OR REPLACE FUNCTION ats.search_jobs_with_company(
+CREATE OR REPLACE FUNCTION search_jobs_with_company(
     search_terms TEXT[] DEFAULT NULL,
     filter_status TEXT DEFAULT NULL,
     filter_location TEXT DEFAULT NULL,
@@ -66,8 +66,8 @@ BEGIN
         c.identity_organization_id as company_identity_organization_id,
         c.created_at as company_created_at,
         c.updated_at as company_updated_at
-    FROM ats.jobs j
-    INNER JOIN ats.companies c ON j.company_id = c.id
+    FROM jobs j
+    INNER JOIN companies c ON j.company_id = c.id
     WHERE
         -- Status filter (CRITICAL: must filter by status)
         (filter_status IS NULL OR j.status = filter_status)
@@ -96,7 +96,7 @@ END;
 $$ LANGUAGE plpgsql STABLE;
 
 -- Count function for pagination
-CREATE OR REPLACE FUNCTION ats.count_jobs_with_company(
+CREATE OR REPLACE FUNCTION count_jobs_with_company(
     search_terms TEXT[] DEFAULT NULL,
     filter_status TEXT DEFAULT NULL,
     filter_location TEXT DEFAULT NULL,
@@ -108,8 +108,8 @@ DECLARE
 BEGIN
     SELECT COUNT(*)
     INTO total_count
-    FROM ats.jobs j
-    INNER JOIN ats.companies c ON j.company_id = c.id
+    FROM jobs j
+    INNER JOIN companies c ON j.company_id = c.id
     WHERE
         -- Status filter (CRITICAL: must filter by status)
         (filter_status IS NULL OR j.status = filter_status)
@@ -137,5 +137,5 @@ END;
 $$ LANGUAGE plpgsql STABLE;
 
 -- Grant permissions
-GRANT EXECUTE ON FUNCTION ats.search_jobs_with_company TO authenticated;
-GRANT EXECUTE ON FUNCTION ats.count_jobs_with_company TO authenticated;
+GRANT EXECUTE ON FUNCTION search_jobs_with_company TO authenticated;
+GRANT EXECUTE ON FUNCTION count_jobs_with_company TO authenticated;

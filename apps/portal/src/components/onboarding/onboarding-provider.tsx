@@ -8,7 +8,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useUser, useAuth } from '@clerk/nextjs';
 import { OnboardingState, OnboardingContextType, UserRole } from './types';
-import { ApiClient } from '@/lib/api-client';
+import { ApiClient, createAuthenticatedClient } from '@/lib/api-client';
 
 const OnboardingContext = createContext<OnboardingContextType | null>(null);
 
@@ -33,7 +33,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 const token = await getToken();
                 if (!token) throw new Error('No authentication token');
 
-                const apiClient = new ApiClient(token);
+                const apiClient = createAuthenticatedClient(token);
 
                 // Get current user data using V2 API
                 const response = await apiClient.get('/users', { params: { limit: 1 } });

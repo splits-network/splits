@@ -46,7 +46,7 @@ export class CandidateMatchRepository {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            .schema('platform')
+            
             .from('candidate_role_matches')
             .select('*', { count: 'exact' });
 
@@ -79,7 +79,7 @@ export class CandidateMatchRepository {
 
     async findMatch(id: string): Promise<CandidateJobMatch | null> {
         const { data, error } = await this.supabase
-            .schema('platform')
+            
             .from('candidate_role_matches')
             .select('*')
             .eq('id', id)
@@ -97,7 +97,7 @@ export class CandidateMatchRepository {
 
     async createMatch(input: CreateMatchInput): Promise<CandidateJobMatch> {
         const { data, error } = await this.supabase
-            .schema('platform')
+            
             .from('candidate_role_matches')
             .insert({
                 candidate_id: input.candidate_id,
@@ -148,7 +148,7 @@ export class CandidateMatchRepository {
         }
 
         const { data, error } = await this.supabase
-            .schema('platform')
+            
             .from('candidate_role_matches')
             .update(payload)
             .eq('id', id)
@@ -164,7 +164,7 @@ export class CandidateMatchRepository {
 
     async deleteMatch(id: string): Promise<void> {
         const { error } = await this.supabase
-            .schema('platform')
+            
             .from('candidate_role_matches')
             .delete()
             .eq('id', id);

@@ -6,7 +6,7 @@ export class NotificationRepository {
 
     constructor(supabaseUrl: string, supabaseKey: string) {
         this.supabase = createClient(supabaseUrl, supabaseKey, {
-            
+            db: { schema: 'public' }
         });
     }
 
@@ -19,7 +19,7 @@ export class NotificationRepository {
     async healthCheck(): Promise<void> {
         // Simple query to verify database connectivity
         const { error } = await this.supabase
-            .schema('notifications')
+            
             .from('notification_log')
             .select('id')
             .limit(1);
@@ -38,7 +38,7 @@ export class NotificationRepository {
         }
     ): Promise<NotificationLog> {
         const { data, error } = await this.supabase
-            .schema('notifications').from('notification_log')
+            .from('notification_log')
             .insert(log)
             .select()
             .single();
@@ -52,7 +52,7 @@ export class NotificationRepository {
         updates: Partial<NotificationLog>
     ): Promise<NotificationLog> {
         const { data, error } = await this.supabase
-            .schema('notifications').from('notification_log')
+            .from('notification_log')
             .update(updates)
             .eq('id', id)
             .select()
@@ -74,7 +74,7 @@ export class NotificationRepository {
         const { unreadOnly = false, limit = 50, offset = 0 } = options || {};
         
         let query = this.supabase
-            .schema('notifications')
+            
             .from('notification_log')
             .select('*')
             .eq('recipient_user_id', userId)
@@ -99,7 +99,7 @@ export class NotificationRepository {
     // Get unread count for badge
     async getUnreadCount(userId: string): Promise<number> {
         const { count, error } = await this.supabase
-            .schema('notifications')
+            
             .from('notification_log')
             .select('*', { count: 'exact', head: true })
             .eq('recipient_user_id', userId)
@@ -114,7 +114,7 @@ export class NotificationRepository {
     // Mark notification as read
     async markAsRead(notificationId: string, userId: string): Promise<NotificationLog> {
         const { data, error } = await this.supabase
-            .schema('notifications')
+            
             .from('notification_log')
             .update({ 
                 read: true, 
@@ -132,7 +132,7 @@ export class NotificationRepository {
     // Mark all notifications as read
     async markAllAsRead(userId: string): Promise<void> {
         const { error } = await this.supabase
-            .schema('notifications')
+            
             .from('notification_log')
             .update({ 
                 read: true, 
@@ -148,7 +148,7 @@ export class NotificationRepository {
     // Dismiss notification
     async dismissNotification(notificationId: string, userId: string): Promise<NotificationLog> {
         const { data, error } = await this.supabase
-            .schema('notifications')
+            
             .from('notification_log')
             .update({ dismissed: true })
             .eq('id', notificationId)
@@ -163,7 +163,7 @@ export class NotificationRepository {
     // Legacy method - keep for backwards compatibility
     async findNotificationsByUserId(userId: string, limit = 50): Promise<NotificationLog[]> {
         const { data, error } = await this.supabase
-            .schema('notifications').from('notification_log')
+            .from('notification_log')
             .select('*')
             .eq('recipient_user_id', userId)
             .order('created_at', { ascending: false })

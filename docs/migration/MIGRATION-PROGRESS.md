@@ -36,9 +36,9 @@ async findProposalsForUser(
 ```
 
 **Role-based filtering** (via JOINs):
-- LEFT JOIN network.recruiters - For independent recruiters
-- LEFT JOIN identity.memberships - For company-affiliated users
-- LEFT JOIN ats.candidates - For candidates
+- LEFT JOIN recruiters - For independent recruiters
+- LEFT JOIN memberships - For company-affiliated users
+- LEFT JOIN candidates - For candidates
 - WHERE clause checks all three paths
 
 **Applied Migrations**:

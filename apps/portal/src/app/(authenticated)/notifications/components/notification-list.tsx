@@ -28,7 +28,7 @@ export default function NotificationList({
                     <div className="flex justify-center items-center py-12">
                         <span className="loading loading-spinner loading-lg"></span>
                     </div>
-                ) : notifications.length === 0 ? (
+                ) : length === 0 ? (
                     <NotificationEmptyState
                         filter={filter}
                         onShowAll={onShowAll}

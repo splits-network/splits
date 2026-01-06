@@ -37,8 +37,8 @@ This document analyzes the current state of the AI-assisted application flow imp
 result = await submitApplication(
     {
         job_id: jobId,
-        document_ids: formData.documents.selected,
-        primary_resume_id: formData.documents.primary_resume_id!,
+        document_ids: formData.selected,
+        primary_resume_id: formData.primary_resume_id!,
         pre_screen_answers: formData.pre_screen_answers,
         notes: formData.notes,
         stage: 'ai_review',  // ✅ Sets stage to ai_review
@@ -254,7 +254,7 @@ case 'application.stage_changed':
 
 ```typescript
 // AI service expects this structure (WRONG):
-const primaryResume = application.documents.find(doc => doc.extracted_text);
+const primaryResume = application.find(doc => doc.extracted_text);
 if (primaryResume && primaryResume.extracted_text) {
     resumeText = primaryResume.extracted_text;  // ❌ This field doesn't exist
 }
@@ -262,8 +262,8 @@ if (primaryResume && primaryResume.extracted_text) {
 
 **Database Schema (VERIFIED):**
 ```sql
--- documents.documents table
-CREATE TABLE documents.documents (
+-- documents table
+CREATE TABLE documents (
     id UUID PRIMARY KEY,
     entity_type entity_type NOT NULL,  -- enum: 'candidate', 'job', 'application', 'company', 'placement', 'contract', 'invoice'
     entity_id UUID NOT NULL,           -- polymorphic foreign key
@@ -289,7 +289,7 @@ CREATE TABLE documents.documents (
 
 **Document-Application Relationship (VERIFIED):**
 - Uses polymorphic pattern via `entity_type` + `entity_id`
-- For applications: `entity_type='application'` AND `entity_id` references `ats.applications.id`
+- For applications: `entity_type='application'` AND `entity_id` references `applications.id`
 - NO junction table - direct polymorphic relation
 - Query pattern: `WHERE entity_type='application' AND entity_id={application_id}`
 

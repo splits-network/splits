@@ -15,7 +15,9 @@ export class SubscriptionRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     async listSubscriptions(filters: SubscriptionListFilters = {}): Promise<RepositoryListResult<Subscription>> {
@@ -24,7 +26,7 @@ export class SubscriptionRepository {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            .schema('billing')
+            
             .from('subscriptions')
             .select('*', { count: 'exact' });
 
@@ -55,7 +57,7 @@ export class SubscriptionRepository {
 
     async findSubscription(id: string): Promise<Subscription | null> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('subscriptions')
             .select('*')
             .eq('id', id)
@@ -70,7 +72,7 @@ export class SubscriptionRepository {
 
     async createSubscription(payload: SubscriptionCreateInput): Promise<Subscription> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('subscriptions')
             .insert(payload)
             .select('*')
@@ -82,7 +84,7 @@ export class SubscriptionRepository {
 
     async updateSubscription(id: string, updates: SubscriptionUpdateInput): Promise<Subscription> {
         const { data, error } = await this.supabase
-            .schema('billing')
+            
             .from('subscriptions')
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id)

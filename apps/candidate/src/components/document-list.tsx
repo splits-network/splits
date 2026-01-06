@@ -110,7 +110,7 @@ export default function DocumentList({
         );
     }
 
-    if (documents.length === 0) {
+    if (length === 0) {
         return (
             <>
                 <div className="text-center py-6 text-base-content/60">

@@ -46,7 +46,7 @@ export class FraudSignalRepository {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            .schema('platform')
+            
             .from('fraud_signals')
             .select('*', { count: 'exact' });
 
@@ -82,7 +82,7 @@ export class FraudSignalRepository {
 
     async findSignal(id: string): Promise<FraudSignal | null> {
         const { data, error } = await this.supabase
-            .schema('platform')
+            
             .from('fraud_signals')
             .select('*')
             .eq('id', id)
@@ -100,7 +100,7 @@ export class FraudSignalRepository {
 
     async createSignal(input: CreateFraudSignalInput): Promise<FraudSignal> {
         const { data, error } = await this.supabase
-            .schema('platform')
+            
             .from('fraud_signals')
             .insert({
                 event_id: input.event_id,
@@ -142,7 +142,7 @@ export class FraudSignalRepository {
         }
 
         const { data, error } = await this.supabase
-            .schema('platform')
+            
             .from('fraud_signals')
             .update(payload)
             .eq('id', id)
@@ -158,7 +158,7 @@ export class FraudSignalRepository {
 
     async deleteSignal(id: string): Promise<void> {
         const { error } = await this.supabase
-            .schema('platform')
+            
             .from('fraud_signals')
             .delete()
             .eq('id', id);

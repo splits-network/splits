@@ -122,7 +122,7 @@ export class AIReviewServiceV2 {
                 this.logger.error({ 
                     application_id: input.application_id, 
                     documents_without_text: documentsWithoutText.length,
-                    total_documents: application.documents.length,
+                    total_documents: application.length,
                     details: documentsWithoutText
                 }, '❌ CRITICAL: Documents found but NO extracted_text in metadata - document text extraction is not running!');
             }
@@ -131,7 +131,7 @@ export class AIReviewServiceV2 {
             if (!resumeText) {
                 this.logger.error({ 
                     application_id: input.application_id,
-                    total_documents: application.documents.length
+                    total_documents: application.length
                 }, '❌ CRITICAL: NO resume text available for AI review - all documents have processing_status=pending');
             }
         }

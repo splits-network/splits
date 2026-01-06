@@ -1,64 +1,64 @@
--- Migration: Fix recruiter_id FK constraints to point to network.recruiters.id
+-- Migration: Fix recruiter_id FK constraints to point to recruiters.id
 -- Date: 2025-12-20
 -- Description: Corrects the FK constraints for recruiter_id fields to reference
---              network.recruiters.id instead of identity.users.id
+--              recruiters.id instead of users.id
 
 -- ============================================================================
--- PART 1: Fix ats.applications.recruiter_id
+-- PART 1: Fix applications.recruiter_id
 -- ============================================================================
 
 -- Step 1: Drop the incorrect FK constraint
-ALTER TABLE ats.applications 
+ALTER TABLE applications 
 DROP CONSTRAINT IF EXISTS applications_recruiter_id_fkey;
 
 -- Step 2: Migrate existing data from user_id to recruiter_id
 -- This updates all applications that have a recruiter_id (which was user_id)
--- to use the corresponding recruiter_id from network.recruiters
-UPDATE ats.applications a
+-- to use the corresponding recruiter_id from recruiters
+UPDATE applications a
 SET recruiter_id = r.id
-FROM identity.users u
-JOIN network.recruiters r ON u.id = r.user_id
+FROM users u
+JOIN recruiters r ON u.id = r.user_id
 WHERE a.recruiter_id = u.id;
 
 -- Step 3: Add the correct FK constraint
-ALTER TABLE ats.applications 
+ALTER TABLE applications 
 ADD CONSTRAINT applications_recruiter_id_fkey 
-FOREIGN KEY (recruiter_id) REFERENCES network.recruiters(id);
+FOREIGN KEY (recruiter_id) REFERENCES recruiters(id);
 
 -- ============================================================================
--- PART 2: Fix ats.placements.recruiter_id
+-- PART 2: Fix placements.recruiter_id
 -- ============================================================================
 
 -- Step 1: Drop the incorrect FK constraint
-ALTER TABLE ats.placements 
+ALTER TABLE placements 
 DROP CONSTRAINT IF EXISTS placements_recruiter_id_fkey;
 
 -- Step 2: Migrate existing data (if any)
-UPDATE ats.placements p
+UPDATE placements p
 SET recruiter_id = r.id
-FROM identity.users u
-JOIN network.recruiters r ON u.id = r.user_id
+FROM users u
+JOIN recruiters r ON u.id = r.user_id
 WHERE p.recruiter_id = u.id;
 
 -- Step 3: Add the correct FK constraint
-ALTER TABLE ats.placements 
+ALTER TABLE placements 
 ADD CONSTRAINT placements_recruiter_id_fkey 
-FOREIGN KEY (recruiter_id) REFERENCES network.recruiters(id);
+FOREIGN KEY (recruiter_id) REFERENCES recruiters(id);
 
 -- ============================================================================
 -- Verification Queries
 -- ============================================================================
 
--- Verify applications now reference network.recruiters correctly
+-- Verify applications now reference recruiters correctly
 SELECT 
     a.id,
     a.recruiter_id,
     r.id as recruiter_match,
     r.user_id,
     u.email
-FROM ats.applications a
-JOIN network.recruiters r ON a.recruiter_id = r.id
-JOIN identity.users u ON r.user_id = u.id
+FROM applications a
+JOIN recruiters r ON a.recruiter_id = r.id
+JOIN users u ON r.user_id = u.id
 WHERE a.recruiter_id IS NOT NULL
 LIMIT 5;
 

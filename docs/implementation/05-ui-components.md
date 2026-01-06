@@ -22,7 +22,7 @@ apps/candidate/src/app/(authenticated)/jobs/[id]/apply/
 ├── application-wizard.tsx        # Wizard orchestrator
 ├── components/
 │   ├── step-indicator.tsx        # Progress indicator
-│   ├── step-documents.tsx        # Step 1: Document selection
+│   ├── step-tsx        # Step 1: Document selection
 │   ├── step-questions.tsx        # Step 2: Pre-screen questions
 │   ├── step-review.tsx           # Step 3: Review & submit
 │   └── document-selector.tsx     # Reusable document picker
@@ -147,8 +147,8 @@ export default function ApplicationWizard({ job, candidate, draft, questions, do
     try {
       const result = await submitApplication({
         job_id: job.id,
-        document_ids: formData.documents.selected,
-        primary_resume_id: formData.documents.primary_resume_id,
+        document_ids: formData.selected,
+        primary_resume_id: formData.primary_resume_id,
         pre_screen_answers: Object.entries(formData.pre_screen_answers).map(([question_id, answer]) => ({
           question_id,
           ...answer,
@@ -170,8 +170,8 @@ export default function ApplicationWizard({ job, candidate, draft, questions, do
         return (
           <StepDocuments
             documents={documents}
-            selected={formData.documents.selected}
-            primaryResumeId={formData.documents.primary_resume_id}
+            selected={formData.selected}
+            primaryResumeId={formData.primary_resume_id}
             onChange={(docs) => setFormData({ ...formData, documents: docs })}
             onNext={handleNext}
           />
@@ -248,7 +248,7 @@ export default function ApplicationWizard({ job, candidate, draft, questions, do
 
 #### Step 1: Documents
 
-**File:** `components/step-documents.tsx`
+**File:** `components/step-tsx`
 
 ```tsx
 'use client';
@@ -259,9 +259,9 @@ import { uploadDocument } from '@/lib/api';
 export default function StepDocuments({ documents, selected, primaryResumeId, onChange, onNext }) {
   const [uploading, setUploading] = useState(false);
 
-  const resumes = documents.filter(d => d.document_type === 'resume');
-  const coverLetters = documents.filter(d => d.document_type === 'cover_letter');
-  const other = documents.filter(d => !['resume', 'cover_letter'].includes(d.document_type));
+  const resumes = filter(d => d.document_type === 'resume');
+  const coverLetters = filter(d => d.document_type === 'cover_letter');
+  const other = filter(d => !['resume', 'cover_letter'].includes(d.document_type));
 
   const toggleDocument = (docId: string) => {
     const newSelected = selected.includes(docId)
@@ -533,8 +533,8 @@ export default function StepQuestions({ questions, answers, onChange, onNext, on
 'use client';
 
 export default function StepReview({ job, formData, documents, questions, onSubmit, onBack, submitting, error }) {
-  const selectedDocs = documents.filter(d => formData.documents.selected.includes(d.id));
-  const primaryResume = selectedDocs.find(d => d.id === formData.documents.primary_resume_id);
+  const selectedDocs = filter(d => formData.selected.includes(d.id));
+  const primaryResume = selectedDocs.find(d => d.id === formData.primary_resume_id);
 
   return (
     <div className="space-y-6">

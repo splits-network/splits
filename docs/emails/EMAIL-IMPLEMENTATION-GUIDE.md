@@ -54,14 +54,14 @@ The Splits Network notification system is **event-driven** and uses **RabbitMQ**
 
 2. **RabbitMQ**
    - Exchange: `splits-network-events` (topic exchange)
-   - Routing keys: `<domain>.<entity>.<action>` (e.g., `ats.application.created`)
+   - Routing keys: `<domain>.<entity>.<action>` (e.g., `application.created`)
    - Connection: `rabbitmq:5672`
 
 3. **Notification Service**
    - Location: `services/notification-service/`
    - Consumes events via domain-specific consumers
    - Sends emails via Resend API
-   - Logs all notifications to `notifications.notification_logs` table
+   - Logs all notifications to `notification_logs` table
 
 4. **Email Service Layer**
    - Location: `services/notification-service/src/services/*/service.ts`
@@ -353,14 +353,14 @@ const interviewsConsumer = new InterviewsEventConsumer(
 );
 
 // Bind events
-await channel.bindQueue(queueName, exchangeName, 'ats.interview.scheduled');
-await channel.bindQueue(queueName, exchangeName, 'ats.interview.rescheduled');
-await channel.bindQueue(queueName, exchangeName, 'ats.interview.canceled');
+await channel.bindQueue(queueName, exchangeName, 'interview.scheduled');
+await channel.bindQueue(queueName, exchangeName, 'interview.rescheduled');
+await channel.bindQueue(queueName, exchangeName, 'interview.canceled');
 
 // Handle messages
-if (msg.fields.routingKey === 'ats.interview.scheduled') {
+if (msg.fields.routingKey === 'interview.scheduled') {
   await interviewsConsumer.handleInterviewScheduled(msg);
-} else if (msg.fields.routingKey === 'ats.interview.rescheduled') {
+} else if (msg.fields.routingKey === 'interview.rescheduled') {
   await interviewsConsumer.handleInterviewRescheduled(msg);
 }
 // ... etc
@@ -495,10 +495,10 @@ Add queue bindings for new events:
 
 ```typescript
 // Bind interview events
-await channel.bindQueue(queueName, exchangeName, 'ats.interview.scheduled');
-await channel.bindQueue(queueName, exchangeName, 'ats.interview.rescheduled');
-await channel.bindQueue(queueName, exchangeName, 'ats.interview.canceled');
-await channel.bindQueue(queueName, exchangeName, 'ats.interview.reminder');
+await channel.bindQueue(queueName, exchangeName, 'interview.scheduled');
+await channel.bindQueue(queueName, exchangeName, 'interview.rescheduled');
+await channel.bindQueue(queueName, exchangeName, 'interview.canceled');
+await channel.bindQueue(queueName, exchangeName, 'interview.reminder');
 ```
 
 #### 6. Test the Implementation
@@ -698,7 +698,7 @@ describe('Interview Email Integration', () => {
     // Publish test event
     await channel.publish(
       'splits-network-events',
-      'ats.interview.scheduled',
+      'interview.scheduled',
       Buffer.from(JSON.stringify({
         interview_id: 'test-int-123',
         candidate_id: 'test-cand-123',
@@ -746,7 +746,7 @@ describe('Interview Email Integration', () => {
 
 5. **Check database**:
    ```sql
-   SELECT * FROM notifications.notification_logs 
+   SELECT * FROM notification_logs 
    WHERE type = 'interview.scheduled' 
    ORDER BY created_at DESC 
    LIMIT 10;
@@ -779,8 +779,8 @@ Before deploying:
    ```
 
 2. **Verify routing key** matches binding pattern:
-   - Publisher: `ats.interview.scheduled`
-   - Binding: `ats.interview.scheduled` (exact match)
+   - Publisher: `interview.scheduled`
+   - Binding: `interview.scheduled` (exact match)
 
 3. **Check consumer is running**:
    ```bash

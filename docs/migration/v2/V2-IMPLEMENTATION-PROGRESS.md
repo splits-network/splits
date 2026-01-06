@@ -28,7 +28,7 @@ services/ats-service/src/v2/
 
 ### Features Implemented
 - Standardized 5-route pattern (LIST, GET, CREATE, UPDATE, DELETE)
-- Role-based data scoping via identity.memberships
+- Role-based data scoping via memberships
 - Direct Supabase queries with enriched JOINs
 - Single update methods with smart validation
 - Event publishing after all operations
@@ -342,7 +342,7 @@ Every resource (Jobs, Companies, Recruiters, etc.) follows exactly:
 - Error: `{ error: { message: 'Description' } }`
 
 ### 5. Role-Based Scoping
-- Backend determines data access via identity.memberships
+- Backend determines data access via memberships
 - No authorization logic duplicated in downstream services
 - Organization ID resolved from user's memberships or recruiter status
 

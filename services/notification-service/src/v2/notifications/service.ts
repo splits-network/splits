@@ -73,7 +73,7 @@ export class NotificationServiceV2 {
         const updated = await this.repository.updateNotification(id, updates);
 
         if (this.eventPublisher) {
-            await this.eventPublisher.publish('notifications.updated', {
+            await this.eventPublisher.publish('updated', {
                 notification_id: id,
                 updates,
             });
@@ -89,7 +89,7 @@ export class NotificationServiceV2 {
         await this.repository.dismissNotification(id);
 
         if (this.eventPublisher) {
-            await this.eventPublisher.publish('notifications.dismissed', {
+            await this.eventPublisher.publish('dismissed', {
                 notification_id: id,
             });
         }

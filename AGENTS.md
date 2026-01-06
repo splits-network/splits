@@ -15,7 +15,7 @@ The /docs/migrations/V2-ARCHITECTURE-IMPLEMENTATION_GUIDE.md outlines the high-l
 ## Recruiter-Candidate Responses
 
 - The network service V2 repository enriches recruiter-candidate rows with recruiter metadata:
-  - It gathers recruiter IDs, loads the corresponding `network.recruiters` plus linked `identity.users`, and fills in `recruiter_name`, `recruiter_email`, `recruiter_bio`, and `recruiter_status` when missing.
+  - It gathers recruiter IDs, loads the corresponding `recruiters` plus linked `users`, and fills in `recruiter_name`, `recruiter_email`, `recruiter_bio`, and `recruiter_status` when missing.
   - As a result, frontends can expect these fields without additional joins.
 - `/api/v2/recruiter-candidates` returns `{ data: RecruiterRelationship[], pagination: { ... } }`. Client code should read `response.data` before mapping.
 
@@ -29,7 +29,7 @@ The /docs/migrations/V2-ARCHITECTURE-IMPLEMENTATION_GUIDE.md outlines the high-l
 - **Always call `/api/v2/*`.** When we migrate the portal pages, every data fetch must go through the V2 gateway routes (`/api/v2/jobs`, `/api/v2/recruiter-candidates`, `/api/v2/applications`, etc.). If a page still points at `/api/*` or `/api/<domain>/me`, update it to the V2 equivalent.
 - **Handle `{ data, pagination }` responses.** Many V2 endpoints wrap results in this shape; portal components should destructure `const { data } = await client.get('/api/v2/<resource>')` before iterating.
 - **No client-side role checks.** The backend enforces access via `resolveAccessContext`, so portal modules shouldn't attempt to hit "recruiter-only" variants (like `/api/recruiter-candidates/me`). Use the shared API helper and trust upstream scoping.
-- **Reuse shared helpers.** If the portal needs recruiter metadata, rely on the enriched fields returned by `/api/v2/recruiter-candidates`-do not re-fetch `identity.users` directly.
+- **Reuse shared helpers.** If the portal needs recruiter metadata, rely on the enriched fields returned by `/api/v2/recruiter-candidates`-do not re-fetch `users` directly.
 
 ### Portal API Client Base URLs
 
@@ -41,12 +41,12 @@ The /docs/migrations/V2-ARCHITECTURE-IMPLEMENTATION_GUIDE.md outlines the high-l
 
 ### Network Service V2 Proposals
 
-- PostgREST cannot join across schemas, so `services/network-service/src/v2/proposals/repository.ts` now fetches jobs/candidates via follow-up queries in the `ats` schema and filters company users by precomputing accessible job IDs. Any new V2 repository must avoid `ats.*` joins inside a `schema('network')` select to prevent `PGRST100` errors.
-- The canonical proposals table lives at `network.candidate_role_assignments`. Remember to query that table (not a nonexistent `network.proposals`) whenever adding new V2 proposal endpoints or migrations.
+- PostgREST cannot join across schemas, so `services/network-service/src/v2/proposals/repository.ts` now fetches jobs/candidates via follow-up queries in the `ats` schema and filters company users by precomputing accessible job IDs. Any new V2 repository must avoid `*` joins inside a `schema('network')` select to prevent `PGRST100` errors.
+- The canonical proposals table lives at `candidate_role_assignments`. Remember to query that table (not a nonexistent `proposals`) whenever adding new V2 proposal endpoints or migrations.
 
 ### Notification APIs
 
-- Portal and candidate apps now expose `/api/v2/notifications/*` Next.js proxies that forward to the API Gateway V2 routes. All notification helpers (`apps/*/src/lib/notifications.ts`) call these V2 paths, using `PATCH /api/v2/notifications/:id` to mark as read, `DELETE` to dismiss, `POST /api/v2/notifications/mark-all-read`, and `GET /api/v2/notifications/unread-count`. Keep any new notification fetches on the `/api/v2` surface so we don't reintroduce the legacy `/api/notifications` calls.
+- Portal and candidate apps now expose `/api/v2/notifications/*` Next.js proxies that forward to the API Gateway V2 routes. All notification helpers (`apps/*/src/lib/ts`) call these V2 paths, using `PATCH /api/v2/notifications/:id` to mark as read, `DELETE` to dismiss, `POST /api/v2/notifications/mark-all-read`, and `GET /api/v2/notifications/unread-count`. Keep any new notification fetches on the `/api/v2` surface so we don't reintroduce the legacy `/api/notifications` calls.
 
 ### Application Include Parameters
 

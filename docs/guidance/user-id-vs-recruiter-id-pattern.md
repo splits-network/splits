@@ -6,18 +6,18 @@
 
 We have two different ID types for recruiters:
 
-1. **`user_id`** (from `identity.users.id`) - The identity/authentication ID for the user
-2. **`recruiter_id`** (from `network.recruiters.id`) - The recruiter profile/business entity ID
+1. **`user_id`** (from `users.id`) - The identity/authentication ID for the user
+2. **`recruiter_id`** (from `recruiters.id`) - The recruiter profile/business entity ID
 
-**THE GOLDEN RULE:** When a field is named `recruiter_id`, it should ALWAYS reference `network.recruiters.id`, NOT `identity.users.id`.
+**THE GOLDEN RULE:** When a field is named `recruiter_id`, it should ALWAYS reference `recruiters.id`, NOT `users.id`.
 
 ---
 
 ## Database Schema
 
-### identity.users
+### users
 ```sql
-CREATE TABLE identity.users (
+CREATE TABLE users (
     id UUID PRIMARY KEY,              -- User identity ID (for auth)
     clerk_user_id TEXT,
     email TEXT,
@@ -25,37 +25,37 @@ CREATE TABLE identity.users (
 );
 ```
 
-### network.recruiters
+### recruiters
 ```sql
-CREATE TABLE network.recruiters (
+CREATE TABLE recruiters (
     id UUID PRIMARY KEY,              -- Recruiter business entity ID
-    user_id UUID NOT NULL,            -- FK to identity.users.id
+    user_id UUID NOT NULL,            -- FK to users.id
     status TEXT,
     ...
-    FOREIGN KEY (user_id) REFERENCES identity.users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 ```
 
-### ats.applications
+### applications
 ```sql
-CREATE TABLE ats.applications (
+CREATE TABLE applications (
     id UUID PRIMARY KEY,
     job_id UUID NOT NULL,
     candidate_id UUID NOT NULL,
-    recruiter_id UUID,                             -- FK to network.recruiters.id ✅
+    recruiter_id UUID,                             -- FK to recruiters.id ✅
     ...
-    FOREIGN KEY (recruiter_id) REFERENCES network.recruiters(id)  -- CORRECT!
+    FOREIGN KEY (recruiter_id) REFERENCES recruiters(id)  -- CORRECT!
 );
 ```
 
-### ats.placements
+### placements
 ```sql
-CREATE TABLE ats.placements (
+CREATE TABLE placements (
     id UUID PRIMARY KEY,
     application_id UUID NOT NULL,
-    recruiter_id UUID NOT NULL,                    -- FK to network.recruiters.id ✅
+    recruiter_id UUID NOT NULL,                    -- FK to recruiters.id ✅
     ...
-    FOREIGN KEY (recruiter_id) REFERENCES network.recruiters(id)  -- CORRECT!
+    FOREIGN KEY (recruiter_id) REFERENCES recruiters(id)  -- CORRECT!
 );
 ```
 
@@ -65,22 +65,22 @@ CREATE TABLE ats.placements (
 
 **When storing a recruiter reference, use the correct ID based on the field name:**
 
-- Field named `recruiter_id` → Use `network.recruiters.id`
-- Field named `user_id` → Use `identity.users.id`
+- Field named `recruiter_id` → Use `recruiters.id`
+- Field named `user_id` → Use `users.id`
 
 ### Example: applications.recruiter_id
 
 ```typescript
-// ✅ CORRECT - Use recruiter_id from network.recruiters
+// ✅ CORRECT - Use recruiter_id from recruiters
 const recruiterRelationship = await repository.findActiveRecruiterForCandidate(candidateId);
 await repository.createApplication({
-    recruiter_id: recruiterRelationship.recruiter_id  // network.recruiters.id ✅
+    recruiter_id: recruiterRelationship.recruiter_id  // recruiters.id ✅
 });
 
 // ❌ WRONG - Don't use user_id for recruiter_id field
 const recruiterRelationship = await repository.findActiveRecruiterForCandidate(candidateId);
 await repository.createApplication({
-    recruiter_id: recruiterRelationship.recruiter_user_id  // identity.users.id ❌ WRONG!
+    recruiter_id: recruiterRelationship.recruiter_user_id  // users.id ❌ WRONG!
 });
 ```
 
@@ -99,7 +99,7 @@ const recruiterRelationship = await this.repository.findActiveRecruiterForCandid
 const application = await this.repository.createApplication({
     job_id: jobId,
     candidate_id: candidateId,
-    recruiter_id: recruiterRelationship.recruiter_id, // ✅ network.recruiters.id
+    recruiter_id: recruiterRelationship.recruiter_id, // ✅ recruiters.id
     stage: 'screen',
 });
 ```
@@ -107,15 +107,15 @@ const application = await this.repository.createApplication({
 ### 2. Querying Applications by Recruiter
 
 ```typescript
-// If you have the recruiter_id from network.recruiters
+// If you have the recruiter_id from recruiters
 const applications = await atsService.getApplications({
-    recruiter_id: recruiterId  // ✅ network.recruiters.id
+    recruiter_id: recruiterId  // ✅ recruiters.id
 });
 
 // If you only have user_id (e.g., from auth context), look up the recruiter first
 const recruiter = await networkService.getRecruiterByUserId(req.auth.userId);
 const applications = await atsService.getApplications({
-    recruiter_id: recruiter.id  // ✅ network.recruiters.id
+    recruiter_id: recruiter.id  // ✅ recruiters.id
 });
 ```
 
@@ -126,8 +126,8 @@ When a repository method returns recruiter information, it should clearly indica
 ```typescript
 // ✅ GOOD - Clear naming
 interface RecruiterRelationship {
-    recruiter_id: string;       // network.recruiters.id
-    recruiter_user_id: string;  // identity.users.id
+    recruiter_id: string;       // recruiters.id
+    recruiter_user_id: string;  // users.id
 }
 
 async findActiveRecruiterForCandidate(candidateId: string): Promise<RecruiterRelationship | null> {
@@ -147,22 +147,22 @@ async findActiveRecruiterForCandidate(candidateId: string): Promise<RecruiterRel
 
 ## Foreign Key Constraints Reference
 
-### Tables with FK to network.recruiters.id
+### Tables with FK to recruiters.id
 
 These tables have fields named `recruiter_id` that reference the recruiter business entity:
 
-- `ats.applications.recruiter_id` → `network.recruiters.id` ✅
-- `ats.placements.recruiter_id` → `network.recruiters.id` ✅
-- `network.recruiter_candidates.recruiter_id` → `network.recruiters.id` ✅
-- `network.role_assignments.recruiter_id` → `network.recruiters.id` ✅
+- `applications.recruiter_id` → `recruiters.id` ✅
+- `placements.recruiter_id` → `recruiters.id` ✅
+- `recruiter_candidates.recruiter_id` → `recruiters.id` ✅
+- `role_assignments.recruiter_id` → `recruiters.id` ✅
 
-### Tables with FK to identity.users.id
+### Tables with FK to users.id
 
 These tables have fields named `user_id` that reference the user identity:
 
-- `network.recruiters.user_id` → `identity.users.id` ✅
-- `billing.subscriptions.user_id` → `identity.users.id` ✅
-- `identity.memberships.user_id` → `identity.users.id` ✅
+- `recruiters.user_id` → `users.id` ✅
+- `subscriptions.user_id` → `users.id` ✅
+- `memberships.user_id` → `users.id` ✅
 
 ---
 
@@ -172,10 +172,10 @@ These tables have fields named `user_id` that reference the user identity:
 Need to reference a recruiter?
 │
 ├─ Is the field named "recruiter_id"?
-│  └─ Use network.recruiters.id ✅
+│  └─ Use recruiters.id ✅
 │
 ├─ Is the field named "user_id"?
-│  └─ Use identity.users.id ✅
+│  └─ Use users.id ✅
 │
 ├─ Not sure? Check the FK constraint:
 │  └─ SELECT pg_get_constraintdef(oid) FROM pg_constraint 
@@ -208,7 +208,7 @@ insert or update on table "applications" violates foreign key constraint "applic
 Key (recruiter_id)=(41a7e453-e648-4368-aab0-1ee48eedf5b9) is not present in table "recruiters".
 ```
 
-**Cause:** You used `identity.users.id` instead of `network.recruiters.id`
+**Cause:** You used `users.id` instead of `recruiters.id`
 
 **Fix:** Use `recruiter_id` instead of `recruiter_user_id` from your query result
 
@@ -216,11 +216,11 @@ Key (recruiter_id)=(41a7e453-e648-4368-aab0-1ee48eedf5b9) is not present in tabl
 
 ## Summary
 
-- **`user_id`** = Identity/auth ID from `identity.users.id`
-- **`recruiter_id`** = Recruiter business entity ID from `network.recruiters.id`
-- **Follow the field name:** If it's called `recruiter_id`, use `network.recruiters.id`
+- **`user_id`** = Identity/auth ID from `users.id`
+- **`recruiter_id`** = Recruiter business entity ID from `recruiters.id`
+- **Follow the field name:** If it's called `recruiter_id`, use `recruiters.id`
 - **Be explicit in code:** Always comment which ID type you're using
-- **Network service owns recruiters:** The `network.recruiters` table is the source of truth for recruiter business entities
+- **Network service owns recruiters:** The `recruiters` table is the source of truth for recruiter business entities
 
 ---
 

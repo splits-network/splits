@@ -52,7 +52,7 @@ export class PlanServiceV2 {
             status: payload.status || 'active',
         });
 
-        await this.publishEvent('billing.plan.created', plan);
+        await this.publishEvent('plan.created', plan);
         return plan;
     }
 
@@ -62,7 +62,7 @@ export class PlanServiceV2 {
         await this.getPlan(id);
 
         const plan = await this.repository.updatePlan(id, updates);
-        await this.publishEvent('billing.plan.updated', {
+        await this.publishEvent('plan.updated', {
             id: plan.id,
             changes: updates,
         });
@@ -75,7 +75,7 @@ export class PlanServiceV2 {
         requireBillingAdmin(access);
         await this.getPlan(id);
         const archived = await this.repository.archivePlan(id);
-        await this.publishEvent('billing.plan.archived', {
+        await this.publishEvent('plan.archived', {
             id: archived.id,
         });
     }

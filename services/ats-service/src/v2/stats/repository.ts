@@ -37,7 +37,9 @@ export class StatsRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     async getAccessContext(clerkUserId: string) {
@@ -60,26 +62,26 @@ export class StatsRepository {
             placementsResult,
         ] = await Promise.all([
             this.supabase
-                .schema('ats')
+                
                 .from('jobs')
                 .select('id', { count: 'exact', head: true })
                 .eq('recruiter_id', recruiterId)
                 .in('status', ACTIVE_ROLE_STATUSES),
             this.supabase
-                .schema('ats')
+                
                 .from('applications')
                 .select('id', { count: 'exact', head: true })
                 .eq('recruiter_id', recruiterId)
                 .in('stage', PIPELINE_STAGES),
             this.supabase
-                .schema('ats')
+                
                 .from('applications')
                 .select('id', { count: 'exact', head: true })
                 .eq('recruiter_id', recruiterId)
                 .eq('stage', 'offer')
                 .or('accepted_by_company.eq.false,accepted_by_company.is.null'),
             this.supabase
-                .schema('ats')
+                
                 .from('placements')
                 .select('id, hired_at, recruiter_share, state, guarantee_expires_at')
                 .eq('recruiter_id', recruiterId),
@@ -143,27 +145,27 @@ export class StatsRepository {
             await Promise.all([
                 // Total applications
                 this.supabase
-                    .schema('ats')
+                    
                     .from('applications')
                     .select('id', { count: 'exact', head: true })
                     .eq('candidate_id', candidateId),
                 // Active applications (in process stages)
                 this.supabase
-                    .schema('ats')
+                    
                     .from('applications')
                     .select('id', { count: 'exact', head: true })
                     .eq('candidate_id', candidateId)
                     .in('stage', PIPELINE_STAGES),
                 // Interviews scheduled
                 this.supabase
-                    .schema('ats')
+                    
                     .from('applications')
                     .select('id', { count: 'exact', head: true })
                     .eq('candidate_id', candidateId)
                     .eq('stage', 'interview'),
                 // Offers received
                 this.supabase
-                    .schema('ats')
+                    
                     .from('applications')
                     .select('id', { count: 'exact', head: true })
                     .eq('candidate_id', candidateId)
@@ -201,34 +203,34 @@ export class StatsRepository {
         ] = await Promise.all([
             // Active roles
             this.supabase
-                .schema('ats')
+                
                 .from('jobs')
                 .select('id', { count: 'exact', head: true })
                 .in('company_id', companyIds)
                 .in('status', ACTIVE_ROLE_STATUSES),
             // Total applications
             this.supabase
-                .schema('ats')
+                
                 .from('applications')
                 .select('id, job:jobs!inner(company_id)', { count: 'exact', head: true })
                 .in('job.company_id', companyIds),
             // Interviews scheduled
             this.supabase
-                .schema('ats')
+                
                 .from('applications')
                 .select('id, job:jobs!inner(company_id)', { count: 'exact', head: true })
                 .in('job.company_id', companyIds)
                 .eq('stage', 'interview'),
             // Offers extended
             this.supabase
-                .schema('ats')
+                
                 .from('applications')
                 .select('id, job:jobs!inner(company_id)', { count: 'exact', head: true })
                 .in('job.company_id', companyIds)
                 .eq('stage', 'offer'),
             // Placements for time-to-hire and counts
             this.supabase
-                .schema('ats')
+                
                 .from('placements')
                 .select('id, hired_at, application:applications!inner(job:jobs!inner(company_id))')
                 .in('application.job.company_id', companyIds),
@@ -260,7 +262,7 @@ export class StatsRepository {
 
         // Count active recruiters (distinct recruiter IDs from active jobs)
         const activeRecruitersResult = await this.supabase
-            .schema('ats')
+            
             .from('jobs')
             .select('recruiter_id')
             .in('company_id', companyIds)

@@ -4,7 +4,9 @@ export class JobPreScreenAnswerRepository {
     private supabase: SupabaseClient;
 
     constructor(supabaseUrl: string, supabaseKey: string) {
-        this.supabase = createClient(supabaseUrl, supabaseKey);
+        this.supabase = createClient(supabaseUrl, supabaseKey, {
+            db: { schema: 'public' }
+        });
     }
 
     async list(applicationId?: string) {
@@ -13,7 +15,7 @@ export class JobPreScreenAnswerRepository {
         }
 
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('job_pre_screen_answers')
             .select(
                 `
@@ -29,7 +31,7 @@ export class JobPreScreenAnswerRepository {
 
     async getById(id: string) {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('job_pre_screen_answers')
             .select(
                 `
@@ -53,7 +55,7 @@ export class JobPreScreenAnswerRepository {
         }
 
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('job_pre_screen_answers')
             .upsert(answers, { onConflict: 'application_id,question_id' })
             .select();
@@ -64,7 +66,7 @@ export class JobPreScreenAnswerRepository {
 
     async updateAnswer(id: string, payload: { answer: any }) {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('job_pre_screen_answers')
             .update({ answer: payload.answer })
             .eq('id', id)
@@ -80,7 +82,7 @@ export class JobPreScreenAnswerRepository {
 
     async deleteAnswer(id: string): Promise<void> {
         const { error } = await this.supabase
-            .schema('ats')
+            
             .from('job_pre_screen_answers')
             .delete()
             .eq('id', id);

@@ -65,7 +65,7 @@ export class AIReviewRepository {
         processing_time_ms: number;
     }): Promise<any> {
         const { data: review, error } = await this.supabase
-            .schema('ats')
+            
             .from('ai_reviews')
             .insert({
                 ...data,
@@ -97,7 +97,7 @@ export class AIReviewRepository {
         processing_time_ms: number;
     }): Promise<any> {
         const { data: review, error } = await this.supabase
-            .schema('ats')
+            
             .from('ai_reviews')
             .upsert({
                 ...data,
@@ -114,7 +114,7 @@ export class AIReviewRepository {
 
     async findById(id: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('ai_reviews')
             .select('*')
             .eq('id', id)
@@ -126,7 +126,7 @@ export class AIReviewRepository {
 
     async findByApplicationId(applicationId: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            .schema('ats')
+            
             .from('ai_reviews')
             .select('*')
             .eq('application_id', applicationId)
@@ -143,7 +143,7 @@ export class AIReviewRepository {
         const limit = filters.limit || 25;
         const offset = (page - 1) * limit;
 
-        let query = this.supabase.schema('ats').from('ai_reviews').select('*', { count: 'exact' });
+        let query = this.supabase.from('ai_reviews').select('*', { count: 'exact' });
 
         if (filters.application_id) {
             query = query.eq('application_id', filters.application_id);
@@ -173,7 +173,7 @@ export class AIReviewRepository {
     async getStatsByJobId(jobId: string): Promise<any> {
         // Get all AI reviews for applications on this job
         const { data: reviews, error } = await this.supabase
-            .schema('ats')
+            
             .from('ai_reviews')
             .select('*, applications!inner(job_id)')
             .eq('applications.job_id', jobId);
