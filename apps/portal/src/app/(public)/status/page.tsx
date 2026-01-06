@@ -1,6 +1,6 @@
 'use client';
 
-import { useServiceHealth } from '@/hooks/useServiceHealth';
+import { useServiceHealth } from '@/hooks/use-service-health';
 import { FormEvent, useMemo, useState } from 'react';
 
 const portalFormDefaults = {

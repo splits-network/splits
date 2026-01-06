@@ -2,7 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { Sidebar } from '@/components/sidebar';
 import { AuthenticatedLayoutClient } from './layout-client';
-import { ServiceStatusBanner } from '@/components/ServiceStatusBanner';
+import { ServiceStatusBanner } from '@/components/service-status-banner';
 
 export default async function AuthenticatedLayout({
     children,

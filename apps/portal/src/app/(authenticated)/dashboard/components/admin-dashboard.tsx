@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ApiClient } from '@/lib/api-client';
+import { useAuth } from '@clerk/nextjs';
+import { createAuthenticatedClient } from '@/lib/api-client';
+import { useUserProfile } from '@/contexts';
 import { getActivityIcon, getAlertClass, getHealthScore } from '@/lib/utils';
 
 interface PlatformStats {
@@ -44,12 +46,9 @@ interface Alert {
     severity: 'info' | 'warning' | 'error';
 }
 
-interface AdminDashboardProps {
-    token: string;
-    profile: any;
-}
-
-export default function AdminDashboard({ token, profile }: AdminDashboardProps) {
+export default function AdminDashboard() {
+    const { getToken } = useAuth();
+    const { profile } = useUserProfile();
     const [stats, setStats] = useState<PlatformStats | null>(null);
     const [health, setHealth] = useState<MarketplaceHealth | null>(null);
     const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
@@ -63,7 +62,10 @@ export default function AdminDashboard({ token, profile }: AdminDashboardProps) 
     const loadDashboardData = async () => {
         setLoading(true);
         try {
-            const api = new ApiClient();
+            const token = await getToken();
+            if (!token) return;
+
+            const api = createAuthenticatedClient(token);
 
             // Load platform stats
             const statsResponse = await api.get<{ data: PlatformStats }>('/admin/dashboard/stats');

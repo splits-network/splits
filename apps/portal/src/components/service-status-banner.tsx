@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useServiceHealth } from '@/hooks/useServiceHealth';
+import { useServiceHealth } from '@/hooks/use-service-health';
 
 const BANNER_DISMISSED_KEY = 'service-status-banner-dismissed';
 const BANNER_DISMISSED_TIMESTAMP_KEY = 'service-status-banner-dismissed-timestamp';

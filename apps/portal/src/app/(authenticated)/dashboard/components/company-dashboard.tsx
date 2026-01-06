@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ApiClient, createAuthenticatedClient } from '@/lib/api-client';
+import { useAuth } from '@clerk/nextjs';
+import { createAuthenticatedClient } from '@/lib/api-client';
+import { useUserProfile } from '@/contexts';
 import { getActivityIcon, getJobStatusBadge } from '@/lib/utils';
 
 interface CompanyStats {
@@ -36,12 +38,9 @@ interface RecentActivity {
     link?: string;
 }
 
-interface CompanyDashboardProps {
-    token: string;
-    profile: any;
-}
-
-export default function CompanyDashboard({ token, profile }: CompanyDashboardProps) {
+export default function CompanyDashboard() {
+    const { getToken } = useAuth();
+    const { profile } = useUserProfile();
     const [stats, setStats] = useState<CompanyStats | null>(null);
     const [roleBreakdown, setRoleBreakdown] = useState<RoleBreakdown[]>([]);
     const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
@@ -54,6 +53,9 @@ export default function CompanyDashboard({ token, profile }: CompanyDashboardPro
     const loadDashboardData = async () => {
         setLoading(true);
         try {
+            const token = await getToken();
+            if (!token) return;
+
             const api = createAuthenticatedClient(token);
 
             // Load company stats using V2 endpoint

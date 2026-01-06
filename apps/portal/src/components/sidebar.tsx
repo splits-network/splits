@@ -2,9 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
-import { useEffect, useState } from 'react';
-import { createAuthenticatedClient } from '@/lib/api-client';
+import { useUserProfile } from '@/contexts';
 
 const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: 'fa-house', roles: ['all'] },
@@ -26,45 +24,7 @@ const adminNavItems = [
 
 export function Sidebar() {
     const pathname = usePathname();
-    const { getToken, isLoaded } = useAuth();
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [isCompanyUser, setIsCompanyUser] = useState(false);
-    const [isRecruiter, setIsRecruiter] = useState(false);
-
-    useEffect(() => {
-        async function checkUserRoles() {
-            if (!isLoaded) return;
-
-            try {
-                const token = await getToken();
-                if (!token) return;
-
-                const apiClient = createAuthenticatedClient(token);
-                const response: any = await apiClient.get('/users/me');
-
-                // The /users/me endpoint returns { data: { ...user, roles, is_platform_admin, recruiter_id, ... } }
-                const profile = response?.data || {};
-                const roleList: string[] = Array.isArray(profile.roles) ? profile.roles : [];
-
-                const hasAdminRole = Boolean(profile.is_platform_admin || roleList.includes('platform_admin'));
-                const hasCompanyRole = roleList.some((role) =>
-                    role === 'company_admin' || role === 'hiring_manager'
-                );
-                const hasRecruiterRole = Boolean(profile.recruiter_id);
-                console.log('[DEBUG] Sidebar - user roles:', { profile, roleList, hasAdminRole, hasCompanyRole, hasRecruiterRole });
-                setIsAdmin(hasAdminRole);
-                setIsCompanyUser(hasCompanyRole);
-                setIsRecruiter(hasRecruiterRole);
-            } catch (error) {
-                console.error('Failed to check user roles:', error);
-                setIsAdmin(false);
-                setIsCompanyUser(false);
-                setIsRecruiter(false);
-            }
-        }
-
-        checkUserRoles();
-    }, [isLoaded, getToken]);
+    const { isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
 
     return (
         <div className="drawer-side">

@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useUserProfile } from '@/contexts';
 import ActionableProposalsWidget from './actionable-proposals-widget';
 import { getActivityIcon } from '@/lib/utils';
 
@@ -24,11 +26,6 @@ interface RecentActivity {
     candidate_name?: string;
     timestamp: string;
     link?: string;
-}
-
-interface RecruiterDashboardProps {
-    token: string;
-    profile: any;
 }
 
 const ACTIVITY_TYPE_BY_STAGE: Record<string, RecentActivity['type']> = {
@@ -73,7 +70,9 @@ const mapApplicationToActivity = (application: any): RecentActivity => {
     };
 };
 
-export default function RecruiterDashboard({ token, profile }: RecruiterDashboardProps) {
+export default function RecruiterDashboard() {
+    const { getToken } = useAuth();
+    const { profile } = useUserProfile();
     const [stats, setStats] = useState<RecruiterStats | null>(null);
     const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
     const [topRoles, setTopRoles] = useState<any[]>([]);
@@ -86,6 +85,9 @@ export default function RecruiterDashboard({ token, profile }: RecruiterDashboar
     const loadDashboardData = async () => {
         setLoading(true);
         try {
+            const token = await getToken();
+            if (!token) return;
+
             const api = createAuthenticatedClient(token);
 
             const statsResponse: any = await api.get('/stats', {
@@ -156,7 +158,7 @@ export default function RecruiterDashboard({ token, profile }: RecruiterDashboar
             <div className="card bg-linear-to-r from-primary to-secondary text-primary-content shadow">
                 <div className="card-body">
                     <h2 className="card-title text-3xl">
-                        Welcome back, {profile.name || 'Recruiter'}!
+                        Welcome back, {profile?.name || 'Recruiter'}!
                     </h2>
                     <p className="text-lg opacity-90">
                         Here's an overview of your recruiting activity.
