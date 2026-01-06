@@ -33,23 +33,23 @@ spec:
             - name: NEXT_PUBLIC_API_GATEWAY_URL
               value: "https://api.splits.network"
             - name: IDENTITY_SERVICE_URL
-              value: "http://identity-service.splits-svc.cluster.local:3001"
+              value: "http://identity-service.splits-network.svc.cluster.local:3001"
             - name: ATS_SERVICE_URL
-              value: "http://ats-service.splits-svc.cluster.local:3002"
+              value: "http://ats-service.splits-network.svc.cluster.local:3002"
             - name: NETWORK_SERVICE_URL
-              value: "http://network-service.splits-svc.cluster.local:3003"
+              value: "http://network-service.splits-network.svc.cluster.local:3003"
             - name: BILLING_SERVICE_URL
-              value: "http://billing-service.splits-svc.cluster.local:3004"
+              value: "http://billing-service.splits-network.svc.cluster.local:3004"
             - name: NOTIFICATION_SERVICE_URL
-              value: "http://notification-service.splits-svc.cluster.local:3005"
+              value: "http://notification-service.splits-network.svc.cluster.local:3005"
             - name: AUTOMATION_SERVICE_URL
-              value: "http://automation-service.splits-svc.cluster.local:3007"
+              value: "http://automation-service.splits-network.svc.cluster.local:3007"
             - name: DOCUMENT_SERVICE_URL
-              value: "http://document-service.splits-svc.cluster.local:3006"
+              value: "http://document-service.splits-network.svc.cluster.local:3006"
             - name: DOCUMENT_PROCESSING_SERVICE_URL
-              value: "http://document-processing-service.splits-svc.cluster.local:3008"
+              value: "http://document-processing-service.splits-network.svc.cluster.local:3008"
             - name: AI_SERVICE_URL
-              value: "http://ai-service.splits-svc.cluster.local:3009"
+              value: "http://ai-service.splits-network.svc.cluster.local:3009"
             - name: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
               valueFrom:
                 secretKeyRef:
