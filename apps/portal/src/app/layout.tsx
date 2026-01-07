@@ -4,6 +4,7 @@ import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import CookieConsent from '@/components/cookie-consent';
 import { ToastProvider } from '@/lib/toast-context';
+import { ThemeInitializer } from './theme-initializer';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -68,6 +69,7 @@ export default async function RootLayout({
                     <script src="https://kit.fontawesome.com/728c8ddec8.js" crossOrigin="anonymous"></script>
                 </head>
                 <body className="flex flex-col min-h-screen">
+                    <ThemeInitializer />
                     <ToastProvider>
                         <main className="grow">
                             {children}

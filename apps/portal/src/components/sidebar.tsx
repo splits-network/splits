@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useUserProfile } from '@/contexts';
 import { useUser } from '@clerk/nextjs';
 import { useState, useEffect, useMemo } from 'react';
+import NotificationBell from './notification-bell';
 
 interface NavItem {
     href: string;
@@ -147,7 +148,7 @@ export function Sidebar() {
     }, [isAdmin, isRecruiter, isCompanyUser]);
 
     return (
-        <div className="drawer-side z-40">
+        <div className="drawer-side z-40 overflow-visible">
             <label htmlFor="sidebar-drawer" className="drawer-overlay"></label>
             <aside className="bg-base-300 w-64 min-h-screen flex flex-col border-r border-base-200">
 
@@ -218,16 +219,19 @@ export function Sidebar() {
                         </div>
                     )}
                 </nav>
-                <div className="flex items-center justify-center gap-2 py-2">
-                    <i className="fa-solid fa-sun text-yellow-500"></i>
-                    <input
-                        type="checkbox"
-                        checked={isDark}
-                        onChange={handleThemeChange}
-                        className="toggle"
-                        title="Toggle Theme"
-                    />
-                    <i className="fa-solid fa-moon text-blue-400"></i>
+                <div className='flex justify-evenly'>
+                    <div className="flex items-center justify-center gap-2 py-2">
+                        <i className="fa-solid fa-sun text-yellow-500"></i>
+                        <input
+                            type="checkbox"
+                            checked={isDark}
+                            onChange={handleThemeChange}
+                            className="toggle"
+                            title="Toggle Theme"
+                        />
+                        <i className="fa-solid fa-moon text-blue-400"></i>
+                    </div>
+                    <NotificationBell position="right" />
                 </div>
                 {/* User Footer */}
                 <div className="border-t border-base-200/50 p-3">

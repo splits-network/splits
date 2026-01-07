@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
@@ -63,7 +63,8 @@ export default function InvitationsPageClient() {
     // Client-side status filter (for tabs)
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
-    const fetchInvitations = async (params: Record<string, any>) => {
+    // Memoize fetchInvitations to prevent infinite re-renders in useStandardList
+    const fetchInvitations = useCallback(async (params: Record<string, any>) => {
         const token = await getToken();
         if (!token) throw new Error('Not authenticated');
 
@@ -76,7 +77,12 @@ export default function InvitationsPageClient() {
             data: response.data || [],
             pagination: response.pagination || { total: 0, page: 1, limit: 25, total_pages: 0 }
         };
-    };
+    }, [getToken]);
+
+    // Memoize defaultFilters to prevent unnecessary re-renders
+    const defaultFilters = useMemo<InvitationFilters>(() => ({
+        invitation_status: ''
+    }), []);
 
     const {
         data: invitations,
@@ -89,7 +95,7 @@ export default function InvitationsPageClient() {
         refetch
     } = useStandardList<RecruiterCandidate, InvitationFilters>({
         fetchFn: fetchInvitations,
-        defaultFilters: { invitation_status: '' },
+        defaultFilters,
         defaultSortBy: 'invited_at',
         defaultSortOrder: 'desc',
         storageKey: 'invitationsViewMode'

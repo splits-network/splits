@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
@@ -11,7 +11,12 @@ import {
 } from '@/lib/notifications';
 import { createAuthenticatedClient } from '@/lib/api-client';
 
-export default function NotificationBell() {
+interface NotificationBellProps {
+    /** Position of the dropdown. Use 'right' when in a sidebar */
+    position?: 'end' | 'right' | 'top';
+}
+
+export default function NotificationBell({ position = 'end' }: NotificationBellProps) {
     const router = useRouter();
     const { getToken } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
@@ -139,8 +144,15 @@ export default function NotificationBell() {
         }
     };
 
+    // Determine dropdown position class
+    const dropdownPositionClass = position === 'right'
+        ? 'dropdown-right dropdown-end'
+        : position === 'top'
+            ? 'dropdown-top dropdown-end'
+            : 'dropdown-end';
+
     return (
-        <div className="dropdown dropdown-end">
+        <div className={`dropdown relative ${dropdownPositionClass}`}>
             <button
                 type="button"
                 className="btn btn-ghost btn-circle relative indicator"
@@ -148,7 +160,7 @@ export default function NotificationBell() {
                 aria-label="Notifications"
                 title='Notifications'
             >
-                <i className="fa-solid fa-bell text-xl"></i>
+                <i className="fa-solid fa-bell text-lg text-neutral/50"></i>
                 {unreadCount > 0 && (
                     <span className="badge badge-error badge-sm rounded-full absolute indicator-item text-xs opacity-70">
                         {unreadCount > 99 ? '99+' : unreadCount}
@@ -158,7 +170,7 @@ export default function NotificationBell() {
 
             {isOpen && (
                 <div
-                    className="dropdown-content z-50 mt-3 w-96 shadow bg-base-100 rounded-box border border-base-300"
+                    className="dropdown-content z-100 mt-3 w-96 shadow bg-base-100 rounded-box border border-base-300 fixed x-0 y-0"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header */}

@@ -22,7 +22,7 @@ export function ViewModeToggle({ viewMode, setViewMode, onViewModeChange }: View
     const isTableView = viewMode === 'table';
 
     return (
-        <label className="swap swap-rotate btn btn-ghost btn-sm" title={isTableView ? 'Switch to grid view' : 'Switch to table view'}>
+        <label className="swap swap-rotate btn btn-ghost text-accent btn-sm" title={isTableView ? 'Switch to grid view' : 'Switch to table view'}>
             <input
                 type="checkbox"
                 checked={isTableView}

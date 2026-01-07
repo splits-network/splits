@@ -1,9 +1,12 @@
+import { Footer } from '@/components/footer';
+import { Header } from '@/components/header';
 import Link from 'next/link';
 
 export default async function HomePage() {
 
     return (
         <>
+            <Header />
             {/* Hero Section */}
             <section className="hero min-h-[80vh] relative overflow-hidden">
                 {/* Video Background */}
@@ -774,6 +777,7 @@ export default async function HomePage() {
                     </p>
                 </div>
             </section>
+            <Footer />
         </>
     );
 }

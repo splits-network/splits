@@ -1,0 +1,149 @@
+export function getCssVar(name: string, el?: HTMLElement) {
+    if (typeof document === 'undefined') {
+        return '#000000'; // Fallback for SSR
+    }
+    const element = el || document.documentElement;
+    return getComputedStyle(element).getPropertyValue(name).trim();
+}
+
+function hexToRgba(hex: string, a = 1) {
+    const h = hex.replace("#", "").trim();
+    const full = h.length === 3 ? h.split("").map(c => c + c).join("") : h;
+    const r = parseInt(full.slice(0, 2), 16);
+    const g = parseInt(full.slice(2, 4), 16);
+    const b = parseInt(full.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+
+// Initialize color values on first client-side call
+let colorCache: Record<string, string> = {};
+function getColorCache() {
+    if (typeof document === 'undefined' || Object.keys(colorCache).length === 0) {
+        // SSR or initial load - set defaults
+        if (typeof document === 'undefined') {
+            console.log('SSR detected - using default color values for charts');
+            return {
+                primaryHex: '#0000ff',
+                secondaryHex: '#ff00ff',
+                accentHex: '#00ffff',
+                neutralHex: '#888888',
+                infoHex: '#0066ff',
+                successHex: '#00bb00',
+                warningHex: '#ffaa00',
+                errorHex: '#ff0000',
+                base100Hex: '#ffffff',
+                base200Hex: '#f0f0f0',
+                base300Hex: '#e0e0e0',
+                baseContentHex: '#ffffff',
+            };
+        }
+        // Client-side: read actual colors
+        colorCache = {
+            primaryHex: getCssVar("--color-primary"),
+            secondaryHex: getCssVar("--color-secondary"),
+            accentHex: getCssVar("--color-accent"),
+            neutralHex: getCssVar("--color-neutral"),
+            infoHex: getCssVar("--color-info"),
+            successHex: getCssVar("--color-success"),
+            warningHex: getCssVar("--color-warning"),
+            errorHex: getCssVar("--color-error"),
+            base100Hex: getCssVar("--color-base-100"),
+            base200Hex: getCssVar("--color-base-200"),
+            base300Hex: getCssVar("--color-base-300"),
+            baseContentHex: getCssVar("--color-base-content"),
+        };
+    }
+    return colorCache;
+}
+
+export const dataset = (() => {
+    const colors = getColorCache();
+    return {
+        primaryBorderColor: colors.primaryHex,                 // solid line
+        primaryBackgroundColor: hexToRgba(colors.primaryHex, 0.2), // translucent fill
+        secondaryBorderColor: colors.secondaryHex,
+        secondaryBackgroundColor: hexToRgba(colors.secondaryHex, 0.2),
+        accentBorderColor: colors.accentHex,
+        accentBackgroundColor: hexToRgba(colors.accentHex, 0.2),
+        neutralBorderColor: colors.neutralHex,
+        neutralBackgroundColor: hexToRgba(colors.neutralHex, 0.2),
+        infoBorderColor: colors.infoHex,
+        infoBackgroundColor: hexToRgba(colors.infoHex, 0.2),
+        successBorderColor: colors.successHex,
+        successBackgroundColor: hexToRgba(colors.successHex, 0.2),
+        warningBorderColor: colors.warningHex,
+        warningBackgroundColor: hexToRgba(colors.warningHex, 0.2),
+        errorBorderColor: colors.errorHex,
+        errorBackgroundColor: hexToRgba(colors.errorHex, 0.2),
+        base100BorderColor: colors.base100Hex,
+        base100BackgroundColor: hexToRgba(colors.base100Hex, 0.2),
+        base200BorderColor: colors.base200Hex,
+        base200BackgroundColor: hexToRgba(colors.base200Hex, 0.2),
+        base300BorderColor: colors.base300Hex,
+        base300BackgroundColor: hexToRgba(colors.base300Hex, 0.2),
+        baseContentBorderColor: colors.baseContentHex,
+        baseContentBackgroundColor: hexToRgba(colors.baseContentHex, 0.1),
+    };
+})();
+
+export function applyThemeToChart(chart: any) {
+    const primaryHex = getCssVar("--color-primary");
+    const secondaryHex = getCssVar("--color-secondary");
+    const accentHex = getCssVar("--color-accent");
+    const neutralHex = getCssVar("--color-neutral");
+    const infoHex = getCssVar("--color-info");
+    const successHex = getCssVar("--color-success");
+    const warningHex = getCssVar("--color-warning");
+    const errorHex = getCssVar("--color-error");
+    const base100Hex = getCssVar("--color-base-100");
+    const base200Hex = getCssVar("--color-base-200");
+    const base300Hex = getCssVar("--color-base-300");
+    const baseContentHex = getCssVar("--color-base-content");
+
+    chart.data.datasets.forEach((ds: any) => {
+        ds.primaryBorderColor = primaryHex;
+        ds.primaryBackgroundColor = hexToRgba(primaryHex, 0.2);
+        ds.secondaryBorderColor = secondaryHex;
+        ds.secondaryBackgroundColor = hexToRgba(secondaryHex, 0.2);
+        ds.accentBorderColor = accentHex;
+        ds.accentBackgroundColor = hexToRgba(accentHex, 0.2);
+        ds.neutralBorderColor = neutralHex;
+        ds.neutralBackgroundColor = hexToRgba(neutralHex, 0.2);
+        ds.infoBorderColor = infoHex;
+        ds.infoBackgroundColor = hexToRgba(infoHex, 0.2);
+        ds.successBorderColor = successHex;
+        ds.successBackgroundColor = hexToRgba(successHex, 0.2);
+        ds.warningBorderColor = warningHex;
+        ds.warningBackgroundColor = hexToRgba(warningHex, 0.2);
+        ds.errorBorderColor = errorHex;
+        ds.errorBackgroundColor = hexToRgba(errorHex, 0.2);
+        ds.base100BorderColor = base100Hex;
+        ds.base100BackgroundColor = hexToRgba(base100Hex, 0.2);
+        ds.base200BorderColor = base200Hex;
+        ds.base200BackgroundColor = hexToRgba(base200Hex, 0.2);
+        ds.base300BorderColor = base300Hex;
+        ds.base300BackgroundColor = hexToRgba(base300Hex, 0.2);
+        ds.baseContentBorderColor = baseContentHex;
+        ds.baseContentBackgroundColor = hexToRgba(baseContentHex, 0.1);
+    });
+    chart.update();
+}
+
+// Chart registry for managing multiple charts
+const chartRegistry = new Set<any>();
+
+export function registerChart(chart: any) {
+    chartRegistry.add(chart);
+    return () => chartRegistry.delete(chart); // Return cleanup function
+}
+
+export function initThemeListener() {
+    if (typeof window === 'undefined') return;
+
+    new MutationObserver(() => {
+        chartRegistry.forEach(chart => applyThemeToChart(chart));
+    }).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme'],
+    });
+}

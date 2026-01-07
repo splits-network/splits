@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
 import {
     useStandardList,
@@ -52,6 +53,9 @@ interface PlacementFilters {
 // ===== COMPONENT =====
 
 export default function PlacementsPage() {
+    // Memoize defaultFilters to prevent infinite re-renders in useStandardList
+    const defaultFilters = useMemo<PlacementFilters>(() => ({ status: undefined }), []);
+
     const {
         data: placements,
         loading,
@@ -75,7 +79,7 @@ export default function PlacementsPage() {
         refresh,
     } = useStandardList<Placement, PlacementFilters>({
         endpoint: '/portal/placements',
-        defaultFilters: { status: undefined },
+        defaultFilters,
         defaultSortBy: 'hired_at',
         defaultSortOrder: 'desc',
         defaultLimit: 25,

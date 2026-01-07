@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
@@ -36,7 +36,8 @@ export default function CandidatesListClient() {
     const { isRecruiter } = useUserProfile();
     const [showAddModal, setShowAddModal] = useState(false);
 
-    const fetchCandidates = async (params: Record<string, any>) => {
+    // Memoize fetchCandidates to prevent infinite re-renders in useStandardList
+    const fetchCandidates = useCallback(async (params: Record<string, any>) => {
         const token = await getToken();
         if (!token) throw new Error('Not authenticated');
 
@@ -47,7 +48,10 @@ export default function CandidatesListClient() {
             data: response.data || [],
             pagination: response.pagination || { total: 0, page: 1, limit: 25, total_pages: 0 }
         };
-    };
+    }, [getToken]);
+
+    // Memoize defaultFilters to prevent infinite re-renders in useStandardList
+    const defaultFilters = useMemo<CandidateFilters>(() => ({ scope: 'mine' }), []);
 
     const {
         data: candidates,
@@ -68,7 +72,7 @@ export default function CandidatesListClient() {
         refetch
     } = useStandardList<Candidate, CandidateFilters>({
         fetchFn: fetchCandidates,
-        defaultFilters: { scope: 'mine' },
+        defaultFilters,
         defaultSortBy: 'created_at',
         defaultSortOrder: 'desc',
         storageKey: 'candidatesViewMode'

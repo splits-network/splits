@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { UnifiedProposal, ProposalsResponse } from '@splits-network/shared-types';
@@ -70,6 +70,9 @@ export default function ProposalsPage() {
         };
     }, [getToken]);
 
+    // Memoize defaultFilters to prevent infinite re-renders in useStandardList
+    const defaultFilters = useMemo<ProposalFilters>(() => ({ state: 'actionable' }), []);
+
     const {
         data: proposals,
         pagination,
@@ -85,7 +88,7 @@ export default function ProposalsPage() {
     } = useStandardList<UnifiedProposal, ProposalFilters>({
         fetchFn: fetchProposals,
         defaultLimit: 25,
-        defaultFilters: { state: 'actionable' },
+        defaultFilters,
         syncToUrl: true
     });
 

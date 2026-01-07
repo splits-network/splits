@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useMemo } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useStandardList } from '@/hooks/use-standard-list';
 import { formatDate } from '@/lib/utils';
@@ -47,6 +47,9 @@ function DocumentsContent() {
     const [deleting, setDeleting] = useState<string | null>(null);
     const [actionError, setActionError] = useState<string | null>(null);
 
+    // Memoize defaultFilters to prevent infinite re-renders in useStandardList
+    const defaultFilters = useMemo<DocumentFilters>(() => ({}), []);
+
     const {
         data: documents,
         loading,
@@ -56,7 +59,7 @@ function DocumentsContent() {
         refresh,
     } = useStandardList<Document, DocumentFilters>({
         endpoint: '/documents',
-        defaultFilters: {},
+        defaultFilters,
         defaultSortBy: 'created_at',
         defaultSortOrder: 'desc',
         viewModeKey: 'candidateDocumentsViewMode',

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
@@ -32,6 +32,9 @@ export default function RecruiterManagementPage() {
     const { getToken } = useAuth();
     const [updatingId, setUpdatingId] = useState<string | null>(null);
 
+    // Memoize defaultFilters to prevent infinite re-renders in useStandardList
+    const defaultFilters = useMemo<RecruiterFilters>(() => ({}), []);
+
     const {
         items: recruiters,
         loading,
@@ -62,7 +65,7 @@ export default function RecruiterManagementPage() {
             const response = await apiClient.get(`/recruiters?${queryParams.toString()}`);
             return response;
         },
-        defaultFilters: {},
+        defaultFilters,
         storageKey: 'adminRecruitersViewMode',
         syncToUrl: true,
     });

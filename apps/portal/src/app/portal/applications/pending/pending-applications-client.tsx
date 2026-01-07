@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -51,6 +52,9 @@ export default function PendingApplicationsClient() {
     const searchParams = useSearchParams();
     const showSuccess = searchParams.get('success') === 'true';
 
+    // Memoize defaultFilters to prevent infinite re-renders in useStandardList
+    const defaultFilters = useMemo<ApplicationFilters>(() => ({ stage: 'screen' }), []);
+
     const {
         data: applications,
         loading,
@@ -72,7 +76,7 @@ export default function PendingApplicationsClient() {
         refresh,
     } = useStandardList<Application, ApplicationFilters>({
         endpoint: '/applications',
-        defaultFilters: { stage: 'screen' }, // Only pending (screen stage)
+        defaultFilters, // Only pending (screen stage)
         defaultSortBy: 'created_at',
         defaultSortOrder: 'desc',
         defaultLimit: 25,

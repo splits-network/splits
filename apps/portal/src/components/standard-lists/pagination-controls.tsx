@@ -49,21 +49,21 @@ export function PaginationControls(props: PaginationControlsProps) {
     if (total === 0) return null;
 
     return (
-        <div className="flex flex-row items-center justify-between gap-4 mt-6 w-full">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 mt-6 w-full">
             {/* Results info */}
-            <div className="text-sm text-base-content/70">
+            <div className="text-sm text-base-content/70 text-center sm:text-left">
                 Showing <span className="font-medium">{startItem}</span> to{' '}
                 <span className="font-medium">{endItem}</span> of{' '}
                 <span className="font-medium">{total}</span> results
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
                 {/* Limit selector */}
                 {showLimitSelector && onLimitChange && (
                     <div className="flex items-center gap-2">
                         <span className="text-sm text-base-content/70 whitespace-nowrap">Per page:</span>
                         <select
-                            className="select select-sm select-bordered"
+                            className="select select-sm"
                             value={limit}
                             onChange={(e) => onLimitChange(Number(e.target.value))}
                             disabled={loading}
@@ -84,6 +84,7 @@ export function PaginationControls(props: PaginationControlsProps) {
                             className="join-item btn btn-sm"
                             onClick={() => handlePageChange(1)}
                             disabled={page === 1 || loading}
+                            title="First page"
                         >
                             <i className="fa-solid fa-angles-left"></i>
                         </button>
@@ -91,16 +92,18 @@ export function PaginationControls(props: PaginationControlsProps) {
                             className="join-item btn btn-sm"
                             onClick={() => handlePageChange(page - 1)}
                             disabled={page === 1 || loading}
+                            title="Previous page"
                         >
                             <i className="fa-solid fa-angle-left"></i>
                         </button>
-                        <button className="join-item btn btn-sm pointer-events-none">
-                            Page {page} of {totalPages}
+                        <button className="join-item btn btn-sm pointer-events-none min-w-[5rem] sm:min-w-[7rem]">
+                            <span className="hidden sm:inline">Page </span>{page}<span className="hidden sm:inline"> of </span><span className="sm:hidden">/</span>{totalPages}
                         </button>
                         <button
                             className="join-item btn btn-sm"
                             onClick={() => handlePageChange(page + 1)}
                             disabled={page === totalPages || loading}
+                            title="Next page"
                         >
                             <i className="fa-solid fa-angle-right"></i>
                         </button>
@@ -108,6 +111,7 @@ export function PaginationControls(props: PaginationControlsProps) {
                             className="join-item btn btn-sm"
                             onClick={() => handlePageChange(totalPages)}
                             disabled={page === totalPages || loading}
+                            title="Last page"
                         >
                             <i className="fa-solid fa-angles-right"></i>
                         </button>

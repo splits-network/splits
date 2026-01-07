@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
@@ -37,6 +38,9 @@ interface PlacementFilters {
 export default function PlacementAuditPage() {
     const { getToken } = useAuth();
 
+    // Memoize defaultFilters to prevent infinite re-renders in useStandardList
+    const defaultFilters = useMemo<PlacementFilters>(() => ({}), []);
+
     const {
         items: placements,
         loading,
@@ -66,7 +70,7 @@ export default function PlacementAuditPage() {
             const response = await apiClient.get(`/placements?${queryParams.toString()}`);
             return response;
         },
-        defaultFilters: {},
+        defaultFilters,
         syncToUrl: true,
     });
 

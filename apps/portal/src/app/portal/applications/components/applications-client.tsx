@@ -145,7 +145,8 @@ export default function ApplicationsClient() {
         }
     }, [isCompanyUser, companyId, profile?.organization_ids, resolveCompanyFromOrg]);
 
-    const fetchApplications = async (params: Record<string, any>) => {
+    // Memoize fetchApplications to prevent infinite re-renders in useStandardList
+    const fetchApplications = useCallback(async (params: Record<string, any>) => {
         const token = await getToken();
         if (!token) throw new Error('Not authenticated');
 
@@ -162,7 +163,13 @@ export default function ApplicationsClient() {
             data: response.data || [],
             pagination: response.pagination || { total: 0, page: 1, limit: 25, total_pages: 0 }
         };
-    };
+    }, [getToken, companyId]);
+
+    // Memoize defaultFilters to prevent unnecessary re-renders
+    const defaultFilters = useMemo<ApplicationFilters>(() => ({
+        stage: '',
+        ai_score_filter: ''
+    }), []);
 
     const {
         data: applications,
@@ -179,7 +186,7 @@ export default function ApplicationsClient() {
         refetch
     } = useStandardList<Application, ApplicationFilters>({
         fetchFn: fetchApplications,
-        defaultFilters: { stage: '', ai_score_filter: '' },
+        defaultFilters,
         defaultSortBy: 'created_at',
         defaultSortOrder: 'desc',
         storageKey: 'applicationsViewMode'

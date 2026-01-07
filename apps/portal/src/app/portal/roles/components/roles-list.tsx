@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import {
     useStandardList,
     PaginationControls,
@@ -14,6 +15,7 @@ import { DataTable, type TableColumn } from '@/components/ui/tables';
 import { useUserProfile } from '@/contexts';
 import { RoleCard, type Job } from './role-card';
 import { RoleTableRow } from './role-table-row';
+import { RolesTrendsChart, TIME_PERIODS, calculateStatTrends } from '../../../../components/charts/roles-trends-chart';
 
 // ===== TYPES =====
 
@@ -54,6 +56,12 @@ export default function RolesList() {
     // Check if user can manage roles
     const canManageRole = isAdmin || profile?.roles?.includes('company_admin');
 
+    // Memoize defaultFilters to prevent unnecessary re-renders
+    const defaultFilters = useMemo<JobFilters>(() => ({
+        status: undefined,
+        job_owner_filter: 'all'
+    }), []);
+
     // Use the standard list hook with server-side pagination/filtering
     const {
         data: jobs,
@@ -79,13 +87,22 @@ export default function RolesList() {
         refresh,
     } = useStandardList<Job, JobFilters>({
         endpoint: '/jobs',
-        defaultFilters: { status: undefined, job_owner_filter: 'all' },
+        defaultFilters,
         defaultSortBy: 'created_at',
         defaultSortOrder: 'desc',
         defaultLimit: 25,
         syncToUrl: true,
         viewModeKey: 'rolesViewMode',
     });
+
+    // Time period state for trends (shared with chart)
+    const [trendPeriod, setTrendPeriod] = useState(6);
+
+    // Calculate stat trends based on selected time period
+    const statTrends = useMemo(() =>
+        calculateStatTrends(jobs, trendPeriod),
+        [jobs, trendPeriod]
+    );
 
     // Wait for profile to load
     if (profileLoading) {
@@ -107,30 +124,41 @@ export default function RolesList() {
                             value={total}
                             icon="fa-briefcase"
                             color="primary"
+                            trend={statTrends.total}
+                            trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
                         />
                         <StatCard
                             title="Active"
                             value={jobs.filter(j => j.status === 'active').length}
                             icon="fa-circle-check"
                             color="success"
+                            trend={statTrends.active}
+                            trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
                         />
                         <StatCard
                             title="Paused"
                             value={jobs.filter(j => j.status === 'paused').length}
                             icon="fa-pause"
                             color="warning"
+                            trend={statTrends.paused}
+                            trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
                         />
                         <StatCard
                             title="Filled"
                             value={jobs.filter(j => j.status === 'filled').length}
                             icon="fa-check-double"
                             color="info"
+                            trend={statTrends.filled}
+                            trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
                         />
                     </StatCardGrid>
-                    <div className='card-body'>
-                        <h2 className='card-title'>Roles</h2>
-                        <p className='text-base-content/70'>Manage and review all roles within your organization.</p>
-                        {/* Quick Stats */}
+                    <div className="p-4 pt-0">
+                        <RolesTrendsChart
+                            jobs={jobs}
+                            loading={loading && jobs.length === 0}
+                            trendPeriod={trendPeriod}
+                            onTrendPeriodChange={setTrendPeriod}
+                        />
                     </div>
                 </div>
 
@@ -204,12 +232,16 @@ export default function RolesList() {
                 {/* Filters and View Toggle */}
                 <div className="card bg-base-200 shadow">
                     <div className="card-body p-4">
-                        <h3 className='card-title'>Filters & View</h3>
+                        <h3 className='card-title'>
+                            Filters & View
+                            <span className="text-base-content/30">•••</span>
+                        </h3>
                         <div className="flex flex-wrap gap-4 items-center">
                             {/* Status Filter */}
-                            <div className="fieldset">
+                            <div className="fieldset w-full">
                                 <select
-                                    className="select w-full max-w-xs"
+                                    name="status-selector"
+                                    className="select w-full"
                                     value={filters.status || 'all'}
                                     onChange={(e) => setFilter('status', e.target.value === 'all' ? undefined : e.target.value)}
                                 >
@@ -223,9 +255,10 @@ export default function RolesList() {
 
                             {/* Ownership Filter (for recruiters and company users) */}
                             {(userRole === 'recruiter' || userRole === 'company_admin' || userRole === 'hiring_manager') && (
-                                <div className="fieldset">
+                                <div className="fieldset w-full">
                                     <select
-                                        className="select w-full max-w-xs"
+                                        name="job-owner-filter"
+                                        className="select w-full"
                                         value={filters.job_owner_filter || 'all'}
                                         onChange={(e) => setFilter('job_owner_filter', e.target.value as 'all' | 'assigned')}
                                     >
