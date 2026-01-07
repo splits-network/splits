@@ -39,6 +39,10 @@ interface ApplicationFilters {
     stage?: string;
 }
 
+// ===== CONSTANTS =====
+
+const DEFAULT_FILTERS: ApplicationFilters = {};
+
 // ===== CLIENT COMPONENT =====
 
 export default function ApplicationsClient() {
@@ -63,7 +67,7 @@ export default function ApplicationsClient() {
         refresh,
     } = useStandardList<Application, ApplicationFilters>({
         endpoint: '/applications',
-        defaultFilters: {},
+        defaultFilters: DEFAULT_FILTERS,
         defaultSortBy: 'created_at',
         defaultSortOrder: 'desc',
         include: 'job,recruiter',

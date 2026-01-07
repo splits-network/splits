@@ -75,27 +75,11 @@ export class ApplicationsEventConsumer {
             console.log('[APPLICATIONS-CONSUMER] 🔄 Stage changed:', { application_id, old_stage, new_stage });
             this.logger.info({ application_id, old_stage, new_stage }, 'Processing stage changed notification');
 
-            // Special handling for AI review completion
-            if (old_stage === 'ai_review' && (new_stage === 'screen' || new_stage === 'submitted')) {
-                this.logger.info({ 
-                    application_id, 
-                    fit_score, 
-                    recommendation,
-                    next_stage: new_stage
-                }, 'AI review completed, handling notifications');
-                
-                // Let the AI review completed handler deal with it
-                // This includes the fit score and recommendation
-                await this.handleAIReviewCompleted({
-                    ...event,
-                    payload: {
-                        ...event.payload,
-                        ai_review_completed: true,
-                    }
-                });
-                
-                // Continue with normal stage change notification
-            }
+            // Note: AI review completion notifications are handled by the ai_review.completed event
+            // which is published by the AI service and triggers handleAIReviewCompleted directly.
+            // We don't need to call handleAIReviewCompleted here to avoid duplicate notifications.
+            // However, stage change notifications are SEPARATE from AI review results - candidates
+            // should still receive stage transition emails (e.g., "moved to recruiter review").
 
             // Fetch application details
             const applicationResponse = await this.services.getAtsService().get<any>(`/applications/${application_id}`);
@@ -646,6 +630,56 @@ export class ApplicationsEventConsumer {
                     console.log('[APPLICATIONS-CONSUMER] ⚠️ Skipping candidate email (no email address found)');
                 }
 
+                return;
+            }
+
+            // Scenario 5: Application submitted for AI review (stage === 'ai_review')
+            // This happens when a candidate submits directly (no recruiter) and AI review is triggered
+            if (stage === 'ai_review') {
+                console.log('[APPLICATIONS-CONSUMER] 📋 Scenario 5: Application submitted for AI review');
+                this.logger.info({ application_id, has_recruiter }, 'Application submitted for AI review - notifying candidate');
+
+                const nextSteps = has_recruiter
+                    ? 'Your application is being reviewed by our AI system. Once complete, your recruiter will review and submit it to the company.'
+                    : 'Your application is being reviewed by our AI system. Once complete, it will be submitted to the company for their review.';
+
+                // Send confirmation email to candidate
+                if (candidateEmail) {
+                    console.log('[APPLICATIONS-CONSUMER] 📧 Sending AI review started email to candidate:', candidateEmail);
+                    await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
+                        candidateName: candidate.full_name,
+                        jobTitle: job.title,
+                        companyName: job.company?.name || 'Unknown Company',
+                        hasRecruiter: !!recruiter_id,
+                        nextSteps,
+                        applicationId: application_id,
+                        userId: candidateUserId,
+                    });
+                    console.log('[APPLICATIONS-CONSUMER] ✅ Candidate email sent successfully');
+                } else {
+                    console.log('[APPLICATIONS-CONSUMER] ⚠️ Skipping candidate email (no email address found)');
+                }
+
+                // Notify recruiter if there is one
+                if (recruiter_id) {
+                    const recruiterEmail = await this.emailLookup.getRecruiterEmail(recruiter_id);
+                    if (recruiterEmail) {
+                        console.log('[APPLICATIONS-CONSUMER] 📧 Sending notification to recruiter:', recruiterEmail);
+                        const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
+                        const recruiter = recruiterResponse.data || recruiterResponse;
+
+                        await this.emailService.sendRecruiterApplicationPending(recruiterEmail, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName: job.company?.name || 'Unknown Company',
+                            applicationId: application_id,
+                            userId: recruiter.user_id,
+                        });
+                        console.log('[APPLICATIONS-CONSUMER] ✅ Recruiter email sent successfully');
+                    }
+                }
+
+                console.log('[APPLICATIONS-CONSUMER] 🎉 Scenario 5 complete - all notifications sent');
                 return;
             }
 

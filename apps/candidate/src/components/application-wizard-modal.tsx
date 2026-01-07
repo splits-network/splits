@@ -81,7 +81,7 @@ export default function ApplicationWizardModal({
                 if (existingApplication?.documents?.length > 0) {
                     // Create a set of document IDs that are already attached to the application
                     const appDocIds = new Set(
-                        existingApplication.map((doc: any) => doc.id)
+                        existingApplication.documents.map((doc: any) => doc.id)
                     );
 
                     // Create a set of original_document_id values from application documents
