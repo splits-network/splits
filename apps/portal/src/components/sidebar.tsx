@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useUserProfile } from '@/contexts';
-import { useUser } from '@clerk/nextjs';
+import { useClerk, useUser } from '@clerk/nextjs';
 import { useState, useEffect, useMemo } from 'react';
 import NotificationBell from './notification-bell';
 
@@ -86,7 +86,9 @@ function SectionHeader({ title }: { title: string }) {
 
 export function Sidebar() {
     const pathname = usePathname();
+    const router = useRouter();
     const { user } = useUser();
+    const { signOut } = useClerk();
     const { isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
 
     // Badge counts (could be fetched from API)
@@ -148,115 +150,236 @@ export function Sidebar() {
     }, [isAdmin, isRecruiter, isCompanyUser]);
 
     return (
-        <div className="drawer-side z-40 overflow-visible">
-            <label htmlFor="sidebar-drawer" className="drawer-overlay"></label>
-            <aside className="bg-base-300 w-64 min-h-screen flex flex-col border-r border-base-200">
+        <>
+            <div className="drawer-side z-40 overflow-visible hidden md:block">
+                <label htmlFor="sidebar-drawer" className="drawer-overlay"></label>
+                <aside className="bg-base-300 w-64 min-h-screen flex flex-col border-r border-base-200">
 
-                {/* Logo / Brand */}
-                <div className="px-4 py-5 border-b border-base-200/50">
-                    <Link href="/" className="">
-                        <img src="/logo.svg" alt="Applicant Network" className="h-12" />
-                    </Link>
-                </div>
-
-                {/* Navigation */}
-                <nav className="flex-1 px-3 py-2 overflow-y-auto scrollbar-thin">
-                    {/* Main Section */}
-                    {groupedItems.main.length > 0 && (
-                        <div>
-                            {groupedItems.main.map((item) => (
-                                <NavItem
-                                    key={item.href}
-                                    item={item}
-                                    isActive={pathname === item.href || (item.href !== '/portal/dashboard' && pathname.startsWith(item.href))}
-                                    badge={badges[item.href]}
-                                />
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Management Section */}
-                    {groupedItems.management.length > 0 && (
-                        <div>
-                            <SectionHeader title="Management" />
-                            {groupedItems.management.map((item) => (
-                                <NavItem
-                                    key={item.href}
-                                    item={item}
-                                    isActive={pathname === item.href || pathname.startsWith(item.href)}
-                                    badge={badges[item.href]}
-                                />
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Settings Section */}
-                    {groupedItems.settings.length > 0 && (
-                        <div>
-                            <SectionHeader title="Settings" />
-                            {groupedItems.settings.map((item) => (
-                                <NavItem
-                                    key={item.href}
-                                    item={item}
-                                    isActive={pathname === item.href || pathname.startsWith(item.href)}
-                                    badge={badges[item.href]}
-                                />
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Admin Section */}
-                    {isAdmin && adminNavItems.length > 0 && (
-                        <div>
-                            <SectionHeader title="Platform" />
-                            {adminNavItems.map((item) => (
-                                <NavItem
-                                    key={item.href}
-                                    item={item}
-                                    isActive={pathname === item.href || pathname.startsWith(item.href + '/')}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </nav>
-                <div className='flex justify-evenly'>
-                    <div className="flex items-center justify-center gap-2 py-2">
-                        <i className="fa-solid fa-sun text-yellow-500"></i>
-                        <input
-                            type="checkbox"
-                            checked={isDark}
-                            onChange={handleThemeChange}
-                            className="toggle"
-                            title="Toggle Theme"
-                        />
-                        <i className="fa-solid fa-moon text-blue-400"></i>
+                    {/* Logo / Brand */}
+                    <div className="px-4 py-5 border-b border-base-200/50">
+                        <Link href="/" className="">
+                            <img src="/logo.svg" alt="Applicant Network" className="h-12" />
+                        </Link>
                     </div>
-                    <NotificationBell position="right" />
-                </div>
-                {/* User Footer */}
-                <div className="border-t border-base-200/50 p-3">
-                    <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-base-200/50 transition-colors cursor-pointer">
-                        <div className="avatar avatar-placeholder">
-                            <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-medium">
-                                {user?.imageUrl ? (
-                                    <img src={user.imageUrl} alt="" className="rounded-full" />
-                                ) : (
-                                    userInitials
-                                )}
+
+                    {/* Navigation */}
+                    <nav className="flex-1 px-3 py-2 overflow-y-auto scrollbar-thin">
+                        {/* Main Section */}
+                        {groupedItems.main.length > 0 && (
+                            <div>
+                                {groupedItems.main.map((item) => (
+                                    <NavItem
+                                        key={item.href}
+                                        item={item}
+                                        isActive={pathname === item.href || (item.href !== '/portal/dashboard' && pathname.startsWith(item.href))}
+                                        badge={badges[item.href]}
+                                    />
+                                ))}
                             </div>
+                        )}
+
+                        {/* Management Section */}
+                        {groupedItems.management.length > 0 && (
+                            <div>
+                                <SectionHeader title="Management" />
+                                {groupedItems.management.map((item) => (
+                                    <NavItem
+                                        key={item.href}
+                                        item={item}
+                                        isActive={pathname === item.href || pathname.startsWith(item.href)}
+                                        badge={badges[item.href]}
+                                    />
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Settings Section */}
+                        {groupedItems.settings.length > 0 && (
+                            <div>
+                                <SectionHeader title="Settings" />
+                                {groupedItems.settings.map((item) => (
+                                    <NavItem
+                                        key={item.href}
+                                        item={item}
+                                        isActive={pathname === item.href || pathname.startsWith(item.href)}
+                                        badge={badges[item.href]}
+                                    />
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Admin Section */}
+                        {isAdmin && adminNavItems.length > 0 && (
+                            <div>
+                                <SectionHeader title="Platform" />
+                                {adminNavItems.map((item) => (
+                                    <NavItem
+                                        key={item.href}
+                                        item={item}
+                                        isActive={pathname === item.href || pathname.startsWith(item.href + '/')}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </nav>
+                    <div className='flex justify-evenly'>
+                        <div className="flex items-center justify-center gap-2 py-2">
+                            <i className="fa-solid fa-sun text-yellow-500"></i>
+                            <input
+                                type="checkbox"
+                                checked={isDark}
+                                onChange={handleThemeChange}
+                                className="toggle"
+                                title="Toggle Theme"
+                            />
+                            <i className="fa-solid fa-moon text-blue-400"></i>
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-base-content truncate">
-                                {user?.fullName || user?.primaryEmailAddress?.emailAddress || 'User'}
-                            </p>
-                            <p className="text-xs text-base-content/50 truncate">
-                                {roleDisplay}
-                            </p>
-                        </div>
-                        <i className="fa-solid fa-ellipsis-vertical text-base-content/40"></i>
+                        <NotificationBell position="right" />
                     </div>
+                    {/* User Footer */}
+                    <div className="border-t border-base-200/50 p-3">
+                        <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-base-200/50 transition-colors">
+                            <div className="avatar avatar-placeholder">
+                                <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-medium">
+                                    {user?.imageUrl ? (
+                                        <img src={user.imageUrl} alt="" className="rounded-full" />
+                                    ) : (
+                                        userInitials
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-base-content truncate">
+                                    {user?.fullName || user?.primaryEmailAddress?.emailAddress || 'User'}
+                                </p>
+                                <p className="text-xs text-base-content/50 truncate">
+                                    {roleDisplay}
+                                </p>
+                            </div>
+                            <details className="dropdown dropdown-top dropdown-right">
+                                <summary className="btn btn-ghost btn-sm px-2">
+                                    <i className="fa-solid fa-ellipsis-vertical text-base-content/60"></i>
+                                </summary>
+                                <ul className="dropdown-content menu bg-base-100 rounded-box shadow p-2 w-56 z-[1]">
+                                    <li>
+                                        <Link href="/portal/profile" className="justify-between">
+                                            <span className="flex items-center gap-2">
+                                                <i className="fa-solid fa-user text-base-content/70"></i>
+                                                Profile
+                                            </span>
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/portal/billing" className="justify-between">
+                                            <span className="flex items-center gap-2">
+                                                <i className="fa-solid fa-credit-card text-base-content/70"></i>
+                                                Billing
+                                            </span>
+                                        </Link>
+                                    </li>
+                                    <div className="divider my-1"></div>
+                                    <li>
+                                        <button
+                                            type="button"
+                                            onClick={() => signOut()}
+                                            className="text-error"
+                                        >
+                                            <span className="flex items-center gap-2">
+                                                <i className="fa-solid fa-arrow-right-from-bracket"></i>
+                                                Sign out
+                                            </span>
+                                        </button>
+                                    </li>
+                                </ul>
+                            </details>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+            {/* Mobile Dock - visible only on small screens */}
+            <div className="md:hidden fixed inset-x-0 bottom-0 z-50">
+                <div className="dock bg-base-100 border-t border-base-200">
+                    {(() => {
+                        const dockConfigHrefs = ['/portal/dashboard', '/portal/roles', '/portal/applications', '/portal/candidates'];
+                        const dockItems = navItems
+                            .filter((i) => dockConfigHrefs.includes(i.href))
+                            .filter(filterByRole);
+                        const isItemActive = (href: string) => href === '/portal/dashboard'
+                            ? pathname === href
+                            : pathname === href || pathname.startsWith(`${href}/`);
+                        return dockItems.map((item) => (
+                            <button
+                                key={item.href}
+                                type="button"
+                                onClick={() => router.push(item.href)}
+                                className={isItemActive(item.href) ? 'dock-active' : ''}
+                                title={item.label}
+                            >
+                                <i className={`fa-solid ${item.icon}`}></i>
+                                <span className="dock-label">{item.label}</span>
+                            </button>
+                        ));
+                    })()}
+                    {/* Menu button for additional options */}
+                    <details className="dropdown dropdown-top">
+                        <summary className="dock-label dock" role="button" tabIndex={0}>
+                            <i className="fa-solid fa-ellipsis"></i>
+                            <span className="dock-label">Menu</span>
+                        </summary>
+                        <ul className="dropdown-content menu bg-base-100 rounded-box shadow p-2 w-56 z-[1]">
+                            <li>
+                                <Link href="/portal/profile" className="justify-between">
+                                    <span className="flex items-center gap-2">
+                                        <i className="fa-solid fa-user text-base-content/70"></i>
+                                        Profile
+                                    </span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/portal/billing" className="justify-between">
+                                    <span className="flex items-center gap-2">
+                                        <i className="fa-solid fa-credit-card text-base-content/70"></i>
+                                        Billing
+                                    </span>
+                                </Link>
+                            </li>
+                            {isCompanyUser && (
+                                <>
+                                    <li>
+                                        <Link href="/portal/company/settings" className="justify-between">
+                                            <span className="flex items-center gap-2">
+                                                <i className="fa-solid fa-building text-base-content/70"></i>
+                                                Company Settings
+                                            </span>
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/portal/company/team" className="justify-between">
+                                            <span className="flex items-center gap-2">
+                                                <i className="fa-solid fa-user-group text-base-content/70"></i>
+                                                Team
+                                            </span>
+                                        </Link>
+                                    </li>
+                                </>
+                            )}
+                            <div className="divider my-1"></div>
+                            <li>
+                                <button
+                                    type="button"
+                                    onClick={() => signOut()}
+                                    className="text-error"
+                                >
+                                    <span className="flex items-center gap-2">
+                                        <i className="fa-solid fa-arrow-right-from-bracket"></i>
+                                        Sign out
+                                    </span>
+                                </button>
+                            </li>
+                        </ul>
+                    </details>
                 </div>
-            </aside>
-        </div>
+            </div>
+        </>
     );
 }

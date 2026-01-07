@@ -160,7 +160,7 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
                 aria-label="Notifications"
                 title='Notifications'
             >
-                <i className="fa-solid fa-bell text-lg text-neutral/50"></i>
+                <i className="fa-solid fa-bell text-lg text-content/60"></i>
                 {unreadCount > 0 && (
                     <span className="badge badge-error badge-sm rounded-full absolute indicator-item text-xs opacity-70">
                         {unreadCount > 99 ? '99+' : unreadCount}
