@@ -3,6 +3,7 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useUserProfile } from '@/contexts';
 
 interface ProfileData {
     industries: string[];
@@ -41,6 +42,8 @@ const SPECIALTY_OPTIONS = [
 
 export function ProfileSettings() {
     const { getToken } = useAuth();
+    const { profile: userProfile, isLoading: contextLoading } = useUserProfile();
+
     const [profile, setProfile] = useState<ProfileData>({
         industries: [],
         specialties: [],
@@ -55,11 +58,17 @@ export function ProfileSettings() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
+    // Load recruiter profile when context is ready and we have a recruiter_id
     useEffect(() => {
-        loadProfile();
-    }, []);
+        if (!contextLoading && userProfile?.recruiter_id) {
+            loadRecruiterProfile(userProfile.recruiter_id);
+        } else if (!contextLoading && !userProfile?.recruiter_id) {
+            setError('No recruiter profile found');
+            setLoading(false);
+        }
+    }, [contextLoading, userProfile?.recruiter_id]);
 
-    const loadProfile = async () => {
+    const loadRecruiterProfile = async (recId: string) => {
         try {
             setLoading(true);
             const token = await getToken();
@@ -70,11 +79,10 @@ export function ProfileSettings() {
             }
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.get('/recruiters?limit=1');
+            const response: any = await client.get(`/recruiters/${recId}`);
 
-            // Handle array response from V2 API
-            const dataArray = response?.data || response;
-            const data = Array.isArray(dataArray) ? dataArray[0] : dataArray;
+            // Handle response
+            const data = response?.data || response;
 
             if (!data?.id) {
                 throw new Error('Recruiter profile not found');

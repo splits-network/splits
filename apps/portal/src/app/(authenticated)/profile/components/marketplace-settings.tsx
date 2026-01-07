@@ -3,8 +3,9 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useUserProfile } from '@/contexts';
 
-interface MarketplaceSettings {
+interface MarketplaceSettingsData {
     marketplace_enabled: boolean;
     marketplace_visibility: 'public' | 'limited' | 'hidden';
     show_success_metrics: boolean;
@@ -13,7 +14,8 @@ interface MarketplaceSettings {
 
 export function MarketplaceSettings() {
     const { getToken } = useAuth();
-    const [settings, setSettings] = useState<MarketplaceSettings>({
+    const { profile: userProfile, isLoading: contextLoading } = useUserProfile();
+    const [settings, setSettings] = useState<MarketplaceSettingsData>({
         marketplace_enabled: false,
         marketplace_visibility: 'public',
         show_success_metrics: false,
@@ -25,11 +27,17 @@ export function MarketplaceSettings() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
+    // Load marketplace settings when context is ready and we have a recruiter_id
     useEffect(() => {
-        loadSettings();
-    }, []);
+        if (!contextLoading && userProfile?.recruiter_id) {
+            loadMarketplaceSettings(userProfile.recruiter_id);
+        } else if (!contextLoading && !userProfile?.recruiter_id) {
+            setError('No recruiter profile found');
+            setLoading(false);
+        }
+    }, [contextLoading, userProfile?.recruiter_id]);
 
-    const loadSettings = async () => {
+    const loadMarketplaceSettings = async (recId: string) => {
         try {
             setLoading(true);
             const token = await getToken();
@@ -40,11 +48,10 @@ export function MarketplaceSettings() {
             }
 
             const client = createAuthenticatedClient(token);
-            const response: any = await client.get('/recruiters?limit=1');
+            const response: any = await client.get(`/recruiters/${recId}`);
 
-            // Handle array response from V2 API
-            const dataArray = response?.data || response;
-            const recruiter = Array.isArray(dataArray) ? dataArray[0] : dataArray;
+            // Handle response
+            const recruiter = response?.data || response;
 
             if (!recruiter?.id) {
                 throw new Error('Recruiter profile not found');

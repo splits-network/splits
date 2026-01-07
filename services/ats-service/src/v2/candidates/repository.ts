@@ -88,24 +88,36 @@ export class CandidateRepository {
 
         filters = typeof params.filters === 'string' ? parseFilters(params.filters) : (params.filters || {});
         
-        for(const key of Object.keys(filters)) {
-            const value = filters[key];
+        // Extract special filters that are NOT database columns
+        const { scope, ...columnFilters } = filters;
+        
+        // Apply column-based filters (actual database columns only)
+        for(const key of Object.keys(columnFilters)) {
+            const value = columnFilters[key];
             if (value !== undefined && value !== null) {
                 query = query.eq(key, value);
             }
         }
 
+        // Handle scope-based filtering
+        // scope="mine" means only candidates the recruiter sourced/has relationships with
+        // scope="all" means all accessible candidates (still respects role-based access)
+        
         // For recruiters: filter to candidates they sourced OR have relationships with
         if (accessContext.recruiterId) {
             // Build list of candidate IDs the recruiter can access
             const accessibleCandidateIds = [...new Set(recruiterCandidateIds)];
             
-            // If recruiter has relationship candidates, filter by those OR by recruiter_id (who sourced them)
-            if (accessibleCandidateIds.length > 0) {
-                query = query.or(`recruiter_id.eq.${accessContext.recruiterId},id.in.(${accessibleCandidateIds.join(',')})`);
-            } else {
-                // No relationships - only show candidates they sourced
-                query = query.eq('recruiter_id', accessContext.recruiterId);
+            // If scope is "mine" or not specified, apply recruiter filtering
+            // If scope is "all", skip recruiter filtering (show all accessible to their role)
+            if (scope !== 'all') {
+                // If recruiter has relationship candidates, filter by those OR by recruiter_id (who sourced them)
+                if (accessibleCandidateIds.length > 0) {
+                    query = query.or(`recruiter_id.eq.${accessContext.recruiterId},id.in.(${accessibleCandidateIds.join(',')})`);
+                } else {
+                    // No relationships - only show candidates they sourced
+                    query = query.eq('recruiter_id', accessContext.recruiterId);
+                }
             }
         }
 

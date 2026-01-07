@@ -3,8 +3,9 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useUserProfile } from '@/contexts';
 
-interface UserProfile {
+interface UserProfileData {
     id: string;
     email: string;
     name: string;
@@ -13,7 +14,9 @@ interface UserProfile {
 export function UserProfileSettings() {
     const { getToken } = useAuth();
     const { user: clerkUser } = useUser();
-    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const { profile: contextProfile, isLoading: contextLoading, refresh: refreshContext } = useUserProfile();
+
+    const [profile, setProfile] = useState<UserProfileData | null>(null);
     const [name, setName] = useState('');
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
@@ -29,44 +32,29 @@ export function UserProfileSettings() {
     const [passwordSuccess, setPasswordSuccess] = useState('');
     const [changingPassword, setChangingPassword] = useState(false);
 
+    // Initialize from context when available
     useEffect(() => {
-        loadProfile();
-    }, []);
-
-    const loadProfile = async () => {
-        try {
-            setLoading(true);
-            setError('');
-            const token = await getToken();
-            if (!token) {
-                setError('Please sign in to manage your profile.');
-                setLoading(false);
-                return;
-            }
-
-            const apiClient = createAuthenticatedClient(token);
-            const response: any = await apiClient.get('/users?limit=1');
-
-            // Handle array response from V2 API
-            const dataArray = response?.data || response;
-            const userProfile = Array.isArray(dataArray) ? dataArray[0] : dataArray;
-
-            if (!userProfile?.id) {
-                throw new Error('User profile not found');
-            }
-
+        if (!contextLoading && contextProfile) {
             setProfile({
-                id: userProfile.id,
-                email: userProfile.email,
-                name: userProfile.name || '', // Use 'name' field, not 'full_name'
+                id: contextProfile.id,
+                email: contextProfile.email,
+                name: contextProfile.name || '',
             });
-            setName(userProfile.name || '');
-        } catch (err: any) {
-            console.error('Failed to load profile:', err);
-            setError('Failed to load profile. Please try again.');
-        } finally {
+            setName(contextProfile.name || '');
+            setLoading(false);
+        } else if (!contextLoading && !contextProfile) {
+            // Context loaded but no profile - show error
+            setError('User profile not found');
             setLoading(false);
         }
+    }, [contextProfile, contextLoading]);
+
+    const resetForm = () => {
+        if (contextProfile) {
+            setName(contextProfile.name || '');
+        }
+        setError('');
+        setSuccess('');
     };
 
     const handleSubmit = async (e: FormEvent) => {
@@ -106,6 +94,9 @@ export function UserProfileSettings() {
                 });
                 setName(updated.name || '');
                 setSuccess('Profile updated successfully!');
+
+                // Refresh the context so other components see the updated name
+                await refreshContext();
 
                 // Clear success message after 3 seconds
                 setTimeout(() => setSuccess(''), 3000);
@@ -250,7 +241,7 @@ export function UserProfileSettings() {
                             <button
                                 type="button"
                                 className="btn"
-                                onClick={loadProfile}
+                                onClick={resetForm}
                                 disabled={submitting}
                             >
                                 Cancel

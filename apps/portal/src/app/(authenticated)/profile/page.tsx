@@ -1,56 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
 import { UserProfileSettings } from './components/user-profile-settings';
 import { ProfileSettings } from './components/profile-settings';
 import { MarketplaceSettings } from './components/marketplace-settings';
+import { useUserProfile } from '@/contexts';
 
 export default function SettingsPage() {
-    const router = useRouter();
-    const { getToken, isLoaded } = useAuth();
-    const [userRoles, setUserRoles] = useState<{
-        isRecruiter: boolean;
-        isCompanyAdmin: boolean;
-        isHiringManager: boolean;
-        isPlatformAdmin: boolean;
-    }>({
-        isRecruiter: false,
-        isCompanyAdmin: false,
-        isHiringManager: false,
-        isPlatformAdmin: false,
-    });
-    const [loading, setLoading] = useState(true);
+    const { profile, isLoading, isAdmin, isRecruiter, isCompanyUser, hasRole } = useUserProfile();
 
-    useEffect(() => {
-        async function checkUserRole() {
-            if (!isLoaded) return;
+    // Derive specific role checks
+    const isCompanyAdmin = hasRole('company_admin');
+    const isHiringManager = hasRole('hiring_manager');
+    const isPlatformAdmin = isAdmin;
 
-            try {
-                const token = await getToken();
-                if (!token) {
-                    setLoading(false);
-                    return;
-                }
-
-                const apiClient = createAuthenticatedClient(token);
-                const roleData = await apiClient.getUserRoles();
-
-                console.log('Profile page - roleData:', roleData);
-                setUserRoles(roleData);
-                setLoading(false);
-            } catch (error) {
-                console.error('Failed to check user role:', error);
-                setLoading(false);
-            }
-        }
-
-        checkUserRole();
-    }, [isLoaded, getToken]);
-
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
                 <span className="loading loading-spinner loading-lg"></span>
@@ -67,13 +30,13 @@ export default function SettingsPage() {
                 <UserProfileSettings />
 
                 {/* Recruiter Profile (Recruiters Only) */}
-                {userRoles.isRecruiter && <ProfileSettings />}
+                {isRecruiter && <ProfileSettings />}
 
                 {/* Marketplace Settings (Recruiters Only) */}
-                {userRoles.isRecruiter && <MarketplaceSettings />}
+                {isRecruiter && <MarketplaceSettings />}
 
                 {/* Company Settings - Future (Company Admins & Hiring Managers) */}
-                {(userRoles.isCompanyAdmin || userRoles.isHiringManager) && (
+                {(isCompanyAdmin || isHiringManager) && (
                     <div className="card bg-base-100 shadow opacity-60">
                         <div className="card-body">
                             <h2 className="card-title">
@@ -89,7 +52,7 @@ export default function SettingsPage() {
                 )}
 
                 {/* Platform Administration (Platform Admins Only) */}
-                {userRoles.isPlatformAdmin && (
+                {isPlatformAdmin && (
                     <div className="card bg-base-100 shadow opacity-60">
                         <div className="card-body">
                             <h2 className="card-title">
@@ -119,7 +82,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Integrations Card (Future - Available based on role) */}
-                {(userRoles.isRecruiter || userRoles.isCompanyAdmin || userRoles.isPlatformAdmin) && (
+                {(isRecruiter || isCompanyAdmin || isPlatformAdmin) && (
                     <div className="card bg-base-100 shadow opacity-60">
                         <div className="card-body">
                             <h2 className="card-title">

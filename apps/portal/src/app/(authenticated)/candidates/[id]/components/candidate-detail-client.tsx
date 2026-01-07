@@ -69,7 +69,6 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                 ]);
 
                 setCandidate(candidateResponse.data);
-                console.log('Loaded candidate:', candidateResponse.data);
 
                 // Check if user can edit (upload documents for) this candidate
                 // V2 users endpoint returns array, get first (current) user

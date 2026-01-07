@@ -1,13 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useViewMode } from '@/hooks/use-view-mode';
+import { useDebouncedCallback } from '@/hooks/use-debounce';
 import { formatDate, getVerificationStatusBadge, getVerificationStatusIcon } from '@/lib/utils';
 import CandidateCard from './candidate-card';
 import AddCandidateModal from './add-candidate-modal';
+
+interface PaginationState {
+    total: number;
+    page: number;
+    limit: number;
+    total_pages: number;
+}
 
 export default function CandidatesListClient() {
     const { getToken } = useAuth();
@@ -16,50 +24,106 @@ export default function CandidatesListClient() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [searchInput, setSearchInput] = useState(''); // For controlled input
     const [viewMode, setViewMode] = useViewMode('candidatesViewMode');
     const [userRole, setUserRole] = useState<string | null>(null);
     const [scope, setScope] = useState<'mine' | 'all'>('mine');
     const [recruiterId, setRecruiterId] = useState<string | null>(null);
     const [showAddModal, setShowAddModal] = useState(false);
 
-    useEffect(() => {
-        async function loadCandidates() {
-            try {
-                setLoading(true);
-                setError(null);
+    // Pagination state
+    const [pagination, setPagination] = useState<PaginationState>({
+        total: 0,
+        page: 1,
+        limit: 25,
+        total_pages: 0
+    });
 
-                const token = await getToken();
-                if (!token) {
-                    setError('Not authenticated');
-                    return;
-                }
+    // Sorting state
+    const [sortBy, setSortBy] = useState<string>('created_at');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-                const client = createAuthenticatedClient(token);
+    // Debounced search handler
+    const debouncedSetSearch = useDebouncedCallback((value: string) => {
+        setSearchQuery(value);
+        setPagination(prev => ({ ...prev, page: 1 })); // Reset to first page on search
+    }, 300);
 
-                const response = await client.get('/candidates', {
-                    params: {
-                        //include: 'applications',
-                        filters: {
-                        }
-                    }
-                });
-                setCandidates(response.data || []);
-            } catch (err: any) {
-                console.error('Failed to load candidates:', err);
-                setError(err.message || 'Failed to load candidates');
-            } finally {
-                setLoading(false);
-            }
+    // Handle search input change
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchInput(value);
+        debouncedSetSearch(value);
+    };
+
+    // Handle sort change
+    const handleSort = (field: string) => {
+        if (sortBy === field) {
+            // Toggle sort order if same field
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            // New field, default to descending
+            setSortBy(field);
+            setSortOrder('desc');
         }
+        setPagination(prev => ({ ...prev, page: 1 })); // Reset to first page on sort change
+    };
 
+    // Get sort icon for column
+    const getSortIcon = (field: string) => {
+        if (sortBy !== field) return 'fa-sort';
+        return sortOrder === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
+    };
+
+    // Load candidates
+    const loadCandidates = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const token = await getToken();
+            if (!token) {
+                setError('Not authenticated');
+                return;
+            }
+
+            const client = createAuthenticatedClient(token);
+
+            const response = await client.get('/candidates', {
+                params: {
+                    page: pagination.page,
+                    limit: pagination.limit,
+                    search: searchQuery || undefined,
+                    sort_by: sortBy,
+                    sort_order: sortOrder,
+                    filters: {
+                        scope: scope
+                    }
+                }
+            });
+
+            setCandidates(response.data || []);
+            if (response.pagination) {
+                setPagination(response.pagination);
+            }
+        } catch (err: any) {
+            console.error('Failed to load candidates:', err);
+            setError(err.message || 'Failed to load candidates');
+        } finally {
+            setLoading(false);
+        }
+    }, [getToken, pagination.page, pagination.limit, searchQuery, sortBy, sortOrder, scope]);
+
+    useEffect(() => {
         loadCandidates();
-    }, [getToken, scope]);
+    }, [loadCandidates]);
 
-    const filteredCandidates = candidates.filter(candidate =>
-        searchQuery === '' ||
-        candidate.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        candidate.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Page change handler
+    const handlePageChange = (newPage: number) => {
+        if (newPage >= 1 && newPage <= pagination.total_pages) {
+            setPagination(prev => ({ ...prev, page: newPage }));
+        }
+    };
 
     const handleAddCandidateSuccess = (newCandidate: any) => {
         // Add the new candidate to the beginning of the list
@@ -126,10 +190,31 @@ export default function CandidatesListClient() {
                                 type="text"
                                 placeholder="Search by name or email..."
                                 className="input w-full"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                value={searchInput}
+                                onChange={handleSearchChange}
                             />
                         </div>
+                        {/* Sort dropdown for grid view */}
+                        {viewMode === 'grid' && (
+                            <div className="fieldset">
+                                <select
+                                    className="select"
+                                    value={`${sortBy}-${sortOrder}`}
+                                    onChange={(e) => {
+                                        const [field, order] = e.target.value.split('-');
+                                        setSortBy(field);
+                                        setSortOrder(order as 'asc' | 'desc');
+                                    }}
+                                >
+                                    <option value="created_at-desc">Newest First</option>
+                                    <option value="created_at-asc">Oldest First</option>
+                                    <option value="full_name-asc">Name (A-Z)</option>
+                                    <option value="full_name-desc">Name (Z-A)</option>
+                                    <option value="email-asc">Email (A-Z)</option>
+                                    <option value="email-desc">Email (Z-A)</option>
+                                </select>
+                            </div>
+                        )}
                         <div className="join">
                             <button
                                 className={`btn join-item ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
@@ -151,9 +236,9 @@ export default function CandidatesListClient() {
             </div>
 
             {/* Candidates List - Grid View */}
-            {viewMode === 'grid' && filteredCandidates.length > 0 && (
+            {viewMode === 'grid' && candidates.length > 0 && (
                 <div className="columns-1 lg:columns-2 xl:columns-3 gap-6 space-y-6">
-                    {filteredCandidates.map((candidate) => (
+                    {candidates.map((candidate) => (
                         <div key={candidate.id} className="break-inside-avoid mb-6">
                             <CandidateCard candidate={candidate} />
                         </div>
@@ -162,23 +247,55 @@ export default function CandidatesListClient() {
             )}
 
             {/* Candidates List - Table View */}
-            {viewMode === 'table' && filteredCandidates.length > 0 && (
+            {viewMode === 'table' && candidates.length > 0 && (
                 <div className="card bg-base-100 shadow overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="table">
                             <thead>
                                 <tr>
-                                    <th>Candidate</th>
-                                    <th>Email</th>
-                                    <th>Status</th>
+                                    <th
+                                        className="cursor-pointer hover:bg-base-200 select-none"
+                                        onClick={() => handleSort('full_name')}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            Candidate
+                                            <i className={`fa-solid ${getSortIcon('full_name')} text-xs opacity-50`}></i>
+                                        </div>
+                                    </th>
+                                    <th
+                                        className="cursor-pointer hover:bg-base-200 select-none"
+                                        onClick={() => handleSort('email')}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            Email
+                                            <i className={`fa-solid ${getSortIcon('email')} text-xs opacity-50`}></i>
+                                        </div>
+                                    </th>
+                                    <th
+                                        className="cursor-pointer hover:bg-base-200 select-none"
+                                        onClick={() => handleSort('verification_status')}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            Status
+                                            <i className={`fa-solid ${getSortIcon('verification_status')} text-xs opacity-50`}></i>
+                                        </div>
+                                    </th>
                                     {userRole === 'recruiter' && <th>Relationship</th>}
                                     <th>Links</th>
-                                    <th>Added</th>
+                                    <th
+                                        className="cursor-pointer hover:bg-base-200 select-none"
+                                        onClick={() => handleSort('created_at')}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            Added
+                                            <i className={`fa-solid ${getSortIcon('created_at')} text-xs opacity-50`}></i>
+                                        </div>
+                                    </th>
                                     <th className="text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredCandidates.map((candidate) => (
+                                {candidates.map((candidate) => (
                                     <tr key={candidate.id} className="hover">
                                         <td>
                                             <div className="flex items-center gap-3">
@@ -293,7 +410,7 @@ export default function CandidatesListClient() {
             )}
 
             {/* Empty State */}
-            {filteredCandidates.length === 0 && (
+            {candidates.length === 0 && !loading && (
                 <div className="card bg-base-100 shadow">
                     <div className="card-body text-center py-12">
                         <i className="fa-solid fa-users text-6xl text-base-content/20"></i>
@@ -301,6 +418,120 @@ export default function CandidatesListClient() {
                         <p className="text-base-content/70 mt-2">
                             {searchQuery ? 'Try adjusting your search' : 'Submit candidates to roles to see them appear here'}
                         </p>
+                    </div>
+                </div>
+            )}
+
+            {/* Pagination Controls */}
+            {pagination.total_pages > 1 && (
+                <div className="card bg-base-100 shadow">
+                    <div className="card-body p-4">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            {/* Results info */}
+                            <div className="text-sm text-base-content/70">
+                                Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} candidates
+                            </div>
+
+                            {/* Pagination buttons */}
+                            <div className="join">
+                                <button
+                                    className="join-item btn btn-sm"
+                                    onClick={() => handlePageChange(1)}
+                                    disabled={pagination.page === 1}
+                                    title="First page"
+                                >
+                                    <i className="fa-solid fa-angles-left"></i>
+                                </button>
+                                <button
+                                    className="join-item btn btn-sm"
+                                    onClick={() => handlePageChange(pagination.page - 1)}
+                                    disabled={pagination.page === 1}
+                                    title="Previous page"
+                                >
+                                    <i className="fa-solid fa-angle-left"></i>
+                                </button>
+
+                                {/* Page numbers */}
+                                {(() => {
+                                    const pagesSet = new Set<number>();
+                                    const current = pagination.page;
+                                    const total = pagination.total_pages;
+
+                                    // Show first page
+                                    if (current > 3) pagesSet.add(1);
+
+                                    // Show pages around current
+                                    for (let i = Math.max(1, current - 2); i <= Math.min(total, current + 2); i++) {
+                                        pagesSet.add(i);
+                                    }
+
+                                    // Show last page
+                                    if (current < total - 2) pagesSet.add(total);
+
+                                    // Convert to sorted array and add ellipsis markers
+                                    const sortedPages = Array.from(pagesSet).sort((a, b) => a - b);
+                                    const pages: (number | string)[] = [];
+
+                                    for (let i = 0; i < sortedPages.length; i++) {
+                                        if (i > 0 && sortedPages[i] - sortedPages[i - 1] > 1) {
+                                            pages.push(`ellipsis-${i}`); // Ellipsis marker
+                                        }
+                                        pages.push(sortedPages[i]);
+                                    }
+
+                                    return pages.map((page) => {
+                                        if (typeof page === 'string') {
+                                            return <span key={page} className="join-item btn btn-sm btn-disabled">...</span>;
+                                        }
+                                        return (
+                                            <button
+                                                key={page}
+                                                className={`join-item btn btn-sm ${pagination.page === page ? 'btn-primary' : ''}`}
+                                                onClick={() => handlePageChange(page)}
+                                            >
+                                                {page}
+                                            </button>
+                                        );
+                                    });
+                                })()}
+
+                                <button
+                                    className="join-item btn btn-sm"
+                                    onClick={() => handlePageChange(pagination.page + 1)}
+                                    disabled={pagination.page === pagination.total_pages}
+                                    title="Next page"
+                                >
+                                    <i className="fa-solid fa-angle-right"></i>
+                                </button>
+                                <button
+                                    className="join-item btn btn-sm"
+                                    onClick={() => handlePageChange(pagination.total_pages)}
+                                    disabled={pagination.page === pagination.total_pages}
+                                    title="Last page"
+                                >
+                                    <i className="fa-solid fa-angles-right"></i>
+                                </button>
+                            </div>
+
+                            {/* Page size selector */}
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-base-content/70">Per page:</span>
+                                <select
+                                    className="select select-sm"
+                                    value={pagination.limit}
+                                    onChange={(e) => setPagination(prev => ({
+                                        ...prev,
+                                        limit: parseInt(e.target.value),
+                                        page: 1
+                                    }))}
+                                >
+                                    <option value={10}>10</option>
+                                    <option value={25}>25</option>
+                                    <option value={50}>50</option>
+                                    <option value={100}>100</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
