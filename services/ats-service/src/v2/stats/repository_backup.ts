@@ -55,49 +55,33 @@ export class StatsRepository {
         const startOfYear = new Date(now.getFullYear(), 0, 1);
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-        // First, get job IDs assigned to this recruiter via role_assignments (in network schema)
-        // Jobs don't have recruiter_id - recruiters are assigned to jobs via role_assignments
-        const assignedJobsResult = await this.supabase
-            .schema('network')
-            .from('role_assignments')
-            .select('job_id')
-            .eq('recruiter_id', recruiterId)
-            .eq('status', 'active');
-
-        const assignedJobIds = (assignedJobsResult.data || []).map((a: any) => a.job_id);
-
         const [
             activeRolesResult,
             pipelineResult,
             offersPendingResult,
             placementsResult,
         ] = await Promise.all([
-            // Count active jobs from assigned job IDs
-            assignedJobIds.length > 0
-                ? this.supabase
-                    .schema('ats')
-                    .from('jobs')
-                    .select('id', { count: 'exact', head: true })
-                    .in('id', assignedJobIds)
-                    .in('status', ACTIVE_ROLE_STATUSES)
-                : Promise.resolve({ count: 0, error: null }),
-            // applications.recruiter_id exists in ats schema
             this.supabase
-                .schema('ats')
+                
+                .from('jobs')
+                .select('id', { count: 'exact', head: true })
+                .eq('recruiter_id', recruiterId)
+                .in('status', ACTIVE_ROLE_STATUSES),
+            this.supabase
+                
                 .from('applications')
                 .select('id', { count: 'exact', head: true })
                 .eq('recruiter_id', recruiterId)
                 .in('stage', PIPELINE_STAGES),
             this.supabase
-                .schema('ats')
+                
                 .from('applications')
                 .select('id', { count: 'exact', head: true })
                 .eq('recruiter_id', recruiterId)
                 .eq('stage', 'offer')
                 .or('accepted_by_company.eq.false,accepted_by_company.is.null'),
-            // placements.recruiter_id exists in ats schema
             this.supabase
-                .schema('ats')
+                
                 .from('placements')
                 .select('id, hired_at, recruiter_share, state, guarantee_expires_at')
                 .eq('recruiter_id', recruiterId),
@@ -161,27 +145,27 @@ export class StatsRepository {
             await Promise.all([
                 // Total applications
                 this.supabase
-                    .schema('ats')
+                    
                     .from('applications')
                     .select('id', { count: 'exact', head: true })
                     .eq('candidate_id', candidateId),
                 // Active applications (in process stages)
                 this.supabase
-                    .schema('ats')
+                    
                     .from('applications')
                     .select('id', { count: 'exact', head: true })
                     .eq('candidate_id', candidateId)
                     .in('stage', PIPELINE_STAGES),
                 // Interviews scheduled
                 this.supabase
-                    .schema('ats')
+                    
                     .from('applications')
                     .select('id', { count: 'exact', head: true })
                     .eq('candidate_id', candidateId)
                     .eq('stage', 'interview'),
                 // Offers received
                 this.supabase
-                    .schema('ats')
+                    
                     .from('applications')
                     .select('id', { count: 'exact', head: true })
                     .eq('candidate_id', candidateId)
@@ -219,34 +203,34 @@ export class StatsRepository {
         ] = await Promise.all([
             // Active roles
             this.supabase
-                .schema('ats')
+                
                 .from('jobs')
                 .select('id', { count: 'exact', head: true })
                 .in('company_id', companyIds)
                 .in('status', ACTIVE_ROLE_STATUSES),
             // Total applications
             this.supabase
-                .schema('ats')
+                
                 .from('applications')
                 .select('id, job:jobs!inner(company_id)', { count: 'exact', head: true })
                 .in('job.company_id', companyIds),
             // Interviews scheduled
             this.supabase
-                .schema('ats')
+                
                 .from('applications')
                 .select('id, job:jobs!inner(company_id)', { count: 'exact', head: true })
                 .in('job.company_id', companyIds)
                 .eq('stage', 'interview'),
             // Offers extended
             this.supabase
-                .schema('ats')
+                
                 .from('applications')
                 .select('id, job:jobs!inner(company_id)', { count: 'exact', head: true })
                 .in('job.company_id', companyIds)
                 .eq('stage', 'offer'),
             // Placements for time-to-hire and counts
             this.supabase
-                .schema('ats')
+                
                 .from('placements')
                 .select('id, hired_at, application:applications!inner(job:jobs!inner(company_id))')
                 .in('application.job.company_id', companyIds),
@@ -272,38 +256,24 @@ export class StatsRepository {
 
         // Calculate average time to hire (simplified - using days from year start)
         // In a real implementation, we'd calculate from job post date to hire date per placement
-        const avgTimeToHireDays = placementsData.length > 0
+        const avgTimeToHireDays = placementsData.length > 0 
             ? Math.round((now.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24) / Math.max(placementsData.length, 1))
             : 0;
 
-        // Count active recruiters from role_assignments (not jobs.recruiter_id which doesn't exist)
-        // First get job IDs for these companies
-        const companyJobsResult = await this.supabase
-            .schema('ats')
+        // Count active recruiters (distinct recruiter IDs from active jobs)
+        const activeRecruitersResult = await this.supabase
+            
             .from('jobs')
-            .select('id')
+            .select('recruiter_id')
             .in('company_id', companyIds)
-            .in('status', ACTIVE_ROLE_STATUSES);
+            .in('status', ACTIVE_ROLE_STATUSES)
+            .not('recruiter_id', 'is', null);
 
-        const companyJobIds = (companyJobsResult.data || []).map((j: any) => j.id);
-
-        // Then get distinct recruiters assigned to these jobs
-        let activeRecruitersCount = 0;
-        if (companyJobIds.length > 0) {
-            const activeRecruitersResult = await this.supabase
-                .schema('network')
-                .from('role_assignments')
-                .select('recruiter_id')
-                .in('job_id', companyJobIds)
-                .eq('status', 'active');
-
-            const uniqueRecruiterIds = new Set(
-                (activeRecruitersResult.data || [])
-                    .map((assignment: any) => assignment.recruiter_id)
-                    .filter((id: string | null) => id !== null)
-            );
-            activeRecruitersCount = uniqueRecruiterIds.size;
-        }
+        const uniqueRecruiterIds = new Set(
+            (activeRecruitersResult.data || [])
+                .map((job: any) => job.recruiter_id)
+                .filter((id: string | null) => id !== null)
+        );
 
         return {
             active_roles: activeRolesResult.count || 0,
@@ -313,7 +283,7 @@ export class StatsRepository {
             placements_this_month: placementsThisMonth,
             placements_this_year: placementsThisYear,
             avg_time_to_hire_days: avgTimeToHireDays,
-            active_recruiters: activeRecruitersCount,
+            active_recruiters: uniqueRecruiterIds.size,
         };
     }
 }
