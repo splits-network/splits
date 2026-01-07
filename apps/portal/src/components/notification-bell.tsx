@@ -5,17 +5,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import {
-    fetchNotifications,
-    fetchUnreadCount,
-    markAsRead,
-    markAllAsRead,
-    dismissNotification,
     formatNotificationTime,
     getNotificationIcon,
     InAppNotification,
 } from '@/lib/notifications';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import { create } from 'domain';
 
 export default function NotificationBell() {
     const router = useRouter();
@@ -24,6 +18,7 @@ export default function NotificationBell() {
     const [notifications, setNotifications] = useState<InAppNotification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(false);
 
     // Fetch unread count every 30 seconds
     const loadUnreadCount = useCallback(async () => {
@@ -32,11 +27,15 @@ export default function NotificationBell() {
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const count = await client.get('/notifications/unread-count').then(res => res.data.count);
+            const res = await client.get('/notifications/unread-count');
+            const count = res?.data?.count ?? 0;
 
             setUnreadCount(count);
-        } catch (error) {
-            console.error('Failed to fetch unread count:', error);
+            setError(false);
+        } catch (err) {
+            // Silently fail - notification count is non-critical
+            console.warn('Failed to fetch unread count:', err);
+            setError(true);
         }
     }, [getToken]);
 
@@ -51,10 +50,14 @@ export default function NotificationBell() {
             }
 
             const client = createAuthenticatedClient(token);
-            const data = await client.get('/notifications', { params: { limit: 10 } }).then(res => res.data);
-            setNotifications(data);
-        } catch (error) {
-            console.error('Failed to fetch notifications:', error);
+            const res = await client.get('/notifications', { params: { limit: 10 } });
+            const data = res?.data ?? [];
+            setNotifications(Array.isArray(data) ? data : []);
+            setError(false);
+        } catch (err) {
+            console.warn('Failed to fetch notifications:', err);
+            setNotifications([]);
+            setError(true);
         } finally {
             setLoading(false);
         }
@@ -107,7 +110,8 @@ export default function NotificationBell() {
             const token = await getToken();
             if (!token) return;
 
-            await markAllAsRead(token);
+            const client = createAuthenticatedClient(token);
+            await client.post('/notifications/mark-all-read', {});
             setUnreadCount(0);
             setNotifications((prev) =>
                 prev.map((n) => ({ ...n, read: true }))
@@ -123,14 +127,15 @@ export default function NotificationBell() {
             const token = await getToken();
             if (!token) return;
 
-            await dismissNotification(token, notificationId);
+            const client = createAuthenticatedClient(token);
+            await client.delete(`/notifications/${notificationId}`);
             setNotifications((prev) =>
                 prev.filter((n) => n.id !== notificationId)
             );
             // Refresh unread count
             loadUnreadCount();
-        } catch (error) {
-            console.error('Failed to dismiss notification:', error);
+        } catch (err) {
+            console.warn('Failed to dismiss notification:', err);
         }
     };
 
@@ -185,7 +190,7 @@ export default function NotificationBell() {
                             <div className="flex justify-center items-center py-8">
                                 <span className="loading loading-spinner loading-md"></span>
                             </div>
-                        ) : length === 0 ? (
+                        ) : notifications.length === 0 ? (
                             <div className="text-center py-8 text-base-content/60">
                                 <i className="fa-solid fa-inbox text-4xl mb-2"></i>
                                 <p>No notifications</p>
@@ -202,7 +207,7 @@ export default function NotificationBell() {
                                     onClick={() => handleNotificationClick(notification)}
                                 >
                                     {/* Icon */}
-                                    <div className="flex-shrink-0">
+                                    <div className="shrink-0">
                                         <div className={`
                                             w-10 h-10 rounded-full flex items-center justify-center
                                             ${!notification.read ? 'bg-primary text-primary-content' : 'bg-base-300'}
@@ -248,7 +253,7 @@ export default function NotificationBell() {
                     </div>
 
                     {/* Footer */}
-                    {length > 0 && (
+                    {notifications.length > 0 && (
                         <div className="p-2 border-t border-base-300 text-center">
                             <Link
                                 href="/notifications"

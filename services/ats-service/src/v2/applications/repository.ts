@@ -6,6 +6,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ApplicationFilters, ApplicationUpdate } from './types';
 import { resolveAccessContext, AccessContext } from '../shared/access';
 import { create } from 'domain';
+import { parseFilters, StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 
 export interface RepositoryListResponse<T> {
     data: T[];
@@ -23,17 +24,18 @@ export class ApplicationRepository {
 
     async findApplications(
         clerkUserId: string,
-        filters: ApplicationFilters = {}
-    ): Promise<RepositoryListResponse<any>> {
-        const page = filters.page || 1;
-        const limit = filters.limit || 25;
+        params: StandardListParams = {}
+    ): Promise<StandardListResponse<any>> {
+        const page = params.page || 1;
+        const limit = params.limit || 25;
         const offset = (page - 1) * limit;
+        let filters: Record<string, any> = {};
+        filters = typeof params.filters === 'string' ? parseFilters(params.filters) : (params.filters || {});
 
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
 
         // Build query with enriched data
         let query = this.supabase
-            
             .from('applications')
             .select(`
                 *,
@@ -58,7 +60,12 @@ export class ApplicationRepository {
             } else {
                 return {
                     data: [],
-                    total: 0,
+                    pagination: { 
+                        page: 1,
+                        limit,
+                        total: 0,
+                        total_pages: 0
+                    }
                 };
             }
         }
@@ -96,7 +103,12 @@ export class ApplicationRepository {
 
         return {
             data: data || [],
+            pagination: {
+                page,
+                limit,
+                total_pages: Math.ceil((count || 0) / limit),
             total: count || 0,
+            },
         };
     }
 
@@ -113,7 +125,8 @@ export class ApplicationRepository {
                     description,
                     status,
                     company:companies(id, name, description)
-                )
+                ),
+                ai_review:ai_reviews(fit_score, recommendation)
             `)
             .eq('id', id)
             .single();

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useUserProfile } from '@/contexts/user-profile-context';
 import { useViewMode } from '@/hooks/use-view-mode';
 import { useToast } from '@/lib/toast-context';
 import { ApplicationCard } from './application-card';
@@ -66,21 +67,10 @@ interface ApplicationStats {
     acceptedByCompany: number;
 }
 
-interface ApplicationsListClientProps {
-    initialUserRole?: string | null;
-    initialOrganizationId?: string | null;
-}
-
-const personaDescriptor = (role: string | null) => {
-    if (role === 'platform_admin') {
-        return 'System-wide';
-    }
-    if (role === 'recruiter') {
-        return 'Assigned to you';
-    }
-    if (role === 'company_admin' || role === 'hiring_manager') {
-        return 'In your company';
-    }
+const personaDescriptor = (isAdmin: boolean, isRecruiter: boolean, isCompanyUser: boolean) => {
+    if (isAdmin) return 'System-wide';
+    if (isRecruiter) return 'Assigned to you';
+    if (isCompanyUser) return 'In your company';
     return 'Your activity';
 };
 
@@ -111,12 +101,10 @@ const buildStats = (data: Application[], total: number): ApplicationStats => {
     return stats;
 };
 
-export default function ApplicationsListClient({
-    initialUserRole = null,
-    initialOrganizationId = null,
-}: ApplicationsListClientProps) {
+export default function ApplicationsClient() {
     const { getToken } = useAuth();
     const toast = useToast();
+    const { profile, isLoading: profileLoading, isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
 
     // State
     const [applications, setApplications] = useState<Application[]>([]);
@@ -132,27 +120,20 @@ export default function ApplicationsListClient({
     const [stageFilter, setStageFilter] = useState('');
     const [aiScoreFilter, setAIScoreFilter] = useState('');
     const [viewMode, setViewMode] = useViewMode('applicationsViewMode');
-    const [userRole, setUserRole] = useState<string | null>(initialUserRole);
-    const [organizationId, setOrganizationId] = useState<string | null>(initialOrganizationId);
     const [acceptingId, setAcceptingId] = useState<string | null>(null);
     const [companyId, setCompanyId] = useState<string | null>(null);
     const [stats, setStats] = useState<ApplicationStats | null>(null);
     const [statsLoading, setStatsLoading] = useState(true);
     const [hasBootstrapped, setHasBootstrapped] = useState(false);
 
-    const isCompanyUser = userRole === 'company_admin' || userRole === 'hiring_manager';
-    const isRecruiter = userRole === 'recruiter';
-    const isPlatformAdmin = userRole === 'platform_admin';
-    const personaReady = Boolean(
-        userRole &&
-        (!isCompanyUser || !!companyId)
-    );
-
     // Bulk actions state
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [showBulkActionModal, setShowBulkActionModal] = useState(false);
     const [bulkAction, setBulkAction] = useState<'stage' | 'reject' | null>(null);
     const [bulkLoading, setBulkLoading] = useState(false);
+
+    // Company users need companyId resolved before fetching
+    const isReady = !profileLoading && (!isCompanyUser || !!companyId);
 
     const loadApplications = useCallback(async (options: {
         page?: number;
@@ -161,10 +142,6 @@ export default function ApplicationsListClient({
         aiScore?: string;
         company?: string | null;
     } = {}) => {
-        if (!personaReady) {
-            return;
-        }
-
         try {
             setLoading(true);
             setError(null);
@@ -227,51 +204,14 @@ export default function ApplicationsListClient({
             setLoading(false);
             setStatsLoading(false);
         }
-    }, [aiScoreFilter, companyId, getToken, pagination.limit, pagination.page, personaReady, searchQuery, stageFilter]);
+    }, [aiScoreFilter, companyId, getToken, pagination.limit, pagination.page, searchQuery, stageFilter]);
 
-    useEffect(() => {
-        if (userRole && (!isCompanyUser || organizationId)) {
-            return;
-        }
-
-        let cancelled = false;
-
-        const resolveProfile = async () => {
-            try {
-                const token = await getToken();
-                if (!token || cancelled) {
-                    return;
-                }
-                const client = createAuthenticatedClient(token);
-                const response = await client.get('/users', { params: { limit: 1 } });
-                const profile = response?.data?.[0] || response?.data || response || {};
-                const roles: string[] = Array.isArray(profile.roles) ? profile.roles : [];
-                const membershipRole =
-                    roles.find(role => ['company_admin', 'hiring_manager', 'recruiter', 'platform_admin'].includes(role)) ||
-                    (profile.is_platform_admin ? 'platform_admin' : null);
-                const orgId = Array.isArray(profile.organization_ids) ? profile.organization_ids[0] : null;
-                if (!cancelled) {
-                    setUserRole(membershipRole);
-                    setOrganizationId(orgId);
-                }
-            } catch (err) {
-                console.error('Failed to load user profile for applications:', err);
-            }
-        };
-
-        resolveProfile();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [getToken, isCompanyUser, organizationId, userRole]);
-
+    // Resolve companyId for company users
     const resolveCompanyFromOrg = useCallback(async (orgId: string) => {
         try {
             const token = await getToken();
-            if (!token) {
-                return;
-            }
+            if (!token) return;
+
             const client = createAuthenticatedClient(token);
             const response: any = await client.get('/companies', {
                 params: {
@@ -288,25 +228,27 @@ export default function ApplicationsListClient({
         }
     }, [getToken]);
 
+    // For company users, resolve companyId from organizationId
     useEffect(() => {
-        if (!organizationId || companyId || !isCompanyUser) {
-            return;
-        }
-        resolveCompanyFromOrg(organizationId);
-    }, [companyId, isCompanyUser, organizationId, resolveCompanyFromOrg]);
+        if (!isCompanyUser || companyId) return;
 
-    useEffect(() => {
-        if (!personaReady) {
-            return;
+        const orgId = profile?.organization_ids?.[0];
+        if (orgId) {
+            resolveCompanyFromOrg(orgId);
         }
+    }, [isCompanyUser, companyId, profile?.organization_ids, resolveCompanyFromOrg]);
+
+    // Load applications when ready
+    useEffect(() => {
+        if (!isReady) return;
+
         loadApplications({ page: 1 });
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [personaReady]);
+    }, [isReady]);
 
+    // Handle search with debounce
     useEffect(() => {
-        if (!personaReady || !hasBootstrapped) {
-            return;
-        }
+        if (!isReady || !hasBootstrapped) return;
 
         const timer = setTimeout(() => {
             setPagination(prev => ({ ...prev, page: 1 }));
@@ -315,12 +257,12 @@ export default function ApplicationsListClient({
 
         return () => clearTimeout(timer);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchQuery, personaReady, hasBootstrapped]);
+    }, [searchQuery, isReady, hasBootstrapped]);
 
     const handleStageFilterChange = (value: string) => {
         setStageFilter(value);
         setPagination(prev => ({ ...prev, page: 1 }));
-        if (personaReady) {
+        if (isReady) {
             loadApplications({ page: 1, stage: value });
         }
     };
@@ -328,7 +270,7 @@ export default function ApplicationsListClient({
     const handleAIScoreFilterChange = (value: string) => {
         setAIScoreFilter(value);
         setPagination(prev => ({ ...prev, page: 1 }));
-        if (personaReady) {
+        if (isReady) {
             loadApplications({ page: 1, aiScore: value });
         }
     };
@@ -339,7 +281,7 @@ export default function ApplicationsListClient({
 
     const handlePageChange = (page: number) => {
         setPagination(prev => ({ ...prev, page }));
-        if (personaReady) {
+        if (isReady) {
             loadApplications({ page });
         }
     };
@@ -455,7 +397,7 @@ export default function ApplicationsListClient({
                             </div>
                             <div className="stat-title">Total Applications</div>
                             <div className="stat-value">{stats.totalApplications}</div>
-                            <div className="stat-desc">{personaDescriptor(userRole)}</div>
+                            <div className="stat-desc">{personaDescriptor(isAdmin, isRecruiter, isCompanyUser)}</div>
                         </div>
                     </div>
                     <div className="stats bg-base-100 shadow">
@@ -542,7 +484,7 @@ export default function ApplicationsListClient({
                                 </div>
                             </div>
                             <div className="flex-none flex gap-2">
-                                {isPlatformAdmin && (
+                                {isAdmin && (
                                     <button
                                         onClick={() => handleBulkAction('stage')}
                                         className="btn btn-sm btn-primary gap-2"

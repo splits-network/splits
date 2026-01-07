@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useAuth } from '@clerk/nextjs';
 import { useToast } from '@/lib/toast-context';
+import { useUserProfile } from '@/contexts/user-profile-context';
 import StageUpdateModal from './stage-update-modal';
 import AddNoteModal from './add-note-modal';
 import ApplicationTimeline from './application-timeline';
@@ -39,35 +40,20 @@ export default function ApplicationDetailClient({
     const router = useRouter();
     const { getToken } = useAuth();
     const toast = useToast();
+    const { isAdmin } = useUserProfile();
     const [showStageModal, setShowStageModal] = useState(false);
     const [showNoteModal, setShowNoteModal] = useState(false);
     const [loading, setLoading] = useState(false);
     const [token, setToken] = useState<string | null>(null);
-    const [userRole, setUserRole] = useState<string | null>(null);
 
-    // Check if user is platform admin
-    const isPlatformAdmin = userRole === 'platform_admin';
+    // Use context for platform admin check
+    const isPlatformAdmin = isAdmin;
 
-    // Get token and user role on mount
+    // Get token on mount
     useEffect(() => {
         async function initializeAuth() {
             const authToken = await getToken();
             setToken(authToken);
-
-            if (authToken) {
-                try {
-                    const client = createAuthenticatedClient(authToken);
-                    const response: any = await client.get('/users?limit=1');
-                    const profile = response.data?.[0] || response.data;
-
-                    // Get user's role from first membership
-                    if (profile.memberships && profile.memberships.length > 0) {
-                        setUserRole(profile.memberships[0].role);
-                    }
-                } catch (error) {
-                    console.error('Failed to fetch user role:', error);
-                }
-            }
         }
         initializeAuth();
     }, [getToken]);

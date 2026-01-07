@@ -45,7 +45,7 @@ export async function resolveAccessContext(
         .maybeSingle();
         
     const identityUserId = identityUserResult.data?.id || null;
-console.log('[DEBUG] resolveAccessContext - identityUserResult:', { clerkUserId, identityUserResult });
+    
     if (!identityUserId) {
         return {
             identityUserId: null,

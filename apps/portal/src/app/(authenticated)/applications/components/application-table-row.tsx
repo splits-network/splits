@@ -108,6 +108,7 @@ export function ApplicationTableRow({
                 )}
             </td>
             <td>
+                {application.ai_review?.fit_score}
                 {application.ai_reviewed && application.ai_review ? (
                     <div className="flex items-center gap-2">
                         <span className="font-bold text-lg">{application.ai_review.fit_score}</span>
