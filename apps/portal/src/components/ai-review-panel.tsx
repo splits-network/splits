@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useUserProfile } from '@/contexts';
 import type { AIReview } from '@splits-network/shared-types';
 
 
@@ -65,37 +66,11 @@ const getLocationLabel = (compatibility: string) => {
 
 export default function AIReviewPanel({ applicationId, compact = false }: AIReviewPanelProps) {
     const { getToken } = useAuth();
+    const { isAdmin } = useUserProfile();
     const [loading, setLoading] = useState(true);
     const [aiReview, setAIReview] = useState<AIReview | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [requesting, setRequesting] = useState(false);
-    const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
-
-    // Check if user is platform admin
-    useEffect(() => {
-        async function checkAdminStatus() {
-            try {
-                const token = await getToken();
-                if (!token) return;
-
-                const client = createAuthenticatedClient(token);
-                const profileResponse = await client.get<{ data: any[] }>('/users?limit=1');
-                const profile = profileResponse.data?.[0] || profileResponse.data;
-
-                // Check if user has platform_admin role
-                const isAdmin = profile?.memberships?.some(
-                    (m: any) => m.role === 'platform_admin'
-                ) || profile?.is_platform_admin;
-
-                setIsPlatformAdmin(isAdmin || false);
-            } catch (err) {
-                console.error('Error checking admin status:', err);
-                setIsPlatformAdmin(false);
-            }
-        }
-
-        checkAdminStatus();
-    }, [getToken]);
 
     useEffect(() => {
         async function fetchAIReview() {
@@ -194,7 +169,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                             <i className="fa-solid fa-robot"></i>
                             AI Analysis
                         </h3>
-                        {isPlatformAdmin && (
+                        {isAdmin && (
                             <button
                                 onClick={handleRequestNewReview}
                                 disabled={requesting}
@@ -254,7 +229,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                             AI Analysis
                         </h3>
 
-                        {isPlatformAdmin && (
+                        {isAdmin && (
                             <button
                                 onClick={handleRequestNewReview}
                                 disabled={requesting}
@@ -339,7 +314,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                         AI Analysis
                     </h3>
 
-                    {isPlatformAdmin && (
+                    {isAdmin && (
                         <button
                             onClick={handleRequestNewReview}
                             disabled={requesting}
@@ -491,3 +466,4 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
         </div>
     );
 }
+

@@ -7,6 +7,7 @@ import { createAuthenticatedClient } from '@/lib/api-client';
 import { useViewMode } from '@/hooks/use-view-mode';
 import { useDebouncedCallback } from '@/hooks/use-debounce';
 import { formatDate, getVerificationStatusBadge, getVerificationStatusIcon } from '@/lib/utils';
+import { useUserProfile } from '@/contexts';
 import CandidateCard from './candidate-card';
 import AddCandidateModal from './add-candidate-modal';
 
@@ -20,13 +21,13 @@ interface PaginationState {
 export default function CandidatesListClient() {
     const { getToken } = useAuth();
     const { user } = useUser();
+    const { isRecruiter } = useUserProfile();
     const [candidates, setCandidates] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchInput, setSearchInput] = useState(''); // For controlled input
     const [viewMode, setViewMode] = useViewMode('candidatesViewMode');
-    const [userRole, setUserRole] = useState<string | null>(null);
     const [scope, setScope] = useState<'mine' | 'all'>('mine');
     const [recruiterId, setRecruiterId] = useState<string | null>(null);
     const [showAddModal, setShowAddModal] = useState(false);
@@ -173,7 +174,7 @@ export default function CandidatesListClient() {
                 <div className="card-body p-2">
                     <div className="flex flex-wrap gap-4 items-end">
                         {/* Scope Filter - Only show for recruiters */}
-                        {userRole === 'recruiter' && (
+                        {isRecruiter && (
                             <div className="fieldset">
                                 <select
                                     className="select"
@@ -280,7 +281,7 @@ export default function CandidatesListClient() {
                                             <i className={`fa-solid ${getSortIcon('verification_status')} text-xs opacity-50`}></i>
                                         </div>
                                     </th>
-                                    {userRole === 'recruiter' && <th>Relationship</th>}
+                                    {isRecruiter && <th>Relationship</th>}
                                     <th>Links</th>
                                     <th
                                         className="cursor-pointer hover:bg-base-200 select-none"
@@ -329,7 +330,7 @@ export default function CandidatesListClient() {
                                                 </span>
                                             )}
                                         </td>
-                                        {userRole === 'recruiter' && (
+                                        {isRecruiter && (
                                             <td>
                                                 <div className="flex gap-1">
                                                     {candidate.is_sourcer && (

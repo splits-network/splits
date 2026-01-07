@@ -235,7 +235,6 @@ export class SplitsApiClient {
             if (value !== undefined && value !== null) {
                 // JSON stringify objects (like filters) but keep primitives as strings
                 if (typeof value === 'object' && value !== null) {
-                    console.log("Adding object param to query:", key, value);
                     searchParams.append(key, JSON.stringify(value));
                 } else {
                     searchParams.append(key, String(value));

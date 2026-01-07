@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useToast } from '@/lib/toast-context';
+import { useUserProfile } from '@/contexts';
 
 interface Company {
     id: string;
@@ -13,20 +14,13 @@ interface Company {
     identity_organization_id?: string;
 }
 
-interface UserProfile {
-    memberships: Array<{
-        organization_id: string;
-        role: string;
-    }>;
-}
-
 export default function NewRolePage() {
     const router = useRouter();
     const { getToken } = useAuth();
     const toast = useToast();
+    const { profile, isAdmin, isLoading: profileLoading } = useUserProfile();
     const [loading, setLoading] = useState(false);
     const [initializing, setInitializing] = useState(true);
-    const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
     const [companies, setCompanies] = useState<Company[]>([]);
     const [formData, setFormData] = useState({
         title: '',
@@ -51,6 +45,9 @@ export default function NewRolePage() {
 
     useEffect(() => {
         async function initializeForm() {
+            // Wait for profile to load from context
+            if (profileLoading) return;
+
             try {
                 const token = await getToken();
                 if (!token) {
@@ -61,16 +58,7 @@ export default function NewRolePage() {
                 console.log('Initializing form...');
                 const client = createAuthenticatedClient(token);
 
-                // Get user profile to check role and company
-                console.log('Fetching user profile...');
-                const profileResponse = await client.get<{ data: UserProfile[] }>('/users?limit=1');
-                console.log('Profile response:', profileResponse);
-                const profile = profileResponse.data?.[0] || profileResponse.data;
-
-                // Check if user is a platform admin
-                const isAdmin = profile.memberships?.some(m => m.role === 'platform_admin');
                 console.log('Is platform admin:', isAdmin);
-                setIsPlatformAdmin(isAdmin);
 
                 if (isAdmin) {
                     // Platform admin: fetch all companies for dropdown
@@ -85,13 +73,13 @@ export default function NewRolePage() {
                     }
                 } else {
                     // Company admin: auto-populate from their organization
-                    // Find the company associated with their organization
-                    const membership = profile.memberships?.find(m => m.role === 'company_admin');
-                    if (membership?.organization_id) {
+                    // Use the first organization_id from the profile
+                    const organizationId = profile?.organization_ids?.[0];
+                    if (organizationId) {
                         // Fetch company by organization ID
                         try {
-                            console.log('Fetching company for org:', membership.organization_id);
-                            const companyResponse = await client.get<{ data: Company }>(`/companies/by-org/${membership.organization_id}`);
+                            console.log('Fetching company for org:', organizationId);
+                            const companyResponse = await client.get<{ data: Company }>(`/companies/by-org/${organizationId}`);
                             console.log('Company response:', companyResponse);
                             if (companyResponse.data) {
                                 setFormData(prev => ({ ...prev, company_id: companyResponse.data.id }));
@@ -118,7 +106,7 @@ export default function NewRolePage() {
         }
 
         initializeForm();
-    }, [getToken]);
+    }, [getToken, profileLoading, isAdmin, profile]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -218,7 +206,7 @@ export default function NewRolePage() {
                                 />
                             </div>
 
-                            {isPlatformAdmin ? (
+                            {isAdmin ? (
                                 <div className="fieldset">
                                     <label className="label">Company *</label>
                                     <select

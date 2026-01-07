@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth, useUser } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import type { AIReview } from '@splits-network/shared-types';
 
@@ -84,38 +84,10 @@ const getLocationLabel = (compatibility: string) => {
 
 export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
     const { getToken } = useAuth();
-    const { user } = useUser();
     const [loading, setLoading] = useState(true);
     const [aiReview, setAIReview] = useState<AIReview | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [requesting, setRequesting] = useState(false);
-    const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
-
-    // Check if user is platform admin
-    useEffect(() => {
-        async function checkAdminStatus() {
-            try {
-                const token = await getToken();
-                if (!token) return;
-
-                const client = createAuthenticatedClient(token);
-                const profileResponse = await client.get<{ data: any[] }>('/users?limit=1');
-                const profile = profileResponse.data?.[0] || profileResponse.data;
-
-                // Check if user has platform_admin role
-                const isAdmin = profile?.memberships?.some(
-                    (m: any) => m.role === 'platform_admin'
-                ) || profile?.is_platform_admin;
-
-                setIsPlatformAdmin(isAdmin || false);
-            } catch (err) {
-                console.error('Error checking admin status:', err);
-                setIsPlatformAdmin(false);
-            }
-        }
-
-        checkAdminStatus();
-    }, [getToken]);
 
     useEffect(() => {
         async function fetchAIReview() {
@@ -253,32 +225,10 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
     return (
         <div className="card bg-base-100 shadow">
             <div className="card-body">
-                <div className='flex justify-between'>
-                    <h2 className="card-title mb-4">
-                        <i className="fa-solid fa-robot"></i>
-                        AI Analysis
-                    </h2>
-
-                    {isPlatformAdmin && (
-                        <button
-                            onClick={handleRequestNewReview}
-                            disabled={requesting}
-                            className="btn btn-primary btn-sm"
-                        >
-                            {requesting ? (
-                                <>
-                                    <span className="loading loading-spinner loading-xs"></span>
-                                    Requesting Review...
-                                </>
-                            ) : (
-                                <>
-                                    <i className="fa-solid fa-rotate"></i>
-                                    Request New Review
-                                </>
-                            )}
-                        </button>
-                    )}
-                </div>
+                <h2 className="card-title mb-4">
+                    <i className="fa-solid fa-robot"></i>
+                    AI Analysis
+                </h2>
 
                 {/* Fit Score */}
                 <div className='flex flex-col gap-4'>

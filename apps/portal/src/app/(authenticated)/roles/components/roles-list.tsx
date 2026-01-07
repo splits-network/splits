@@ -9,6 +9,7 @@ import { formatRelativeTime } from '@/lib/utils';
 import { getJobStatusBorderColor } from '@/lib/utils/color-styles';
 import { getRoleBadges } from '@/lib/utils/role-badges';
 import { getJobStatusBadge } from '@/lib/utils/badge-styles';
+import { useUserProfile } from '@/contexts';
 
 interface Job {
     id: string;
@@ -27,18 +28,6 @@ interface Job {
     status: string;
     created_at: string | Date;
     application_count?: number;
-}
-
-interface Membership {
-    role: string;
-    organization_id: string;
-}
-
-interface UserProfile {
-    memberships?: Membership[];
-    roles?: string[];
-    is_platform_admin?: boolean;
-    recruiter_id?: string | null;
 }
 
 interface Stats {
@@ -62,74 +51,37 @@ interface Badge {
 
 export default function RolesList() {
     const { getToken } = useAuth();
+    const { profile, isAdmin, isRecruiter, isCompanyUser, isLoading: profileLoading } = useUserProfile();
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('all');
     const [ownershipFilter, setOwnershipFilter] = useState<'all' | 'assigned'>('all');
     const [searchQuery, setSearchQuery] = useState('');
-    const [userRole, setUserRole] = useState<string | null>(null);
     const [viewMode, setViewMode] = useViewMode('rolesViewMode');
     const [stats, setStats] = useState<Stats | null>(null);
     const [statsLoading, setStatsLoading] = useState(true);
 
+    // Derive user role from context
+    const userRole = isAdmin ? 'platform_admin'
+        : profile?.roles?.includes('company_admin') ? 'company_admin'
+            : profile?.roles?.includes('hiring_manager') ? 'hiring_manager'
+                : isRecruiter ? 'recruiter'
+                    : profile?.roles?.[0] || null;
+
     // Check if user can manage roles
-    const canManageRole = userRole === 'company_admin' || userRole === 'platform_admin';
+    const canManageRole = isAdmin || profile?.roles?.includes('company_admin');
 
     useEffect(() => {
-        fetchUserRole();
         fetchJobs();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [statusFilter, ownershipFilter]);
 
     useEffect(() => {
-        if (userRole) {
+        if (userRole && !profileLoading) {
             fetchStats();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [userRole, statusFilter]);
-
-    const resolveUserRole = (profile: UserProfile): string | null => {
-        const membershipRoles = Array.isArray(profile.memberships)
-            ? profile.memberships
-                .map((membership) => membership.role)
-                .filter((role): role is string => Boolean(role))
-            : [];
-        const normalizedRoles = Array.isArray(profile.roles) ? profile.roles : membershipRoles;
-
-        if (profile.is_platform_admin || normalizedRoles.includes('platform_admin')) {
-            return 'platform_admin';
-        }
-        if (normalizedRoles.includes('company_admin')) {
-            return 'company_admin';
-        }
-        if (normalizedRoles.includes('hiring_manager')) {
-            return 'hiring_manager';
-        }
-        if (profile.recruiter_id || normalizedRoles.includes('recruiter')) {
-            return 'recruiter';
-        }
-        return normalizedRoles[0] || null;
-    };
-
-    const fetchUserRole = async () => {
-        try {
-            const token = await getToken();
-            if (!token) return;
-
-            const client = createAuthenticatedClient(token);
-            const response: any = await client.get('/users', { params: { limit: 1 } });
-            const profile: UserProfile = response.data?.[0] || response.data;
-            const role = resolveUserRole(profile);
-            setUserRole(role);
-
-            if (!role) {
-                setStatsLoading(false);
-            }
-        } catch (error) {
-            console.error('Failed to fetch user role:', error);
-            setStatsLoading(false);
-        }
-    };
+    }, [userRole, statusFilter, profileLoading]);
 
     const fetchJobs = async () => {
         try {

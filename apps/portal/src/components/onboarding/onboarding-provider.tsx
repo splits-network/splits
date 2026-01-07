@@ -9,12 +9,14 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { useUser, useAuth } from '@clerk/nextjs';
 import { OnboardingState, OnboardingContextType, UserRole } from './types';
 import { ApiClient, createAuthenticatedClient } from '@/lib/api-client';
+import { useUserProfile } from '@/contexts';
 
 const OnboardingContext = createContext<OnboardingContextType | null>(null);
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {
     const { user } = useUser();
     const { getToken } = useAuth();
+    const { isAdmin, isLoading: profileLoading } = useUserProfile();
     const [state, setState] = useState<OnboardingState>({
         currentStep: 1,
         status: 'pending',
@@ -26,7 +28,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
     // Fetch user's onboarding status on mount
     useEffect(() => {
-        if (!user) return;
+        if (!user || profileLoading) return;
 
         const fetchOnboardingStatus = async () => {
             try {
@@ -43,9 +45,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 const userData = Array.isArray(response.data) ? response.data[0] : response.data;
                 if (!userData) throw new Error('No user data found');
 
-                // Skip onboarding modal for platform_admin users
-                const isPlatformAdmin = userData.memberships?.some((m: any) => m.role === 'platform_admin');
-                if (isPlatformAdmin) {
+                // Skip onboarding modal for platform_admin users (use context value)
+                if (isAdmin) {
                     setState(prev => ({
                         ...prev,
                         currentStep: userData.onboarding_step || 1,
@@ -70,7 +71,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         };
 
         fetchOnboardingStatus();
-    }, [user, getToken]);
+    }, [user, getToken, profileLoading, isAdmin]);
 
     const actions = {
         setStep: async (step: number) => {

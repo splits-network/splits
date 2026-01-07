@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useToast } from '@/lib/toast-context';
+import { useUserProfile } from '@/contexts';
 import SubmitCandidateWizard from './submit-candidate-wizard';
 import { getJobStatusBadge } from '@/lib/utils/badge-styles';
 import { getRoleBadges } from '@/lib/utils/role-badges';
@@ -31,15 +32,6 @@ interface Job {
     application_count?: number;
 }
 
-interface Membership {
-    role: string;
-    organization_id: string;
-}
-
-interface UserProfile {
-    memberships: Membership[];
-}
-
 interface Badge {
     class: string;
     icon: string;
@@ -48,6 +40,7 @@ interface Badge {
     animated?: boolean;
 }
 
+
 interface RoleHeaderProps {
     roleId: string;
 }
@@ -55,38 +48,19 @@ interface RoleHeaderProps {
 export default function RoleHeader({ roleId }: RoleHeaderProps) {
     const { getToken } = useAuth();
     const toast = useToast();
+    const { isAdmin, profile } = useUserProfile();
     const [job, setJob] = useState<Job | null>(null);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
     const [showSubmitModal, setShowSubmitModal] = useState(false);
-    const [userRole, setUserRole] = useState<string | null>(null);
 
     // Check if user is company admin or platform admin
-    const canManageRole = userRole === 'company_admin' || userRole === 'platform_admin';
+    const canManageRole = isAdmin || profile?.roles?.includes('company_admin');
 
     useEffect(() => {
-        fetchUserRole();
         fetchJob();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [roleId]);
-
-    const fetchUserRole = async () => {
-        try {
-            const token = await getToken();
-            if (!token) return;
-
-            const client = createAuthenticatedClient(token);
-            const response: any = await client.get('/users', { params: { limit: 1 } });
-            const profile: UserProfile = response.data;
-
-            // Get the first membership role (Phase 1: users have one membership)
-            if (profile.memberships && profile.memberships.length > 0) {
-                setUserRole(profile.memberships[0].role);
-            }
-        } catch (error) {
-            console.error('Failed to fetch user role:', error);
-        }
-    };
 
     const fetchJob = async () => {
         try {

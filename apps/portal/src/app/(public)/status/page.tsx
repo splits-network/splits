@@ -127,7 +127,7 @@ export default function StatusPage() {
                         </p>
                     </div>
                     <div className="text-sm text-base-content/70 flex flex-col gap-2 items-start">
-                        <span className="text-xs">
+                        <span className="text-xs" suppressHydrationWarning>
                             Last checked {lastChecked.toLocaleTimeString()} · Auto-refresh every 30 seconds
                         </span>
                     </div>
@@ -193,7 +193,7 @@ export default function StatusPage() {
                                             </div>
                                             <div className="flex items-center gap-3">
                                                 {service.timestamp && (
-                                                    <span className="text-xs text-base-content/50">
+                                                    <span className="text-xs text-base-content/50" suppressHydrationWarning>
                                                         {new Date(service.timestamp).toLocaleTimeString()}
                                                     </span>
                                                 )}
