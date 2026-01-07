@@ -96,7 +96,7 @@ export default function UserDropdown() {
                     </Link>
                 </li>
                 <li>
-                    <Link href="/documents">
+                    <Link href="/portal/documents">
                         <i className="fa-solid fa-folder-open"></i>
                         Documents
                     </Link>

@@ -15,22 +15,22 @@ export default function Footer() {
                 <nav>
                     <h6 className="footer-title">Platform</h6>
                     <Link href="/public/jobs" className="link link-hover">Browse Jobs</Link>
-                    <Link href="/how-it-works" className="link link-hover">How It Works</Link>
-                    <Link href="/for-recruiters" className="link link-hover">For Recruiters</Link>
-                    <Link href="/help" className="link link-hover">Help Center</Link>
+                    <Link href="/public/how-it-works" className="link link-hover">How It Works</Link>
+                    <Link href="/public/for-recruiters" className="link link-hover">For Recruiters</Link>
+                    <Link href="/public/help" className="link link-hover">Help Center</Link>
                 </nav>
                 <nav>
                     <h6 className="footer-title">Company</h6>
-                    <Link href="/about" className="link link-hover">About Us</Link>
-                    <Link href="/contact" className="link link-hover">Contact</Link>
+                    <Link href="/public/about" className="link link-hover">About Us</Link>
+                    <Link href="/public/contact" className="link link-hover">Contact</Link>
                     <a href="https://splits.network" className="link link-hover" target="_blank" rel="noopener noreferrer">Splits Network</a>
                 </nav>
                 <nav>
                     <h6 className="footer-title">Legal</h6>
-                    <Link href="/privacy" className="link link-hover">Privacy Policy</Link>
-                    <Link href="/terms" className="link link-hover">Terms of Service</Link>
-                    <Link href="/cookies" className="link link-hover">Cookie Policy</Link>
-                    <Link href="/status" className="link link-hover">System Status</Link>
+                    <Link href="/public/privacy" className="link link-hover">Privacy Policy</Link>
+                    <Link href="/public/terms" className="link link-hover">Terms of Service</Link>
+                    <Link href="/public/cookies" className="link link-hover">Cookie Policy</Link>
+                    <Link href="/public/status" className="link link-hover">System Status</Link>
                 </nav>
             </footer>
             <footer className="footer footer-center p-4 bg-neutral text-neutral-content border-t border-base-300">
