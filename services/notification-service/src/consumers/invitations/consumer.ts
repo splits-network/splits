@@ -7,6 +7,7 @@ import { NotificationService } from '../../service';
 import { ServiceRegistry } from '../../clients';
 import { Logger } from '@splits-network/shared-logging';
 import { DataLookupHelper } from '../../helpers/data-lookup';
+import { ContactLookupHelper } from '../../helpers/contact-lookup';
 
 export class InvitationsConsumer {
     constructor(
@@ -14,7 +15,8 @@ export class InvitationsConsumer {
         private serviceRegistry: ServiceRegistry,
         private logger: Logger,
         private portalUrl: string,
-        private dataLookup: DataLookupHelper
+        private dataLookup: DataLookupHelper,
+        private contactLookup: ContactLookupHelper
     ) {}
 
     /**
@@ -35,10 +37,10 @@ export class InvitationsConsumer {
                 throw new Error(`Organization not found: ${organization_id}`);
             }
 
-            // Fetch inviter details
-            const inviter = await this.dataLookup.getUser(invited_by);
-            if (!inviter) {
-                throw new Error(`Inviter user not found: ${invited_by}`);
+            // Fetch inviter contact
+            const inviterContact = await this.contactLookup.getContactByUserId(invited_by);
+            if (!inviterContact) {
+                throw new Error(`Inviter contact not found: ${invited_by}`);
             }
 
             // Fetch full invitation details (to get expires_at)
@@ -50,15 +52,13 @@ export class InvitationsConsumer {
             // Build invitation link
             const invitation_link = `${this.portalUrl}/accept-invitation/${invitation_id}`;
 
-            const inviterName = `${inviter.first_name || ''} ${inviter.last_name || ''}`.trim() || inviter.email;
-
             // Send invitation email
             await this.notificationService.invitations.sendInvitation({
                 invitation_id,
                 email,
                 organization_name: organization.name,
                 role,
-                invited_by_name: inviterName,
+                invited_by_name: inviterContact.name,
                 invitation_link,
                 expires_at: invitation.expires_at || '',
             });

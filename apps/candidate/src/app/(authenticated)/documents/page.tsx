@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useStandardList } from '@/hooks/use-standard-list';
 import { formatDate } from '@/lib/utils';
@@ -14,9 +14,33 @@ interface DocumentFilters {
     document_type?: string;
 }
 
-// ===== PAGE COMPONENT =====
+// ===== LOADING FALLBACK =====
+
+function DocumentsLoading() {
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-base-200 to-base-300 p-6">
+            <div className="max-w-6xl mx-auto">
+                <div className="flex justify-center items-center h-64">
+                    <span className="loading loading-spinner loading-lg"></span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ===== PAGE WRAPPER =====
 
 export default function DocumentsPage() {
+    return (
+        <Suspense fallback={<DocumentsLoading />}>
+            <DocumentsContent />
+        </Suspense>
+    );
+}
+
+// ===== PAGE CONTENT =====
+
+function DocumentsContent() {
     const { getToken } = useAuth();
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [candidateId, setCandidateId] = useState<string | null>(null);
@@ -251,7 +275,7 @@ export default function DocumentsPage() {
                                                 </span>
                                                 <span>
                                                     <i className="fa-solid fa-calendar mr-1"></i>
-                                                    Uploaded {formatDate(doc.created_at)}
+                                                    Uploaded {doc.created_at ? formatDate(doc.created_at) : 'Unknown'}
                                                 </span>
                                             </div>
                                         </div>

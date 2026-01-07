@@ -171,24 +171,46 @@ export default function ApplicationsClient() {
         filters,
         searchQuery,
         viewMode,
-        selectedItems,
         setFilters,
-        handleSearch,
-        handlePageChange,
+        setSearchInput,
+        goToPage,
         setViewMode,
-        toggleItemSelection,
-        toggleSelectAll,
-        clearSelections,
         refetch
     } = useStandardList<Application, ApplicationFilters>({
         fetchFn: fetchApplications,
         defaultFilters: { stage: '', ai_score_filter: '' },
         defaultSortBy: 'created_at',
         defaultSortOrder: 'desc',
-        storageKey: 'applicationsViewMode',
-        enableSelection: true,
-        enabled: companyResolved && !profileLoading
+        storageKey: 'applicationsViewMode'
     });
+
+    // Selection state (managed locally since useStandardList doesn't support it)
+    const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+
+    const toggleItemSelection = useCallback((id: string) => {
+        setSelectedItems(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(id)) {
+                newSet.delete(id);
+            } else {
+                newSet.add(id);
+            }
+            return newSet;
+        });
+    }, []);
+
+    const toggleSelectAll = useCallback((ids: string[]) => {
+        setSelectedItems(prev => {
+            if (prev.size === ids.length) {
+                return new Set();
+            }
+            return new Set(ids);
+        });
+    }, []);
+
+    const clearSelections = useCallback(() => {
+        setSelectedItems(new Set());
+    }, []);
 
     // Compute stats from current data
     const stats = useMemo(() => {
@@ -344,7 +366,7 @@ export default function ApplicationsClient() {
                 stageFilter={filters.stage}
                 aiScoreFilter={filters.ai_score_filter}
                 viewMode={viewMode}
-                onSearchChange={handleSearch}
+                onSearchChange={setSearchInput}
                 onStageFilterChange={handleStageFilterChange}
                 onAIScoreFilterChange={handleAIScoreFilterChange}
                 onViewModeChange={setViewMode}
@@ -480,14 +502,14 @@ export default function ApplicationsClient() {
                             <div className="join">
                                 <button
                                     className="join-item btn btn-sm"
-                                    onClick={() => handlePageChange(1)}
+                                    onClick={() => goToPage(1)}
                                     disabled={pagination.page === 1 || loading}
                                 >
                                     <i className="fa-solid fa-angles-left"></i>
                                 </button>
                                 <button
                                     className="join-item btn btn-sm"
-                                    onClick={() => handlePageChange(pagination.page - 1)}
+                                    onClick={() => goToPage(pagination.page - 1)}
                                     disabled={pagination.page === 1 || loading}
                                 >
                                     <i className="fa-solid fa-angle-left"></i>
@@ -497,14 +519,14 @@ export default function ApplicationsClient() {
                                 </button>
                                 <button
                                     className="join-item btn btn-sm"
-                                    onClick={() => handlePageChange(pagination.page + 1)}
+                                    onClick={() => goToPage(pagination.page + 1)}
                                     disabled={pagination.page === pagination.total_pages || loading}
                                 >
                                     <i className="fa-solid fa-angle-right"></i>
                                 </button>
                                 <button
                                     className="join-item btn btn-sm"
-                                    onClick={() => handlePageChange(pagination.total_pages)}
+                                    onClick={() => goToPage(pagination.total_pages)}
                                     disabled={pagination.page === pagination.total_pages || loading}
                                 >
                                     <i className="fa-solid fa-angles-right"></i>

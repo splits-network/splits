@@ -83,8 +83,8 @@ export default function InvitationsPageClient() {
         error,
         pagination,
         searchQuery,
-        handleSearch,
-        handlePageChange,
+        setSearchInput,
+        goToPage,
         refetch
     } = useStandardList<RecruiterCandidate, InvitationFilters>({
         fetchFn: fetchInvitations,
@@ -364,7 +364,7 @@ export default function InvitationsPageClient() {
                             placeholder="Search by candidate name or email..."
                             className="input w-full lg:w-80"
                             value={searchQuery}
-                            onChange={(e) => handleSearch(e.target.value)}
+                            onChange={(e) => setSearchInput(e.target.value)}
                         />
                     </div>
                 </div>
@@ -408,7 +408,7 @@ export default function InvitationsPageClient() {
                                             </div>
                                         </td>
                                         <td>{invitation.candidate?.email || 'N/A'}</td>
-                                        <td>{formatDate(invitation.invited_at)}</td>
+                                        <td>{invitation.invited_at ? formatDate(invitation.invited_at) : 'N/A'}</td>
                                         <td>
                                             {invitation.invitation_expires_at ? (
                                                 <span
@@ -508,14 +508,14 @@ export default function InvitationsPageClient() {
                             <div className="join">
                                 <button
                                     className="join-item btn btn-sm"
-                                    onClick={() => handlePageChange(1)}
+                                    onClick={() => goToPage(1)}
                                     disabled={pagination.page === 1 || loading}
                                 >
                                     <i className="fa-solid fa-angles-left"></i>
                                 </button>
                                 <button
                                     className="join-item btn btn-sm"
-                                    onClick={() => handlePageChange(pagination.page - 1)}
+                                    onClick={() => goToPage(pagination.page - 1)}
                                     disabled={pagination.page === 1 || loading}
                                 >
                                     <i className="fa-solid fa-angle-left"></i>
@@ -525,14 +525,14 @@ export default function InvitationsPageClient() {
                                 </button>
                                 <button
                                     className="join-item btn btn-sm"
-                                    onClick={() => handlePageChange(pagination.page + 1)}
+                                    onClick={() => goToPage(pagination.page + 1)}
                                     disabled={pagination.page === pagination.total_pages || loading}
                                 >
                                     <i className="fa-solid fa-angle-right"></i>
                                 </button>
                                 <button
                                     className="join-item btn btn-sm"
-                                    onClick={() => handlePageChange(pagination.total_pages)}
+                                    onClick={() => goToPage(pagination.total_pages)}
                                     disabled={pagination.page === pagination.total_pages || loading}
                                 >
                                     <i className="fa-solid fa-angles-right"></i>

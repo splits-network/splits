@@ -12,7 +12,7 @@ import { CollaborationEventConsumer } from './consumers/collaboration/consumer';
 import { InvitationsConsumer } from './consumers/invitations/consumer';
 import { RecruiterSubmissionEventConsumer } from './consumers/recruiter-submission/consumer';
 import { SupportEventConsumer } from './consumers/support/consumer';
-import { EmailLookupHelper } from './helpers/email-lookup';
+import { ContactLookupHelper } from './helpers/contact-lookup';
 import { DataLookupHelper } from './helpers/data-lookup';
 
 export class DomainEventConsumer {
@@ -42,29 +42,29 @@ export class DomainEventConsumer {
         // Create data lookup helper for direct database queries (avoiding inter-service HTTP calls)
         const dataLookup = new DataLookupHelper(repository.supabaseClient, logger);
         
-        // Create email lookup helper for resolving user IDs to email addresses (direct DB access)
-        const emailLookup = new EmailLookupHelper(repository.supabaseClient, logger);
+        // Create contact lookup helper for unified contact resolution
+        const contactLookup = new ContactLookupHelper(repository.supabaseClient, logger);
         
         this.applicationsConsumer = new ApplicationsEventConsumer(
             notificationService.applications,
             services,
-            emailLookup,
             logger,
-            dataLookup
+            dataLookup,
+            contactLookup
         );
         this.placementsConsumer = new PlacementsEventConsumer(
             notificationService.placements,
             services,
             logger,
             dataLookup,
-            emailLookup
+            contactLookup
         );
         this.proposalsConsumer = new ProposalsEventConsumer(
             notificationService.proposals,
             services,
             logger,
             dataLookup,
-            emailLookup
+            contactLookup
         );
         this.candidatesConsumer = new CandidatesEventConsumer(
             notificationService.candidates,
@@ -72,21 +72,22 @@ export class DomainEventConsumer {
             this.repository,
             logger,
             dataLookup,
-            emailLookup
+            contactLookup
         );
         this.collaborationConsumer = new CollaborationEventConsumer(
             notificationService.collaboration,
             services,
             logger,
             dataLookup,
-            emailLookup
+            contactLookup
         );
         this.invitationsConsumer = new InvitationsConsumer(
             notificationService,
             services,
             logger,
             portalUrl,
-            dataLookup
+            dataLookup,
+            contactLookup
         );
         this.recruiterSubmissionConsumer = new RecruiterSubmissionEventConsumer(
             notificationService.recruiterSubmission,
@@ -94,7 +95,7 @@ export class DomainEventConsumer {
             logger,
             portalUrl,
             dataLookup,
-            emailLookup
+            contactLookup
         );
         this.supportConsumer = new SupportEventConsumer(notificationService.support, logger);
     }

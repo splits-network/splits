@@ -3,7 +3,7 @@ import { DomainEvent } from '@splits-network/shared-types';
 import { PlacementsEmailService } from '../../services/placements/service';
 import { ServiceRegistry } from '../../clients';
 import { DataLookupHelper } from '../../helpers/data-lookup';
-import { EmailLookupHelper } from '../../helpers/email-lookup';
+import { ContactLookupHelper } from '../../helpers/contact-lookup';
 
 export class PlacementsEventConsumer {
     constructor(
@@ -11,7 +11,7 @@ export class PlacementsEventConsumer {
         private services: ServiceRegistry,
         private logger: Logger,
         private dataLookup: DataLookupHelper,
-        private emailLookup: EmailLookupHelper
+        private contactLookup: ContactLookupHelper
     ) {}
 
     async handlePlacementCreated(event: DomainEvent): Promise<void> {
@@ -27,37 +27,31 @@ export class PlacementsEventConsumer {
                 throw new Error(`Job not found: ${job_id}`);
             }
 
-            // Fetch candidate details
-            const candidate = await this.dataLookup.getCandidate(placementData.candidate_id || candidate_id);
-            if (!candidate) {
-                throw new Error(`Candidate not found: ${placementData.candidate_id || candidate_id}`);
+            // Fetch candidate contact
+            const candidateContact = await this.contactLookup.getCandidateContact(placementData.candidate_id || candidate_id);
+            if (!candidateContact) {
+                throw new Error(`Candidate contact not found: ${placementData.candidate_id || candidate_id}`);
             }
 
-            // Fetch recruiter details
-            const recruiter = await this.dataLookup.getRecruiter(placementData.recruiter_id || recruiter_id);
-            if (!recruiter) {
-                throw new Error(`Recruiter not found: ${placementData.recruiter_id || recruiter_id}`);
-            }
-
-            // Fetch recruiter's user profile to get email
-            const user = await this.dataLookup.getUser(recruiter.user_id);
-            if (!user) {
-                throw new Error(`User not found for recruiter: ${recruiter.user_id}`);
+            // Fetch recruiter contact
+            const recruiterContact = await this.contactLookup.getRecruiterContact(placementData.recruiter_id || recruiter_id);
+            if (!recruiterContact) {
+                throw new Error(`Recruiter contact not found: ${placementData.recruiter_id || recruiter_id}`);
             }
 
             // Send email notification
-            await this.emailService.sendPlacementCreated(user.email, {
-                candidateName: candidate.full_name,
+            await this.emailService.sendPlacementCreated(recruiterContact.email, {
+                candidateName: candidateContact.name,
                 jobTitle: job.title,
                 companyName: job.company?.name || 'Unknown Company',
                 salary: placementData.salary || salary,
                 recruiterShare: placementData.recruiter_share_amount || recruiter_share,
                 placementId: placement_id,
-                userId: recruiter.user_id,
+                userId: recruiterContact.user_id || undefined,
             });
 
             this.logger.info(
-                { placement_id, recipient: user.email, recruiter_share: placementData.recruiter_share_amount },
+                { placement_id, recipient: recruiterContact.email, recruiter_share: placementData.recruiter_share_amount },
                 'Placement created notification sent successfully'
             );
         } catch (error) {
@@ -84,10 +78,10 @@ export class PlacementsEventConsumer {
             // Fetch collaborators
             const collaborators = await this.dataLookup.getPlacementCollaborators(placement_id);
             
-            // Fetch candidate and job details
-            const candidate = await this.dataLookup.getCandidate(candidate_id);
-            if (!candidate) {
-                throw new Error(`Candidate not found: ${candidate_id}`);
+            // Fetch candidate contact
+            const candidateContact = await this.contactLookup.getCandidateContact(candidate_id);
+            if (!candidateContact) {
+                throw new Error(`Candidate contact not found: ${candidate_id}`);
             }
             
             const job = await this.dataLookup.getJob(job_id);
@@ -97,20 +91,14 @@ export class PlacementsEventConsumer {
             
             // Notify all collaborators
             for (const collaborator of collaborators) {
-                const recruiter = await this.dataLookup.getRecruiter(collaborator.recruiter_id);
-                if (!recruiter) {
-                    this.logger.warn({ recruiter_id: collaborator.recruiter_id }, 'Recruiter not found for collaborator');
+                const recruiterContact = await this.contactLookup.getRecruiterContact(collaborator.recruiter_id);
+                if (!recruiterContact) {
+                    this.logger.warn({ recruiter_id: collaborator.recruiter_id }, 'Recruiter contact not found for collaborator');
                     continue;
                 }
                 
-                const user = await this.dataLookup.getUser(recruiter.user_id);
-                if (!user) {
-                    this.logger.warn({ user_id: recruiter.user_id }, 'User not found for recruiter');
-                    continue;
-                }
-                
-                await this.emailService.sendPlacementActivated(user.email, {
-                    candidateName: candidate.full_name,
+                await this.emailService.sendPlacementActivated(recruiterContact.email, {
+                    candidateName: candidateContact.name,
                     jobTitle: job.title,
                     companyName: job.company?.name || 'Unknown Company',
                     guaranteeDays: guarantee_days || 90,
@@ -118,7 +106,7 @@ export class PlacementsEventConsumer {
                     placementId: placement_id,
                     role: collaborator.role,
                     splitPercentage: collaborator.split_percentage || 0,
-                    userId: recruiter.user_id,
+                    userId: recruiterContact.user_id || undefined,
                 });
             }
             
@@ -138,10 +126,10 @@ export class PlacementsEventConsumer {
             // Fetch collaborators
             const collaborators = await this.dataLookup.getPlacementCollaborators(placement_id);
             
-            // Fetch candidate and job details
-            const candidate = await this.dataLookup.getCandidate(candidate_id);
-            if (!candidate) {
-                throw new Error(`Candidate not found: ${candidate_id}`);
+            // Fetch candidate contact
+            const candidateContact = await this.contactLookup.getCandidateContact(candidate_id);
+            if (!candidateContact) {
+                throw new Error(`Candidate contact not found: ${candidate_id}`);
             }
             
             const job = await this.dataLookup.getJob(job_id);
@@ -151,25 +139,19 @@ export class PlacementsEventConsumer {
             
             // Notify all collaborators
             for (const collaborator of collaborators) {
-                const recruiter = await this.dataLookup.getRecruiter(collaborator.recruiter_id);
-                if (!recruiter) {
-                    this.logger.warn({ recruiter_id: collaborator.recruiter_id }, 'Recruiter not found for collaborator');
+                const recruiterContact = await this.contactLookup.getRecruiterContact(collaborator.recruiter_id);
+                if (!recruiterContact) {
+                    this.logger.warn({ recruiter_id: collaborator.recruiter_id }, 'Recruiter contact not found for collaborator');
                     continue;
                 }
                 
-                const user = await this.dataLookup.getUser(recruiter.user_id);
-                if (!user) {
-                    this.logger.warn({ user_id: recruiter.user_id }, 'User not found for recruiter');
-                    continue;
-                }
-                
-                await this.emailService.sendPlacementCompleted(user.email, {
-                    candidateName: candidate.full_name,
+                await this.emailService.sendPlacementCompleted(recruiterContact.email, {
+                    candidateName: candidateContact.name,
                     jobTitle: job.title,
                     companyName: job.company?.name || 'Unknown Company',
                     finalPayout: (collaborator as any).amount_earned,
                     placementId: placement_id,
-                    userId: recruiter.user_id,
+                    userId: recruiterContact.user_id || undefined,
                 });
             }
             
@@ -189,10 +171,10 @@ export class PlacementsEventConsumer {
             // Fetch collaborators
             const collaborators = await this.dataLookup.getPlacementCollaborators(placement_id);
             
-            // Fetch candidate and job details
-            const candidate = await this.dataLookup.getCandidate(candidate_id);
-            if (!candidate) {
-                throw new Error(`Candidate not found: ${candidate_id}`);
+            // Fetch candidate contact
+            const candidateContact = await this.contactLookup.getCandidateContact(candidate_id);
+            if (!candidateContact) {
+                throw new Error(`Candidate contact not found: ${candidate_id}`);
             }
             
             const job = await this.dataLookup.getJob(job_id);
@@ -202,25 +184,19 @@ export class PlacementsEventConsumer {
             
             // Notify all collaborators
             for (const collaborator of collaborators) {
-                const recruiter = await this.dataLookup.getRecruiter(collaborator.recruiter_id);
-                if (!recruiter) {
-                    this.logger.warn({ recruiter_id: collaborator.recruiter_id }, 'Recruiter not found for collaborator');
+                const recruiterContact = await this.contactLookup.getRecruiterContact(collaborator.recruiter_id);
+                if (!recruiterContact) {
+                    this.logger.warn({ recruiter_id: collaborator.recruiter_id }, 'Recruiter contact not found for collaborator');
                     continue;
                 }
                 
-                const user = await this.dataLookup.getUser(recruiter.user_id);
-                if (!user) {
-                    this.logger.warn({ user_id: recruiter.user_id }, 'User not found for recruiter');
-                    continue;
-                }
-                
-                await this.emailService.sendPlacementFailed(user.email, {
-                    candidateName: candidate.full_name,
+                await this.emailService.sendPlacementFailed(recruiterContact.email, {
+                    candidateName: candidateContact.name,
                     jobTitle: job.title,
                     companyName: job.company?.name || 'Unknown Company',
                     failureReason: failure_reason || 'Not specified',
                     placementId: placement_id,
-                    userId: recruiter.user_id,
+                    userId: recruiterContact.user_id || undefined,
                 });
             }
             
@@ -240,10 +216,10 @@ export class PlacementsEventConsumer {
             // Fetch collaborators
             const collaborators = await this.dataLookup.getPlacementCollaborators(placement_id);
             
-            // Fetch candidate and job details
-            const candidate = await this.dataLookup.getCandidate(candidate_id);
-            if (!candidate) {
-                throw new Error(`Candidate not found: ${candidate_id}`);
+            // Fetch candidate contact
+            const candidateContact = await this.contactLookup.getCandidateContact(candidate_id);
+            if (!candidateContact) {
+                throw new Error(`Candidate contact not found: ${candidate_id}`);
             }
             
             const job = await this.dataLookup.getJob(job_id);
@@ -253,26 +229,20 @@ export class PlacementsEventConsumer {
             
             // Notify all collaborators
             for (const collaborator of collaborators) {
-                const recruiter = await this.dataLookup.getRecruiter(collaborator.recruiter_id);
-                if (!recruiter) {
-                    this.logger.warn({ recruiter_id: collaborator.recruiter_id }, 'Recruiter not found for collaborator');
+                const recruiterContact = await this.contactLookup.getRecruiterContact(collaborator.recruiter_id);
+                if (!recruiterContact) {
+                    this.logger.warn({ recruiter_id: collaborator.recruiter_id }, 'Recruiter contact not found for collaborator');
                     continue;
                 }
                 
-                const user = await this.dataLookup.getUser(recruiter.user_id);
-                if (!user) {
-                    this.logger.warn({ user_id: recruiter.user_id }, 'User not found for recruiter');
-                    continue;
-                }
-                
-                await this.emailService.sendGuaranteeExpiring(user.email, {
-                    candidateName: candidate.full_name,
+                await this.emailService.sendGuaranteeExpiring(recruiterContact.email, {
+                    candidateName: candidateContact.name,
                     jobTitle: job.title,
                     companyName: job.company?.name || 'Unknown Company',
                     daysRemaining: days_until_expiry,
                     guaranteeEndDate: event.payload.guarantee_end_date || new Date(Date.now() + days_until_expiry * 86400000).toISOString().split('T')[0],
                     placementId: placement_id,
-                    userId: recruiter.user_id,
+                    userId: recruiterContact.user_id || undefined,
                 });
             }
             

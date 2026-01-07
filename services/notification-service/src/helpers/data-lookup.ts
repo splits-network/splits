@@ -15,6 +15,7 @@ export interface ApplicationData {
     recruiter_id: string | null;
     stage: string;
     notes: string | null;
+    recruiter_notes: string | null;
     created_at: string;
     updated_at: string;
 }

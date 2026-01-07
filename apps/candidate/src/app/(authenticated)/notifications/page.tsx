@@ -95,7 +95,7 @@ export default function NotificationsPage() {
 
     // Computed values
     const unreadCount = notifications.filter((n) => !n.read).length;
-    const categories = ['all', ...Array.from(new Set(notifications.map((n) => n.category).filter(Boolean)))];
+    const categories = ['all', ...Array.from(new Set(notifications.map((n) => n.category).filter((c): c is string => Boolean(c))))];
     const filteredNotifications = selectedCategory === 'all'
         ? notifications
         : notifications.filter((n) => n.category === selectedCategory);

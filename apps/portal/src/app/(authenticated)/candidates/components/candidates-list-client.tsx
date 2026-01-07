@@ -60,12 +60,11 @@ export default function CandidatesListClient() {
         sortOrder,
         viewMode,
         setFilters,
-        handleSearch,
-        handlePageChange,
+        setSearchInput,
+        goToPage,
         handleSort,
-        handleSortChange,
         setViewMode,
-        handleLimitChange,
+        setLimit,
         refetch
     } = useStandardList<Candidate, CandidateFilters>({
         fetchFn: fetchCandidates,
@@ -153,7 +152,7 @@ export default function CandidatesListClient() {
                                 placeholder="Search by name or email..."
                                 className="input w-full"
                                 defaultValue={searchQuery}
-                                onChange={(e) => handleSearch(e.target.value)}
+                                onChange={(e) => setSearchInput(e.target.value)}
                             />
                         </div>
 
@@ -164,8 +163,8 @@ export default function CandidatesListClient() {
                                     className="select"
                                     value={`${sortBy}-${sortOrder}`}
                                     onChange={(e) => {
-                                        const [field, order] = e.target.value.split('-');
-                                        handleSortChange(field, order as 'asc' | 'desc');
+                                        const [field] = e.target.value.split('-');
+                                        handleSort(field);
                                     }}
                                 >
                                     <option value="created_at-desc">Newest First</option>
@@ -416,7 +415,7 @@ export default function CandidatesListClient() {
                             <div className="join">
                                 <button
                                     className="join-item btn btn-sm"
-                                    onClick={() => handlePageChange(1)}
+                                    onClick={() => goToPage(1)}
                                     disabled={pagination.page === 1}
                                     title="First page"
                                 >
@@ -424,7 +423,7 @@ export default function CandidatesListClient() {
                                 </button>
                                 <button
                                     className="join-item btn btn-sm"
-                                    onClick={() => handlePageChange(pagination.page - 1)}
+                                    onClick={() => goToPage(pagination.page - 1)}
                                     disabled={pagination.page === 1}
                                     title="Previous page"
                                 >
@@ -461,7 +460,7 @@ export default function CandidatesListClient() {
                                             <button
                                                 key={page}
                                                 className={`join-item btn btn-sm ${pagination.page === page ? 'btn-primary' : ''}`}
-                                                onClick={() => handlePageChange(page)}
+                                                onClick={() => goToPage(page)}
                                             >
                                                 {page}
                                             </button>
@@ -471,7 +470,7 @@ export default function CandidatesListClient() {
 
                                 <button
                                     className="join-item btn btn-sm"
-                                    onClick={() => handlePageChange(pagination.page + 1)}
+                                    onClick={() => goToPage(pagination.page + 1)}
                                     disabled={pagination.page === pagination.total_pages}
                                     title="Next page"
                                 >
@@ -479,7 +478,7 @@ export default function CandidatesListClient() {
                                 </button>
                                 <button
                                     className="join-item btn btn-sm"
-                                    onClick={() => handlePageChange(pagination.total_pages)}
+                                    onClick={() => goToPage(pagination.total_pages)}
                                     disabled={pagination.page === pagination.total_pages}
                                     title="Last page"
                                 >
@@ -493,7 +492,7 @@ export default function CandidatesListClient() {
                                 <select
                                     className="select select-sm"
                                     value={pagination.limit}
-                                    onChange={(e) => handleLimitChange(parseInt(e.target.value))}
+                                    onChange={(e) => setLimit(parseInt(e.target.value))}
                                 >
                                     <option value={10}>10</option>
                                     <option value={25}>25</option>
