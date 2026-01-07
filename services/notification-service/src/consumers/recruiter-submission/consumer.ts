@@ -7,13 +7,17 @@ import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
 import { RecruiterSubmissionEmailService } from '../../services/recruiter-submission/service';
 import { ServiceRegistry } from '../../clients';
+import { DataLookupHelper } from '../../helpers/data-lookup';
+import { EmailLookupHelper } from '../../helpers/email-lookup';
 
 export class RecruiterSubmissionEventConsumer {
     constructor(
         private emailService: RecruiterSubmissionEmailService,
         private services: ServiceRegistry,
         private logger: Logger,
-        private portalUrl: string
+        private portalUrl: string,
+        private dataLookup: DataLookupHelper,
+        private emailLookup: EmailLookupHelper
     ) {}
 
     /**
@@ -30,20 +34,28 @@ export class RecruiterSubmissionEventConsumer {
             );
 
             // Fetch job details
-            const jobResponse = await this.services.getAtsService().get<any>(`/jobs/${job_id}`);
-            const job = jobResponse.data || jobResponse;
+            const job = await this.dataLookup.getJob(job_id);
+            if (!job) {
+                throw new Error(`Job not found: ${job_id}`);
+            }
 
             // Fetch candidate details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            const candidate = await this.dataLookup.getCandidate(candidate_id);
+            if (!candidate) {
+                throw new Error(`Candidate not found: ${candidate_id}`);
+            }
 
             // Fetch recruiter details
-            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
-            const recruiter = recruiterResponse.data || recruiterResponse;
+            const recruiter = await this.dataLookup.getRecruiter(recruiter_id);
+            if (!recruiter) {
+                throw new Error(`Recruiter not found: ${recruiter_id}`);
+            }
 
             // Fetch recruiter's user profile to get name and email
-            const recruiterUserResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-            const recruiterUser = recruiterUserResponse.data || recruiterUserResponse;
+            const recruiterUser = await this.dataLookup.getUser(recruiter.user_id);
+            if (!recruiterUser) {
+                throw new Error(`User not found for recruiter: ${recruiter.user_id}`);
+            }
 
             // Build opportunity URL
             const opportunityUrl = `${this.portalUrl}/opportunities/${application_id}`;
@@ -58,16 +70,16 @@ export class RecruiterSubmissionEventConsumer {
             });
 
             // Send notification to candidate
-            await this.emailService.sendNewOpportunityNotification(candidate.email, {
+            await this.emailService.sendNewOpportunityNotification(candidate.email || '', {
                 candidateName: candidate.full_name,
-                recruiterName: recruiterUser.full_name || recruiterUser.email,
+                recruiterName: `${recruiterUser.first_name || ''} ${recruiterUser.last_name || ''}`.trim() || recruiterUser.email,
                 jobTitle: job.title,
                 companyName: job.company?.name || 'the company',
-                jobDescription: job.description,
+                jobDescription: job.description || '',
                 recruiterPitch: recruiter_pitch,
                 opportunityUrl,
                 expiresAt: formattedExpiryDate,
-                userId: candidate.user_id, // ✅ Use candidate.user_id (users.id), not candidate_id
+                userId: candidate.user_id || undefined,
                 applicationId: application_id,
             });
 
@@ -98,31 +110,40 @@ export class RecruiterSubmissionEventConsumer {
             );
 
             // Fetch job details
-            const jobResponse = await this.services.getAtsService().get<any>(`/jobs/${job_id}`);
-            const job = jobResponse.data || jobResponse;
+            const job = await this.dataLookup.getJob(job_id);
+            if (!job) {
+                throw new Error(`Job not found: ${job_id}`);
+            }
 
             // Fetch candidate details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            const candidate = await this.dataLookup.getCandidate(candidate_id);
+            if (!candidate) {
+                throw new Error(`Candidate not found: ${candidate_id}`);
+            }
 
             // Fetch recruiter details
-            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
-            const recruiter = recruiterResponse.data || recruiterResponse;
+            const recruiter = await this.dataLookup.getRecruiter(recruiter_id);
+            if (!recruiter) {
+                throw new Error(`Recruiter not found: ${recruiter_id}`);
+            }
 
             // Fetch recruiter's user profile
-            const recruiterUserResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-            const recruiterUser = recruiterUserResponse.data || recruiterUserResponse;
+            const recruiterUser = await this.dataLookup.getUser(recruiter.user_id);
+            if (!recruiterUser) {
+                throw new Error(`User not found for recruiter: ${recruiter.user_id}`);
+            }
 
             // Build application URL
             const applicationUrl = `${this.portalUrl}/applications/${application_id}`;
 
             // Send notification to recruiter
+            const recruiterName = `${recruiterUser.first_name || ''} ${recruiterUser.last_name || ''}`.trim() || recruiterUser.email;
             await this.emailService.sendCandidateApprovedNotification(recruiterUser.email, {
                 candidateName: candidate.full_name,
-                recruiterName: recruiterUser.full_name || recruiterUser.email,
+                recruiterName,
                 jobTitle: job.title,
                 companyName: job.company?.name || 'the company',
-                candidateEmail: candidate.email,
+                candidateEmail: candidate.email || '',
                 applicationUrl,
                 userId: recruiter.user_id,
                 applicationId: application_id,
@@ -155,28 +176,37 @@ export class RecruiterSubmissionEventConsumer {
             );
 
             // Fetch job details
-            const jobResponse = await this.services.getAtsService().get<any>(`/jobs/${job_id}`);
-            const job = jobResponse.data || jobResponse;
+            const job = await this.dataLookup.getJob(job_id);
+            if (!job) {
+                throw new Error(`Job not found: ${job_id}`);
+            }
 
             // Fetch candidate details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            const candidate = await this.dataLookup.getCandidate(candidate_id);
+            if (!candidate) {
+                throw new Error(`Candidate not found: ${candidate_id}`);
+            }
 
             // Fetch recruiter details
-            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
-            const recruiter = recruiterResponse.data || recruiterResponse;
+            const recruiter = await this.dataLookup.getRecruiter(recruiter_id);
+            if (!recruiter) {
+                throw new Error(`Recruiter not found: ${recruiter_id}`);
+            }
 
             // Fetch recruiter's user profile
-            const recruiterUserResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-            const recruiterUser = recruiterUserResponse.data || recruiterUserResponse;
+            const recruiterUser = await this.dataLookup.getUser(recruiter.user_id);
+            if (!recruiterUser) {
+                throw new Error(`User not found for recruiter: ${recruiter.user_id}`);
+            }
 
             // Build roles browser URL
             const rolesUrl = `${this.portalUrl}/roles`;
 
             // Send notification to recruiter
+            const recruiterName = `${recruiterUser.first_name || ''} ${recruiterUser.last_name || ''}`.trim() || recruiterUser.email;
             await this.emailService.sendCandidateDeclinedNotification(recruiterUser.email, {
                 candidateName: candidate.full_name,
-                recruiterName: recruiterUser.full_name || recruiterUser.email,
+                recruiterName,
                 jobTitle: job.title,
                 companyName: job.company?.name || 'the company',
                 declineReason: decline_reason,
@@ -213,32 +243,41 @@ export class RecruiterSubmissionEventConsumer {
             );
 
             // Fetch job details
-            const jobResponse = await this.services.getAtsService().get<any>(`/jobs/${job_id}`);
-            const job = jobResponse.data || jobResponse;
+            const job = await this.dataLookup.getJob(job_id);
+            if (!job) {
+                throw new Error(`Job not found: ${job_id}`);
+            }
 
             // Fetch candidate details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            const candidate = await this.dataLookup.getCandidate(candidate_id);
+            if (!candidate) {
+                throw new Error(`Candidate not found: ${candidate_id}`);
+            }
 
             // Fetch recruiter details
-            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
-            const recruiter = recruiterResponse.data || recruiterResponse;
+            const recruiter = await this.dataLookup.getRecruiter(recruiter_id);
+            if (!recruiter) {
+                throw new Error(`Recruiter not found: ${recruiter_id}`);
+            }
 
             // Fetch recruiter's user profile
-            const recruiterUserResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-            const recruiterUser = recruiterUserResponse.data || recruiterUserResponse;
+            const recruiterUser = await this.dataLookup.getUser(recruiter.user_id);
+            if (!recruiterUser) {
+                throw new Error(`User not found for recruiter: ${recruiter.user_id}`);
+            }
 
             // Build explore URL
             const exploreUrl = `${this.portalUrl}/opportunities`;
 
             // Send notification to candidate
-            await this.emailService.sendOpportunityExpiredNotification(candidate.email, {
+            const recruiterName = `${recruiterUser.first_name || ''} ${recruiterUser.last_name || ''}`.trim() || recruiterUser.email;
+            await this.emailService.sendOpportunityExpiredNotification(candidate.email || '', {
                 candidateName: candidate.full_name,
-                recruiterName: recruiterUser.full_name || recruiterUser.email,
+                recruiterName,
                 jobTitle: job.title,
                 companyName: job.company?.name || 'the company',
                 exploreUrl,
-                userId: candidate.user_id, // ✅ Use candidate.user_id (users.id), not candidate_id
+                userId: candidate.user_id || undefined,
                 applicationId: application_id,
             });
 

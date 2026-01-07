@@ -1,18 +1,17 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useStandardList } from '@/hooks/use-standard-list';
 import { useUserProfile } from '@/contexts/user-profile-context';
-import { useViewMode } from '@/hooks/use-view-mode';
 import { useToast } from '@/lib/toast-context';
 import { ApplicationCard } from './application-card';
 import { ApplicationTableRow } from './application-table-row';
 import { ApplicationFilters } from './application-filters';
-import { PaginationControls } from './pagination-controls';
-import BulkActionModal from './bulk-action-modal';
 import { formatDate } from '@/lib/utils';
 import { getApplicationStageBadge } from '@/lib/utils/badge-styles';
+import BulkActionModal from './bulk-action-modal';
 import type { ApplicationStage } from '@splits-network/shared-types';
 
 interface Application {
@@ -53,11 +52,10 @@ interface Application {
     };
 }
 
-interface PaginationInfo {
-    total: number;
-    page: number;
-    limit: number;
-    total_pages: number;
+interface ApplicationFilters {
+    stage: string;
+    ai_score_filter: string;
+    company_id?: string;
 }
 
 interface ApplicationStats {
@@ -89,14 +87,8 @@ const buildStats = (data: Application[], total: number): ApplicationStats => {
             }
             return acc;
         },
-        {
-            totalApplications: total,
-            awaitingReview: 0,
-            aiPending: 0,
-            acceptedByCompany: 0,
-        } as ApplicationStats,
+        { totalApplications: total, awaitingReview: 0, aiPending: 0, acceptedByCompany: 0 } as ApplicationStats,
     );
-
     stats.totalApplications = total;
     return stats;
 };
@@ -106,107 +98,17 @@ export default function ApplicationsClient() {
     const toast = useToast();
     const { profile, isLoading: profileLoading, isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
 
-    // State
-    const [applications, setApplications] = useState<Application[]>([]);
-    const [pagination, setPagination] = useState<PaginationInfo>({
-        total: 0,
-        page: 1,
-        limit: 25,
-        total_pages: 0,
-    });
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [stageFilter, setStageFilter] = useState('');
-    const [aiScoreFilter, setAIScoreFilter] = useState('');
-    const [viewMode, setViewMode] = useViewMode('applicationsViewMode');
-    const [acceptingId, setAcceptingId] = useState<string | null>(null);
+    // Company resolution for company users
     const [companyId, setCompanyId] = useState<string | null>(null);
-    const [stats, setStats] = useState<ApplicationStats | null>(null);
-    const [statsLoading, setStatsLoading] = useState(true);
-    const [hasBootstrapped, setHasBootstrapped] = useState(false);
+    const [companyResolved, setCompanyResolved] = useState(!isCompanyUser);
 
-    // Bulk actions state
-    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    // Bulk action state
+    const [acceptingId, setAcceptingId] = useState<string | null>(null);
     const [showBulkActionModal, setShowBulkActionModal] = useState(false);
     const [bulkAction, setBulkAction] = useState<'stage' | 'reject' | null>(null);
     const [bulkLoading, setBulkLoading] = useState(false);
 
-    // Company users need companyId resolved before fetching
-    const isReady = !profileLoading && (!isCompanyUser || !!companyId);
-
-    const loadApplications = useCallback(async (options: {
-        page?: number;
-        stage?: string;
-        search?: string;
-        aiScore?: string;
-        company?: string | null;
-    } = {}) => {
-        try {
-            setLoading(true);
-            setError(null);
-            setStatsLoading(true);
-
-            const token = await getToken();
-            if (!token) {
-                setError('Not authenticated');
-                setLoading(false);
-                setStatsLoading(false);
-                return;
-            }
-
-            const client = createAuthenticatedClient(token);
-            const pageToFetch = options.page ?? pagination.page;
-            const stageValue = options.stage ?? stageFilter;
-            const searchValue = options.search ?? searchQuery;
-            const aiScoreValue = options.aiScore ?? aiScoreFilter;
-            const companyFilter = options.company ?? companyId ?? undefined;
-
-            const params = new URLSearchParams({
-                page: pageToFetch.toString(),
-                limit: pagination.limit.toString(),
-                sort_by: 'created_at',
-                sort_order: 'desc',
-            });
-
-            if (searchValue) {
-                params.append('search', searchValue);
-            }
-            if (stageValue) {
-                params.append('stage', stageValue);
-            }
-            if (aiScoreValue) {
-                params.append('ai_score_filter', aiScoreValue);
-            }
-            if (companyFilter) {
-                params.append('company_id', companyFilter);
-            }
-
-            const response = await client.get(`/applications?${params.toString()}`);
-            const nextData = response.data || [];
-            const paginationPayload = response.pagination || {};
-
-            setApplications(nextData);
-            setSelectedIds(new Set());
-            setPagination(prev => ({
-                ...prev,
-                total: paginationPayload.total ?? nextData.length,
-                total_pages: paginationPayload.total_pages ?? prev.total_pages,
-                limit: paginationPayload.limit ?? prev.limit,
-                page: pageToFetch,
-            }));
-            setStats(buildStats(nextData, paginationPayload.total ?? nextData.length));
-            setHasBootstrapped(true);
-        } catch (err: any) {
-            console.error('Failed to load applications:', err);
-            setError(err.message || 'Failed to load applications');
-        } finally {
-            setLoading(false);
-            setStatsLoading(false);
-        }
-    }, [aiScoreFilter, companyId, getToken, pagination.limit, pagination.page, searchQuery, stageFilter]);
-
-    // Resolve companyId for company users
+    // Resolve companyId from organization
     const resolveCompanyFromOrg = useCallback(async (orgId: string) => {
         try {
             const token = await getToken();
@@ -214,10 +116,7 @@ export default function ApplicationsClient() {
 
             const client = createAuthenticatedClient(token);
             const response: any = await client.get('/companies', {
-                params: {
-                    identity_organization_id: orgId,
-                    limit: 1,
-                },
+                params: { identity_organization_id: orgId, limit: 1 },
             });
             const companies = response.data || response;
             if (Array.isArray(companies) && companies.length > 0) {
@@ -225,67 +124,88 @@ export default function ApplicationsClient() {
             }
         } catch (err) {
             console.error('Failed to resolve company for organization:', err);
+        } finally {
+            setCompanyResolved(true);
         }
     }, [getToken]);
 
-    // For company users, resolve companyId from organizationId
     useEffect(() => {
-        if (!isCompanyUser || companyId) return;
+        if (!isCompanyUser) {
+            setCompanyResolved(true);
+            return;
+        }
+        if (companyId) return;
 
         const orgId = profile?.organization_ids?.[0];
         if (orgId) {
             resolveCompanyFromOrg(orgId);
+        } else {
+            setCompanyResolved(true);
         }
     }, [isCompanyUser, companyId, profile?.organization_ids, resolveCompanyFromOrg]);
 
-    // Load applications when ready
-    useEffect(() => {
-        if (!isReady) return;
+    const fetchApplications = async (params: Record<string, any>) => {
+        const token = await getToken();
+        if (!token) throw new Error('Not authenticated');
 
-        loadApplications({ page: 1 });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isReady]);
+        const client = createAuthenticatedClient(token);
 
-    // Handle search with debounce
-    useEffect(() => {
-        if (!isReady || !hasBootstrapped) return;
-
-        const timer = setTimeout(() => {
-            setPagination(prev => ({ ...prev, page: 1 }));
-            loadApplications({ page: 1, search: searchQuery });
-        }, searchQuery ? 300 : 0);
-
-        return () => clearTimeout(timer);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchQuery, isReady, hasBootstrapped]);
-
-    const handleStageFilterChange = (value: string) => {
-        setStageFilter(value);
-        setPagination(prev => ({ ...prev, page: 1 }));
-        if (isReady) {
-            loadApplications({ page: 1, stage: value });
+        // Add company_id filter if resolved
+        if (companyId) {
+            params.company_id = companyId;
         }
+
+        const response = await client.get('/applications', { params });
+
+        return {
+            data: response.data || [],
+            pagination: response.pagination || { total: 0, page: 1, limit: 25, total_pages: 0 }
+        };
+    };
+
+    const {
+        data: applications,
+        loading,
+        error,
+        pagination,
+        filters,
+        searchQuery,
+        viewMode,
+        selectedItems,
+        setFilters,
+        handleSearch,
+        handlePageChange,
+        setViewMode,
+        toggleItemSelection,
+        toggleSelectAll,
+        clearSelections,
+        refetch
+    } = useStandardList<Application, ApplicationFilters>({
+        fetchFn: fetchApplications,
+        defaultFilters: { stage: '', ai_score_filter: '' },
+        defaultSortBy: 'created_at',
+        defaultSortOrder: 'desc',
+        storageKey: 'applicationsViewMode',
+        enableSelection: true,
+        enabled: companyResolved && !profileLoading
+    });
+
+    // Compute stats from current data
+    const stats = useMemo(() => {
+        if (applications.length === 0 && pagination.total === 0) return null;
+        return buildStats(applications, pagination.total);
+    }, [applications, pagination.total]);
+
+    // Filter handlers
+    const handleStageFilterChange = (value: string) => {
+        setFilters({ ...filters, stage: value });
     };
 
     const handleAIScoreFilterChange = (value: string) => {
-        setAIScoreFilter(value);
-        setPagination(prev => ({ ...prev, page: 1 }));
-        if (isReady) {
-            loadApplications({ page: 1, aiScore: value });
-        }
+        setFilters({ ...filters, ai_score_filter: value });
     };
 
-    const handleSearchChange = (value: string) => {
-        setSearchQuery(value);
-    };
-
-    const handlePageChange = (page: number) => {
-        setPagination(prev => ({ ...prev, page }));
-        if (isReady) {
-            loadApplications({ page });
-        }
-    };
-
+    // Accept application handler
     const handleAcceptApplication = async (applicationId: string) => {
         try {
             setAcceptingId(applicationId);
@@ -293,11 +213,8 @@ export default function ApplicationsClient() {
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            await client.patch(`/applications/${applicationId}`, {
-                accepted_by_company: true
-            });
-
-            await loadApplications();
+            await client.patch(`/applications/${applicationId}`, { accepted_by_company: true });
+            await refetch();
         } catch (err: any) {
             console.error('Failed to accept application:', err);
             toast.error('Failed to accept application: ' + (err.message || 'Unknown error'));
@@ -306,32 +223,13 @@ export default function ApplicationsClient() {
         }
     };
 
-    // Bulk selection handlers
-    const toggleSelection = (id: string) => {
-        const newSelected = new Set(selectedIds);
-        if (newSelected.has(id)) {
-            newSelected.delete(id);
-        } else {
-            newSelected.add(id);
-        }
-        setSelectedIds(newSelected);
-    };
-
-    const toggleSelectAll = () => {
-        if (selectedIds.size === applications.length) {
-            setSelectedIds(new Set());
-        } else {
-            setSelectedIds(new Set(applications.map(app => app.id)));
-        }
-    };
-
+    // Bulk action handlers
     const handleBulkAction = (action: 'stage' | 'reject') => {
         setBulkAction(action);
         setShowBulkActionModal(true);
     };
 
-    const clearSelections = () => {
-        setSelectedIds(new Set());
+    const handleCloseBulkModal = () => {
         setShowBulkActionModal(false);
         setBulkAction(null);
     };
@@ -343,13 +241,12 @@ export default function ApplicationsClient() {
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            const idsArray = Array.from(selectedIds);
+            const idsArray = Array.from(selectedItems);
 
             if (bulkAction === 'stage' && data.newStage) {
-                const nextStage: ApplicationStage = data.newStage;
                 await Promise.all(
                     idsArray.map(id =>
-                        client.patch(`/applications/${id}`, { stage: nextStage, notes: data.notes })
+                        client.patch(`/applications/${id}`, { stage: data.newStage, notes: data.notes })
                     )
                 );
             } else if (bulkAction === 'reject') {
@@ -360,8 +257,10 @@ export default function ApplicationsClient() {
                 );
             }
 
-            await loadApplications();
+            await refetch();
             clearSelections();
+            handleCloseBulkModal();
+            toast.success(`Successfully updated ${idsArray.length} application(s)`);
         } catch (err: any) {
             console.error('Bulk action failed:', err);
             toast.error('Bulk action failed: ' + (err.message || 'Unknown error'));
@@ -370,25 +269,31 @@ export default function ApplicationsClient() {
         }
     };
 
-    // Using centralized utilities from @/lib/utils
-
-    const listIsLoading = loading;
-    const showResultsSummary = !listIsLoading && applications.length > 0;
+    // Loading state
+    if ((loading && applications.length === 0) || !companyResolved || profileLoading) {
+        return (
+            <div className="flex justify-center py-12">
+                <span className="loading loading-spinner loading-lg"></span>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
+            {/* Error */}
             {error && (
                 <div className="alert alert-error">
                     <i className="fa-solid fa-circle-exclamation"></i>
                     <span>{error}</span>
+                    <button className="btn btn-sm btn-ghost" onClick={refetch}>
+                        <i className="fa-solid fa-rotate"></i>
+                        Retry
+                    </button>
                 </div>
             )}
 
-            {statsLoading ? (
-                <div className="flex justify-center py-6">
-                    <span className="loading loading-spinner loading-md"></span>
-                </div>
-            ) : stats && (
+            {/* Stats */}
+            {stats && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="stats bg-base-100 shadow">
                         <div className="stat">
@@ -433,160 +338,204 @@ export default function ApplicationsClient() {
                 </div>
             )}
 
+            {/* Filters */}
             <ApplicationFilters
                 searchQuery={searchQuery}
-                stageFilter={stageFilter}
-                aiScoreFilter={aiScoreFilter}
+                stageFilter={filters.stage}
+                aiScoreFilter={filters.ai_score_filter}
                 viewMode={viewMode}
-                onSearchChange={handleSearchChange}
+                onSearchChange={handleSearch}
                 onStageFilterChange={handleStageFilterChange}
                 onAIScoreFilterChange={handleAIScoreFilterChange}
                 onViewModeChange={setViewMode}
             />
 
-            {showResultsSummary && (
+            {/* Results summary */}
+            {!loading && applications.length > 0 && (
                 <div className="text-sm text-base-content/70">
                     Showing {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} applications
                 </div>
             )}
 
-            {listIsLoading ? (
-                <div className="flex justify-center py-12">
-                    <span className="loading loading-spinner loading-lg"></span>
+            {/* Loading overlay */}
+            {loading && applications.length > 0 && (
+                <div className="flex justify-center py-4">
+                    <span className="loading loading-spinner loading-md"></span>
                 </div>
-            ) : (
-                <>
-                    {viewMode === 'grid' && applications.length > 0 && (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {applications.map((application) => (
-                                <ApplicationCard
-                                    key={application.id}
-                                    application={{
-                                        ...application,
-                                        company: application.job?.company
-                                    }}
-                                    canAccept={isCompanyUser && !application.accepted_by_company}
-                                    isAccepting={acceptingId === application.id}
-                                    onAccept={() => handleAcceptApplication(application.id)}
-                                    formatDate={formatDate}
-                                />
-                            ))}
-                        </div>
-                    )}
+            )}
 
-                    {selectedIds.size > 0 && isRecruiter && (
-                        <div className="alert shadow">
-                            <div className="flex-1">
-                                <i className="fa-solid fa-check-square text-xl"></i>
-                                <div>
-                                    <h3 className="font-bold">{selectedIds.size} application{selectedIds.size !== 1 ? 's' : ''} selected</h3>
-                                    <div className="text-xs">Choose an action to apply to all selected applications</div>
-                                </div>
-                            </div>
-                            <div className="flex-none flex gap-2">
-                                {isAdmin && (
-                                    <button
-                                        onClick={() => handleBulkAction('stage')}
-                                        className="btn btn-sm btn-primary gap-2"
-                                    >
-                                        <i className="fa-solid fa-list-check"></i>
-                                        Update Stage
-                                    </button>
-                                )}
-                                <button
-                                    onClick={() => handleBulkAction('reject')}
-                                    className="btn btn-sm btn-error gap-2"
-                                >
-                                    <i className="fa-solid fa-ban"></i>
-                                    Reject
-                                </button>
-                                <button
-                                    onClick={clearSelections}
-                                    className="btn btn-sm btn-ghost"
-                                >
-                                    Clear
-                                </button>
-                            </div>
-                        </div>
-                    )}
+            {/* Grid View */}
+            {viewMode === 'grid' && applications.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {applications.map((application) => (
+                        <ApplicationCard
+                            key={application.id}
+                            application={{
+                                ...application,
+                                company: application.job?.company
+                            }}
+                            canAccept={isCompanyUser && !application.accepted_by_company}
+                            isAccepting={acceptingId === application.id}
+                            onAccept={() => handleAcceptApplication(application.id)}
+                            formatDate={formatDate}
+                        />
+                    ))}
+                </div>
+            )}
 
-                    {viewMode === 'table' && applications.length > 0 && (
-                        <div className="card bg-base-100 shadow overflow-hidden">
-                            <div className="overflow-x-auto">
-                                <table className="table table-zebra">
-                                    <thead>
-                                        <tr>
-                                            {isRecruiter && (
-                                                <th>
-                                                    <input
-                                                        type="checkbox"
-                                                        className="checkbox checkbox-sm"
-                                                        checked={selectedIds.size === applications.length && applications.length > 0}
-                                                        onChange={toggleSelectAll}
-                                                    />
-                                                </th>
-                                            )}
-                                            <th>Candidate</th>
-                                            <th>Job</th>
-                                            <th>Company</th>
-                                            <th>AI Score</th>
-                                            <th>Stage</th>
-                                            {isRecruiter && <th>Recruiter</th>}
-                                            <th>Submitted</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {applications.map((application) => (
-                                            <ApplicationTableRow
-                                                key={application.id}
-                                                application={application}
-                                                isSelected={selectedIds.has(application.id)}
-                                                onToggleSelect={() => toggleSelection(application.id)}
-                                                canAccept={isCompanyUser && !application.accepted_by_company}
-                                                isAccepting={acceptingId === application.id}
-                                                onAccept={() => handleAcceptApplication(application.id)}
-                                                getStageColor={getApplicationStageBadge}
-                                                formatDate={formatDate}
-                                                isRecruiter={isRecruiter}
-                                                isCompanyUser={isCompanyUser}
+            {/* Bulk Selection Bar */}
+            {selectedItems.size > 0 && isRecruiter && (
+                <div className="alert shadow">
+                    <div className="flex-1">
+                        <i className="fa-solid fa-check-square text-xl"></i>
+                        <div>
+                            <h3 className="font-bold">{selectedItems.size} application{selectedItems.size !== 1 ? 's' : ''} selected</h3>
+                            <div className="text-xs">Choose an action to apply to all selected applications</div>
+                        </div>
+                    </div>
+                    <div className="flex-none flex gap-2">
+                        {isAdmin && (
+                            <button
+                                onClick={() => handleBulkAction('stage')}
+                                className="btn btn-sm btn-primary gap-2"
+                            >
+                                <i className="fa-solid fa-list-check"></i>
+                                Update Stage
+                            </button>
+                        )}
+                        <button
+                            onClick={() => handleBulkAction('reject')}
+                            className="btn btn-sm btn-error gap-2"
+                        >
+                            <i className="fa-solid fa-ban"></i>
+                            Reject
+                        </button>
+                        <button
+                            onClick={clearSelections}
+                            className="btn btn-sm btn-ghost"
+                        >
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Table View */}
+            {viewMode === 'table' && applications.length > 0 && (
+                <div className="card bg-base-100 shadow overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="table table-zebra">
+                            <thead>
+                                <tr>
+                                    {isRecruiter && (
+                                        <th>
+                                            <input
+                                                type="checkbox"
+                                                className="checkbox checkbox-sm"
+                                                checked={selectedItems.size === applications.length && applications.length > 0}
+                                                onChange={() => toggleSelectAll(applications.map(a => a.id))}
                                             />
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </th>
+                                    )}
+                                    <th>Candidate</th>
+                                    <th>Job</th>
+                                    <th>Company</th>
+                                    <th>AI Score</th>
+                                    <th>Stage</th>
+                                    {isRecruiter && <th>Recruiter</th>}
+                                    <th>Submitted</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {applications.map((application) => (
+                                    <ApplicationTableRow
+                                        key={application.id}
+                                        application={application}
+                                        isSelected={selectedItems.has(application.id)}
+                                        onToggleSelect={() => toggleItemSelection(application.id)}
+                                        canAccept={isCompanyUser && !application.accepted_by_company}
+                                        isAccepting={acceptingId === application.id}
+                                        onAccept={() => handleAcceptApplication(application.id)}
+                                        getStageColor={getApplicationStageBadge}
+                                        formatDate={formatDate}
+                                        isRecruiter={isRecruiter}
+                                        isCompanyUser={isCompanyUser}
+                                    />
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
+            {/* Pagination */}
+            {pagination.total_pages > 1 && (
+                <div className="card bg-base-100 shadow">
+                    <div className="card-body p-4">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div className="text-sm text-base-content/70">
+                                Page {pagination.page} of {pagination.total_pages}
+                            </div>
+                            <div className="join">
+                                <button
+                                    className="join-item btn btn-sm"
+                                    onClick={() => handlePageChange(1)}
+                                    disabled={pagination.page === 1 || loading}
+                                >
+                                    <i className="fa-solid fa-angles-left"></i>
+                                </button>
+                                <button
+                                    className="join-item btn btn-sm"
+                                    onClick={() => handlePageChange(pagination.page - 1)}
+                                    disabled={pagination.page === 1 || loading}
+                                >
+                                    <i className="fa-solid fa-angle-left"></i>
+                                </button>
+                                <button className="join-item btn btn-sm btn-disabled">
+                                    {pagination.page}
+                                </button>
+                                <button
+                                    className="join-item btn btn-sm"
+                                    onClick={() => handlePageChange(pagination.page + 1)}
+                                    disabled={pagination.page === pagination.total_pages || loading}
+                                >
+                                    <i className="fa-solid fa-angle-right"></i>
+                                </button>
+                                <button
+                                    className="join-item btn btn-sm"
+                                    onClick={() => handlePageChange(pagination.total_pages)}
+                                    disabled={pagination.page === pagination.total_pages || loading}
+                                >
+                                    <i className="fa-solid fa-angles-right"></i>
+                                </button>
                             </div>
                         </div>
-                    )}
+                    </div>
+                </div>
+            )}
 
-                    <PaginationControls
-                        currentPage={pagination.page}
-                        totalPages={pagination.total_pages}
-                        onPageChange={handlePageChange}
-                        disabled={loading}
-                    />
-
-                    {applications.length === 0 && (
-                        <div className="card bg-base-100 shadow">
-                            <div className="card-body text-center py-12">
-                                <i className="fa-solid fa-briefcase text-6xl text-base-content/20"></i>
-                                <h3 className="text-xl font-semibold mt-4">No Applications Found</h3>
-                                <p className="text-base-content/70 mt-2">
-                                    {searchQuery || stageFilter
-                                        ? 'Try adjusting your search or filters'
-                                        : 'No applications have been created yet'}
-                                </p>
-                            </div>
-                        </div>
-                    )}
-                </>
+            {/* Empty State */}
+            {applications.length === 0 && !loading && (
+                <div className="card bg-base-100 shadow">
+                    <div className="card-body text-center py-12">
+                        <i className="fa-solid fa-briefcase text-6xl text-base-content/20"></i>
+                        <h3 className="text-xl font-semibold mt-4">No Applications Found</h3>
+                        <p className="text-base-content/70 mt-2">
+                            {searchQuery || filters.stage
+                                ? 'Try adjusting your search or filters'
+                                : 'No applications have been created yet'}
+                        </p>
+                    </div>
+                </div>
             )}
 
             {/* Bulk Action Modal */}
             {showBulkActionModal && bulkAction && (
                 <BulkActionModal
                     action={bulkAction}
-                    selectedCount={selectedIds.size}
-                    onClose={clearSelections}
+                    selectedCount={selectedItems.size}
+                    onClose={handleCloseBulkModal}
                     onConfirm={handleBulkConfirm}
                     loading={bulkLoading}
                 />

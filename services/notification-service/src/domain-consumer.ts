@@ -13,6 +13,7 @@ import { InvitationsConsumer } from './consumers/invitations/consumer';
 import { RecruiterSubmissionEventConsumer } from './consumers/recruiter-submission/consumer';
 import { SupportEventConsumer } from './consumers/support/consumer';
 import { EmailLookupHelper } from './helpers/email-lookup';
+import { DataLookupHelper } from './helpers/data-lookup';
 
 export class DomainEventConsumer {
     private connection: Connection | null = null;
@@ -38,47 +39,62 @@ export class DomainEventConsumer {
     ) {
         const portalUrl = process.env.PORTAL_URL || 'http://localhost:3001';
         
-        // Create email lookup helper for resolving user IDs to email addresses
-        const emailLookup = new EmailLookupHelper(services, logger);
+        // Create data lookup helper for direct database queries (avoiding inter-service HTTP calls)
+        const dataLookup = new DataLookupHelper(repository.supabaseClient, logger);
+        
+        // Create email lookup helper for resolving user IDs to email addresses (direct DB access)
+        const emailLookup = new EmailLookupHelper(repository.supabaseClient, logger);
         
         this.applicationsConsumer = new ApplicationsEventConsumer(
             notificationService.applications,
             services,
             emailLookup,
-            logger
+            logger,
+            dataLookup
         );
         this.placementsConsumer = new PlacementsEventConsumer(
             notificationService.placements,
             services,
-            logger
+            logger,
+            dataLookup,
+            emailLookup
         );
         this.proposalsConsumer = new ProposalsEventConsumer(
             notificationService.proposals,
             services,
-            logger
+            logger,
+            dataLookup,
+            emailLookup
         );
         this.candidatesConsumer = new CandidatesEventConsumer(
             notificationService.candidates,
             services,
             this.repository,
-            logger
+            logger,
+            dataLookup,
+            emailLookup
         );
         this.collaborationConsumer = new CollaborationEventConsumer(
             notificationService.collaboration,
             services,
-            logger
+            logger,
+            dataLookup,
+            emailLookup
         );
         this.invitationsConsumer = new InvitationsConsumer(
             notificationService,
             services,
             logger,
-            portalUrl
+            portalUrl,
+            dataLookup
         );
         this.recruiterSubmissionConsumer = new RecruiterSubmissionEventConsumer(
             notificationService.recruiterSubmission,
             services,
             logger,
-            portalUrl
+            portalUrl,
+            dataLookup,
+            emailLookup
         );
         this.supportConsumer = new SupportEventConsumer(notificationService.support, logger);
     }

@@ -2,12 +2,16 @@ import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
 import { CollaborationEmailService } from '../../services/collaboration/service';
 import { ServiceRegistry } from '../../clients';
+import { DataLookupHelper } from '../../helpers/data-lookup';
+import { EmailLookupHelper } from '../../helpers/email-lookup';
 
 export class CollaborationEventConsumer {
     constructor(
         private emailService: CollaborationEmailService,
         private services: ServiceRegistry,
-        private logger: Logger
+        private logger: Logger,
+        private dataLookup: DataLookupHelper,
+        private emailLookup: EmailLookupHelper
     ) {}
 
     async handleCollaboratorAdded(event: DomainEvent): Promise<void> {
@@ -17,18 +21,26 @@ export class CollaborationEventConsumer {
             this.logger.info({ placement_id, recruiter_id }, 'Handling collaborator added notification');
             
             // Fetch new collaborator
-            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
-            const recruiter = recruiterResponse.data || recruiterResponse;
+            const recruiter = await this.dataLookup.getRecruiter(recruiter_id);
+            if (!recruiter) {
+                throw new Error(`Recruiter not found: ${recruiter_id}`);
+            }
             
-            const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-            const user = userResponse.data || userResponse;
+            const user = await this.dataLookup.getUser(recruiter.user_id);
+            if (!user) {
+                throw new Error(`User not found for recruiter: ${recruiter.user_id}`);
+            }
             
             // Fetch candidate and job details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            const candidate = await this.dataLookup.getCandidate(candidate_id);
+            if (!candidate) {
+                throw new Error(`Candidate not found: ${candidate_id}`);
+            }
             
-            const jobResponse = await this.services.getAtsService().get<any>(`/jobs/${job_id}`);
-            const job = jobResponse.data || jobResponse;
+            const job = await this.dataLookup.getJob(job_id);
+            if (!job) {
+                throw new Error(`Job not found: ${job_id}`);
+            }
             
             // Send notification
             await this.emailService.sendCollaboratorAdded(user.email, {

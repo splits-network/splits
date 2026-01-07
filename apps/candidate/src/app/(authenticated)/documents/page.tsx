@@ -1,56 +1,49 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { useStandardList } from '@/hooks/use-standard-list';
 import { formatDate } from '@/lib/utils';
 import UploadDocumentModal from '@/components/upload-document-modal';
 import type { Document } from '@/lib/document-utils';
 import { createAuthenticatedClient } from '@/lib/api-client';
 
+// ===== TYPES =====
+
+interface DocumentFilters {
+    document_type?: string;
+}
+
+// ===== PAGE COMPONENT =====
+
 export default function DocumentsPage() {
     const { getToken } = useAuth();
-    const [documents, setDocuments] = useState<Document[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [deleting, setDeleting] = useState<string | null>(null);
-    const [filterType, setFilterType] = useState<string>('all');
     const [showUploadModal, setShowUploadModal] = useState(false);
     const [candidateId, setCandidateId] = useState<string | null>(null);
+    const [deleting, setDeleting] = useState<string | null>(null);
+    const [actionError, setActionError] = useState<string | null>(null);
 
-    useEffect(() => {
-        loadDocuments();
-    }, []);
+    const {
+        data: documents,
+        loading,
+        error,
+        filters,
+        setFilter,
+        refresh,
+    } = useStandardList<Document, DocumentFilters>({
+        endpoint: '/documents',
+        defaultFilters: {},
+        defaultSortBy: 'created_at',
+        defaultSortOrder: 'desc',
+        viewModeKey: 'candidateDocumentsViewMode',
+    });
 
-    const loadDocuments = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const token = await getToken();
-            if (!token) {
-                setError('Please sign in to view documents');
-                return;
-            }
-
-            const client = createAuthenticatedClient(token);
-            const response = await client.get('/documents');
-            setDocuments(response.data);
-        } catch (err: any) {
-            console.error('Failed to load documents:', err);
-            setError(err.message || 'Failed to load documents');
-        } finally {
-            setLoading(false);
-        }
-    };
-
+    // Helper functions
     const formatFileSize = (bytes?: number): string => {
         if (typeof bytes !== 'number' || Number.isNaN(bytes)) return '-';
         if (bytes < 1024) return `${bytes} B`;
         if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
         return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-    };
-
-    const formatUploadedAt = (value?: string | Date): string => {
-        return value ? formatDate(value) : '-';
     };
 
     const getFileIcon = (name?: string): string => {
@@ -94,7 +87,7 @@ export default function DocumentsPage() {
     const handleUploadClick = async () => {
         const id = await getCandidateId();
         if (!id) {
-            setError('Failed to find candidate profile. Please contact support.');
+            setActionError('Failed to find candidate profile. Please contact support.');
             return;
         }
         setShowUploadModal(true);
@@ -106,31 +99,32 @@ export default function DocumentsPage() {
         }
 
         setDeleting(documentId);
-        setError(null);
+        setActionError(null);
 
         try {
             const token = await getToken();
             if (!token) {
-                setError('Please sign in to delete documents');
+                setActionError('Please sign in to delete documents');
                 return;
             }
 
             const client = createAuthenticatedClient(token);
             await client.delete(`/documents/${documentId}`);
-            await loadDocuments();
+            refresh();
         } catch (err: any) {
             console.error('Failed to delete document:', err);
-            setError(err.message || 'Failed to delete document');
+            setActionError(err.message || 'Failed to delete document');
         } finally {
             setDeleting(null);
         }
     };
 
     const handleDownload = async (doc: Document) => {
+        setActionError(null);
         try {
             const token = await getToken();
             if (!token) {
-                setError('Please sign in to download documents');
+                setActionError('Please sign in to download documents');
                 return;
             }
 
@@ -139,26 +133,23 @@ export default function DocumentsPage() {
             if (response.data?.download_url) {
                 window.open(response.data.download_url, '_blank');
             } else {
-                setError('Download URL not available');
+                setActionError('Download URL not available');
             }
         } catch (err: any) {
             console.error('Failed to get download URL:', err);
-            setError(err.message || 'Failed to download document');
+            setActionError(err.message || 'Failed to download document');
         }
     };
 
+    // Filter documents by type (client-side for tab-based UI)
+    const filterType = filters.document_type || 'all';
     const filteredDocuments = filterType === 'all'
         ? documents
-        : documents.filter(doc => {
-            if (filterType === 'resumes') return doc.document_type === 'resume';
-            if (filterType === 'cover-letters') return doc.document_type === 'cover_letter';
-            if (filterType === 'portfolios') return doc.document_type === 'portfolio';
-            if (filterType === 'other') return doc.document_type === 'other';
-            return true;
-        });
+        : documents.filter(doc => doc.document_type === filterType);
 
     return (
         <div className="container mx-auto px-4 py-8 max-w-6xl">
+            {/* Header */}
             <div className="mb-8">
                 <h1 className="text-4xl font-bold mb-2">My Documents</h1>
                 <p className="text-lg text-base-content/70">
@@ -166,10 +157,11 @@ export default function DocumentsPage() {
                 </p>
             </div>
 
-            {error && (
+            {/* Error Display */}
+            {(error || actionError) && (
                 <div className="alert alert-error mb-6">
                     <i className="fa-solid fa-circle-exclamation"></i>
-                    <span>{error}</span>
+                    <span>{error || actionError}</span>
                 </div>
             )}
 
@@ -181,10 +173,9 @@ export default function DocumentsPage() {
                         Upload Documents
                     </h2>
                     <p className="mb-6">
-                        Upload your resume, cover letters, portfolio, or other
+                        Upload your resume, cover letters, portfolio, or other documents.
                         Supported formats: PDF, DOC, DOCX (Max 10MB)
                     </p>
-
                     <button
                         className="btn bg-white text-primary hover:bg-gray-100 w-fit"
                         onClick={handleUploadClick}
@@ -195,38 +186,57 @@ export default function DocumentsPage() {
                 </div>
             </div>
 
-            {/* Document Type Filters */}
+            {/* Document Type Filters (Tab-based) */}
             <div className="tabs tabs-boxed mb-6 bg-base-100 shadow">
-                <a className={`tab ${filterType === 'all' ? 'tab-active' : ''}`} onClick={() => setFilterType('all')}>
+                <a
+                    className={`tab ${filterType === 'all' ? 'tab-active' : ''}`}
+                    onClick={() => setFilter('document_type', undefined)}
+                >
                     All Documents
                 </a>
-                <a className={`tab ${filterType === 'resumes' ? 'tab-active' : ''}`} onClick={() => setFilterType('resumes')}>
+                <a
+                    className={`tab ${filterType === 'resume' ? 'tab-active' : ''}`}
+                    onClick={() => setFilter('document_type', 'resume')}
+                >
                     Resumes
                 </a>
-                <a className={`tab ${filterType === 'cover-letters' ? 'tab-active' : ''}`} onClick={() => setFilterType('cover-letters')}>
+                <a
+                    className={`tab ${filterType === 'cover_letter' ? 'tab-active' : ''}`}
+                    onClick={() => setFilter('document_type', 'cover_letter')}
+                >
                     Cover Letters
                 </a>
-                <a className={`tab ${filterType === 'portfolios' ? 'tab-active' : ''}`} onClick={() => setFilterType('portfolios')}>
+                <a
+                    className={`tab ${filterType === 'portfolio' ? 'tab-active' : ''}`}
+                    onClick={() => setFilter('document_type', 'portfolio')}
+                >
                     Portfolios
                 </a>
-                <a className={`tab ${filterType === 'other' ? 'tab-active' : ''}`} onClick={() => setFilterType('other')}>
+                <a
+                    className={`tab ${filterType === 'other' ? 'tab-active' : ''}`}
+                    onClick={() => setFilter('document_type', 'other')}
+                >
                     Other
                 </a>
             </div>
 
-            {loading ? (
+            {/* Loading State */}
+            {loading && (
                 <div className="flex items-center justify-center py-16">
                     <span className="loading loading-spinner loading-lg"></span>
                 </div>
-            ) : filteredDocuments.length > 0 ? (
+            )}
+
+            {/* Document List */}
+            {!loading && filteredDocuments.length > 0 && (
                 <div className="space-y-4">
                     {filteredDocuments.map((doc) => (
-                        <div key={doc.id} className="card bg-base-100 shadow hover:shadow transition-shadow">
+                        <div key={doc.id} className="card bg-base-100 shadow hover:shadow-lg transition-shadow">
                             <div className="card-body">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-4 flex-1">
                                         <div className="avatar avatar-placeholder">
-                                            <div className="bg-base-200 text-base-content rounded-lg w-16 h-16">
+                                            <div className="bg-base-200 text-base-content rounded-lg w-16 h-16 flex items-center justify-center">
                                                 <i className={`fa-solid ${getFileIcon(doc.file_name)} text-3xl`}></i>
                                             </div>
                                         </div>
@@ -236,10 +246,12 @@ export default function DocumentsPage() {
                                             <div className="flex flex-wrap gap-3 text-sm text-base-content/70">
                                                 <span className="badge badge-sm capitalize">{getDocumentTypeLabel(doc.document_type)}</span>
                                                 <span>
-                                                    <i className="fa-solid fa-file-arrow-down"></i> {formatFileSize(doc.file_size)}
+                                                    <i className="fa-solid fa-file-arrow-down mr-1"></i>
+                                                    {formatFileSize(doc.file_size)}
                                                 </span>
                                                 <span>
-                                                    <i className="fa-solid fa-calendar"></i> Uploaded {formatUploadedAt(doc.created_at)}
+                                                    <i className="fa-solid fa-calendar mr-1"></i>
+                                                    Uploaded {formatDate(doc.created_at)}
                                                 </span>
                                             </div>
                                         </div>
@@ -270,8 +282,10 @@ export default function DocumentsPage() {
                         </div>
                     ))}
                 </div>
-            ) : (
-                /* Empty State */
+            )}
+
+            {/* Empty State */}
+            {!loading && filteredDocuments.length === 0 && (
                 <div className="card bg-base-100 shadow">
                     <div className="card-body text-center py-16">
                         <i className="fa-solid fa-folder-open text-6xl text-base-content/30 mb-4"></i>
@@ -321,7 +335,7 @@ export default function DocumentsPage() {
                     onClose={() => setShowUploadModal(false)}
                     onSuccess={() => {
                         setShowUploadModal(false);
-                        loadDocuments();
+                        refresh();
                     }}
                 />
             )}

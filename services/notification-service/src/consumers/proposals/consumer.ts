@@ -2,12 +2,16 @@ import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
 import { ProposalsEmailService } from '../../services/proposals/service';
 import { ServiceRegistry } from '../../clients';
+import { DataLookupHelper } from '../../helpers/data-lookup';
+import { EmailLookupHelper } from '../../helpers/email-lookup';
 
 export class ProposalsEventConsumer {
     constructor(
         private emailService: ProposalsEmailService,
         private services: ServiceRegistry,
-        private logger: Logger
+        private logger: Logger,
+        private dataLookup: DataLookupHelper,
+        private emailLookup: EmailLookupHelper
     ) {}
 
     async handleProposalCreated(event: DomainEvent): Promise<void> {
@@ -17,16 +21,22 @@ export class ProposalsEventConsumer {
             this.logger.info({ proposal_id, job_id, candidate_id }, 'Handling proposal created');
             
             // Fetch job details
-            const jobResponse = await this.services.getAtsService().get<any>(`/jobs/${job_id}`);
-            const job = jobResponse.data || jobResponse;
+            const job = await this.dataLookup.getJob(job_id);
+            if (!job) {
+                throw new Error(`Job not found: ${job_id}`);
+            }
             
             // Fetch candidate details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            const candidate = await this.dataLookup.getCandidate(candidate_id);
+            if (!candidate) {
+                throw new Error(`Candidate not found: ${candidate_id}`);
+            }
             
             // Fetch proposing recruiter
-            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${proposing_recruiter_id}`);
-            const recruiter = recruiterResponse.data || recruiterResponse;
+            const recruiter = await this.dataLookup.getRecruiter(proposing_recruiter_id);
+            if (!recruiter) {
+                throw new Error(`Recruiter not found: ${proposing_recruiter_id}`);
+            }
             
             // TODO: Notify hiring manager (when we have that feature)
             // For now, just log
@@ -45,19 +55,27 @@ export class ProposalsEventConsumer {
             this.logger.info({ proposal_id, recruiter_id }, 'Handling proposal accepted notification');
             
             // Fetch recruiter
-            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
-            const recruiter = recruiterResponse.data || recruiterResponse;
+            const recruiter = await this.dataLookup.getRecruiter(recruiter_id);
+            if (!recruiter) {
+                throw new Error(`Recruiter not found: ${recruiter_id}`);
+            }
             
-            const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-            const user = userResponse.data || userResponse;
+            const user = await this.dataLookup.getUser(recruiter.user_id);
+            if (!user) {
+                throw new Error(`User not found for recruiter: ${recruiter.user_id}`);
+            }
             
             // Fetch job details
-            const jobResponse = await this.services.getAtsService().get<any>(`/jobs/${job_id}`);
-            const job = jobResponse.data || jobResponse;
+            const job = await this.dataLookup.getJob(job_id);
+            if (!job) {
+                throw new Error(`Job not found: ${job_id}`);
+            }
             
             // Fetch candidate details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            const candidate = await this.dataLookup.getCandidate(candidate_id);
+            if (!candidate) {
+                throw new Error(`Candidate not found: ${candidate_id}`);
+            }
             
             // Send notification
             await this.emailService.sendProposalAccepted(user.email, {
@@ -81,19 +99,27 @@ export class ProposalsEventConsumer {
             this.logger.info({ proposal_id, recruiter_id }, 'Handling proposal declined notification');
             
             // Fetch recruiter
-            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
-            const recruiter = recruiterResponse.data || recruiterResponse;
+            const recruiter = await this.dataLookup.getRecruiter(recruiter_id);
+            if (!recruiter) {
+                throw new Error(`Recruiter not found: ${recruiter_id}`);
+            }
             
-            const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-            const user = userResponse.data || userResponse;
+            const user = await this.dataLookup.getUser(recruiter.user_id);
+            if (!user) {
+                throw new Error(`User not found for recruiter: ${recruiter.user_id}`);
+            }
             
             // Fetch job details
-            const jobResponse = await this.services.getAtsService().get<any>(`/jobs/${job_id}`);
-            const job = jobResponse.data || jobResponse;
+            const job = await this.dataLookup.getJob(job_id);
+            if (!job) {
+                throw new Error(`Job not found: ${job_id}`);
+            }
             
             // Fetch candidate details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            const candidate = await this.dataLookup.getCandidate(candidate_id);
+            if (!candidate) {
+                throw new Error(`Candidate not found: ${candidate_id}`);
+            }
             
             // Send notification
             await this.emailService.sendProposalDeclined(user.email, {
@@ -117,19 +143,27 @@ export class ProposalsEventConsumer {
             this.logger.info({ proposal_id, recruiter_id }, 'Handling proposal timeout notification');
             
             // Fetch recruiter
-            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
-            const recruiter = recruiterResponse.data || recruiterResponse;
+            const recruiter = await this.dataLookup.getRecruiter(recruiter_id);
+            if (!recruiter) {
+                throw new Error(`Recruiter not found: ${recruiter_id}`);
+            }
             
-            const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-            const user = userResponse.data || userResponse;
+            const user = await this.dataLookup.getUser(recruiter.user_id);
+            if (!user) {
+                throw new Error(`User not found for recruiter: ${recruiter.user_id}`);
+            }
             
             // Fetch job details
-            const jobResponse = await this.services.getAtsService().get<any>(`/jobs/${job_id}`);
-            const job = jobResponse.data || jobResponse;
+            const job = await this.dataLookup.getJob(job_id);
+            if (!job) {
+                throw new Error(`Job not found: ${job_id}`);
+            }
             
             // Fetch candidate details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            const candidate = await this.dataLookup.getCandidate(candidate_id);
+            if (!candidate) {
+                throw new Error(`Candidate not found: ${candidate_id}`);
+            }
             
             // Send notification
             await this.emailService.sendProposalTimeout(user.email, {

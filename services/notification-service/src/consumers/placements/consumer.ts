@@ -2,12 +2,16 @@ import { Logger } from '@splits-network/shared-logging';
 import { DomainEvent } from '@splits-network/shared-types';
 import { PlacementsEmailService } from '../../services/placements/service';
 import { ServiceRegistry } from '../../clients';
+import { DataLookupHelper } from '../../helpers/data-lookup';
+import { EmailLookupHelper } from '../../helpers/email-lookup';
 
 export class PlacementsEventConsumer {
     constructor(
         private emailService: PlacementsEmailService,
         private services: ServiceRegistry,
-        private logger: Logger
+        private logger: Logger,
+        private dataLookup: DataLookupHelper,
+        private emailLookup: EmailLookupHelper
     ) {}
 
     async handlePlacementCreated(event: DomainEvent): Promise<void> {
@@ -18,20 +22,28 @@ export class PlacementsEventConsumer {
             this.logger.info({ placement_id, recruiter_id }, 'Handling placement created notification');
 
             // Fetch job details
-            const jobResponse = await this.services.getAtsService().get<any>(`/jobs/${job_id}`);
-            const job = jobResponse.data || jobResponse;
+            const job = await this.dataLookup.getJob(job_id);
+            if (!job) {
+                throw new Error(`Job not found: ${job_id}`);
+            }
 
             // Fetch candidate details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${placementData.candidate_id || candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            const candidate = await this.dataLookup.getCandidate(placementData.candidate_id || candidate_id);
+            if (!candidate) {
+                throw new Error(`Candidate not found: ${placementData.candidate_id || candidate_id}`);
+            }
 
             // Fetch recruiter details
-            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${placementData.recruiter_id || recruiter_id}`);
-            const recruiter = recruiterResponse.data || recruiterResponse;
+            const recruiter = await this.dataLookup.getRecruiter(placementData.recruiter_id || recruiter_id);
+            if (!recruiter) {
+                throw new Error(`Recruiter not found: ${placementData.recruiter_id || recruiter_id}`);
+            }
 
             // Fetch recruiter's user profile to get email
-            const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-            const user = userResponse.data || userResponse;
+            const user = await this.dataLookup.getUser(recruiter.user_id);
+            if (!user) {
+                throw new Error(`User not found for recruiter: ${recruiter.user_id}`);
+            }
 
             // Send email notification
             await this.emailService.sendPlacementCreated(user.email, {
@@ -64,27 +76,38 @@ export class PlacementsEventConsumer {
             this.logger.info({ placement_id, guarantee_days }, 'Handling placement activated notification');
             
             // Fetch placement to get all recruiters involved
-            const placementResponse = await this.services.getAtsService().get<any>(`/placements/${placement_id}`);
-            const placement = placementResponse.data || placementResponse;
+            const placement = await this.dataLookup.getPlacement(placement_id);
+            if (!placement) {
+                throw new Error(`Placement not found: ${placement_id}`);
+            }
             
             // Fetch collaborators
-            const collaboratorsResponse = await this.services.getAtsService().get<any>(`/placements/${placement_id}/collaborators`);
-            const collaborators = collaboratorsResponse.data || collaboratorsResponse;
+            const collaborators = await this.dataLookup.getPlacementCollaborators(placement_id);
             
             // Fetch candidate and job details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            const candidate = await this.dataLookup.getCandidate(candidate_id);
+            if (!candidate) {
+                throw new Error(`Candidate not found: ${candidate_id}`);
+            }
             
-            const jobResponse = await this.services.getAtsService().get<any>(`/jobs/${job_id}`);
-            const job = jobResponse.data || jobResponse;
+            const job = await this.dataLookup.getJob(job_id);
+            if (!job) {
+                throw new Error(`Job not found: ${job_id}`);
+            }
             
             // Notify all collaborators
             for (const collaborator of collaborators) {
-                const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${collaborator.recruiter_id}`);
-                const recruiter = recruiterResponse.data || recruiterResponse;
+                const recruiter = await this.dataLookup.getRecruiter(collaborator.recruiter_id);
+                if (!recruiter) {
+                    this.logger.warn({ recruiter_id: collaborator.recruiter_id }, 'Recruiter not found for collaborator');
+                    continue;
+                }
                 
-                const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-                const user = userResponse.data || userResponse;
+                const user = await this.dataLookup.getUser(recruiter.user_id);
+                if (!user) {
+                    this.logger.warn({ user_id: recruiter.user_id }, 'User not found for recruiter');
+                    continue;
+                }
                 
                 await this.emailService.sendPlacementActivated(user.email, {
                     candidateName: candidate.full_name,
@@ -94,7 +117,7 @@ export class PlacementsEventConsumer {
                     startDate: placement.start_date || new Date().toISOString().split('T')[0],
                     placementId: placement_id,
                     role: collaborator.role,
-                    splitPercentage: collaborator.split_percentage,
+                    splitPercentage: collaborator.split_percentage || 0,
                     userId: recruiter.user_id,
                 });
             }
@@ -113,29 +136,40 @@ export class PlacementsEventConsumer {
             this.logger.info({ placement_id }, 'Handling placement completed notification');
             
             // Fetch collaborators
-            const collaboratorsResponse = await this.services.getAtsService().get<any>(`/placements/${placement_id}/collaborators`);
-            const collaborators = collaboratorsResponse.data || collaboratorsResponse;
+            const collaborators = await this.dataLookup.getPlacementCollaborators(placement_id);
             
             // Fetch candidate and job details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            const candidate = await this.dataLookup.getCandidate(candidate_id);
+            if (!candidate) {
+                throw new Error(`Candidate not found: ${candidate_id}`);
+            }
             
-            const jobResponse = await this.services.getAtsService().get<any>(`/jobs/${job_id}`);
-            const job = jobResponse.data || jobResponse;
+            const job = await this.dataLookup.getJob(job_id);
+            if (!job) {
+                throw new Error(`Job not found: ${job_id}`);
+            }
             
             // Notify all collaborators
             for (const collaborator of collaborators) {
-                const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${collaborator.recruiter_id}`);
-                const recruiter = recruiterResponse.data || recruiterResponse;
+                const recruiter = await this.dataLookup.getRecruiter(collaborator.recruiter_id);
+                if (!recruiter) {
+                    this.logger.warn({ recruiter_id: collaborator.recruiter_id }, 'Recruiter not found for collaborator');
+                    continue;
+                }
                 
-                const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-                const user = userResponse.data || userResponse;
+                const user = await this.dataLookup.getUser(recruiter.user_id);
+                if (!user) {
+                    this.logger.warn({ user_id: recruiter.user_id }, 'User not found for recruiter');
+                    continue;
+                }
                 
                 await this.emailService.sendPlacementCompleted(user.email, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
                     companyName: job.company?.name || 'Unknown Company',
-                    finalPayout: collaborator.amount_earned,                    placementId: placement_id,                    userId: recruiter.user_id,
+                    finalPayout: (collaborator as any).amount_earned,
+                    placementId: placement_id,
+                    userId: recruiter.user_id,
                 });
             }
             
@@ -153,23 +187,32 @@ export class PlacementsEventConsumer {
             this.logger.info({ placement_id, failure_reason }, 'Handling placement failed notification');
             
             // Fetch collaborators
-            const collaboratorsResponse = await this.services.getAtsService().get<any>(`/placements/${placement_id}/collaborators`);
-            const collaborators = collaboratorsResponse.data || collaboratorsResponse;
+            const collaborators = await this.dataLookup.getPlacementCollaborators(placement_id);
             
             // Fetch candidate and job details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            const candidate = await this.dataLookup.getCandidate(candidate_id);
+            if (!candidate) {
+                throw new Error(`Candidate not found: ${candidate_id}`);
+            }
             
-            const jobResponse = await this.services.getAtsService().get<any>(`/jobs/${job_id}`);
-            const job = jobResponse.data || jobResponse;
+            const job = await this.dataLookup.getJob(job_id);
+            if (!job) {
+                throw new Error(`Job not found: ${job_id}`);
+            }
             
             // Notify all collaborators
             for (const collaborator of collaborators) {
-                const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${collaborator.recruiter_id}`);
-                const recruiter = recruiterResponse.data || recruiterResponse;
+                const recruiter = await this.dataLookup.getRecruiter(collaborator.recruiter_id);
+                if (!recruiter) {
+                    this.logger.warn({ recruiter_id: collaborator.recruiter_id }, 'Recruiter not found for collaborator');
+                    continue;
+                }
                 
-                const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-                const user = userResponse.data || userResponse;
+                const user = await this.dataLookup.getUser(recruiter.user_id);
+                if (!user) {
+                    this.logger.warn({ user_id: recruiter.user_id }, 'User not found for recruiter');
+                    continue;
+                }
                 
                 await this.emailService.sendPlacementFailed(user.email, {
                     candidateName: candidate.full_name,
@@ -195,23 +238,32 @@ export class PlacementsEventConsumer {
             this.logger.info({ placement_id, days_until_expiry }, 'Handling guarantee expiring notification');
             
             // Fetch collaborators
-            const collaboratorsResponse = await this.services.getAtsService().get<any>(`/placements/${placement_id}/collaborators`);
-            const collaborators = collaboratorsResponse.data || collaboratorsResponse;
+            const collaborators = await this.dataLookup.getPlacementCollaborators(placement_id);
             
             // Fetch candidate and job details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            const candidate = await this.dataLookup.getCandidate(candidate_id);
+            if (!candidate) {
+                throw new Error(`Candidate not found: ${candidate_id}`);
+            }
             
-            const jobResponse = await this.services.getAtsService().get<any>(`/jobs/${job_id}`);
-            const job = jobResponse.data || jobResponse;
+            const job = await this.dataLookup.getJob(job_id);
+            if (!job) {
+                throw new Error(`Job not found: ${job_id}`);
+            }
             
             // Notify all collaborators
             for (const collaborator of collaborators) {
-                const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${collaborator.recruiter_id}`);
-                const recruiter = recruiterResponse.data || recruiterResponse;
+                const recruiter = await this.dataLookup.getRecruiter(collaborator.recruiter_id);
+                if (!recruiter) {
+                    this.logger.warn({ recruiter_id: collaborator.recruiter_id }, 'Recruiter not found for collaborator');
+                    continue;
+                }
                 
-                const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-                const user = userResponse.data || userResponse;
+                const user = await this.dataLookup.getUser(recruiter.user_id);
+                if (!user) {
+                    this.logger.warn({ user_id: recruiter.user_id }, 'User not found for recruiter');
+                    continue;
+                }
                 
                 await this.emailService.sendGuaranteeExpiring(user.email, {
                     candidateName: candidate.full_name,

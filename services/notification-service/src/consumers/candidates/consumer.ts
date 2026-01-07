@@ -3,13 +3,17 @@ import { DomainEvent } from '@splits-network/shared-types';
 import { CandidatesEmailService } from '../../services/candidates/service';
 import { ServiceRegistry } from '../../clients';
 import { NotificationRepository } from '../../repository';
+import { DataLookupHelper } from '../../helpers/data-lookup';
+import { EmailLookupHelper } from '../../helpers/email-lookup';
 
 export class CandidatesEventConsumer {
     constructor(
         private emailService: CandidatesEmailService,
         private services: ServiceRegistry,
         private repository: NotificationRepository, // Repository with Supabase client
-        private logger: Logger
+        private logger: Logger,
+        private dataLookup: DataLookupHelper,
+        private emailLookup: EmailLookupHelper
     ) {}
 
     async handleCandidateSourced(event: DomainEvent): Promise<void> {
@@ -24,11 +28,13 @@ export class CandidatesEventConsumer {
             let candidateUserId: string | undefined;
             
             if (!candidateEmail || !candidateName) {
-                const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-                const candidate = candidateResponse.data || candidateResponse;
+                const candidate = await this.dataLookup.getCandidate(candidate_id);
+                if (!candidate) {
+                    throw new Error(`Candidate not found: ${candidate_id}`);
+                }
                 candidateEmail = candidateEmail || candidate.email;
                 candidateName = candidateName || candidate.full_name;
-                candidateUserId = candidate.user_id; // ✅ Use candidate.user_id for notification log
+                candidateUserId = candidate.user_id || undefined;
             }
             
             if (!candidateEmail) {
@@ -36,18 +42,24 @@ export class CandidatesEventConsumer {
             }
             
             // Fetch recruiter details
-            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${sourcer_recruiter_id}`);
-            const recruiter = recruiterResponse.data || recruiterResponse;
+            const recruiter = await this.dataLookup.getRecruiter(sourcer_recruiter_id);
+            if (!recruiter) {
+                throw new Error(`Recruiter not found: ${sourcer_recruiter_id}`);
+            }
             
             // Fetch recruiter's user profile to get email
-            const recruiterUserResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-            const recruiterUser = recruiterUserResponse.data || recruiterUserResponse;
+            const recruiterUser = await this.dataLookup.getUser(recruiter.user_id);
+            if (!recruiterUser) {
+                throw new Error(`User not found for recruiter: ${recruiter.user_id}`);
+            }
+            
+            const recruiterName = `${recruiterUser.first_name || ''} ${recruiterUser.last_name || ''}`.trim() || recruiterUser.email;
             
             // Send email to the CANDIDATE: "You've been added to a recruiter's network"
             await this.emailService.sendCandidateAddedToNetwork(candidateEmail, {
                 candidateName: candidateName,
-                recruiterName: recruiterUser.name || recruiterUser.email,
-                userId: candidateUserId, // ✅ Use candidate.user_id (users.id), not candidate_id
+                recruiterName,
+                userId: candidateUserId,
             });
             
             this.logger.info({ candidate_id, recipient: candidateEmail }, 'Candidate sourced notification sent to candidate');
@@ -57,7 +69,7 @@ export class CandidatesEventConsumer {
                 candidateName: candidateName,
                 sourceMethod: source_method || 'direct',
                 protectionPeriod: '365 days',
-                userId: recruiter.user_id, // ✅ Use recruiter.user_id (users.id)
+                userId: recruiter.user_id,
             });
             
             this.logger.info({ candidate_id, sourcer_recruiter_id, recipient: recruiterUser.email }, 'Candidate sourced confirmation sent to recruiter');
@@ -74,34 +86,47 @@ export class CandidatesEventConsumer {
             this.logger.info({ candidate_id, original_sourcer_id }, 'Handling ownership conflict notification');
             
             // Fetch candidate details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            const candidate = await this.dataLookup.getCandidate(candidate_id);
+            if (!candidate) {
+                throw new Error(`Candidate not found: ${candidate_id}`);
+            }
             
             // Fetch original sourcer
-            const originalRecruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${original_sourcer_id}`);
-            const originalRecruiter = originalRecruiterResponse.data || originalRecruiterResponse;
+            const originalRecruiter = await this.dataLookup.getRecruiter(original_sourcer_id);
+            if (!originalRecruiter) {
+                throw new Error(`Original recruiter not found: ${original_sourcer_id}`);
+            }
             
-            const originalUserResponse = await this.services.getIdentityService().get<any>(`/users/${originalRecruiter.user_id}`);
-            const originalUser = originalUserResponse.data || originalUserResponse;
+            const originalUser = await this.dataLookup.getUser(originalRecruiter.user_id);
+            if (!originalUser) {
+                throw new Error(`User not found for original recruiter: ${originalRecruiter.user_id}`);
+            }
             
             // Fetch attempting recruiter
-            const attemptingRecruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${attempting_recruiter_id}`);
-            const attemptingRecruiter = attemptingRecruiterResponse.data || attemptingRecruiterResponse;
+            const attemptingRecruiter = await this.dataLookup.getRecruiter(attempting_recruiter_id);
+            if (!attemptingRecruiter) {
+                throw new Error(`Attempting recruiter not found: ${attempting_recruiter_id}`);
+            }
             
-            const attemptingUserResponse = await this.services.getIdentityService().get<any>(`/users/${attemptingRecruiter.user_id}`);
-            const attemptingUser = attemptingUserResponse.data || attemptingUserResponse;
+            const attemptingUser = await this.dataLookup.getUser(attemptingRecruiter.user_id);
+            if (!attemptingUser) {
+                throw new Error(`User not found for attempting recruiter: ${attemptingRecruiter.user_id}`);
+            }
+            
+            const originalUserName = `${originalUser.first_name || ''} ${originalUser.last_name || ''}`.trim() || originalUser.email;
+            const attemptingUserName = `${attemptingUser.first_name || ''} ${attemptingUser.last_name || ''}`.trim() || attemptingUser.email;
             
             // Notify original sourcer
             await this.emailService.sendOwnershipConflict(originalUser.email, {
                 candidateName: candidate.full_name,
-                attemptingRecruiterName: attemptingUser.name,
+                attemptingRecruiterName: attemptingUserName,
                 userId: originalRecruiter.user_id,
             });
             
             // Notify attempting recruiter
             await this.emailService.sendOwnershipConflictRejection(attemptingUser.email, {
                 candidateName: candidate.full_name,
-                originalSourcerName: originalUser.name,
+                originalSourcerName: originalUserName,
                 userId: attemptingRecruiter.user_id,
             });
             
@@ -245,21 +270,30 @@ export class CandidatesEventConsumer {
             this.logger.info({ relationship_id, recruiter_id, candidate_id }, 'Handling candidate consent given notification');
 
             // Fetch candidate details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            const candidate = await this.dataLookup.getCandidate(candidate_id);
+            if (!candidate) {
+                throw new Error(`Candidate not found: ${candidate_id}`);
+            }
 
-            // Fetch recruiter details with user information (network-service now JOINs with users)
-            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
-            const recruiter = recruiterResponse.data || recruiterResponse;
+            // Fetch recruiter details
+            const recruiter = await this.dataLookup.getRecruiter(recruiter_id);
+            if (!recruiter) {
+                throw new Error(`Recruiter not found: ${recruiter_id}`);
+            }
 
-            // Extract user info from enriched recruiter response
-            const recruiterUser = recruiter.user || {};
+            // Fetch recruiter user
+            const recruiterUser = await this.dataLookup.getUser(recruiter.user_id);
+            if (!recruiterUser) {
+                throw new Error(`User not found for recruiter: ${recruiter.user_id}`);
+            }
+
+            const recruiterName = `${recruiterUser.first_name || ''} ${recruiterUser.last_name || ''}`.trim() || recruiterUser.email;
 
             // Send "You've been added to a recruiter's network" email to CANDIDATE
-            await this.emailService.sendCandidateAddedToNetwork(candidate.email, {
+            await this.emailService.sendCandidateAddedToNetwork(candidate.email || '', {
                 candidateName: candidate.full_name,
-                recruiterName: recruiterUser.name || recruiterUser.email,
-                userId: candidate.user_id, // Use candidate.user_id (users.id)
+                recruiterName,
+                userId: candidate.user_id || undefined,
             });
 
             this.logger.info({ 
@@ -269,9 +303,9 @@ export class CandidatesEventConsumer {
 
             // Send acceptance notification to RECRUITER
             await this.emailService.sendConsentGivenToRecruiter(recruiterUser.email, {
-                recruiter_name: recruiterUser.name,
+                recruiter_name: recruiterName,
                 candidate_name: candidate.full_name,
-                candidate_email: candidate.email,
+                candidate_email: candidate.email || '',
                 consent_given_at: consent_given_at,
                 userId: recruiter.user_id,
             });
@@ -294,22 +328,30 @@ export class CandidatesEventConsumer {
             this.logger.info({ relationship_id, recruiter_id, candidate_id }, 'Handling candidate consent declined notification');
 
             // Fetch candidate details
-            const candidateResponse = await this.services.getAtsService().get<any>(`/candidates/${candidate_id}`);
-            const candidate = candidateResponse.data || candidateResponse;
+            const candidate = await this.dataLookup.getCandidate(candidate_id);
+            if (!candidate) {
+                throw new Error(`Candidate not found: ${candidate_id}`);
+            }
 
             // Fetch recruiter details
-            const recruiterResponse = await this.services.getNetworkService().get<any>(`/recruiters/${recruiter_id}`);
-            const recruiter = recruiterResponse.data || recruiterResponse;
+            const recruiter = await this.dataLookup.getRecruiter(recruiter_id);
+            if (!recruiter) {
+                throw new Error(`Recruiter not found: ${recruiter_id}`);
+            }
 
             // Fetch recruiter's user profile to get email
-            const userResponse = await this.services.getIdentityService().get<any>(`/users/${recruiter.user_id}`);
-            const recruiterUser = userResponse.data || userResponse;
+            const recruiterUser = await this.dataLookup.getUser(recruiter.user_id);
+            if (!recruiterUser) {
+                throw new Error(`User not found for recruiter: ${recruiter.user_id}`);
+            }
+
+            const recruiterName = `${recruiterUser.first_name || ''} ${recruiterUser.last_name || ''}`.trim() || recruiterUser.email;
 
             // Send declined notification to recruiter
             await this.emailService.sendConsentDeclinedToRecruiter(recruiterUser.email, {
-                recruiter_name: recruiterUser.name,
+                recruiter_name: recruiterName,
                 candidate_name: candidate.full_name,
-                candidate_email: candidate.email,
+                candidate_email: candidate.email || '',
                 declined_at: declined_at,
                 declined_reason: declined_reason,
                 userId: recruiter.user_id,

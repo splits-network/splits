@@ -1,137 +1,91 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { useAuth, useUser } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import { useViewMode } from '@/hooks/use-view-mode';
-import { useDebouncedCallback } from '@/hooks/use-debounce';
-import { formatDate, getVerificationStatusBadge, getVerificationStatusIcon } from '@/lib/utils';
+import { useStandardList } from '@/hooks/use-standard-list';
 import { useUserProfile } from '@/contexts';
+import { formatDate, getVerificationStatusBadge, getVerificationStatusIcon } from '@/lib/utils';
 import CandidateCard from './candidate-card';
 import AddCandidateModal from './add-candidate-modal';
 
-interface PaginationState {
-    total: number;
-    page: number;
-    limit: number;
-    total_pages: number;
+interface Candidate {
+    id: string;
+    full_name: string;
+    email: string;
+    phone?: string;
+    linkedin_url?: string;
+    portfolio_url?: string;
+    github_url?: string;
+    verification_status?: string;
+    is_sourcer?: boolean;
+    has_active_relationship?: boolean;
+    is_new?: boolean;
+    has_other_active_recruiters?: boolean;
+    other_active_recruiters_count?: number;
+    created_at: string;
+}
+
+interface CandidateFilters {
+    scope: 'mine' | 'all';
 }
 
 export default function CandidatesListClient() {
     const { getToken } = useAuth();
-    const { user } = useUser();
     const { isRecruiter } = useUserProfile();
-    const [candidates, setCandidates] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [searchInput, setSearchInput] = useState(''); // For controlled input
-    const [viewMode, setViewMode] = useViewMode('candidatesViewMode');
-    const [scope, setScope] = useState<'mine' | 'all'>('mine');
-    const [recruiterId, setRecruiterId] = useState<string | null>(null);
     const [showAddModal, setShowAddModal] = useState(false);
 
-    // Pagination state
-    const [pagination, setPagination] = useState<PaginationState>({
-        total: 0,
-        page: 1,
-        limit: 25,
-        total_pages: 0
+    const fetchCandidates = async (params: Record<string, any>) => {
+        const token = await getToken();
+        if (!token) throw new Error('Not authenticated');
+
+        const client = createAuthenticatedClient(token);
+        const response = await client.get('/candidates', { params });
+
+        return {
+            data: response.data || [],
+            pagination: response.pagination || { total: 0, page: 1, limit: 25, total_pages: 0 }
+        };
+    };
+
+    const {
+        data: candidates,
+        loading,
+        error,
+        pagination,
+        filters,
+        searchQuery,
+        sortBy,
+        sortOrder,
+        viewMode,
+        setFilters,
+        handleSearch,
+        handlePageChange,
+        handleSort,
+        handleSortChange,
+        setViewMode,
+        handleLimitChange,
+        refetch
+    } = useStandardList<Candidate, CandidateFilters>({
+        fetchFn: fetchCandidates,
+        defaultFilters: { scope: 'mine' },
+        defaultSortBy: 'created_at',
+        defaultSortOrder: 'desc',
+        storageKey: 'candidatesViewMode'
     });
 
-    // Sorting state
-    const [sortBy, setSortBy] = useState<string>('created_at');
-    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-
-    // Debounced search handler
-    const debouncedSetSearch = useDebouncedCallback((value: string) => {
-        setSearchQuery(value);
-        setPagination(prev => ({ ...prev, page: 1 })); // Reset to first page on search
-    }, 300);
-
-    // Handle search input change
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setSearchInput(value);
-        debouncedSetSearch(value);
+    const handleAddCandidateSuccess = (newCandidate: Candidate) => {
+        refetch();
     };
 
-    // Handle sort change
-    const handleSort = (field: string) => {
-        if (sortBy === field) {
-            // Toggle sort order if same field
-            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-        } else {
-            // New field, default to descending
-            setSortBy(field);
-            setSortOrder('desc');
-        }
-        setPagination(prev => ({ ...prev, page: 1 })); // Reset to first page on sort change
-    };
-
-    // Get sort icon for column
+    // Sort icon helper for table headers
     const getSortIcon = (field: string) => {
         if (sortBy !== field) return 'fa-sort';
         return sortOrder === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
     };
 
-    // Load candidates
-    const loadCandidates = useCallback(async () => {
-        try {
-            setLoading(true);
-            setError(null);
-
-            const token = await getToken();
-            if (!token) {
-                setError('Not authenticated');
-                return;
-            }
-
-            const client = createAuthenticatedClient(token);
-
-            const response = await client.get('/candidates', {
-                params: {
-                    page: pagination.page,
-                    limit: pagination.limit,
-                    search: searchQuery || undefined,
-                    sort_by: sortBy,
-                    sort_order: sortOrder,
-                    filters: {
-                        scope: scope
-                    }
-                }
-            });
-
-            setCandidates(response.data || []);
-            if (response.pagination) {
-                setPagination(response.pagination);
-            }
-        } catch (err: any) {
-            console.error('Failed to load candidates:', err);
-            setError(err.message || 'Failed to load candidates');
-        } finally {
-            setLoading(false);
-        }
-    }, [getToken, pagination.page, pagination.limit, searchQuery, sortBy, sortOrder, scope]);
-
-    useEffect(() => {
-        loadCandidates();
-    }, [loadCandidates]);
-
-    // Page change handler
-    const handlePageChange = (newPage: number) => {
-        if (newPage >= 1 && newPage <= pagination.total_pages) {
-            setPagination(prev => ({ ...prev, page: newPage }));
-        }
-    };
-
-    const handleAddCandidateSuccess = (newCandidate: any) => {
-        // Add the new candidate to the beginning of the list
-        setCandidates(prev => [newCandidate, ...prev]);
-    };
-
-    if (loading) {
+    if (loading && candidates.length === 0) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
                 <div className="text-center">
@@ -147,12 +101,17 @@ export default function CandidatesListClient() {
             <div className="alert alert-error">
                 <i className="fa-solid fa-circle-exclamation"></i>
                 <span>{error}</span>
+                <button className="btn btn-sm btn-ghost" onClick={refetch}>
+                    <i className="fa-solid fa-rotate"></i>
+                    Retry
+                </button>
             </div>
         );
     }
 
     return (
         <div className="space-y-6">
+            {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold">Candidates</h1>
@@ -171,30 +130,33 @@ export default function CandidatesListClient() {
 
             {/* Filters and View Toggle */}
             <div className="card bg-base-100 shadow">
-                <div className="card-body p-2">
+                <div className="card-body p-4">
                     <div className="flex flex-wrap gap-4 items-end">
                         {/* Scope Filter - Only show for recruiters */}
                         {isRecruiter && (
                             <div className="fieldset">
                                 <select
                                     className="select"
-                                    value={scope}
-                                    onChange={(e) => setScope(e.target.value as 'mine' | 'all')}
+                                    value={filters.scope}
+                                    onChange={(e) => setFilters({ scope: e.target.value as 'mine' | 'all' })}
                                 >
                                     <option value="mine">My Candidates</option>
                                     <option value="all">All Candidates</option>
                                 </select>
                             </div>
                         )}
+
+                        {/* Search */}
                         <div className="fieldset flex-1">
                             <input
                                 type="text"
                                 placeholder="Search by name or email..."
                                 className="input w-full"
-                                value={searchInput}
-                                onChange={handleSearchChange}
+                                defaultValue={searchQuery}
+                                onChange={(e) => handleSearch(e.target.value)}
                             />
                         </div>
+
                         {/* Sort dropdown for grid view */}
                         {viewMode === 'grid' && (
                             <div className="fieldset">
@@ -203,8 +165,7 @@ export default function CandidatesListClient() {
                                     value={`${sortBy}-${sortOrder}`}
                                     onChange={(e) => {
                                         const [field, order] = e.target.value.split('-');
-                                        setSortBy(field);
-                                        setSortOrder(order as 'asc' | 'desc');
+                                        handleSortChange(field, order as 'asc' | 'desc');
                                     }}
                                 >
                                     <option value="created_at-desc">Newest First</option>
@@ -216,6 +177,8 @@ export default function CandidatesListClient() {
                                 </select>
                             </div>
                         )}
+
+                        {/* View Mode Toggle */}
                         <div className="join">
                             <button
                                 className={`btn join-item ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
@@ -236,7 +199,14 @@ export default function CandidatesListClient() {
                 </div>
             </div>
 
-            {/* Candidates List - Grid View */}
+            {/* Loading overlay for subsequent fetches */}
+            {loading && candidates.length > 0 && (
+                <div className="flex justify-center py-4">
+                    <span className="loading loading-spinner loading-md"></span>
+                </div>
+            )}
+
+            {/* Grid View */}
             {viewMode === 'grid' && candidates.length > 0 && (
                 <div className="columns-1 lg:columns-2 xl:columns-3 gap-6 space-y-6">
                     {candidates.map((candidate) => (
@@ -247,7 +217,7 @@ export default function CandidatesListClient() {
                 </div>
             )}
 
-            {/* Candidates List - Table View */}
+            {/* Table View */}
             {viewMode === 'table' && candidates.length > 0 && (
                 <div className="card bg-base-100 shadow overflow-hidden">
                     <div className="overflow-x-auto">
@@ -419,6 +389,15 @@ export default function CandidatesListClient() {
                         <p className="text-base-content/70 mt-2">
                             {searchQuery ? 'Try adjusting your search' : 'Submit candidates to roles to see them appear here'}
                         </p>
+                        {!searchQuery && (
+                            <button
+                                className="btn btn-primary mt-4"
+                                onClick={() => setShowAddModal(true)}
+                            >
+                                <i className="fa-solid fa-plus"></i>
+                                Add Your First Candidate
+                            </button>
+                        )}
                     </div>
                 </div>
             )}
@@ -458,24 +437,18 @@ export default function CandidatesListClient() {
                                     const current = pagination.page;
                                     const total = pagination.total_pages;
 
-                                    // Show first page
                                     if (current > 3) pagesSet.add(1);
-
-                                    // Show pages around current
                                     for (let i = Math.max(1, current - 2); i <= Math.min(total, current + 2); i++) {
                                         pagesSet.add(i);
                                     }
-
-                                    // Show last page
                                     if (current < total - 2) pagesSet.add(total);
 
-                                    // Convert to sorted array and add ellipsis markers
                                     const sortedPages = Array.from(pagesSet).sort((a, b) => a - b);
                                     const pages: (number | string)[] = [];
 
                                     for (let i = 0; i < sortedPages.length; i++) {
                                         if (i > 0 && sortedPages[i] - sortedPages[i - 1] > 1) {
-                                            pages.push(`ellipsis-${i}`); // Ellipsis marker
+                                            pages.push(`ellipsis-${i}`);
                                         }
                                         pages.push(sortedPages[i]);
                                     }
@@ -520,11 +493,7 @@ export default function CandidatesListClient() {
                                 <select
                                     className="select select-sm"
                                     value={pagination.limit}
-                                    onChange={(e) => setPagination(prev => ({
-                                        ...prev,
-                                        limit: parseInt(e.target.value),
-                                        page: 1
-                                    }))}
+                                    onChange={(e) => handleLimitChange(parseInt(e.target.value))}
                                 >
                                     <option value={10}>10</option>
                                     <option value={25}>25</option>

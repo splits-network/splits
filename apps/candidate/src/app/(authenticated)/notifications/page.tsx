@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
     fetchNotifications,
@@ -14,33 +13,44 @@ import {
     InAppNotification,
 } from '@/lib/notifications';
 
+// ===== TYPES =====
+
+type FilterMode = 'all' | 'unread';
+
+// ===== PAGE COMPONENT =====
+
 export default function NotificationsPage() {
     const router = useRouter();
     const [notifications, setNotifications] = useState<InAppNotification[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState<'all' | 'unread'>('all');
+    const [error, setError] = useState<string | null>(null);
+    const [filter, setFilter] = useState<FilterMode>('all');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
+    // Load notifications when filter changes
     useEffect(() => {
         loadNotifications();
     }, [filter]);
 
     const loadNotifications = async () => {
         setLoading(true);
+        setError(null);
         try {
             const data = await fetchNotifications({
                 unreadOnly: filter === 'unread',
                 limit: 100,
             });
             setNotifications(data);
-        } catch (error) {
-            console.error('Failed to fetch notifications:', error);
+        } catch (err: any) {
+            console.error('Failed to fetch notifications:', err);
+            setError(err.message || 'Failed to load notifications');
         } finally {
             setLoading(false);
         }
     };
 
     const handleNotificationClick = async (notification: InAppNotification) => {
+        // Mark as read if unread
         if (!notification.read) {
             try {
                 await markAsRead(notification.id);
@@ -49,11 +59,12 @@ export default function NotificationsPage() {
                         n.id === notification.id ? { ...n, read: true } : n
                     )
                 );
-            } catch (error) {
-                console.error('Failed to mark as read:', error);
+            } catch (err) {
+                console.error('Failed to mark as read:', err);
             }
         }
 
+        // Navigate if action URL exists
         if (notification.action_url) {
             router.push(notification.action_url);
         }
@@ -65,8 +76,8 @@ export default function NotificationsPage() {
             setNotifications((prev) =>
                 prev.map((n) => ({ ...n, read: true }))
             );
-        } catch (error) {
-            console.error('Failed to mark all as read:', error);
+        } catch (err) {
+            console.error('Failed to mark all as read:', err);
         }
     };
 
@@ -77,14 +88,14 @@ export default function NotificationsPage() {
             setNotifications((prev) =>
                 prev.filter((n) => n.id !== notificationId)
             );
-        } catch (error) {
-            console.error('Failed to dismiss notification:', error);
+        } catch (err) {
+            console.error('Failed to dismiss notification:', err);
         }
     };
 
+    // Computed values
     const unreadCount = notifications.filter((n) => !n.read).length;
     const categories = ['all', ...Array.from(new Set(notifications.map((n) => n.category).filter(Boolean)))];
-
     const filteredNotifications = selectedCategory === 'all'
         ? notifications
         : notifications.filter((n) => n.category === selectedCategory);
@@ -113,10 +124,18 @@ export default function NotificationsPage() {
                 )}
             </div>
 
+            {/* Error Display */}
+            {error && (
+                <div className="alert alert-error mb-6">
+                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <span>{error}</span>
+                </div>
+            )}
+
             {/* Filters */}
             <div className="card bg-base-100 shadow mb-4">
                 <div className="card-body p-4">
-                    <div className="flex flex-wrap gap-4">
+                    <div className="flex flex-wrap gap-4 items-center">
                         {/* Read/Unread Filter */}
                         <div className="flex gap-2">
                             <button
@@ -133,7 +152,7 @@ export default function NotificationsPage() {
                             >
                                 Unread
                                 {unreadCount > 0 && (
-                                    <span className="badge badge-sm">{unreadCount}</span>
+                                    <span className="badge badge-sm ml-1">{unreadCount}</span>
                                 )}
                             </button>
                         </div>
@@ -147,14 +166,11 @@ export default function NotificationsPage() {
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
                                 >
-                                    {categories.map((cat) => {
-                                        const label = cat === 'all' ? 'All Categories' : (cat ? cat.charAt(0).toUpperCase() + cat.slice(1) : '');
-                                        return (
-                                            <option key={cat} value={cat}>
-                                                {label}
-                                            </option>
-                                        );
-                                    })}
+                                    {categories.map((cat) => (
+                                        <option key={cat} value={cat}>
+                                            {cat === 'all' ? 'All Categories' : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                         )}
@@ -165,11 +181,15 @@ export default function NotificationsPage() {
             {/* Notification List */}
             <div className="card bg-base-100 shadow">
                 <div className="card-body p-0">
-                    {loading ? (
+                    {/* Loading State */}
+                    {loading && (
                         <div className="flex justify-center items-center py-12">
                             <span className="loading loading-spinner loading-lg"></span>
                         </div>
-                    ) : filteredNotifications.length === 0 ? (
+                    )}
+
+                    {/* Empty State */}
+                    {!loading && filteredNotifications.length === 0 && (
                         <div className="text-center py-12">
                             <i className="fa-solid fa-inbox text-6xl text-base-content/20 mb-4"></i>
                             <p className="text-lg text-base-content/60">
@@ -185,7 +205,10 @@ export default function NotificationsPage() {
                                 </button>
                             )}
                         </div>
-                    ) : (
+                    )}
+
+                    {/* Notification Items */}
+                    {!loading && filteredNotifications.length > 0 && (
                         <div className="divide-y divide-base-300">
                             {filteredNotifications.map((notification) => (
                                 <div

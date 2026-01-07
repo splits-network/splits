@@ -6,13 +6,15 @@
 import { NotificationService } from '../../service';
 import { ServiceRegistry } from '../../clients';
 import { Logger } from '@splits-network/shared-logging';
+import { DataLookupHelper } from '../../helpers/data-lookup';
 
 export class InvitationsConsumer {
     constructor(
         private notificationService: NotificationService,
         private serviceRegistry: ServiceRegistry,
         private logger: Logger,
-        private portalUrl: string
+        private portalUrl: string,
+        private dataLookup: DataLookupHelper
     ) {}
 
     /**
@@ -28,25 +30,27 @@ export class InvitationsConsumer {
 
         try {
             // Fetch organization details
-            const orgResponse: any = await this.serviceRegistry
-                .getIdentityService()
-                .get(`/organizations/${organization_id}`);
-            const organization = orgResponse.data;
+            const organization = await this.dataLookup.getOrganization(organization_id);
+            if (!organization) {
+                throw new Error(`Organization not found: ${organization_id}`);
+            }
 
             // Fetch inviter details
-            const inviterResponse: any = await this.serviceRegistry
-                .getIdentityService()
-                .get(`/users/${invited_by}`);
-            const inviter = inviterResponse.data;
+            const inviter = await this.dataLookup.getUser(invited_by);
+            if (!inviter) {
+                throw new Error(`Inviter user not found: ${invited_by}`);
+            }
 
             // Fetch full invitation details (to get expires_at)
-            const invitationResponse: any = await this.serviceRegistry
-                .getIdentityService()
-                .get(`/invitations/${invitation_id}`);
-            const invitation = invitationResponse.data;
+            const invitation = await this.dataLookup.getInvitation(invitation_id);
+            if (!invitation) {
+                throw new Error(`Invitation not found: ${invitation_id}`);
+            }
 
             // Build invitation link
             const invitation_link = `${this.portalUrl}/accept-invitation/${invitation_id}`;
+
+            const inviterName = `${inviter.first_name || ''} ${inviter.last_name || ''}`.trim() || inviter.email;
 
             // Send invitation email
             await this.notificationService.invitations.sendInvitation({
@@ -54,9 +58,9 @@ export class InvitationsConsumer {
                 email,
                 organization_name: organization.name,
                 role,
-                invited_by_name: inviter.full_name || inviter.email,
+                invited_by_name: inviterName,
                 invitation_link,
-                expires_at: invitation.expires_at,
+                expires_at: invitation.expires_at || '',
             });
 
             this.logger.info({ invitation_id, email }, 'Invitation email sent successfully');
@@ -79,10 +83,10 @@ export class InvitationsConsumer {
 
         try {
             // Fetch organization details
-            const orgResponse: any = await this.serviceRegistry
-                .getIdentityService()
-                .get(`/organizations/${organization_id}`);
-            const organization = orgResponse.data;
+            const organization = await this.dataLookup.getOrganization(organization_id);
+            if (!organization) {
+                throw new Error(`Organization not found: ${organization_id}`);
+            }
 
             // Send revoked email
             await this.notificationService.invitations.sendInvitationRevoked({
