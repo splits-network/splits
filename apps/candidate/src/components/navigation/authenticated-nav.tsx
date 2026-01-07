@@ -35,7 +35,7 @@ export default function AuthenticatedNav() {
                             </Link>
                         </li>
                         <li>
-                            <Link href="/documents">
+                            <Link href="/portal/documents">
                                 <i className="fa-solid fa-folder"></i>
                                 Documents
                             </Link>

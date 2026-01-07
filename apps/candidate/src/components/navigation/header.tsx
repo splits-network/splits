@@ -93,10 +93,10 @@ export default function Header() {
                     </label>
                     <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-10 p-2 shadow bg-base-100 rounded-box w-52">
                         <li><Link href="/public/jobs">Find Jobs</Link></li>
-                        <li><Link href="/marketplace">Find a Recruiter</Link></li>
-                        <li><Link href="/how-it-works">How It Works</Link></li>
-                        <li><Link href="/resources">Resources</Link></li>
-                        <li><Link href="/companies">Companies</Link></li>
+                        <li><Link href="/public/marketplace">Find a Recruiter</Link></li>
+                        <li><Link href="/public/how-it-works">How It Works</Link></li>
+                        <li><Link href="/public/resources">Resources</Link></li>
+                        <li><Link href="/public/companies">Companies</Link></li>
                         {isSignedIn && (
                             <>
                                 <li className="menu-title mt-2">My Account</li>
@@ -115,7 +115,7 @@ export default function Header() {
             {/* Center: Desktop mega menus */}
             <div className="navbar-center hidden lg:flex">
                 <ul className="menu menu-horizontal px-1 gap-1" ref={menuRef}>
-                    <li><Link href="/how-it-works">How It Works</Link></li>
+                    <li><Link href="/public/how-it-works">How It Works</Link></li>
 
                     {/* Jobs Mega Dropdown */}
                     <li>
@@ -129,7 +129,7 @@ export default function Header() {
                                             {jobCategories.map((cat) => (
                                                 <li key={cat.name}>
                                                     <Link
-                                                        href={`/jobs?category=${encodeURIComponent(cat.name.toLowerCase())}`}
+                                                        href={`/public/jobs?category=${encodeURIComponent(cat.name.toLowerCase())}`}
                                                         className="flex items-center justify-between p-2 hover:bg-base-200 rounded-lg transition-colors group"
                                                         onClick={closeAllDropdowns}
                                                     >
@@ -190,7 +190,7 @@ export default function Header() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-1">
                                         <li>
-                                            <Link href="/resources/career-guides" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                            <Link href="/public/resources/career-guides" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
                                                 <i className="fa-solid fa-book text-primary text-lg mt-1"></i>
                                                 <div>
                                                     <div className="font-semibold">Career Guides</div>
@@ -199,7 +199,7 @@ export default function Header() {
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link href="/resources/salary-insights" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                            <Link href="/public/resources/salary-insights" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
                                                 <i className="fa-solid fa-chart-line text-success text-lg mt-1"></i>
                                                 <div>
                                                     <div className="font-semibold">Salary Insights</div>
@@ -208,7 +208,7 @@ export default function Header() {
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link href="/resources/interview-prep" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                            <Link href="/public/resources/interview-prep" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
                                                 <i className="fa-solid fa-user-tie text-secondary text-lg mt-1"></i>
                                                 <div>
                                                     <div className="font-semibold">Interview Prep</div>
@@ -219,7 +219,7 @@ export default function Header() {
                                     </div>
                                     <div className="space-y-1">
                                         <li>
-                                            <Link href="/resources/success-stories" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                            <Link href="/public/resources/success-stories" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
                                                 <i className="fa-solid fa-star text-warning text-lg mt-1"></i>
                                                 <div>
                                                     <div className="font-semibold">Success Stories</div>
@@ -228,7 +228,7 @@ export default function Header() {
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link href="/resources/resume-tips" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                            <Link href="/public/resources/resume-tips" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
                                                 <i className="fa-solid fa-file-alt text-info text-lg mt-1"></i>
                                                 <div>
                                                     <div className="font-semibold">Resume Tips</div>
@@ -237,7 +237,7 @@ export default function Header() {
                                             </Link>
                                         </li>
                                         <li>
-                                            <Link href="/resources/industry-trends" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                            <Link href="/public/resources/industry-trends" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
                                                 <i className="fa-solid fa-trending-up text-accent text-lg mt-1"></i>
                                                 <div>
                                                     <div className="font-semibold">Industry Trends</div>
@@ -253,7 +253,7 @@ export default function Header() {
 
                     {/* Recruiters/Marketplace Link */}
                     <li>
-                        <Link href="/marketplace" className="flex items-center gap-2">
+                        <Link href="/public/marketplace" className="flex items-center gap-2">
                             <i className="fa-solid fa-users text-primary"></i>
                             Find a Recruiter
                         </Link>
@@ -267,7 +267,7 @@ export default function Header() {
                                 <h3 className="font-bold text-sm mb-3 text-base-content/60">EXPLORE COMPANIES</h3>
                                 <div className="space-y-1">
                                     <li>
-                                        <Link href="/companies" className="flex items-center gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                        <Link href="/public/companies" className="flex items-center gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
                                             <i className="fa-solid fa-building text-primary text-lg"></i>
                                             <div>
                                                 <div className="font-semibold">Browse All Companies</div>
@@ -276,7 +276,7 @@ export default function Header() {
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href="/companies/featured" className="flex items-center gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                        <Link href="/public/companies/featured" className="flex items-center gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
                                             <i className="fa-solid fa-crown text-warning text-lg"></i>
                                             <div>
                                                 <div className="font-semibold">Featured Employers</div>
@@ -285,7 +285,7 @@ export default function Header() {
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link href="/companies/reviews" className="flex items-center gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                        <Link href="/public/companies/reviews" className="flex items-center gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
                                             <i className="fa-solid fa-star text-success text-lg"></i>
                                             <div>
                                                 <div className="font-semibold">Company Reviews</div>
@@ -297,7 +297,7 @@ export default function Header() {
                                 <div className="divider my-4"></div>
                                 <h3 className="font-bold text-sm mb-3 text-base-content/60">FOR EMPLOYERS</h3>
                                 <li>
-                                    <Link href="/for-recruiters" className="flex items-center gap-3 p-3 hover:bg-base-200 rounded-lg bg-primary/5 border border-primary/20" onClick={closeAllDropdowns}>
+                                    <Link href="/public/for-recruiters" className="flex items-center gap-3 p-3 hover:bg-base-200 rounded-lg bg-primary/5 border border-primary/20" onClick={closeAllDropdowns}>
                                         <i className="fa-solid fa-user-tie text-primary text-lg"></i>
                                         <div>
                                             <div className="font-semibold">Hire Great Talent</div>
