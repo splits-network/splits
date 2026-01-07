@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import ApplicationsClient from './applications-client';
+import ApplicationsClient from './components/applications-client';
 
 // Loading component for Suspense fallback
 function ApplicationsLoading() {

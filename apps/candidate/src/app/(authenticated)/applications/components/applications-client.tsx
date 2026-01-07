@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { useStandardList } from '@/hooks/use-standard-list';
 import { formatDate } from '@/lib/utils';
 import { useToast } from '@/lib/toast-context';
-import ApplicationCard from './components/application-card';
+import ApplicationCard from './application-card';
 import { getStatusColor, formatStage } from '@/lib/application-utils';
 
 // ===== TYPES =====
