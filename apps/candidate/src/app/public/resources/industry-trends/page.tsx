@@ -238,7 +238,7 @@ export default function IndustryTrendsPage() {
                                 Explore jobs in the sectors and roles that are shaping the future of work.
                             </p>
                             <div className="flex gap-2 justify-center">
-                                <a href="/jobs" className="btn btn-primary">
+                                <a href="/public/jobs" className="btn btn-primary">
                                     Browse Jobs <i className="fa-solid fa-briefcase"></i>
                                 </a>
                                 <a href="/resources/salary-insights" className="btn btn-outline">

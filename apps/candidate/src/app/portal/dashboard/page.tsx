@@ -193,7 +193,7 @@ export default async function DashboardPage() {
 
                         <div className="space-y-3">
                             <Link
-                                href="/jobs"
+                                href="/public/jobs"
                                 className="btn btn-primary btn-block justify-start"
                             >
                                 <i className="fa-solid fa-search"></i>

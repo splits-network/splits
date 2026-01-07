@@ -168,7 +168,7 @@ export default function InterviewPrepPage() {
                                 Start applying to opportunities that match your experience and career goals.
                             </p>
                             <div className="flex gap-2 justify-center">
-                                <a href="/jobs" className="btn btn-primary">
+                                <a href="/public/jobs" className="btn btn-primary">
                                     Browse Jobs <i className="fa-solid fa-briefcase"></i>
                                 </a>
                                 <a href="/resources/career-guides" className="btn btn-outline">

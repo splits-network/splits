@@ -109,7 +109,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
 
     if (loading) {
         return (
-            <div className="card bg-base-100 shadow">
+            <div className="card bg-base-200 shadow">
                 <div className="card-body">
                     <div className="flex justify-center py-12">
                         <span className="loading loading-spinner loading-lg"></span>
@@ -121,7 +121,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
 
     if (!job) {
         return (
-            <div className="card bg-base-100 shadow">
+            <div className="card bg-base-200 shadow">
                 <div className="card-body">
                     <div className="alert alert-error">
                         <i className="fa-solid fa-circle-exclamation"></i>
@@ -139,7 +139,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                 Back to Roles
             </Link>
 
-            <div className="card bg-base-100 shadow">
+            <div className="card bg-base-200 shadow">
                 <div className="card-body">
                     <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                         <div className="flex-1">

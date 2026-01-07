@@ -32,7 +32,7 @@ export default async function CandidateHomePage() {
                             Browse thousands of opportunities from top companies. Get matched with specialized recruiters who advocate for you throughout the hiring process.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
-                            <Link href="/jobs" className="btn btn-primary btn-lg gap-2 shadow hover:shadow transition-all">
+                            <Link href="/public/jobs" className="btn btn-primary btn-lg gap-2 shadow hover:shadow transition-all">
                                 <i className="fa-solid fa-magnifying-glass"></i>
                                 Explore Jobs
                             </Link>
@@ -167,7 +167,7 @@ export default async function CandidateHomePage() {
                                     <div>
                                         <h3 className="card-title text-lg mb-2">One-Click Apply</h3>
                                         <p className="text-sm text-base-content/70">
-                                            Apply to multiple jobs instantly with your saved profile and 
+                                            Apply to multiple jobs instantly with your saved profile and
                                         </p>
                                     </div>
                                 </div>
@@ -341,7 +341,7 @@ export default async function CandidateHomePage() {
                                 <i className="fa-solid fa-user-plus"></i>
                                 Create Free Account
                             </Link>
-                            <Link href="/jobs" className="btn btn-lg btn-outline text-white border-white hover:bg-white hover:text-primary">
+                            <Link href="/public/jobs" className="btn btn-lg btn-outline text-white border-white hover:bg-white hover:text-primary">
                                 <i className="fa-solid fa-search"></i>
                                 Browse Jobs First
                             </Link>

@@ -85,7 +85,7 @@ export default function JobDetailClient({
         <>
             <div className="container mx-auto px-4 py-8">
                 {/* Back Button */}
-                <Link href="/jobs" className="btn btn-ghost mb-6">
+                <Link href="/public/jobs" className="btn btn-ghost mb-6">
                     <i className="fa-solid fa-arrow-left"></i>
                     Back to Jobs
                 </Link>

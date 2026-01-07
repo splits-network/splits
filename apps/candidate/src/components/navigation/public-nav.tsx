@@ -13,7 +13,7 @@ export default function PublicNav() {
                 <div className="flex-none">
                     <ul className="menu menu-horizontal px-1">
                         <li>
-                            <Link href="/jobs">Browse Jobs</Link>
+                            <Link href="/public/jobs">Browse Jobs</Link>
                         </li>
                         <li>
                             <Link href="/sign-in" className="btn btn-primary btn-sm">

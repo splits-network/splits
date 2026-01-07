@@ -173,10 +173,10 @@ export default function AboutPage() {
             <section className="text-center bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-12">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Start Your Journey?</h2>
                 <p className="text-xl text-base-content/80 mb-8 max-w-2xl mx-auto">
-                    Join thousands of candidates who have found their dream jobs through Applicant 
+                    Join thousands of candidates who have found their dream jobs through Applicant
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Link href="/jobs" className="btn btn-primary btn-lg">
+                    <Link href="/public/jobs" className="btn btn-primary btn-lg">
                         <i className="fa-solid fa-magnifying-glass mr-2"></i>
                         Browse Jobs
                     </Link>

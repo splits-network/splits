@@ -150,7 +150,7 @@ export default function SuccessStoriesPage() {
                                 Join thousands of professionals who found their dream jobs through our platform.
                             </p>
                             <div className="flex gap-2 justify-center">
-                                <a href="/jobs" className="btn btn-neutral">
+                                <a href="/public/jobs" className="btn btn-neutral">
                                     Start Your Search <i className="fa-solid fa-arrow-right"></i>
                                 </a>
                                 <a href="/sign-up" className="btn btn-outline btn-neutral">

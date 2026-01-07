@@ -227,7 +227,7 @@ export default function ResumeTipsPage() {
                                 Browse thousands of opportunities and submit your polished resume.
                             </p>
                             <div className="flex gap-2 justify-center">
-                                <a href="/jobs" className="btn btn-primary">
+                                <a href="/public/jobs" className="btn btn-primary">
                                     Browse Jobs <i className="fa-solid fa-briefcase"></i>
                                 </a>
                                 <a href="/resources/interview-prep" className="btn btn-outline">

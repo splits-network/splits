@@ -17,9 +17,14 @@ export default async function RoleDetailPage({
     const { id } = await params;
 
     return (
-        <div className="space-y-6">
-            <RoleHeader roleId={id} />
-            <RoleDetailsTabs roleId={id} />
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between">
+            <div className="w-full md:flex-1 md:mr-4 space-y-6">
+                <RoleHeader roleId={id} />
+                <RoleDetailsTabs roleId={id} />
+            </div>
+            <div className="w-full md:w-64 lg:w-72 xl:w-80 shrink-0 mt-6 md:mt-0">
+                <CandidatePipeline roleId={id} />
+            </div>
         </div>
     );
 }

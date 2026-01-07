@@ -393,7 +393,7 @@ export default function First90DaysGuidePage() {
                                     <i className="fa-solid fa-handshake"></i>
                                     Negotiate Offers
                                 </Link>
-                                <Link href="/jobs" className="btn btn-primary">
+                                <Link href="/public/jobs" className="btn btn-primary">
                                     <i className="fa-solid fa-briefcase"></i>
                                     Find Your Next Role
                                 </Link>

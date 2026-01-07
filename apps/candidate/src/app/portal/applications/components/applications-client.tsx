@@ -411,7 +411,7 @@ export default function ApplicationsClient() {
                                 <p className="text-base-content/70 mb-6">
                                     Start applying to jobs to track your applications here
                                 </p>
-                                <Link href="/jobs" className="btn btn-primary">
+                                <Link href="/public/jobs" className="btn btn-primary">
                                     <i className="fa-solid fa-search"></i>
                                     Browse Jobs
                                 </Link>

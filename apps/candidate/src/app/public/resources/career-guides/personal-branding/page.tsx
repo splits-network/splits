@@ -398,7 +398,7 @@ export default function PersonalBrandingGuidePage() {
                                     <i className="fa-solid fa-star"></i>
                                     Success Stories
                                 </Link>
-                                <Link href="/jobs" className="btn btn-primary">
+                                <Link href="/public/jobs" className="btn btn-primary">
                                     <i className="fa-solid fa-briefcase"></i>
                                     Browse Jobs
                                 </Link>

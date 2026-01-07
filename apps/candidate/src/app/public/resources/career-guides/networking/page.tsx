@@ -245,7 +245,7 @@ export default function NetworkingGuidePage() {
                                     <i className="fa-solid fa-badge-check"></i>
                                     Personal Branding
                                 </Link>
-                                <Link href="/jobs" className="btn btn-primary">
+                                <Link href="/public/jobs" className="btn btn-primary">
                                     <i className="fa-solid fa-briefcase"></i>
                                     Browse Jobs
                                 </Link>

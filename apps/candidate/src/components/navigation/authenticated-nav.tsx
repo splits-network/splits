@@ -14,7 +14,7 @@ export default function AuthenticatedNav() {
                 <div className="flex-none">
                     <ul className="menu menu-horizontal px-1 gap-2">
                         <li>
-                            <Link href="/jobs">Browse Jobs</Link>
+                            <Link href="/public/jobs">Browse Jobs</Link>
                         </li>
                         <li>
                             <Link href="/portal/dashboard">

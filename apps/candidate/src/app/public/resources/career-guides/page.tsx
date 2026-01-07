@@ -106,7 +106,7 @@ export default function CareerGuidesPage() {
                             <p className="mb-4">
                                 Browse thousands of opportunities from top companies.
                             </p>
-                            <Link href="/jobs" className="btn btn-neutral">
+                            <Link href="/public/jobs" className="btn btn-neutral">
                                 Explore Jobs <i className="fa-solid fa-briefcase"></i>
                             </Link>
                         </div>

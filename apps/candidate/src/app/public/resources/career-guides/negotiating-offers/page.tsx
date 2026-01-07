@@ -277,8 +277,8 @@ export default function NegotiatingOffersGuidePage() {
                                                 <h3 className="card-title text-lg">{item.category}</h3>
                                             </div>
                                             <span className={`badge ${item.negotiable.includes('High') ? 'badge-success' :
-                                                    item.negotiable.includes('Medium') ? 'badge-warning' :
-                                                        'badge-error'
+                                                item.negotiable.includes('Medium') ? 'badge-warning' :
+                                                    'badge-error'
                                                 }`}>
                                                 {item.negotiable}
                                             </span>
@@ -382,7 +382,7 @@ export default function NegotiatingOffersGuidePage() {
                                     <i className="fa-solid fa-user-tie"></i>
                                     Interview Prep
                                 </Link>
-                                <Link href="/jobs" className="btn btn-outline">
+                                <Link href="/public/jobs" className="btn btn-outline">
                                     <i className="fa-solid fa-briefcase"></i>
                                     Browse Jobs
                                 </Link>

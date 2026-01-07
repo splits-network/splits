@@ -292,7 +292,7 @@ export default function HowItWorksPage() {
                         <i className="fa-solid fa-user-plus mr-2"></i>
                         Create Free Account
                     </Link>
-                    <Link href="/jobs" className="btn btn-outline btn-lg">
+                    <Link href="/public/jobs" className="btn btn-outline btn-lg">
                         <i className="fa-solid fa-magnifying-glass mr-2"></i>
                         Browse Jobs
                     </Link>

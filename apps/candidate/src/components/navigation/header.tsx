@@ -92,7 +92,7 @@ export default function Header() {
                         <i className="fa-solid fa-bars"></i>
                     </label>
                     <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-10 p-2 shadow bg-base-100 rounded-box w-52">
-                        <li><Link href="/jobs">Find Jobs</Link></li>
+                        <li><Link href="/public/jobs">Find Jobs</Link></li>
                         <li><Link href="/marketplace">Find a Recruiter</Link></li>
                         <li><Link href="/how-it-works">How It Works</Link></li>
                         <li><Link href="/resources">Resources</Link></li>
@@ -147,32 +147,32 @@ export default function Header() {
                                         <h3 className="font-bold text-sm mb-3 text-base-content/60">POPULAR SEARCHES</h3>
                                         <ul className="space-y-2">
                                             <li>
-                                                <Link href="/jobs?remote=true" className="flex items-center gap-2 p-2 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                                <Link href="/public/jobs?remote=true" className="flex items-center gap-2 p-2 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
                                                     <i className="fa-solid fa-house-laptop text-secondary"></i>
                                                     Remote Jobs
                                                 </Link>
                                             </li>
                                             <li>
-                                                <Link href="/jobs?level=director" className="flex items-center gap-2 p-2 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                                <Link href="/public/jobs?level=director" className="flex items-center gap-2 p-2 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
                                                     <i className="fa-solid fa-user-tie text-accent"></i>
                                                     Director Roles
                                                 </Link>
                                             </li>
                                             <li>
-                                                <Link href="/jobs?salary_min=100000" className="flex items-center gap-2 p-2 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                                <Link href="/public/jobs?salary_min=100000" className="flex items-center gap-2 p-2 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
                                                     <i className="fa-solid fa-dollar-sign text-success"></i>
                                                     $100K+ Salary
                                                 </Link>
                                             </li>
                                             <li>
-                                                <Link href="/jobs?type=full_time" className="flex items-center gap-2 p-2 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                                <Link href="/public/jobs?type=full_time" className="flex items-center gap-2 p-2 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
                                                     <i className="fa-solid fa-briefcase text-info"></i>
                                                     Full-Time Positions
                                                 </Link>
                                             </li>
                                         </ul>
                                         <div className="mt-4 pt-4 border-t border-base-300">
-                                            <Link href="/jobs" className="btn btn-primary btn-sm btn-block" onClick={closeAllDropdowns}>
+                                            <Link href="/public/jobs" className="btn btn-primary btn-sm btn-block" onClick={closeAllDropdowns}>
                                                 View All Jobs <i className="fa-solid fa-arrow-right"></i>
                                             </Link>
                                         </div>

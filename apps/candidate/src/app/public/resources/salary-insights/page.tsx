@@ -159,7 +159,7 @@ export default function SalaryInsightsPage() {
                                 Browse jobs with transparent salary information and competitive compensation.
                             </p>
                             <div className="flex gap-2 justify-center">
-                                <a href="/jobs" className="btn btn-neutral">
+                                <a href="/public/jobs" className="btn btn-neutral">
                                     Browse Jobs <i className="fa-solid fa-briefcase"></i>
                                 </a>
                                 <a href="/resources/career-guides" className="btn btn-outline btn-neutral">
