@@ -1,0 +1,195 @@
+'use client';
+
+import Link from 'next/link';
+import { DataRow, DataList, KeyMetric, MetricCard } from '@/components/ui/cards';
+import { formatRelativeTime } from '@/lib/utils';
+import { getRoleBadges } from '@/lib/utils/role-badges';
+import { getJobStatusBadge } from '@/lib/utils/badge-styles';
+
+// ===== TYPES =====
+
+export interface Job {
+    id: string;
+    title: string;
+    company_id: string;
+    company: {
+        name: string;
+        industry?: string;
+        headquarters_location?: string;
+        logo_url?: string;
+    };
+    location?: string;
+    salary_min?: number;
+    salary_max?: number;
+    fee_percentage: number;
+    status: string;
+    created_at: string | Date;
+    application_count?: number;
+}
+
+interface Badge {
+    class: string;
+    icon: string;
+    text?: string;
+    tooltip?: string;
+    animated?: boolean;
+}
+
+// ===== ROLE CARD COMPONENT =====
+
+interface RoleCardProps {
+    job: Job;
+    allJobs: Job[];
+    userRole: string | null;
+    canManageRole: boolean | undefined;
+}
+
+export function RoleCard({ job, allJobs, userRole, canManageRole }: RoleCardProps) {
+    const badges = getRoleBadges(job, allJobs);
+    const maxPayout = job.salary_max ? Math.round(job.fee_percentage * job.salary_max / 100) : null;
+    const isRecruiterView = userRole === 'recruiter' || userRole === 'platform_admin';
+    const isCompanyView = userRole === 'company_admin' || userRole === 'hiring_manager';
+
+    // Get key metric based on user role
+    const getKeyMetricLabel = () => {
+        if (isRecruiterView) return 'Potential Commission';
+        if (isCompanyView) return 'Placement Fee';
+        return 'Fee Rate';
+    };
+
+    const getKeyMetricValue = () => {
+        if (isRecruiterView || isCompanyView) {
+            return maxPayout ? `$${maxPayout.toLocaleString()}` : '—';
+        }
+        return `${job.fee_percentage}%`;
+    };
+
+    const getKeyMetricColor = () => {
+        if (isRecruiterView) return 'text-success';
+        if (isCompanyView) return 'text-info';
+        return 'text-base-content';
+    };
+
+    const getProgressColor = (): 'success' | 'info' | 'primary' => {
+        if (isRecruiterView) return 'success';
+        if (isCompanyView) return 'info';
+        return 'primary';
+    };
+    return (
+        <MetricCard
+            href={`/portal/roles/${job.id}`}
+            className="group hover:shadow-lg transition-all duration-200"
+        >
+            <MetricCard.Header>
+                <div className="flex items-center gap-3 min-w-0">
+                    {/* Company Avatar */}
+                    <div className="avatar avatar-placeholder shrink-0">
+                        <div className="bg-base-200 text-base-content/70 w-10 h-10 rounded-lg flex items-center justify-center text-sm font-semibold">
+                            {job.company?.logo_url ? (
+                                <img
+                                    src={job.company.logo_url}
+                                    alt={job.company.name}
+                                    className="w-full h-full object-cover rounded-lg"
+                                    onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                        e.currentTarget.parentElement!.innerHTML = (job.company?.name || 'C')[0].toUpperCase();
+                                    }}
+                                />) : (
+                                (job.company?.name || 'C')[0].toUpperCase()
+                            )}
+                        </div>
+                    </div>
+                    <div className="min-w-0">
+                        <h3 className="font-semibold text-base-content group-hover:text-primary transition-colors truncate">
+                            {job.title}
+                        </h3>
+                        <p className="text-sm text-base-content/60 truncate">
+                            {job.company?.name}
+                        </p>
+                    </div>
+                    {/* Status Badge */}
+                    <div className={`badge ${getJobStatusBadge(job.status)} shrink-0`}>
+                        {job.status}
+                    </div>
+                </div>
+            </MetricCard.Header>
+            <MetricCard.Body>
+                {/* Key Metric */}
+                <KeyMetric
+                    label={getKeyMetricLabel()}
+                    value={getKeyMetricValue()}
+                    valueColor={getKeyMetricColor()}
+                    progress={job.application_count ? Math.min((job.application_count / 10) * 100, 100) : undefined}
+                    progressColor={getProgressColor()}
+                />
+                {/* Data Rows */}
+                <DataList compact>
+                    {job.location && (
+                        <DataRow
+                            icon="fa-location-dot"
+                            label="Location"
+                            value={job.location}
+                        />
+                    )}
+                    {job.salary_min && job.salary_max && (
+                        <DataRow
+                            icon="fa-dollar-sign"
+                            label="Salary Range"
+                            value={`$${(job.salary_min / 1000).toFixed(0)}k – $${(job.salary_max / 1000).toFixed(0)}k`}
+                        />
+                    )}
+                    <DataRow
+                        icon="fa-percent"
+                        label="Placement Fee"
+                        value={`${job.fee_percentage}%`}
+                    />
+                    <DataRow
+                        icon="fa-users"
+                        label="Applicants"
+                        value={job.application_count || 0}
+                    />
+                </DataList>
+                {/* Badges Row */}
+                {badges.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                        {badges.map((badge: Badge, idx: number) => (
+                            <span
+                                key={idx}
+
+                                className={`badge badge-sm ${badge.class} gap-1 ${badge.animated ? 'animate-pulse' : ''}`}
+                                title={badge.tooltip}
+                            >
+                                <i className={`fa-solid ${badge.icon}`}></i>
+                                {badge.text}
+                            </span>
+                        ))}
+                    </div>
+                )}
+            </MetricCard.Body>
+            <MetricCard.Footer>
+                <div className="flex items-center justify-between w-full">
+                    <span className="text-xs text-base-content/50">
+                        Posted {formatRelativeTime(job.created_at)}
+                    </span>
+                    <div className="flex items-center gap-2">
+                        {canManageRole && (
+                            <span
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    window.location.href = `/portal/roles/${job.id}/edit`;
+                                }}
+                                className="btn btn-ghost btn-xs"
+                            >
+                                <i className="fa-solid fa-pen"></i>
+                            </span>
+                        )}
+                        <span className="text-primary text-sm font-medium group-hover:underline">
+                            View Details →
+                        </span>
+                    </div>
+                </div>
+            </MetricCard.Footer>
+        </MetricCard>
+    );
+}

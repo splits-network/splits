@@ -59,7 +59,7 @@ pnpm --filter @splits-network/candidate start
 
 Copy `.env.example` to `.env.local` and fill in:
 
-- Clerk keys from [Clerk Dashboard](https://dashboard.clerk.com)
+- Clerk keys from [Clerk Dashboard](https://portal/dashboard.clerk.com)
 - API Gateway URL (defaults to `http://localhost:4000`)
 
 ## Deployment

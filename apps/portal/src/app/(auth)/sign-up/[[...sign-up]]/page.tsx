@@ -117,7 +117,7 @@ export default function SignUpPage() {
                 if (invitationId) {
                     router.push(`/accept-invitation/${invitationId}`);
                 } else {
-                    router.push('/dashboard');
+                    router.push('/portal/dashboard');
                 }
             } else {
                 setError(`Sign up incomplete. Status: ${completeSignUp.status}. Please check the console for details.`);
@@ -137,7 +137,7 @@ export default function SignUpPage() {
         const redirectUrl = '/sso-callback';
         const redirectUrlComplete = invitationId
             ? `/accept-invitation/${invitationId}`
-            : '/dashboard';
+            : '/portal/dashboard';
 
         signUp.authenticateWithRedirect({
             strategy: provider,
@@ -167,7 +167,7 @@ export default function SignUpPage() {
 
                         <div className="space-y-2">
                             <button
-                                onClick={() => router.push('/dashboard')}
+                                onClick={() => router.push('/portal/dashboard')}
                                 className="btn btn-primary w-full"
                             >
                                 <i className="fa-solid fa-home"></i>

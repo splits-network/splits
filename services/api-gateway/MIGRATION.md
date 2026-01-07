@@ -128,7 +128,7 @@ Each route file is focused on a single domain, making it easy to locate and modi
 - [routes/reputation/routes.ts](g:\code\splits.network\services\api-gateway\src\routes\reputation\routes.ts) - Recruiter reputation
 - [routes/billing/routes.ts](g:\code\splits.network\services\api-gateway\src\routes\billing\routes.ts) - Subscriptions and billing
 - [routes/documents/routes.ts](g:\code\splits.network\services\api-gateway\src\routes\documents\routes.ts) - Document management
-- [routes/dashboards/routes.ts](g:\code\splits.network\services\api-gateway\src\routes\dashboards\routes.ts) - Dashboard stats
+- [routes/portal/dashboards/routes.ts](g:\code\splits.network\services\api-gateway\src\routes\dashboards\routes.ts) - Dashboard stats
 - [routes/admin/routes.ts](g:\code\splits.network\services\api-gateway\src\routes\admin\routes.ts) - Admin and automation
 
 ### Moved Files

@@ -76,7 +76,7 @@ export function UserDropdown() {
 
                     <div className="py-2">
                         <Link
-                            href="/profile"
+                            href="/portal/profile"
                             onClick={() => setIsOpen(false)}
                             className="flex items-center gap-3 px-4 py-2.5 hover:bg-base-200 transition-colors text-sm text-base-content"
                         >
@@ -84,7 +84,7 @@ export function UserDropdown() {
                             Profile
                         </Link>
                         <Link
-                            href="/billing"
+                            href="/portal/billing"
                             onClick={() => setIsOpen(false)}
                             className="flex items-center gap-3 px-4 py-2.5 hover:bg-base-200 transition-colors text-sm text-base-content"
                         >

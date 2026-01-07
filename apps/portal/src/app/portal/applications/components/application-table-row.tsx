@@ -1,0 +1,168 @@
+import Link from 'next/link';
+
+interface ApplicationTableRowProps {
+    application: {
+        id: string;
+        stage: string;
+        accepted_by_company: boolean;
+        created_at: string;
+        ai_reviewed?: boolean;
+        candidate: {
+            full_name: string;
+            email: string;
+            _masked?: boolean;
+        };
+        job?: {
+            title: string;
+        };
+        company?: {
+            name: string;
+        };
+        recruiter?: {
+            name: string;
+        };
+        ai_review?: {
+            fit_score: number;
+            recommendation: 'strong_fit' | 'good_fit' | 'fair_fit' | 'poor_fit';
+        };
+    };
+    canAccept: boolean;
+    isAccepting: boolean;
+    onAccept: () => void;
+    getStageColor: (stage: string) => string;
+    formatDate: (date: string) => string;
+    isSelected?: boolean;
+    onToggleSelect?: () => void;
+    isRecruiter?: boolean;
+    isCompanyUser?: boolean;
+}
+
+export function ApplicationTableRow({
+    application,
+    canAccept,
+    isAccepting,
+    onAccept,
+    getStageColor,
+    formatDate,
+    isSelected = false,
+    onToggleSelect,
+    isRecruiter = false,
+    isCompanyUser = false,
+}: ApplicationTableRowProps) {
+    const candidate = application.candidate;
+    const isMasked = candidate._masked;
+
+    return (
+        <tr className="hover">
+            {isRecruiter && (
+                <td className="w-12">
+                    <input
+                        type="checkbox"
+                        className="checkbox checkbox-sm"
+                        checked={isSelected}
+                        onChange={onToggleSelect}
+                        onClick={(e) => e.stopPropagation()}
+                        aria-label={`Select application for ${candidate.full_name}`}
+                    />
+                </td>
+            )}
+            <td>
+                <div className="flex items-center gap-3">
+                    <div className="avatar avatar-placeholder">
+                        <div className="bg-primary/10 text-primary rounded-full w-10">
+                            <span className="text-sm">
+                                {isMasked ? <i className="fa-solid fa-user-secret"></i> : candidate.full_name[0]}
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <div className="font-bold flex items-center gap-2">
+                            {isMasked && (
+                                <i className="fa-solid fa-eye-slash text-warning" title="Anonymous"></i>
+                            )}
+                            {candidate.full_name}
+                        </div>
+                        <div className="text-sm text-base-content/70">
+                            {!isMasked && candidate.email}
+                            {isMasked && <span className="italic">{candidate.email}</span>}
+                        </div>
+                    </div>
+                </div>
+            </td>
+            <td>
+                {application.job ? (
+                    <div className="text-sm font-medium">
+                        {application.job.title}
+                    </div>
+                ) : (
+                    <span className="text-base-content/40">—</span>
+                )}
+            </td>
+            <td>
+                {application.company ? (
+                    <div className="text-sm">
+                        {application.company.name}
+                    </div>
+                ) : (
+                    <span className="text-base-content/40">—</span>
+                )}
+            </td>
+            <td>
+                {application.ai_review?.fit_score}
+                {application.ai_reviewed && application.ai_review ? (
+                    <div className="flex items-center gap-2">
+                        <span className="font-bold text-lg">{application.ai_review.fit_score}</span>
+                        <span className="text-xs text-base-content/60">/100</span>
+                    </div>
+                ) : application.stage === 'ai_review' ? (
+                    <span className="loading loading-spinner loading-sm"></span>
+                ) : (
+                    <span className="text-base-content/40 text-sm">—</span>
+                )}
+            </td>
+            <td>
+                <span className={`badge ${getStageColor(application.stage)}`}>
+                    {application.stage}
+                </span>
+            </td>
+            {isRecruiter && (
+                <td>
+                    {application.recruiter ? (
+                        <div className="text-sm">
+                            {application.recruiter.name}
+                        </div>
+                    ) : (
+                        <span className="text-base-content/40">—</span>
+                    )}
+                </td>
+            )
+            }
+            <td>
+                <div className="text-sm">{formatDate(application.created_at)}</div>
+            </td>
+            <td className="text-right">
+                <div className="flex gap-2 justify-end">
+                    {isCompanyUser && canAccept && (
+                        <button
+                            onClick={onAccept}
+                            className="btn btn-success btn-sm"
+                            disabled={isAccepting}
+                        >
+                            {isAccepting ? (
+                                <span className="loading loading-spinner loading-xs"></span>
+                            ) : (
+                                <i className="fa-solid fa-check"></i>
+                            )}
+                        </button>
+                    )}
+                    <Link
+                        href={`/portal/application/${application.id}`}
+                        className="btn btn-primary btn-sm"
+                    >
+                        <i className="fa-solid fa-arrow-right"></i>
+                    </Link>
+                </div>
+            </td>
+        </tr >
+    );
+}

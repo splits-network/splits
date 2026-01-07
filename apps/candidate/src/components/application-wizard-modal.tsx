@@ -175,7 +175,7 @@ export default function ApplicationWizardModal({
             // Note: onSuccess callback is NOT called here to avoid double toasts
             // The applications page will show a success toast based on URL param
             onClose();
-            router.push(`/applications?success=true&application=${applicationId}`);
+            router.push(`/portal/application?success=true&application=${applicationId}`);
         } catch (err: any) {
             console.error('Failed to submit application:', err);
             setError(err.message || 'Failed to submit application');
@@ -229,7 +229,7 @@ export default function ApplicationWizardModal({
             // Note: onSuccess callback is NOT called here to avoid double toasts
             // The applications page will show an info toast based on URL param
             onClose();
-            router.push(`/applications?draft=true&application=${applicationId}`);
+            router.push(`/portal/application?draft=true&application=${applicationId}`);
         } catch (err: any) {
             console.error('Failed to save draft:', err);
             setError(err.message || 'Failed to save draft');

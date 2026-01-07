@@ -85,7 +85,7 @@ Successfully implemented the missing application detail page for recruiter appli
 **File:** `apps/portal/src/app/(authenticated)/candidates/[id]/candidate-detail-client.tsx`
 
 **Change:** Line ~426
-- **Before:** `href={`/roles/${application.job_id}`}`
+- **Before:** `href={`/portal/roles/${application.job_id}`}`
 - **After:** `href={`/applications/${application.id}`}`
 
 Now clicking on an application from the candidate detail page correctly navigates to the application detail page instead of the job page.

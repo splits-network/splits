@@ -184,7 +184,7 @@ const [stats, setStats] = useState({
 // For logged-in users: Full navigation with account context
 {isSignedIn && (
     <ul className="menu menu-horizontal">
-        <li><Link href="/dashboard">Dashboard</Link></li>
+        <li><Link href="/portal/dashboard">Dashboard</Link></li>
         <li><Link href="/jobs">Jobs</Link></li>
         <li><Link href="/applications">Applications</Link></li>
         <li><Link href="/marketplace">Recruiters</Link></li>
@@ -839,7 +839,7 @@ useEffect(() => {
 ```tsx
 // Add mobile dock navigation
 <div className="dock dock-bottom lg:hidden">
-    <Link href="/dashboard" className={currentPath === '/dashboard' ? 'dock-active' : ''}>
+    <Link href="/portal/dashboard" className={currentPath === '/portal/dashboard' ? 'dock-active' : ''}>
         <i className="fa-solid fa-gauge"></i>
         <span className="dock-label">Dashboard</span>
     </Link>

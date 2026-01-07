@@ -208,7 +208,7 @@ const application = await api.post('/api/applications', {
 The middleware (`src/middleware.ts`) automatically protects routes:
 
 - Public: `/`, `/sign-in`, `/sign-up`
-- Protected: `/dashboard/*`
+- Protected: `/portal/dashboard/*`
 
 ### User Context
 

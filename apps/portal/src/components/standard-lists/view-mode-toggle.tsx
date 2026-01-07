@@ -5,27 +5,33 @@ interface ViewModeToggleProps {
     onViewModeChange?: (mode: 'grid' | 'table') => void;
 }
 
+/**
+ * ViewModeToggle - Uses DaisyUI swap component
+ * 
+ * Based on: https://daisyui.com/components/swap/
+ * 
+ * Toggles between grid and table view with a smooth rotate animation.
+ * - swap-off (unchecked) = grid view
+ * - swap-on (checked) = table view
+ */
 export function ViewModeToggle({ viewMode, setViewMode, onViewModeChange }: ViewModeToggleProps) {
     const handleChange = setViewMode ?? onViewModeChange;
 
     if (!handleChange) return null;
 
+    const isTableView = viewMode === 'table';
+
     return (
-        <div className="join">
-            <button
-                className={`join-item btn btn-sm ${viewMode === 'grid' ? 'btn-active' : ''}`}
-                onClick={() => handleChange('grid')}
-                title="Grid view"
-            >
-                <i className="fa-solid fa-grip"></i>
-            </button>
-            <button
-                className={`join-item btn btn-sm ${viewMode === 'table' ? 'btn-active' : ''}`}
-                onClick={() => handleChange('table')}
-                title="Table view"
-            >
-                <i className="fa-solid fa-list"></i>
-            </button>
-        </div>
+        <label className="swap swap-rotate btn btn-ghost btn-sm" title={isTableView ? 'Switch to grid view' : 'Switch to table view'}>
+            <input
+                type="checkbox"
+                checked={isTableView}
+                onChange={() => handleChange(isTableView ? 'grid' : 'table')}
+            />
+            {/* Grid icon - shown when swap is off (unchecked) */}
+            <i className="swap-off fa-solid fa-grip text-base"></i>
+            {/* Table icon - shown when swap is on (checked) */}
+            <i className="swap-on fa-solid fa-list text-base"></i>
+        </label>
     );
 }

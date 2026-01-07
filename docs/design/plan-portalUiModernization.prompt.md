@@ -49,7 +49,7 @@ Build foundational card components that all pages will use:
 
 ### 4. Upgrade dashboard pages
 
-**Location:** `apps/portal/src/app/(authenticated)/dashboard/components/`
+**Location:** `apps/portal/src/app/(authenticated)/portal/dashboard/components/`
 
 - Replace all inline stat cards with unified `StatCard` components
 - Add trend indicators to all metrics
@@ -202,6 +202,6 @@ apps/portal/src/components/ui/
 
 - `apps/portal/src/app/globals.css` — Design tokens, animations
 - `apps/portal/src/components/sidebar.tsx` — Full redesign
-- `apps/portal/src/app/(authenticated)/dashboard/components/*.tsx` — All dashboard variants
+- `apps/portal/src/app/(authenticated)/portal/dashboard/components/*.tsx` — All dashboard variants
 - `apps/portal/src/app/(authenticated)/*/page.tsx` — All list pages
 - `apps/portal/src/app/(authenticated)/*/components/*-card.tsx` — All entity cards

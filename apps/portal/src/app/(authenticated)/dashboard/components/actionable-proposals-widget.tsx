@@ -108,7 +108,7 @@ export default function ActionableProposalsWidget({ compact = true }: Actionable
                 return (
                     <Link
                         key={application.id}
-                        href={`/applications/${application.id}/review`}
+                        href={`/portal/application/${application.id}/review`}
                         className="block card bg-base-100 shadow hover:shadow transition-all border border-base-300"
                     >
                         <div className="card-body p-4">
@@ -179,8 +179,8 @@ export default function ActionableProposalsWidget({ compact = true }: Actionable
             })}
 
             <div className="text-center pt-2">
-                <Link href="/applications/pending" className="text-sm text-primary hover:underline">
-                    View all pending reviews 
+                <Link href="/portal/application/pending" className="text-sm text-primary hover:underline">
+                    View all pending reviews
                 </Link>
             </div>
         </div>

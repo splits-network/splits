@@ -35,12 +35,12 @@ export function Header() {
     if (isAuthPage) return null;
 
     // Authenticated app pages
-    const isAuthenticatedPage = pathname?.startsWith('/dashboard') || pathname?.startsWith('/roles') ||
-        pathname?.startsWith('/candidates') || pathname?.startsWith('/placements') ||
-        pathname?.startsWith('/admin') || pathname?.startsWith('/profile') || pathname?.startsWith('/billing') ||
-        pathname?.startsWith('/notifications') || pathname?.startsWith('/applications') ||
+    const isAuthenticatedPage = pathname?.startsWith('/portal/dashboard') || pathname?.startsWith('/portal/roles') ||
+        pathname?.startsWith('/portal/candidates') || pathname?.startsWith('/portal/placements') ||
+        pathname?.startsWith('/admin') || pathname?.startsWith('/portal/profile') || pathname?.startsWith('/portal/billing') ||
+        pathname?.startsWith('/notifications') || pathname?.startsWith('/portal/applications') ||
         pathname?.startsWith('/proposals') || pathname?.startsWith('/teams') ||
-        pathname?.startsWith('/company') || pathname?.startsWith('/integrations') ||
+        pathname?.startsWith('/portal/company') || pathname?.startsWith('/integrations') ||
         pathname?.startsWith('/invitations');
 
     return (
@@ -54,15 +54,15 @@ export function Header() {
                     <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-10 p-2 shadow bg-base-100 rounded-box w-52">
                         {isSignedIn ? (
                             <>
-                                <li><Link href="/dashboard">Dashboard</Link></li>
-                                <li><Link href="/roles">Roles</Link></li>
-                                <li><Link href="/candidates">Candidates</Link></li>
+                                <li><Link href="/portal/dashboard">Dashboard</Link></li>
+                                <li><Link href="/portal/roles">Roles</Link></li>
+                                <li><Link href="/portal/candidates">Candidates</Link></li>
                                 <li><Link href="/invitations">Invitations</Link></li>
-                                <li><Link href="/placements">Placements</Link></li>
-                                <li><Link href="/applications">Applications</Link></li>
+                                <li><Link href="/portal/placements">Placements</Link></li>
+                                <li><Link href="/portal/application">Applications</Link></li>
                                 <li className="menu-title mt-2">Account</li>
-                                <li><Link href="/profile">Profile</Link></li>
-                                <li><Link href="/billing">Billing</Link></li>
+                                <li><Link href="/portal/profile">Profile</Link></li>
+                                <li><Link href="/portal/billing">Billing</Link></li>
                             </>
                         ) : (
                             <>
@@ -102,7 +102,7 @@ export function Header() {
 
                 {isSignedIn ? (
                     <>
-                        <Link href="/dashboard" className="btn btn-ghost xs:btn-circle" title='Dashboard'>
+                        <Link href="/portal/dashboard" className="btn btn-ghost xs:btn-circle" title='Dashboard'>
                             <i className="fa-solid fa-gauge text-xl"></i>
                             <span className="hidden md:inline-block ml-2">Dashboard</span>
                         </Link>

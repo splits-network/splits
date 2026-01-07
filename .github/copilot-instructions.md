@@ -11,6 +11,8 @@ We should only be using @latest versions of packages unless there's a specific r
 
 IMPORTANT: DO NOT MAKE ASSUMPTIONS, YOU MUST INVESTIGATE THE CURRENT CODEBASE AND DOCUMENTATION BEFORE SUGGESTING ANYTHING.
 
+EXTREMELY IMPORTANT: We need to ensure our files are single responsibility, easy to read, and maintainable.  So don't put everything in one file or function.
+
 **Current State:** This project is actively under development with functional services and frontends. The core architecture is established and several services are operational. When generating code, follow the existing patterns in the codebase and reference `docs/guidance/` for standards.
 
 File nameing conventions: kebab-case for files and folders, PascalCase for React components, camelCase for variables and functions.
@@ -342,7 +344,7 @@ When Copilot generates React/Next.js code:
    - Use Next.js 16 **App Router** (`app/` directory, server components first where reasonable).
    - All authenticated routes MUST be placed in the `(authenticated)` route group folder: `app/(authenticated)/`.
    - Keep routes grouped by domain:
-     - `(authenticated)/dashboard`, `(authenticated)/roles`, `(authenticated)/roles/[id]`, `(authenticated)/candidates`, `(authenticated)/placements`, `(authenticated)/admin`, etc.
+     - `(authenticated)/portal/dashboard`, `(authenticated)/roles`, `(authenticated)/roles/[id]`, `(authenticated)/candidates`, `(authenticated)/placements`, `(authenticated)/admin`, etc.
    - NEVER create duplicate route groups like `(dashboard)` - always use `(authenticated)` for protected pages.
 
 2. **Data Fetching & Performance** ⚠️ **CRITICAL FOR PAGE SPEED**

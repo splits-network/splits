@@ -79,7 +79,7 @@ export default function AcceptInvitationClient({ invitation, userId }: Props) {
             });
 
             // Success! Redirect to dashboard or organization page
-            router.push('/dashboard');
+            router.push('/portal/dashboard');
         } catch (err: any) {
             setError(err.message || 'An error occurred while accepting the invitation');
             setAccepting(false);

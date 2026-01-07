@@ -84,7 +84,7 @@ ALTER TABLE users
    - `clerk_user_id`, `email`, `name`
    - `onboarding_status: 'pending'`
    - `onboarding_step: 1`
-5. **Redirects to `/dashboard`**
+5. **Redirects to `/portal/dashboard`**
 
 **Phase 2: Onboarding Wizard (Modal)**
 6. Dashboard detects `onboarding_status: 'pending'`
@@ -168,7 +168,7 @@ POST /api/identity/users/me/complete-onboarding
 2. Completes Clerk sign-up (email + password)
 3. Verifies email via Clerk
 4. System creates minimal user record in `users`
-5. **Redirects to `/dashboard`**
+5. **Redirects to `/portal/dashboard`**
 
 **Phase 2: Onboarding Wizard (Modal)**
 6. Dashboard detects `onboarding_status: 'pending'`
@@ -241,7 +241,7 @@ POST /api/identity/users/me/complete-onboarding  // Step 3: Complete
 4. Completes Clerk sign-up (email + password)
 5. Verifies email via Clerk
 6. System creates user record with `onboarding_status: 'pending'`
-7. **Redirects to `/dashboard`**
+7. **Redirects to `/portal/dashboard`**
 
 **Phase 2: Invitation Acceptance (Modal)**
 8. Dashboard detects invitation token and `onboarding_status: 'pending'`
@@ -300,7 +300,7 @@ POST /api/identity/invitations/{token}/accept
 1. Team owner sends team invitation from their dashboard
 2. User receives email with invitation link (e.g., `/sign-up?team_invite={token}`)
 3. User clicks link, completes Clerk sign-up
-4. **Redirects to `/dashboard`**
+4. **Redirects to `/portal/dashboard`**
 5. Shows full recruiter onboarding wizard with team invite auto-filled
 6. After completing wizard, auto-joins team
 
@@ -332,7 +332,7 @@ POST /api/teams/invitations/{token}/accept
 ### 4.1 Modal Wizard Behavior
 
 **Trigger Conditions:**
-- User lands on `/dashboard`
+- User lands on `/portal/dashboard`
 - Check `users.onboarding_status`
 - If `'pending'` or `'in_progress'` → Show modal wizard
 - Modal is **mandatory** and cannot be dismissed
@@ -541,7 +541,7 @@ export const OnboardingProvider = ({ children }) => {
 The dashboard page checks onboarding status and triggers the modal:
 
 ```typescript
-// app/(authenticated)/dashboard/page.tsx
+// app/(authenticated)/portal/dashboard/page.tsx
 'use client';
 
 import { OnboardingProvider } from '@/components/onboarding/onboarding-provider';

@@ -234,13 +234,13 @@ const navGroups = [
     {
         label: 'Overview',
         items: [
-            { href: '/dashboard', label: 'Dashboard', icon: 'fa-house' },
+            { href: '/portal/dashboard', label: 'Dashboard', icon: 'fa-house' },
         ]
     },
     {
         label: 'Recruiting',
         items: [
-            { href: '/roles', label: 'Roles', icon: 'fa-briefcase' },
+            { href: '/portal/roles', label: 'Roles', icon: 'fa-briefcase' },
             { href: '/candidates', label: 'Candidates', icon: 'fa-users' },
             { href: '/applications', label: 'Applications', icon: 'fa-file-lines' },
         ]
@@ -287,8 +287,8 @@ const navGroups = [
             <i className="fa-solid fa-plus text-xl"></i>
         </label>
         <ul tabIndex={0} className="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-52 mb-2">
-            <li><a href="/candidates/new"><i className="fa-solid fa-user-plus w-4"></i>New Candidate</a></li>
-            <li><a href="/roles/new"><i className="fa-solid fa-briefcase w-4"></i>New Role</a></li>
+            <li><a href="/portal/candidates/new"><i className="fa-solid fa-user-plus w-4"></i>New Candidate</a></li>
+            <li><a href="/portal/roles/new"><i className="fa-solid fa-briefcase w-4"></i>New Role</a></li>
             <li><a href="/applications/quick-submit"><i className="fa-solid fa-paper-plane w-4"></i>Quick Submit</a></li>
         </ul>
     </div>
@@ -325,7 +325,7 @@ export function Breadcrumbs() {
     return (
         <div className="breadcrumbs text-sm mb-4">
             <ul>
-                <li><Link href="/dashboard">Home</Link></li>
+                <li><Link href="/portal/dashboard">Home</Link></li>
                 {segments.map((segment, index) => {
                     const path = '/' + segments.slice(0, index + 1).join('/');
                     const isLast = index === segments.length - 1;
@@ -468,11 +468,11 @@ function usePolledStats(fetchFn: () => Promise<any>, interval = 60000) {
             Get started by browsing available roles or adding your first candidate to the platform.
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
-            <Link href="/roles" className="btn btn-primary">
+            <Link href="/portal/roles" className="btn btn-primary">
                 <i className="fa-solid fa-briefcase mr-2"></i>
                 Browse Roles
             </Link>
-            <Link href="/candidates/new" className="btn btn-outline">
+            <Link href="/portal/candidates/new" className="btn btn-outline">
                 <i className="fa-solid fa-user-plus mr-2"></i>
                 Add Candidate
             </Link>
@@ -600,7 +600,7 @@ function usePolledStats(fetchFn: () => Promise<any>, interval = 60000) {
                     </div>
                 </div>
                 <div>
-                    <Link href={`/roles/${job.id}`} className="hover:text-primary">
+                    <Link href={`/portal/roles/${job.id}`} className="hover:text-primary">
                         <h3 className="card-title text-lg group-hover:text-primary transition-colors">
                             {job.title}
                         </h3>
@@ -652,11 +652,11 @@ function usePolledStats(fetchFn: () => Promise<any>, interval = 60000) {
                 Posted {formatDate(job.created_at)}
             </span>
             <div className="flex gap-2">
-                <Link href={`/roles/${job.id}`} className="btn btn-primary btn-sm">
+                <Link href={`/portal/roles/${job.id}`} className="btn btn-primary btn-sm">
                     View Details
                 </Link>
                 {isRecruiter && (
-                    <Link href={`/roles/${job.id}/submit`} className="btn btn-outline btn-sm">
+                    <Link href={`/portal/roles/${job.id}/submit`} className="btn btn-outline btn-sm">
                         Submit Candidate
                     </Link>
                 )}
@@ -1153,11 +1153,11 @@ import { Line } from 'react-chartjs-2';
 ```tsx
 {/* Mobile Bottom Navigation - visible only on mobile */}
 <div className="dock lg:hidden">
-    <Link href="/dashboard" className={pathname === '/dashboard' ? 'dock-active' : ''}>
+    <Link href="/portal/dashboard" className={pathname === '/portal/dashboard' ? 'dock-active' : ''}>
         <i className="fa-solid fa-house"></i>
         <span className="dock-label">Home</span>
     </Link>
-    <Link href="/roles" className={pathname?.startsWith('/roles') ? 'dock-active' : ''}>
+    <Link href="/portal/roles" className={pathname?.startsWith('/portal/roles') ? 'dock-active' : ''}>
         <i className="fa-solid fa-briefcase"></i>
         <span className="dock-label">Roles</span>
     </Link>
@@ -1168,7 +1168,7 @@ import { Line } from 'react-chartjs-2';
             <span className="badge badge-xs badge-error absolute -top-1 -right-1">{actionableCount}</span>
         )}
     </Link>
-    <Link href="/placements" className={pathname?.startsWith('/placements') ? 'dock-active' : ''}>
+    <Link href="/portal/placements" className={pathname?.startsWith('/placements') ? 'dock-active' : ''}>
         <i className="fa-solid fa-trophy"></i>
         <span className="dock-label">Earnings</span>
     </Link>
@@ -1441,7 +1441,7 @@ export function PageHeader({ title, description, actions }: PageHeaderProps) {
     title="Candidates"
     description="View and manage all your submitted candidates"
     actions={
-        <Link href="/candidates/new" className="btn btn-primary gap-2">
+        <Link href="/portal/candidates/new" className="btn btn-primary gap-2">
             <i className="fa-solid fa-plus"></i>
             New Candidate
         </Link>

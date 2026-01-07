@@ -685,7 +685,7 @@ ProposalsPage
 - [ ] `apps/portal/src/app/(authenticated)/proposals/page.tsx` (old version)
 - [ ] `apps/portal/src/app/(authenticated)/proposals/components/proposals-list-client.tsx`
 - [ ] `apps/portal/src/components/proposal-card.tsx` (old recruiter-collaboration version)
-- [ ] `apps/portal/src/app/(authenticated)/dashboard/components/proposed-jobs-list.tsx`
+- [ ] `apps/portal/src/app/(authenticated)/portal/dashboard/components/proposed-jobs-list.tsx`
 
 ### Code to Remove/Update
 
@@ -707,7 +707,7 @@ async getProposedJobsForRecruiter(recruiterId: string) { ... }
 app.get('/recruiters/:recruiterId/proposed-jobs', ...)
 ```
 
-**Recruiter Dashboard (`apps/portal/src/app/(authenticated)/dashboard/components/recruiter-dashboard.tsx`):**
+**Recruiter Dashboard (`apps/portal/src/app/(authenticated)/portal/dashboard/components/recruiter-dashboard.tsx`):**
 ```typescript
 // UPDATE: Replace ProposedJobsList import with unified proposals
 import ProposedJobsList from './proposed-jobs-list';  // REMOVE

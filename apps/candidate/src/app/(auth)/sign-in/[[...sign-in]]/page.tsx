@@ -34,7 +34,7 @@ export default function SignInPage() {
 
             if (signInAttempt.status === 'complete') {
                 await setActive({ session: signInAttempt.createdSessionId });
-                router.push(redirectUrl || '/dashboard');
+                router.push(redirectUrl || '/portal/dashboard');
             } else {
                 setError('Sign in incomplete. Please try again.');
             }
@@ -51,7 +51,7 @@ export default function SignInPage() {
         signIn.authenticateWithRedirect({
             strategy: provider,
             redirectUrl: '/sso-callback',
-            redirectUrlComplete: redirectUrl || '/dashboard',
+            redirectUrlComplete: redirectUrl || '/portal/dashboard',
         });
     };
 

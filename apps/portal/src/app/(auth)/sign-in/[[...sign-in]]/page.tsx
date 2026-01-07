@@ -46,7 +46,7 @@ export default function SignInPage() {
                 if (invitationId) {
                     router.push(`/accept-invitation/${invitationId}`);
                 } else {
-                    router.push('/dashboard');
+                    router.push('/portal/dashboard');
                 }
             } else {
                 setError('Sign in incomplete. Please try again.');
@@ -65,7 +65,7 @@ export default function SignInPage() {
         const redirectUrl = '/sso-callback';
         const redirectUrlComplete = invitationId
             ? `/accept-invitation/${invitationId}`
-            : '/dashboard';
+            : '/portal/dashboard';
 
         signIn.authenticateWithRedirect({
             strategy: provider,
@@ -98,7 +98,7 @@ export default function SignInPage() {
 
                         <div className="space-y-2">
                             <button
-                                onClick={() => router.push('/dashboard')}
+                                onClick={() => router.push('/portal/dashboard')}
                                 className="btn btn-primary w-full"
                             >
                                 <i className="fa-solid fa-home"></i>

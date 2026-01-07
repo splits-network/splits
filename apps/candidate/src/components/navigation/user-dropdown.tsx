@@ -78,19 +78,19 @@ export default function UserDropdown() {
 
                 {/* Menu Items */}
                 <li>
-                    <Link href="/dashboard">
+                    <Link href="/portal/dashboard">
                         <i className="fa-solid fa-house"></i>
                         Dashboard
                     </Link>
                 </li>
                 <li>
-                    <Link href="/profile">
+                    <Link href="/portal/profile">
                         <i className="fa-solid fa-user"></i>
                         Profile
                     </Link>
                 </li>
                 <li>
-                    <Link href="/applications">
+                    <Link href="/portal/application">
                         <i className="fa-solid fa-file-lines"></i>
                         Applications
                     </Link>

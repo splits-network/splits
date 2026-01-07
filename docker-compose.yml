@@ -417,8 +417,8 @@ services:
       CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
       NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
-      NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: /dashboard
-      NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: /dashboard
+      NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: /portal/dashboard
+      NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: /portal/dashboard
       NEXT_PUBLIC_APP_URL: http://localhost:3101
     volumes:
       - ./apps/candidate/src:/app/apps/candidate/src

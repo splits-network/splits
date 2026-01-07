@@ -57,7 +57,7 @@ envsubst < infra/k8s/candidate/deployment.yaml | kubectl apply -f -
 ### Clerk Routes
 - `NEXT_PUBLIC_CLERK_SIGN_IN_URL` - `/sign-in`
 - `NEXT_PUBLIC_CLERK_SIGN_UP_URL` - `/sign-up`
-- `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` - `/dashboard`
+- `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` - `/portal/dashboard`
 - `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` - `/onboarding`
 
 ## Kubernetes Resources

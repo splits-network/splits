@@ -6,7 +6,7 @@ export default function AuthenticatedNav() {
         <nav className="navbar bg-base-100 shadow">
             <div className="container mx-auto">
                 <div className="flex-1">
-                    <Link href="/dashboard" className="btn btn-ghost text-xl">
+                    <Link href="/portal/dashboard" className="btn btn-ghost text-xl">
                         <i className="fa-solid fa-briefcase"></i>
                         Applicant Network
                     </Link>
@@ -17,19 +17,19 @@ export default function AuthenticatedNav() {
                             <Link href="/jobs">Browse Jobs</Link>
                         </li>
                         <li>
-                            <Link href="/dashboard">
+                            <Link href="/portal/dashboard">
                                 <i className="fa-solid fa-house"></i>
                                 Dashboard
                             </Link>
                         </li>
                         <li>
-                            <Link href="/applications">
+                            <Link href="/portal/application">
                                 <i className="fa-solid fa-file-lines"></i>
                                 Applications
                             </Link>
                         </li>
                         <li>
-                            <Link href="/profile">
+                            <Link href="/portal/profile">
                                 <i className="fa-solid fa-user"></i>
                                 Profile
                             </Link>

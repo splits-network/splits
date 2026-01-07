@@ -61,7 +61,7 @@ export function PaginationControls(props: PaginationControlsProps) {
                 {/* Limit selector */}
                 {showLimitSelector && onLimitChange && (
                     <div className="flex items-center gap-2">
-                        <span className="text-sm text-base-content/70">Per page:</span>
+                        <span className="text-sm text-base-content/70 whitespace-nowrap">Per page:</span>
                         <select
                             className="select select-sm select-bordered"
                             value={limit}

@@ -121,7 +121,7 @@ export default function SignUpPage() {
                     console.error('Failed to create user in database (webhook will handle):', userCreationError);
                 }
 
-                router.push(redirectUrl || '/dashboard');
+                router.push(redirectUrl || '/portal/dashboard');
             } else {
                 setError('Verification incomplete. Please try again.');
             }
@@ -138,7 +138,7 @@ export default function SignUpPage() {
         signUp.authenticateWithRedirect({
             strategy: provider,
             redirectUrl: '/sso-callback',
-            redirectUrlComplete: redirectUrl || '/dashboard',
+            redirectUrlComplete: redirectUrl || '/portal/dashboard',
         });
     };
 

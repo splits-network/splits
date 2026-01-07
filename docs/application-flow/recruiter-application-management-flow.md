@@ -69,13 +69,13 @@ When a recruiter views a candidate's details page (where an active relationship 
 **Current Behavior:**
 - Displays list of all applications for a candidate
 - Shows application stage, job title, timestamps
-- Clicking application link → redirects to `/roles/${application.job_id}` (the job page)
+- Clicking application link → redirects to `/portal/roles/${application.job_id}` (the job page)
 - **Gap:** No direct link to manage the specific application
 
 **Code Reference (Lines 420-429):**
 ```tsx
 <Link
-    href={`/roles/${application.job_id}`}
+    href={`/portal/roles/${application.job_id}`}
     className="btn btn-sm btn-ghost"
 >
     <i className="fa-solid fa-arrow-right"></i>
@@ -354,7 +354,7 @@ await apiClient.updateApplicationStage(
 **Change:** Line ~428
 ```tsx
 // BEFORE
-<Link href={`/roles/${application.job_id}`}>
+<Link href={`/portal/roles/${application.job_id}`}>
   <i className="fa-solid fa-arrow-right"></i>
 </Link>
 
@@ -379,7 +379,7 @@ await apiClient.updateApplicationStage(
     Manage
   </Link>
   <Link
-    href={`/roles/${application.job_id}`}
+    href={`/portal/roles/${application.job_id}`}
     className="btn btn-sm btn-ghost"
   >
     <i className="fa-solid fa-briefcase"></i>

@@ -954,7 +954,7 @@ export type TeamRole = 'owner' | 'admin' | 'member' | 'collaborator';
 ### 12.1 Recruiter Workflow
 
 **Daily Activities:**
-1. **Discover Jobs:** Browse `/roles` to see all active jobs on the platform
+1. **Discover Jobs:** Browse `/portal/roles` to see all active jobs on the platform
 2. **Research Opportunities:** Review job details, fee percentages, company information
 3. **Source Candidates:** Search external channels for qualified candidates
 4. **Submit Candidates:** Use Submit Candidate modal to add candidates to jobs
@@ -970,9 +970,9 @@ export type TeamRole = 'owner' | 'admin' | 'member' | 'collaborator';
 - Review earnings and payouts
 
 **Key Pages:**
-- `/dashboard` - Personal metrics and activity
-- `/roles` - Browse all active jobs
-- `/roles/:id` - Job details and submit candidate
+- `/portal/dashboard` - Personal metrics and activity
+- `/portal/roles` - Browse all active jobs
+- `/portal/roles/:id` - Job details and submit candidate
 - `/candidates` - View sourced candidates and relationships
 - `/placements` - Track successful placements
 
@@ -998,9 +998,9 @@ export type TeamRole = 'owner' | 'admin' | 'member' | 'collaborator';
 - Manage company profile and settings
 
 **Key Pages:**
-- `/dashboard` - Company hiring metrics
-- `/roles` - All company jobs
-- `/roles/:id` - Job details and pipeline
+- `/portal/dashboard` - Company hiring metrics
+- `/portal/roles` - All company jobs
+- `/portal/roles/:id` - Job details and pipeline
 - `/candidates` - All submitted candidates
 - `/placements` - Company hires and fees
 - `/settings/company` - Company profile
@@ -1025,9 +1025,9 @@ export type TeamRole = 'owner' | 'admin' | 'member' | 'collaborator';
 - View department hiring metrics
 
 **Key Pages:**
-- `/dashboard` - Department/role metrics
-- `/roles` - Company jobs
-- `/roles/:id` - Job pipeline and candidates
+- `/portal/dashboard` - Department/role metrics
+- `/portal/roles` - Company jobs
+- `/portal/roles/:id` - Job pipeline and candidates
 - `/candidates` - Submitted candidates
 - `/candidates/:id` - Candidate details and feedback
 
@@ -1052,10 +1052,10 @@ export type TeamRole = 'owner' | 'admin' | 'member' | 'collaborator';
 - Generate platform reports
 
 **Key Pages:**
-- `/admin/dashboard` - Platform-wide metrics
+- `/admin/portal/dashboard` - Platform-wide metrics
 - `/admin/recruiters` - Recruiter management
 - `/admin/companies` - Company directory
-- `/roles` - All jobs (global view)
+- `/portal/roles` - All jobs (global view)
 - `/admin/placements` - All placements and fees
 - `/admin/system` - Configuration and settings
 

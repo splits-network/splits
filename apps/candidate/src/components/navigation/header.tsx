@@ -100,9 +100,9 @@ export default function Header() {
                         {isSignedIn && (
                             <>
                                 <li className="menu-title mt-2">My Account</li>
-                                <li><Link href="/dashboard">Dashboard</Link></li>
-                                <li><Link href="/applications">Applications</Link></li>
-                                <li><Link href="/profile">Profile</Link></li>
+                                <li><Link href="/portal/dashboard">Dashboard</Link></li>
+                                <li><Link href="/portal/application">Applications</Link></li>
+                                <li><Link href="/portal/profile">Profile</Link></li>
                             </>
                         )}
                     </ul>
@@ -326,7 +326,7 @@ export default function Header() {
 
                 {isSignedIn ? (
                     <>
-                        <Link href="/dashboard" className="btn btn-ghost xs:btn-circle" title='Dashboard'>
+                        <Link href="/portal/dashboard" className="btn btn-ghost xs:btn-circle" title='Dashboard'>
                             <i className="fa-solid fa-gauge text-xl"></i> <span className='hidden md:inline-block'>Dashboard</span>
                         </Link>
                         <NotificationBell />
