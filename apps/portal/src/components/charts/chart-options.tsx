@@ -126,6 +126,33 @@ export function applyThemeToChart(chart: any) {
         ds.baseContentBorderColor = baseContentHex;
         ds.baseContentBackgroundColor = hexToRgba(baseContentHex, 0.1);
     });
+    // Also update options that don't live on datasets (ticks, grid, legend, tooltip)
+    const opts: any = chart.options || {};
+    if (opts.scales) {
+        if (opts.scales.x) {
+            opts.scales.x.ticks = { ...(opts.scales.x.ticks || {}), color: baseContentHex };
+            if (opts.scales.x.grid) {
+                opts.scales.x.grid.color = hexToRgba(base300Hex, 0.4);
+            }
+        }
+        if (opts.scales.y) {
+            opts.scales.y.ticks = { ...(opts.scales.y.ticks || {}), color: baseContentHex };
+            if (opts.scales.y.grid) {
+                opts.scales.y.grid.color = hexToRgba(base300Hex, 0.4);
+            }
+        }
+    }
+    if (opts.plugins) {
+        if (opts.plugins.legend && opts.plugins.legend.labels) {
+            opts.plugins.legend.labels.color = baseContentHex;
+        }
+        if (opts.plugins.tooltip) {
+            opts.plugins.tooltip.backgroundColor = hexToRgba(base100Hex, 0.95);
+            opts.plugins.tooltip.titleColor = baseContentHex;
+            opts.plugins.tooltip.bodyColor = baseContentHex;
+            opts.plugins.tooltip.borderColor = base300Hex;
+        }
+    }
     chart.update();
 }
 
@@ -134,7 +161,7 @@ const chartRegistry = new Set<any>();
 
 export function registerChart(chart: any) {
     chartRegistry.add(chart);
-    return () => chartRegistry.delete(chart); // Return cleanup function
+    return () => { chartRegistry.delete(chart); }; // Return cleanup function with void return
 }
 
 export function initThemeListener() {

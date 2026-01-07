@@ -369,14 +369,14 @@ export function RolesTrendsChart({ jobs, loading, trendPeriod, onTrendPeriodChan
                     </span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
-                    <span className="w-1.5 h-3 rounded-sm" style={{ backgroundColor: 'oklch(0.6 0.15 250)' }}></span>
+                    <span className="w-1.5 h-3 rounded-sm" style={{ backgroundColor: dataset.infoBorderColor }}></span>
                     <span className="text-base-content/70">Active</span>
                     <span className={`font-medium ${changes.active.startsWith('+') ? 'text-success' : changes.active.startsWith('-') ? 'text-error' : 'text-base-content/50'}`}>
                         {changes.active}
                     </span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
-                    <span className="w-1.5 h-3 rounded-sm" style={{ backgroundColor: 'oklch(0.7 0.02 250)' }}></span>
+                    <span className="w-1.5 h-3 rounded-sm" style={{ backgroundColor: dataset.neutralBorderColor }}></span>
                     <span className="text-base-content/70">Filled</span>
                     <span className={`font-medium ${changes.filled.startsWith('+') ? 'text-success' : changes.filled.startsWith('-') ? 'text-error' : 'text-base-content/50'}`}>
                         {changes.filled}

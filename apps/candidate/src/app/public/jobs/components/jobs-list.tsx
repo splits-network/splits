@@ -127,7 +127,7 @@ export default function JobsListClient({
         if (typeFilter) params.set('employment_type', typeFilter);
         if (currentPage > 1) params.set('page', currentPage.toString());
 
-        const newUrl = params.toString() ? `/jobs?${params.toString()}` : '/jobs';
+        const newUrl = params.toString() ? `/public/jobs?${params.toString()}` : '/public/jobs';
 
         // Only update URL if it's different from current URL to prevent infinite loop
         const currentUrl = window.location.pathname + (window.location.search || '');

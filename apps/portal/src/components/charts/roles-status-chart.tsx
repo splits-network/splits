@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useEffect } from 'react';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, type TooltipItem } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { registerChart } from './chart-options';
 import type { Job } from '../../app/portal/roles/components/role-card';
@@ -103,11 +103,13 @@ export function RolesStatusChart({ jobs, loading }: RolesStatusChartProps) {
                 cornerRadius: 8,
                 displayColors: true,
                 callbacks: {
-                    label: function (context: { label?: string; raw?: number }) {
+                    label: function (tooltipItem: TooltipItem<'doughnut'>) {
                         const total = jobs.length;
-                        const value = context.raw || 0;
-                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
-                        return `${context.label}: ${value} (${percentage}%)`;
+                        const raw = tooltipItem.raw as number | undefined;
+                        const value = raw ?? 0;
+                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+                        const label = tooltipItem.label ?? '';
+                        return `${label}: ${value} (${percentage}%)`;
                     },
                 },
             },
