@@ -1,61 +1,80 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import { useViewMode } from '@/hooks/use-view-mode';
+import {
+    useStandardList,
+    PaginationControls,
+    ViewModeToggle,
+    SearchInput,
+    EmptyState,
+    LoadingState,
+    ErrorState,
+} from '@/hooks/use-standard-list';
 
 interface Recruiter {
     id: string;
     user_id: string;
     status: 'pending' | 'active' | 'suspended';
     bio?: string;
+    name?: string;
+    email?: string;
     created_at: string;
+}
+
+interface RecruiterFilters {
+    status?: 'pending' | 'active' | 'suspended';
 }
 
 export default function RecruiterManagementPage() {
     const { getToken } = useAuth();
-    const [recruiters, setRecruiters] = useState<Recruiter[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState<'all' | 'pending' | 'active' | 'suspended'>('all');
     const [updatingId, setUpdatingId] = useState<string | null>(null);
-    const [viewMode, setViewMode] = useViewMode('adminRecruitersViewMode', 'table');
 
-    useEffect(() => {
-        loadRecruiters();
-    }, []);
-
-    async function loadRecruiters() {
-        try {
+    const {
+        items: recruiters,
+        loading,
+        error,
+        pagination,
+        filters,
+        search,
+        viewMode,
+        setSearch,
+        setFilters,
+        setPage,
+        setViewMode,
+        refresh,
+    } = useStandardList<Recruiter, RecruiterFilters>({
+        fetchFn: async (params) => {
             const token = await getToken();
-            if (!token) {
-                throw new Error('No auth token');
-            }
+            if (!token) throw new Error('No auth token');
             const apiClient = createAuthenticatedClient(token);
-            const response = await apiClient.get('/recruiters');
-            setRecruiters(response.data || []);
-        } catch (error) {
-            console.error('Failed to load recruiters:', error);
-        } finally {
-            setLoading(false);
-        }
-    }
+
+            const queryParams = new URLSearchParams();
+            queryParams.set('page', String(params.page));
+            queryParams.set('limit', String(params.limit));
+            if (params.search) queryParams.set('search', params.search);
+            if (params.filters?.status) queryParams.set('status', params.filters.status);
+            if (params.sort_by) queryParams.set('sort_by', params.sort_by);
+            if (params.sort_order) queryParams.set('sort_order', params.sort_order);
+
+            const response = await apiClient.get(`/recruiters?${queryParams.toString()}`);
+            return response;
+        },
+        defaultFilters: {},
+        storageKey: 'adminRecruitersViewMode',
+        syncToUrl: true,
+    });
 
     async function updateRecruiterStatus(recruiterId: string, newStatus: 'active' | 'suspended' | 'pending') {
         setUpdatingId(recruiterId);
         try {
             const token = await getToken();
-            if (!token) {
-                throw new Error('No auth token');
-            }
+            if (!token) throw new Error('No auth token');
             const apiClient = createAuthenticatedClient(token);
             await apiClient.patch(`/recruiters/${recruiterId}/status`, { status: newStatus });
-
-            // Update local state
-            setRecruiters(prev =>
-                prev.map(r => r.id === recruiterId ? { ...r, status: newStatus } : r)
-            );
+            refresh();
         } catch (error) {
             console.error('Failed to update recruiter status:', error);
             alert('Failed to update recruiter status');
@@ -64,19 +83,163 @@ export default function RecruiterManagementPage() {
         }
     }
 
-    const filteredRecruiters = recruiters.filter(r =>
-        filter === 'all' || r.status === filter
-    );
+    const statusOptions = [
+        { value: '', label: 'All Statuses' },
+        { value: 'pending', label: 'Pending' },
+        { value: 'active', label: 'Active' },
+        { value: 'suspended', label: 'Suspended' },
+    ];
 
-    const pendingCount = recruiters.filter(r => r.status === 'pending').length;
-    const activeCount = recruiters.filter(r => r.status === 'active').length;
-    const suspendedCount = recruiters.filter(r => r.status === 'suspended').length;
+    // Status badge component
+    function StatusBadge({ status }: { status: Recruiter['status'] }) {
+        if (status === 'pending') {
+            return (
+                <span className="badge badge-warning gap-1">
+                    <i className="fa-solid fa-clock"></i>
+                    Pending
+                </span>
+            );
+        }
+        if (status === 'active') {
+            return (
+                <span className="badge badge-success gap-1">
+                    <i className="fa-solid fa-check"></i>
+                    Active
+                </span>
+            );
+        }
+        if (status === 'suspended') {
+            return (
+                <span className="badge badge-error gap-1">
+                    <i className="fa-solid fa-ban"></i>
+                    Suspended
+                </span>
+            );
+        }
+        return null;
+    }
 
-    if (loading) {
+    // Action buttons component
+    function ActionButtons({ recruiter, size = 'sm' }: { recruiter: Recruiter; size?: 'xs' | 'sm' }) {
+        const btnSize = size === 'xs' ? 'btn-xs' : 'btn-sm';
+        const isUpdating = updatingId === recruiter.id;
+
+        if (recruiter.status === 'pending') {
+            return (
+                <button
+                    onClick={() => updateRecruiterStatus(recruiter.id, 'active')}
+                    disabled={isUpdating}
+                    className={`btn ${btnSize} btn-success`}
+                >
+                    {isUpdating ? (
+                        <span className="loading loading-spinner loading-xs"></span>
+                    ) : (
+                        <>
+                            <i className="fa-solid fa-check"></i>
+                            Approve
+                        </>
+                    )}
+                </button>
+            );
+        }
+        if (recruiter.status === 'active') {
+            return (
+                <button
+                    onClick={() => updateRecruiterStatus(recruiter.id, 'suspended')}
+                    disabled={isUpdating}
+                    className={`btn ${btnSize} btn-error`}
+                >
+                    {isUpdating ? (
+                        <span className="loading loading-spinner loading-xs"></span>
+                    ) : (
+                        <>
+                            <i className="fa-solid fa-ban"></i>
+                            Suspend
+                        </>
+                    )}
+                </button>
+            );
+        }
+        if (recruiter.status === 'suspended') {
+            return (
+                <button
+                    onClick={() => updateRecruiterStatus(recruiter.id, 'active')}
+                    disabled={isUpdating}
+                    className={`btn ${btnSize} btn-success`}
+                >
+                    {isUpdating ? (
+                        <span className="loading loading-spinner loading-xs"></span>
+                    ) : (
+                        <>
+                            <i className="fa-solid fa-rotate-left"></i>
+                            Reactivate
+                        </>
+                    )}
+                </button>
+            );
+        }
+        return null;
+    }
+
+    // Recruiter card component for grid view
+    function RecruiterCard({ recruiter }: { recruiter: Recruiter }) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <span className="loading loading-spinner loading-lg"></span>
+            <div className="card bg-base-100 shadow hover:shadow-md transition-shadow">
+                <div className="card-body">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <h3 className="font-semibold">
+                                {recruiter.name || 'Unknown'}
+                            </h3>
+                            <p className="text-sm text-base-content/60">
+                                {recruiter.email || recruiter.id.slice(0, 8)}
+                            </p>
+                        </div>
+                        <StatusBadge status={recruiter.status} />
+                    </div>
+                    <p className="text-sm mt-2 min-h-[3rem] line-clamp-2">
+                        {recruiter.bio || (
+                            <span className="text-base-content/40 italic">No bio provided</span>
+                        )}
+                    </p>
+                    <div className="text-xs text-base-content/60 mt-2">
+                        Joined {new Date(recruiter.created_at).toLocaleDateString()}
+                    </div>
+                    <div className="card-actions justify-end mt-4">
+                        <ActionButtons recruiter={recruiter} size="sm" />
+                    </div>
+                </div>
             </div>
+        );
+    }
+
+    // Recruiter row component for table view
+    function RecruiterRow({ recruiter }: { recruiter: Recruiter }) {
+        return (
+            <tr>
+                <td>
+                    <div>
+                        <div className="font-medium">{recruiter.name || 'Unknown'}</div>
+                        <div className="text-xs text-base-content/60">
+                            {recruiter.email || recruiter.id.slice(0, 8)}
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <StatusBadge status={recruiter.status} />
+                </td>
+                <td>
+                    <div className="max-w-xs truncate">
+                        {recruiter.bio || (
+                            <span className="text-base-content/50">No bio</span>
+                        )}
+                    </div>
+                </td>
+                <td>{new Date(recruiter.created_at).toLocaleDateString()}</td>
+                <td>
+                    <ActionButtons recruiter={recruiter} size="xs" />
+                </td>
+            </tr>
         );
     }
 
@@ -96,164 +259,61 @@ export default function RecruiterManagementPage() {
                 </div>
             </div>
 
-            {/* Filters and View Toggle */}
-            <div className="flex gap-4 flex-wrap items-center justify-between">
-                <div className="flex gap-2 flex-wrap">
-                    <button
-                        onClick={() => setFilter('all')}
-                        className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-ghost'}`}
+            {/* Filters Row */}
+            <div className="flex flex-wrap gap-4 items-center justify-between">
+                <div className="flex flex-wrap gap-4 items-center">
+                    <SearchInput
+                        value={search}
+                        onChange={setSearch}
+                        placeholder="Search recruiters..."
+                    />
+                    <select
+                        className="select select-sm"
+                        value={filters.status || ''}
+                        onChange={(e) => setFilters({
+                            ...filters,
+                            status: e.target.value as RecruiterFilters['status'] || undefined
+                        })}
                     >
-                        All ({recruiters.length})
-                    </button>
-                    <button
-                        onClick={() => setFilter('pending')}
-                        className={`btn btn-sm ${filter === 'pending' ? 'btn-warning' : 'btn-ghost'}`}
-                    >
-                        <i className="fa-solid fa-clock mr-1"></i>
-                        Pending ({pendingCount})
-                    </button>
-                    <button
-                        onClick={() => setFilter('active')}
-                        className={`btn btn-sm ${filter === 'active' ? 'btn-success' : 'btn-ghost'}`}
-                    >
-                        <i className="fa-solid fa-check mr-1"></i>
-                        Active ({activeCount})
-                    </button>
-                    <button
-                        onClick={() => setFilter('suspended')}
-                        className={`btn btn-sm ${filter === 'suspended' ? 'btn-error' : 'btn-ghost'}`}
-                    >
-                        <i className="fa-solid fa-ban mr-1"></i>
-                        Suspended ({suspendedCount})
-                    </button>
+                        {statusOptions.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                            </option>
+                        ))}
+                    </select>
                 </div>
-                <div className="join">
-                    <button
-                        className={`btn btn-sm join-item ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
-                        onClick={() => setViewMode('grid')}
-                        title="Grid View"
-                    >
-                        <i className="fa-solid fa-grip"></i>
-                    </button>
-                    <button
-                        className={`btn btn-sm join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
-                        onClick={() => setViewMode('table')}
-                        title="Table View"
-                    >
-                        <i className="fa-solid fa-table"></i>
-                    </button>
-                </div>
+                <ViewModeToggle viewMode={viewMode} setViewMode={setViewMode} />
             </div>
 
-            {/* Recruiters Grid View */}
-            {viewMode === 'grid' && (
+            {/* Content */}
+            {loading ? (
+                <LoadingState />
+            ) : error ? (
+                <ErrorState message={error} onRetry={refresh} />
+            ) : recruiters.length === 0 ? (
+                <EmptyState
+                    icon="fa-solid fa-users"
+                    title="No recruiters found"
+                    description={
+                        search || filters.status
+                            ? 'Try adjusting your search or filters'
+                            : 'Recruiters will appear here once they sign up'
+                    }
+                />
+            ) : viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredRecruiters.length === 0 ? (
-                        <div className="col-span-full card bg-base-100 shadow">
-                            <div className="card-body items-center text-center py-12">
-                                <i className="fa-solid fa-users text-6xl text-base-content/20"></i>
-                                <h3 className="text-xl font-semibold mt-4">No recruiters found</h3>
-                            </div>
-                        </div>
-                    ) : (
-                        filteredRecruiters.map((recruiter) => (
-                            <div key={recruiter.id} className="card bg-base-100 shadow hover:shadow transition-shadow">
-                                <div className="card-body">
-                                    <div className="flex justify-between items-start">
-                                        <div className="font-mono text-xs text-base-content/60">
-                                            {recruiter.id.slice(0, 8)}
-                                        </div>
-                                        {recruiter.status === 'pending' && (
-                                            <span className="badge badge-warning gap-1">
-                                                <i className="fa-solid fa-clock"></i>
-                                                Pending
-                                            </span>
-                                        )}
-                                        {recruiter.status === 'active' && (
-                                            <span className="badge badge-success gap-1">
-                                                <i className="fa-solid fa-check"></i>
-                                                Active
-                                            </span>
-                                        )}
-                                        {recruiter.status === 'suspended' && (
-                                            <span className="badge badge-error gap-1">
-                                                <i className="fa-solid fa-ban"></i>
-                                                Suspended
-                                            </span>
-                                        )}
-                                    </div>
-                                    <p className="text-sm mt-2 min-h-[3rem]">
-                                        {recruiter.bio || <span className="text-base-content/40 italic">No bio provided</span>}
-                                    </p>
-                                    <div className="text-xs text-base-content/60 mt-2">
-                                        Joined {new Date(recruiter.created_at).toLocaleDateString()}
-                                    </div>
-                                    <div className="card-actions justify-end mt-4">
-                                        {recruiter.status === 'pending' && (
-                                            <button
-                                                onClick={() => updateRecruiterStatus(recruiter.id, 'active')}
-                                                disabled={updatingId === recruiter.id}
-                                                className="btn btn-sm btn-success"
-                                            >
-                                                {updatingId === recruiter.id ? (
-                                                    <span className="loading loading-spinner loading-xs"></span>
-                                                ) : (
-                                                    <>
-                                                        <i className="fa-solid fa-check"></i>
-                                                        Approve
-                                                    </>
-                                                )}
-                                            </button>
-                                        )}
-                                        {recruiter.status === 'active' && (
-                                            <button
-                                                onClick={() => updateRecruiterStatus(recruiter.id, 'suspended')}
-                                                disabled={updatingId === recruiter.id}
-                                                className="btn btn-sm btn-error"
-                                            >
-                                                {updatingId === recruiter.id ? (
-                                                    <span className="loading loading-spinner loading-xs"></span>
-                                                ) : (
-                                                    <>
-                                                        <i className="fa-solid fa-ban"></i>
-                                                        Suspend
-                                                    </>
-                                                )}
-                                            </button>
-                                        )}
-                                        {recruiter.status === 'suspended' && (
-                                            <button
-                                                onClick={() => updateRecruiterStatus(recruiter.id, 'active')}
-                                                disabled={updatingId === recruiter.id}
-                                                className="btn btn-sm btn-success"
-                                            >
-                                                {updatingId === recruiter.id ? (
-                                                    <span className="loading loading-spinner loading-xs"></span>
-                                                ) : (
-                                                    <>
-                                                        <i className="fa-solid fa-rotate-left"></i>
-                                                        Reactivate
-                                                    </>
-                                                )}
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))
-                    )}
+                    {recruiters.map((recruiter) => (
+                        <RecruiterCard key={recruiter.id} recruiter={recruiter} />
+                    ))}
                 </div>
-            )}
-
-            {/* Recruiters Table View */}
-            {viewMode === 'table' && (
+            ) : (
                 <div className="card bg-base-100 shadow">
                     <div className="card-body p-0">
                         <div className="overflow-x-auto">
                             <table className="table table-zebra">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
+                                        <th>Recruiter</th>
                                         <th>Status</th>
                                         <th>Bio</th>
                                         <th>Joined</th>
@@ -261,104 +321,22 @@ export default function RecruiterManagementPage() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredRecruiters.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={5} className="text-center py-8 text-base-content/70">
-                                                No recruiters found
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        filteredRecruiters.map((recruiter) => (
-                                            <tr key={recruiter.id}>
-                                                <td>
-                                                    <div className="font-mono text-xs">{recruiter.id.slice(0, 8)}</div>
-                                                </td>
-                                                <td>
-                                                    {recruiter.status === 'pending' && (
-                                                        <span className="badge badge-warning gap-1">
-                                                            <i className="fa-solid fa-clock"></i>
-                                                            Pending
-                                                        </span>
-                                                    )}
-                                                    {recruiter.status === 'active' && (
-                                                        <span className="badge badge-success gap-1">
-                                                            <i className="fa-solid fa-check"></i>
-                                                            Active
-                                                        </span>
-                                                    )}
-                                                    {recruiter.status === 'suspended' && (
-                                                        <span className="badge badge-error gap-1">
-                                                            <i className="fa-solid fa-ban"></i>
-                                                            Suspended
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    <div className="max-w-xs truncate">
-                                                        {recruiter.bio || <span className="text-base-content/50">No bio</span>}
-                                                    </div>
-                                                </td>
-                                                <td>{new Date(recruiter.created_at).toLocaleDateString()}</td>
-                                                <td>
-                                                    <div className="flex gap-2">
-                                                        {recruiter.status === 'pending' && (
-                                                            <button
-                                                                onClick={() => updateRecruiterStatus(recruiter.id, 'active')}
-                                                                disabled={updatingId === recruiter.id}
-                                                                className="btn btn-xs btn-success"
-                                                            >
-                                                                {updatingId === recruiter.id ? (
-                                                                    <span className="loading loading-spinner loading-xs"></span>
-                                                                ) : (
-                                                                    <>
-                                                                        <i className="fa-solid fa-check"></i>
-                                                                        Approve
-                                                                    </>
-                                                                )}
-                                                            </button>
-                                                        )}
-                                                        {recruiter.status === 'active' && (
-                                                            <button
-                                                                onClick={() => updateRecruiterStatus(recruiter.id, 'suspended')}
-                                                                disabled={updatingId === recruiter.id}
-                                                                className="btn btn-xs btn-error"
-                                                            >
-                                                                {updatingId === recruiter.id ? (
-                                                                    <span className="loading loading-spinner loading-xs"></span>
-                                                                ) : (
-                                                                    <>
-                                                                        <i className="fa-solid fa-ban"></i>
-                                                                        Suspend
-                                                                    </>
-                                                                )}
-                                                            </button>
-                                                        )}
-                                                        {recruiter.status === 'suspended' && (
-                                                            <button
-                                                                onClick={() => updateRecruiterStatus(recruiter.id, 'active')}
-                                                                disabled={updatingId === recruiter.id}
-                                                                className="btn btn-xs btn-success"
-                                                            >
-                                                                {updatingId === recruiter.id ? (
-                                                                    <span className="loading loading-spinner loading-xs"></span>
-                                                                ) : (
-                                                                    <>
-                                                                        <i className="fa-solid fa-rotate-left"></i>
-                                                                        Reactivate
-                                                                    </>
-                                                                )}
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
+                                    {recruiters.map((recruiter) => (
+                                        <RecruiterRow key={recruiter.id} recruiter={recruiter} />
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Pagination */}
+            {!loading && !error && recruiters.length > 0 && (
+                <PaginationControls
+                    pagination={pagination}
+                    setPage={setPage}
+                />
             )}
         </div>
     );

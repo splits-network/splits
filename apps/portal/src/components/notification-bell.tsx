@@ -143,14 +143,14 @@ export default function NotificationBell() {
         <div className="dropdown dropdown-end">
             <button
                 type="button"
-                className="btn btn-ghost btn-circle relative"
+                className="btn btn-ghost btn-circle relative indicator"
                 onClick={() => setIsOpen(!isOpen)}
                 aria-label="Notifications"
                 title='Notifications'
             >
                 <i className="fa-solid fa-bell text-xl"></i>
                 {unreadCount > 0 && (
-                    <span className="badge badge-error badge-sm absolute top-1 right-1">
+                    <span className="badge badge-error badge-sm rounded-full absolute indicator-item text-xs opacity-70">
                         {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                 )}

@@ -1,46 +1,93 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ApiClient } from '@/lib/api-client';
+import { useState } from 'react';
+import Link from 'next/link';
+import { useAuth } from '@clerk/nextjs';
+import { createAuthenticatedClient } from '@/lib/api-client';
+import {
+    useStandardList,
+    PaginationControls,
+    SearchInput,
+    EmptyState,
+    LoadingState,
+    ErrorState,
+} from '@/hooks/use-standard-list';
+
+interface Payout {
+    id: string;
+    placement_id: string;
+    recruiter_id: string;
+    payout_amount: number;
+    placement_fee: number;
+    recruiter_share_percentage: number;
+    status: 'pending' | 'processing' | 'completed' | 'failed' | 'on_hold';
+    created_at: string;
+    processed_at?: string;
+    // Enriched
+    recruiter_name?: string;
+}
+
+interface PayoutFilters {
+    status?: 'pending' | 'processing' | 'completed' | 'failed' | 'on_hold';
+}
 
 export default function PayoutsAdminPage() {
-    const [payouts, setPayouts] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState<string>('pending');
+    const { getToken } = useAuth();
+    const [processingId, setProcessingId] = useState<string | null>(null);
 
-    useEffect(() => {
-        loadPayouts();
-    }, [filter]);
+    const {
+        items: payouts,
+        loading,
+        error,
+        pagination,
+        filters,
+        search,
+        setSearch,
+        setFilters,
+        setPage,
+        refresh,
+    } = useStandardList<Payout, PayoutFilters>({
+        fetchFn: async (params) => {
+            const token = await getToken();
+            if (!token) throw new Error('No auth token');
+            const apiClient = createAuthenticatedClient(token);
 
-    const loadPayouts = async () => {
-        setLoading(true);
-        try {
-            const api = new ApiClient();
-            // TODO: Add filter to API
-            const response = await api.get<{ data: any[] }>('/billing/payouts');
-            setPayouts(response.data || []);
-        } catch (error) {
-            console.error('Failed to load payouts:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+            const queryParams = new URLSearchParams();
+            queryParams.set('page', String(params.page));
+            queryParams.set('limit', String(params.limit));
+            if (params.search) queryParams.set('search', params.search);
+            if (params.filters?.status) queryParams.set('status', params.filters.status);
+            if (params.sort_by) queryParams.set('sort_by', params.sort_by);
+            if (params.sort_order) queryParams.set('sort_order', params.sort_order);
 
-    const processPayout = async (payoutId: string) => {
+            const response = await apiClient.get(`/payouts?${queryParams.toString()}`);
+            return response;
+        },
+        defaultFilters: { status: 'pending' },
+        syncToUrl: true,
+    });
+
+    async function processPayout(payoutId: string) {
         if (!confirm('Process this payout? This will initiate a Stripe transfer.')) return;
 
+        setProcessingId(payoutId);
         try {
-            const api = new ApiClient();
-            await api.post(`/billing/payouts/${payoutId}/process`);
+            const token = await getToken();
+            if (!token) throw new Error('No auth token');
+            const apiClient = createAuthenticatedClient(token);
+            await apiClient.post(`/payouts/${payoutId}/process`);
             alert('Payout processed successfully');
-            loadPayouts();
+            refresh();
         } catch (error) {
             console.error('Failed to process payout:', error);
             alert('Failed to process payout');
+        } finally {
+            setProcessingId(null);
         }
-    };
+    }
 
-    const getStatusBadge = (status: string) => {
+    // Status badge component
+    function StatusBadge({ status }: { status: Payout['status'] }) {
         const colors: Record<string, string> = {
             pending: 'badge-warning',
             processing: 'badge-info',
@@ -48,47 +95,127 @@ export default function PayoutsAdminPage() {
             failed: 'badge-error',
             on_hold: 'badge-neutral',
         };
-        return colors[status] || 'badge-neutral';
-    };
+        return (
+            <span className={`badge ${colors[status] || 'badge-neutral'} gap-1`}>
+                {status === 'pending' && <i className="fa-solid fa-clock"></i>}
+                {status === 'processing' && <i className="fa-solid fa-spinner fa-spin"></i>}
+                {status === 'completed' && <i className="fa-solid fa-check"></i>}
+                {status === 'failed' && <i className="fa-solid fa-xmark"></i>}
+                {status === 'on_hold' && <i className="fa-solid fa-pause"></i>}
+                {status}
+            </span>
+        );
+    }
+
+    const statusOptions = [
+        { value: '', label: 'All Statuses' },
+        { value: 'pending', label: 'Pending' },
+        { value: 'processing', label: 'Processing' },
+        { value: 'completed', label: 'Completed' },
+        { value: 'failed', label: 'Failed' },
+        { value: 'on_hold', label: 'On Hold' },
+    ];
+
+    // Calculate summary stats from loaded page
+    const pendingCount = payouts.filter(p => p.status === 'pending').length;
+    const processingCount = payouts.filter(p => p.status === 'processing').length;
+    const completedCount = payouts.filter(p => p.status === 'completed').length;
+    const totalAmount = payouts
+        .filter(p => p.status === 'completed')
+        .reduce((sum, p) => sum + (p.payout_amount || 0), 0);
 
     return (
-        <div className="container mx-auto p-6">
-            <div className="flex justify-between items-center mb-6">
+        <div className="space-y-6">
+            {/* Header */}
+            <div>
+                <Link href="/admin" className="text-sm text-primary hover:underline mb-2 inline-block">
+                    <i className="fa-solid fa-arrow-left mr-2"></i>
+                    Back to Admin Dashboard
+                </Link>
                 <h1 className="text-3xl font-bold">Payout Management</h1>
+                <p className="text-base-content/70 mt-1">
+                    Process and track recruiter payouts
+                </p>
             </div>
 
-            {/* Filters */}
-            <div className="card bg-base-100 shadow mb-6">
-                <div className="card-body">
-                    <div className="flex gap-2">
-                        {['all', 'pending', 'processing', 'completed', 'failed'].map((status) => (
-                            <button
-                                key={status}
-                                className={`btn btn-sm ${filter === status ? 'btn-primary' : 'btn-ghost'}`}
-                                onClick={() => setFilter(status)}
-                            >
-                                {status.charAt(0).toUpperCase() + status.slice(1)}
-                            </button>
-                        ))}
+            {/* Summary Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="stat bg-base-100 shadow rounded-lg">
+                    <div className="stat-title">Pending</div>
+                    <div className="stat-value text-warning">
+                        {loading ? '...' : pendingCount}
                     </div>
+                    <div className="stat-desc">Awaiting processing</div>
+                </div>
+
+                <div className="stat bg-base-100 shadow rounded-lg">
+                    <div className="stat-title">Processing</div>
+                    <div className="stat-value text-info">
+                        {loading ? '...' : processingCount}
+                    </div>
+                    <div className="stat-desc">In progress</div>
+                </div>
+
+                <div className="stat bg-base-100 shadow rounded-lg">
+                    <div className="stat-title">Completed</div>
+                    <div className="stat-value text-success">
+                        {loading ? '...' : completedCount}
+                    </div>
+                    <div className="stat-desc">This page</div>
+                </div>
+
+                <div className="stat bg-base-100 shadow rounded-lg">
+                    <div className="stat-title">Total Paid</div>
+                    <div className="stat-value text-2xl">
+                        {loading ? '...' : `$${totalAmount.toLocaleString()}`}
+                    </div>
+                    <div className="stat-desc">This page</div>
                 </div>
             </div>
 
-            {/* Payouts Table */}
-            <div className="card bg-base-100 shadow">
-                <div className="card-body">
-                    {loading ? (
-                        <div className="flex justify-center p-8">
-                            <span className="loading loading-spinner loading-lg"></span>
-                        </div>
-                    ) : payouts.length === 0 ? (
-                        <div className="text-center p-8 text-base-content/60">
-                            <i className="fa-solid fa-money-bill-wave text-4xl mb-2"></i>
-                            <p>No payouts found</p>
-                        </div>
-                    ) : (
+            {/* Filters Row */}
+            <div className="flex flex-wrap gap-4 items-center">
+                <SearchInput
+                    value={search}
+                    onChange={setSearch}
+                    placeholder="Search payouts..."
+                />
+                <select
+                    className="select select-sm"
+                    value={filters.status || ''}
+                    onChange={(e) => setFilters({
+                        ...filters,
+                        status: e.target.value as PayoutFilters['status'] || undefined
+                    })}
+                >
+                    {statusOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            {/* Content */}
+            {loading ? (
+                <LoadingState />
+            ) : error ? (
+                <ErrorState message={error} onRetry={refresh} />
+            ) : payouts.length === 0 ? (
+                <EmptyState
+                    icon="fa-solid fa-money-bill-wave"
+                    title="No payouts found"
+                    description={
+                        search || filters.status
+                            ? 'Try adjusting your search or filters'
+                            : 'Payouts will appear here once placements are completed'
+                    }
+                />
+            ) : (
+                <div className="card bg-base-100 shadow">
+                    <div className="card-body p-0">
                         <div className="overflow-x-auto">
-                            <table className="table">
+                            <table className="table table-zebra">
                                 <thead>
                                     <tr>
                                         <th>Placement</th>
@@ -106,23 +233,23 @@ export default function PayoutsAdminPage() {
                                         <tr key={payout.id}>
                                             <td>
                                                 <span className="font-mono text-sm">
-                                                    {payout.placement_id.substring(0, 8)}...
+                                                    {payout.placement_id?.substring(0, 8) || '-'}...
                                                 </span>
                                             </td>
                                             <td>
-                                                <span className="font-mono text-sm">
-                                                    {payout.recruiter_id.substring(0, 8)}...
-                                                </span>
+                                                {payout.recruiter_name || (
+                                                    <span className="font-mono text-sm">
+                                                        {payout.recruiter_id?.substring(0, 8) || '-'}...
+                                                    </span>
+                                                )}
                                             </td>
                                             <td className="font-semibold">
-                                                ${payout.payout_amount.toLocaleString()}
+                                                ${(payout.payout_amount || 0).toLocaleString()}
                                             </td>
-                                            <td>${payout.placement_fee.toLocaleString()}</td>
-                                            <td>{payout.recruiter_share_percentage}%</td>
+                                            <td>${(payout.placement_fee || 0).toLocaleString()}</td>
+                                            <td>{payout.recruiter_share_percentage || 0}%</td>
                                             <td>
-                                                <span className={`badge ${getStatusBadge(payout.status)}`}>
-                                                    {payout.status}
-                                                </span>
+                                                <StatusBadge status={payout.status} />
                                             </td>
                                             <td>
                                                 {new Date(payout.created_at).toLocaleDateString()}
@@ -131,19 +258,26 @@ export default function PayoutsAdminPage() {
                                                 <div className="flex gap-2">
                                                     {payout.status === 'pending' && (
                                                         <button
-                                                            className="btn btn-primary btn-sm"
+                                                            className="btn btn-primary btn-xs"
                                                             onClick={() => processPayout(payout.id)}
+                                                            disabled={processingId === payout.id}
                                                         >
-                                                            <i className="fa-solid fa-play"></i>
-                                                            Process
+                                                            {processingId === payout.id ? (
+                                                                <span className="loading loading-spinner loading-xs"></span>
+                                                            ) : (
+                                                                <>
+                                                                    <i className="fa-solid fa-play"></i>
+                                                                    Process
+                                                                </>
+                                                            )}
                                                         </button>
                                                     )}
-                                                    <a
+                                                    <Link
                                                         href={`/admin/payouts/${payout.id}`}
-                                                        className="btn btn-ghost btn-sm"
+                                                        className="btn btn-ghost btn-xs"
                                                     >
                                                         <i className="fa-solid fa-eye"></i>
-                                                    </a>
+                                                    </Link>
                                                 </div>
                                             </td>
                                         </tr>
@@ -151,48 +285,17 @@ export default function PayoutsAdminPage() {
                                 </tbody>
                             </table>
                         </div>
-                    )}
+                    </div>
                 </div>
-            </div>
+            )}
 
-            {/* Summary Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-                <div className="stats shadow">
-                    <div className="stat">
-                        <div className="stat-title">Pending</div>
-                        <div className="stat-value text-warning">
-                            {payouts.filter(p => p.status === 'pending').length}
-                        </div>
-                    </div>
-                </div>
-                <div className="stats shadow">
-                    <div className="stat">
-                        <div className="stat-title">Processing</div>
-                        <div className="stat-value text-info">
-                            {payouts.filter(p => p.status === 'processing').length}
-                        </div>
-                    </div>
-                </div>
-                <div className="stats shadow">
-                    <div className="stat">
-                        <div className="stat-title">Completed</div>
-                        <div className="stat-value text-success">
-                            {payouts.filter(p => p.status === 'completed').length}
-                        </div>
-                    </div>
-                </div>
-                <div className="stats shadow">
-                    <div className="stat">
-                        <div className="stat-title">Total Amount</div>
-                        <div className="stat-value text-sm">
-                            ${payouts
-                                .filter(p => p.status === 'completed')
-                                .reduce((sum, p) => sum + p.payout_amount, 0)
-                                .toLocaleString()}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {/* Pagination */}
+            {!loading && !error && payouts.length > 0 && (
+                <PaginationControls
+                    pagination={pagination}
+                    setPage={setPage}
+                />
+            )}
         </div>
     );
 }

@@ -1,6 +1,16 @@
+'use client';
+
 import Link from 'next/link';
-import { auth } from '@clerk/nextjs/server';
-import { ApiClient } from '@/lib/api-client';
+import { useAuth } from '@clerk/nextjs';
+import { createAuthenticatedClient } from '@/lib/api-client';
+import {
+    useStandardList,
+    PaginationControls,
+    SearchInput,
+    EmptyState,
+    LoadingState,
+    ErrorState,
+} from '@/hooks/use-standard-list';
 
 interface Placement {
     id: string;
@@ -13,32 +23,57 @@ interface Placement {
     recruiter_share_amount: number;
     start_date: string;
     created_at: string;
+    // Enriched data
+    job_title?: string;
+    candidate_name?: string;
+    recruiter_name?: string;
 }
 
-async function getPlacements(token: string): Promise<Placement[]> {
-    try {
-        const client = new ApiClient();
-        const response = await client.get('/placements');
-        return response.data || [];
-    } catch (error) {
-        console.error('Failed to fetch placements:', error);
-        return [];
-    }
+interface PlacementFilters {
+    date_from?: string;
+    date_to?: string;
 }
 
-export default async function PlacementAuditPage() {
-    const { getToken } = await auth();
-    const token = await getToken();
+export default function PlacementAuditPage() {
+    const { getToken } = useAuth();
 
-    if (!token) {
-        return <div>Unauthorized</div>;
-    }
+    const {
+        items: placements,
+        loading,
+        error,
+        pagination,
+        filters,
+        search,
+        setSearch,
+        setFilters,
+        setPage,
+        refresh,
+    } = useStandardList<Placement, PlacementFilters>({
+        fetchFn: async (params) => {
+            const token = await getToken();
+            if (!token) throw new Error('No auth token');
+            const apiClient = createAuthenticatedClient(token);
 
-    const placements = await getPlacements(token);
+            const queryParams = new URLSearchParams();
+            queryParams.set('page', String(params.page));
+            queryParams.set('limit', String(params.limit));
+            if (params.search) queryParams.set('search', params.search);
+            if (params.filters?.date_from) queryParams.set('date_from', params.filters.date_from);
+            if (params.filters?.date_to) queryParams.set('date_to', params.filters.date_to);
+            if (params.sort_by) queryParams.set('sort_by', params.sort_by);
+            if (params.sort_order) queryParams.set('sort_order', params.sort_order);
 
-    const totalValue = placements.reduce((sum, p) => sum + p.salary, 0);
-    const totalFees = placements.reduce((sum, p) => sum + p.fee_amount, 0);
-    const totalRecruiterPayout = placements.reduce((sum, p) => sum + p.recruiter_share_amount, 0);
+            const response = await apiClient.get(`/placements?${queryParams.toString()}`);
+            return response;
+        },
+        defaultFilters: {},
+        syncToUrl: true,
+    });
+
+    // Calculate summary stats from loaded data
+    const totalValue = placements.reduce((sum, p) => sum + (p.salary || 0), 0);
+    const totalFees = placements.reduce((sum, p) => sum + (p.fee_amount || 0), 0);
+    const totalRecruiterPayout = placements.reduce((sum, p) => sum + (p.recruiter_share_amount || 0), 0);
 
     return (
         <div className="space-y-6">
@@ -58,70 +93,118 @@ export default async function PlacementAuditPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="stat bg-base-100 shadow rounded-lg">
                     <div className="stat-title">Total Placements</div>
-                    <div className="stat-value text-primary">{placements.length}</div>
+                    <div className="stat-value text-primary">
+                        {loading ? '...' : pagination.total}
+                    </div>
                 </div>
 
                 <div className="stat bg-base-100 shadow rounded-lg">
-                    <div className="stat-title">Total Value</div>
-                    <div className="stat-value text-2xl">${(totalValue / 1000).toFixed(0)}k</div>
-                    <div className="stat-desc">Combined salaries</div>
+                    <div className="stat-title">Page Value</div>
+                    <div className="stat-value text-2xl">
+                        {loading ? '...' : `$${(totalValue / 1000).toFixed(0)}k`}
+                    </div>
+                    <div className="stat-desc">Combined salaries (this page)</div>
                 </div>
 
                 <div className="stat bg-base-100 shadow rounded-lg">
-                    <div className="stat-title">Total Fees</div>
-                    <div className="stat-value text-2xl text-success">${(totalFees / 1000).toFixed(0)}k</div>
-                    <div className="stat-desc">Platform revenue</div>
+                    <div className="stat-title">Page Fees</div>
+                    <div className="stat-value text-2xl text-success">
+                        {loading ? '...' : `$${(totalFees / 1000).toFixed(0)}k`}
+                    </div>
+                    <div className="stat-desc">Platform revenue (this page)</div>
                 </div>
 
                 <div className="stat bg-base-100 shadow rounded-lg">
                     <div className="stat-title">Recruiter Payouts</div>
-                    <div className="stat-value text-2xl text-warning">${(totalRecruiterPayout / 1000).toFixed(0)}k</div>
-                    <div className="stat-desc">Total owed</div>
+                    <div className="stat-value text-2xl text-warning">
+                        {loading ? '...' : `$${(totalRecruiterPayout / 1000).toFixed(0)}k`}
+                    </div>
+                    <div className="stat-desc">Total owed (this page)</div>
                 </div>
             </div>
 
-            {/* Placements Table */}
-            <div className="card bg-base-100 shadow">
-                <div className="card-body p-0">
-                    <div className="overflow-x-auto">
-                        <table className="table table-zebra">
-                            <thead>
-                                <tr>
-                                    <th>Placement ID</th>
-                                    <th>Start Date</th>
-                                    <th>Salary</th>
-                                    <th>Fee %</th>
-                                    <th>Total Fee</th>
-                                    <th>Recruiter Share</th>
-                                    <th>Platform Share</th>
-                                    <th>Created</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {placements.length === 0 ? (
+            {/* Filters Row */}
+            <div className="flex flex-wrap gap-4 items-center">
+                <SearchInput
+                    value={search}
+                    onChange={setSearch}
+                    placeholder="Search placements..."
+                />
+                <div className="flex items-center gap-2">
+                    <label className="text-sm text-base-content/70">From:</label>
+                    <input
+                        type="date"
+                        className="input input-sm"
+                        value={filters.date_from || ''}
+                        onChange={(e) => setFilters({ ...filters, date_from: e.target.value || undefined })}
+                    />
+                </div>
+                <div className="flex items-center gap-2">
+                    <label className="text-sm text-base-content/70">To:</label>
+                    <input
+                        type="date"
+                        className="input input-sm"
+                        value={filters.date_to || ''}
+                        onChange={(e) => setFilters({ ...filters, date_to: e.target.value || undefined })}
+                    />
+                </div>
+            </div>
+
+            {/* Content */}
+            {loading ? (
+                <LoadingState />
+            ) : error ? (
+                <ErrorState message={error} onRetry={refresh} />
+            ) : placements.length === 0 ? (
+                <EmptyState
+                    icon="fa-solid fa-trophy"
+                    title="No placements found"
+                    description={
+                        search || filters.date_from || filters.date_to
+                            ? 'Try adjusting your search or date filters'
+                            : 'Placements will appear here once candidates are hired'
+                    }
+                />
+            ) : (
+                <div className="card bg-base-100 shadow">
+                    <div className="card-body p-0">
+                        <div className="overflow-x-auto">
+                            <table className="table table-zebra">
+                                <thead>
                                     <tr>
-                                        <td colSpan={8} className="text-center py-8 text-base-content/70">
-                                            No placements found
-                                        </td>
+                                        <th>Placement ID</th>
+                                        <th>Start Date</th>
+                                        <th>Salary</th>
+                                        <th>Fee %</th>
+                                        <th>Total Fee</th>
+                                        <th>Recruiter Share</th>
+                                        <th>Platform Share</th>
+                                        <th>Created</th>
                                     </tr>
-                                ) : (
-                                    placements.map((placement) => {
-                                        const platformShare = placement.fee_amount - placement.recruiter_share_amount;
+                                </thead>
+                                <tbody>
+                                    {placements.map((placement) => {
+                                        const platformShare = (placement.fee_amount || 0) - (placement.recruiter_share_amount || 0);
                                         return (
                                             <tr key={placement.id}>
                                                 <td>
                                                     <div className="font-mono text-xs">{placement.id.slice(0, 8)}</div>
                                                 </td>
-                                                <td>{new Date(placement.start_date).toLocaleDateString()}</td>
-                                                <td className="font-semibold">
-                                                    ${placement.salary.toLocaleString()}
+                                                <td>
+                                                    {placement.start_date
+                                                        ? new Date(placement.start_date).toLocaleDateString()
+                                                        : '-'
+                                                    }
                                                 </td>
-                                                <td>{placement.fee_percentage}%</td>
+                                                <td className="font-semibold">
+                                                    ${(placement.salary || 0).toLocaleString()}
+                                                </td>
+                                                <td>{placement.fee_percentage || 0}%</td>
                                                 <td className="text-success font-semibold">
-                                                    ${placement.fee_amount.toLocaleString()}
+                                                    ${(placement.fee_amount || 0).toLocaleString()}
                                                 </td>
                                                 <td className="text-warning">
-                                                    ${placement.recruiter_share_amount.toLocaleString()}
+                                                    ${(placement.recruiter_share_amount || 0).toLocaleString()}
                                                 </td>
                                                 <td className="text-info">
                                                     ${platformShare.toLocaleString()}
@@ -131,13 +214,21 @@ export default async function PlacementAuditPage() {
                                                 </td>
                                             </tr>
                                         );
-                                    })
-                                )}
-                            </tbody>
-                        </table>
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
+
+            {/* Pagination */}
+            {!loading && !error && placements.length > 0 && (
+                <PaginationControls
+                    pagination={pagination}
+                    setPage={setPage}
+                />
+            )}
 
             {/* Export & Actions */}
             <div className="flex justify-end gap-2">

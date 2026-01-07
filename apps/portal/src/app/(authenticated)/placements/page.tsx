@@ -1,10 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useViewMode } from '@/hooks/use-view-mode';
 import Link from 'next/link';
+import {
+    useStandardList,
+    PaginationControls,
+    ViewModeToggle,
+    SearchInput,
+    EmptyState,
+    LoadingState,
+    ErrorState,
+} from '@/hooks/use-standard-list';
+import { formatRelativeTime } from '@/lib/utils';
+
+// ===== TYPES =====
 
 interface Placement {
     id: string;
@@ -18,101 +26,72 @@ interface Placement {
     fee_amount: number;
     recruiter_share: number;
     platform_share: number;
+    status: string;
     created_at: string;
     updated_at: string;
-    // Enriched fields (added client-side)
-    candidate_name?: string;
-    job_title?: string;
-    company_name?: string;
+    candidate?: {
+        id: string;
+        full_name: string;
+        email: string;
+    };
+    job?: {
+        id: string;
+        title: string;
+        company?: {
+            id: string;
+            name: string;
+        };
+    };
 }
 
+interface PlacementFilters {
+    status?: string;
+}
+
+// ===== COMPONENT =====
+
 export default function PlacementsPage() {
-    const { getToken } = useAuth();
-    const [placements, setPlacements] = useState<Placement[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [viewMode, setViewMode] = useViewMode('placementsViewMode');
-
-    useEffect(() => {
-        const fetchPlacements = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-
-                const token = await getToken();
-                if (!token) {
-                    throw new Error('No authentication token available');
-                }
-
-                const client = createAuthenticatedClient(token);
-
-                // Fetch placements
-                const placementsResponse = await client.get('/placements') as any;
-                const placementsData = (placementsResponse.data || []) as Placement[];
-
-                const enrichedPlacements = placementsData.map((placement: any) => ({
-                    ...placement,
-                    candidate_name: placement.candidate?.full_name || placement.candidate_name,
-                    job_title: placement.job?.title || placement.job_title,
-                    company_name: placement.job?.company?.name || placement.company_name,
-                }));
-
-                setPlacements(enrichedPlacements);
-            } catch (err) {
-                console.error('Error fetching placements:', err);
-                setError(err instanceof Error ? err.message : 'Failed to load placements');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchPlacements();
-    }, [getToken]);
-
-    // Calculate earnings statistics
-    const lifetimeEarnings = placements.reduce((sum, p) => sum + p.recruiter_share, 0);
-    const thisYearEarnings = placements
-        .filter(p => new Date(p.hired_at).getFullYear() === new Date().getFullYear())
-        .reduce((sum, p) => sum + p.recruiter_share, 0);
-    const last30DaysEarnings = placements
-        .filter(p => {
-            const hiredDate = new Date(p.hired_at);
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-            return hiredDate >= thirtyDaysAgo;
-        })
-        .reduce((sum, p) => sum + p.recruiter_share, 0);
-
-    // Filter placements based on search query
-    const filteredPlacements = placements.filter(placement => {
-        if (!searchQuery) return true;
-        const query = searchQuery.toLowerCase();
-        return (
-            placement.candidate_name?.toLowerCase().includes(query) ||
-            placement.job_title?.toLowerCase().includes(query) ||
-            placement.company_name?.toLowerCase().includes(query)
-        );
+    const {
+        data: placements,
+        loading,
+        error,
+        searchInput,
+        setSearchInput,
+        clearSearch,
+        filters,
+        setFilter,
+        sortBy,
+        handleSort,
+        getSortIcon,
+        page,
+        limit,
+        totalPages,
+        total,
+        goToPage,
+        setLimit,
+        viewMode,
+        setViewMode,
+        refresh,
+    } = useStandardList<Placement, PlacementFilters>({
+        endpoint: '/placements',
+        defaultFilters: { status: undefined },
+        defaultSortBy: 'hired_at',
+        defaultSortOrder: 'desc',
+        defaultLimit: 25,
+        syncToUrl: true,
+        viewModeKey: 'placementsViewMode',
     });
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                    <span className="loading loading-spinner loading-lg"></span>
-                    <p className="mt-4 text-base-content/70">Loading placements...</p>
-                </div>
-            </div>
-        );
-    }
+    // Calculate earnings statistics from loaded data (page-level stats)
+    const pageEarnings = placements.reduce((sum, p) => sum + (p.recruiter_share || 0), 0);
+    const thisYearPlacements = placements.filter(
+        (p) => new Date(p.hired_at).getFullYear() === new Date().getFullYear()
+    );
+    const thisYearEarnings = thisYearPlacements.reduce((sum, p) => sum + (p.recruiter_share || 0), 0);
 
+    // Handle error state
     if (error) {
-        return (
-            <div className="alert alert-error">
-                <i className="fa-solid fa-circle-exclamation"></i>
-                <span>Error: {error}</span>
-            </div>
-        );
+        return <ErrorState message={error} onRetry={refresh} />;
     }
 
     return (
@@ -128,17 +107,28 @@ export default function PlacementsPage() {
             </div>
 
             {/* Earnings Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="stats shadow bg-base-100">
                     <div className="stat">
                         <div className="stat-figure text-primary">
+                            <i className="fa-solid fa-trophy text-3xl"></i>
+                        </div>
+                        <div className="stat-title">Total Placements</div>
+                        <div className="stat-value text-primary">{total}</div>
+                        <div className="stat-desc">All time</div>
+                    </div>
+                </div>
+
+                <div className="stats shadow bg-base-100">
+                    <div className="stat">
+                        <div className="stat-figure text-success">
                             <i className="fa-solid fa-sack-dollar text-3xl"></i>
                         </div>
-                        <div className="stat-title">Lifetime Earnings</div>
-                        <div className="stat-value text-primary">
-                            ${lifetimeEarnings.toLocaleString()}
+                        <div className="stat-title">Page Earnings</div>
+                        <div className="stat-value text-success">
+                            ${pageEarnings.toLocaleString()}
                         </div>
-                        <div className="stat-desc">Total from {placements.length} placements</div>
+                        <div className="stat-desc">From {placements.length} shown</div>
                     </div>
                 </div>
 
@@ -147,179 +137,240 @@ export default function PlacementsPage() {
                         <div className="stat-figure text-secondary">
                             <i className="fa-solid fa-calendar-days text-3xl"></i>
                         </div>
-                        <div className="stat-title">This Year</div>
+                        <div className="stat-title">This Year (shown)</div>
                         <div className="stat-value text-secondary">
                             ${thisYearEarnings.toLocaleString()}
                         </div>
-                        <div className="stat-desc">January - December {new Date().getFullYear()}</div>
+                        <div className="stat-desc">{thisYearPlacements.length} placements in {new Date().getFullYear()}</div>
                     </div>
                 </div>
 
                 <div className="stats shadow bg-base-100">
                     <div className="stat">
-                        <div className="stat-figure text-accent">
-                            <i className="fa-solid fa-clock text-3xl"></i>
+                        <div className="stat-figure text-info">
+                            <i className="fa-solid fa-dollar-sign text-3xl"></i>
                         </div>
-                        <div className="stat-title">Last 30 Days</div>
-                        <div className="stat-value text-accent">
-                            ${last30DaysEarnings.toLocaleString()}
+                        <div className="stat-title">Avg. Commission</div>
+                        <div className="stat-value text-info">
+                            ${placements.length > 0
+                                ? Math.round(pageEarnings / placements.length).toLocaleString()
+                                : '0'}
                         </div>
-                        <div className="stat-desc">Recent activity</div>
+                        <div className="stat-desc">Per placement</div>
                     </div>
                 </div>
             </div>
 
             {/* Filters and View Toggle */}
             <div className="card bg-base-100 shadow">
-                <div className="card-body">
-                    <div className="flex flex-wrap gap-4 items-end">
-                        <div className="fieldset flex-1">
-                            <label className="label">Search</label>
-                            <input
-                                type="text"
-                                placeholder="Search placements..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="input w-full"
-                            />
-                        </div>
-                        <div className="join">
-                            <button
-                                className={`btn join-item ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
-                                onClick={() => setViewMode('grid')}
-                                title="Grid View"
+                <div className="card-body p-4">
+                    <div className="flex flex-wrap gap-4 items-center">
+                        {/* Status Filter */}
+                        <div className="fieldset">
+                            <select
+                                className="select w-full max-w-xs"
+                                value={filters.status || 'all'}
+                                onChange={(e) => setFilter('status', e.target.value === 'all' ? undefined : e.target.value)}
                             >
-                                <i className="fa-solid fa-grip"></i>
-                            </button>
-                            <button
-                                className={`btn join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
-                                onClick={() => setViewMode('table')}
-                                title="Table View"
-                            >
-                                <i className="fa-solid fa-table"></i>
-                            </button>
+                                <option value="all">All Statuses</option>
+                                <option value="active">Active</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
                         </div>
+
+                        {/* Search */}
+                        <SearchInput
+                            value={searchInput}
+                            onChange={setSearchInput}
+                            onClear={clearSearch}
+                            placeholder="Search placements..."
+                            loading={loading}
+                            className="flex-1 min-w-[200px]"
+                        />
+
+                        {/* View Toggle */}
+                        <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} />
                     </div>
                 </div>
             </div>
 
-            {/* Empty State */}
-            {filteredPlacements.length === 0 && (
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body text-center py-12">
-                        <i className="fa-solid fa-trophy text-6xl text-base-content/20"></i>
-                        <h3 className="text-xl font-semibold mt-4">
-                            {searchQuery ? 'No placements found' : 'No placements yet'}
-                        </h3>
-                        <p className="text-base-content/70 mt-2">
-                            {searchQuery
-                                ? 'Try adjusting your search criteria'
-                                : 'Your successful placements will appear here'}
-                        </p>
-                    </div>
-                </div>
-            )}
+            {/* Loading State */}
+            {loading && placements.length === 0 && <LoadingState />}
 
             {/* Grid View */}
-            {viewMode === 'grid' && filteredPlacements.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {filteredPlacements.map((placement) => (
-                        <div key={placement.id} className="card bg-base-100 shadow hover:shadow transition-shadow">
-                            <div className="card-body">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className="badge badge-success badge-lg">
-                                        ${placement.recruiter_share.toLocaleString()}
-                                    </div>
-                                    <div className="text-sm text-base-content/70">
-                                        {new Date(placement.hired_at).toLocaleDateString()}
-                                    </div>
-                                </div>
-
-                                <h3 className="card-title text-xl">
-                                    {placement.candidate_name || 'Unknown Candidate'}
-                                </h3>
-
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex items-start gap-2">
-                                        <i className="fa-solid fa-briefcase text-base-content/50 mt-1"></i>
-                                        <div>
-                                            <div className="font-medium">
-                                                {placement.job_title || 'Unknown Role'}
-                                            </div>
-                                            <div className="text-base-content/70">
-                                                {placement.company_name || 'Unknown Company'}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-2">
-                                        <i className="fa-solid fa-dollar-sign text-base-content/50"></i>
-                                        <span>Salary: ${placement.salary.toLocaleString()}</span>
-                                    </div>
-
-                                    <div className="flex items-center gap-2">
-                                        <i className="fa-solid fa-percent text-base-content/50"></i>
-                                        <span>Fee: {placement.fee_percentage}%</span>
-                                    </div>
-                                </div>
-
-                                <div className="divider my-2"></div>
-
-                                <div className="flex justify-between items-center text-xs">
-                                    <span className="text-base-content/70">
-                                        Total Fee: ${placement.fee_amount.toLocaleString()}
-                                    </span>
-                                    <span className="font-semibold text-success">
-                                        Your Share: ${placement.recruiter_share.toLocaleString()}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
+            {viewMode === 'grid' && placements.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {placements.map((placement) => (
+                        <PlacementCard key={placement.id} placement={placement} />
                     ))}
                 </div>
             )}
 
             {/* Table View */}
-            {viewMode === 'table' && filteredPlacements.length > 0 && (
-                <div className="overflow-x-auto">
-                    <table className="table table-zebra">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Candidate</th>
-                                <th>Role</th>
-                                <th>Company</th>
-                                <th className="text-right">Salary</th>
-                                <th className="text-right">Fee %</th>
-                                <th className="text-right">Total Fee</th>
-                                <th className="text-right">Your Share</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredPlacements.map((placement) => (
-                                <tr key={placement.id}>
-                                    <td>{new Date(placement.hired_at).toLocaleDateString()}</td>
-                                    <td className="font-medium">
-                                        {placement.candidate_name || 'Unknown Candidate'}
-                                    </td>
-                                    <td>{placement.job_title || 'Unknown Role'}</td>
-                                    <td>{placement.company_name || 'Unknown Company'}</td>
-                                    <td className="text-right">
-                                        ${placement.salary.toLocaleString()}
-                                    </td>
-                                    <td className="text-right">{placement.fee_percentage}%</td>
-                                    <td className="text-right">
-                                        ${placement.fee_amount.toLocaleString()}
-                                    </td>
-                                    <td className="text-right font-semibold text-success">
-                                        ${placement.recruiter_share.toLocaleString()}
-                                    </td>
+            {viewMode === 'table' && placements.length > 0 && (
+                <div className="card bg-base-100 shadow overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="table">
+                            <thead>
+                                <tr>
+                                    <th
+                                        className="cursor-pointer hover:bg-base-200"
+                                        onClick={() => handleSort('hired_at')}
+                                    >
+                                        Date
+                                        <i className={`fa-solid ${getSortIcon('hired_at')} ml-2 text-xs`}></i>
+                                    </th>
+                                    <th>Candidate</th>
+                                    <th>Role</th>
+                                    <th>Company</th>
+                                    <th
+                                        className="text-right cursor-pointer hover:bg-base-200"
+                                        onClick={() => handleSort('salary')}
+                                    >
+                                        Salary
+                                        <i className={`fa-solid ${getSortIcon('salary')} ml-2 text-xs`}></i>
+                                    </th>
+                                    <th className="text-right">Fee %</th>
+                                    <th className="text-right">Total Fee</th>
+                                    <th
+                                        className="text-right cursor-pointer hover:bg-base-200"
+                                        onClick={() => handleSort('recruiter_share')}
+                                    >
+                                        Your Share
+                                        <i className={`fa-solid ${getSortIcon('recruiter_share')} ml-2 text-xs`}></i>
+                                    </th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {placements.map((placement) => (
+                                    <PlacementTableRow key={placement.id} placement={placement} />
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             )}
+
+            {/* Empty State */}
+            {!loading && placements.length === 0 && (
+                <EmptyState
+                    icon="fa-trophy"
+                    title="No Placements Yet"
+                    description={
+                        searchInput
+                            ? 'Try adjusting your search criteria'
+                            : 'Your successful placements will appear here'
+                    }
+                />
+            )}
+
+            {/* Pagination */}
+            <PaginationControls
+                page={page}
+                totalPages={totalPages}
+                total={total}
+                limit={limit}
+                onPageChange={goToPage}
+                onLimitChange={setLimit}
+                loading={loading}
+            />
         </div>
+    );
+}
+
+// ===== SUB-COMPONENTS =====
+
+interface PlacementCardProps {
+    placement: Placement;
+}
+
+function PlacementCard({ placement }: PlacementCardProps) {
+    const candidateName = placement.candidate?.full_name || 'Unknown Candidate';
+    const jobTitle = placement.job?.title || 'Unknown Role';
+    const companyName = placement.job?.company?.name || 'Unknown Company';
+
+    return (
+        <div className="card bg-base-100 shadow hover:shadow-lg transition-shadow">
+            <div className="card-body">
+                <div className="flex justify-between items-start mb-4">
+                    <div className="badge badge-success badge-lg">
+                        ${(placement.recruiter_share || 0).toLocaleString()}
+                    </div>
+                    <div className="text-sm text-base-content/70">
+                        {new Date(placement.hired_at).toLocaleDateString()}
+                    </div>
+                </div>
+
+                <h3 className="card-title text-xl">{candidateName}</h3>
+
+                <div className="space-y-2 text-sm">
+                    <div className="flex items-start gap-2">
+                        <i className="fa-solid fa-briefcase text-base-content/50 mt-1"></i>
+                        <div>
+                            <div className="font-medium">{jobTitle}</div>
+                            <div className="text-base-content/70">{companyName}</div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <i className="fa-solid fa-dollar-sign text-base-content/50"></i>
+                        <span>Salary: ${(placement.salary || 0).toLocaleString()}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <i className="fa-solid fa-percent text-base-content/50"></i>
+                        <span>Fee: {placement.fee_percentage || 0}%</span>
+                    </div>
+                </div>
+
+                <div className="divider my-2"></div>
+
+                <div className="flex justify-between items-center text-xs">
+                    <span className="text-base-content/70">
+                        Total Fee: ${(placement.fee_amount || 0).toLocaleString()}
+                    </span>
+                    <span className="font-semibold text-success">
+                        Your Share: ${(placement.recruiter_share || 0).toLocaleString()}
+                    </span>
+                </div>
+
+                {placement.status && (
+                    <div className="mt-2">
+                        <span className={`badge ${placement.status === 'completed' ? 'badge-success' :
+                                placement.status === 'active' ? 'badge-info' :
+                                    'badge-ghost'
+                            }`}>
+                            {placement.status}
+                        </span>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+interface PlacementTableRowProps {
+    placement: Placement;
+}
+
+function PlacementTableRow({ placement }: PlacementTableRowProps) {
+    const candidateName = placement.candidate?.full_name || 'Unknown Candidate';
+    const jobTitle = placement.job?.title || 'Unknown Role';
+    const companyName = placement.job?.company?.name || 'Unknown Company';
+
+    return (
+        <tr className="hover">
+            <td>{new Date(placement.hired_at).toLocaleDateString()}</td>
+            <td className="font-medium">{candidateName}</td>
+            <td>{jobTitle}</td>
+            <td>{companyName}</td>
+            <td className="text-right">${(placement.salary || 0).toLocaleString()}</td>
+            <td className="text-right">{placement.fee_percentage || 0}%</td>
+            <td className="text-right">${(placement.fee_amount || 0).toLocaleString()}</td>
+            <td className="text-right font-semibold text-success">
+                ${(placement.recruiter_share || 0).toLocaleString()}
+            </td>
+        </tr>
     );
 }

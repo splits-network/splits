@@ -1,13 +1,27 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { UnifiedProposal, ProposalsResponse } from '@splits-network/shared-types';
 import UnifiedProposalCard from '@/components/unified-proposal-card';
+import { useStandardList, PaginationControls, SearchInput, EmptyState, LoadingState, ErrorState } from '@/hooks/use-standard-list';
 import { ApiClient } from '@/lib/api-client';
 
 type TabType = 'action' | 'waiting' | 'completed';
+
+// Proposal filters interface
+interface ProposalFilters {
+    state?: 'actionable' | 'waiting' | 'completed';
+}
+
+// Proposal summary interface
+interface ProposalSummary {
+    actionable_count: number;
+    waiting_count: number;
+    urgent_count: number;
+    overdue_count: number;
+}
 
 /**
  * Unified Proposals Page
@@ -22,213 +36,264 @@ export default function ProposalsPage() {
     const router = useRouter();
     const { getToken } = useAuth();
     const [activeTab, setActiveTab] = useState<TabType>('action');
-    const [proposals, setProposals] = useState<UnifiedProposal[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [summary, setSummary] = useState<{
-        actionable_count: number;
-        waiting_count: number;
-        urgent_count: number;
-        overdue_count: number;
-    } | null>(null);
+    const [summary, setSummary] = useState<ProposalSummary | null>(null);
+    const [summaryLoading, setSummaryLoading] = useState(true);
 
-    // Pagination state
-    const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [total, setTotal] = useState(0);
-
-    useEffect(() => {
-        fetchProposals();
-        fetchSummary();
-    }, [activeTab, page]);
-
-    const fetchProposals = async () => {
-        setLoading(true);
-        setError(null);
-
-        try {
-            const stateParam =
-                activeTab === 'action' ? 'actionable' :
-                    activeTab === 'waiting' ? 'waiting' :
-                        'completed';
-
-            const token = await getToken();
-            if (!token) {
-                throw new Error('Not authenticated');
-            }
-
-            const client = new ApiClient();
-            const result: { data: ProposalsResponse } = await client.get(
-                `/proposals?state=${stateParam}&page=${page}&limit=25`
-            );
-
-            setProposals(result.data.data);
-            setTotal(result.data.pagination.total);
-            setTotalPages(result.data.pagination.total_pages);
-        } catch (err: any) {
-            setError(err.message || 'Failed to load proposals');
-        } finally {
-            setLoading(false);
+    // Map tab to state filter
+    const getStateFromTab = (tab: TabType): ProposalFilters['state'] => {
+        switch (tab) {
+            case 'action': return 'actionable';
+            case 'waiting': return 'waiting';
+            case 'completed': return 'completed';
         }
     };
 
-    const fetchSummary = async () => {
+    // Fetch function for proposals
+    const fetchProposals = useCallback(async (params: Record<string, any>) => {
+        const token = await getToken();
+        if (!token) throw new Error('Not authenticated');
+
+        const client = new ApiClient(token);
+        const queryParams = new URLSearchParams();
+
+        if (params.page) queryParams.set('page', params.page.toString());
+        if (params.limit) queryParams.set('limit', params.limit.toString());
+        if (params.search) queryParams.set('search', params.search);
+        if (params.state) queryParams.set('state', params.state);
+
+        const result: { data: ProposalsResponse } = await client.get(`/proposals?${queryParams.toString()}`);
+
+        return {
+            data: result.data.data,
+            pagination: result.data.pagination
+        };
+    }, [getToken]);
+
+    const {
+        data: proposals,
+        pagination,
+        loading,
+        error,
+        filters,
+        setFilters,
+        searchTerm,
+        setSearchTerm,
+        viewMode,
+        setViewMode,
+        refetch
+    } = useStandardList<UnifiedProposal, ProposalFilters>({
+        fetchFn: fetchProposals,
+        defaultLimit: 25,
+        defaultFilters: { state: 'actionable' },
+        syncToUrl: true
+    });
+
+    // Fetch summary stats
+    const fetchSummary = useCallback(async () => {
         try {
             const token = await getToken();
             if (!token) return;
 
-            const client = new ApiClient();
-            const result: { data: any } = await client.get('/proposals/summary');
+            const client = new ApiClient(token);
+            const result: { data: ProposalSummary } = await client.get('/proposals/summary');
             setSummary(result.data);
         } catch (err) {
             console.error('Failed to fetch summary:', err);
+        } finally {
+            setSummaryLoading(false);
         }
+    }, [getToken]);
+
+    // Load summary on mount and after actions
+    useEffect(() => {
+        fetchSummary();
+    }, [fetchSummary]);
+
+    // Handle tab change
+    const handleTabChange = (tab: TabType) => {
+        setActiveTab(tab);
+        setFilters({ state: getStateFromTab(tab) });
     };
 
+    // Sync tab with URL state
+    useEffect(() => {
+        if (filters.state === 'actionable' && activeTab !== 'action') {
+            setActiveTab('action');
+        } else if (filters.state === 'waiting' && activeTab !== 'waiting') {
+            setActiveTab('waiting');
+        } else if (filters.state === 'completed' && activeTab !== 'completed') {
+            setActiveTab('completed');
+        }
+    }, [filters.state, activeTab]);
+
+    // Handle accept proposal
     const handleAccept = async (proposalId: string, notes: string) => {
         const token = await getToken();
-        if (!token) {
-            throw new Error('Not authenticated');
-        }
+        if (!token) throw new Error('Not authenticated');
 
-        const client = new ApiClient();
+        const client = new ApiClient(token);
         await client.post(`/proposals/${proposalId}/accept`, { notes });
 
-        // Refresh proposals
-        await fetchProposals();
-        await fetchSummary();
+        // Refresh proposals and summary
+        await Promise.all([refetch(), fetchSummary()]);
     };
 
+    // Handle decline proposal
     const handleDecline = async (proposalId: string, notes: string) => {
         const token = await getToken();
-        if (!token) {
-            throw new Error('Not authenticated');
-        }
+        if (!token) throw new Error('Not authenticated');
 
-        const client = new ApiClient();
+        const client = new ApiClient(token);
         await client.post(`/proposals/${proposalId}/decline`, { notes });
 
-        // Refresh proposals
-        await fetchProposals();
-        await fetchSummary();
+        // Refresh proposals and summary
+        await Promise.all([refetch(), fetchSummary()]);
     };
 
+    // Handle proposal click
     const handleProposalClick = (proposalId: string) => {
-        // Navigate to application detail page
         router.push(`/applications/${proposalId}`);
     };
 
     return (
-        <div className="space-y-6">
+        <div className="container mx-auto p-6 max-w-7xl">
             {/* Header */}
-            <div>
-                <h1 className="text-3xl font-bold">Proposals</h1>
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold">Proposals</h1>
                 <p className="text-base-content/60 mt-1">
                     Manage all your job opportunities, applications, and reviews
                 </p>
             </div>
 
             {/* Summary Stats */}
-            {summary && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="stats shadow">
-                        <div className="stat bg-base-100">
-                            <div className="stat-title">Requiring Action</div>
-                            <div className="stat-value text-primary">{summary.actionable_count}</div>
-                            <div className="stat-desc">Items awaiting your response</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="stats shadow">
+                    <div className="stat bg-base-100 p-4">
+                        <div className="stat-title text-xs">Requiring Action</div>
+                        <div className="stat-value text-xl text-primary">
+                            {summaryLoading ? (
+                                <span className="loading loading-spinner loading-sm"></span>
+                            ) : (
+                                summary?.actionable_count ?? 0
+                            )}
                         </div>
-                    </div>
-                    <div className="stats shadow">
-                        <div className="stat bg-base-100">
-                            <div className="stat-title">Awaiting Response</div>
-                            <div className="stat-value">{summary.waiting_count}</div>
-                            <div className="stat-desc">Items sent to others</div>
-                        </div>
-                    </div>
-                    <div className="stats shadow">
-                        <div className="stat bg-base-100">
-                            <div className="stat-title">Urgent</div>
-                            <div className="stat-value text-warning">{summary.urgent_count}</div>
-                            <div className="stat-desc">Due within 24 hours</div>
-                        </div>
-                    </div>
-                    <div className="stats shadow">
-                        <div className="stat bg-base-100">
-                            <div className="stat-title">Overdue</div>
-                            <div className="stat-value text-error">{summary.overdue_count}</div>
-                            <div className="stat-desc">Past deadline</div>
-                        </div>
+                        <div className="stat-desc text-xs">Awaiting your response</div>
                     </div>
                 </div>
-            )}
-
-            {/* Tabs */}
-            <div className="tabs tabs-box">
-                <button
-                    className={`tab ${activeTab === 'action' ? 'tab-active' : ''}`}
-                    onClick={() => {
-                        setActiveTab('action');
-                        setPage(1);
-                    }}
-                >
-                    <i className="fa-solid fa-bolt mr-2"></i>
-                    Action Required
-                    {summary && summary.actionable_count > 0 && (
-                        <span className="badge badge-primary badge-sm ml-2">
-                            {summary.actionable_count}
-                        </span>
-                    )}
-                </button>
-                <button
-                    className={`tab ${activeTab === 'waiting' ? 'tab-active' : ''}`}
-                    onClick={() => {
-                        setActiveTab('waiting');
-                        setPage(1);
-                    }}
-                >
-                    <i className="fa-solid fa-clock mr-2"></i>
-                    Awaiting Response
-                    {summary && summary.waiting_count > 0 && (
-                        <span className="badge badge-sm ml-2">
-                            {summary.waiting_count}
-                        </span>
-                    )}
-                </button>
-                <button
-                    className={`tab ${activeTab === 'completed' ? 'tab-active' : ''}`}
-                    onClick={() => {
-                        setActiveTab('completed');
-                        setPage(1);
-                    }}
-                >
-                    <i className="fa-solid fa-check-circle mr-2"></i>
-                    Completed
-                </button>
+                <div className="stats shadow">
+                    <div className="stat bg-base-100 p-4">
+                        <div className="stat-title text-xs">Awaiting Response</div>
+                        <div className="stat-value text-xl">
+                            {summaryLoading ? (
+                                <span className="loading loading-spinner loading-sm"></span>
+                            ) : (
+                                summary?.waiting_count ?? 0
+                            )}
+                        </div>
+                        <div className="stat-desc text-xs">Sent to others</div>
+                    </div>
+                </div>
+                <div className="stats shadow">
+                    <div className="stat bg-base-100 p-4">
+                        <div className="stat-title text-xs">Urgent</div>
+                        <div className="stat-value text-xl text-warning">
+                            {summaryLoading ? (
+                                <span className="loading loading-spinner loading-sm"></span>
+                            ) : (
+                                summary?.urgent_count ?? 0
+                            )}
+                        </div>
+                        <div className="stat-desc text-xs">Due within 24 hours</div>
+                    </div>
+                </div>
+                <div className="stats shadow">
+                    <div className="stat bg-base-100 p-4">
+                        <div className="stat-title text-xs">Overdue</div>
+                        <div className="stat-value text-xl text-error">
+                            {summaryLoading ? (
+                                <span className="loading loading-spinner loading-sm"></span>
+                            ) : (
+                                summary?.overdue_count ?? 0
+                            )}
+                        </div>
+                        <div className="stat-desc text-xs">Past deadline</div>
+                    </div>
+                </div>
             </div>
 
-            {/* Content */}
-            {loading ? (
-                <div className="flex justify-center items-center py-12">
-                    <span className="loading loading-spinner loading-lg"></span>
+            {/* Tabs and Search */}
+            <div className="bg-base-100 rounded-lg shadow-sm p-4 mb-6">
+                <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                    {/* Tabs */}
+                    <div className="tabs tabs-box">
+                        <button
+                            className={`tab ${activeTab === 'action' ? 'tab-active' : ''}`}
+                            onClick={() => handleTabChange('action')}
+                        >
+                            <i className="fa-solid fa-bolt mr-2"></i>
+                            Action Required
+                            {summary && summary.actionable_count > 0 && (
+                                <span className="badge badge-primary badge-sm ml-2">
+                                    {summary.actionable_count}
+                                </span>
+                            )}
+                        </button>
+                        <button
+                            className={`tab ${activeTab === 'waiting' ? 'tab-active' : ''}`}
+                            onClick={() => handleTabChange('waiting')}
+                        >
+                            <i className="fa-solid fa-clock mr-2"></i>
+                            Awaiting Response
+                            {summary && summary.waiting_count > 0 && (
+                                <span className="badge badge-sm ml-2">
+                                    {summary.waiting_count}
+                                </span>
+                            )}
+                        </button>
+                        <button
+                            className={`tab ${activeTab === 'completed' ? 'tab-active' : ''}`}
+                            onClick={() => handleTabChange('completed')}
+                        >
+                            <i className="fa-solid fa-check-circle mr-2"></i>
+                            Completed
+                        </button>
+                    </div>
+
+                    {/* Search */}
+                    <div className="w-full md:w-64">
+                        <SearchInput
+                            value={searchTerm}
+                            onChange={setSearchTerm}
+                            placeholder="Search proposals..."
+                        />
+                    </div>
                 </div>
-            ) : error ? (
-                <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
-                    <span>{error}</span>
-                </div>
-            ) : proposals.length === 0 ? (
-                <div className="text-center py-12">
-                    <i className="fa-solid fa-inbox text-4xl text-base-content/30 mb-4"></i>
-                    <h3 className="text-xl font-semibold mb-2">No proposals here</h3>
-                    <p className="text-base-content/60">
-                        {activeTab === 'action' && 'No items requiring your action at this time.'}
-                        {activeTab === 'waiting' && 'No items awaiting response from others.'}
-                        {activeTab === 'completed' && 'No completed proposals yet.'}
-                    </p>
-                </div>
-            ) : (
+            </div>
+
+            {/* Loading State */}
+            {loading && <LoadingState />}
+
+            {/* Error State */}
+            {error && <ErrorState message={error} onRetry={refetch} />}
+
+            {/* Empty State */}
+            {!loading && !error && proposals.length === 0 && (
+                <EmptyState
+                    icon="fa-inbox"
+                    title="No proposals here"
+                    description={
+                        activeTab === 'action'
+                            ? 'No items requiring your action at this time.'
+                            : activeTab === 'waiting'
+                                ? 'No items awaiting response from others.'
+                                : 'No completed proposals yet.'
+                    }
+                />
+            )}
+
+            {/* Proposals Grid */}
+            {!loading && !error && proposals.length > 0 && (
                 <>
-                    {/* Proposals Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                         {proposals.map((proposal) => (
                             <UnifiedProposalCard
@@ -242,26 +307,11 @@ export default function ProposalsPage() {
                     </div>
 
                     {/* Pagination */}
-                    {totalPages > 1 && (
-                        <div className="flex justify-center items-center gap-2 mt-6">
-                            <button
-                                className="btn btn-sm"
-                                onClick={() => setPage(p => Math.max(1, p - 1))}
-                                disabled={page === 1}
-                            >
-                                <i className="fa-solid fa-chevron-left"></i>
-                            </button>
-                            <span className="text-sm">
-                                Page {page} of {totalPages} ({total} total)
-                            </span>
-                            <button
-                                className="btn btn-sm"
-                                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                                disabled={page === totalPages}
-                            >
-                                <i className="fa-solid fa-chevron-right"></i>
-                            </button>
-                        </div>
+                    {pagination && (
+                        <PaginationControls
+                            pagination={pagination}
+                            onPageChange={(page) => setFilters({ ...filters })}
+                        />
                     )}
                 </>
             )}
