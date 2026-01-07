@@ -203,6 +203,13 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
                         )}
                     </div>
                 )}
+
+                {/* Candidate Pipeline Tab */}
+                {activeTab === 'pipeline' && (
+                    <div>
+                        <CandidatePipeline roleId={roleId} />
+                    </div>
+                )}
             </div>
         </div>
     );

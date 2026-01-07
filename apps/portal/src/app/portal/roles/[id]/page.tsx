@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import RoleHeader from './components/role-header';
 import RoleDetailsTabs from './components/role-details-tabs';
-import CandidatePipeline from './components/candidate-pipeline';
 
 // This would normally come from the API, but we'll let the client components handle it
 async function getJobData(id: string) {
@@ -22,9 +21,6 @@ export default async function RoleDetailPage({
             <div className="w-full md:flex-1 md:mr-4 space-y-6">
                 <RoleHeader roleId={id} />
                 <RoleDetailsTabs roleId={id} />
-            </div>
-            <div className="w-full md:w-64 lg:w-72 xl:w-80 shrink-0 mt-6 md:mt-0">
-                <CandidatePipeline roleId={id} />
             </div>
         </div>
     );
