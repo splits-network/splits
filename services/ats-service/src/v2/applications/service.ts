@@ -23,7 +23,7 @@ export class ApplicationServiceV2 {
     }> {
         const { page, limit } = validatePaginationParams(filters.page, filters.limit);
 
-        const { data, total } = await this.repository.findApplications(clerkUserId, {
+        const { data, pagination } = await this.repository.findApplications(clerkUserId, {
             ...filters,
             page,
             limit,
@@ -31,7 +31,7 @@ export class ApplicationServiceV2 {
 
         return {
             data,
-            pagination: buildPaginationResponse<any>(data, total, page, limit).pagination,
+            pagination: pagination
         };
     }
 

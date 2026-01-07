@@ -36,18 +36,17 @@ export class CandidateRepository {
         let filters: Record<string, any> = {};
 
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-        
-        const organizationIds = accessContext.organizationIds;
-        const restrictToOrganizations = accessContext.organizationIds.length > 0;// !accessContext.isPlatformAdmin && !accessContext.candidateId && !accessContext.recruiterId;
 
-        if (restrictToOrganizations && organizationIds.length === 0) {
-            return { data: [], pagination: {
-                total: 0,
-                page: page,
-                limit: limit,
-                total_pages: 0,
-            }};
+        // For recruiters, pre-fetch candidate IDs they have relationships with
+        let recruiterCandidateIds: string[] = [];
+        if (accessContext.recruiterId) {
+            const { data: relationships } = await this.supabase
+                .from('recruiter_candidates')
+                .select('candidate_id')
+                .eq('recruiter_id', accessContext.recruiterId);
+            recruiterCandidateIds = relationships?.map(r => r.candidate_id) || [];
         }
+
         // ***********************************************
         // NEW WAY - SIMPLER, USING INCLUDES ONLY
         // ***********************************************
@@ -68,7 +67,7 @@ export class CandidateRepository {
                     `;
                 } else if (table === 'recruiter_candidates') {
                     return `
-                        ,recruiter_candidates!inner(
+                        ,recruiter_candidates(
                             id,
                             recruiter_id,
                             relationship_start_date,
@@ -96,13 +95,18 @@ export class CandidateRepository {
             }
         }
 
-        /// apply role based access control based on recruiter id, organization ids, platform admin status, etc.
-        if (restrictToOrganizations) {
-            query = query.in('identity_organization_id', organizationIds);
-        }
-
+        // For recruiters: filter to candidates they sourced OR have relationships with
         if (accessContext.recruiterId) {
-            query = query.or(`sourcer_recruiter_id.eq.${accessContext.recruiterId},recruiter_candidates.recruiter_id.eq.${accessContext.recruiterId}`);
+            // Build list of candidate IDs the recruiter can access
+            const accessibleCandidateIds = [...new Set(recruiterCandidateIds)];
+            
+            // If recruiter has relationship candidates, filter by those OR by recruiter_id (who sourced them)
+            if (accessibleCandidateIds.length > 0) {
+                query = query.or(`recruiter_id.eq.${accessContext.recruiterId},id.in.(${accessibleCandidateIds.join(',')})`);
+            } else {
+                // No relationships - only show candidates they sourced
+                query = query.eq('recruiter_id', accessContext.recruiterId);
+            }
         }
 
 
