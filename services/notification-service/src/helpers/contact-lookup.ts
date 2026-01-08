@@ -35,7 +35,7 @@ export class ContactLookupHelper {
     constructor(
         private supabase: SupabaseClient,
         private logger: Logger
-    ) {}
+    ) { }
 
     /**
      * Get contact by internal user UUID
@@ -47,7 +47,7 @@ export class ContactLookupHelper {
         try {
             const { data: user, error } = await this.supabase
                 .from('users')
-                .select('id, email, first_name, last_name, name, phone')
+                .select('id, email, name, phone')
                 .eq('id', userId)
                 .single();
 
@@ -61,8 +61,7 @@ export class ContactLookupHelper {
                 return null;
             }
 
-            const name = this.resolveUserName(user);
-            
+
             if (!user.email) {
                 this.logger.warn({ userId }, 'User found but no email address');
                 return null;
@@ -71,7 +70,7 @@ export class ContactLookupHelper {
             return {
                 id: user.id,
                 user_id: user.id,
-                name,
+                name: user.name,
                 email: user.email,
                 phone: user.phone || null,
                 type: 'user',
@@ -96,7 +95,7 @@ export class ContactLookupHelper {
         try {
             const { data: user, error } = await this.supabase
                 .from('users')
-                .select('id, email, first_name, last_name, name, phone')
+                .select('id, email, name, phone')
                 .eq('clerk_user_id', clerkUserId)
                 .single();
 
@@ -110,7 +109,6 @@ export class ContactLookupHelper {
                 return null;
             }
 
-            const name = this.resolveUserName(user);
 
             if (!user.email) {
                 this.logger.warn({ clerkUserId }, 'User found but no email address');
@@ -120,7 +118,7 @@ export class ContactLookupHelper {
             return {
                 id: user.id,
                 user_id: user.id,
-                name,
+                name: user.name,
                 email: user.email,
                 phone: user.phone || null,
                 type: 'user',
@@ -149,7 +147,7 @@ export class ContactLookupHelper {
         try {
             const { data: recruiter, error } = await this.supabase
                 .from('recruiters')
-                .select('id, user_id')
+                .select('id, user_id, phone')
                 .eq('id', recruiterId)
                 .single();
 
@@ -166,7 +164,7 @@ export class ContactLookupHelper {
             // Fetch user details
             const { data: user, error: userError } = await this.supabase
                 .from('users')
-                .select('id, email, first_name, last_name, name, phone')
+                .select('id, email, name')
                 .eq('id', recruiter.user_id)
                 .single();
 
@@ -174,8 +172,6 @@ export class ContactLookupHelper {
                 this.logger.error({ recruiterId, userId: recruiter.user_id, error: userError }, 'Failed to fetch recruiter user');
                 return null;
             }
-
-            const name = this.resolveUserName(user);
 
             if (!user.email) {
                 this.logger.warn({ recruiterId }, 'Recruiter user found but no email address');
@@ -185,9 +181,9 @@ export class ContactLookupHelper {
             return {
                 id: user.id,
                 user_id: user.id,
-                name,
+                name: user.name,
                 email: user.email,
-                phone: user.phone || null,
+                phone: recruiter.phone || null,
                 type: 'recruiter',
                 entity_id: recruiterId,
             };
@@ -233,16 +229,15 @@ export class ContactLookupHelper {
             if (candidate.user_id) {
                 const { data: user, error: userError } = await this.supabase
                     .from('users')
-                    .select('id, email, first_name, last_name, name, phone')
+                    .select('id, email, name, phone')
                     .eq('id', candidate.user_id)
                     .single();
 
                 if (!userError && user) {
-                    const name = this.resolveUserName(user);
                     return {
                         id: user.id,
                         user_id: user.id,
-                        name: name || candidate.full_name || 'Unknown',
+                        name: user.name || candidate.full_name || 'Unknown',
                         email: user.email || candidate.email || '',
                         phone: user.phone || candidate.phone || null,
                         type: 'candidate',
@@ -310,16 +305,15 @@ export class ContactLookupHelper {
                 if (membership.user_id) {
                     const { data: user, error: userError } = await this.supabase
                         .from('users')
-                        .select('id, email, first_name, last_name, name, phone')
+                        .select('id, email, name, phone')
                         .eq('id', membership.user_id)
                         .single();
 
                     if (!userError && user && user.email) {
-                        const name = this.resolveUserName(user);
                         contacts.push({
                             id: user.id,
                             user_id: user.id,
-                            name,
+                            name: user.name,
                             email: user.email,
                             phone: user.phone || null,
                             type: 'company_admin',
@@ -338,34 +332,6 @@ export class ContactLookupHelper {
             );
             return [];
         }
-    }
-
-    /**
-     * Resolve user name from various possible fields
-     * Priority: name > first_name + last_name > email
-     */
-    private resolveUserName(user: {
-        name?: string | null;
-        first_name?: string | null;
-        last_name?: string | null;
-        email?: string | null;
-    }): string {
-        // If there's a 'name' field, use it
-        if (user.name) {
-            return user.name;
-        }
-
-        // Otherwise try first_name + last_name
-        const firstName = user.first_name || '';
-        const lastName = user.last_name || '';
-        const fullName = `${firstName} ${lastName}`.trim();
-        
-        if (fullName) {
-            return fullName;
-        }
-
-        // Fallback to email
-        return user.email || 'Unknown';
     }
 }
 
