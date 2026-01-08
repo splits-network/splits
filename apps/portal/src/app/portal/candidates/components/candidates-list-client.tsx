@@ -4,19 +4,34 @@ import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import { useStandardList, LoadingState, SearchInput, ViewModeToggle, PaginationControls } from '@/hooks/use-standard-list';
+import { useStandardList, LoadingState, SearchInput, ViewModeToggle, PaginationControls, EmptyState, ErrorState } from '@/hooks/use-standard-list';
 import { useUserProfile } from '@/contexts';
 import { formatDate, getVerificationStatusBadge, getVerificationStatusIcon } from '@/lib/utils';
 import CandidateCard, { type Candidate } from './candidate-card';
+import { CandidateTableRow } from './candidate-table-row';
 import AddCandidateModal from './add-candidate-modal';
 import { useToast } from '@/lib/toast-context';
 import { StatCardGrid, StatCard } from '@/components/ui';
+import { DataTable, type TableColumn } from '@/components/ui/tables';
 import { CandidatesTrendsChart, TIME_PERIODS, calculateCandidateStatTrends } from '@/components/charts/candidates-trends-chart';
 
 
 interface CandidateFilters {
     scope: 'mine' | 'all';
 }
+
+// ===== TABLE COLUMNS =====
+
+const candidateColumns: TableColumn[] = [
+    { key: 'full_name', label: 'Candidate', sortable: true },
+    { key: 'verification_status', label: 'Status', sortable: true },
+    // 'relationship' column is conditional based on isRecruiter and handled in component
+    { key: 'links', label: 'Links' },
+    { key: 'created_at', label: 'Added', sortable: true },
+    { key: 'actions', label: 'Actions', align: 'right' },
+];
+
+// ===== COMPONENT =====
 
 export default function CandidatesListClient() {
     const { getToken } = useAuth();
@@ -48,12 +63,13 @@ export default function CandidatesListClient() {
         error,
         pagination,
         filters,
-        searchQuery,
+        searchInput,
+        setSearchInput,
+        clearSearch,
         sortBy,
         sortOrder,
         viewMode,
         setFilters,
-        setSearchInput,
         goToPage,
         handleSort,
         setViewMode,
@@ -85,27 +101,11 @@ export default function CandidatesListClient() {
     };
 
     if (loading && candidates.length === 0) {
-        return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                    <span className="loading loading-spinner loading-lg"></span>
-                    <p className="mt-4 text-base-content/70">Loading candidates...</p>
-                </div>
-            </div>
-        );
+        return <LoadingState message="Loading candidates..." />;
     }
 
     if (error) {
-        return (
-            <div className="alert alert-error">
-                <i className="fa-solid fa-circle-exclamation"></i>
-                <span>{error}</span>
-                <button className="btn btn-sm btn-ghost" onClick={refetch}>
-                    <i className="fa-solid fa-rotate"></i>
-                    Retry
-                </button>
-            </div>
-        );
+        return <ErrorState message={error} onRetry={refetch} />;
     }
 
     return (
@@ -115,12 +115,14 @@ export default function CandidatesListClient() {
                     <StatCardGrid className='m-2 shadow-lg'>
                         <StatCard
                             title='Total Candidates'
+                            icon="fa-users"
                             value={pagination.total}
                             trend={statTrends.total}
                             trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
                         />
                         <StatCard
                             title='New Candidates'
+                            icon="fa-user-plus"
                             value={candidates.filter(c => c.is_new).length}
                             trend={statTrends.total}
                             trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
@@ -128,12 +130,14 @@ export default function CandidatesListClient() {
                         {isRecruiter && (
                             <StatCard
                                 title='Sourced by You'
+                                icon="fa-user-astronaut"
                                 value={candidates.filter(c => c.is_sourcer).length}
                             />
                         )}
                         {isRecruiter && (
                             <StatCard
                                 title='With Active Relationships'
+                                icon="fa-handshake"
                                 value={candidates.filter(c => c.has_active_relationship).length}
                                 trend={statTrends.withRelationships}
                                 trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
@@ -164,194 +168,47 @@ export default function CandidatesListClient() {
 
                 {/* Table View */}
                 {viewMode === 'table' && candidates.length > 0 && (
-                    <div className="card bg-base-200 shadow overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th
-                                            className="cursor-pointer hover:bg-base-200 select-none"
-                                            onClick={() => handleSort('full_name')}
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                Candidate
-                                                <i className={`fa-solid ${getSortIcon('full_name')} text-xs opacity-50`}></i>
-                                            </div>
-                                        </th>
-                                        <th
-                                            className="cursor-pointer hover:bg-base-200 select-none"
-                                            onClick={() => handleSort('email')}
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                Email
-                                                <i className={`fa-solid ${getSortIcon('email')} text-xs opacity-50`}></i>
-                                            </div>
-                                        </th>
-                                        <th
-                                            className="cursor-pointer hover:bg-base-200 select-none"
-                                            onClick={() => handleSort('verification_status')}
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                Status
-                                                <i className={`fa-solid ${getSortIcon('verification_status')} text-xs opacity-50`}></i>
-                                            </div>
-                                        </th>
-                                        {isRecruiter && <th>Relationship</th>}
-                                        <th>Links</th>
-                                        <th
-                                            className="cursor-pointer hover:bg-base-200 select-none"
-                                            onClick={() => handleSort('created_at')}
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                Added
-                                                <i className={`fa-solid ${getSortIcon('created_at')} text-xs opacity-50`}></i>
-                                            </div>
-                                        </th>
-                                        <th className="text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {candidates.map((candidate) => (
-                                        <tr key={candidate.id} className="hover">
-                                            <td>
-                                                <div className="flex items-center gap-3">
-                                                    <div className="avatar avatar-placeholder">
-                                                        <div className="bg-primary/10 text-primary rounded-full w-10">
-                                                            <span className="text-sm">
-                                                                {(() => {
-                                                                    const names = candidate.full_name.split(' ');
-                                                                    const firstInitial = names[0]?.[0]?.toUpperCase() || '';
-                                                                    const lastInitial = names[names.length - 1]?.[0]?.toUpperCase() || '';
-                                                                    return names.length > 1 ? firstInitial + lastInitial : firstInitial;
-                                                                })()}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    <Link href={`/portal/candidates/${candidate.id}`} className="font-semibold hover:text-primary transition-colors">
-                                                        {candidate.full_name}
-                                                    </Link>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <a href={`mailto:${candidate.email}`} className="link link-hover text-sm">
-                                                    {candidate.email}
-                                                </a>
-                                            </td>
-                                            <td>
-                                                {candidate.verification_status && (
-                                                    <span className={`badge badge-sm ${getVerificationStatusBadge(candidate.verification_status)} gap-1`}>
-                                                        <i className={`fa-solid ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
-                                                        {candidate.verification_status.charAt(0).toUpperCase() + candidate.verification_status.slice(1)}
-                                                    </span>
-                                                )}
-                                            </td>
-                                            {isRecruiter && (
-                                                <td>
-                                                    <div className="flex gap-1">
-                                                        {candidate.is_sourcer && (
-                                                            <span className="badge badge-sm badge-primary gap-1" title="You sourced this candidate">
-                                                                <i className="fa-solid fa-star"></i>
-                                                                Sourcer
-                                                            </span>
-                                                        )}
-                                                        {candidate.has_active_relationship && (
-                                                            <span className="badge badge-sm badge-success gap-1" title="Active relationship">
-                                                                <i className="fa-solid fa-handshake"></i>
-                                                                Active
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            )}
-                                            <td>
-                                                <div className="flex gap-1">
-                                                    {candidate.linkedin_url && (
-                                                        <a
-                                                            href={candidate.linkedin_url}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="btn btn-ghost btn-sm"
-                                                            title="View LinkedIn Profile"
-                                                        >
-                                                            <i className="fa-brands fa-linkedin text-blue-600"></i>
-                                                        </a>
-                                                    )}
-                                                    {candidate.portfolio_url && (
-                                                        <a
-                                                            href={candidate.portfolio_url}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="btn btn-ghost btn-sm"
-                                                            title="View Portfolio"
-                                                        >
-                                                            <i className="fa-solid fa-globe text-purple-600"></i>
-                                                        </a>
-                                                    )}
-                                                    {candidate.github_url && (
-                                                        <a
-                                                            href={candidate.github_url}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="btn btn-ghost btn-sm"
-                                                            title="View GitHub"
-                                                        >
-                                                            <i className="fa-brands fa-github text-gray-600"></i>
-                                                        </a>
-                                                    )}
-                                                    {!candidate.linkedin_url && !candidate.portfolio_url && !candidate.github_url && (
-                                                        <span className="text-base-content/40">—</span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="text-sm text-base-content/70">
-                                                {formatDate(candidate.created_at)}
-                                            </td>
-                                            <td>
-                                                <div className="flex gap-2 justify-end">
-                                                    <Link
-                                                        href={`/portal/candidates/${candidate.id}`}
-                                                        className="btn btn-primary btn-sm"
-                                                        title="View Details"
-                                                    >
-                                                        <i className="fa-solid fa-arrow-right"></i>
-                                                    </Link>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <DataTable
+                        columns={candidateColumns}
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSort={handleSort}
+                        showExpandColumn={true}
+                        isEmpty={candidates.length === 0}
+                        loading={loading}
+                    >
+                        {candidates.map((candidate) => (
+                            <CandidateTableRow
+                                key={candidate.id}
+                                candidate={candidate}
+                                isRecruiter={isRecruiter}
+                            />
+                        ))}
+                    </DataTable>
                 )}
 
                 {/* Empty State */}
-                {candidates.length === 0 && !loading && (
-                    <div className="card bg-base-100 shadow">
-                        <div className="card-body text-center py-12">
-                            <i className="fa-solid fa-users text-6xl text-base-content/20"></i>
-                            <h3 className="text-xl font-semibold mt-4">No Candidates Found</h3>
-                            <p className="text-base-content/70 mt-2">
-                                {searchQuery ? 'Try adjusting your search' : 'Submit candidates to roles to see them appear here'}
-                            </p>
-                            {!searchQuery && (
-                                <button
-                                    className="btn btn-primary mt-4"
-                                    onClick={() => setShowAddModal(true)}
-                                >
-                                    <i className="fa-solid fa-plus"></i>
-                                    Add Your First Candidate
-                                </button>
-                            )}
-                        </div>
-                    </div>
+                {!loading && candidates.length === 0 && (
+                    <EmptyState
+                        icon="fa-users"
+                        title="No Candidates Found"
+                        description={
+                            searchInput
+                                ? 'Try adjusting your search or filters'
+                                : 'Submit candidates to roles to see them appear here'
+                        }
+                    />
                 )}
 
                 {/* Pagination Controls */}
                 <PaginationControls
-                    pagination={pagination}
+                    page={pagination.page}
+                    totalPages={pagination.total_pages}
+                    total={pagination.total}
+                    limit={pagination.limit}
                     onPageChange={goToPage}
                     onLimitChange={setLimit}
+                    loading={loading}
                 />
             </div>
             <div className="w-full md:w-64 lg:w-72 xl:w-80 shrink-0 mt-6 md:mt-0 space-y-6">
@@ -378,12 +235,13 @@ export default function CandidatesListClient() {
                             Filters & View
                             <span className="text-base-content/30">•••</span>
                         </h3>
-                        <div className="flex flex-wrap gap-4 items-end">
+                        <div className="flex flex-wrap gap-4 items-center">
                             {/* Scope Filter - Only show for recruiters */}
                             {isRecruiter && (
                                 <div className="fieldset w-full">
                                     <select
-                                        className="select"
+                                        name="scope-filter"
+                                        className="select w-full"
                                         value={filters.scope}
                                         onChange={(e) => setFilters({ scope: e.target.value as 'mine' | 'all' })}
                                     >
@@ -393,36 +251,18 @@ export default function CandidatesListClient() {
                                 </div>
                             )}
 
-                            {/* Sort dropdown for grid view */}
-                            {viewMode === 'grid' && (
-                                <div className="fieldset w-full">
-                                    <select
-                                        className="select"
-                                        value={`${sortBy}-${sortOrder}`}
-                                        onChange={(e) => {
-                                            const [field] = e.target.value.split('-');
-                                            handleSort(field);
-                                        }}
-                                    >
-                                        <option value="created_at-desc">Newest First</option>
-                                        <option value="created_at-asc">Oldest First</option>
-                                        <option value="full_name-asc">Name (A-Z)</option>
-                                        <option value="full_name-desc">Name (Z-A)</option>
-                                        <option value="email-asc">Email (A-Z)</option>
-                                        <option value="email-desc">Email (Z-A)</option>
-                                    </select>
-                                </div>
-                            )}
-
+                            {/* Search */}
                             <SearchInput
-                                value={searchQuery}
+                                value={searchInput}
                                 onChange={setSearchInput}
-                                className="flex-1 min-w-[150px]"
-                                placeholder="Search by name or email..."
+                                onClear={clearSearch}
+                                placeholder="Search candidates..."
                                 loading={loading}
+                                className="flex-1 min-w-[200px]"
                             />
 
-                            <ViewModeToggle viewMode={viewMode} setViewMode={setViewMode} />
+                            {/* View Toggle */}
+                            <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} />
                         </div>
                     </div>
                 </div>

@@ -7,6 +7,8 @@ import { createAuthenticatedClient } from '@/lib/api-client';
 import { useUserProfile } from '@/contexts';
 import ActionableProposalsWidget from './actionable-proposals-widget';
 import { getActivityIcon } from '@/lib/utils';
+import { StatCard, StatCardGrid, ContentCard, EmptyState } from '@/components/ui/cards';
+import { TrendBadge } from '@/components/ui';
 
 interface RecruiterStats {
     active_roles: number;
@@ -16,6 +18,13 @@ interface RecruiterStats {
     placements_this_year: number;
     total_earnings_ytd: number;
     pending_payouts: number;
+    // Trend data (percentage change from previous period)
+    trends?: {
+        active_roles?: number;
+        candidates_in_process?: number;
+        placements_this_month?: number;
+        placements_this_year?: number;
+    };
 }
 
 interface RecentActivity {
@@ -149,282 +158,304 @@ export default function RecruiterDashboard() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen">
-                <span className="loading loading-spinner loading-lg"></span>
+            <div className="space-y-6 animate-fade-in">
+                {/* Welcome skeleton */}
+                <div className="h-28 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 skeleton"></div>
+                {/* Stats skeleton */}
+                <StatCardGrid>
+                    {[1, 2, 3, 4].map((i) => (
+                        <StatCard key={i} title="" value={0} icon="fa-spinner" loading />
+                    ))}
+                </StatCardGrid>
             </div>
         );
     }
 
-
     return (
-        <div className="space-y-6">
-            {/* Welcome Section */}
-            <div className="card bg-linear-to-r from-primary to-secondary text-primary-content shadow">
-                <div className="card-body">
-                    <h2 className="card-title text-3xl">
-                        Welcome back, {profile?.name || 'Recruiter'}!
-                    </h2>
-                    <p className="text-lg opacity-90">
-                        Here's an overview of your recruiting activity.
-                    </p>
-                </div>
-            </div>
-
-            {/* Key Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="stats shadow bg-base-100">
-                    <div className="stat">
-                        <div className="stat-figure text-primary">
-                            <i className="fa-solid fa-briefcase text-3xl"></i>
-                        </div>
-                        <div className="stat-title">Active Roles</div>
-                        <div className="stat-value text-primary">{stats?.active_roles || 0}</div>
-                        <div className="stat-desc">Roles assigned to you</div>
-                    </div>
+        <div className="space-y-6 animate-fade-in">
+            {/* Welcome Section - Enhanced gradient card */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-secondary text-primary-content shadow-elevation-3">
+                {/* Decorative pattern */}
+                <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/20 -translate-y-1/2 translate-x-1/4"></div>
+                    <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-white/10 translate-y-1/2 -translate-x-1/4"></div>
                 </div>
 
-                <div className="stats shadow bg-base-100">
-                    <div className="stat">
-                        <div className="stat-figure text-secondary">
-                            <i className="fa-solid fa-users text-3xl"></i>
+                <div className="relative p-6 md:p-8">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <h2 className="text-2xl md:text-3xl font-bold">
+                                Welcome back, {profile?.name?.split(' ')[0] || 'Recruiter'}!
+                            </h2>
+                            <p className="text-lg opacity-90 mt-1">
+                                Here's an overview of your recruiting activity.
+                            </p>
                         </div>
-                        <div className="stat-title">In Process</div>
-                        <div className="stat-value text-secondary">{stats?.candidates_in_process || 0}</div>
-                        <div className="stat-desc">Active candidates</div>
-                    </div>
-                </div>
-
-                <div className="stats shadow bg-base-100">
-                    <div className="stat">
-                        <div className="stat-figure text-accent">
-                            <i className="fa-solid fa-file-contract text-3xl"></i>
+                        <div className="flex gap-2">
+                            <Link href="/portal/roles" className="btn btn-sm bg-white/20 border-0 hover:bg-white/30 text-white">
+                                <i className="fa-solid fa-briefcase"></i>
+                                Browse Roles
+                            </Link>
                         </div>
-                        <div className="stat-title">Pending Offers</div>
-                        <div className="stat-value text-accent">{stats?.offers_pending || 0}</div>
-                        <div className="stat-desc">Awaiting acceptance</div>
-                    </div>
-                </div>
-
-                <div className="stats shadow bg-base-100">
-                    <div className="stat">
-                        <div className="stat-figure text-success">
-                            <i className="fa-solid fa-trophy text-3xl"></i>
-                        </div>
-                        <div className="stat-title">Placements</div>
-                        <div className="stat-value text-success">{stats?.placements_this_year || 0}</div>
-                        <div className="stat-desc">This year</div>
                     </div>
                 </div>
             </div>
 
-            {/* Earnings Overview */}
+            {/* Key Stats Grid - Using new StatCard component */}
+            <StatCardGrid>
+                <StatCard
+                    title="Active Roles"
+                    value={stats?.active_roles || 0}
+                    description="Roles assigned to you"
+                    icon="fa-briefcase"
+                    color="primary"
+                    trend={stats?.trends?.active_roles}
+                    href="/portal/roles"
+                />
+                <StatCard
+                    title="In Process"
+                    value={stats?.candidates_in_process || 0}
+                    description="Active candidates"
+                    icon="fa-users"
+                    color="secondary"
+                    trend={stats?.trends?.candidates_in_process}
+                    href="/portal/application"
+                />
+                <StatCard
+                    title="Pending Offers"
+                    value={stats?.offers_pending || 0}
+                    description="Awaiting acceptance"
+                    icon="fa-file-contract"
+                    color="accent"
+                    href="/portal/application?stage=offer"
+                />
+                <StatCard
+                    title="Placements YTD"
+                    value={stats?.placements_this_year || 0}
+                    description="Successful hires"
+                    icon="fa-trophy"
+                    color="success"
+                    trend={stats?.trends?.placements_this_year}
+                    href="/portal/placements"
+                />
+            </StatCardGrid>
+
+            {/* Earnings Overview - Enhanced cards */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body">
-                        <h3 className="card-title">
-                            <i className="fa-solid fa-chart-line text-success mr-2"></i>
-                            Earnings This Year
-                        </h3>
-                        <div className="flex items-baseline gap-2 mt-4">
-                            <div className="text-4xl font-bold text-success">
-                                ${((stats?.total_earnings_ytd || 0) / 1000).toFixed(1)}k
-                            </div>
-                            <div className="text-base-content/60">total</div>
+                <ContentCard
+                    title="Earnings This Year"
+                    icon="fa-chart-line"
+                    headerActions={
+                        <Link href="/portal/placements" className="btn btn-sm btn-ghost text-success">
+                            View Details
+                            <i className="fa-solid fa-arrow-right ml-1"></i>
+                        </Link>
+                    }
+                >
+                    <div className="flex items-baseline gap-3 mt-2">
+                        <div className="text-4xl font-bold text-success">
+                            ${((stats?.total_earnings_ytd || 0) / 1000).toFixed(1)}k
                         </div>
-                        <div className="flex justify-between items-center mt-4 pt-4 border-t border-base-300">
+                        {stats?.trends?.placements_this_year && (
+                            <TrendBadge value={stats.trends.placements_this_year} />
+                        )}
+                    </div>
+                    <div className="flex items-center gap-4 mt-4 pt-4 border-t border-base-200">
+                        <div className="flex items-center gap-2">
+                            <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
+                                <i className="fa-solid fa-calendar-check text-success"></i>
+                            </div>
                             <div>
                                 <div className="text-sm text-base-content/60">This Month</div>
-                                <div className="text-xl font-semibold">{stats?.placements_this_month || 0} placements</div>
+                                <div className="text-lg font-semibold">{stats?.placements_this_month || 0} placements</div>
                             </div>
-                            <Link href="/portal/placements" className="btn btn-sm btn-outline btn-success">
-                                View Details
-                                <i className="fa-solid fa-arrow-right ml-2"></i>
-                            </Link>
                         </div>
                     </div>
-                </div>
+                </ContentCard>
 
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body">
-                        <h3 className="card-title">
-                            <i className="fa-solid fa-money-bill-transfer text-primary mr-2"></i>
-                            Pending Payouts
-                        </h3>
-                        <div className="flex items-baseline gap-2 mt-4">
-                            <div className="text-4xl font-bold text-primary">
-                                ${((stats?.pending_payouts || 0) / 1000).toFixed(1)}k
-                            </div>
-                            <div className="text-base-content/60">pending</div>
-                        </div>
-                        <div className="flex justify-between items-center mt-4 pt-4 border-t border-base-300">
-                            <div className="text-sm text-base-content/60">
-                                Payments processed after guarantee period
-                            </div>
-                            <Link href="/earnings" className="btn btn-sm btn-outline btn-primary">
-                                View Payouts
-                                <i className="fa-solid fa-arrow-right ml-2"></i>
-                            </Link>
+                <ContentCard
+                    title="Pending Payouts"
+                    icon="fa-money-bill-transfer"
+                    headerActions={
+                        <Link href="/earnings" className="btn btn-sm btn-ghost text-primary">
+                            View Payouts
+                            <i className="fa-solid fa-arrow-right ml-1"></i>
+                        </Link>
+                    }
+                >
+                    <div className="flex items-baseline gap-3 mt-2">
+                        <div className="text-4xl font-bold text-primary">
+                            ${((stats?.pending_payouts || 0) / 1000).toFixed(1)}k
                         </div>
                     </div>
-                </div>
+                    <div className="flex items-center gap-2 mt-4 pt-4 border-t border-base-200">
+                        <i className="fa-solid fa-info-circle text-base-content/40"></i>
+                        <span className="text-sm text-base-content/60">
+                            Payments processed after guarantee period
+                        </span>
+                    </div>
+                </ContentCard>
             </div>
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Proposed Jobs + Recent Activity */}
+                {/* Left Column - Proposals + Activity */}
                 <div className="lg:col-span-2 space-y-6">
-                    {/* Actionable Proposals Preview */}
-                    <div className="card bg-base-100 shadow">
-                        <div className="card-body">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="card-title">
-                                    <i className="fa-solid fa-inbox mr-2"></i>
-                                    Action Required
-                                </h3>
-                                <Link href="/proposals" className="text-sm text-primary hover:underline">
-                                    View all →
-                                </Link>
-                            </div>
-                            <ActionableProposalsWidget compact={true} />
-                        </div>
-                    </div>
+                    {/* Actionable Proposals */}
+                    <ContentCard
+                        title="Action Required"
+                        icon="fa-inbox"
+                        headerActions={
+                            <Link href="/proposals" className="btn btn-sm btn-ghost">
+                                View all
+                                <i className="fa-solid fa-arrow-right ml-1"></i>
+                            </Link>
+                        }
+                    >
+                        <ActionableProposalsWidget compact={true} />
+                    </ContentCard>
 
-                    {/* Recent Activity */}
-                    <div className="card bg-base-100 shadow">
-                        <div className="card-body">
-                            <h3 className="card-title">
-                                <i className="fa-solid fa-clock-rotate-left mr-2"></i>
-                                Recent Activity
-                            </h3>
-                            {recentActivity.length === 0 ? (
-                                <div className="text-center py-12 text-base-content/60">
-                                    <i className="fa-solid fa-inbox text-4xl mb-4"></i>
-                                    <p>No recent activity</p>
-                                    <p className="text-sm">Start by submitting candidates to active roles</p>
-                                </div>
-                            ) : (
-                                <div className="space-y-3 mt-4">
-                                    {recentActivity.slice(0, 8).map((activity) => (
-                                        <div
-                                            key={activity.id}
-                                            className="flex items-start gap-4 p-3 rounded-lg hover:bg-base-200 transition-colors cursor-pointer"
-                                        >
-                                            <div className="avatar avatar-placeholder">
-                                                <div className="bg-primary text-primary-content rounded-full w-10 h-10">
-                                                    <i className={`fa-solid ${getActivityIcon(activity.type)}`}></i>
-                                                </div>
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-medium">{activity.message}</p>
-                                                {activity.job_title && (
-                                                    <p className="text-sm text-primary">{activity.job_title}</p>
-                                                )}
-                                                <p className="text-sm text-base-content/60">{activity.timestamp}</p>
-                                            </div>
-                                            {activity.link && (
-                                                <Link href={activity.link} className="btn btn-ghost btn-sm btn-square">
-                                                    <i className="fa-solid fa-arrow-right"></i>
-                                                </Link>
-                                            )}
+                    {/* Recent Activity - Enhanced styling */}
+                    <ContentCard
+                        title="Recent Activity"
+                        icon="fa-clock-rotate-left"
+                        headerActions={
+                            recentActivity.length > 5 && (
+                                <Link href="/activity" className="btn btn-sm btn-ghost">
+                                    View all
+                                    <i className="fa-solid fa-arrow-right ml-1"></i>
+                                </Link>
+                            )
+                        }
+                    >
+                        {recentActivity.length === 0 ? (
+                            <EmptyState
+                                icon="fa-inbox"
+                                title="No recent activity"
+                                description="Start by submitting candidates to active roles"
+                                size="sm"
+                            />
+                        ) : (
+                            <div className="space-y-1 -mx-2">
+                                {recentActivity.slice(0, 8).map((activity) => (
+                                    <Link
+                                        key={activity.id}
+                                        href={activity.link || '#'}
+                                        className="flex items-start gap-4 p-3 rounded-xl hover:bg-base-200/70 transition-all group"
+                                    >
+                                        <div className={`
+                                            w-10 h-10 rounded-xl flex items-center justify-center shrink-0
+                                            ${activity.type === 'placement_created' ? 'bg-success/10 text-success' :
+                                                activity.type === 'offer_extended' ? 'bg-accent/10 text-accent' :
+                                                    activity.type === 'application_submitted' ? 'bg-primary/10 text-primary' :
+                                                        'bg-secondary/10 text-secondary'}
+                                        `}>
+                                            <i className={`fa-solid ${getActivityIcon(activity.type)}`}></i>
                                         </div>
-                                    ))}
-                                </div>
-                            )}
-                            {recentActivity.length > 8 && (
-                                <div className="card-actions justify-end mt-4">
-                                    <Link href="/activity" className="btn btn-ghost btn-sm">
-                                        View All Activity
-                                        <i className="fa-solid fa-arrow-right ml-2"></i>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-medium text-sm line-clamp-1">{activity.message}</p>
+                                            {activity.job_title && (
+                                                <p className="text-xs text-primary mt-0.5">{activity.job_title}</p>
+                                            )}
+                                            <p className="text-xs text-base-content/50 mt-0.5">{activity.timestamp}</p>
+                                        </div>
+                                        <i className="fa-solid fa-chevron-right text-base-content/30 group-hover:text-primary transition-colors"></i>
                                     </Link>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </ContentCard>
                 </div>
 
-                {/* Quick Actions & Top Roles */}
+                {/* Right Column - Quick Actions & Top Roles */}
                 <div className="space-y-6">
-                    {/* Quick Actions */}
-                    <div className="card bg-base-100 shadow">
-                        <div className="card-body">
-                            <h3 className="card-title text-lg">Quick Actions</h3>
-                            <div className="flex flex-col gap-2 mt-4">
-                                <Link href="/portal/roles" className="btn btn-primary w-full justify-start">
-                                    <i className="fa-solid fa-briefcase"></i>
-                                    Browse Roles
-                                </Link>
-                                <Link href="/portal/candidates" className="btn btn-outline w-full justify-start">
-                                    <i className="fa-solid fa-users"></i>
-                                    My Candidates
-                                </Link>
-                                <Link href="/proposals" className="btn btn-outline w-full justify-start">
-                                    <i className="fa-solid fa-inbox"></i>
-                                    Proposals
-                                </Link>
-                                <Link href="/portal/placements" className="btn btn-outline w-full justify-start">
-                                    <i className="fa-solid fa-trophy"></i>
-                                    My Placements
-                                </Link>
-                                <Link href="/earnings" className="btn btn-outline w-full justify-start">
-                                    <i className="fa-solid fa-chart-line"></i>
-                                    Earnings Report
-                                </Link>
-                            </div>
+                    {/* Quick Actions - Enhanced buttons */}
+                    <ContentCard title="Quick Actions" icon="fa-bolt">
+                        <div className="flex flex-col gap-2">
+                            <Link href="/portal/roles" className="btn btn-primary w-full justify-start gap-3">
+                                <i className="fa-solid fa-briefcase w-4"></i>
+                                Browse Roles
+                            </Link>
+                            <Link href="/portal/candidates" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
+                                <i className="fa-solid fa-users w-4"></i>
+                                My Candidates
+                            </Link>
+                            <Link href="/proposals" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
+                                <i className="fa-solid fa-inbox w-4"></i>
+                                Proposals
+                            </Link>
+                            <Link href="/portal/placements" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
+                                <i className="fa-solid fa-trophy w-4"></i>
+                                My Placements
+                            </Link>
                         </div>
-                    </div>
+                    </ContentCard>
 
-                    {/* Top Active Roles */}
-                    <div className="card bg-base-100 shadow">
-                        <div className="card-body">
-                            <h3 className="card-title text-lg">Top Active Roles</h3>
-                            {topRoles.length === 0 ? (
-                                <div className="text-center py-8 text-base-content/60 text-sm">
-                                    <p>No active roles assigned yet</p>
-                                </div>
-                            ) : (
-                                <div className="space-y-3 mt-4">
-                                    {topRoles.slice(0, 5).map((role) => (
-                                        <Link
-                                            key={role.id}
-                                            href={`/portal/roles/${role.id}`}
-                                            className="block p-3 rounded-lg hover:bg-base-200 transition-colors"
-                                        >
-                                            <div className="font-semibold text-sm">{role.title}</div>
-                                            <div className="text-xs text-base-content/60 flex items-center gap-2 mt-1">
-                                                <span>{role.company?.name}</span>
-                                                {role.location && (
-                                                    <>
-                                                        <span>•</span>
-                                                        <span>{role.location}</span>
-                                                    </>
-                                                )}
+                    {/* Top Active Roles - Enhanced list */}
+                    <ContentCard
+                        title="Top Active Roles"
+                        icon="fa-fire"
+                        headerActions={
+                            <Link href="/portal/roles" className="btn btn-sm btn-ghost">
+                                All roles
+                                <i className="fa-solid fa-arrow-right ml-1"></i>
+                            </Link>
+                        }
+                    >
+                        {topRoles.length === 0 ? (
+                            <EmptyState
+                                icon="fa-briefcase"
+                                title="No active roles"
+                                description="Check back soon for new opportunities"
+                                size="sm"
+                            />
+                        ) : (
+                            <div className="space-y-2 -mx-2">
+                                {topRoles.slice(0, 5).map((role) => (
+                                    <Link
+                                        key={role.id}
+                                        href={`/portal/roles/${role.id}`}
+                                        className="block p-3 rounded-xl hover:bg-base-200/70 transition-all group"
+                                    >
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="min-w-0">
+                                                <div className="font-semibold text-sm line-clamp-1 group-hover:text-primary transition-colors">
+                                                    {role.title}
+                                                </div>
+                                                <div className="text-xs text-base-content/60 flex items-center gap-1.5 mt-1">
+                                                    <i className="fa-solid fa-building text-[10px]"></i>
+                                                    <span className="line-clamp-1">{role.company?.name}</span>
+                                                    {role.location && (
+                                                        <>
+                                                            <span className="text-base-content/30">•</span>
+                                                            <span className="line-clamp-1">{role.location}</span>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
                                             {role.candidate_count > 0 && (
-                                                <div className="text-xs text-primary mt-1">
-                                                    {role.candidate_count} candidate{role.candidate_count !== 1 ? 's' : ''} in pipeline
-                                                </div>
+                                                <span className="badge badge-sm badge-primary badge-outline shrink-0">
+                                                    {role.candidate_count}
+                                                </span>
                                             )}
-                                        </Link>
-                                    ))}
-                                </div>
-                            )}
-                            <div className="card-actions justify-end mt-2">
-                                <Link href="/portal/roles" className="text-sm text-primary hover:underline">
-                                    View all roles →
-                                </Link>
+                                        </div>
+                                    </Link>
+                                ))}
                             </div>
-                        </div>
-                    </div>
+                        )}
+                    </ContentCard>
                 </div>
             </div>
 
-            {/* Insights & Tips */}
+            {/* Getting Started Tips - Enhanced alert */}
             {(stats?.active_roles === 0 || stats?.candidates_in_process === 0) && (
-                <div className="alert alert-info">
-                    <i className="fa-solid fa-lightbulb"></i>
+                <div className="alert bg-info/10 border-info/20 shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-info/20 flex items-center justify-center shrink-0">
+                        <i className="fa-solid fa-lightbulb text-info"></i>
+                    </div>
                     <div>
-                        <h4 className="font-bold">Getting Started Tips</h4>
-                        <div className="text-sm mt-1">
+                        <h4 className="font-bold text-info">Getting Started Tips</h4>
+                        <div className="text-sm mt-1 text-base-content/70">
                             {stats?.active_roles === 0 && (
                                 <p>• Browse available roles and start submitting qualified candidates</p>
                             )}

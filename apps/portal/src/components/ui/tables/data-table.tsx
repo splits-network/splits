@@ -121,7 +121,7 @@ export function DataTable<T = unknown>({
         <div className="overflow-x-auto bg-base-200">
             <table className={tableClasses}>
                 <thead>
-                    <tr className="bg-base-200/50">
+                    <tr className="bg-base-200">
                         {/* Selection checkbox column */}
                         {showSelectColumn && (
                             <th className="w-10">

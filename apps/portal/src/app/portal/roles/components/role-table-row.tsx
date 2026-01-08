@@ -49,12 +49,12 @@ export function RoleTableRow({ job, allJobs, canManageRole }: RoleTableRowProps)
                 <div className="flex items-center gap-3">
                     {/* Company Avatar */}
                     <div className="avatar avatar-placeholder shrink-0">
-                        <div className="bg-base-200 text-base-content/70 w-9 h-9 rounded-lg flex items-center justify-center text-sm font-semibold">
+                        <div className="bg-primary/10 text-base-content/70 w-10 rounded-full flex items-center justify-center text-sm font-semibold">
                             {job.company?.logo_url ? (
                                 <img
                                     src={job.company.logo_url}
                                     alt={job.company.name}
-                                    className="w-full h-full object-cover rounded-lg"
+                                    className="w-full h-full object-contain rounded-lg"
                                     onError={(e) => {
                                         e.currentTarget.style.display = 'none';
                                     }}

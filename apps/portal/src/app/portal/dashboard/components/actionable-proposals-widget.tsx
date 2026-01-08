@@ -180,7 +180,7 @@ export default function ActionableProposalsWidget({ compact = true }: Actionable
 
             <div className="text-center pt-2">
                 <Link href="/portal/application/pending" className="text-sm text-primary hover:underline">
-                    View all pending reviews 
+                    View all pending reviews
                 </Link>
             </div>
         </div>
