@@ -64,8 +64,8 @@ export function RoleTableRow({ job, allJobs, canManageRole }: RoleTableRowProps)
                             )}
                         </div>
                     </div>
-                    <div>
-                        <span className="font-semibold">
+                    <div className="text-sm min-w-0">
+                        <span className="font-semibold whitespace-pre-line" title={job.title}>
                             {job.title}
                         </span>
                         <div className="text-sm text-base-content/60">
@@ -74,13 +74,13 @@ export function RoleTableRow({ job, allJobs, canManageRole }: RoleTableRowProps)
                     </div>
                 </div>
             </td>
-            <td>
+            {/* <td>
                 {job.location ? (
                     <span className="text-sm">{job.location}</span>
                 ) : (
                     <span className="text-base-content/30">—</span>
                 )}
-            </td>
+            </td> */}
             <td>
                 {job.salary_min && job.salary_max ? (
                     <span className="text-sm tabular-nums">

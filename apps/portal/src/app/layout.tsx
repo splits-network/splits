@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
 import { ClerkProvider } from '@clerk/nextjs';
-import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
 import CookieConsent from '@/components/cookie-consent';
 import { ToastProvider } from '@/lib/toast-context';
 import { ThemeInitializer } from './theme-initializer';

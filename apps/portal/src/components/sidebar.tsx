@@ -14,25 +14,26 @@ interface NavItem {
     roles: string[];
     section?: 'main' | 'management' | 'settings';
     badge?: number;
+    mobileDock?: boolean;
 }
 
 // Navigation items organized by section
 const navItems: NavItem[] = [
     // Main section
-    { href: '/portal/dashboard', label: 'Dashboard', icon: 'fa-house', roles: ['all'], section: 'main' },
-    { href: '/portal/roles', label: 'Roles', icon: 'fa-briefcase', roles: ['all'], section: 'management' },
+    { href: '/portal/dashboard', label: 'Dashboard', icon: 'fa-house', roles: ['all'], section: 'main', mobileDock: true },
+    { href: '/portal/roles', label: 'Roles', icon: 'fa-briefcase', roles: ['all'], section: 'management', mobileDock: true },
 
     // Management section (recruiter/company focused)
-    { href: '/portal/invitations', label: 'Invitations', icon: 'fa-envelope', roles: ['recruiter'], section: 'management' },
-    { href: '/portal/candidates', label: 'Candidates', icon: 'fa-users', roles: ['recruiter', 'platform_admin'], section: 'management' },
-    { href: '/portal/applications', label: 'Applications', icon: 'fa-file-lines', roles: ['company_admin', 'hiring_manager', 'recruiter'], section: 'management' },
-    { href: '/portal/placements', label: 'Placements', icon: 'fa-trophy', roles: ['recruiter', 'platform_admin'], section: 'management' },
+    { href: '/portal/invitations', label: 'Invitations', icon: 'fa-envelope', roles: ['recruiter'], section: 'management', mobileDock: false },
+    { href: '/portal/candidates', label: 'Candidates', icon: 'fa-users', roles: ['recruiter', 'platform_admin'], section: 'management', mobileDock: true },
+    { href: '/portal/applications', label: 'Applications', icon: 'fa-file-lines', roles: ['company_admin', 'hiring_manager', 'recruiter'], section: 'management', mobileDock: true },
+    { href: '/portal/placements', label: 'Placements', icon: 'fa-trophy', roles: ['recruiter', 'platform_admin'], section: 'management', mobileDock: false },
 
     // Settings section
-    { href: '/portal/profile', label: 'Profile', icon: 'fa-user', roles: ['recruiter', 'company_admin', 'hiring_manager'], section: 'settings' },
-    { href: '/portal/billing', label: 'Billing', icon: 'fa-credit-card', roles: ['all'], section: 'settings' },
-    { href: '/portal/company/settings', label: 'Company Settings', icon: 'fa-building', roles: ['company_admin', 'hiring_manager'], section: 'settings' },
-    { href: '/portal/company/team', label: 'Team', icon: 'fa-user-group', roles: ['company_admin', 'hiring_manager'], section: 'settings' },
+    { href: '/portal/profile', label: 'Profile', icon: 'fa-user', roles: ['recruiter', 'company_admin', 'hiring_manager'], section: 'settings', mobileDock: false },
+    { href: '/portal/billing', label: 'Billing', icon: 'fa-credit-card', roles: ['all'], section: 'settings', mobileDock: false },
+    { href: '/portal/company/settings', label: 'Company Settings', icon: 'fa-building', roles: ['company_admin', 'hiring_manager'], section: 'settings', mobileDock: false },
+    { href: '/portal/company/team', label: 'Team', icon: 'fa-user-group', roles: ['company_admin', 'hiring_manager'], section: 'settings', mobileDock: false },
 ];
 
 const adminNavItems: NavItem[] = [
@@ -300,84 +301,52 @@ export function Sidebar() {
             <div className="md:hidden fixed inset-x-0 bottom-0 z-50">
                 <div className="dock bg-base-100 border-t border-base-200">
                     {(() => {
-                        const dockConfigHrefs = ['/portal/dashboard', '/portal/roles', '/portal/applications', '/portal/candidates'];
-                        const dockItems = navItems
-                            .filter((i) => dockConfigHrefs.includes(i.href))
-                            .filter(filterByRole);
-                        const isItemActive = (href: string) => href === '/portal/dashboard'
-                            ? pathname === href
-                            : pathname === href || pathname.startsWith(`${href}/`);
-                        return dockItems.map((item) => (
+                        const dockItems = navItems.filter(i => i.mobileDock).map((item) => (
                             <button
                                 key={item.href}
                                 type="button"
                                 onClick={() => router.push(item.href)}
-                                className={isItemActive(item.href) ? 'dock-active' : ''}
+                                className={pathname === item.href || pathname.startsWith(item.href + '/') ? 'dock-active' : ''}
                                 title={item.label}
                             >
                                 <i className={`fa-solid ${item.icon}`}></i>
                                 <span className="dock-label">{item.label}</span>
                             </button>
                         ));
+
+                        const moreItems = navItems.filter(i => !i.mobileDock && filterByRole(i));
+                        const adminItems = isAdmin ? adminNavItems : [];
+                        const allMoreItems = [...moreItems, ...adminItems];
+
+                        dockItems.push(
+                            <details key="menu" className="dropdown dropdown-top dropdown-center">
+                                <summary className="btn btn-ghost btn-circle dock-item" title="More options">
+                                    <i className="fa-solid fa-ellipsis text-lg"></i>
+                                </summary>
+                                <ul className="dropdown-content menu bg-base-100 rounded-box shadow p-2 w-52 z-[1]">
+                                    {allMoreItems.map((item) => (
+                                        <li key={item.href}>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    router.push(item.href);
+                                                    // Close dropdown by finding and unchecking the details element
+                                                    const details = document.querySelector('details[open]') as HTMLDetailsElement;
+                                                    if (details) details.open = false;
+                                                }}
+                                                className={`flex items-center gap-3 ${pathname === item.href || pathname.startsWith(item.href) ? 'active' : ''}`}
+                                            >
+                                                <i className={`fa-solid ${item.icon}`}></i>
+                                                {item.label}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </details>
+                        );
+
+                        return dockItems;
                     })()}
-                    {/* Menu button for additional options */}
-                    <details className="dropdown dropdown-top">
-                        <summary className="dock-label dock" role="button" tabIndex={0}>
-                            <i className="fa-solid fa-ellipsis"></i>
-                            <span className="dock-label">Menu</span>
-                        </summary>
-                        <ul className="dropdown-content menu bg-base-100 rounded-box shadow p-2 w-56 z-[1]">
-                            <li>
-                                <Link href="/portal/profile" className="justify-between">
-                                    <span className="flex items-center gap-2">
-                                        <i className="fa-solid fa-user text-base-content/70"></i>
-                                        Profile
-                                    </span>
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/portal/billing" className="justify-between">
-                                    <span className="flex items-center gap-2">
-                                        <i className="fa-solid fa-credit-card text-base-content/70"></i>
-                                        Billing
-                                    </span>
-                                </Link>
-                            </li>
-                            {isCompanyUser && (
-                                <>
-                                    <li>
-                                        <Link href="/portal/company/settings" className="justify-between">
-                                            <span className="flex items-center gap-2">
-                                                <i className="fa-solid fa-building text-base-content/70"></i>
-                                                Company Settings
-                                            </span>
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link href="/portal/company/team" className="justify-between">
-                                            <span className="flex items-center gap-2">
-                                                <i className="fa-solid fa-user-group text-base-content/70"></i>
-                                                Team
-                                            </span>
-                                        </Link>
-                                    </li>
-                                </>
-                            )}
-                            <div className="divider my-1"></div>
-                            <li>
-                                <button
-                                    type="button"
-                                    onClick={() => signOut()}
-                                    className="text-error"
-                                >
-                                    <span className="flex items-center gap-2">
-                                        <i className="fa-solid fa-arrow-right-from-bracket"></i>
-                                        Sign out
-                                    </span>
-                                </button>
-                            </li>
-                        </ul>
-                    </details>
                 </div>
             </div>
         </>

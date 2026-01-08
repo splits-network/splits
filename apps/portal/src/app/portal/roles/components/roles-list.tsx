@@ -28,7 +28,7 @@ interface JobFilters {
 
 const roleColumns: TableColumn[] = [
     { key: 'title', label: 'Role', sortable: true },
-    { key: 'location', label: 'Location', sortable: true },
+    // { key: 'location', label: 'Location', sortable: true },
     { key: 'salary_max', label: 'Salary', sortable: true },
     { key: 'fee_percentage', label: 'Fee', sortable: true },
     { key: 'commission', label: 'Commission' },
