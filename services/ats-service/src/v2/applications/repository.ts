@@ -31,7 +31,7 @@ export class ApplicationRepository {
         const offset = (page - 1) * limit;
         let filters: Record<string, any> = {};
         filters = typeof params.filters === 'string' ? parseFilters(params.filters) : (params.filters || {});
-
+        console.log('Filters applied:', filters);
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
 
         // Build query with enriched data
@@ -47,12 +47,16 @@ export class ApplicationRepository {
                     company:companies!inner(id, name, identity_organization_id)
                 )
             `, { count: 'exact' });
+
+
         if (accessContext.candidateId) {
+            console.log('Filtering applications for candidate:', accessContext.candidateId);
             query = query.eq('candidate_id', accessContext.candidateId);
         } else if (accessContext.recruiterId) {
             console.log('Filtering applications for recruiter:', accessContext.recruiterId);
             query = query.eq('recruiter_id', accessContext.recruiterId);
         } else if (!accessContext.isPlatformAdmin) {
+            console.log('Filtering applications for organizations:', accessContext.organizationIds);
             if (accessContext.organizationIds.length > 0) {
                 query = query.in('job.company.identity_organization_id', accessContext.organizationIds);
                 // Company admins and hiring managers only see applications in company-relevant stages
@@ -60,7 +64,7 @@ export class ApplicationRepository {
             } else {
                 return {
                     data: [],
-                    pagination: { 
+                    pagination: {
                         page: 1,
                         limit,
                         total: 0,
@@ -107,14 +111,14 @@ export class ApplicationRepository {
                 page,
                 limit,
                 total_pages: Math.ceil((count || 0) / limit),
-            total: count || 0,
+                total: count || 0,
             },
         };
     }
 
     async findApplication(id: string, clerkUserId?: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            
+
             .from('applications')
             .select(`
                 *,
@@ -149,7 +153,7 @@ export class ApplicationRepository {
         if (accessContext.candidateId && data.candidate_id === accessContext.candidateId) {
             return data;
         }
-        
+
         if (accessContext.recruiterId && data.recruiter_id === accessContext.recruiterId) {
             return data;
         }
@@ -168,27 +172,27 @@ export class ApplicationRepository {
 
     async createApplication(application: any, clerkUserId?: string): Promise<any> {
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-        
+
         // If candidate is submitting (not recruiter), lookup their active recruiter
         let recruiterId = accessContext.recruiterId || null;
         if (!recruiterId && application.candidate_id) {
             const { data: recruiterRelationship } = await this.supabase
-                
+
                 .from('recruiter_candidates')
                 .select('recruiter_id')
                 .eq('candidate_id', application.candidate_id)
                 .eq('status', 'active')
                 .single();
-            
+
             if (recruiterRelationship) {
                 recruiterId = recruiterRelationship.recruiter_id;
             }
         }
-        
+
         const { data, error } = await this.supabase
-            
+
             .from('applications')
-            .insert({...application, recruiter_id: recruiterId })
+            .insert({ ...application, recruiter_id: recruiterId })
             .select()
             .single();
 
@@ -198,7 +202,7 @@ export class ApplicationRepository {
 
     async updateApplication(id: string, updates: ApplicationUpdate): Promise<any> {
         const { data, error } = await this.supabase
-            
+
             .from('applications')
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id)
@@ -212,7 +216,7 @@ export class ApplicationRepository {
     async deleteApplication(id: string): Promise<void> {
         // Soft delete - move to withdrawn stage
         const { error } = await this.supabase
-            
+
             .from('applications')
             .update({ stage: 'withdrawn', updated_at: new Date().toISOString() })
             .eq('id', id);
@@ -226,7 +230,7 @@ export class ApplicationRepository {
         }
 
         const { data, error } = await this.supabase
-            
+
             .from('candidates')
             .select('*')
             .eq('id', candidateId)
@@ -240,7 +244,7 @@ export class ApplicationRepository {
         if (!jobId) return null;
 
         const { data, error } = await this.supabase
-            
+
             .from('jobs')
             .select(
                 `
@@ -259,7 +263,7 @@ export class ApplicationRepository {
         if (!recruiterId) return null;
 
         const { data, error } = await this.supabase
-            
+
             .from('recruiters')
             .select('*')
             .eq('id', recruiterId)
@@ -272,12 +276,12 @@ export class ApplicationRepository {
         let userInfo: { name?: string; email?: string; phone?: string } | undefined = undefined;
         if (data.user_id) {
             const { data: identityUser } = await this.supabase
-                
+
                 .from('users')
                 .select('id, name, email')
                 .eq('id', data.user_id)
                 .maybeSingle();
-                
+
             if (identityUser) {
                 userInfo = identityUser;
             }
@@ -305,7 +309,7 @@ export class ApplicationRepository {
 
     async getDocumentsForApplication(applicationId: string): Promise<any[]> {
         const { data, error } = await this.supabase
-            
+
             .from('documents')
             .select('*')
             .eq('entity_type', 'application')
@@ -327,7 +331,7 @@ export class ApplicationRepository {
 
     async getPreScreenAnswersForApplication(applicationId: string): Promise<any[]> {
         const { data, error } = await this.supabase
-            
+
             .from('job_pre_screen_answers')
             .select(
                 `
@@ -348,7 +352,7 @@ export class ApplicationRepository {
     }): Promise<any> {
         // Use UPSERT to handle resubmissions - update answer if it exists
         const { data, error } = await this.supabase
-            
+
             .from('job_pre_screen_answers')
             .upsert(answer, {
                 onConflict: 'application_id,question_id',
@@ -364,7 +368,7 @@ export class ApplicationRepository {
         if (!jobId) return [];
 
         const { data, error } = await this.supabase
-            
+
             .from('job_requirements')
             .select('*')
             .eq('job_id', jobId)
@@ -380,7 +384,7 @@ export class ApplicationRepository {
         }
 
         const { data, error } = await this.supabase
-            
+
             .from('ai_reviews')
             .select('*')
             .eq('application_id', applicationId)
@@ -392,7 +396,7 @@ export class ApplicationRepository {
 
     async getAuditLogsForApplication(applicationId: string): Promise<any[]> {
         const { data, error } = await this.supabase
-            
+
             .from('application_audit_log')
             .select('*')
             .eq('application_id', applicationId)
@@ -412,7 +416,7 @@ export class ApplicationRepository {
         }
 
         const { data: identityUser, error: identityError } = await this.supabase
-            
+
             .from('users')
             .select('id')
             .eq('clerk_user_id', clerkUserId)
@@ -424,7 +428,7 @@ export class ApplicationRepository {
         }
 
         const { data, error } = await this.supabase
-            
+
             .from('candidates')
             .select('*')
             .eq('user_id', identityUser.id)
@@ -436,7 +440,7 @@ export class ApplicationRepository {
 
     async findUserByClerkUserId(clerkUserId: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            
+
             .from('users')
             .select('id, email, name')
             .eq('clerk_user_id', clerkUserId)
@@ -448,7 +452,7 @@ export class ApplicationRepository {
 
     async findApplicationById(id: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            
+
             .from('applications')
             .select('*')
             .eq('id', id)
@@ -464,7 +468,7 @@ export class ApplicationRepository {
         isPrimary: boolean
     ): Promise<void> {
         const { data: originalDoc, error: fetchError } = await this.supabase
-            
+
             .from('documents')
             .select('*')
             .eq('id', documentId)
@@ -475,7 +479,7 @@ export class ApplicationRepository {
         }
 
         const { error: insertError } = await this.supabase
-            
+
             .from('documents')
             .insert({
                 entity_type: 'application',
@@ -504,7 +508,7 @@ export class ApplicationRepository {
     async unlinkApplicationDocuments(applicationId: string): Promise<void> {
         // Soft delete all documents linked to this application
         const { error } = await this.supabase
-            
+
             .from('documents')
             .update({ deleted_at: new Date().toISOString() })
             .eq('entity_type', 'application')
@@ -524,7 +528,7 @@ export class ApplicationRepository {
         metadata?: any;
     }): Promise<void> {
         const { error } = await this.supabase
-            
+
             .from('application_audit_log')
             .insert({
                 application_id: log.application_id,

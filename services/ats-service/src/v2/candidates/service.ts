@@ -12,7 +12,7 @@ export class CandidateServiceV2 {
     constructor(
         private repository: CandidateRepository,
         private eventPublisher?: EventPublisher
-    ) {}
+    ) { }
 
     async getCandidates(
         clerkUserId: string,
@@ -23,12 +23,12 @@ export class CandidateServiceV2 {
     }> {
         const { page, limit } = validatePaginationParams(filters.page, filters.limit);
 
-        const { data, pagination: {total} } = await this.repository.findCandidates(clerkUserId, {
+        const { data, pagination: { total } } = await this.repository.findCandidates(clerkUserId, {
             ...filters,
             page,
             limit,
         });
-        
+
         return {
             data,
             pagination: buildPaginationResponse<any>(data, total, page, limit).pagination,
@@ -65,12 +65,12 @@ export class CandidateServiceV2 {
         });
 
         // Emit event
-            if (this.eventPublisher) {
-                await this.eventPublisher.publish('candidate.created', {
-                    candidateId: candidate.id,
-                    email: candidate.email,
-                    createdBy: clerkUserId,
-                });
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish('candidate.created', {
+                candidateId: candidate.id,
+                email: candidate.email,
+                createdBy: clerkUserId,
+            });
         }
 
         return candidate;
@@ -106,22 +106,22 @@ export class CandidateServiceV2 {
                 if (!canVerify) {
                     throw new Error('Only recruiters and platform admins can update verification status');
                 }
-                
+
                 // Smart verification handling: set verified_by and verified_at when status changes
                 if (!updates.verified_by_user_id) {
                     // Get the internal user_id from users for verified_by_user_id
                     const { data: verifierUser } = await this.repository['supabase']
-                        
+
                         .from('users')
                         .select('id')
                         .eq('clerk_user_id', clerkUserId)
                         .single();
-                    
+
                     if (verifierUser) {
                         updates.verified_by_user_id = verifierUser.id;
                     }
                 }
-                
+
                 if (!updates.verified_at) {
                     updates.verified_at = new Date().toISOString();
                 }
@@ -143,12 +143,12 @@ export class CandidateServiceV2 {
         const updatedCandidate = await this.repository.updateCandidate(id, updates);
 
         // Emit event
-            if (this.eventPublisher) {
-                await this.eventPublisher.publish('candidate.updated', {
-                    candidateId: id,
-                    updatedFields: Object.keys(updates),
-                    updatedBy: clerkUserId,
-                });
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish('candidate.updated', {
+                candidateId: id,
+                updatedFields: Object.keys(updates),
+                updatedBy: clerkUserId,
+            });
         }
 
         return updatedCandidate;

@@ -116,7 +116,9 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                 // Use V2 API with query parameters and includes
                 const applicationsResponse = await client.get(`/applications`, {
                     params: {
-                        candidate_id: candidateId,
+                        filters: {
+                            candidate_id: candidateId,
+                        },
                         include: 'job,recruiter,company'
                     }
                 });

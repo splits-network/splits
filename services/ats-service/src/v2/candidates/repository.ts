@@ -29,7 +29,7 @@ export class CandidateRepository {
         clerkUserId: string,
         params: StandardListParams = {}
     ): Promise<StandardListResponse<any>> {
-        
+
         const page = params.page || 1;
         const limit = params.limit || 25;
         const offset = (page - 1) * limit;
@@ -51,7 +51,7 @@ export class CandidateRepository {
         // NEW WAY - SIMPLER, USING INCLUDES ONLY
         // ***********************************************
         let select = '*';
-        if(params.include) {
+        if (params.include) {
             const tables = params.include.split(',');
             const relations = tables.map(table => {
                 if (table === 'applications') {
@@ -87,12 +87,12 @@ export class CandidateRepository {
             .select(select, { count: 'exact' });
 
         filters = typeof params.filters === 'string' ? parseFilters(params.filters) : (params.filters || {});
-        
+
         // Extract special filters that are NOT database columns
         const { scope, ...columnFilters } = filters;
-        
+
         // Apply column-based filters (actual database columns only)
-        for(const key of Object.keys(columnFilters)) {
+        for (const key of Object.keys(columnFilters)) {
             const value = columnFilters[key];
             if (value !== undefined && value !== null) {
                 query = query.eq(key, value);
@@ -102,12 +102,12 @@ export class CandidateRepository {
         // Handle scope-based filtering
         // scope="mine" means only candidates the recruiter sourced/has relationships with
         // scope="all" means all accessible candidates (still respects role-based access)
-        
+
         // For recruiters: filter to candidates they sourced OR have relationships with
         if (accessContext.recruiterId) {
             // Build list of candidate IDs the recruiter can access
             const accessibleCandidateIds = [...new Set(recruiterCandidateIds)];
-            
+
             // If scope is "mine" or not specified, apply recruiter filtering
             // If scope is "all", skip recruiter filtering (show all accessible to their role)
             if (scope !== 'all') {
@@ -123,7 +123,7 @@ export class CandidateRepository {
 
 
         // Apply sorting
-        
+
         const sortBy1 = params.sort_by || 'created_at';
         const sortOrder1 = params.sort_order?.toLowerCase() === 'asc' ? true : false;
         query = query.order(sortBy1, { ascending: sortOrder1 });
@@ -131,7 +131,7 @@ export class CandidateRepository {
         // Apply pagination
         query = query.range(offset, offset + limit - 1);
 
-        const { data:data, error: error, count: count } = await query;
+        const { data: data, error: error, count: count } = await query;
         if (error) {
             console.error('Error fetching candidates:', error);
             throw error;
@@ -173,7 +173,7 @@ export class CandidateRepository {
     async createCandidate(candidate: any): Promise<any> {
         const { data, error } = await this.supabase
             .from('candidates')
-            .insert({...candidate, verification_status: 'verified' })
+            .insert({ ...candidate, verification_status: 'unverified' })
             .select()
             .single();
 
@@ -223,7 +223,7 @@ export class CandidateRepository {
 
         const [applicationsResult, interviewsResult, offersResult, relationshipsResult] = await Promise.all([
             this.supabase
-                
+
                 .from('applications')
                 .select('id', { count: 'exact', head: true })
                 .eq('candidate_id', candidateId),
@@ -268,7 +268,7 @@ export class CandidateRepository {
         const safeLimit = Math.max(1, Math.min(limit, 25));
 
         const { data, error } = await this.supabase
-            
+
             .from('applications')
             .select(
                 `
@@ -318,7 +318,7 @@ export class CandidateRepository {
 
         // Get all recruiter relationships for these candidates
         const { data: allRelationships, error: relError } = await this.supabase
-            
+
             .from('recruiter_candidates')
             .select('candidate_id, recruiter_id, status')
             .in('candidate_id', candidateIds)
