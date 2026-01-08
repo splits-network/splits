@@ -134,13 +134,6 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 const token = await getToken();
                 if (!token) throw new Error('No authentication token');
 
-                const payload: any = { role: selectedRole };
-                if (selectedRole === 'recruiter') {
-                    payload.profile = recruiterProfile;
-                } else {
-                    payload.company = companyInfo;
-                }
-
                 const apiClient = new ApiClient(token);
 
                 // Get current user data using V2 API
@@ -151,8 +144,20 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 const userData = Array.isArray(userResponse.data) ? userResponse.data[0] : userResponse.data;
                 if (!userData) throw new Error('No user data found');
 
-                // Call completion endpoint using ApiClient
-                await apiClient.post(`/users/${userData.id}/complete-onboarding`, payload);
+                // Update user with onboarding completion data using standard PATCH endpoint
+                const updatePayload: any = {
+                    onboarding_status: 'completed',
+                    onboarding_step: 4,
+                };
+
+                // Include role and profile/company data
+                if (selectedRole === 'recruiter') {
+                    updatePayload.recruiter_profile = recruiterProfile;
+                } else if (selectedRole === 'company_admin') {
+                    updatePayload.company_info = companyInfo;
+                }
+
+                await apiClient.patch(`/users/${userData.id}`, updatePayload);
 
                 // Move to completion step
                 setState(prev => ({
