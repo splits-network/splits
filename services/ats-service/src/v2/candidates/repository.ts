@@ -37,20 +37,17 @@ export class CandidateRepository {
 
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
 
-        // For recruiters, pre-fetch candidate IDs they have relationships with
-        let recruiterCandidateIds: string[] = [];
-        if (accessContext.recruiterId) {
-            const { data: relationships } = await this.supabase
-                .from('recruiter_candidates')
-                .select('candidate_id')
-                .eq('recruiter_id', accessContext.recruiterId);
-            recruiterCandidateIds = relationships?.map(r => r.candidate_id) || [];
-        }
+        // Build the select query with JOINs for recruiter relationships
+        // This allows us to check if candidate has active relationships in a single query
+        let select = `
+            *,
+            recruiter_relationships:recruiter_candidates(
+                id,
+                recruiter_id,
+                status
+            )
+        `;
 
-        // ***********************************************
-        // NEW WAY - SIMPLER, USING INCLUDES ONLY
-        // ***********************************************
-        let select = '*';
         if (params.include) {
             const tables = params.include.split(',');
             const relations = tables.map(table => {
@@ -78,9 +75,9 @@ export class CandidateRepository {
                 }
                 return table;
             });
-            select = ['*', ...relations].join(',');
+            // Append include relations to the base select
+            select = select + relations.join(',');
         }
-
 
         let query = this.supabase
             .from('candidates')
@@ -89,7 +86,9 @@ export class CandidateRepository {
         filters = typeof params.filters === 'string' ? parseFilters(params.filters) : (params.filters || {});
 
         // Extract special filters that are NOT database columns
-        const { scope, ...columnFilters } = filters;
+        // scope can come from either filters object or direct query parameter
+        const scope = filters.scope || (params as any).scope || 'all';
+        const { scope: _scope, ...columnFilters } = filters;
 
         // Apply column-based filters (actual database columns only)
         for (const key of Object.keys(columnFilters)) {
@@ -100,35 +99,49 @@ export class CandidateRepository {
         }
 
         // Handle scope-based filtering
+        // CRITICAL: Apply filtering BEFORE pagination to ensure consistent page sizes
         // scope="mine" means only candidates the recruiter sourced/has relationships with
         // scope="all" means all accessible candidates (still respects role-based access)
 
-        // For recruiters: filter to candidates they sourced OR have relationships with
-        if (accessContext.recruiterId) {
-            // Build list of candidate IDs the recruiter can access
-            const accessibleCandidateIds = [...new Set(recruiterCandidateIds)];
+        // For recruiters with scope="mine": filter to candidates they have relationships with
+        if (accessContext.recruiterId && scope === 'mine') {
+            // Get IDs of candidates this recruiter has relationships with
+            const { data: relationships, error: relError } = await this.supabase
 
-            // If scope is "mine" or not specified, apply recruiter filtering
-            // If scope is "all", skip recruiter filtering (show all accessible to their role)
-            if (scope !== 'all') {
-                // If recruiter has relationship candidates, filter by those OR by recruiter_id (who sourced them)
-                if (accessibleCandidateIds.length > 0) {
-                    query = query.or(`recruiter_id.eq.${accessContext.recruiterId},id.in.(${accessibleCandidateIds.join(',')})`);
-                } else {
-                    // No relationships - only show candidates they sourced
-                    query = query.eq('recruiter_id', accessContext.recruiterId);
-                }
+                .from('recruiter_candidates')
+                .select('candidate_id')
+                .eq('recruiter_id', accessContext.recruiterId)
+                .eq('status', 'active');
+
+            if (relError) {
+                console.error('Error fetching recruiter relationships for filtering:', relError);
+                throw relError;
             }
+
+            const candidateIds = (relationships || []).map(r => r.candidate_id);
+            if (candidateIds.length === 0) {
+                // No candidates for this recruiter - return empty result
+                return {
+                    data: [],
+                    pagination: {
+                        page: page,
+                        limit: limit,
+                        total: 0,
+                        total_pages: 0,
+                    },
+                };
+            }
+
+            // Filter query to only these candidates BEFORE pagination
+            query = query.in('id', candidateIds);
         }
 
-
         // Apply sorting
-
         const sortBy1 = params.sort_by || 'created_at';
         const sortOrder1 = params.sort_order?.toLowerCase() === 'asc' ? true : false;
         query = query.order(sortBy1, { ascending: sortOrder1 });
 
-        // Apply pagination
+        // Apply pagination (NOW the total count reflects filtered candidates)
         query = query.range(offset, offset + limit - 1);
 
         const { data: data, error: error, count: count } = await query;
@@ -137,8 +150,16 @@ export class CandidateRepository {
             throw error;
         }
 
+        // Enrich candidates with relationship data from JOINed recruiter_relationships
+        // Now WITHOUT filtering - that's already done in the SQL query above
+        const enrichedData = this.enrichCandidatesFromJoin(
+            data || [],
+            accessContext.recruiterId ?? undefined,
+            undefined // Pass undefined to skip post-processing filter
+        );
+
         return {
-            data: data || [],
+            data: enrichedData,
             pagination: {
                 page: page,
                 limit: limit,
@@ -309,7 +330,49 @@ export class CandidateRepository {
     }
 
     /**
+     * Enrich candidates with recruiter relationship data from JOINed data
+     * This processes the recruiter_relationships array that comes from the JOIN
+     * Filtering is already done in SQL - no post-processing filtering here
+     */
+    private enrichCandidatesFromJoin(candidates: any[], currentRecruiterId?: string, scope?: string): any[] {
+        // Get current date for "new" badge logic (7 days ago)
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        return candidates
+            .map(candidate => {
+                // Extract relationships from the JOIN
+                const relationships = candidate.recruiter_relationships || [];
+
+                // Check if current recruiter has an active relationship
+                const hasActiveRelationship = currentRecruiterId &&
+                    relationships.some((rel: any) =>
+                        rel.recruiter_id === currentRecruiterId && rel.status === 'active'
+                    );
+
+                // Count other active recruiters
+                const otherRecruiters = new Set(
+                    relationships
+                        .filter((rel: any) => rel.status === 'active' && (!currentRecruiterId || rel.recruiter_id !== currentRecruiterId))
+                        .map((rel: any) => rel.recruiter_id)
+                );
+
+                return {
+                    ...candidate,
+                    recruiter_relationships: undefined, // Remove the JOIN array to keep response clean
+                    is_sourcer: currentRecruiterId && candidate.sourcer_recruiter_id === currentRecruiterId,
+                    has_active_relationship: hasActiveRelationship,
+                    has_other_active_recruiters: otherRecruiters.size > 0,
+                    other_active_recruiters_count: otherRecruiters.size,
+                    is_new: new Date(candidate.created_at) > sevenDaysAgo,
+                };
+            });
+        // NO filtering here - filtering is done in the SQL query before pagination
+    }
+
+    /**
      * Enrich candidates with recruiter relationship data and status badges
+     * DEPRECATED: Use enrichCandidatesFromJoin instead for better performance
      */
     private async enrichWithRecruiterRelationships(candidates: any[], currentRecruiterId?: string): Promise<any[]> {
         if (candidates.length === 0) return candidates;

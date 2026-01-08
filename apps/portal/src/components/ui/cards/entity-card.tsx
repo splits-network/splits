@@ -1,107 +1,128 @@
 'use client';
 
 import { ReactNode } from 'react';
-import Link from 'next/link';
 
-export interface EntityCardProps {
-    /** Link destination */
-    href?: string;
-    /** Click handler (alternative to href) */
-    onClick?: () => void;
-    /** Header gradient color: 'primary' | 'secondary' | 'accent' | 'neutral' */
-    headerGradient?: 'primary' | 'secondary' | 'accent' | 'neutral';
-    /** Avatar content (initials, image, or icon) */
-    avatar?: ReactNode;
-    /** Status badges displayed as vertical ribbon on right */
-    badges?: ReactNode;
-    /** Main content area */
+// ===== ENTITY CARD CHILD COMPONENTS =====
+
+interface EntityCardHeaderProps {
+    /** Header content */
     children: ReactNode;
-    /** Additional CSS classes */
+    /** Additional class names */
     className?: string;
-    /** Card footer with actions */
-    footer?: ReactNode;
 }
 
-const gradientClasses = {
-    primary: 'from-primary/15 to-transparent',
-    secondary: 'from-secondary/15 to-transparent',
-    accent: 'from-accent/15 to-transparent',
-    neutral: 'from-base-200 to-transparent',
-};
-
-/**
- * EntityCard - Card template for displaying entities (candidates, jobs, applications)
- * 
- * Features:
- * - Gradient header with avatar
- * - Vertical badge ribbon on right side
- * - Hover lift effect with border highlight
- * - Flexible content area
- * - Optional footer for actions
- */
-export function EntityCard({
-    href,
-    onClick,
-    headerGradient = 'secondary',
-    avatar,
-    badges,
-    children,
-    className = '',
-    footer,
-}: EntityCardProps) {
-    const cardContent = (
-        <div
-            className={`group card bg-base-100 border border-base-200/50 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col ${className}`}
-        >
-            {/* Header with gradient background */}
-            <div className={`relative h-20 bg-linear-90 ${gradientClasses[headerGradient]} flex items-center`}>
-                {/* Badge ribbon - vertical stack on right */}
-                {badges && (
-                    <div className="absolute top-2 right-0 flex flex-col gap-1.5 items-end z-10">
-                        {badges}
-                    </div>
-                )}
-
-                {/* Avatar positioned in header */}
-                {avatar && (
-                    <div className="flex items-center p-3">
-                        {avatar}
-                    </div>
-                )}
-            </div>
-
-            {/* Main content */}
-            <div className="card-body p-5 space-y-3 flex-1">
+function EntityCardHeader({ children, className = '' }: EntityCardHeaderProps) {
+    return (
+        <div className={`bg-base-100 m-2 rounded-lg shadow-lg ${className}`}>
+            <div className="px-4 py-3">
                 {children}
             </div>
-
-            {/* Optional footer */}
-            {footer && (
-                <div className="px-5 pb-5 pt-0">
-                    {footer}
-                </div>
-            )}
         </div>
     );
+}
 
+interface EntityCardBodyProps {
+    /** Body content */
+    children: ReactNode;
+    /** Additional class names */
+    className?: string;
+}
+
+function EntityCardBody({ children, className = '' }: EntityCardBodyProps) {
+    return (
+        <div className={`flex-1 px-5 py-4 space-y-3 ${className}`}>
+            {children}
+        </div>
+    );
+}
+
+interface EntityCardFooterProps {
+    /** Footer content */
+    children: ReactNode;
+    /** Additional class names */
+    className?: string;
+}
+
+function EntityCardFooter({ children, className = '' }: EntityCardFooterProps) {
+    return (
+        <div className={`px-5 py-3 border-t border-base-300 ${className}`}>
+            {children}
+        </div>
+    );
+}
+
+export interface EntityCardProps {
+    /** Card content */
+    children: ReactNode;
+    /** Additional class names */
+    className?: string;
+    /** Link href (wraps card in anchor) */
+    href?: string;
+}
+
+/**
+ * EntityCard - Clean card template for displaying entity information
+ *
+ * Uses depth pattern: bg-base-200 outer container with
+ * bg-base-100 inner content areas for visual hierarchy.
+ *
+ * Compound component usage (recommended):
+ * ```tsx
+ * <EntityCard href="/candidates/123">
+ *   <EntityCard.Header>
+ *     <div className="flex items-center gap-3">
+ *       <EntityCard.Avatar initials="JD" size="md" />
+ *       <div>
+ *         <h3 className="font-semibold">John Doe</h3>
+ *         <p className="text-sm text-base-content/60">Senior Engineer</p>
+ *       </div>
+ *     </div>
+ *   </EntityCard.Header>
+ *   <EntityCard.Body>
+ *     <p className="text-sm">john@example.com</p>
+ *   </EntityCard.Body>
+ *   <EntityCard.Footer>
+ *     <span className="text-xs text-base-content/50">View Details →</span>
+ *   </EntityCard.Footer>
+ * </EntityCard>
+ * ```
+ */
+function EntityCardComponent({
+    children,
+    className = '',
+    href,
+}: EntityCardProps) {
+    const cardContent = (
+        <>
+            {children}
+        </>
+    );
+
+    // Wrap in link if href provided
     if (href) {
+        // Dynamic import to avoid SSR issues
+        const Link = require('next/link').default;
         return (
-            <Link href={href} className="block">
+            <Link href={href} className={`flex flex-col bg-base-200 rounded-2xl overflow-hidden ${className}`}>
                 {cardContent}
             </Link>
         );
     }
 
-    if (onClick) {
-        return (
-            <div onClick={onClick} className="cursor-pointer" role="button" tabIndex={0}>
-                {cardContent}
-            </div>
-        );
-    }
-
-    return cardContent;
+    return (
+        <div className={`flex flex-col bg-base-200 rounded-2xl overflow-hidden ${className}`}>
+            {cardContent}
+        </div>
+    );
 }
+
+// Attach compound components to EntityCard
+export const EntityCard = Object.assign(EntityCardComponent, {
+    Header: EntityCardHeader,
+    Body: EntityCardBody,
+    Footer: EntityCardFooter,
+    Avatar: EntityCardAvatar,
+});
 
 /**
  * EntityCardAvatar - Standardized avatar for entity cards
@@ -145,7 +166,7 @@ export function EntityCardAvatar({
     if (src) {
         return (
             <div className={`avatar ${sizeClass}`}>
-                <div className="rounded-full shadow-lg">
+                <div className="rounded-full overflow-hidden">
                     <img src={src} alt={alt} />
                 </div>
             </div>
@@ -153,51 +174,10 @@ export function EntityCardAvatar({
     }
 
     return (
-        <div className="avatar avatar-placeholder">
-            <div className={`${sizeClass} ${colorClass} font-bold rounded-full shadow-lg flex items-center justify-center`}>
-                {initials}
+        <div className={`avatar avatar-placeholder ${sizeClass}`}>
+            <div className={colorClass}>
+                <span className="font-semibold">{initials}</span>
             </div>
         </div>
-    );
-}
-
-/**
- * EntityCardBadge - Standardized badge for entity card ribbons
- */
-export interface EntityCardBadgeProps {
-    children: ReactNode;
-    /** Badge color variant */
-    variant?: 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error' | 'info' | 'neutral';
-    /** Icon class (FontAwesome) */
-    icon?: string;
-    /** Tooltip text */
-    title?: string;
-}
-
-const badgeVariantClasses = {
-    primary: 'badge-primary',
-    secondary: 'badge-secondary',
-    accent: 'badge-accent',
-    success: 'badge-success',
-    warning: 'badge-warning',
-    error: 'badge-error',
-    info: 'badge-info',
-    neutral: 'badge-neutral',
-};
-
-export function EntityCardBadge({
-    children,
-    variant = 'neutral',
-    icon,
-    title,
-}: EntityCardBadgeProps) {
-    return (
-        <span
-            className={`badge ${badgeVariantClasses[variant]} gap-1 rounded-e-none shadow-md text-xs`}
-            title={title}
-        >
-            {icon && <i className={`fa-solid ${icon}`}></i>}
-            {children}
-        </span>
     );
 }

@@ -134,11 +134,6 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
 
     return (
         <>
-            <Link href="/portal/roles" className="btn btn-ghost btn-sm gap-2">
-                <i className="fa-solid fa-arrow-left"></i>
-                Back to Roles
-            </Link>
-
             <div className="card bg-base-200 shadow">
                 <div className="card-body">
                     <div className="flex flex-col md:flex-row justify-between items-start gap-4">

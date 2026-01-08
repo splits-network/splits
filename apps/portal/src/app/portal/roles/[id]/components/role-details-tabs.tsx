@@ -177,23 +177,6 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
                                         </ul>
                                     </div>
                                 )}
-
-                                {/* Preferred Requirements */}
-                                {job.requirements.filter(r => r.requirement_type === 'preferred').length > 0 && (
-                                    <div>
-                                        <h3 className="font-semibold text-lg mb-3">
-                                            <i className="fa-solid fa-star mr-2 text-warning"></i>
-                                            Preferred Requirements
-                                        </h3>
-                                        <ul className="list-disc list-inside space-y-2">
-                                            {job.requirements
-                                                .filter(r => r.requirement_type === 'preferred')
-                                                .map(r => (
-                                                    <li key={r.id} className="text-base-content/70">{r.description}</li>
-                                                ))}
-                                        </ul>
-                                    </div>
-                                )}
                             </>
                         ) : (
                             <div className="text-center py-8 text-base-content/60">

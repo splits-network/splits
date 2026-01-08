@@ -77,39 +77,44 @@ export function RoleCard({ job, allJobs, userRole, canManageRole }: RoleCardProp
     };
     return (
         <MetricCard
-            href={`/portal/roles/${job.id}`}
             className="group hover:shadow-lg transition-all duration-200"
         >
             <MetricCard.Header>
                 <div className="flex items-center gap-3 min-w-0">
-                    {/* Company Avatar */}
-                    <div className="avatar avatar-placeholder shrink-0">
-                        <div className="bg-base-200 text-base-content/70 w-10 h-10 rounded-lg flex items-center justify-center text-sm font-semibold">
-                            {job.company?.logo_url ? (
-                                <img
-                                    src={job.company.logo_url}
-                                    alt={job.company.name}
-                                    className="w-full h-full object-cover rounded-lg"
-                                    onError={(e) => {
-                                        e.currentTarget.style.display = 'none';
-                                        e.currentTarget.parentElement!.innerHTML = (job.company?.name || 'C')[0].toUpperCase();
-                                    }}
-                                />) : (
-                                (job.company?.name || 'C')[0].toUpperCase()
-                            )}
+                    <div className='flex justify-between w-full items-center'>
+                        {/* Company Avatar */}
+                        <div className="flex items-center gap-3 min-w-0">
+                            <div className="avatar avatar-placeholder shrink-0">
+                                <div className="bg-base-200 text-base-content/70 w-10 h-10 rounded-lg flex items-center justify-center text-sm font-semibold">
+                                    {job.company?.logo_url ? (
+                                        <img
+                                            src={job.company.logo_url}
+                                            alt={job.company.name}
+                                            className="w-full h-full object-cover rounded-lg"
+                                            onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                                e.currentTarget.parentElement!.innerHTML = (job.company?.name || 'C')[0].toUpperCase();
+                                            }}
+                                        />) : (
+                                        (job.company?.name || 'C')[0].toUpperCase()
+                                    )}
+                                </div>
+                            </div>
+                            <div className="min-w-0">
+                                <h3 className="font-semibold text-base-content group-hover:text-primary transition-colors truncate">
+                                    {job.title}
+                                </h3>
+                                <p className="text-sm text-base-content/60 truncate">
+                                    {job.company?.name}
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                    <div className="min-w-0">
-                        <h3 className="font-semibold text-base-content group-hover:text-primary transition-colors truncate">
-                            {job.title}
-                        </h3>
-                        <p className="text-sm text-base-content/60 truncate">
-                            {job.company?.name}
-                        </p>
-                    </div>
-                    {/* Status Badge */}
-                    <div className={`badge ${getJobStatusBadge(job.status)} shrink-0`}>
-                        {job.status}
+                        <div className="flex items-center gap-2 ml-4">
+                            {/* Status Badge */}
+                            <div className={`badge ${getJobStatusBadge(job.status)} shrink-0`}>
+                                {job.status}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </MetricCard.Header>
@@ -185,7 +190,9 @@ export function RoleCard({ job, allJobs, userRole, canManageRole }: RoleCardProp
                             </span>
                         )}
                         <span className="text-primary text-sm font-medium group-hover:underline">
-                            View Details →
+                            <Link href={`/portal/roles/${job.id}`}>
+                                View Details →
+                            </Link>
                         </span>
                     </div>
                 </div>
