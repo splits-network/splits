@@ -71,8 +71,8 @@ export default function SubmitToJobModal({
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Job Selection */}
-                    <div className="fieldset">
-                        <label className="label">Select Job *</label>
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">Select Job *</legend>
                         <select
                             className="select w-full"
                             value={selectedJobId}
@@ -88,35 +88,31 @@ export default function SubmitToJobModal({
                             ))}
                         </select>
                         {jobs.length === 0 && (
-                            <label className="label">
-                                <span className="label-text-alt text-warning">
-                                    <i className="fa-solid fa-triangle-exclamation mr-1"></i>
-                                    No active jobs found. Create a job first.
-                                </span>
-                            </label>
+                            <p className="fieldset-label text-warning">
+                                <i className="fa-solid fa-triangle-exclamation mr-1"></i>
+                                No active jobs found. Create a job first.
+                            </p>
                         )}
-                    </div>
+                    </fieldset>
 
                     {/* Notes */}
-                    <div className="fieldset">
-                        <label className="label">Submission Notes</label>
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">Submission Notes</legend>
                         <textarea
                             className="textarea h-24"
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             placeholder="Add any notes about this submission..."
                         />
-                        <label className="label">
-                            <span className="label-text-alt">
-                                These notes will be visible to the hiring company
-                            </span>
-                        </label>
-                    </div>
+                        <p className="fieldset-label">
+                            These notes will be visible to the hiring company
+                        </p>
+                    </fieldset>
 
                     {/* Document Selection */}
                     {length > 0 && (
-                        <div className="fieldset">
-                            <label className="label">Attach Documents</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">Attach Documents</legend>
                             <div className="space-y-2 max-h-48 overflow-y-auto border border-base-300 rounded-lg p-3">
                                 {documents.map((doc) => (
                                     <label key={doc.id} className="flex items-center gap-2 cursor-pointer hover:bg-base-200 p-2 rounded">
@@ -134,12 +130,10 @@ export default function SubmitToJobModal({
                                     </label>
                                 ))}
                             </div>
-                            <label className="label">
-                                <span className="label-text-alt">
-                                    {selectedDocIds.size} document(s) selected
-                                </span>
-                            </label>
-                        </div>
+                            <p className="fieldset-label">
+                                {selectedDocIds.size} document(s) selected
+                            </p>
+                        </fieldset>
                     )}
 
                     {/* Action Buttons */}

@@ -96,8 +96,8 @@ export default function UploadDocumentModal({
                 )}
 
                 <form onSubmit={handleUpload} className="space-y-4">
-                    <div className="fieldset">
-                        <label className="label">Document Type</label>
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">Document Type</legend>
                         <select
                             className="select w-full"
                             value={selectedDocType}
@@ -111,15 +111,15 @@ export default function UploadDocumentModal({
                             <option value="invoice">Invoice</option>
                             <option value="other">Other</option>
                         </select>
-                    </div>
+                    </fieldset>
 
-                    <div className="fieldset">
-                        <label className="label">
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">
                             File *
-                            <span className="label-text-alt text-base-content/60">
+                            <span className="text-base-content/60 font-normal text-sm ml-2">
                                 PDF, DOC, DOCX, TXT, or RTF - Max 10MB
                             </span>
-                        </label>
+                        </legend>
                         <input
                             type="file"
                             ref={fileInputRef}
@@ -149,7 +149,7 @@ export default function UploadDocumentModal({
                                 </button>
                             </div>
                         )}
-                    </div>
+                    </fieldset>
 
                     <div className="modal-action">
                         <button

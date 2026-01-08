@@ -110,8 +110,8 @@ export default function ForgotPasswordPage() {
                         )}
 
                         <form onSubmit={handleReset} className="space-y-4">
-                            <div className="fieldset">
-                                <label className="label">Reset Code</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Reset Code</legend>
                                 <input
                                     type="text"
                                     placeholder="123456"
@@ -122,10 +122,10 @@ export default function ForgotPasswordPage() {
                                     disabled={isLoading}
                                     maxLength={6}
                                 />
-                            </div>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label">New Password</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">New Password</legend>
                                 <input
                                     type="password"
                                     placeholder="••••••••"
@@ -136,10 +136,8 @@ export default function ForgotPasswordPage() {
                                     disabled={isLoading}
                                     minLength={8}
                                 />
-                                <label className="label">
-                                    <span className="label-text-alt">Must be at least 8 characters</span>
-                                </label>
-                            </div>
+                                <p className="fieldset-label">Must be at least 8 characters</p>
+                            </fieldset>
 
                             <button
                                 type="submit"
@@ -191,8 +189,8 @@ export default function ForgotPasswordPage() {
                     )}
 
                     <form onSubmit={handleSendCode} className="space-y-4">
-                        <div className="fieldset">
-                            <label className="label">Email</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">Email</legend>
                             <input
                                 type="email"
                                 placeholder="you@example.com"
@@ -202,7 +200,7 @@ export default function ForgotPasswordPage() {
                                 required
                                 disabled={isLoading}
                             />
-                        </div>
+                        </fieldset>
 
                         <button
                             type="submit"

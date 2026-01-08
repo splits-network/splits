@@ -87,7 +87,7 @@ export default function AddCandidateModal({
 
                     {/* Description */}
                     <p className="text-base-content/70 mb-6">
-                        Send a candidate an invitation to join your 
+                        Send a candidate an invitation to join your
                     </p>
 
                     {/* Error Alert */}
@@ -100,8 +100,8 @@ export default function AddCandidateModal({
 
                     {/* Form */}
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="fieldset">
-                            <label className="label">Full Name *</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">Full Name *</legend>
                             <input
                                 type="text"
                                 className="input w-full"
@@ -112,10 +112,10 @@ export default function AddCandidateModal({
                                 disabled={submitting}
                                 autoFocus
                             />
-                        </div>
+                        </fieldset>
 
-                        <div className="fieldset">
-                            <label className="label">Email *</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">Email *</legend>
                             <input
                                 type="email"
                                 className="input w-full"
@@ -125,10 +125,8 @@ export default function AddCandidateModal({
                                 required
                                 disabled={submitting}
                             />
-                            <label className="label">
-                                <span className="label-text-alt">They'll receive an invitation to join and accept your representation</span>
-                            </label>
-                        </div>
+                            <p className="fieldset-label">They'll receive an invitation to join and accept your representation</p>
+                        </fieldset>
 
                         {/* Action Buttons */}
                         <div className="flex gap-2 justify-end pt-4">

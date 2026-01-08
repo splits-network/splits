@@ -70,8 +70,8 @@ export default function HireModal({ application, onClose, onSuccess }: HireModal
                         <span>This will create a placement record and calculate your earnings.</span>
                     </div>
 
-                    <div className="fieldset">
-                        <label className="label">Annual Salary (USD) *</label>
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">Annual Salary (USD) *</legend>
                         <input
                             type="number"
                             className="input w-full"
@@ -82,23 +82,19 @@ export default function HireModal({ application, onClose, onSuccess }: HireModal
                             min="0"
                             step="1000"
                         />
-                        <label className="label">
-                            <span className="label-text-alt">The candidate's agreed annual salary</span>
-                        </label>
-                    </div>
+                        <p className="fieldset-label">The candidate's agreed annual salary</p>
+                    </fieldset>
 
-                    <div className="fieldset">
-                        <label className="label">Start Date</label>
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">Start Date</legend>
                         <input
                             type="date"
                             className="input w-full"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
                         />
-                        <label className="label">
-                            <span className="label-text-alt">Leave blank to use today's date</span>
-                        </label>
-                    </div>
+                        <p className="fieldset-label">Leave blank to use today's date</p>
+                    </fieldset>
 
                     <div className="modal-action">
                         <button

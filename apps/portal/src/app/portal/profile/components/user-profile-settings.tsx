@@ -206,8 +206,8 @@ export function UserProfileSettings() {
                         )}
 
                         <div className="space-y-4 mt-4">
-                            <div className="fieldset">
-                                <label className="label">Full Name *</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Full Name *</legend>
                                 <input
                                     type="text"
                                     className="input w-full"
@@ -216,25 +216,21 @@ export function UserProfileSettings() {
                                     placeholder="John Doe"
                                     required
                                 />
-                                <label className="label">
-                                    <span className="label-text-alt">Your name will be synced to your account</span>
-                                </label>
-                            </div>
+                                <p className="fieldset-label">Your name will be synced to your account</p>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label">Email Address</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Email Address</legend>
                                 <input
                                     type="email"
                                     className="input w-full"
                                     value={profile?.email || ''}
                                     disabled
                                 />
-                                <label className="label">
-                                    <span className="label-text-alt">
-                                        Contact support to change your email address
-                                    </span>
-                                </label>
-                            </div>
+                                <p className="fieldset-label">
+                                    Contact support to change your email address
+                                </p>
+                            </fieldset>
                         </div>
 
                         <div className="card-actions justify-end mt-6">
@@ -315,8 +311,8 @@ export function UserProfileSettings() {
                                 </div>
                             )}
 
-                            <div className="fieldset">
-                                <label className="label">Current Password *</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Current Password *</legend>
                                 <input
                                     type="password"
                                     className="input w-full"
@@ -326,10 +322,10 @@ export function UserProfileSettings() {
                                     required
                                     disabled={changingPassword}
                                 />
-                            </div>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label">New Password *</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">New Password *</legend>
                                 <input
                                     type="password"
                                     className="input w-full"
@@ -340,13 +336,11 @@ export function UserProfileSettings() {
                                     minLength={8}
                                     disabled={changingPassword}
                                 />
-                                <label className="label">
-                                    <span className="label-text-alt">At least 8 characters</span>
-                                </label>
-                            </div>
+                                <p className="fieldset-label">At least 8 characters</p>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label">Confirm New Password *</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Confirm New Password *</legend>
                                 <input
                                     type="password"
                                     className="input w-full"
@@ -356,7 +350,7 @@ export function UserProfileSettings() {
                                     required
                                     disabled={changingPassword}
                                 />
-                            </div>
+                            </fieldset>
 
                             <div className="flex gap-2 justify-end">
                                 <button

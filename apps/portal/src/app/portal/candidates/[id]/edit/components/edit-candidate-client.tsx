@@ -159,8 +159,8 @@ export default function EditCandidateClient({ candidateId }: EditCandidateClient
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Full Name */}
-                            <div className="fieldset">
-                                <label className="label">Full Name *</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Full Name *</legend>
                                 <input
                                     type="text"
                                     className="input w-full"
@@ -169,11 +169,11 @@ export default function EditCandidateClient({ candidateId }: EditCandidateClient
                                     placeholder="John Doe"
                                     required
                                 />
-                            </div>
+                            </fieldset>
 
                             {/* Email */}
-                            <div className="fieldset">
-                                <label className="label">Email *</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Email *</legend>
                                 <input
                                     type="email"
                                     className="input w-full"
@@ -182,11 +182,11 @@ export default function EditCandidateClient({ candidateId }: EditCandidateClient
                                     placeholder="john@example.com"
                                     required
                                 />
-                            </div>
+                            </fieldset>
 
                             {/* Phone */}
-                            <div className="fieldset">
-                                <label className="label">Phone</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Phone</legend>
                                 <input
                                     type="tel"
                                     className="input w-full"
@@ -194,11 +194,11 @@ export default function EditCandidateClient({ candidateId }: EditCandidateClient
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                     placeholder="+1 (555) 123-4567"
                                 />
-                            </div>
+                            </fieldset>
 
                             {/* Location */}
-                            <div className="fieldset">
-                                <label className="label">Location</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Location</legend>
                                 <input
                                     type="text"
                                     className="input w-full"
@@ -206,11 +206,11 @@ export default function EditCandidateClient({ candidateId }: EditCandidateClient
                                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                                     placeholder="San Francisco, CA"
                                 />
-                            </div>
+                            </fieldset>
 
                             {/* Current Title */}
-                            <div className="fieldset">
-                                <label className="label">Current Title</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Current Title</legend>
                                 <input
                                     type="text"
                                     className="input w-full"
@@ -218,11 +218,11 @@ export default function EditCandidateClient({ candidateId }: EditCandidateClient
                                     onChange={(e) => setFormData({ ...formData, current_title: e.target.value })}
                                     placeholder="Senior Software Engineer"
                                 />
-                            </div>
+                            </fieldset>
 
                             {/* Current Company */}
-                            <div className="fieldset">
-                                <label className="label">Current Company</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Current Company</legend>
                                 <input
                                     type="text"
                                     className="input w-full"
@@ -230,12 +230,12 @@ export default function EditCandidateClient({ candidateId }: EditCandidateClient
                                     onChange={(e) => setFormData({ ...formData, current_company: e.target.value })}
                                     placeholder="Tech Corp Inc."
                                 />
-                            </div>
+                            </fieldset>
                         </div>
 
                         {/* LinkedIn URL */}
-                        <div className="fieldset">
-                            <label className="label">LinkedIn Profile</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">LinkedIn Profile</legend>
                             <input
                                 type="url"
                                 className="input w-full"
@@ -243,7 +243,7 @@ export default function EditCandidateClient({ candidateId }: EditCandidateClient
                                 onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
                                 placeholder="https://linkedin.com/in/johndoe"
                             />
-                        </div>
+                        </fieldset>
 
                         {/* Actions */}
                         <div className="flex gap-2 justify-end pt-4">

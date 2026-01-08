@@ -76,8 +76,8 @@ export default function SignInPage() {
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div id="clerk-captcha"></div>
-                        <div className="fieldset">
-                            <label className="label">Email</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">Email</legend>
                             <input
                                 type="email"
                                 placeholder="you@example.com"
@@ -87,10 +87,10 @@ export default function SignInPage() {
                                 required
                                 disabled={isLoading}
                             />
-                        </div>
+                        </fieldset>
 
-                        <div className="fieldset">
-                            <label className="label">Password</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">Password</legend>
                             <input
                                 type="password"
                                 placeholder="••••••••"
@@ -100,12 +100,12 @@ export default function SignInPage() {
                                 required
                                 disabled={isLoading}
                             />
-                            <label className="label">
-                                <Link href="/forgot-password" className="label-text-alt link link-hover">
+                            <p className="fieldset-label">
+                                <Link href="/forgot-password" className="link link-hover">
                                     Forgot password?
                                 </Link>
-                            </label>
-                        </div>
+                            </p>
+                        </fieldset>
 
                         <button
                             type="submit"

@@ -245,8 +245,8 @@ export default function SubmitToJobWizard({
                             <div className="card bg-base-200">
                                 <div className="card-body py-4">
                                     <div className="flex gap-4 items-end">
-                                        <div className="fieldset flex-1">
-                                            <label className="label">Search Jobs</label>
+                                        <fieldset className="fieldset flex-1">
+                                            <legend className="fieldset-legend">Search Jobs</legend>
                                             <input
                                                 type="text"
                                                 placeholder="Search by title, company, location..."
@@ -254,21 +254,19 @@ export default function SubmitToJobWizard({
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
                                             />
-                                            <label className="label">
-                                                <span className="label-text-alt text-base-content/50">
-                                                    {jobsLoading && debouncedSearch ? (
-                                                        <>
-                                                            <span className="loading loading-spinner loading-xs mr-1"></span>
-                                                            Searching...
-                                                        </>
-                                                    ) : (
-                                                        'Search updates as you type'
-                                                    )}
-                                                </span>
-                                            </label>
-                                        </div>
-                                        <div className="fieldset">
-                                            <label className="label">Status</label>
+                                            <p className="fieldset-label text-base-content/50">
+                                                {jobsLoading && debouncedSearch ? (
+                                                    <>
+                                                        <span className="loading loading-spinner loading-xs mr-1"></span>
+                                                        Searching...
+                                                    </>
+                                                ) : (
+                                                    'Search updates as you type'
+                                                )}
+                                            </p>
+                                        </fieldset>
+                                        <fieldset className="fieldset">
+                                            <legend className="fieldset-legend">Status</legend>
                                             <select
                                                 className="select w-full"
                                                 value={statusFilter}
@@ -280,7 +278,7 @@ export default function SubmitToJobWizard({
                                                 <option value="filled">Filled</option>
                                                 <option value="closed">Closed</option>
                                             </select>
-                                        </div>
+                                        </fieldset>
                                     </div>
                                 </div>
                             </div>
@@ -424,24 +422,22 @@ export default function SubmitToJobWizard({
                             </div>
 
                             {/* Notes */}
-                            <div className="fieldset">
-                                <label className="label">Your Pitch to Candidate (Optional)</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Your Pitch to Candidate (Optional)</legend>
                                 <textarea
                                     className="textarea h-48 w-full"
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}
                                     placeholder="Why is this opportunity a great fit? This message will be included in the email notification to the candidate..."
                                 />
-                                <label className="label">
-                                    <span className="label-text-alt">
-                                        Explain why you think {candidateName} should consider this role. Be specific about how it matches their skills and career goals.
-                                    </span>
-                                </label>
-                            </div>
+                                <p className="fieldset-label">
+                                    Explain why you think {candidateName} should consider this role. Be specific about how it matches their skills and career goals.
+                                </p>
+                            </fieldset>
 
                             {/* Document Selection */}
-                            <div className="fieldset">
-                                <label className="label">Attach Documents (Optional)</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Attach Documents (Optional)</legend>
                                 {documentsLoading ? (
                                     <div className="flex justify-center py-8">
                                         <span className="loading loading-spinner"></span>
@@ -477,10 +473,8 @@ export default function SubmitToJobWizard({
                                         ))}
                                     </div>
                                 )}
-                                <label className="label">
-                                    <span className="label-text-alt">{selectedDocIds.size} document(s) selected</span>
-                                </label>
-                            </div>
+                                <p className="fieldset-label">{selectedDocIds.size} document(s) selected</p>
+                            </fieldset>
                         </div>
                     )}
 

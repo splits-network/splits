@@ -247,8 +247,8 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                     {mode === 'select' ? (
                         <>
                             {/* Existing Candidate Selection */}
-                            <div className="fieldset">
-                                <label className="label">Select Candidate *</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Select Candidate *</legend>
                                 {loadingCandidates ? (
                                     <div className="flex justify-center py-4">
                                         <span className="loading loading-spinner"></span>
@@ -310,25 +310,25 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                                         <span>No existing candidates found. Please add a new candidate.</span>
                                     </div>
                                 )}
-                            </div>
+                            </fieldset>
 
                             {/* Notes for existing candidate submission */}
-                            <div className="fieldset">
-                                <label className="label">Submission Notes</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Submission Notes</legend>
                                 <textarea
                                     className="textarea w-full h-24"
                                     value={formData.notes}
                                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                                     placeholder="Why is this candidate a great fit for this role?"
                                 />
-                            </div>
+                            </fieldset>
                         </>
                     ) : (
                         <>
                             {/* New Candidate Form */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="fieldset">
-                                    <label className="label">Full Name *</label>
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">Full Name *</legend>
                                     <input
                                         type="text"
                                         className="input w-full"
@@ -336,10 +336,10 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                                         onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                                         required
                                     />
-                                </div>
+                                </fieldset>
 
-                                <div className="fieldset">
-                                    <label className="label">Email *</label>
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">Email *</legend>
                                     <input
                                         type="email"
                                         className="input w-full"
@@ -347,12 +347,12 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                         required
                                     />
-                                </div>
+                                </fieldset>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="fieldset">
-                                    <label className="label">Phone</label>
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">Phone</legend>
                                     <input
                                         type="tel"
                                         className="input w-full"
@@ -360,10 +360,10 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                         placeholder="+1 (555) 123-4567"
                                     />
-                                </div>
+                                </fieldset>
 
-                                <div className="fieldset">
-                                    <label className="label">Location</label>
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">Location</legend>
                                     <input
                                         type="text"
                                         className="input w-full"
@@ -371,12 +371,12 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                                         placeholder="City, State/Country"
                                     />
-                                </div>
+                                </fieldset>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="fieldset">
-                                    <label className="label">Current Title</label>
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">Current Title</legend>
                                     <input
                                         type="text"
                                         className="input w-full"
@@ -384,10 +384,10 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                                         onChange={(e) => setFormData({ ...formData, current_title: e.target.value })}
                                         placeholder="e.g., Senior Software Engineer"
                                     />
-                                </div>
+                                </fieldset>
 
-                                <div className="fieldset">
-                                    <label className="label">Current Company</label>
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">Current Company</legend>
                                     <input
                                         type="text"
                                         className="input w-full"
@@ -395,11 +395,11 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                                         onChange={(e) => setFormData({ ...formData, current_company: e.target.value })}
                                         placeholder="e.g., Acme Corp"
                                     />
-                                </div>
+                                </fieldset>
                             </div>
 
-                            <div className="fieldset">
-                                <label className="label">LinkedIn URL</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">LinkedIn URL</legend>
                                 <input
                                     type="url"
                                     className="input w-full"
@@ -407,22 +407,22 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                                     onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
                                     placeholder="https://linkedin.com/in/..."
                                 />
-                            </div>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label">Submission Notes</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Submission Notes</legend>
                                 <textarea
                                     className="textarea w-full h-24"
                                     value={formData.notes}
                                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                                     placeholder="Why is this candidate a great fit for this role?"
                                 />
-                            </div>
+                            </fieldset>
                         </>
                     )}
 
-                    <div className="fieldset">
-                        <label className="label">Proposal Pitch *</label>
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">Proposal Pitch *</legend>
                         <textarea
                             className="textarea w-full h-24"
                             value={pitch}
@@ -430,16 +430,14 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                             placeholder="Share why this role is a great fit for the candidate"
                             required
                         />
-                        <label className="label">
-                            <span className="label-text-alt">{pitch.length} / 500 characters</span>
-                        </label>
-                    </div>
+                        <p className="fieldset-label">{pitch.length} / 500 characters</p>
+                    </fieldset>
 
-                    <div className="fieldset">
-                        <label className="label">
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">
                             Resume (Optional)
-                            <span className="label-text-alt text-base-content/60">PDF, DOC, DOCX, or TXT - Max 10MB</span>
-                        </label>
+                            <span className="text-base-content/60 font-normal text-sm ml-2">PDF, DOC, DOCX, or TXT - Max 10MB</span>
+                        </legend>
                         <input
                             type="file"
                             ref={fileInputRef}

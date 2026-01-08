@@ -568,8 +568,8 @@ export default function InvitationsPageClient() {
                             </button>
                         </div>
 
-                        <div className="fieldset mb-4">
-                            <label className="label">Candidate Email *</label>
+                        <fieldset className="fieldset mb-4">
+                            <legend className="fieldset-legend">Candidate Email *</legend>
                             <input
                                 type="email"
                                 className="input w-full"
@@ -584,12 +584,10 @@ export default function InvitationsPageClient() {
                                     }
                                 }}
                             />
-                            <label className="label">
-                                <span className="label-text-alt">
-                                    Enter the email address of the candidate you want to invite
-                                </span>
-                            </label>
-                        </div>
+                            <p className="fieldset-label">
+                                Enter the email address of the candidate you want to invite
+                            </p>
+                        </fieldset>
 
                         <div className="modal-action">
                             <button

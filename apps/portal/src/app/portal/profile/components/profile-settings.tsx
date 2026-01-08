@@ -193,8 +193,8 @@ export function ProfileSettings() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Basic Info */}
                     <div className="space-y-4">
-                        <div className="fieldset">
-                            <label className="label">Professional Tagline</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">Professional Tagline</legend>
                             <input
                                 type="text"
                                 className="input w-full"
@@ -203,24 +203,22 @@ export function ProfileSettings() {
                                 value={profile.tagline}
                                 onChange={(e) => setProfile({ ...profile, tagline: e.target.value })}
                             />
-                            <label className="label">
-                                <span className="label-text-alt">A short headline that describes your expertise</span>
-                            </label>
-                        </div>
+                            <p className="fieldset-label">A short headline that describes your expertise</p>
+                        </fieldset>
 
-                        <div className="fieldset">
-                            <label className="label">Bio</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">Bio</legend>
                             <textarea
                                 className="textarea w-full h-32"
                                 placeholder="Tell candidates about your background and recruiting experience..."
                                 value={profile.bio}
                                 onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                             />
-                        </div>
+                        </fieldset>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="fieldset">
-                                <label className="label">Location</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Location</legend>
                                 <input
                                     type="text"
                                     className="input w-full"
@@ -228,10 +226,10 @@ export function ProfileSettings() {
                                     value={profile.location}
                                     onChange={(e) => setProfile({ ...profile, location: e.target.value })}
                                 />
-                            </div>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label">Years of Experience</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Years of Experience</legend>
                                 <input
                                     type="number"
                                     className="input w-full"
@@ -239,7 +237,7 @@ export function ProfileSettings() {
                                     value={profile.years_experience}
                                     onChange={(e) => setProfile({ ...profile, years_experience: parseInt(e.target.value) || 0 })}
                                 />
-                            </div>
+                            </fieldset>
                         </div>
                     </div>
 

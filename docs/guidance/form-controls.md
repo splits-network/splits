@@ -12,56 +12,74 @@ This document outlines the standard patterns for implementing form controls in t
 
 ## Standard Form Pattern
 
-### ✅ Correct Implementation (DaisyUI Fieldset Pattern)
+### ✅ Correct Implementation (DaisyUI v5 Semantic Fieldset Pattern)
 
-Use the `fieldset` class wrapper with simple label elements:
+Use semantic HTML `<fieldset>` and `<legend>` elements with DaisyUI classes:
 
 ```tsx
-<div className="fieldset">
-    <label className="label">Field Label</label>
+<fieldset className="fieldset">
+    <legend className="fieldset-legend">Field Label</legend>
     <input 
         type="text"
-        className="input"
+        className="input w-full"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="Placeholder text"
         required
     />
-</div>
+</fieldset>
 ```
 
-### ❌ Incorrect (Legacy form-control Pattern)
+### With Helper Text
 
-Do NOT use the `form-control` pattern with verbose label markup:
+Use `<p className="fieldset-label">` for helper text:
 
 ```tsx
-{/* WRONG - Do not use this pattern */}
-<div className="form-control">
-    <label className="label">
-        <span className="label-text">Field Label</span>
-    </label>
+<fieldset className="fieldset">
+    <legend className="fieldset-legend">Annual Salary (USD) *</legend>
+    <input 
+        type="number"
+        className="input w-full"
+        value={salary}
+        onChange={(e) => setSalary(e.target.value)}
+        required
+    />
+    <p className="fieldset-label">The candidate's agreed annual salary</p>
+</fieldset>
+```
+
+### ❌ Incorrect (Legacy v4 Pattern - Causes Mobile Cursor Issues)
+
+Do NOT use `<div>` with `<label className="label">` - this causes cursor misalignment on mobile:
+
+```tsx
+{/* WRONG - Do not use this pattern - causes mobile issues */}
+<div className="fieldset">
+    <label className="label">Field Label</label>
     <input 
         type="text"
-        className="input input-bordered"
+        className="input w-full"
         value={value}
         onChange={(e) => setValue(e.target.value)}
     />
+    <label className="label">
+        <span className="label-text-alt">Helper text</span>
+    </label>
 </div>
 ```
 
 ---
 
-## Key Differences
+## Key Differences (v4 → v5 Migration)
 
-| Aspect | ✅ Correct (Fieldset) | ❌ Incorrect (form-control) |
-|--------|---------------------|---------------------------|
-| Wrapper class | `fieldset` | `form-control` |
-| Label markup | `<label className="label">Text</label>` | `<label className="label"><span className="label-text">Text</span></label>` |
-| Input classes | `input` | `input input-bordered` |
-| Select classes | `select` | `select select-bordered` |
-| Textarea classes | `textarea` | `textarea textarea-bordered` |
+| Aspect | ❌ Old v4 Pattern | ✅ New v5 Pattern |
+|--------|-------------------|-------------------|
+| Wrapper element | `<div className="fieldset">` | `<fieldset className="fieldset">` |
+| Label element | `<label className="label">Text</label>` | `<legend className="fieldset-legend">Text</legend>` |
+| Helper text | `<label className="label"><span className="label-text-alt">...</span></label>` | `<p className="fieldset-label">...</p>` |
+| Input classes | `input` or `input w-full` | `input w-full` (unchanged) |
 
-**Key Rule**: Never use `-bordered` suffixes on form elements. DaisyUI applies borders automatically.
+**Why This Matters**: The v4 `<label className="label">` pattern causes cursor misalignment on mobile devices. The v5 semantic pattern with `<fieldset>` and `<legend>` is both more accessible and works correctly on all devices.
 
 ---
 
@@ -70,42 +88,42 @@ Do NOT use the `form-control` pattern with verbose label markup:
 ### Text Input
 
 ```tsx
-<div className="fieldset">
-    <label className="label">Company Name *</label>
+<fieldset className="fieldset">
+    <legend className="fieldset-legend">Company Name *</legend>
     <input 
         type="text"
-        className="input"
+        className="input w-full"
         value={companyName}
         onChange={(e) => setCompanyName(e.target.value)}
         placeholder="Enter company name"
         required
     />
-</div>
+</fieldset>
 ```
 
 ### Email Input
 
 ```tsx
-<div className="fieldset">
-    <label className="label">Email *</label>
+<fieldset className="fieldset">
+    <legend className="fieldset-legend">Email *</legend>
     <input 
         type="email"
-        className="input"
+        className="input w-full"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="you@example.com"
         required
     />
-</div>
+</fieldset>
 ```
 
 ### Select Dropdown
 
 ```tsx
-<div className="fieldset">
-    <label className="label">Status</label>
+<fieldset className="fieldset">
+    <legend className="fieldset-legend">Status</legend>
     <select 
-        className="select"
+        className="select w-full"
         value={status}
         onChange={(e) => setStatus(e.target.value)}
     >
@@ -114,31 +132,31 @@ Do NOT use the `form-control` pattern with verbose label markup:
         <option value="paused">Paused</option>
         <option value="closed">Closed</option>
     </select>
-</div>
+</fieldset>
 ```
 
 ### Textarea
 
 ```tsx
-<div className="fieldset">
-    <label className="label">Description</label>
+<fieldset className="fieldset">
+    <legend className="fieldset-legend">Description</legend>
     <textarea
-        className="textarea h-24"
+        className="textarea w-full h-24"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         placeholder="Enter details..."
     />
-</div>
+</fieldset>
 ```
 
-### Number Input
+### Number Input with Helper Text
 
 ```tsx
-<div className="fieldset">
-    <label className="label">Salary (USD) *</label>
+<fieldset className="fieldset">
+    <legend className="fieldset-legend">Salary (USD) *</legend>
     <input 
         type="number"
-        className="input"
+        className="input w-full"
         value={salary}
         onChange={(e) => setSalary(e.target.value)}
         placeholder="150000"
@@ -146,76 +164,43 @@ Do NOT use the `form-control` pattern with verbose label markup:
         step="1000"
         required
     />
-</div>
+    <p className="fieldset-label">Percentage of annual salary</p>
+</fieldset>
 ```
 
 ### Date Input
 
 ```tsx
-<div className="fieldset">
-    <label className="label">Start Date</label>
+<fieldset className="fieldset">
+    <legend className="fieldset-legend">Start Date</legend>
     <input 
         type="date"
-        className="input"
+        className="input w-full"
         value={startDate}
         onChange={(e) => setStartDate(e.target.value)}
     />
-</div>
+</fieldset>
 ```
 
----
-
-## Additional Help Text
-
-Use `label-text-alt` for helper text below inputs:
+### Password with Forgot Link
 
 ```tsx
-<div className="fieldset">
-    <label className="label">Annual Salary (USD) *</label>
-    <input 
-        type="number"
-        className="input"
-        value={salary}
-        onChange={(e) => setSalary(e.target.value)}
+<fieldset className="fieldset">
+    <legend className="fieldset-legend">Password</legend>
+    <input
+        type="password"
+        placeholder="••••••••"
+        className="input w-full"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
         required
     />
-    <label className="label">
-        <span className="label-text-alt">The candidate's agreed annual salary</span>
-    </label>
-</div>
-```
-
----
-
-## Full Width Modifiers
-
-For inputs that should fill their container (common in forms):
-
-```tsx
-<div className="fieldset">
-    <label className="label">Email</label>
-    <input 
-        type="email"
-        className="input w-full"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-    />
-</div>
-```
-
-For selects with max width:
-
-```tsx
-<div className="fieldset">
-    <label className="label">Status</label>
-    <select 
-        className="select w-full max-w-xs"
-        value={status}
-        onChange={(e) => setStatus(e.target.value)}
-    >
-        <option>Select...</option>
-    </select>
-</div>
+    <p className="fieldset-label">
+        <Link href="/forgot-password" className="link link-hover">
+            Forgot password?
+        </Link>
+    </p>
+</fieldset>
 ```
 
 ---
@@ -226,24 +211,24 @@ For side-by-side fields:
 
 ```tsx
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div className="fieldset">
-        <label className="label">First Name</label>
+    <fieldset className="fieldset">
+        <legend className="fieldset-legend">First Name</legend>
         <input 
             type="text"
-            className="input"
+            className="input w-full"
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
         />
-    </div>
-    <div className="fieldset">
-        <label className="label">Last Name</label>
+    </fieldset>
+    <fieldset className="fieldset">
+        <legend className="fieldset-legend">Last Name</legend>
         <input 
             type="text"
-            className="input"
+            className="input w-full"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
         />
-    </div>
+    </fieldset>
 </div>
 ```
 
@@ -276,32 +261,32 @@ export default function ExampleForm() {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="fieldset">
-                <label className="label">Name *</label>
+            <fieldset className="fieldset">
+                <legend className="fieldset-legend">Name *</legend>
                 <input 
                     type="text"
-                    className="input"
+                    className="input w-full"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
                 />
-            </div>
+            </fieldset>
 
-            <div className="fieldset">
-                <label className="label">Email *</label>
+            <fieldset className="fieldset">
+                <legend className="fieldset-legend">Email *</legend>
                 <input 
                     type="email"
-                    className="input"
+                    className="input w-full"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     required
                 />
-            </div>
+            </fieldset>
 
-            <div className="fieldset">
-                <label className="label">Role</label>
+            <fieldset className="fieldset">
+                <legend className="fieldset-legend">Role</legend>
                 <select 
-                    className="select"
+                    className="select w-full"
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 >
@@ -309,17 +294,17 @@ export default function ExampleForm() {
                     <option value="recruiter">Recruiter</option>
                     <option value="admin">Admin</option>
                 </select>
-            </div>
+            </fieldset>
 
-            <div className="fieldset">
-                <label className="label">Notes</label>
+            <fieldset className="fieldset">
+                <legend className="fieldset-legend">Notes</legend>
                 <textarea
-                    className="textarea h-24"
+                    className="textarea w-full h-24"
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     placeholder="Additional information..."
                 />
-            </div>
+            </fieldset>
 
             <div className="flex gap-2 justify-end">
                 <button type="button" className="btn">
@@ -345,7 +330,7 @@ export default function ExampleForm() {
 
 ## Validation & Error States
 
-For error states, wrap fieldset with error alert:
+For error states, use alerts above the form:
 
 ```tsx
 {error && (
@@ -355,15 +340,15 @@ For error states, wrap fieldset with error alert:
     </div>
 )}
 
-<div className="fieldset">
-    <label className="label">Field Label</label>
+<fieldset className="fieldset">
+    <legend className="fieldset-legend">Field Label</legend>
     <input 
         type="text"
-        className="input"
+        className="input w-full"
         value={value}
         onChange={(e) => setValue(e.target.value)}
     />
-</div>
+</fieldset>
 ```
 
 ---
@@ -372,24 +357,26 @@ For error states, wrap fieldset with error alert:
 
 ### Disabled Fields
 
-Use `disabled` prop, not special classes:
+Use `disabled` prop:
 
 ```tsx
-<input 
-    type="text"
-    className="input"
-    value={companyId}
-    disabled
-/>
+<fieldset className="fieldset">
+    <legend className="fieldset-legend">Company ID</legend>
+    <input 
+        type="text"
+        className="input w-full"
+        value={companyId}
+        disabled
+    />
+    <p className="fieldset-label">Company cannot be changed</p>
+</fieldset>
 ```
 
-### Large Text Inputs (Code Entry)
-
-For verification codes or special inputs:
+### Large Text Inputs (Verification Codes)
 
 ```tsx
-<div className="fieldset">
-    <label className="label">Verification Code</label>
+<fieldset className="fieldset">
+    <legend className="fieldset-legend">Verification Code</legend>
     <input 
         type="text"
         className="input w-full text-center text-2xl tracking-widest"
@@ -397,31 +384,50 @@ For verification codes or special inputs:
         onChange={(e) => setCode(e.target.value)}
         maxLength={6}
     />
-</div>
+</fieldset>
+```
+
+### Legend with Inline Helper
+
+For file uploads or fields needing inline context:
+
+```tsx
+<fieldset className="fieldset">
+    <legend className="fieldset-legend">
+        Resume (Optional)
+        <span className="text-base-content/60 font-normal text-sm ml-2">
+            PDF, DOC, DOCX, or TXT - Max 10MB
+        </span>
+    </legend>
+    <input
+        type="file"
+        className="file-input w-full"
+        accept=".pdf,.doc,.docx,.txt"
+    />
+</fieldset>
 ```
 
 ---
 
 ## Migration Checklist
 
-When updating legacy forms:
+When updating legacy forms from v4 to v5:
 
-- [ ] Replace `form-control` with `fieldset`
-- [ ] Simplify labels: remove `<span className="label-text">` wrapper
-- [ ] Remove `-bordered` suffixes from all inputs/selects/textareas
-- [ ] Verify `w-full` is applied where needed
-- [ ] Test form submission and validation
-- [ ] Check responsive behavior on mobile
+- [ ] Replace `<div className="fieldset">` with `<fieldset className="fieldset">`
+- [ ] Replace `<label className="label">Label Text</label>` with `<legend className="fieldset-legend">Label Text</legend>`
+- [ ] Replace helper text `<label className="label"><span className="label-text-alt">...</span></label>` with `<p className="fieldset-label">...</p>`
+- [ ] Ensure `w-full` is applied to inputs where needed
+- [ ] Test on mobile devices to verify cursor placement
+- [ ] Check accessibility with screen reader
 
 ---
 
 ## References
 
-- DaisyUI Documentation: https://daisyui.com/components/
-- DaisyUI Fieldset: https://daisyui.com/components/fieldset/
+- DaisyUI v5 Fieldset: https://daisyui.com/components/fieldset/
 - TailwindCSS: https://tailwindcss.com/docs
 
 ---
 
-**Last Updated**: December 14, 2025  
-**Version**: 1.0
+**Last Updated**: January 8, 2026  
+**Version**: 2.0 (DaisyUI v5 Migration)

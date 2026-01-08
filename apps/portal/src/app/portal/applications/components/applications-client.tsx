@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import { useStandardList } from '@/hooks/use-standard-list';
+import { PaginationControls, SearchInput, useStandardList, ViewModeToggle } from '@/hooks/use-standard-list';
 import { useUserProfile } from '@/contexts/user-profile-context';
 import { useToast } from '@/lib/toast-context';
 import { StatCard, StatCardGrid } from '@/components/ui/cards';
@@ -183,6 +183,7 @@ export default function ApplicationsClient() {
         setSearchInput,
         goToPage,
         setViewMode,
+        setLimit,
         refetch
     } = useStandardList<Application, ApplicationFilters>({
         fetchFn: fetchApplications,
@@ -309,255 +310,238 @@ export default function ApplicationsClient() {
     }
 
     return (
-        <div className="space-y-6">
-            {/* Error */}
-            {error && (
-                <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
-                    <span>{error}</span>
-                    <button className="btn btn-sm btn-ghost" onClick={refetch}>
-                        <i className="fa-solid fa-rotate"></i>
-                        Retry
-                    </button>
-                </div>
-            )}
-
-            {/* Stats */}
-            {stats && (
-                <StatCardGrid>
-                    <StatCard
-                        title="Total Applications"
-                        value={stats.totalApplications}
-                        icon="fa-folder-open"
-                        color="primary"
-                        description={personaDescriptor(isAdmin, isRecruiter, isCompanyUser)}
-                    />
-                    <StatCard
-                        title="Awaiting Review"
-                        value={stats.awaitingReview}
-                        icon="fa-hourglass-half"
-                        color="warning"
-                        description="Need action"
-                    />
-                    <StatCard
-                        title="AI Reviews Pending"
-                        value={stats.aiPending}
-                        icon="fa-robot"
-                        color="info"
-                        description="Queued for AI triage"
-                    />
-                    <StatCard
-                        title="Accepted by Company"
-                        value={stats.acceptedByCompany}
-                        icon="fa-circle-check"
-                        color="success"
-                        description="Greenlit offers"
-                    />
-                </StatCardGrid>
-            )}
-
-            {/* Filters */}
-            <ApplicationFilters
-                searchQuery={searchQuery}
-                stageFilter={filters.stage}
-                aiScoreFilter={filters.ai_score_filter}
-                viewMode={viewMode}
-                onSearchChange={setSearchInput}
-                onStageFilterChange={handleStageFilterChange}
-                onAIScoreFilterChange={handleAIScoreFilterChange}
-                onViewModeChange={setViewMode}
-            />
-
-            {/* Results summary */}
-            {!loading && applications.length > 0 && (
-                <div className="text-sm text-base-content/70">
-                    Showing {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} applications
-                </div>
-            )}
-
-            {/* Loading overlay */}
-            {loading && applications.length > 0 && (
-                <div className="flex justify-center py-4">
-                    <span className="loading loading-spinner loading-md"></span>
-                </div>
-            )}
-
-            {/* Grid View */}
-            {viewMode === 'grid' && applications.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {applications.map((application) => (
-                        <ApplicationCard
-                            key={application.id}
-                            application={{
-                                ...application,
-                                company: application.job?.company
-                            }}
-                            canAccept={isCompanyUser && !application.accepted_by_company}
-                            isAccepting={acceptingId === application.id}
-                            onAccept={() => handleAcceptApplication(application.id)}
-                            formatDate={formatDate}
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between">
+            <div className='w-full md:flex-1 md:mr-4 space-y-6'>
+                <div className='card bg-base-200'>
+                    <StatCardGrid className='m-2 shadow-lg'>
+                        <StatCard
+                            title="Total Applications"
+                            value={stats?.totalApplications || 0}
+                            icon="fa-folder-open"
+                            color="primary"
+                            description={personaDescriptor(isAdmin, isRecruiter, isCompanyUser)}
                         />
-                    ))}
-                </div>
-            )}
-
-            {/* Bulk Selection Bar */}
-            {selectedItems.size > 0 && isRecruiter && (
-                <div className="alert shadow">
-                    <div className="flex-1">
-                        <i className="fa-solid fa-check-square text-xl"></i>
-                        <div>
-                            <h3 className="font-bold">{selectedItems.size} application{selectedItems.size !== 1 ? 's' : ''} selected</h3>
-                            <div className="text-xs">Choose an action to apply to all selected applications</div>
-                        </div>
+                        <StatCard
+                            title="Awaiting Review"
+                            value={stats?.awaitingReview || 0}
+                            icon="fa-hourglass-half"
+                            color="warning"
+                            description="Need action"
+                        />
+                        <StatCard
+                            title="AI Reviews Pending"
+                            value={stats?.aiPending || 0}
+                            icon="fa-robot"
+                            color="info"
+                            description="Queued for AI triage"
+                        />
+                        <StatCard
+                            title="Accepted by Company"
+                            value={stats?.acceptedByCompany || 0}
+                            icon="fa-circle-check"
+                            color="success"
+                            description="Greenlit offers"
+                        />
+                    </StatCardGrid>
+                    <div className='p-4 pt-0'>
                     </div>
-                    <div className="flex-none flex gap-2">
-                        {isAdmin && (
+                </div>
+
+
+                {/* Results summary */}
+                {!loading && applications.length > 0 && (
+                    <div className="text-sm text-base-content/70">
+                        Showing {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} applications
+                    </div>
+                )}
+
+                {/* Loading overlay */}
+                {loading && applications.length > 0 && (
+                    <div className="flex justify-center py-4">
+                        <span className="loading loading-spinner loading-md"></span>
+                    </div>
+                )}
+
+                {/* Grid View */}
+                {viewMode === 'grid' && applications.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {applications.map((application) => (
+                            <ApplicationCard
+                                key={application.id}
+                                application={{
+                                    ...application,
+                                    company: application.job?.company
+                                }}
+                                canAccept={isCompanyUser && !application.accepted_by_company}
+                                isAccepting={acceptingId === application.id}
+                                onAccept={() => handleAcceptApplication(application.id)}
+                                formatDate={formatDate}
+                            />
+                        ))}
+                    </div>
+                )}
+
+                {/* Bulk Selection Bar */}
+                {selectedItems.size > 0 && isRecruiter && (
+                    <div className="alert shadow">
+                        <div className="flex-1">
+                            <i className="fa-solid fa-check-square text-xl"></i>
+                            <div>
+                                <h3 className="font-bold">{selectedItems.size} application{selectedItems.size !== 1 ? 's' : ''} selected</h3>
+                                <div className="text-xs">Choose an action to apply to all selected applications</div>
+                            </div>
+                        </div>
+                        <div className="flex-none flex gap-2">
+                            {isAdmin && (
+                                <button
+                                    onClick={() => handleBulkAction('stage')}
+                                    className="btn btn-sm btn-primary gap-2"
+                                >
+                                    <i className="fa-solid fa-list-check"></i>
+                                    Update Stage
+                                </button>
+                            )}
                             <button
-                                onClick={() => handleBulkAction('stage')}
-                                className="btn btn-sm btn-primary gap-2"
+                                onClick={() => handleBulkAction('reject')}
+                                className="btn btn-sm btn-error gap-2"
                             >
-                                <i className="fa-solid fa-list-check"></i>
-                                Update Stage
+                                <i className="fa-solid fa-ban"></i>
+                                Reject
                             </button>
-                        )}
-                        <button
-                            onClick={() => handleBulkAction('reject')}
-                            className="btn btn-sm btn-error gap-2"
-                        >
-                            <i className="fa-solid fa-ban"></i>
-                            Reject
-                        </button>
-                        <button
-                            onClick={clearSelections}
-                            className="btn btn-sm btn-ghost"
-                        >
-                            Clear
-                        </button>
+                            <button
+                                onClick={clearSelections}
+                                className="btn btn-sm btn-ghost"
+                            >
+                                Clear
+                            </button>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
 
-            {/* Table View */}
-            {viewMode === 'table' && applications.length > 0 && (
-                <div className="card bg-base-100 shadow overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="table table-zebra">
-                            <thead>
-                                <tr>
-                                    {isRecruiter && (
-                                        <th>
-                                            <input
-                                                type="checkbox"
-                                                className="checkbox checkbox-sm"
-                                                checked={selectedItems.size === applications.length && applications.length > 0}
-                                                onChange={() => toggleSelectAll(applications.map(a => a.id))}
-                                            />
-                                        </th>
-                                    )}
-                                    <th>Candidate</th>
-                                    <th>Job</th>
-                                    <th>Company</th>
-                                    <th>AI Score</th>
-                                    <th>Stage</th>
-                                    {isRecruiter && <th>Recruiter</th>}
-                                    <th>Submitted</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {applications.map((application) => (
-                                    <ApplicationTableRow
-                                        key={application.id}
-                                        application={application}
-                                        isSelected={selectedItems.has(application.id)}
-                                        onToggleSelect={() => toggleItemSelection(application.id)}
-                                        canAccept={isCompanyUser && !application.accepted_by_company}
-                                        isAccepting={acceptingId === application.id}
-                                        onAccept={() => handleAcceptApplication(application.id)}
-                                        getStageColor={getApplicationStageBadge}
-                                        formatDate={formatDate}
-                                        isRecruiter={isRecruiter}
-                                        isCompanyUser={isCompanyUser}
-                                    />
-                                ))}
-                            </tbody>
-                        </table>
+                {/* Table View */}
+                {viewMode === 'table' && applications.length > 0 && (
+                    <div className="card bg-base-100 shadow overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="table table-zebra">
+                                <thead>
+                                    <tr>
+                                        {isRecruiter && (
+                                            <th>
+                                                <input
+                                                    type="checkbox"
+                                                    className="checkbox checkbox-sm"
+                                                    checked={selectedItems.size === applications.length && applications.length > 0}
+                                                    onChange={() => toggleSelectAll(applications.map(a => a.id))}
+                                                />
+                                            </th>
+                                        )}
+                                        <th>Candidate</th>
+                                        <th>Job</th>
+                                        <th>Company</th>
+                                        <th>AI Score</th>
+                                        <th>Stage</th>
+                                        {isRecruiter && <th>Recruiter</th>}
+                                        <th>Submitted</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {applications.map((application) => (
+                                        <ApplicationTableRow
+                                            key={application.id}
+                                            application={application}
+                                            isSelected={selectedItems.has(application.id)}
+                                            onToggleSelect={() => toggleItemSelection(application.id)}
+                                            canAccept={isCompanyUser && !application.accepted_by_company}
+                                            isAccepting={acceptingId === application.id}
+                                            onAccept={() => handleAcceptApplication(application.id)}
+                                            getStageColor={getApplicationStageBadge}
+                                            formatDate={formatDate}
+                                            isRecruiter={isRecruiter}
+                                            isCompanyUser={isCompanyUser}
+                                        />
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
 
-            {/* Pagination */}
-            {pagination.total_pages > 1 && (
+                {/* Pagination Controls */}
+                <PaginationControls
+                    page={pagination.page}
+                    totalPages={pagination.total_pages}
+                    total={pagination.total}
+                    limit={pagination.limit}
+                    onPageChange={goToPage}
+                    onLimitChange={setLimit}
+                    loading={loading}
+                />
+
+                {/* Empty State */}
+                {applications.length === 0 && !loading && (
+                    <div className="card bg-base-100 shadow">
+                        <div className="card-body text-center py-12">
+                            <i className="fa-solid fa-briefcase text-6xl text-base-content/20"></i>
+                            <h3 className="text-xl font-semibold mt-4">No Applications Found</h3>
+                            <p className="text-base-content/70 mt-2">
+                                {searchQuery || filters.stage
+                                    ? 'Try adjusting your search or filters'
+                                    : 'No applications have been created yet'}
+                            </p>
+                        </div>
+                    </div>
+                )}
+            </div>
+            <div className="w-full md:w-64 lg:w-72 xl:w-80 shrink-0 mt-6 md:mt-0 space-y-6">
                 <div className="card bg-base-100 shadow">
-                    <div className="card-body p-4">
-                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <div className="text-sm text-base-content/70">
-                                Page {pagination.page} of {pagination.total_pages}
-                            </div>
-                            <div className="join">
-                                <button
-                                    className="join-item btn btn-sm"
-                                    onClick={() => goToPage(1)}
-                                    disabled={pagination.page === 1 || loading}
-                                >
-                                    <i className="fa-solid fa-angles-left"></i>
-                                </button>
-                                <button
-                                    className="join-item btn btn-sm"
-                                    onClick={() => goToPage(pagination.page - 1)}
-                                    disabled={pagination.page === 1 || loading}
-                                >
-                                    <i className="fa-solid fa-angle-left"></i>
-                                </button>
-                                <button className="join-item btn btn-sm btn-disabled">
-                                    {pagination.page}
-                                </button>
-                                <button
-                                    className="join-item btn btn-sm"
-                                    onClick={() => goToPage(pagination.page + 1)}
-                                    disabled={pagination.page === pagination.total_pages || loading}
-                                >
-                                    <i className="fa-solid fa-angle-right"></i>
-                                </button>
-                                <button
-                                    className="join-item btn btn-sm"
-                                    onClick={() => goToPage(pagination.total_pages)}
-                                    disabled={pagination.page === pagination.total_pages || loading}
-                                >
-                                    <i className="fa-solid fa-angles-right"></i>
-                                </button>
-                            </div>
+                    <div className="card-body p-2">
+                        <h3 className='card-title'>
+                            Filters & View
+                            <span className="text-base-content/30">•••</span>
+                        </h3>
+                        <div className="flex flex-wrap gap-4 items-center">
+                            {/* Filters */}
+                            <ApplicationFilters
+                                searchQuery={searchQuery}
+                                stageFilter={filters.stage}
+                                aiScoreFilter={filters.ai_score_filter}
+                                viewMode={viewMode}
+                                onSearchChange={setSearchInput}
+                                onStageFilterChange={handleStageFilterChange}
+                                onAIScoreFilterChange={handleAIScoreFilterChange}
+                                onViewModeChange={setViewMode}
+                            />
+
+                            {/* Search */}
+                            <SearchInput
+                                value={searchQuery}
+                                onChange={setSearchInput}
+                                onClear={clearSelections}
+                                placeholder="Search candidates..."
+                                loading={loading}
+                                className="flex-1 min-w-[200px]"
+                            />
+
+                            {/* View Toggle */}
+                            <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} />
                         </div>
                     </div>
                 </div>
-            )}
-
-            {/* Empty State */}
-            {applications.length === 0 && !loading && (
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body text-center py-12">
-                        <i className="fa-solid fa-briefcase text-6xl text-base-content/20"></i>
-                        <h3 className="text-xl font-semibold mt-4">No Applications Found</h3>
-                        <p className="text-base-content/70 mt-2">
-                            {searchQuery || filters.stage
-                                ? 'Try adjusting your search or filters'
-                                : 'No applications have been created yet'}
-                        </p>
-                    </div>
-                </div>
-            )}
+            </div>
 
             {/* Bulk Action Modal */}
-            {showBulkActionModal && bulkAction && (
-                <BulkActionModal
-                    action={bulkAction}
-                    selectedCount={selectedItems.size}
-                    onClose={handleCloseBulkModal}
-                    onConfirm={handleBulkConfirm}
-                    loading={bulkLoading}
-                />
-            )}
-        </div>
+            {
+                showBulkActionModal && bulkAction && (
+                    <BulkActionModal
+                        action={bulkAction}
+                        selectedCount={selectedItems.size}
+                        onClose={handleCloseBulkModal}
+                        onConfirm={handleBulkConfirm}
+                        loading={bulkLoading}
+                    />
+                )
+            }
+        </div >
     );
 }

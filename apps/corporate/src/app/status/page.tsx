@@ -274,8 +274,8 @@ export default function StatusPage() {
                                 )}
 
                                 <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
-                                    <div className="fieldset">
-                                        <label className="label">Full name</label>
+                                    <fieldset className="fieldset">
+                                        <legend className="fieldset-legend">Full name</legend>
                                         <input
                                             className="input w-full"
                                             required
@@ -283,9 +283,9 @@ export default function StatusPage() {
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                             placeholder="Jordan Recruiter"
                                         />
-                                    </div>
-                                    <div className="fieldset">
-                                        <label className="label">Email</label>
+                                    </fieldset>
+                                    <fieldset className="fieldset">
+                                        <legend className="fieldset-legend">Email</legend>
                                         <input
                                             className="input w-full"
                                             type="email"
@@ -294,10 +294,10 @@ export default function StatusPage() {
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                             placeholder="you@company.com"
                                         />
-                                    </div>
+                                    </fieldset>
                                     <div className="grid gap-4 md:grid-cols-2">
-                                        <div className="fieldset">
-                                            <label className="label">Topic</label>
+                                        <fieldset className="fieldset">
+                                            <legend className="fieldset-legend">Topic</legend>
                                             <select
                                                 className="select w-full"
                                                 value={formData.topic}
@@ -309,9 +309,9 @@ export default function StatusPage() {
                                                 <option value="ai">AI review</option>
                                                 <option value="documents">Document workflows</option>
                                             </select>
-                                        </div>
-                                        <div className="fieldset">
-                                            <label className="label">Urgency</label>
+                                        </fieldset>
+                                        <fieldset className="fieldset">
+                                            <legend className="fieldset-legend">Urgency</legend>
                                             <select
                                                 className="select w-full"
                                                 value={formData.urgency}
@@ -321,10 +321,10 @@ export default function StatusPage() {
                                                 <option value="high">High - launch blocking</option>
                                                 <option value="low">Low - FYI</option>
                                             </select>
-                                        </div>
+                                        </fieldset>
                                     </div>
-                                    <div className="fieldset">
-                                        <label className="label">Message</label>
+                                    <fieldset className="fieldset">
+                                        <legend className="fieldset-legend">Message</legend>
                                         <textarea
                                             className="textarea h-24 w-full"
                                             required
@@ -332,7 +332,7 @@ export default function StatusPage() {
                                             onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                                             placeholder="Share impact, timeline expectations, and stakeholders."
                                         />
-                                    </div>
+                                    </fieldset>
                                     <button className="btn btn-primary w-full" disabled={submitting} type="submit">
                                         {submitting ? (
                                             <>

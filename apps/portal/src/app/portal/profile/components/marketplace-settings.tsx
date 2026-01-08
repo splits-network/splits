@@ -150,17 +150,15 @@ export function MarketplaceSettings() {
                                     onChange={(e) => setSettings({ ...settings, marketplace_enabled: e.target.checked })}
                                 />
                             </label>
-                            <label className="label">
-                                <span className="label-text-alt">Allow candidates to discover and connect with you</span>
-                            </label>
+                            <p className="fieldset-label">Allow candidates to discover and connect with you</p>
                         </div>
 
                         {settings.marketplace_enabled && (
                             <>
                                 <div className="divider"></div>
 
-                                <div className="fieldset">
-                                    <label className="label">Visibility</label>
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">Visibility</legend>
                                     <select
                                         className="select w-full"
                                         value={settings.marketplace_visibility}
@@ -170,7 +168,7 @@ export function MarketplaceSettings() {
                                         <option value="limited">Limited - Visible to verified candidates only</option>
                                         <option value="hidden">Hidden - Not visible in marketplace</option>
                                     </select>
-                                </div>
+                                </fieldset>
 
                                 <div className="divider">Privacy Settings</div>
 

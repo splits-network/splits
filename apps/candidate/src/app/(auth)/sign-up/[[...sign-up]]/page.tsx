@@ -165,8 +165,8 @@ export default function SignUpPage() {
 
                         <form onSubmit={handleVerification} className="space-y-4">
                             <div id="clerk-captcha"></div>
-                            <div className="fieldset">
-                                <label className="label">Verification Code</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Verification Code</legend>
                                 <input
                                     type="text"
                                     placeholder="123456"
@@ -177,7 +177,7 @@ export default function SignUpPage() {
                                     disabled={isLoading}
                                     maxLength={6}
                                 />
-                            </div>
+                            </fieldset>
 
                             <button
                                 type="submit"
@@ -242,8 +242,8 @@ export default function SignUpPage() {
                         <div id="clerk-captcha"></div>
 
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="fieldset">
-                                <label className="label">First Name</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">First Name</legend>
                                 <input
                                     type="text"
                                     placeholder="John"
@@ -253,9 +253,9 @@ export default function SignUpPage() {
                                     required
                                     disabled={isLoading}
                                 />
-                            </div>
-                            <div className="fieldset">
-                                <label className="label">Last Name</label>
+                            </fieldset>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Last Name</legend>
                                 <input
                                     type="text"
                                     placeholder="Doe"
@@ -265,11 +265,11 @@ export default function SignUpPage() {
                                     required
                                     disabled={isLoading}
                                 />
-                            </div>
+                            </fieldset>
                         </div>
 
-                        <div className="fieldset">
-                            <label className="label">Email</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">Email</legend>
                             <input
                                 type="email"
                                 placeholder="you@example.com"
@@ -279,10 +279,10 @@ export default function SignUpPage() {
                                 required
                                 disabled={isLoading}
                             />
-                        </div>
+                        </fieldset>
 
-                        <div className="fieldset">
-                            <label className="label">Password</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">Password</legend>
                             <input
                                 type="password"
                                 placeholder="••••••••"
@@ -293,10 +293,8 @@ export default function SignUpPage() {
                                 disabled={isLoading}
                                 minLength={8}
                             />
-                            <label className="label">
-                                <span className="label-text-alt">Must be at least 8 characters</span>
-                            </label>
-                        </div>
+                            <p className="fieldset-label">Must be at least 8 characters</p>
+                        </fieldset>
 
                         <button
                             type="submit"

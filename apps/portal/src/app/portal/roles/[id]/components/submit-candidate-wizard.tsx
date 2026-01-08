@@ -339,8 +339,8 @@ export default function SubmitCandidateWizard({
                                     {/* Search */}
                                     <div className="card bg-base-200">
                                         <div className="card-body py-4">
-                                            <div className="fieldset">
-                                                <label className="label">Search Candidates</label>
+                                            <fieldset className="fieldset">
+                                                <legend className="fieldset-legend">Search Candidates</legend>
                                                 <input
                                                     type="text"
                                                     placeholder="Search by name, email, title, company..."
@@ -348,19 +348,17 @@ export default function SubmitCandidateWizard({
                                                     value={searchQuery}
                                                     onChange={(e) => setSearchQuery(e.target.value)}
                                                 />
-                                                <label className="label">
-                                                    <span className="label-text-alt text-base-content/50">
-                                                        {candidatesLoading && debouncedSearch ? (
-                                                            <>
-                                                                <span className="loading loading-spinner loading-xs mr-1"></span>
-                                                                Searching...
-                                                            </>
-                                                        ) : (
-                                                            'Search updates as you type'
-                                                        )}
-                                                    </span>
-                                                </label>
-                                            </div>
+                                                <p className="fieldset-label text-base-content/50">
+                                                    {candidatesLoading && debouncedSearch ? (
+                                                        <>
+                                                            <span className="loading loading-spinner loading-xs mr-1"></span>
+                                                            Searching...
+                                                        </>
+                                                    ) : (
+                                                        'Search updates as you type'
+                                                    )}
+                                                </p>
+                                            </fieldset>
                                         </div>
                                     </div>
 
@@ -477,8 +475,8 @@ export default function SubmitCandidateWizard({
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="fieldset">
-                                            <label className="label">Full Name *</label>
+                                        <fieldset className="fieldset">
+                                            <legend className="fieldset-legend">Full Name *</legend>
                                             <input
                                                 type="text"
                                                 className="input w-full"
@@ -486,10 +484,10 @@ export default function SubmitCandidateWizard({
                                                 onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                                                 placeholder="John Doe"
                                             />
-                                        </div>
+                                        </fieldset>
 
-                                        <div className="fieldset">
-                                            <label className="label">Email *</label>
+                                        <fieldset className="fieldset">
+                                            <legend className="fieldset-legend">Email *</legend>
                                             <input
                                                 type="email"
                                                 className="input w-full"
@@ -497,12 +495,12 @@ export default function SubmitCandidateWizard({
                                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                                 placeholder="john@example.com"
                                             />
-                                        </div>
+                                        </fieldset>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="fieldset">
-                                            <label className="label">Phone</label>
+                                        <fieldset className="fieldset">
+                                            <legend className="fieldset-legend">Phone</legend>
                                             <input
                                                 type="tel"
                                                 className="input w-full"
@@ -510,10 +508,10 @@ export default function SubmitCandidateWizard({
                                                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                                 placeholder="+1 (555) 123-4567"
                                             />
-                                        </div>
+                                        </fieldset>
 
-                                        <div className="fieldset">
-                                            <label className="label">Location</label>
+                                        <fieldset className="fieldset">
+                                            <legend className="fieldset-legend">Location</legend>
                                             <input
                                                 type="text"
                                                 className="input w-full"
@@ -521,12 +519,12 @@ export default function SubmitCandidateWizard({
                                                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                                                 placeholder="City, State/Country"
                                             />
-                                        </div>
+                                        </fieldset>
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="fieldset">
-                                            <label className="label">Current Title</label>
+                                        <fieldset className="fieldset">
+                                            <legend className="fieldset-legend">Current Title</legend>
                                             <input
                                                 type="text"
                                                 className="input w-full"
@@ -534,10 +532,10 @@ export default function SubmitCandidateWizard({
                                                 onChange={(e) => setFormData({ ...formData, current_title: e.target.value })}
                                                 placeholder="e.g., Senior Software Engineer"
                                             />
-                                        </div>
+                                        </fieldset>
 
-                                        <div className="fieldset">
-                                            <label className="label">Current Company</label>
+                                        <fieldset className="fieldset">
+                                            <legend className="fieldset-legend">Current Company</legend>
                                             <input
                                                 type="text"
                                                 className="input w-full"
@@ -545,11 +543,11 @@ export default function SubmitCandidateWizard({
                                                 onChange={(e) => setFormData({ ...formData, current_company: e.target.value })}
                                                 placeholder="e.g., Acme Corp"
                                             />
-                                        </div>
+                                        </fieldset>
                                     </div>
 
-                                    <div className="fieldset">
-                                        <label className="label">LinkedIn URL</label>
+                                    <fieldset className="fieldset">
+                                        <legend className="fieldset-legend">LinkedIn URL</legend>
                                         <input
                                             type="url"
                                             className="input w-full"
@@ -557,7 +555,7 @@ export default function SubmitCandidateWizard({
                                             onChange={(e) => setFormData({ ...formData, linkedin_url: e.target.value })}
                                             placeholder="https://linkedin.com/in/..."
                                         />
-                                    </div>
+                                    </fieldset>
                                 </div>
                             )}
                         </div>
@@ -576,28 +574,26 @@ export default function SubmitCandidateWizard({
                             </div>
 
                             {/* Pitch */}
-                            <div className="fieldset">
-                                <label className="label">Your Pitch to Candidate *</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Your Pitch to Candidate *</legend>
                                 <textarea
                                     className="textarea h-48 w-full"
                                     value={pitch}
                                     onChange={(e) => setPitch(e.target.value)}
                                     placeholder="Why is this role a great fit? This message will be included in the email notification to the candidate..."
                                 />
-                                <label className="label">
-                                    <span className="label-text-alt">
-                                        Explain why you think {selectedCandidate.full_name} should consider this role. Be specific about how it matches their skills and career goals.
-                                    </span>
-                                    <span className="label-text-alt">{pitch.length} / 500 characters</span>
-                                </label>
-                            </div>
+                                <p className="fieldset-label">
+                                    Explain why you think {selectedCandidate.full_name} should consider this role. Be specific about how it matches their skills and career goals.
+                                    <span className="float-right">{pitch.length} / 500 characters</span>
+                                </p>
+                            </fieldset>
 
                             {/* Resume Upload */}
-                            <div className="fieldset">
-                                <label className="label">
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">
                                     Resume (Optional)
-                                    <span className="label-text-alt text-base-content/60">PDF, DOC, DOCX, or TXT - Max 10MB</span>
-                                </label>
+                                    <span className="text-base-content/60 font-normal text-sm ml-2">PDF, DOC, DOCX, or TXT - Max 10MB</span>
+                                </legend>
                                 <input
                                     type="file"
                                     ref={fileInputRef}
@@ -623,7 +619,7 @@ export default function SubmitCandidateWizard({
                                         </button>
                                     </div>
                                 )}
-                            </div>
+                            </fieldset>
                         </div>
                     )}
 

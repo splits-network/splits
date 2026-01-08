@@ -58,8 +58,8 @@ export function RecruiterProfileStep() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Bio */}
-                <div className="fieldset">
-                    <label className="label">Bio / About You</label>
+                <fieldset className="fieldset">
+                    <legend className="fieldset-legend">Bio / About You</legend>
                     <textarea
                         className="textarea h-24 w-full"
                         value={formData.bio}
@@ -67,14 +67,12 @@ export function RecruiterProfileStep() {
                         placeholder="Share your recruiting experience, specializations, and what makes you great at finding talent..."
                         required
                     />
-                    <label className="label">
-                        <span className="label-text-alt">Help companies understand your expertise</span>
-                    </label>
-                </div>
+                    <p className="fieldset-label">Help companies understand your expertise</p>
+                </fieldset>
 
                 {/* Phone */}
-                <div className="fieldset">
-                    <label className="label">Phone Number *</label>
+                <fieldset className="fieldset">
+                    <legend className="fieldset-legend">Phone Number *</legend>
                     <input
                         type="tel"
                         className="input w-full"
@@ -83,11 +81,11 @@ export function RecruiterProfileStep() {
                         placeholder="+1 (555) 123-4567"
                         required
                     />
-                </div>
+                </fieldset>
 
                 {/* Industries */}
-                <div className="fieldset">
-                    <label className="label">Industries</label>
+                <fieldset className="fieldset">
+                    <legend className="fieldset-legend">Industries</legend>
                     <input
                         type="text"
                         className="input w-full"
@@ -95,14 +93,12 @@ export function RecruiterProfileStep() {
                         onChange={(e) => handleChange('industries', e.target.value)}
                         placeholder="e.g., Technology, Healthcare, Finance"
                     />
-                    <label className="label">
-                        <span className="label-text-alt">Comma-separated list of industries you recruit in</span>
-                    </label>
-                </div>
+                    <p className="fieldset-label">Comma-separated list of industries you recruit in</p>
+                </fieldset>
 
                 {/* Specialties */}
-                <div className="fieldset">
-                    <label className="label">Specialties</label>
+                <fieldset className="fieldset">
+                    <legend className="fieldset-legend">Specialties</legend>
                     <input
                         type="text"
                         className="input w-full"
@@ -110,14 +106,12 @@ export function RecruiterProfileStep() {
                         onChange={(e) => handleChange('specialties', e.target.value)}
                         placeholder="e.g., Software Engineering, Data Science, Product Management"
                     />
-                    <label className="label">
-                        <span className="label-text-alt">Comma-separated list of roles/specializations you focus on</span>
-                    </label>
-                </div>
+                    <p className="fieldset-label">Comma-separated list of roles/specializations you focus on</p>
+                </fieldset>
 
                 {/* Location */}
-                <div className="fieldset">
-                    <label className="label">Location</label>
+                <fieldset className="fieldset">
+                    <legend className="fieldset-legend">Location</legend>
                     <input
                         type="text"
                         className="input w-full"
@@ -125,15 +119,13 @@ export function RecruiterProfileStep() {
                         onChange={(e) => handleChange('location', e.target.value)}
                         placeholder="e.g., New York, NY"
                     />
-                    <label className="label">
-                        <span className="label-text-alt">Your primary work location</span>
-                    </label>
-                </div>
+                    <p className="fieldset-label">Your primary work location</p>
+                </fieldset>
 
                 {/* Tagline and Years Experience - Side by Side */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="fieldset">
-                        <label className="label">Tagline</label>
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">Tagline</legend>
                         <input
                             type="text"
                             className="input"
@@ -141,13 +133,11 @@ export function RecruiterProfileStep() {
                             onChange={(e) => handleChange('tagline', e.target.value)}
                             placeholder="e.g., Tech Recruiting Expert"
                         />
-                        <label className="label">
-                            <span className="label-text-alt">Brief headline about your expertise</span>
-                        </label>
-                    </div>
+                        <p className="fieldset-label">Brief headline about your expertise</p>
+                    </fieldset>
 
-                    <div className="fieldset">
-                        <label className="label">Years of Experience</label>
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">Years of Experience</legend>
                         <input
                             type="number"
                             className="input"
@@ -156,15 +146,13 @@ export function RecruiterProfileStep() {
                             onChange={(e) => handleChange('years_experience', e.target.value)}
                             placeholder="5"
                         />
-                        <label className="label">
-                            <span className="label-text-alt">Years in recruiting</span>
-                        </label>
-                    </div>
+                        <p className="fieldset-label">Years in recruiting</p>
+                    </fieldset>
                 </div>
 
                 {/* Team Invite Code (Optional) */}
-                <div className="fieldset">
-                    <label className="label">Team Invite Code (Optional)</label>
+                <fieldset className="fieldset">
+                    <legend className="fieldset-legend">Team Invite Code (Optional)</legend>
                     <input
                         type="text"
                         className="input w-full"
@@ -172,10 +160,8 @@ export function RecruiterProfileStep() {
                         onChange={(e) => handleChange('teamInviteCode', e.target.value.toUpperCase())}
                         placeholder="TEAM-ABC123"
                     />
-                    <label className="label">
-                        <span className="label-text-alt">If you were invited by a team, enter the code here</span>
-                    </label>
-                </div>
+                    <p className="fieldset-label">If you were invited by a team, enter the code here</p>
+                </fieldset>
 
                 {state.error && (
                     <div className="alert alert-error">

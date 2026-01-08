@@ -194,8 +194,8 @@ export default function NewRolePage() {
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Basic Information */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="fieldset">
-                                <label className="label">Job Title *</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Job Title *</legend>
                                 <input
                                     type="text"
                                     className="input w-full"
@@ -204,11 +204,11 @@ export default function NewRolePage() {
                                     required
                                     placeholder="e.g. Senior React Developer"
                                 />
-                            </div>
+                            </fieldset>
 
                             {isAdmin ? (
-                                <div className="fieldset">
-                                    <label className="label">Company *</label>
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">Company *</legend>
                                     <select
                                         className="select w-full"
                                         value={formData.company_id}
@@ -222,10 +222,10 @@ export default function NewRolePage() {
                                             </option>
                                         ))}
                                     </select>
-                                </div>
+                                </fieldset>
                             ) : (
-                                <div className="fieldset">
-                                    <label className="label">Company</label>
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">Company</legend>
                                     <input
                                         type="text"
                                         className="input w-full"
@@ -233,14 +233,12 @@ export default function NewRolePage() {
                                         disabled
                                         placeholder="Auto-populated from your organization"
                                     />
-                                    <label className="label">
-                                        <span className="label-text-alt">Linked to your organization</span>
-                                    </label>
-                                </div>
+                                    <p className="fieldset-label">Linked to your organization</p>
+                                </fieldset>
                             )}
 
-                            <div className="fieldset">
-                                <label className="label">Location</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Location</legend>
                                 <input
                                     type="text"
                                     className="input w-full"
@@ -248,10 +246,10 @@ export default function NewRolePage() {
                                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                                     placeholder="e.g. Remote, New York, NY"
                                 />
-                            </div>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label">Department</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Department</legend>
                                 <input
                                     type="text"
                                     className="input w-full"
@@ -259,10 +257,10 @@ export default function NewRolePage() {
                                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                                     placeholder="e.g. Engineering"
                                 />
-                            </div>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label">Fee Percentage *</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Fee Percentage *</legend>
                                 <input
                                     type="number"
                                     className="input w-full"
@@ -273,13 +271,11 @@ export default function NewRolePage() {
                                     max="100"
                                     step="0.1"
                                 />
-                                <label className="label">
-                                    <span className="label-text-alt">Percentage of annual salary</span>
-                                </label>
-                            </div>
+                                <p className="fieldset-label">Percentage of annual salary</p>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label">Status *</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Status *</legend>
                                 <select
                                     className="select w-full"
                                     value={formData.status}
@@ -290,14 +286,14 @@ export default function NewRolePage() {
                                     <option value="paused">Paused</option>
                                     <option value="closed">Closed</option>
                                 </select>
-                            </div>
+                            </fieldset>
                         </div>
 
                         {/* Salary Range */}
                         <div className="divider">Salary Range (Optional)</div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="fieldset">
-                                <label className="label">Minimum Salary</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Minimum Salary</legend>
                                 <input
                                     type="number"
                                     className="input w-full"
@@ -305,10 +301,10 @@ export default function NewRolePage() {
                                     onChange={(e) => setFormData({ ...formData, salary_min: e.target.value })}
                                     placeholder="e.g. 100000"
                                 />
-                            </div>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label">Maximum Salary</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Maximum Salary</legend>
                                 <input
                                     type="number"
                                     className="input w-full"
@@ -316,10 +312,10 @@ export default function NewRolePage() {
                                     onChange={(e) => setFormData({ ...formData, salary_max: e.target.value })}
                                     placeholder="e.g. 150000"
                                 />
-                            </div>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label flex items-center gap-2">
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend flex items-center gap-2">
                                     <input
                                         type="checkbox"
                                         className="checkbox checkbox-sm"
@@ -327,15 +323,15 @@ export default function NewRolePage() {
                                         onChange={(e) => setFormData({ ...formData, show_salary_range: e.target.checked })}
                                     />
                                     <span>Show Salary Range to Candidates</span>
-                                </label>
-                            </div>
+                                </legend>
+                            </fieldset>
                         </div>
 
                         {/* Additional Details */}
                         <div className="divider">Additional Details</div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="fieldset">
-                                <label className="label">Employment Type *</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Employment Type *</legend>
                                 <select
                                     className="select w-full"
                                     value={formData.employment_type}
@@ -346,10 +342,10 @@ export default function NewRolePage() {
                                     <option value="contract">Contract</option>
                                     <option value="temporary">Temporary</option>
                                 </select>
-                            </div>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label flex items-center gap-2">
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend flex items-center gap-2">
                                     <input
                                         type="checkbox"
                                         className="checkbox checkbox-sm"
@@ -357,11 +353,11 @@ export default function NewRolePage() {
                                         onChange={(e) => setFormData({ ...formData, open_to_relocation: e.target.checked })}
                                     />
                                     <span>Open to Relocation</span>
-                                </label>
-                            </div>
+                                </legend>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label">Splits Fee Percentage *</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">Splits Fee Percentage *</legend>
                                 <input
                                     type="number"
                                     className="input w-full"
@@ -372,39 +368,33 @@ export default function NewRolePage() {
                                     max="100"
                                     step="1"
                                 />
-                                <label className="label">
-                                    <span className="label-text-alt">Default 50% - recruiter split of placement fee</span>
-                                </label>
-                            </div>
+                                <p className="fieldset-label">Default 50% - recruiter split of placement fee</p>
+                            </fieldset>
                         </div>
 
                         {/* Descriptions */}
                         <div className="divider">Job Descriptions</div>
-                        <div className="fieldset">
-                            <label className="label">Recruiter-Facing Description</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">Recruiter-Facing Description</legend>
                             <textarea
                                 className="textarea w-full h-32"
                                 value={formData.recruiter_description}
                                 onChange={(e) => setFormData({ ...formData, recruiter_description: e.target.value })}
                                 placeholder="Internal notes, hiring manager details, and context for recruiters..."
                             ></textarea>
-                            <label className="label">
-                                <span className="label-text-alt">Only visible to recruiters</span>
-                            </label>
-                        </div>
+                            <p className="fieldset-label">Only visible to recruiters</p>
+                        </fieldset>
 
-                        <div className="fieldset">
-                            <label className="label">Candidate-Facing Description</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">Candidate-Facing Description</legend>
                             <textarea
                                 className="textarea w-full h-32"
                                 value={formData.candidate_description}
                                 onChange={(e) => setFormData({ ...formData, candidate_description: e.target.value })}
                                 placeholder="Public job posting text that candidates will see..."
                             ></textarea>
-                            <label className="label">
-                                <span className="label-text-alt">Visible to candidates</span>
-                            </label>
-                        </div>
+                            <p className="fieldset-label">Visible to candidates</p>
+                        </fieldset>
 
                         {/* Requirements */}
                         <div className="divider">Requirements</div>
