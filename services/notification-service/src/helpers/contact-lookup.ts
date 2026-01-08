@@ -47,7 +47,7 @@ export class ContactLookupHelper {
         try {
             const { data: user, error } = await this.supabase
                 .from('users')
-                .select('id, email, name, phone')
+                .select('id, email, name')
                 .eq('id', userId)
                 .single();
 
@@ -72,7 +72,7 @@ export class ContactLookupHelper {
                 user_id: user.id,
                 name: user.name,
                 email: user.email,
-                phone: user.phone || null,
+                phone: null,
                 type: 'user',
                 entity_id: userId,
             };
@@ -95,7 +95,7 @@ export class ContactLookupHelper {
         try {
             const { data: user, error } = await this.supabase
                 .from('users')
-                .select('id, email, name, phone')
+                .select('id, email, name')
                 .eq('clerk_user_id', clerkUserId)
                 .single();
 
@@ -120,7 +120,7 @@ export class ContactLookupHelper {
                 user_id: user.id,
                 name: user.name,
                 email: user.email,
-                phone: user.phone || null,
+                phone: null,
                 type: 'user',
                 entity_id: clerkUserId,
             };
@@ -229,7 +229,7 @@ export class ContactLookupHelper {
             if (candidate.user_id) {
                 const { data: user, error: userError } = await this.supabase
                     .from('users')
-                    .select('id, email, name, phone')
+                    .select('id, email, name')
                     .eq('id', candidate.user_id)
                     .single();
 
@@ -239,7 +239,7 @@ export class ContactLookupHelper {
                         user_id: user.id,
                         name: user.name || candidate.full_name || 'Unknown',
                         email: user.email || candidate.email || '',
-                        phone: user.phone || candidate.phone || null,
+                        phone: candidate.phone || null,
                         type: 'candidate',
                         entity_id: candidateId,
                     };
@@ -305,7 +305,7 @@ export class ContactLookupHelper {
                 if (membership.user_id) {
                     const { data: user, error: userError } = await this.supabase
                         .from('users')
-                        .select('id, email, name, phone')
+                        .select('id, email, name')
                         .eq('id', membership.user_id)
                         .single();
 
@@ -315,7 +315,7 @@ export class ContactLookupHelper {
                             user_id: user.id,
                             name: user.name,
                             email: user.email,
-                            phone: user.phone || null,
+                            phone: null,
                             type: 'company_admin',
                             entity_id: membership.user_id,
                         });
