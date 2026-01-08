@@ -14,7 +14,7 @@ export class CandidatesEmailService {
         private repository: NotificationRepository,
         private fromEmail: string,
         private logger: Logger
-    ) {}
+    ) { }
 
     /**
      * Send email notification (creates record with channel='email')
@@ -32,18 +32,18 @@ export class CandidatesEmailService {
         // Validate email address
         if (!to || !to.includes('@')) {
             const error = new Error(`Invalid recipient email address: ${to}`);
-            this.logger.error({ 
-                email: to, 
+            this.logger.error({
+                email: to,
                 subject,
                 event_type: options.eventType,
-                error: error.message 
+                error: error.message
             }, 'Cannot send email - invalid recipient address');
             throw error;
         }
 
-        this.logger.debug({ 
-            to, 
-            subject, 
+        this.logger.debug({
+            to,
+            subject,
             event_type: options.eventType,
             has_html: !!html,
             html_length: html?.length
@@ -74,8 +74,8 @@ export class CandidatesEmailService {
             });
 
             if (error) {
-                this.logger.error({ 
-                    to, 
+                this.logger.error({
+                    to,
                     subject,
                     resend_error: error,
                     error_message: JSON.stringify(error)
@@ -93,8 +93,8 @@ export class CandidatesEmailService {
                 'Email sent successfully via Resend'
             );
         } catch (error: any) {
-            this.logger.error({ 
-                email: to, 
+            this.logger.error({
+                email: to,
                 subject,
                 event_type: options.eventType,
                 error_message: error?.message || 'Unknown error',
@@ -203,20 +203,20 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `Candidate Sourced: ${data.candidateName}`;
-        const candidatesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/candidates`;
-        
+        const candidatesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/candidates`;
+
         const html = candidateSourcedEmail({
             candidateName: data.candidateName,
             sourceMethod: data.sourceMethod,
             protectionPeriod: data.protectionPeriod,
             candidatesUrl,
         });
-        
+
         await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'candidate.sourced',
             userId: data.userId,
             payload: data,
-            actionUrl: '/candidates',
+            actionUrl: '/portal/candidates',
             actionLabel: 'View Candidates',
             priority: 'normal',
             category: 'candidate',
@@ -233,20 +233,20 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `Candidate Sourced: ${data.candidateName}`;
-        const candidatesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/candidates`;
-        
+        const candidatesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/candidates`;
+
         const html = candidateSourcedEmail({
             candidateName: data.candidateName,
             sourceMethod: data.sourceMethod,
             protectionPeriod: data.protectionPeriod,
             candidatesUrl,
         });
-        
+
         await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'candidate.sourced_confirmation',
             userId: data.userId,
             payload: data,
-            actionUrl: '/candidates',
+            actionUrl: '/portal/candidates',
             actionLabel: 'View Candidates',
             priority: 'normal',
             category: 'candidate',
@@ -262,19 +262,19 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = "You've Been Added to a Recruiter's Network";
-        const portalUrl = `${process.env.CANDIDATE_PORTAL_URL || 'https://candidate.splits.network'}/profile`;
-        
+        const portalUrl = `${process.env.CANDIDATE_PORTAL_URL || 'https://applicant.network'}/portal/profile`;
+
         const html = candidateAddedToNetworkEmail({
             candidateName: data.candidateName,
             recruiterName: data.recruiterName,
             portalUrl,
         });
-        
+
         await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'candidate.added_to_network',
             userId: data.userId,
             payload: data,
-            actionUrl: '/profile',
+            actionUrl: '/portal/profile',
             actionLabel: 'View Profile',
             priority: 'normal',
             category: 'candidate',
@@ -290,19 +290,19 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `Ownership Conflict Detected: ${data.candidateName}`;
-        const candidateUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/candidates`;
-        
+        const candidateUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/candidates`;
+
         const html = ownershipConflictEmail({
             candidateName: data.candidateName,
             attemptingRecruiterName: data.attemptingRecruiterName,
             candidateUrl,
         });
-        
+
         await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'ownership.conflict_detected',
             userId: data.userId,
             payload: data,
-            actionUrl: '/candidates',
+            actionUrl: '/portal/candidates',
             actionLabel: 'View Candidates',
             priority: 'high',
             category: 'candidate',
@@ -318,19 +318,19 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `Candidate Already Claimed: ${data.candidateName}`;
-        const candidatesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/candidates`;
-        
+        const candidatesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/candidates`;
+
         const html = ownershipConflictRejectionEmail({
             candidateName: data.candidateName,
             originalSourcerName: data.originalSourcerName,
             candidatesUrl,
         });
-        
+
         await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'ownership.conflict_detected',
             userId: data.userId,
             payload: data,
-            actionUrl: '/candidates',
+            actionUrl: '/portal/candidates',
             actionLabel: 'View Candidates',
             priority: 'normal',
             category: 'candidate',
@@ -352,8 +352,8 @@ export class CandidatesEmailService {
     ): Promise<void> {
         const subject = `${data.recruiter_name} wants to represent you`;
         const candidateWebsiteUrl = process.env.CANDIDATE_WEBSITE_URL || 'https://applicant.network';
-        const invitationUrl = `${candidateWebsiteUrl}/invitation/${data.invitation_token}`;
-        
+        const invitationUrl = `${candidateWebsiteUrl}/portal/invitation/${data.invitation_token}`;
+
         const expiryDate = new Date(data.invitation_expires_at).toLocaleDateString('en-US', {
             month: 'long',
             day: 'numeric',
@@ -428,8 +428,8 @@ export class CandidatesEmailService {
     <div style="text-align: center; padding: 20px; color: #6b7280; font-size: 12px;">
         <p>© ${new Date().getFullYear()} Splits  All rights reserved.</p>
         <p>
-            <a href="https://splits.network/privacy" style="color: #667eea; text-decoration: none;">Privacy Policy</a> | 
-            <a href="https://splits.network/terms" style="color: #667eea; text-decoration: none;">Terms of Service</a>
+            <a href="https://splits.network/public/privacy" style="color: #667eea; text-decoration: none;">Privacy Policy</a> | 
+            <a href="https://splits.network/public/terms" style="color: #667eea; text-decoration: none;">Terms of Service</a>
         </p>
     </div>
 </body>
@@ -453,7 +453,7 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `${data.candidate_name} accepted your invitation!`;
-        
+
         const consentDate = new Date(data.consent_given_at).toLocaleDateString('en-US', {
             month: 'long',
             day: 'numeric',
@@ -502,7 +502,7 @@ export class CandidatesEmailService {
         </ul>
 
         <div style="text-align: center; margin: 30px 0;">
-            <a href="https://splits.network/candidates" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold;">
+            <a href="https://splits.network/portal/candidates" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold;">
                 View Candidate Profile
             </a>
         </div>
@@ -523,7 +523,7 @@ export class CandidatesEmailService {
             eventType: 'candidate.consent_given',
             userId: data.userId,
             payload: data,
-            actionUrl: '/candidates',
+            actionUrl: '/portal/candidates',
             actionLabel: 'View Candidate',
             priority: 'high',
             category: 'candidate',
@@ -542,7 +542,7 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `${data.candidate_name} declined your invitation`;
-        
+
         const declinedDate = new Date(data.declined_at).toLocaleDateString('en-US', {
             month: 'long',
             day: 'numeric',
@@ -602,7 +602,7 @@ export class CandidatesEmailService {
         </div>
 
         <div style="text-align: center; margin: 30px 0;">
-            <a href="https://splits.network/candidates" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold;">
+            <a href="https://splits.network/portal/candidates" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold;">
                 View Your Candidates
             </a>
         </div>
@@ -619,7 +619,7 @@ export class CandidatesEmailService {
             eventType: 'candidate.consent_declined',
             userId: data.userId,
             payload: data,
-            actionUrl: '/candidates',
+            actionUrl: '/portal/candidates',
             actionLabel: 'View Candidates',
             priority: 'normal',
             category: 'candidate',

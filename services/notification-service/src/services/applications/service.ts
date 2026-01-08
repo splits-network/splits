@@ -176,7 +176,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `New Candidate Submitted: ${data.candidateName} for ${data.jobTitle}`;
-        const applicationUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/applications/${data.applicationId}`;
+        const applicationUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/applications/${data.applicationId}`;
 
         const html = applicationCreatedEmail({
             candidateName: data.candidateName,
@@ -189,7 +189,7 @@ export class ApplicationsEmailService {
             eventType: 'application.created',
             userId: data.userId,
             payload: data,
-            actionUrl: `/applications/${data.applicationId}`,
+            actionUrl: `/portal/applications/${data.applicationId}`,
             actionLabel: 'Review Application',
             priority: 'high',
             category: 'application',
@@ -209,7 +209,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Application Received: ${data.jobTitle}`;
-        const applicationUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/applications/${data.applicationId}`;
+        const applicationUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/applications/${data.applicationId}`;
 
         const html = candidateApplicationSubmittedEmail({
             candidateName: data.candidateName,
@@ -224,7 +224,7 @@ export class ApplicationsEmailService {
             eventType: 'application.candidate_submitted',
             userId: data.userId,
             payload: data,
-            actionUrl: `/applications/${data.applicationId}`,
+            actionUrl: `/portal/applications/${data.applicationId}`,
             actionLabel: 'View Application',
             priority: 'normal',
             category: 'application',
@@ -242,7 +242,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `New Candidate Application to Review: ${data.candidateName}`;
-        const applicationUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/applications/${data.applicationId}`;
+        const applicationUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/applications/${data.applicationId}`;
 
         const html = applicationCreatedEmail({
             candidateName: data.candidateName,
@@ -255,7 +255,7 @@ export class ApplicationsEmailService {
             eventType: 'application.recruiter_review_pending',
             userId: data.userId,
             payload: data,
-            actionUrl: `/applications/${data.applicationId}`,
+            actionUrl: `/portal/applications/${data.applicationId}`,
             actionLabel: 'Review Application',
             priority: 'high',
             category: 'application',
@@ -274,7 +274,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `New Candidate: ${data.candidateName} for ${data.jobTitle}`;
-        const applicationUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/applications/${data.applicationId}`;
+        const applicationUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/applications/${data.applicationId}`;
 
         const html = companyApplicationReceivedEmail({
             candidateName: data.candidateName,
@@ -288,7 +288,7 @@ export class ApplicationsEmailService {
             eventType: 'application.company_received',
             userId: data.userId,
             payload: data,
-            actionUrl: `/applications/${data.applicationId}`,
+            actionUrl: `/portal/applications/${data.applicationId}`,
             actionLabel: 'Review Candidate',
             priority: 'high',
             category: 'application',
@@ -308,7 +308,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Application Withdrawn: ${data.candidateName} - ${data.jobTitle}`;
-        const applicationUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/applications/${data.applicationId}`;
+        const applicationUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/applications/${data.applicationId}`;
 
         const html = applicationWithdrawnEmail({
             candidateName: data.candidateName,
@@ -323,7 +323,7 @@ export class ApplicationsEmailService {
             eventType: 'application.withdrawn',
             userId: data.userId,
             payload: data,
-            actionUrl: `/applications/${data.applicationId}`,
+            actionUrl: `/portal/applications/${data.applicationId}`,
             actionLabel: 'View Details',
             priority: 'normal',
             category: 'application',
@@ -343,7 +343,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Application Update: ${data.candidateName} - ${data.newStage}`;
-        const applicationUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/applications/${data.applicationId}`;
+        const applicationUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/applications/${data.applicationId}`;
 
         const html = applicationStageChangedEmail({
             candidateName: data.candidateName,
@@ -358,7 +358,7 @@ export class ApplicationsEmailService {
             eventType: 'application.stage_changed',
             userId: data.userId,
             payload: data,
-            actionUrl: `/applications/${data.applicationId}`,
+            actionUrl: `/portal/applications/${data.applicationId}`,
             actionLabel: 'View Application',
             priority: 'normal',
             category: 'application',
@@ -376,7 +376,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `🎉 Submission Accepted: ${data.candidateName} for ${data.jobTitle}`;
-        const applicationUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/applications/${data.applicationId}`;
+        const applicationUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/applications/${data.applicationId}`;
 
         const html = applicationAcceptedEmail({
             candidateName: data.candidateName,
@@ -389,7 +389,7 @@ export class ApplicationsEmailService {
             eventType: 'application.accepted',
             userId: data.userId,
             payload: data,
-            actionUrl: `/applications/${data.applicationId}`,
+            actionUrl: `/portal/applications/${data.applicationId}`,
             actionLabel: 'View Application',
             priority: 'high',
             category: 'application',
@@ -442,7 +442,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Pre-Screen Request Submitted for ${data.candidateName}`;
-        const portalUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/applications`;
+        const portalUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/applications`;
 
         const html = preScreenRequestConfirmationEmail({
             candidateName: data.candidateName,
@@ -455,7 +455,7 @@ export class ApplicationsEmailService {
             eventType: 'application.prescreen_request_confirmation',
             userId: data.userId,
             payload: data,
-            actionUrl: '/applications',
+            actionUrl: '/portal/applications',
             actionLabel: 'View Applications',
             priority: 'low',
             category: 'application',
@@ -478,7 +478,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Your application for ${data.jobTitle} has been reviewed`;
-        const portalUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/applications/${data.applicationId}`;
+        const portalUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/applications/${data.applicationId}`;
 
         const html = aiReviewCompletedCandidateEmail({
             candidateName: data.candidateName,
@@ -494,7 +494,7 @@ export class ApplicationsEmailService {
             eventType: 'ai_review.completed_candidate',
             userId: data.userId,
             payload: data,
-            actionUrl: `/applications/${data.applicationId}`,
+            actionUrl: `/portal/applications/${data.applicationId}`,
             actionLabel: 'View Review',
             priority: 'high',
             category: 'application',
@@ -519,7 +519,7 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `AI Review Complete: ${data.candidateName} for ${data.jobTitle}`;
-        const portalUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/applications/${data.applicationId}`;
+        const portalUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/applications/${data.applicationId}`;
 
         const html = aiReviewCompletedRecruiterEmail({
             recruiterName: data.recruiterName,
@@ -539,7 +539,7 @@ export class ApplicationsEmailService {
             eventType: 'ai_review.completed_recruiter',
             userId: data.userId,
             payload: data,
-            actionUrl: `/applications/${data.applicationId}`,
+            actionUrl: `/portal/applications/${data.applicationId}`,
             actionLabel: 'Review Application',
             priority: 'high',
             category: 'application',
@@ -559,8 +559,8 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Action Needed: ${data.recruiterName} has requested updates to your application`;
-        const candidatePortalUrl = process.env.CANDIDATE_PORTAL_URL || 'https://candidate.splits.network';
-        const applicationUrl = `${candidatePortalUrl}/applications/${data.applicationId}`;
+        const candidatePortalUrl = process.env.CANDIDATE_PORTAL_URL || 'https://applicant.network';
+        const applicationUrl = `${candidatePortalUrl}/portal/applications/${data.applicationId}`;
 
         const html = `
 <!DOCTYPE html>
@@ -631,7 +631,7 @@ export class ApplicationsEmailService {
             eventType: 'application.recruiter_request',
             userId: data.userId,
             payload: data,
-            actionUrl: `/applications/${data.applicationId}`,
+            actionUrl: `/portal/applications/${data.applicationId}`,
             actionLabel: 'Update Application',
             priority: 'high',
             category: 'application',
@@ -650,8 +650,8 @@ export class ApplicationsEmailService {
         }
     ): Promise<void> {
         const subject = `Job Opportunity: ${data.jobTitle} at ${data.companyName}`;
-        const candidatePortalUrl = process.env.CANDIDATE_PORTAL_URL || 'https://candidate.splits.network';
-        const applicationUrl = `${candidatePortalUrl}/applications/${data.applicationId}`;
+        const candidatePortalUrl = process.env.CANDIDATE_PORTAL_URL || 'https://applicant.network';
+        const applicationUrl = `${candidatePortalUrl}/portal/applications/${data.applicationId}`;
 
         // Simple HTML email for job proposal
         const html = `
@@ -723,7 +723,7 @@ export class ApplicationsEmailService {
             eventType: 'application.job_proposed',
             userId: data.userId,
             payload: data,
-            actionUrl: `/applications/${data.applicationId}`,
+            actionUrl: `/portal/applications/${data.applicationId}`,
             actionLabel: 'View Job Details',
             priority: 'high',
             category: 'application',

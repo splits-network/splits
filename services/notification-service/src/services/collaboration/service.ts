@@ -9,7 +9,7 @@ export class CollaborationEmailService {
         private repository: NotificationRepository,
         private fromEmail: string,
         private logger: Logger
-    ) {}
+    ) { }
 
     /**
      * Send email notification (creates record with channel='email')
@@ -166,9 +166,9 @@ export class CollaborationEmailService {
         }
     ): Promise<void> {
         const subject = `Added to Placement Team: ${data.candidateName}`;
-        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/placements`;
-        const actionUrl = data.roleId ? `/roles/${data.roleId}` : '/roles';
-        
+        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/placements`;
+        const actionUrl = data.roleId ? `/portal/roles/${data.roleId}` : '/roles';
+
         const html = collaboratorAddedEmail({
             candidateName: data.candidateName,
             jobTitle: data.jobTitle,
@@ -177,7 +177,7 @@ export class CollaborationEmailService {
             splitPercentage: data.splitPercentage,
             placementUrl,
         });
-        
+
         await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'collaborator.added',
             userId: data.userId,

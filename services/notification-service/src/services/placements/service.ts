@@ -15,7 +15,7 @@ export class PlacementsEmailService {
         private repository: NotificationRepository,
         private fromEmail: string,
         private logger: Logger
-    ) {}
+    ) { }
 
     /**
      * Send email only (creates channel='email' record)
@@ -163,8 +163,8 @@ export class PlacementsEmailService {
         }
     ): Promise<void> {
         const subject = `Placement Confirmed: ${data.candidateName} - $${data.recruiterShare.toFixed(2)}`;
-        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/placements/${data.placementId}`;
-        
+        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/placements/${data.placementId}`;
+
         const html = placementCreatedEmail({
             candidateName: data.candidateName,
             jobTitle: data.jobTitle,
@@ -178,7 +178,7 @@ export class PlacementsEmailService {
             eventType: 'placement.created',
             userId: data.userId,
             payload: data,
-            actionUrl: `/placements/${data.placementId}`,
+            actionUrl: `/portal/placements/${data.placementId}`,
             actionLabel: 'View Placement',
             priority: 'high',
             category: 'placement',
@@ -200,8 +200,8 @@ export class PlacementsEmailService {
         }
     ): Promise<void> {
         const subject = `Placement Activated: ${data.candidateName} Started!`;
-        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/placements/${data.placementId}`;
-        
+        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/placements/${data.placementId}`;
+
         const html = placementActivatedEmail({
             candidateName: data.candidateName,
             jobTitle: data.jobTitle,
@@ -210,12 +210,12 @@ export class PlacementsEmailService {
             guaranteePeriodDays: data.guaranteeDays,
             placementUrl,
         });
-        
+
         await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'placement.activated',
             userId: data.userId,
             payload: data,
-            actionUrl: `/placements/${data.placementId}`,
+            actionUrl: `/portal/placements/${data.placementId}`,
             actionLabel: 'View Placement',
             priority: 'high',
             category: 'placement',
@@ -234,8 +234,8 @@ export class PlacementsEmailService {
         }
     ): Promise<void> {
         const subject = `💰 Placement Completed: ${data.candidateName} - $${data.finalPayout.toFixed(2)}`;
-        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/placements/${data.placementId}`;
-        
+        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/placements/${data.placementId}`;
+
         const html = placementCompletedEmail({
             candidateName: data.candidateName,
             jobTitle: data.jobTitle,
@@ -243,12 +243,12 @@ export class PlacementsEmailService {
             recruiterShare: data.finalPayout,
             placementUrl,
         });
-        
+
         await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'placement.completed',
             userId: data.userId,
             payload: data,
-            actionUrl: `/placements/${data.placementId}`,
+            actionUrl: `/portal/placements/${data.placementId}`,
             actionLabel: 'View Placement',
             priority: 'high',
             category: 'placement',
@@ -267,8 +267,8 @@ export class PlacementsEmailService {
         }
     ): Promise<void> {
         const subject = `Placement Issue: ${data.candidateName}`;
-        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/placements/${data.placementId}`;
-        
+        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/placements/${data.placementId}`;
+
         const html = placementFailedEmail({
             candidateName: data.candidateName,
             jobTitle: data.jobTitle,
@@ -276,12 +276,12 @@ export class PlacementsEmailService {
             reason: data.failureReason,
             placementUrl,
         });
-        
+
         await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'placement.failed',
             userId: data.userId,
             payload: data,
-            actionUrl: `/placements/${data.placementId}`,
+            actionUrl: `/portal/placements/${data.placementId}`,
             actionLabel: 'View Details',
             priority: 'high',
             category: 'placement',
@@ -301,8 +301,8 @@ export class PlacementsEmailService {
         }
     ): Promise<void> {
         const subject = `⏳ Guarantee Period Ending Soon: ${data.candidateName}`;
-        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/placements/${data.placementId}`;
-        
+        const placementUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/placements/${data.placementId}`;
+
         const html = guaranteeExpiringEmail({
             candidateName: data.candidateName,
             jobTitle: data.jobTitle,
@@ -311,12 +311,12 @@ export class PlacementsEmailService {
             guaranteeEndDate: data.guaranteeEndDate,
             placementUrl,
         });
-        
+
         await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'guarantee.expiring',
             userId: data.userId,
             payload: data,
-            actionUrl: `/placements/${data.placementId}`,
+            actionUrl: `/portal/placements/${data.placementId}`,
             actionLabel: 'View Placement',
             priority: 'normal',
             category: 'placement',

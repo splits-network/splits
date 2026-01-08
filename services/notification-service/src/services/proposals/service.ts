@@ -13,7 +13,7 @@ export class ProposalsEmailService {
         private repository: NotificationRepository,
         private fromEmail: string,
         private logger: Logger
-    ) {}
+    ) { }
 
     /**
      * Send email notification (creates record with channel='email')
@@ -167,20 +167,20 @@ export class ProposalsEmailService {
         }
     ): Promise<void> {
         const subject = `Proposal Accepted: ${data.candidateName} for ${data.jobTitle}`;
-        const proposalUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/roles`;
-        
+        const proposalUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/roles`;
+
         const html = proposalAcceptedEmail({
             candidateName: data.candidateName,
             jobTitle: data.jobTitle,
             companyName: data.companyName,
             proposalUrl,
         });
-        
+
         await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'proposal.accepted',
             userId: data.userId,
             payload: data,
-            actionUrl: '/roles',
+            actionUrl: '/portal/roles',
             actionLabel: 'View Roles',
             priority: 'normal',
             category: 'proposal',
@@ -197,20 +197,20 @@ export class ProposalsEmailService {
         }
     ): Promise<void> {
         const subject = `Proposal Declined: ${data.candidateName}`;
-        const rolesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/roles`;
-        
+        const rolesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/roles`;
+
         const html = proposalDeclinedEmail({
             candidateName: data.candidateName,
             jobTitle: data.jobTitle,
             declineReason: data.declineReason,
             rolesUrl,
         });
-        
+
         await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'proposal.declined',
             userId: data.userId,
             payload: data,
-            actionUrl: '/roles',
+            actionUrl: '/portal/roles',
             actionLabel: 'View Roles',
             priority: 'normal',
             category: 'proposal',
@@ -226,19 +226,19 @@ export class ProposalsEmailService {
         }
     ): Promise<void> {
         const subject = `Proposal Expired: ${data.candidateName}`;
-        const rolesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/roles`;
-        
+        const rolesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/roles`;
+
         const html = proposalTimeoutEmail({
             candidateName: data.candidateName,
             jobTitle: data.jobTitle,
             rolesUrl,
         });
-        
+
         await this.sendDualNotification(recipientEmail, subject, html, {
             eventType: 'proposal.timeout',
             userId: data.userId,
             payload: data,
-            actionUrl: '/roles',
+            actionUrl: '/portal/roles',
             actionLabel: 'View Roles',
             priority: 'low',
             category: 'proposal',

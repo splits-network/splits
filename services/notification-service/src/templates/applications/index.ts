@@ -44,7 +44,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        'Need help? Visit our <a href="https://splits.network/help" style="color: #233876; text-decoration: underline;">Help Center</a> or reply to this email.'
+        'Need help? Visit our <a href="https://splits.network/public/help" style="color: #233876; text-decoration: underline;">Help Center</a> or reply to this email.'
     )}
     `.trim();
 
@@ -190,7 +190,7 @@ ${infoCard({
 ${paragraph('While this opportunity didn\'t work out, there are many more roles available on the platform.')}
 
 ${button({
-        href: 'https://splits.network/roles',
+        href: 'https://splits.network/portal/roles',
         text: 'Browse Open Roles →',
         variant: 'primary',
     })}
@@ -252,7 +252,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        'Looking for other opportunities? Browse available roles in your <a href="https://splits.network/roles" style="color: #233876; text-decoration: underline;">dashboard</a>.'
+        'Looking for other opportunities? Browse available roles in your <a href="https://splits.network/portal/roles" style="color: #233876; text-decoration: underline;">dashboard</a>.'
     )}
     `.trim();
 
@@ -364,7 +364,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-            'Manage all your applications in your <a href="https://splits.network/applications" style="color: #233876; text-decoration: underline;">company portal</a>.'
+            'Manage all your applications in your <a href="https://splits.network/portal/applications" style="color: #233876; text-decoration: underline;">company portal</a>.'
         )}
     `.trim();
 
@@ -636,7 +636,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        'Questions about your review? Visit our <a href="https://splits.network/help" style="color: #233876; text-decoration: underline;">Help Center</a> to learn more about our AI review process.'
+        'Questions about your review? Visit our <a href="https://splits.network/public/help" style="color: #233876; text-decoration: underline;">Help Center</a> to learn more about our AI review process.'
     )}
     `.trim();
 
@@ -740,7 +740,7 @@ ${button({
 ${divider()}
 
 ${paragraph(
-        'Need help interpreting the AI review? Check out our <a href="https://splits.network/help/ai-reviews" style="color: #233876; text-decoration: underline;">AI Review Guide</a>.'
+        'Need help interpreting the AI review? Check out our <a href="https://splits.network/public/help/ai-reviews" style="color: #233876; text-decoration: underline;">AI Review Guide</a>.'
     )}
     `.trim();
 

@@ -23,7 +23,7 @@ export class RecruiterSubmissionEmailService {
         private repository: NotificationRepository,
         private fromEmail: string,
         private logger: Logger
-    ) {}
+    ) { }
 
     /**
      * Send email notification and create notification log

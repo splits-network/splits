@@ -14,7 +14,7 @@ export class InvitationsEmailService {
         private repository: NotificationRepository,
         private fromEmail: string,
         private logger: Logger
-    ) {}
+    ) { }
 
     /**
      * Send email notification (creates record with channel='email')
@@ -203,7 +203,7 @@ export class InvitationsEmailService {
                     organization_name,
                     role,
                 },
-                actionUrl: '/invitations',
+                actionUrl: '/portal/invitations',
                 actionLabel: 'View Invitation',
                 priority: 'high',
                 category: 'invitation',
@@ -248,7 +248,7 @@ export class InvitationsEmailService {
                     organization_name,
                     revoked_by_name,
                 },
-                actionUrl: '/invitations',
+                actionUrl: '/portal/invitations',
                 actionLabel: 'View Invitations',
                 priority: 'normal',
                 category: 'invitation',
