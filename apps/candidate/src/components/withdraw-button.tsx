@@ -51,7 +51,7 @@ export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = 
             });
 
             // Success - redirect to applications list with success message
-            router.push('/portal/application?withdrawn=true');
+            router.push('/portal/applications?withdrawn=true');
             router.refresh();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to withdraw application');

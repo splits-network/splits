@@ -67,7 +67,7 @@ export default function StepReview({
         try {
             await onSubmit();
             // Success - redirect to applications list
-            router.push('/portal/application?success=true');
+            router.push('/portal/applications?success=true');
         } catch (err: any) {
             setError(err.message || 'Failed to submit application. Please try again.');
             setSubmitting(false);
@@ -81,7 +81,7 @@ export default function StepReview({
         try {
             await onSaveAsDraft();
             // Success - redirect to applications list
-            router.push('/portal/application?draft=true');
+            router.push('/portal/applications?draft=true');
         } catch (err: any) {
             setError(err.message || 'Failed to save draft. Please try again.');
             setSubmitting(false);

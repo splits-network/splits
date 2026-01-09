@@ -110,7 +110,7 @@ export default async function ApplicationDetailPage({
             <div className="text-sm breadcrumbs mb-6">
                 <ul>
                     <li><Link href="/portal/dashboard">Dashboard</Link></li>
-                    <li><Link href="/portal/application">Applications</Link></li>
+                    <li><Link href="/portal/applications">Applications</Link></li>
                     <li>Application Details</li>
                 </ul>
             </div>

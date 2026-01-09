@@ -23,7 +23,7 @@ export default function AuthenticatedNav() {
                             </Link>
                         </li>
                         <li>
-                            <Link href="/portal/application">
+                            <Link href="/portal/applications">
                                 <i className="fa-solid fa-file-lines"></i>
                                 Applications
                             </Link>

@@ -101,7 +101,8 @@ export default function Header() {
                             <>
                                 <li className="menu-title mt-2">My Account</li>
                                 <li><Link href="/portal/dashboard">Dashboard</Link></li>
-                                <li><Link href="/portal/application">Applications</Link></li>
+                                <li><Link href="/portal/applications">Applications</Link></li>
+                                <li><Link href="/portal/documents">Documents</Link></li>
                                 <li><Link href="/portal/profile">Profile</Link></li>
                             </>
                         )}
