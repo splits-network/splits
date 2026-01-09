@@ -118,7 +118,7 @@ export default function NotificationsPage() {
                         className="btn btn-primary btn-sm"
                         onClick={handleMarkAllRead}
                     >
-                        <i className="fa-solid fa-check-double"></i>
+                        <i className="fa-duotone fa-regular fa-check-double"></i>
                         Mark all read
                     </button>
                 )}
@@ -127,7 +127,7 @@ export default function NotificationsPage() {
             {/* Error Display */}
             {error && (
                 <div className="alert alert-error mb-6">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
@@ -191,7 +191,7 @@ export default function NotificationsPage() {
                     {/* Empty State */}
                     {!loading && filteredNotifications.length === 0 && (
                         <div className="text-center py-12">
-                            <i className="fa-solid fa-inbox text-6xl text-base-content/20 mb-4"></i>
+                            <i className="fa-duotone fa-regular fa-inbox text-6xl text-base-content/20 mb-4"></i>
                             <p className="text-lg text-base-content/60">
                                 {filter === 'unread' ? 'No unread notifications' : 'No notifications'}
                             </p>
@@ -225,7 +225,7 @@ export default function NotificationsPage() {
                                             w-12 h-12 rounded-full flex items-center justify-center
                                             ${!notification.read ? 'bg-primary text-primary-content' : 'bg-base-300'}
                                         `}>
-                                            <i className={`fa-solid ${getNotificationIcon(notification.category)} text-lg`}></i>
+                                            <i className={`fa-duotone fa-regular ${getNotificationIcon(notification.category)} text-lg`}></i>
                                         </div>
                                     </div>
 
@@ -262,7 +262,7 @@ export default function NotificationsPage() {
                                                     onClick={(e) => handleDismiss(notification.id, e)}
                                                     aria-label="Dismiss"
                                                 >
-                                                    <i className="fa-solid fa-times"></i>
+                                                    <i className="fa-duotone fa-regular fa-times"></i>
                                                 </button>
                                             </div>
                                         </div>
@@ -270,7 +270,7 @@ export default function NotificationsPage() {
                                             <div className="mt-2">
                                                 <span className="text-sm text-primary inline-flex items-center gap-1">
                                                     {notification.action_label}
-                                                    <i className="fa-solid fa-arrow-right text-xs"></i>
+                                                    <i className="fa-duotone fa-regular fa-arrow-right text-xs"></i>
                                                 </span>
                                             </div>
                                         )}

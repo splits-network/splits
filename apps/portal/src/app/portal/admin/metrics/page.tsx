@@ -114,7 +114,7 @@ export default function MarketplaceMetricsPage() {
                 <div className="card bg-base-100 shadow mb-6">
                     <div className="card-body">
                         <h2 className="card-title text-2xl mb-4">
-                            <i className="fa-solid fa-heartbeat text-error"></i>
+                            <i className="fa-duotone fa-regular fa-heartbeat text-error"></i>
                             Overall Health Score
                         </h2>
                         <div className="flex items-center gap-6">
@@ -148,7 +148,7 @@ export default function MarketplaceMetricsPage() {
 
             {!metrics && (
                 <div className="alert alert-info">
-                    <i className="fa-solid fa-info-circle"></i>
+                    <i className="fa-duotone fa-regular fa-info-circle"></i>
                     <span>No metrics data available for the selected date range. Run the daily metrics aggregation job to populate data.</span>
                 </div>
             )}
@@ -162,7 +162,7 @@ export default function MarketplaceMetricsPage() {
                             <div className="stats shadow">
                                 <div className="stat">
                                     <div className="stat-figure text-primary">
-                                        <i className="fa-solid fa-users text-3xl"></i>
+                                        <i className="fa-duotone fa-regular fa-users text-3xl"></i>
                                     </div>
                                     <div className="stat-title">Active Recruiters</div>
                                     <div className="stat-value text-primary">
@@ -175,7 +175,7 @@ export default function MarketplaceMetricsPage() {
                             <div className="stats shadow">
                                 <div className="stat">
                                     <div className="stat-figure text-secondary">
-                                        <i className="fa-solid fa-building text-3xl"></i>
+                                        <i className="fa-duotone fa-regular fa-building text-3xl"></i>
                                     </div>
                                     <div className="stat-title">Active Companies</div>
                                     <div className="stat-value text-secondary">
@@ -188,7 +188,7 @@ export default function MarketplaceMetricsPage() {
                             <div className="stats shadow">
                                 <div className="stat">
                                     <div className="stat-figure text-accent">
-                                        <i className="fa-solid fa-briefcase text-3xl"></i>
+                                        <i className="fa-duotone fa-regular fa-briefcase text-3xl"></i>
                                     </div>
                                     <div className="stat-title">Active Jobs</div>
                                     <div className="stat-value text-accent">
@@ -277,7 +277,7 @@ export default function MarketplaceMetricsPage() {
                             <div className="stats shadow">
                                 <div className="stat">
                                     <div className="stat-figure text-success">
-                                        <i className="fa-solid fa-dollar-sign text-3xl"></i>
+                                        <i className="fa-duotone fa-regular fa-dollar-sign text-3xl"></i>
                                     </div>
                                     <div className="stat-title">Total Fees Generated</div>
                                     <div className="stat-value text-success">
@@ -290,7 +290,7 @@ export default function MarketplaceMetricsPage() {
                             <div className="stats shadow">
                                 <div className="stat">
                                     <div className="stat-figure text-primary">
-                                        <i className="fa-solid fa-money-bill-transfer text-3xl"></i>
+                                        <i className="fa-duotone fa-regular fa-money-bill-transfer text-3xl"></i>
                                     </div>
                                     <div className="stat-title">Total Payouts Processed</div>
                                     <div className="stat-value text-primary">
@@ -309,7 +309,7 @@ export default function MarketplaceMetricsPage() {
                             <div className={`stats shadow ${metrics.health.fraud_signals_raised > 5 ? 'border-2 border-warning' : ''}`}>
                                 <div className="stat">
                                     <div className="stat-figure text-warning">
-                                        <i className="fa-solid fa-shield-halved text-3xl"></i>
+                                        <i className="fa-duotone fa-regular fa-shield-halved text-3xl"></i>
                                     </div>
                                     <div className="stat-title">Fraud Signals</div>
                                     <div className="stat-value text-warning">
@@ -324,7 +324,7 @@ export default function MarketplaceMetricsPage() {
                             <div className={`stats shadow ${metrics.health.disputes_opened > 3 ? 'border-2 border-error' : ''}`}>
                                 <div className="stat">
                                     <div className="stat-figure text-error">
-                                        <i className="fa-solid fa-gavel text-3xl"></i>
+                                        <i className="fa-duotone fa-regular fa-gavel text-3xl"></i>
                                     </div>
                                     <div className="stat-title">Disputes Opened</div>
                                     <div className="stat-value text-error">

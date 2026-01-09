@@ -198,7 +198,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                 <div className="card w-full max-w-2xl bg-base-100 shadow">
                     <div className="card-body">
                         <div className="alert alert-error">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <div>
                                 <h3 className="font-bold">Unable to Load Invitation</h3>
                                 <div className="text-sm">{error || 'Invitation data could not be loaded.'}</div>
@@ -249,7 +249,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
 
                         {error && (
                             <div className="alert alert-error mt-4">
-                                <i className="fa-solid fa-circle-exclamation"></i>
+                                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                                 <span>{error}</span>
                             </div>
                         )}
@@ -300,7 +300,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title text-2xl">
-                            <i className="fa-solid fa-user-tie"></i>
+                            <i className="fa-duotone fa-regular fa-user-tie"></i>
                             About Your Recruiter
                         </h2>
                         <div className="divider my-2"></div>
@@ -330,7 +330,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title text-2xl">
-                            <i className="fa-solid fa-circle-info"></i>
+                            <i className="fa-duotone fa-regular fa-circle-info"></i>
                             What is Applicant Network?
                         </h2>
                         <div className="divider my-2"></div>
@@ -341,19 +341,19 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
 
                         <ul className="space-y-3">
                             <li className="flex items-start gap-3">
-                                <i className="fa-solid fa-check-circle text-success mt-1"></i>
+                                <i className="fa-duotone fa-regular fa-check-circle text-success mt-1"></i>
                                 <span><strong>Track Opportunities:</strong> See all job opportunities your recruiter finds for you</span>
                             </li>
                             <li className="flex items-start gap-3">
-                                <i className="fa-solid fa-check-circle text-success mt-1"></i>
+                                <i className="fa-duotone fa-regular fa-check-circle text-success mt-1"></i>
                                 <span><strong>Centralized Applications:</strong> Manage all your applications in one place</span>
                             </li>
                             <li className="flex items-start gap-3">
-                                <i className="fa-solid fa-check-circle text-success mt-1"></i>
+                                <i className="fa-duotone fa-regular fa-check-circle text-success mt-1"></i>
                                 <span><strong>Direct Communication:</strong> Stay in touch with your recruiter throughout the process</span>
                             </li>
                             <li className="flex items-start gap-3">
-                                <i className="fa-solid fa-check-circle text-success mt-1"></i>
+                                <i className="fa-duotone fa-regular fa-check-circle text-success mt-1"></i>
                                 <span><strong>Progress Updates:</strong> Get real-time updates on your job search progress</span>
                             </li>
                         </ul>
@@ -364,7 +364,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title text-2xl">
-                            <i className="fa-solid fa-file-contract"></i>
+                            <i className="fa-duotone fa-regular fa-file-contract"></i>
                             What is "Right to Represent"?
                         </h2>
                         <div className="divider my-2"></div>
@@ -376,19 +376,19 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
 
                         <div className="bg-base-200 rounded-lg p-4 space-y-3">
                             <div className="flex items-start gap-3">
-                                <i className="fa-solid fa-handshake text-primary mt-1"></i>
+                                <i className="fa-duotone fa-regular fa-handshake text-primary mt-1"></i>
                                 <span><strong>Formalizes Your Relationship:</strong> Creates a professional working agreement with your recruiter</span>
                             </div>
                             <div className="flex items-start gap-3">
-                                <i className="fa-solid fa-shield-halved text-primary mt-1"></i>
+                                <i className="fa-duotone fa-regular fa-shield-halved text-primary mt-1"></i>
                                 <span><strong>Prevents Duplicates:</strong> Ensures you're not submitted to the same job by multiple recruiters</span>
                             </div>
                             <div className="flex items-start gap-3">
-                                <i className="fa-solid fa-award text-primary mt-1"></i>
+                                <i className="fa-duotone fa-regular fa-award text-primary mt-1"></i>
                                 <span><strong>Protects Credit:</strong> Ensures your recruiter gets recognition for placements they facilitate</span>
                             </div>
                             <div className="flex items-start gap-3">
-                                <i className="fa-solid fa-user-check text-primary mt-1"></i>
+                                <i className="fa-duotone fa-regular fa-user-check text-primary mt-1"></i>
                                 <span><strong>Safeguards Your Interests:</strong> Protects you throughout the entire hiring process</span>
                             </div>
                         </div>
@@ -399,7 +399,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                 <div className="card bg-base-100 shadow border-2 border-primary">
                     <div className="card-body">
                         <h2 className="card-title text-2xl">
-                            <i className="fa-solid fa-file-signature"></i>
+                            <i className="fa-duotone fa-regular fa-file-signature"></i>
                             Right to Represent Agreement
                         </h2>
                         <div className="divider my-2"></div>
@@ -478,7 +478,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                         </div>
 
                         <div className="alert alert-info mt-4">
-                            <i className="fa-solid fa-info-circle"></i>
+                            <i className="fa-duotone fa-regular fa-info-circle"></i>
                             <span className="text-sm">
                                 By clicking "Accept Invitation" below, you acknowledge that you have read and agree to the terms of this
                                 Right to Represent Agreement with {recruiter?.name}.
@@ -489,7 +489,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
 
                 {/* Expiry Warning */}
                 <div className="alert alert-warning">
-                    <i className="fa-solid fa-clock"></i>
+                    <i className="fa-duotone fa-regular fa-clock"></i>
                     <span>
                         <strong>Time Sensitive:</strong> This invitation expires on {formattedExpiry}.
                         If you don't respond by then, {recruiter?.name?.split(' ')[0]} will need to send a new invitation.
@@ -499,7 +499,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                 {/* Error Alert */}
                 {error && (
                     <div className="alert alert-error">
-                        <i className="fa-solid fa-circle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                         <span>{error}</span>
                     </div>
                 )}
@@ -523,7 +523,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-check"></i>
+                                        <i className="fa-duotone fa-regular fa-check"></i>
                                         Accept Invitation
                                     </>
                                 )}
@@ -535,7 +535,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                                 onClick={() => setShowDeclineForm(true)}
                                 disabled={processing}
                             >
-                                <i className="fa-solid fa-times"></i>
+                                <i className="fa-duotone fa-regular fa-times"></i>
                                 Decline
                             </button>
                         </div>

@@ -68,7 +68,7 @@ export default function AIMatchesPage() {
                 ) : matches.length === 0 ? (
                     <div className="card bg-base-100 shadow">
                         <div className="card-body text-center text-base-content/60">
-                            <i className="fa-solid fa-sparkles text-4xl mb-2"></i>
+                            <i className="fa-duotone fa-regular fa-sparkles text-4xl mb-2"></i>
                             <p>No pending match suggestions</p>
                         </div>
                     </div>
@@ -115,7 +115,7 @@ export default function AIMatchesPage() {
                                             <div className="flex flex-wrap gap-2">
                                                 {match.match_reasons.map((reason: string, idx: number) => (
                                                     <span key={idx} className="badge badge-outline">
-                                                        <i className="fa-solid fa-check-circle mr-1"></i>
+                                                        <i className="fa-duotone fa-regular fa-check-circle mr-1"></i>
                                                         {reason}
                                                     </span>
                                                 ))}
@@ -128,14 +128,14 @@ export default function AIMatchesPage() {
                                             className="btn btn-success btn-sm"
                                             onClick={() => reviewMatch(match.id, true)}
                                         >
-                                            <i className="fa-solid fa-check"></i>
+                                            <i className="fa-duotone fa-regular fa-check"></i>
                                             Accept
                                         </button>
                                         <button
                                             className="btn btn-ghost btn-sm"
                                             onClick={() => reviewMatch(match.id, false)}
                                         >
-                                            <i className="fa-solid fa-times"></i>
+                                            <i className="fa-duotone fa-regular fa-times"></i>
                                             Reject
                                         </button>
                                     </div>
@@ -148,7 +148,7 @@ export default function AIMatchesPage() {
 
             {!loading && matches.length > 0 && (
                 <div className="alert mt-6">
-                    <i className="fa-solid fa-info-circle"></i>
+                    <i className="fa-duotone fa-regular fa-info-circle"></i>
                     <div>
                         <h3 className="font-bold">AI Match Scoring</h3>
                         <div className="text-sm">

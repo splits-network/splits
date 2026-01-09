@@ -43,7 +43,7 @@ export default function UnifiedProposalCard({
         if (proposal.is_overdue) {
             return (
                 <span className="badge badge-error gap-1">
-                    <i className="fa-solid fa-exclamation-triangle"></i>
+                    <i className="fa-duotone fa-regular fa-exclamation-triangle"></i>
                     Overdue
                 </span>
             );
@@ -51,7 +51,7 @@ export default function UnifiedProposalCard({
         if (proposal.is_urgent) {
             return (
                 <span className="badge badge-warning gap-1">
-                    <i className="fa-solid fa-clock"></i>
+                    <i className="fa-duotone fa-regular fa-clock"></i>
                     {Math.round(proposal.hours_remaining || 0)}h left
                 </span>
             );
@@ -118,7 +118,7 @@ export default function UnifiedProposalCard({
                     <div className="flex gap-2 items-start flex-shrink-0">
                         {getUrgencyBadge()}
                         <span className={`badge gap-1 badge-${proposal.status_badge.color}`}>
-                            <i className={`fa-solid fa-${proposal.status_badge.icon}`}></i>
+                            <i className={`fa-duotone fa-regular fa-${proposal.status_badge.icon}`}></i>
                             {proposal.status_badge.text}
                         </span>
                     </div>
@@ -142,7 +142,7 @@ export default function UnifiedProposalCard({
                 {/* Job Location */}
                 {proposal.job_location && (
                     <div className="text-sm text-base-content/60 mb-2">
-                        <i className="fa-solid fa-location-dot mr-1"></i>
+                        <i className="fa-duotone fa-regular fa-location-dot mr-1"></i>
                         {proposal.job_location}
                     </div>
                 )}
@@ -161,7 +161,7 @@ export default function UnifiedProposalCard({
                 {proposal.ai_analysis && (
                     <div className="text-sm bg-info/10 border border-info/20 p-3 rounded-lg mb-2">
                         <div className="font-medium mb-1 text-xs text-info flex items-center gap-1">
-                            <i className="fa-solid fa-robot"></i>
+                            <i className="fa-duotone fa-regular fa-robot"></i>
                             AI Analysis
                         </div>
                         <p className="text-base-content/80">{proposal.ai_analysis.recommendation || 'Analysis available'}</p>
@@ -176,7 +176,7 @@ export default function UnifiedProposalCard({
                             className="btn btn-sm btn-primary"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <i className="fa-solid fa-user-check"></i>
+                            <i className="fa-duotone fa-regular fa-user-check"></i>
                             Screen Proposal
                         </a>
                     </div>
@@ -190,7 +190,7 @@ export default function UnifiedProposalCard({
                     >
                         {error && (
                             <div className="alert alert-error">
-                                <i className="fa-solid fa-circle-exclamation"></i>
+                                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                                 <span>{error}</span>
                             </div>
                         )}

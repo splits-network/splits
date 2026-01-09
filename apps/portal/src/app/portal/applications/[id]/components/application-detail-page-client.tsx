@@ -152,7 +152,7 @@ export default function ApplicationDetailPageClient() {
         return (
             <div className="container mx-auto px-4 py-8">
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             </div>
@@ -163,7 +163,7 @@ export default function ApplicationDetailPageClient() {
         return (
             <div className="container mx-auto px-4 py-8">
                 <div className="alert alert-warning">
-                    <i className="fa-solid fa-triangle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
                     <span>Application not found</span>
                 </div>
             </div>

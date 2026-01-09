@@ -144,7 +144,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
                             setSelectedStage(null);
                         }}
                     >
-                        <i className="fa-solid fa-user-check mr-1"></i>
+                        <i className="fa-duotone fa-regular fa-user-check mr-1"></i>
                         Needs Pre-Screen
                         <span className="badge badge-warning badge-sm ml-2">
                             {needsPreScreenCount}
@@ -199,7 +199,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
                                                         className="btn btn-ghost btn-xs"
                                                         onClick={() => setExpandedCandidate(isExpanded ? null : application.candidate_id)}
                                                     >
-                                                        <i className={`fa-solid fa-chevron-${isExpanded ? 'down' : 'right'}`}></i>
+                                                        <i className={`fa-duotone fa-regular fa-chevron-${isExpanded ? 'down' : 'right'}`}></i>
                                                     </button>
                                                     <div className="avatar avatar-placeholder">
                                                         <div className="bg-neutral text-neutral-content rounded-full w-10">
@@ -234,7 +234,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
                                                             className="btn btn-warning btn-xs gap-1"
                                                             onClick={() => setPreScreenApplication(application)}
                                                         >
-                                                            <i className="fa-solid fa-user-check"></i>
+                                                            <i className="fa-duotone fa-regular fa-user-check"></i>
                                                             Request Pre-Screen
                                                         </button>
                                                     )}
@@ -243,7 +243,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
                                                             className="btn btn-success btn-xs gap-1"
                                                             onClick={() => setHireApplication(application)}
                                                         >
-                                                            <i className="fa-solid fa-check"></i>
+                                                            <i className="fa-duotone fa-regular fa-check"></i>
                                                             Hire
                                                         </button>
                                                     )}
@@ -255,7 +255,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
                                                 <td colSpan={6} className="bg-base-200">
                                                     <div className="p-4">
                                                         <h4 className="font-semibold mb-3 flex items-center gap-2">
-                                                            <i className="fa-solid fa-paperclip"></i>
+                                                            <i className="fa-duotone fa-regular fa-paperclip"></i>
                                                             Documents
                                                         </h4>
                                                         <DocumentList
@@ -275,7 +275,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
                 </div>
             ) : (
                 <div className="text-center py-12">
-                    <i className="fa-solid fa-users text-6xl text-base-content/20"></i>
+                    <i className="fa-duotone fa-regular fa-users text-6xl text-base-content/20"></i>
                     <h3 className="text-xl font-semibold mt-4">
                         {showNeedsPreScreen
                             ? 'No Applications Need Pre-Screen'

@@ -63,7 +63,7 @@ export default function ConfirmDialog({
             <div className="modal-box">
                 <div className="flex items-start gap-4">
                     <div className={`text-2xl ${getIconColor()}`}>
-                        <i className={`fa-solid ${getIcon()}`}></i>
+                        <i className={`fa-duotone fa-regular ${getIcon()}`}></i>
                     </div>
                     <div className="flex-1">
                         <h3 className="font-bold text-lg mb-2">{title}</h3>

@@ -22,7 +22,7 @@ export default function BlogPage() {
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto text-center">
                         <div className="mb-12">
-                            <i className="fa-solid fa-pen-to-square text-8xl text-primary opacity-20"></i>
+                            <i className="fa-duotone fa-regular fa-pen-to-square text-8xl text-primary opacity-20"></i>
                         </div>
                         <h2 className="text-4xl font-bold mb-6">Blog Coming Soon</h2>
                         <p className="text-xl text-base-content/70 mb-8 max-w-2xl mx-auto">
@@ -30,7 +30,7 @@ export default function BlogPage() {
                             platform updates, and industry insights. Check back soon!
                         </p>
                         <div className="alert alert-info max-w-2xl mx-auto mb-8">
-                            <i className="fa-solid fa-info-circle"></i>
+                            <i className="fa-duotone fa-regular fa-info-circle"></i>
                             <span>
                                 Want to be notified when we publish? Subscribe to our newsletter below.
                             </span>
@@ -48,7 +48,7 @@ export default function BlogPage() {
                             <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-                                        <i className="fa-solid fa-handshake text-primary text-xl"></i>
+                                        <i className="fa-duotone fa-regular fa-handshake text-primary text-xl"></i>
                                     </div>
                                     <h3 className="card-title text-lg">Split Placement Strategies</h3>
                                     <p className="text-sm text-base-content/70">
@@ -59,7 +59,7 @@ export default function BlogPage() {
                             <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center mb-4">
-                                        <i className="fa-solid fa-chart-line text-secondary text-xl"></i>
+                                        <i className="fa-duotone fa-regular fa-chart-line text-secondary text-xl"></i>
                                     </div>
                                     <h3 className="card-title text-lg">Industry Insights</h3>
                                     <p className="text-sm text-base-content/70">
@@ -70,18 +70,18 @@ export default function BlogPage() {
                             <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center mb-4">
-                                        <i className="fa-solid fa-rocket text-accent text-xl"></i>
+                                        <i className="fa-duotone fa-regular fa-rocket text-accent text-xl"></i>
                                     </div>
                                     <h3 className="card-title text-lg">Platform Updates</h3>
                                     <p className="text-sm text-base-content/70">
-                                        New features, improvements, and how to get the most out of Splits 
+                                        New features, improvements, and how to get the most out of Splits
                                     </p>
                                 </div>
                             </div>
                             <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center mb-4">
-                                        <i className="fa-solid fa-user-tie text-success text-xl"></i>
+                                        <i className="fa-duotone fa-regular fa-user-tie text-success text-xl"></i>
                                     </div>
                                     <h3 className="card-title text-lg">Recruiter Success Stories</h3>
                                     <p className="text-sm text-base-content/70">
@@ -92,7 +92,7 @@ export default function BlogPage() {
                             <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <div className="w-12 h-12 rounded-full bg-info/20 flex items-center justify-center mb-4">
-                                        <i className="fa-solid fa-lightbulb text-info text-xl"></i>
+                                        <i className="fa-duotone fa-regular fa-lightbulb text-info text-xl"></i>
                                     </div>
                                     <h3 className="card-title text-lg">Best Practices</h3>
                                     <p className="text-sm text-base-content/70">
@@ -103,7 +103,7 @@ export default function BlogPage() {
                             <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <div className="w-12 h-12 rounded-full bg-warning/20 flex items-center justify-center mb-4">
-                                        <i className="fa-solid fa-building text-warning text-xl"></i>
+                                        <i className="fa-duotone fa-regular fa-building text-warning text-xl"></i>
                                     </div>
                                     <h3 className="card-title text-lg">Company Perspectives</h3>
                                     <p className="text-sm text-base-content/70">
@@ -122,7 +122,7 @@ export default function BlogPage() {
                     <div className="max-w-3xl mx-auto">
                         <div className="card bg-primary text-primary-content shadow">
                             <div className="card-body p-12 text-center">
-                                <i className="fa-solid fa-envelope-open-text text-5xl mb-6 opacity-80"></i>
+                                <i className="fa-duotone fa-regular fa-envelope-open-text text-5xl mb-6 opacity-80"></i>
                                 <h2 className="card-title justify-center text-3xl mb-4">
                                     Subscribe to Our Newsletter
                                 </h2>
@@ -164,7 +164,7 @@ export default function BlogPage() {
                         <div className="grid md:grid-cols-3 gap-6">
                             <Link href="/updates" className="card bg-base-100 text-base-content shadow hover:shadow-2xl transition-shadow">
                                 <div className="card-body text-center">
-                                    <i className="fa-solid fa-bullhorn text-4xl text-primary mb-4"></i>
+                                    <i className="fa-duotone fa-regular fa-bullhorn text-4xl text-primary mb-4"></i>
                                     <h3 className="card-title justify-center">Platform Updates</h3>
                                     <p className="text-sm text-base-content/70">
                                         See our latest releases and upcoming roadmap
@@ -173,7 +173,7 @@ export default function BlogPage() {
                             </Link>
                             <Link href="/how-it-works" className="card bg-base-100 text-base-content shadow hover:shadow-2xl transition-shadow">
                                 <div className="card-body text-center">
-                                    <i className="fa-solid fa-question-circle text-4xl text-secondary mb-4"></i>
+                                    <i className="fa-duotone fa-regular fa-question-circle text-4xl text-secondary mb-4"></i>
                                     <h3 className="card-title justify-center">How It Works</h3>
                                     <p className="text-sm text-base-content/70">
                                         Learn about the split placement process
@@ -182,7 +182,7 @@ export default function BlogPage() {
                             </Link>
                             <a href="mailto:help@splits.network" className="card bg-base-100 text-base-content shadow hover:shadow-2xl transition-shadow">
                                 <div className="card-body text-center">
-                                    <i className="fa-solid fa-headset text-4xl text-accent mb-4"></i>
+                                    <i className="fa-duotone fa-regular fa-headset text-4xl text-accent mb-4"></i>
                                     <h3 className="card-title justify-center">Contact Support</h3>
                                     <p className="text-sm text-base-content/70">
                                         Have questions? Our team is here to help
@@ -203,11 +203,11 @@ export default function BlogPage() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link href="/sign-up" className="btn btn-lg btn-neutral">
-                            <i className="fa-solid fa-user-plus"></i>
+                            <i className="fa-duotone fa-regular fa-user-plus"></i>
                             Join as a Recruiter
                         </Link>
                         <Link href="/sign-up" className="btn btn-lg btn-secondary">
-                            <i className="fa-solid fa-building"></i>
+                            <i className="fa-duotone fa-regular fa-building"></i>
                             Post Roles as a Company
                         </Link>
                     </div>

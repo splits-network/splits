@@ -26,7 +26,7 @@ export default function AboutPage() {
                             <div className="card bg-primary text-primary-content shadow">
                                 <div className="card-body p-8">
                                     <h2 className="card-title text-3xl mb-4">
-                                        <i className="fa-solid fa-bullseye"></i>
+                                        <i className="fa-duotone fa-regular fa-bullseye"></i>
                                         Our Mission
                                     </h2>
                                     <p className="text-lg opacity-90">
@@ -39,7 +39,7 @@ export default function AboutPage() {
                             <div className="card bg-secondary text-secondary-content shadow">
                                 <div className="card-body p-8">
                                     <h2 className="card-title text-3xl mb-4">
-                                        <i className="fa-solid fa-telescope"></i>
+                                        <i className="fa-duotone fa-regular fa-telescope"></i>
                                         Our Vision
                                     </h2>
                                     <p className="text-lg opacity-90">
@@ -88,7 +88,7 @@ export default function AboutPage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body text-center">
                                 <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
-                                    <i className="fa-solid fa-eye text-primary text-3xl"></i>
+                                    <i className="fa-duotone fa-regular fa-eye text-primary text-3xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-2xl mb-3">Transparency</h3>
                                 <p className="text-base-content/70">
@@ -100,7 +100,7 @@ export default function AboutPage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body text-center">
                                 <div className="w-20 h-20 rounded-full bg-secondary/20 flex items-center justify-center mx-auto mb-4">
-                                    <i className="fa-solid fa-scale-balanced text-secondary text-3xl"></i>
+                                    <i className="fa-duotone fa-regular fa-scale-balanced text-secondary text-3xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-2xl mb-3">Fairness</h3>
                                 <p className="text-base-content/70">
@@ -112,7 +112,7 @@ export default function AboutPage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body text-center">
                                 <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-4">
-                                    <i className="fa-solid fa-lightbulb text-accent text-3xl"></i>
+                                    <i className="fa-duotone fa-regular fa-lightbulb text-accent text-3xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-2xl mb-3">Simplicity</h3>
                                 <p className="text-base-content/70">
@@ -124,7 +124,7 @@ export default function AboutPage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body text-center">
                                 <div className="w-20 h-20 rounded-full bg-info/20 flex items-center justify-center mx-auto mb-4">
-                                    <i className="fa-solid fa-users text-info text-3xl"></i>
+                                    <i className="fa-duotone fa-regular fa-users text-info text-3xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-2xl mb-3">Community</h3>
                                 <p className="text-base-content/70">
@@ -136,7 +136,7 @@ export default function AboutPage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body text-center">
                                 <div className="w-20 h-20 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-4">
-                                    <i className="fa-solid fa-chart-line text-success text-3xl"></i>
+                                    <i className="fa-duotone fa-regular fa-chart-line text-success text-3xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-2xl mb-3">Growth</h3>
                                 <p className="text-base-content/70">
@@ -148,7 +148,7 @@ export default function AboutPage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body text-center">
                                 <div className="w-20 h-20 rounded-full bg-warning/20 flex items-center justify-center mx-auto mb-4">
-                                    <i className="fa-solid fa-rocket text-warning text-3xl"></i>
+                                    <i className="fa-duotone fa-regular fa-rocket text-warning text-3xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-2xl mb-3">Innovation</h3>
                                 <p className="text-base-content/70">
@@ -170,7 +170,7 @@ export default function AboutPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl">
-                                        <i className="fa-solid fa-hammer text-primary"></i>
+                                        <i className="fa-duotone fa-regular fa-hammer text-primary"></i>
                                         Built for Splits, Not Adapted
                                     </h3>
                                     <p className="text-base-content/70">
@@ -182,7 +182,7 @@ export default function AboutPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl">
-                                        <i className="fa-solid fa-handshake text-secondary"></i>
+                                        <i className="fa-duotone fa-regular fa-handshake text-secondary"></i>
                                         Recruiter-First Philosophy
                                     </h3>
                                     <p className="text-base-content/70">
@@ -194,7 +194,7 @@ export default function AboutPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl">
-                                        <i className="fa-solid fa-code text-accent"></i>
+                                        <i className="fa-duotone fa-regular fa-code text-accent"></i>
                                         Modern Technology Stack
                                     </h3>
                                     <p className="text-base-content/70">
@@ -263,7 +263,7 @@ export default function AboutPage() {
                     </div>
                     <div className="text-center mt-12">
                         <Link href="/careers" className="btn btn-primary btn-lg">
-                            <i className="fa-solid fa-user-plus"></i>
+                            <i className="fa-duotone fa-regular fa-user-plus"></i>
                             Join Our Team
                         </Link>
                     </div>
@@ -279,11 +279,11 @@ export default function AboutPage() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link href="/sign-up" className="btn btn-lg btn-neutral">
-                            <i className="fa-solid fa-user-tie"></i>
+                            <i className="fa-duotone fa-regular fa-user-tie"></i>
                             Join as a Recruiter
                         </Link>
                         <Link href="/sign-up" className="btn btn-lg btn-secondary">
-                            <i className="fa-solid fa-building"></i>
+                            <i className="fa-duotone fa-regular fa-building"></i>
                             Post Roles as a Company
                         </Link>
                     </div>

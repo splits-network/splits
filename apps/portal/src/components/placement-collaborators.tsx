@@ -15,10 +15,10 @@ interface PlacementCollaboratorsProps {
     compact?: boolean;
 }
 
-export default function PlacementCollaborators({ 
-    collaborators, 
+export default function PlacementCollaborators({
+    collaborators,
     totalFee,
-    compact = false 
+    compact = false
 }: PlacementCollaboratorsProps) {
     if (!collaborators || collaborators.length === 0) {
         return null;
@@ -62,7 +62,7 @@ export default function PlacementCollaborators({
             <div className="flex flex-wrap gap-2">
                 {collaborators.map((collab) => (
                     <div key={collab.id} className={`badge ${getRoleColor(collab.role)} gap-1`}>
-                        <i className={`fa-solid ${getRoleIcon(collab.role)}`}></i>
+                        <i className={`fa-duotone fa-regular ${getRoleIcon(collab.role)}`}></i>
                         {getRoleLabel(collab.role)} ({collab.split_percentage}%)
                     </div>
                 ))}
@@ -74,16 +74,16 @@ export default function PlacementCollaborators({
         <div className="card bg-base-100 border border-base-300">
             <div className="card-body p-4">
                 <div className="flex items-center gap-2 mb-3">
-                    <i className="fa-solid fa-users text-base-content/70"></i>
+                    <i className="fa-duotone fa-regular fa-users text-base-content/70"></i>
                     <h3 className="font-semibold">Recruiter Collaboration</h3>
                 </div>
-                
+
                 <div className="space-y-3">
                     {collaborators.map((collab) => (
                         <div key={collab.id} className="flex items-center justify-between p-3 bg-base-200 rounded-lg">
                             <div className="flex items-center gap-3 flex-1">
                                 <div className={`w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center`}>
-                                    <i className={`fa-solid ${getRoleIcon(collab.role)} text-primary`}></i>
+                                    <i className={`fa-duotone fa-regular ${getRoleIcon(collab.role)} text-primary`}></i>
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2">

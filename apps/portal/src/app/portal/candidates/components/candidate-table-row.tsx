@@ -56,7 +56,7 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
                 <div className="flex flex-wrap gap-1">
                     {candidate.verification_status && (
                         <div className={`badge badge-sm ${getVerificationStatusBadge(candidate.verification_status)} gap-1`}>
-                            <i className={`fa-solid ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
+                            <i className={`fa-duotone fa-regular ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
                             {candidate.verification_status.charAt(0).toUpperCase() + candidate.verification_status.slice(1)}
                         </div>
                     )}
@@ -65,14 +65,14 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
                             {
                                 candidate.is_sourcer && (
                                     <span className="badge badge-sm badge-primary gap-1" title="You sourced this candidate">
-                                        <i className="fa-solid fa-star"></i>
+                                        <i className="fa-duotone fa-regular fa-star"></i>
                                         Sourcer
                                     </span>
                                 )
                             }
                             {candidate.has_active_relationship && (
                                 <span className="badge badge-sm badge-success gap-1" title="Active relationship">
-                                    <i className="fa-solid fa-handshake"></i>
+                                    <i className="fa-duotone fa-regular fa-handshake"></i>
                                     Active
                                 </span>
                             )}
@@ -104,7 +104,7 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
                             className="btn btn-ghost btn-sm btn-square"
                             title="View Portfolio"
                         >
-                            <i className="fa-solid fa-globe text-purple-600 text-sm"></i>
+                            <i className="fa-duotone fa-regular fa-globe text-purple-600 text-sm"></i>
                         </a>
                     )}
                     {candidate.github_url && (
@@ -133,7 +133,7 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
                         className="btn btn-primary btn-sm"
                         title="View Details"
                     >
-                        <i className="fa-solid fa-arrow-right text-xs"></i>
+                        <i className="fa-duotone fa-regular fa-arrow-right text-xs"></i>
                     </Link>
                 </div>
             </td>
@@ -186,7 +186,7 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
                                 rel="noopener noreferrer"
                                 className="link link-hover flex items-center gap-2"
                             >
-                                <i className="fa-solid fa-globe text-purple-600"></i>
+                                <i className="fa-duotone fa-regular fa-globe text-purple-600"></i>
                                 View Portfolio
                             </a>
                         } />
@@ -214,7 +214,7 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
                         <ExpandedDetailItem label="Verification Status" value={
                             candidate.verification_status && (
                                 <div className={`badge badge-sm ${getVerificationStatusBadge(candidate.verification_status)} gap-1 w-fit`}>
-                                    <i className={`fa-solid ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
+                                    <i className={`fa-duotone fa-regular ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
                                     {candidate.verification_status.charAt(0).toUpperCase() + candidate.verification_status.slice(1)}
                                 </div>
                             )
@@ -222,7 +222,7 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
                         {candidate.is_sourcer && (
                             <ExpandedDetailItem label="Sourcing" value={
                                 <span className="badge badge-sm badge-primary gap-1">
-                                    <i className="fa-solid fa-star"></i>
+                                    <i className="fa-duotone fa-regular fa-star"></i>
                                     You sourced this
                                 </span>
                             } />
@@ -230,7 +230,7 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
                         {candidate.has_active_relationship && (
                             <ExpandedDetailItem label="Status" value={
                                 <span className="badge badge-sm badge-success gap-1">
-                                    <i className="fa-solid fa-handshake"></i>
+                                    <i className="fa-duotone fa-regular fa-handshake"></i>
                                     Active relationship
                                 </span>
                             } />
@@ -244,7 +244,7 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
                             className="btn btn-primary btn-sm gap-2"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <i className="fa-solid fa-eye"></i>
+                            <i className="fa-duotone fa-regular fa-eye"></i>
                             View Pipeline
                         </Link>
                         <Link
@@ -252,7 +252,7 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
                             className="btn btn-outline btn-sm gap-2"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <i className="fa-solid fa-user-plus"></i>
+                            <i className="fa-duotone fa-regular fa-user-plus"></i>
                             Send Job
                         </Link>
                     </div>

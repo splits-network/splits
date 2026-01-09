@@ -79,25 +79,25 @@ export default function UserDropdown() {
                 {/* Menu Items */}
                 <li>
                     <Link href="/portal/dashboard">
-                        <i className="fa-solid fa-house"></i>
+                        <i className="fa-duotone fa-regular fa-house"></i>
                         Dashboard
                     </Link>
                 </li>
                 <li>
                     <Link href="/portal/profile">
-                        <i className="fa-solid fa-user"></i>
+                        <i className="fa-duotone fa-regular fa-user"></i>
                         Profile
                     </Link>
                 </li>
                 <li>
                     <Link href="/portal/applications">
-                        <i className="fa-solid fa-file-lines"></i>
+                        <i className="fa-duotone fa-regular fa-file-lines"></i>
                         Applications
                     </Link>
                 </li>
                 <li>
                     <Link href="/portal/documents">
-                        <i className="fa-solid fa-folder-open"></i>
+                        <i className="fa-duotone fa-regular fa-folder-open"></i>
                         Documents
                     </Link>
                 </li>
@@ -110,7 +110,7 @@ export default function UserDropdown() {
                 {/* Sign Out */}
                 <li>
                     <button onClick={handleSignOut} className="text-error">
-                        <i className="fa-solid fa-right-from-bracket"></i>
+                        <i className="fa-duotone fa-regular fa-right-from-bracket"></i>
                         Sign Out
                     </button>
                 </li>

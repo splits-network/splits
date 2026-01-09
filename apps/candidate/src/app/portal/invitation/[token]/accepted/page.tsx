@@ -13,7 +13,7 @@ export default function AcceptedPage() {
                 <div className="card-body text-center">
                     <div className="flex justify-center mb-6">
                         <div className="bg-success/20 rounded-full p-6">
-                            <i className="fa-solid fa-check-circle text-6xl text-success"></i>
+                            <i className="fa-duotone fa-regular fa-check-circle text-6xl text-success"></i>
                         </div>
                     </div>
 
@@ -29,26 +29,26 @@ export default function AcceptedPage() {
                         <h2 className="text-xl font-semibold mb-3">What Happens Next?</h2>
                         <ul className="text-left space-y-3">
                             <li className="flex items-start gap-3">
-                                <i className="fa-solid fa-1 text-primary mt-1"></i>
+                                <i className="fa-duotone fa-regular fa-1 text-primary mt-1"></i>
                                 <span>Your recruiter will receive a notification of your acceptance</span>
                             </li>
                             <li className="flex items-start gap-3">
-                                <i className="fa-solid fa-2 text-primary mt-1"></i>
+                                <i className="fa-duotone fa-regular fa-2 text-primary mt-1"></i>
                                 <span>They'll start searching for job opportunities that match your profile</span>
                             </li>
                             <li className="flex items-start gap-3">
-                                <i className="fa-solid fa-3 text-primary mt-1"></i>
+                                <i className="fa-duotone fa-regular fa-3 text-primary mt-1"></i>
                                 <span>You'll receive updates when you're submitted to positions</span>
                             </li>
                             <li className="flex items-start gap-3">
-                                <i className="fa-solid fa-4 text-primary mt-1"></i>
+                                <i className="fa-duotone fa-regular fa-4 text-primary mt-1"></i>
                                 <span>Track all your applications right here on Applicant Network</span>
                             </li>
                         </ul>
                     </div>
 
                     <div className="alert alert-info mb-6">
-                        <i className="fa-solid fa-info-circle"></i>
+                        <i className="fa-duotone fa-regular fa-info-circle"></i>
                         <span>
                             Your recruiter will contact you directly about next steps and potential opportunities.
                         </span>
@@ -56,7 +56,7 @@ export default function AcceptedPage() {
 
                     <div className="card-actions justify-center">
                         <Link href="/" className="btn btn-primary btn-lg">
-                            <i className="fa-solid fa-home"></i>
+                            <i className="fa-duotone fa-regular fa-home"></i>
                             Go to Dashboard
                         </Link>
                     </div>

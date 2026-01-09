@@ -155,7 +155,7 @@ The portal supports multiple themes (configured in `tailwind.config.js`):
 Icons are loaded from CDN (see `src/app/head.tsx`):
 
 ```tsx
-<i className="fa-solid fa-briefcase"></i>
+<i className="fa-duotone fa-regular fa-briefcase"></i>
 ```
 
 ## API Integration

@@ -79,14 +79,14 @@ export default function PreScreenRequestModal({
         <div className="modal modal-open">
             <div className="modal-box max-w-lg">
                 <h3 className="font-bold text-lg mb-4">
-                    <i className="fa-solid fa-user-check mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-user-check mr-2"></i>
                     Request Pre-Screen
                 </h3>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {error && (
                         <div className="alert alert-error">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <span>{error}</span>
                         </div>
                     )}
@@ -136,7 +136,7 @@ export default function PreScreenRequestModal({
                     </div>
 
                     <div className="alert alert-info">
-                        <i className="fa-solid fa-circle-info"></i>
+                        <i className="fa-duotone fa-regular fa-circle-info"></i>
                         <div className="text-sm">
                             <p className="font-semibold">What happens next?</p>
                             <ul className="list-disc list-inside mt-1">
@@ -168,7 +168,7 @@ export default function PreScreenRequestModal({
                                 </>
                             ) : (
                                 <>
-                                    <i className="fa-solid fa-paper-plane"></i>
+                                    <i className="fa-duotone fa-regular fa-paper-plane"></i>
                                     Send Request
                                 </>
                             )}

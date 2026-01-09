@@ -85,7 +85,7 @@ Treat this stack as the source of truth. Deviations must be documented here befo
   ```tsx
   <div className="card bg-base-100 shadow">
       <div className="card-body text-center py-12">
-          <i className="fa-solid fa-briefcase text-6xl text-base-content/20"></i>
+          <i className="fa-duotone fa-regular fa-briefcase text-6xl text-base-content/20"></i>
           <h3 className="text-xl font-semibold mt-4">No {entityName} Found</h3>
           <p className="text-base-content/70 mt-2">
               {searchQuery ? 'Try adjusting your search' : `No ${entityName.toLowerCase()} have been created yet`}

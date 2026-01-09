@@ -130,7 +130,7 @@ export default function InvitationsPageClient() {
         if (invitation.consent_given) {
             return (
                 <span className="badge badge-success gap-2">
-                    <i className="fa-solid fa-check"></i> Accepted
+                    <i className="fa-duotone fa-regular fa-check"></i> Accepted
                 </span>
             );
         }
@@ -138,7 +138,7 @@ export default function InvitationsPageClient() {
         if (invitation.declined_at) {
             return (
                 <span className="badge badge-error gap-2">
-                    <i className="fa-solid fa-times"></i> Declined
+                    <i className="fa-duotone fa-regular fa-times"></i> Declined
                 </span>
             );
         }
@@ -149,14 +149,14 @@ export default function InvitationsPageClient() {
         if (isExpired) {
             return (
                 <span className="badge badge-warning gap-2">
-                    <i className="fa-solid fa-clock"></i> Expired
+                    <i className="fa-duotone fa-regular fa-clock"></i> Expired
                 </span>
             );
         }
 
         return (
             <span className="badge badge-info gap-2">
-                <i className="fa-solid fa-hourglass-half"></i> Pending
+                <i className="fa-duotone fa-regular fa-hourglass-half"></i> Pending
             </span>
         );
     };
@@ -271,7 +271,7 @@ export default function InvitationsPageClient() {
                     className="btn btn-primary gap-2"
                     onClick={() => setShowInviteModal(true)}
                 >
-                    <i className="fa-solid fa-paper-plane"></i>
+                    <i className="fa-duotone fa-regular fa-paper-plane"></i>
                     Send Invitation
                 </button>
             </div>
@@ -279,10 +279,10 @@ export default function InvitationsPageClient() {
             {/* Error */}
             {error && (
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                     <button className="btn btn-sm btn-ghost" onClick={refetch}>
-                        <i className="fa-solid fa-rotate"></i>
+                        <i className="fa-duotone fa-regular fa-rotate"></i>
                         Retry
                     </button>
                 </div>
@@ -293,27 +293,27 @@ export default function InvitationsPageClient() {
                 <StatCard
                     title="Total Invitations"
                     value={stats.total}
-                    icon="fa-solid fa-envelopes"
+                    icon="fa-duotone fa-regular fa-envelopes"
                     description="Total candidate invitations"
                 />
                 <StatCard
                     title="Pending"
                     value={stats.pending}
-                    icon="fa-solid fa-hourglass-half"
+                    icon="fa-duotone fa-regular fa-hourglass-half"
                     color="info"
                     description="Awaiting response"
                 />
                 <StatCard
                     title="Accepted"
                     value={stats.accepted}
-                    icon="fa-solid fa-check"
+                    icon="fa-duotone fa-regular fa-check"
                     color="success"
                     description="Candidates joined"
                 />
                 <StatCard
                     title="Declined"
                     value={stats.declined}
-                    icon="fa-solid fa-xmark"
+                    icon="fa-duotone fa-regular fa-xmark"
                     color="error"
                     description="Not interested"
                 />
@@ -351,7 +351,7 @@ export default function InvitationsPageClient() {
                 <div className="form-control w-full lg:w-auto">
                     <div className="input-group">
                         <span className="bg-base-200 px-3 flex items-center">
-                            <i className="fa-solid fa-search"></i>
+                            <i className="fa-duotone fa-regular fa-search"></i>
                         </span>
                         <input
                             type="text"
@@ -427,7 +427,7 @@ export default function InvitationsPageClient() {
                                                     onClick={() => router.push(`/portal/candidates/${invitation.candidate_id}`)}
                                                     title="View candidate"
                                                 >
-                                                    <i className="fa-solid fa-eye"></i>
+                                                    <i className="fa-duotone fa-regular fa-eye"></i>
                                                 </button>
                                                 {canResendInvitation(invitation) && (
                                                     <>
@@ -441,7 +441,7 @@ export default function InvitationsPageClient() {
                                                             {resendingId === invitation.id ? (
                                                                 <span className="loading loading-spinner loading-xs"></span>
                                                             ) : (
-                                                                <i className="fa-solid fa-paper-plane"></i>
+                                                                <i className="fa-duotone fa-regular fa-paper-plane"></i>
                                                             )}
                                                         </button>
                                                         <button
@@ -454,7 +454,7 @@ export default function InvitationsPageClient() {
                                                             {cancellingId === invitation.id ? (
                                                                 <span className="loading loading-spinner loading-xs"></span>
                                                             ) : (
-                                                                <i className="fa-solid fa-trash"></i>
+                                                                <i className="fa-duotone fa-regular fa-trash"></i>
                                                             )}
                                                         </button>
                                                     </>
@@ -466,7 +466,7 @@ export default function InvitationsPageClient() {
                                                         onClick={() => toast.info(invitation.declined_reason || 'No reason provided')}
                                                         title="View decline reason"
                                                     >
-                                                        <i className="fa-solid fa-comment"></i>
+                                                        <i className="fa-duotone fa-regular fa-comment"></i>
                                                     </button>
                                                 )}
                                             </div>
@@ -480,7 +480,7 @@ export default function InvitationsPageClient() {
             ) : (
                 <div className="card bg-base-100 shadow">
                     <div className="card-body text-center py-12">
-                        <i className="fa-solid fa-inbox text-6xl text-base-content/20 mb-4"></i>
+                        <i className="fa-duotone fa-regular fa-inbox text-6xl text-base-content/20 mb-4"></i>
                         <h3 className="text-xl font-semibold">No invitations found</h3>
                         <p className="text-base-content/70">
                             {statusFilter === 'all'
@@ -505,14 +505,14 @@ export default function InvitationsPageClient() {
                                     onClick={() => goToPage(1)}
                                     disabled={pagination.page === 1 || loading}
                                 >
-                                    <i className="fa-solid fa-angles-left"></i>
+                                    <i className="fa-duotone fa-regular fa-angles-left"></i>
                                 </button>
                                 <button
                                     className="join-item btn btn-sm"
                                     onClick={() => goToPage(pagination.page - 1)}
                                     disabled={pagination.page === 1 || loading}
                                 >
-                                    <i className="fa-solid fa-angle-left"></i>
+                                    <i className="fa-duotone fa-regular fa-angle-left"></i>
                                 </button>
                                 <button className="join-item btn btn-sm btn-disabled">
                                     {pagination.page}
@@ -522,14 +522,14 @@ export default function InvitationsPageClient() {
                                     onClick={() => goToPage(pagination.page + 1)}
                                     disabled={pagination.page === pagination.total_pages || loading}
                                 >
-                                    <i className="fa-solid fa-angle-right"></i>
+                                    <i className="fa-duotone fa-regular fa-angle-right"></i>
                                 </button>
                                 <button
                                     className="join-item btn btn-sm"
                                     onClick={() => goToPage(pagination.total_pages)}
                                     disabled={pagination.page === pagination.total_pages || loading}
                                 >
-                                    <i className="fa-solid fa-angles-right"></i>
+                                    <i className="fa-duotone fa-regular fa-angles-right"></i>
                                 </button>
                             </div>
                         </div>
@@ -564,7 +564,7 @@ export default function InvitationsPageClient() {
                                     setCandidateEmail('');
                                 }}
                             >
-                                <i className="fa-solid fa-times"></i>
+                                <i className="fa-duotone fa-regular fa-times"></i>
                             </button>
                         </div>
 
@@ -614,7 +614,7 @@ export default function InvitationsPageClient() {
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-paper-plane"></i>
+                                        <i className="fa-duotone fa-regular fa-paper-plane"></i>
                                         Send Invitation
                                     </>
                                 )}

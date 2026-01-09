@@ -101,7 +101,7 @@ return (
                     </p>
                 </div>
                 <button onClick={onClose} className="btn btn-sm btn-circle btn-ghost">
-                    <i className="fa-solid fa-xmark"></i>
+                    <i className="fa-duotone fa-regular fa-xmark"></i>
                 </button>
             </div>
 
@@ -121,7 +121,7 @@ return (
             {/* Error Alert */}
             {error && (
                 <div className="alert alert-error mb-4">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
@@ -279,7 +279,7 @@ useEffect(() => {
             </div>
         ) : items.length === 0 ? (
             <div className="alert">
-                <i className="fa-solid fa-info-circle"></i>
+                <i className="fa-duotone fa-regular fa-info-circle"></i>
                 <span>
                     {debouncedSearch
                         ? `No items found matching "${debouncedSearch}". Try a different search term.`
@@ -349,7 +349,7 @@ useEffect(() => {
                                 onClick={() => setPage(Math.max(1, page - 1))}
                                 disabled={page === 1}
                             >
-                                <i className="fa-solid fa-chevron-left"></i>
+                                <i className="fa-duotone fa-regular fa-chevron-left"></i>
                             </button>
                             <button className="join-item btn btn-sm">
                                 Page {page}
@@ -359,7 +359,7 @@ useEffect(() => {
                                 onClick={() => setPage(Math.min(totalPages, page + 1))}
                                 disabled={page === totalPages}
                             >
-                                <i className="fa-solid fa-chevron-right"></i>
+                                <i className="fa-duotone fa-regular fa-chevron-right"></i>
                             </button>
                         </div>
                     </div>
@@ -438,7 +438,7 @@ const toggleItem = (itemId: string) => {
     <div className="space-y-6">
         {/* Selected Item Summary */}
         <div className="alert alert-info">
-            <i className="fa-solid fa-check-circle"></i>
+            <i className="fa-duotone fa-regular fa-check-circle"></i>
             <div>
                 <div className="font-semibold">{selectedItem.name}</div>
                 <div className="text-sm">{selectedItem.details}</div>
@@ -470,7 +470,7 @@ const toggleItem = (itemId: string) => {
                 </div>
             ) : additionalData.length === 0 ? (
                 <div className="alert">
-                    <i className="fa-solid fa-info-circle"></i>
+                    <i className="fa-duotone fa-regular fa-info-circle"></i>
                     <span>No related items available.</span>
                 </div>
             ) : (
@@ -486,7 +486,7 @@ const toggleItem = (itemId: string) => {
                                 checked={selectedIds.has(item.id)}
                                 onChange={() => toggleItem(item.id)}
                             />
-                            <i className="fa-solid fa-file"></i>
+                            <i className="fa-duotone fa-regular fa-file"></i>
                             <span className="text-sm">{item.name}</span>
                         </label>
                     ))}
@@ -519,7 +519,7 @@ Final step to review all selections before submission.
 {currentStep === 3 && selectedItem && (
     <div className="space-y-6">
         <div className="alert alert-info">
-            <i className="fa-solid fa-info-circle"></i>
+            <i className="fa-duotone fa-regular fa-info-circle"></i>
             <span>Review the details below before submitting.</span>
         </div>
 
@@ -527,7 +527,7 @@ Final step to review all selections before submission.
         <div className="card bg-base-200">
             <div className="card-body">
                 <h4 className="font-semibold mb-2">
-                    <i className="fa-solid fa-check-circle mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-check-circle mr-2"></i>
                     Selected Item
                 </h4>
                 <div className="space-y-2">
@@ -542,7 +542,7 @@ Final step to review all selections before submission.
             <div className="card bg-base-200">
                 <div className="card-body">
                     <h4 className="font-semibold mb-2">
-                        <i className="fa-solid fa-message mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-message mr-2"></i>
                         Additional Notes
                     </h4>
                     <div className="whitespace-pre-wrap text-sm">{notes}</div>
@@ -555,7 +555,7 @@ Final step to review all selections before submission.
             <div className="card bg-base-200">
                 <div className="card-body">
                     <h4 className="font-semibold mb-2">
-                        <i className="fa-solid fa-paperclip mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-paperclip mr-2"></i>
                         Selected Items ({selectedIds.size})
                     </h4>
                     <ul className="space-y-1">
@@ -563,7 +563,7 @@ Final step to review all selections before submission.
                             .filter((item) => selectedIds.has(item.id))
                             .map((item) => (
                                 <li key={item.id} className="flex items-center gap-2 text-sm">
-                                    <i className="fa-solid fa-file"></i>
+                                    <i className="fa-duotone fa-regular fa-file"></i>
                                     {item.name}
                                 </li>
                             ))}
@@ -595,7 +595,7 @@ Final step to review all selections before submission.
     <div className="flex gap-2">
         {currentStep > 1 && (
             <button onClick={handleBack} className="btn" disabled={submitting}>
-                <i className="fa-solid fa-chevron-left"></i>
+                <i className="fa-duotone fa-regular fa-chevron-left"></i>
                 Back
             </button>
         )}
@@ -606,7 +606,7 @@ Final step to review all selections before submission.
                 disabled={!selectedItem}
             >
                 Next
-                <i className="fa-solid fa-chevron-right"></i>
+                <i className="fa-duotone fa-regular fa-chevron-right"></i>
             </button>
         ) : (
             <button 
@@ -621,7 +621,7 @@ Final step to review all selections before submission.
                     </>
                 ) : (
                     <>
-                        <i className="fa-solid fa-paper-plane"></i>
+                        <i className="fa-duotone fa-regular fa-paper-plane"></i>
                         Submit
                     </>
                 )}
@@ -732,7 +732,7 @@ const handleWizardSubmit = async (
     onClick={() => setShowWizard(true)}
     className="btn btn-primary gap-2"
 >
-    <i className="fa-solid fa-plus"></i>
+    <i className="fa-duotone fa-regular fa-plus"></i>
     Open Wizard
 </button>
 ```

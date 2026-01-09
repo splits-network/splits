@@ -126,7 +126,7 @@ export default function MarketplaceList() {
                                             Recruiter
                                             {sortBy === 'name' && (
                                                 <i
-                                                    className={`fa-solid fa-sort-${sortOrder === 'asc' ? 'up' : 'down'
+                                                    className={`fa-duotone fa-regular fa-sort-${sortOrder === 'asc' ? 'up' : 'down'
                                                         }`}
                                                 ></i>
                                             )}

@@ -84,23 +84,23 @@ function ToastContainer({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id
                 <div
                     key={toast.id}
                     className={`alert ${toast.type === 'success'
-                            ? 'alert-success'
-                            : toast.type === 'error'
-                                ? 'alert-error'
-                                : toast.type === 'warning'
-                                    ? 'alert-warning'
-                                    : 'alert-info'
+                        ? 'alert-success'
+                        : toast.type === 'error'
+                            ? 'alert-error'
+                            : toast.type === 'warning'
+                                ? 'alert-warning'
+                                : 'alert-info'
                         }`}
                 >
                     <div className="flex items-center gap-2 w-full">
                         <i
-                            className={`fa-solid ${toast.type === 'success'
-                                    ? 'fa-circle-check'
-                                    : toast.type === 'error'
-                                        ? 'fa-circle-exclamation'
-                                        : toast.type === 'warning'
-                                            ? 'fa-triangle-exclamation'
-                                            : 'fa-circle-info'
+                            className={`fa-duotone fa-regular ${toast.type === 'success'
+                                ? 'fa-circle-check'
+                                : toast.type === 'error'
+                                    ? 'fa-circle-exclamation'
+                                    : toast.type === 'warning'
+                                        ? 'fa-triangle-exclamation'
+                                        : 'fa-circle-info'
                                 }`}
                         ></i>
                         <span className="flex-1">{toast.message}</span>
@@ -109,7 +109,7 @@ function ToastContainer({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id
                             className="btn btn-ghost btn-xs btn-circle"
                             aria-label="Close"
                         >
-                            <i className="fa-solid fa-xmark"></i>
+                            <i className="fa-duotone fa-regular fa-xmark"></i>
                         </button>
                     </div>
                 </div>

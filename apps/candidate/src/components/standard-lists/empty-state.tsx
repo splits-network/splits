@@ -13,7 +13,7 @@ export function EmptyState({ icon = 'fa-inbox', title, description, action }: Em
     return (
         <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center mb-4">
-                <i className={`fa-solid ${icon} text-2xl text-base-content/50`}></i>
+                <i className={`fa-duotone fa-regular ${icon} text-2xl text-base-content/50`}></i>
             </div>
             <h3 className="text-lg font-medium text-base-content mb-2">{title}</h3>
             {description && (

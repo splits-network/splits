@@ -49,7 +49,7 @@ export function Header() {
             <div className="navbar-start ps-4">
                 <div className="dropdown lg:hidden">
                     <label tabIndex={0} className="btn btn-ghost">
-                        <i className="fa-solid fa-bars"></i>
+                        <i className="fa-duotone fa-regular fa-bars"></i>
                     </label>
                     <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-10 p-2 shadow bg-base-100 rounded-box w-52">
                         {isSignedIn ? (
@@ -96,14 +96,14 @@ export function Header() {
                         onChange={handleThemeChange}
                         className="theme-controller"
                     />
-                    <i className="fa-solid fa-sun swap-off text-xl"></i>
-                    <i className="fa-solid fa-moon swap-on text-xl"></i>
+                    <i className="fa-duotone fa-regular fa-sun swap-off text-xl"></i>
+                    <i className="fa-duotone fa-regular fa-moon swap-on text-xl"></i>
                 </label>
 
                 {isSignedIn ? (
                     <>
                         <Link href="/portal/dashboard" className="btn btn-ghost xs:btn-circle" title='Dashboard'>
-                            <i className="fa-solid fa-gauge text-xl"></i>
+                            <i className="fa-duotone fa-regular fa-gauge text-xl"></i>
                             <span className="hidden md:inline-block ml-2">Dashboard</span>
                         </Link>
                         <NotificationBell />

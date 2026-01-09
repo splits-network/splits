@@ -68,7 +68,7 @@ export function ServiceStatusBanner() {
         <div className="fixed top-16 left-0 right-0 z-50 p-4">
             <div className="container mx-auto">
                 <div role="alert" className="alert alert-vertical alert-error sm:alert-horizontal shadow-lg">
-                    <i className="fa-solid fa-bug fa-beat text-xl"></i>
+                    <i className="fa-duotone fa-regular fa-bug fa-beat text-xl"></i>
                     <span>
                         <h3 className="font-bold">Service Degradation Detected</h3>
                         <div className="text-sm opacity-90">
@@ -84,7 +84,7 @@ export function ServiceStatusBanner() {
                             className="btn btn-sm btn-circle btn-ghost"
                             aria-label="Dismiss notification"
                         >
-                            <i className="fa-solid fa-xmark"></i>
+                            <i className="fa-duotone fa-regular fa-xmark"></i>
                         </button>
                     </div>
                 </div>

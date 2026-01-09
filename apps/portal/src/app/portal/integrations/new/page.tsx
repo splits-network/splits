@@ -208,7 +208,7 @@ export default function NewIntegrationPage() {
             {/* Header */}
             <div className="flex items-center gap-4 mb-6">
                 <Link href="/integrations" className="btn btn-ghost btn-circle">
-                    <i className="fa-solid fa-arrow-left"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
                 </Link>
                 <div>
                     <h1 className="text-3xl font-bold">Add ATS Integration</h1>
@@ -221,7 +221,7 @@ export default function NewIntegrationPage() {
             {/* Error Alert */}
             {error && (
                 <div className="alert alert-error mb-6">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
@@ -243,14 +243,14 @@ export default function NewIntegrationPage() {
                                         <div className="flex items-start gap-4">
                                             <div className={`avatar avatar-placeholder`}>
                                                 <div className={`bg-${config.color} text-${config.color}-content rounded-full w-12`}>
-                                                    <i className={`fa-solid ${config.icon} text-xl`}></i>
+                                                    <i className={`fa-duotone fa-regular ${config.icon} text-xl`}></i>
                                                 </div>
                                             </div>
                                             <div className="flex-1">
                                                 <h3 className="card-title text-lg">{config.name}</h3>
                                                 <p className="text-sm text-base-content/70 mt-1">{config.description}</p>
                                             </div>
-                                            <i className="fa-solid fa-chevron-right text-base-content/30"></i>
+                                            <i className="fa-duotone fa-regular fa-chevron-right text-base-content/30"></i>
                                         </div>
                                     </div>
                                 </button>
@@ -271,11 +271,11 @@ export default function NewIntegrationPage() {
                                 className="btn btn-ghost btn-circle btn-sm"
                                 onClick={() => setStep('select')}
                             >
-                                <i className="fa-solid fa-arrow-left"></i>
+                                <i className="fa-duotone fa-regular fa-arrow-left"></i>
                             </button>
                             <div className={`avatar avatar-placeholder`}>
                                 <div className={`bg-${platformConfig.color} text-${platformConfig.color}-content rounded-full w-12`}>
-                                    <i className={`fa-solid ${platformConfig.icon} text-xl`}></i>
+                                    <i className={`fa-duotone fa-regular ${platformConfig.icon} text-xl`}></i>
                                 </div>
                             </div>
                             <div>
@@ -371,7 +371,7 @@ export default function NewIntegrationPage() {
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-plus"></i>
+                                        <i className="fa-duotone fa-regular fa-plus"></i>
                                         Create Integration
                                     </>
                                 )}

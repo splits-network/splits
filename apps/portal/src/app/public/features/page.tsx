@@ -32,7 +32,7 @@ export default function FeaturesPage() {
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center">
-                                        <i className="fa-solid fa-sitemap text-primary text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-sitemap text-primary text-2xl"></i>
                                     </div>
                                     <h3 className="card-title">ATS Foundation</h3>
                                 </div>
@@ -41,19 +41,19 @@ export default function FeaturesPage() {
                                 </p>
                                 <ul className="space-y-2 text-sm">
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Role & job posting management</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Candidate profiles & resumes</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Application tracking & stages</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Notes & activity history</span>
                                     </li>
                                 </ul>
@@ -65,7 +65,7 @@ export default function FeaturesPage() {
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-secondary/20 flex items-center justify-center">
-                                        <i className="fa-solid fa-chart-pie text-secondary text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-chart-pie text-secondary text-2xl"></i>
                                     </div>
                                     <h3 className="card-title">Split Placement Engine</h3>
                                 </div>
@@ -74,19 +74,19 @@ export default function FeaturesPage() {
                                 </p>
                                 <ul className="space-y-2 text-sm">
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Placement fee calculation</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Recruiter share tracking</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Platform fee transparency</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Placement history & reporting</span>
                                     </li>
                                 </ul>
@@ -98,7 +98,7 @@ export default function FeaturesPage() {
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-accent/20 flex items-center justify-center">
-                                        <i className="fa-solid fa-users text-accent text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-users text-accent text-2xl"></i>
                                     </div>
                                     <h3 className="card-title">Recruiter Network</h3>
                                 </div>
@@ -107,19 +107,19 @@ export default function FeaturesPage() {
                                 </p>
                                 <ul className="space-y-2 text-sm">
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Role assignments by niche</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Recruiter profiles & stats</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Access control & permissions</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Performance tracking</span>
                                     </li>
                                 </ul>
@@ -131,7 +131,7 @@ export default function FeaturesPage() {
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center">
-                                        <i className="fa-solid fa-crown text-primary text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-crown text-primary text-2xl"></i>
                                     </div>
                                     <h3 className="card-title">Flexible Plans</h3>
                                 </div>
@@ -140,19 +140,19 @@ export default function FeaturesPage() {
                                 </p>
                                 <ul className="space-y-2 text-sm">
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Starter, Pro & Partner tiers</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Higher payouts on paid plans</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Priority access to roles</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Enhanced features per tier</span>
                                     </li>
                                 </ul>
@@ -164,7 +164,7 @@ export default function FeaturesPage() {
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-secondary/20 flex items-center justify-center">
-                                        <i className="fa-solid fa-bell text-secondary text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-bell text-secondary text-2xl"></i>
                                     </div>
                                     <h3 className="card-title">Smart Notifications</h3>
                                 </div>
@@ -173,19 +173,19 @@ export default function FeaturesPage() {
                                 </p>
                                 <ul className="space-y-2 text-sm">
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>New application alerts</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Stage change notifications</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Placement confirmations</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Customizable preferences</span>
                                     </li>
                                 </ul>
@@ -197,7 +197,7 @@ export default function FeaturesPage() {
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-accent/20 flex items-center justify-center">
-                                        <i className="fa-solid fa-shield-halved text-accent text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-shield-halved text-accent text-2xl"></i>
                                     </div>
                                     <h3 className="card-title">Admin Console</h3>
                                 </div>
@@ -206,19 +206,19 @@ export default function FeaturesPage() {
                                 </p>
                                 <ul className="space-y-2 text-sm">
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Recruiter approval workflow</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Company management</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Placement oversight</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Analytics & reporting</span>
                                     </li>
                                 </ul>
@@ -234,7 +234,7 @@ export default function FeaturesPage() {
                     <div className="max-w-7xl mx-auto">
                         <div className="text-center mb-12">
                             <h2 className="text-3xl font-bold mb-4">
-                                <i className="fa-solid fa-user-tie text-primary"></i> For Recruiters
+                                <i className="fa-duotone fa-regular fa-user-tie text-primary"></i> For Recruiters
                             </h2>
                             <p className="text-lg text-base-content/70">
                                 Tools designed to maximize your placement success
@@ -244,7 +244,7 @@ export default function FeaturesPage() {
                             <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-3">
-                                        <i className="fa-solid fa-briefcase text-primary"></i>
+                                        <i className="fa-duotone fa-regular fa-briefcase text-primary"></i>
                                         Role Discovery
                                     </h3>
                                     <p className="text-base-content/70">
@@ -255,7 +255,7 @@ export default function FeaturesPage() {
                             <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-3">
-                                        <i className="fa-solid fa-users-between-lines text-primary"></i>
+                                        <i className="fa-duotone fa-regular fa-users-between-lines text-primary"></i>
                                         Candidate Management
                                     </h3>
                                     <p className="text-base-content/70">
@@ -266,7 +266,7 @@ export default function FeaturesPage() {
                             <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-3">
-                                        <i className="fa-solid fa-file-invoice-dollar text-primary"></i>
+                                        <i className="fa-duotone fa-regular fa-file-invoice-dollar text-primary"></i>
                                         Earnings Dashboard
                                     </h3>
                                     <p className="text-base-content/70">
@@ -277,7 +277,7 @@ export default function FeaturesPage() {
                             <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-3">
-                                        <i className="fa-solid fa-chart-line text-primary"></i>
+                                        <i className="fa-duotone fa-regular fa-chart-line text-primary"></i>
                                         Performance Insights
                                     </h3>
                                     <p className="text-base-content/70">
@@ -296,7 +296,7 @@ export default function FeaturesPage() {
                     <div className="max-w-7xl mx-auto">
                         <div className="text-center mb-12">
                             <h2 className="text-3xl font-bold mb-4">
-                                <i className="fa-solid fa-building text-secondary"></i> For Companies
+                                <i className="fa-duotone fa-regular fa-building text-secondary"></i> For Companies
                             </h2>
                             <p className="text-lg text-base-content/70">
                                 Streamline your external recruiting operations
@@ -306,7 +306,7 @@ export default function FeaturesPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-3">
-                                        <i className="fa-solid fa-bullhorn text-secondary"></i>
+                                        <i className="fa-duotone fa-regular fa-bullhorn text-secondary"></i>
                                         Role Posting
                                     </h3>
                                     <p className="text-base-content/70">
@@ -317,7 +317,7 @@ export default function FeaturesPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-3">
-                                        <i className="fa-solid fa-diagram-project text-secondary"></i>
+                                        <i className="fa-duotone fa-regular fa-diagram-project text-secondary"></i>
                                         Pipeline Visibility
                                     </h3>
                                     <p className="text-base-content/70">
@@ -328,7 +328,7 @@ export default function FeaturesPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-3">
-                                        <i className="fa-solid fa-handshake text-secondary"></i>
+                                        <i className="fa-duotone fa-regular fa-handshake text-secondary"></i>
                                         Recruiter Coordination
                                     </h3>
                                     <p className="text-base-content/70">
@@ -339,7 +339,7 @@ export default function FeaturesPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-3">
-                                        <i className="fa-solid fa-dollar-sign text-secondary"></i>
+                                        <i className="fa-duotone fa-regular fa-dollar-sign text-secondary"></i>
                                         Cost Management
                                     </h3>
                                     <p className="text-base-content/70">
@@ -363,21 +363,21 @@ export default function FeaturesPage() {
                     </div>
                     <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
                         <div className="text-center">
-                            <i className="fa-solid fa-shield-halved text-5xl mb-4 opacity-80"></i>
+                            <i className="fa-duotone fa-regular fa-shield-halved text-5xl mb-4 opacity-80"></i>
                             <h3 className="font-bold text-xl mb-2">Secure by Design</h3>
                             <p className="text-sm opacity-70">
                                 Enterprise authentication, role-based access control, and encrypted data storage
                             </p>
                         </div>
                         <div className="text-center">
-                            <i className="fa-solid fa-gauge-high text-5xl mb-4 opacity-80"></i>
+                            <i className="fa-duotone fa-regular fa-gauge-high text-5xl mb-4 opacity-80"></i>
                             <h3 className="font-bold text-xl mb-2">Lightning Fast</h3>
                             <p className="text-sm opacity-70">
                                 Microservices architecture with optimized database queries for instant response times
                             </p>
                         </div>
                         <div className="text-center">
-                            <i className="fa-solid fa-arrows-spin text-5xl mb-4 opacity-80"></i>
+                            <i className="fa-duotone fa-regular fa-arrows-spin text-5xl mb-4 opacity-80"></i>
                             <h3 className="font-bold text-xl mb-2">Always Reliable</h3>
                             <p className="text-sm opacity-70">
                                 99.9% uptime guarantee with automated backups and redundant systems
@@ -396,11 +396,11 @@ export default function FeaturesPage() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link href="/sign-up" className="btn btn-lg btn-neutral">
-                            <i className="fa-solid fa-user-tie"></i>
+                            <i className="fa-duotone fa-regular fa-user-tie"></i>
                             Join as a Recruiter
                         </Link>
                         <Link href="/sign-up" className="btn btn-lg btn-secondary">
-                            <i className="fa-solid fa-building"></i>
+                            <i className="fa-duotone fa-regular fa-building"></i>
                             Post Roles as a Company
                         </Link>
                     </div>

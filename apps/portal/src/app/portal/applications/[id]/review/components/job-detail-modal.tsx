@@ -19,26 +19,26 @@ export default function JobDetailModal({ job, isOpen, onClose }: JobDetailModalP
                         <div className="flex flex-wrap gap-4 text-sm text-base-content/70">
                             {job.company?.name && (
                                 <div className="flex items-center gap-2">
-                                    <i className="fa-solid fa-building"></i>
+                                    <i className="fa-duotone fa-regular fa-building"></i>
                                     <span>{job.company.name}</span>
                                 </div>
                             )}
                             {job.location && (
                                 <div className="flex items-center gap-2">
-                                    <i className="fa-solid fa-location-dot"></i>
+                                    <i className="fa-duotone fa-regular fa-location-dot"></i>
                                     <span>{job.location}</span>
                                 </div>
                             )}
                             {job.employment_type && (
                                 <div className="flex items-center gap-2">
-                                    <i className="fa-solid fa-briefcase"></i>
+                                    <i className="fa-duotone fa-regular fa-briefcase"></i>
                                     <span className="capitalize">{job.employment_type.replace('_', ' ')}</span>
                                 </div>
                             )}
                         </div>
                     </div>
                     <button onClick={onClose} className="btn btn-sm btn-circle btn-ghost">
-                        <i className="fa-solid fa-xmark text-xl"></i>
+                        <i className="fa-duotone fa-regular fa-xmark text-xl"></i>
                     </button>
                 </div>
 
@@ -50,7 +50,7 @@ export default function JobDetailModal({ job, isOpen, onClose }: JobDetailModalP
                     {(job.salary_min || job.salary_max) && (
                         <div>
                             <h4 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                                <i className="fa-solid fa-dollar-sign text-success"></i>
+                                <i className="fa-duotone fa-regular fa-dollar-sign text-success"></i>
                                 Salary Range
                             </h4>
                             <p className="text-base-content/80">
@@ -66,7 +66,7 @@ export default function JobDetailModal({ job, isOpen, onClose }: JobDetailModalP
                     {/* Fee Information */}
                     <div>
                         <h4 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                            <i className="fa-solid fa-percent text-primary"></i>
+                            <i className="fa-duotone fa-regular fa-percent text-primary"></i>
                             Fee Structure
                         </h4>
                         <div className="grid grid-cols-2 gap-4">
@@ -85,7 +85,7 @@ export default function JobDetailModal({ job, isOpen, onClose }: JobDetailModalP
                     {job.recruiter_description && (
                         <div>
                             <h4 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                                <i className="fa-solid fa-file-lines text-info"></i>
+                                <i className="fa-duotone fa-regular fa-file-lines text-info"></i>
                                 Position Details (For Recruiters)
                             </h4>
                             <div className="p-4 bg-base-200/50 rounded-lg">
@@ -98,7 +98,7 @@ export default function JobDetailModal({ job, isOpen, onClose }: JobDetailModalP
                     {job.candidate_description && (
                         <div>
                             <h4 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                                <i className="fa-solid fa-user-group text-warning"></i>
+                                <i className="fa-duotone fa-regular fa-user-group text-warning"></i>
                                 Position Details (For Candidates)
                             </h4>
                             <div className="p-4 bg-base-200/50 rounded-lg">
@@ -111,7 +111,7 @@ export default function JobDetailModal({ job, isOpen, onClose }: JobDetailModalP
                     {job.requirements && job.requirements.length > 0 && (
                         <div>
                             <h4 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                                <i className="fa-solid fa-list-check text-error"></i>
+                                <i className="fa-duotone fa-regular fa-list-check text-error"></i>
                                 Requirements
                             </h4>
                             <div className="space-y-2">
@@ -151,8 +151,8 @@ export default function JobDetailModal({ job, isOpen, onClose }: JobDetailModalP
                     <div>
                         <div className="text-sm font-semibold text-base-content/60 mb-1">Status</div>
                         <span className={`badge ${job.status === 'open' ? 'badge-success' :
-                                job.status === 'paused' ? 'badge-warning' :
-                                    'badge-ghost'
+                            job.status === 'paused' ? 'badge-warning' :
+                                'badge-ghost'
                             }`}>
                             {job.status}
                         </span>

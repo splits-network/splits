@@ -41,7 +41,7 @@ export default async function BillingPage() {
         <div className="container mx-auto py-6 px-4">
             <div className="mb-6">
                 <h1 className="text-3xl font-bold">
-                    <i className="fa-solid fa-credit-card mr-3"></i>
+                    <i className="fa-duotone fa-regular fa-credit-card mr-3"></i>
                     Billing & Subscriptions
                 </h1>
                 <p className="text-base-content/70 mt-2">
@@ -54,7 +54,7 @@ export default async function BillingPage() {
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title">
-                            <i className="fa-solid fa-box"></i>
+                            <i className="fa-duotone fa-regular fa-box"></i>
                             Current Plan
                             <div className="badge badge-primary">Active</div>
                         </h2>
@@ -78,20 +78,20 @@ export default async function BillingPage() {
                             <div className="flex flex-col justify-between">
                                 <div className="space-y-2 mb-4">
                                     <div className="flex items-center gap-2">
-                                        <i className="fa-solid fa-check text-success"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success"></i>
                                         <span className="text-sm">Unlimited job applications</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <i className="fa-solid fa-check text-success"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success"></i>
                                         <span className="text-sm">Candidate tracking system</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <i className="fa-solid fa-check text-success"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success"></i>
                                         <span className="text-sm">Email notifications</span>
                                     </div>
                                 </div>
                                 <button className="btn btn-outline" disabled>
-                                    <i className="fa-solid fa-lock"></i>
+                                    <i className="fa-duotone fa-regular fa-lock"></i>
                                     Manage Plan (Coming Soon)
                                 </button>
                             </div>
@@ -103,13 +103,13 @@ export default async function BillingPage() {
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title">
-                            <i className="fa-solid fa-wallet"></i>
+                            <i className="fa-duotone fa-regular fa-wallet"></i>
                             Payment Method
                         </h2>
                         <div className="divider my-2"></div>
 
                         <div className="alert alert-info">
-                            <i className="fa-solid fa-info-circle"></i>
+                            <i className="fa-duotone fa-regular fa-info-circle"></i>
                             <div>
                                 <div className="font-semibold">Stripe Integration Coming Soon</div>
                                 <div className="text-sm">
@@ -128,14 +128,14 @@ export default async function BillingPage() {
                                     <div className="text-sm text-base-content/70">Expires 12/2025</div>
                                 </div>
                                 <button className="btn btn-sm btn-ghost" disabled>
-                                    <i className="fa-solid fa-pen"></i>
+                                    <i className="fa-duotone fa-regular fa-pen"></i>
                                     Edit
                                 </button>
                             </div>
                         </div>
 
                         <button className="btn btn-primary mt-4" disabled>
-                            <i className="fa-solid fa-plus"></i>
+                            <i className="fa-duotone fa-regular fa-plus"></i>
                             Add Payment Method
                         </button>
                     </div>
@@ -145,7 +145,7 @@ export default async function BillingPage() {
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title">
-                            <i className="fa-solid fa-receipt"></i>
+                            <i className="fa-duotone fa-regular fa-receipt"></i>
                             Billing History
                         </h2>
                         <div className="divider my-2"></div>
@@ -171,7 +171,7 @@ export default async function BillingPage() {
                                         </td>
                                         <td>
                                             <button className="btn btn-xs btn-ghost" disabled>
-                                                <i className="fa-solid fa-download"></i>
+                                                <i className="fa-duotone fa-regular fa-download"></i>
                                                 Download
                                             </button>
                                         </td>
@@ -185,7 +185,7 @@ export default async function BillingPage() {
                                         </td>
                                         <td>
                                             <button className="btn btn-xs btn-ghost" disabled>
-                                                <i className="fa-solid fa-download"></i>
+                                                <i className="fa-duotone fa-regular fa-download"></i>
                                                 Download
                                             </button>
                                         </td>
@@ -199,7 +199,7 @@ export default async function BillingPage() {
                                         </td>
                                         <td>
                                             <button className="btn btn-xs btn-ghost" disabled>
-                                                <i className="fa-solid fa-download"></i>
+                                                <i className="fa-duotone fa-regular fa-download"></i>
                                                 Download
                                             </button>
                                         </td>
@@ -214,13 +214,13 @@ export default async function BillingPage() {
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title">
-                                <i className="fa-solid fa-money-bill-transfer"></i>
+                                <i className="fa-duotone fa-regular fa-money-bill-transfer"></i>
                                 Payout Settings
                             </h2>
                             <div className="divider my-2"></div>
 
                             <div className="alert alert-info">
-                                <i className="fa-solid fa-info-circle"></i>
+                                <i className="fa-duotone fa-regular fa-info-circle"></i>
                                 <div>
                                     <div className="font-semibold">Payout Management Coming Soon</div>
                                     <div className="text-sm">
@@ -250,7 +250,7 @@ export default async function BillingPage() {
                                 </div>
 
                                 <button className="btn btn-primary" disabled>
-                                    <i className="fa-solid fa-gear"></i>
+                                    <i className="fa-duotone fa-regular fa-gear"></i>
                                     Configure Payout Settings
                                 </button>
                             </div>
@@ -263,7 +263,7 @@ export default async function BillingPage() {
                     <div className="card bg-base-100 shadow border-2 border-error">
                         <div className="card-body">
                             <h2 className="card-title text-error">
-                                <i className="fa-solid fa-triangle-exclamation"></i>
+                                <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
                                 Danger Zone
                             </h2>
                             <div className="divider my-2"></div>
@@ -273,7 +273,7 @@ export default async function BillingPage() {
                             </p>
 
                             <button className="btn btn-error btn-outline" disabled>
-                                <i className="fa-solid fa-ban"></i>
+                                <i className="fa-duotone fa-regular fa-ban"></i>
                                 Cancel Subscription
                             </button>
                         </div>

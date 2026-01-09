@@ -74,7 +74,7 @@ export function AnswerQuestionsStep({
                             onClick={() => handleAnswerChange(question.id, 'Yes')}
                             className={`btn flex-1 ${answer === 'Yes' ? 'btn-primary' : 'btn-outline'}`}
                         >
-                            <i className="fa-solid fa-check"></i>
+                            <i className="fa-duotone fa-regular fa-check"></i>
                             Yes
                         </button>
                         <button
@@ -82,7 +82,7 @@ export function AnswerQuestionsStep({
                             onClick={() => handleAnswerChange(question.id, 'No')}
                             className={`btn flex-1 ${answer === 'No' ? 'btn-primary' : 'btn-outline'}`}
                         >
-                            <i className="fa-solid fa-times"></i>
+                            <i className="fa-duotone fa-regular fa-times"></i>
                             No
                         </button>
                     </div>
@@ -125,7 +125,7 @@ export function AnswerQuestionsStep({
         <div className="space-y-6">
             <div>
                 <h4 className="text-lg font-semibold mb-2">
-                    <i className="fa-solid fa-clipboard-question"></i>
+                    <i className="fa-duotone fa-regular fa-clipboard-question"></i>
                     {' '}Pre-screening Questions
                 </h4>
                 <p className="text-base-content/70 text-sm">
@@ -137,14 +137,14 @@ export function AnswerQuestionsStep({
 
             {error && (
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
 
             {questions.length === 0 ? (
                 <div className="alert alert-info">
-                    <i className="fa-solid fa-info-circle"></i>
+                    <i className="fa-duotone fa-regular fa-info-circle"></i>
                     <span>No pre-screening questions required. Click Next to continue.</span>
                 </div>
             ) : (
@@ -172,7 +172,7 @@ export function AnswerQuestionsStep({
 
             <div className="flex justify-between">
                 <button type="button" onClick={onBack} className="btn btn-outline">
-                    <i className="fa-solid fa-arrow-left"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
                     Back
                 </button>
                 <button
@@ -182,7 +182,7 @@ export function AnswerQuestionsStep({
                     disabled={!isValid()}
                 >
                     Next: Add Notes
-                    <i className="fa-solid fa-arrow-right"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-right"></i>
                 </button>
             </div>
         </div>

@@ -41,7 +41,7 @@ export default function CandidateHeader() {
                         className="btn btn-primary gap-2"
                         onClick={() => setShowAddModal(true)}
                     >
-                        <i className="fa-solid fa-plus"></i>
+                        <i className="fa-duotone fa-regular fa-plus"></i>
                         New Candidate
                     </button>
                 )}

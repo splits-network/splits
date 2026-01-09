@@ -473,7 +473,7 @@ export class CandidatesEmailService {
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
         <div style="background: white; border-radius: 50%; width: 80px; height: 80px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
-            <i class="fa-solid fa-check-circle" style="font-size: 48px; color: #10b981;"></i>
+            <i class="fa-duotone fa-regular fa-check-circle" style="font-size: 48px; color: #10b981;"></i>
         </div>
         <h1 style="color: white; margin: 0; font-size: 28px;">Great News!</h1>
     </div>
@@ -562,7 +562,7 @@ export class CandidatesEmailService {
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
         <div style="background: white; border-radius: 50%; width: 80px; height: 80px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
-            <i class="fa-solid fa-info-circle" style="font-size: 48px; color: #6b7280;"></i>
+            <i class="fa-duotone fa-regular fa-info-circle" style="font-size: 48px; color: #6b7280;"></i>
         </div>
         <h1 style="color: white; margin: 0; font-size: 28px;">Invitation Response</h1>
     </div>

@@ -193,7 +193,7 @@ export default function RecruiterDashboard() {
                         </div>
                         <div className="flex gap-2">
                             <Link href="/portal/roles" className="btn btn-sm bg-white/20 border-0 hover:bg-white/30 text-white">
-                                <i className="fa-solid fa-briefcase"></i>
+                                <i className="fa-duotone fa-regular fa-briefcase"></i>
                                 Browse Roles
                             </Link>
                         </div>
@@ -248,7 +248,7 @@ export default function RecruiterDashboard() {
                     headerActions={
                         <Link href="/portal/placements" className="btn btn-sm btn-ghost text-success">
                             View Details
-                            <i className="fa-solid fa-arrow-right ml-1"></i>
+                            <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                         </Link>
                     }
                 >
@@ -263,7 +263,7 @@ export default function RecruiterDashboard() {
                     <div className="flex items-center gap-4 mt-4 pt-4 border-t border-base-200">
                         <div className="flex items-center gap-2">
                             <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
-                                <i className="fa-solid fa-calendar-check text-success"></i>
+                                <i className="fa-duotone fa-regular fa-calendar-check text-success"></i>
                             </div>
                             <div>
                                 <div className="text-sm text-base-content/60">This Month</div>
@@ -279,7 +279,7 @@ export default function RecruiterDashboard() {
                     headerActions={
                         <Link href="/earnings" className="btn btn-sm btn-ghost text-primary">
                             View Payouts
-                            <i className="fa-solid fa-arrow-right ml-1"></i>
+                            <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                         </Link>
                     }
                 >
@@ -289,7 +289,7 @@ export default function RecruiterDashboard() {
                         </div>
                     </div>
                     <div className="flex items-center gap-2 mt-4 pt-4 border-t border-base-200">
-                        <i className="fa-solid fa-info-circle text-base-content/40"></i>
+                        <i className="fa-duotone fa-regular fa-info-circle text-base-content/40"></i>
                         <span className="text-sm text-base-content/60">
                             Payments processed after guarantee period
                         </span>
@@ -308,7 +308,7 @@ export default function RecruiterDashboard() {
                         headerActions={
                             <Link href="/proposals" className="btn btn-sm btn-ghost">
                                 View all
-                                <i className="fa-solid fa-arrow-right ml-1"></i>
+                                <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                             </Link>
                         }
                     >
@@ -323,7 +323,7 @@ export default function RecruiterDashboard() {
                             recentActivity.length > 5 && (
                                 <Link href="/activity" className="btn btn-sm btn-ghost">
                                     View all
-                                    <i className="fa-solid fa-arrow-right ml-1"></i>
+                                    <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                                 </Link>
                             )
                         }
@@ -350,7 +350,7 @@ export default function RecruiterDashboard() {
                                                     activity.type === 'application_submitted' ? 'bg-primary/10 text-primary' :
                                                         'bg-secondary/10 text-secondary'}
                                         `}>
-                                            <i className={`fa-solid ${getActivityIcon(activity.type)}`}></i>
+                                            <i className={`fa-duotone fa-regular ${getActivityIcon(activity.type)}`}></i>
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="font-medium text-sm line-clamp-1">{activity.message}</p>
@@ -359,7 +359,7 @@ export default function RecruiterDashboard() {
                                             )}
                                             <p className="text-xs text-base-content/50 mt-0.5">{activity.timestamp}</p>
                                         </div>
-                                        <i className="fa-solid fa-chevron-right text-base-content/30 group-hover:text-primary transition-colors"></i>
+                                        <i className="fa-duotone fa-regular fa-chevron-right text-base-content/30 group-hover:text-primary transition-colors"></i>
                                     </Link>
                                 ))}
                             </div>
@@ -373,19 +373,19 @@ export default function RecruiterDashboard() {
                     <ContentCard title="Quick Actions" icon="fa-bolt">
                         <div className="flex flex-col gap-2">
                             <Link href="/portal/roles" className="btn btn-primary w-full justify-start gap-3">
-                                <i className="fa-solid fa-briefcase w-4"></i>
+                                <i className="fa-duotone fa-regular fa-briefcase w-4"></i>
                                 Browse Roles
                             </Link>
                             <Link href="/portal/candidates" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-solid fa-users w-4"></i>
+                                <i className="fa-duotone fa-regular fa-users w-4"></i>
                                 My Candidates
                             </Link>
                             <Link href="/proposals" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-solid fa-inbox w-4"></i>
+                                <i className="fa-duotone fa-regular fa-inbox w-4"></i>
                                 Proposals
                             </Link>
                             <Link href="/portal/placements" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-solid fa-trophy w-4"></i>
+                                <i className="fa-duotone fa-regular fa-trophy w-4"></i>
                                 My Placements
                             </Link>
                         </div>
@@ -398,7 +398,7 @@ export default function RecruiterDashboard() {
                         headerActions={
                             <Link href="/portal/roles" className="btn btn-sm btn-ghost">
                                 All roles
-                                <i className="fa-solid fa-arrow-right ml-1"></i>
+                                <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                             </Link>
                         }
                     >
@@ -423,7 +423,7 @@ export default function RecruiterDashboard() {
                                                     {role.title}
                                                 </div>
                                                 <div className="text-xs text-base-content/60 flex items-center gap-1.5 mt-1">
-                                                    <i className="fa-solid fa-building text-[10px]"></i>
+                                                    <i className="fa-duotone fa-regular fa-building text-[10px]"></i>
                                                     <span className="line-clamp-1">{role.company?.name}</span>
                                                     {role.location && (
                                                         <>
@@ -451,7 +451,7 @@ export default function RecruiterDashboard() {
             {(stats?.active_roles === 0 || stats?.candidates_in_process === 0) && (
                 <div className="alert bg-info/10 border-info/20 shadow-sm">
                     <div className="w-10 h-10 rounded-xl bg-info/20 flex items-center justify-center shrink-0">
-                        <i className="fa-solid fa-lightbulb text-info"></i>
+                        <i className="fa-duotone fa-regular fa-lightbulb text-info"></i>
                     </div>
                     <div>
                         <h4 className="font-bold text-info">Getting Started Tips</h4>

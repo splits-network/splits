@@ -234,7 +234,7 @@ export function StatCard({
         <>
             {icon && (
                 <div className={`stat-figure ${iconColorClasses[color]}`}>
-                    <i className={`fa-solid ${icon} text-3xl`}></i>
+                    <i className={`fa-duotone fa-regular ${icon} text-3xl`}></i>
                 </div>
             )}
             <div className="stat-title">{title}</div>

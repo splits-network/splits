@@ -49,24 +49,24 @@ export function ApplicationCard({
                 {/* Status badges - vertical ribbon style */}
                 <div className="absolute top-3 right-0 flex flex-col gap-2">
                     <span className={`badge rounded-e-none ${getApplicationStageBadge(application.stage)} gap-1 shadow-lg`}>
-                        <i className="fa-solid fa-clipboard-check mr-1"></i>
+                        <i className="fa-duotone fa-regular fa-clipboard-check mr-1"></i>
                         {application.stage}
                     </span>
                     {application.accepted_by_company && (
                         <span className="badge badge-success gap-1 shadow-lg" title="Accepted by company">
-                            <i className="fa-solid fa-check mr-1"></i>
+                            <i className="fa-duotone fa-regular fa-check mr-1"></i>
                             Accepted
                         </span>
                     )}
                     {application.ai_reviewed && application.ai_review && (
                         <span className="badge badge-accent rounded-e-none gap-1 shadow-lg" title={`AI Score: ${application.ai_review.fit_score}/100`}>
-                            <i className="fa-solid fa-robot mr-1"></i>
+                            <i className="fa-duotone fa-regular fa-robot mr-1"></i>
                             AI: {application.ai_review.fit_score}
                         </span>
                     )}
                     {isMasked && (
                         <span className="badge badge-warning rounded-e-none gap-1 shadow-lg" title="Anonymous candidate">
-                            <i className="fa-solid fa-eye-slash mr-1"></i>
+                            <i className="fa-duotone fa-regular fa-eye-slash mr-1"></i>
                             Anonymous
                         </span>
                     )}
@@ -77,7 +77,7 @@ export function ApplicationCard({
                     <div className="avatar avatar-placeholder">
                         <div className={`bg-base-100 text-primary text-3xl font-bold w-16 p-2 rounded-full shadow-lg`}>
                             {isMasked ? (
-                                <i className="fa-solid fa-user-secret text-2xl"></i>
+                                <i className="fa-duotone fa-regular fa-user-secret text-2xl"></i>
                             ) : (
                                 (() => {
                                     const names = candidate.full_name.split(' ');
@@ -104,12 +104,12 @@ export function ApplicationCard({
                                 className="text-sm text-base-content/70 hover:text-primary transition-colors flex items-center gap-1.5"
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                <i className="fa-solid fa-envelope"></i>
+                                <i className="fa-duotone fa-regular fa-envelope"></i>
                                 {candidate.email}
                             </a>
                         ) : (
                             <span className="text-sm text-base-content/70 flex items-center gap-1.5">
-                                <i className="fa-solid fa-envelope"></i>
+                                <i className="fa-duotone fa-regular fa-envelope"></i>
                                 {candidate.email}
                             </span>
                         )}
@@ -122,13 +122,13 @@ export function ApplicationCard({
                         <div className="space-y-2">
                             {application.job && (
                                 <div className="flex items-center gap-2">
-                                    <i className="fa-solid fa-briefcase text-primary w-4"></i>
+                                    <i className="fa-duotone fa-regular fa-briefcase text-primary w-4"></i>
                                     <span className="font-medium text-base-content/80">{application.job.title}</span>
                                 </div>
                             )}
                             {application.company && (
                                 <div className="flex items-center gap-2">
-                                    <i className="fa-solid fa-building text-primary w-4"></i>
+                                    <i className="fa-duotone fa-regular fa-building text-primary w-4"></i>
                                     <span className="font-medium text-primary">{application.company.name}</span>
                                 </div>
                             )}
@@ -141,7 +141,7 @@ export function ApplicationCard({
                     <div className="bg-linear-to-r from-accent/5 to-accent/5 rounded-lg p-4 border border-accent/20">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2 text-sm font-medium text-base-content/70">
-                                <i className="fa-solid fa-robot text-accent"></i>
+                                <i className="fa-duotone fa-regular fa-robot text-accent"></i>
                                 <span>AI Analysis Complete</span>
                             </div>
                             <div className="text-sm text-base-content/70">
@@ -154,7 +154,7 @@ export function ApplicationCard({
                 {/* Footer with date */}
                 <div className="flex items-center justify-between pt-4 border-t border-base-300 mt-4">
                     <div className="text-xs text-base-content/50 flex items-center gap-1.5">
-                        <i className="fa-solid fa-paper-plane"></i>
+                        <i className="fa-duotone fa-regular fa-paper-plane"></i>
                         Submitted {formatDate(application.created_at)}
                     </div>
                     <div className="flex gap-2">
@@ -174,7 +174,7 @@ export function ApplicationCard({
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-check"></i>
+                                        <i className="fa-duotone fa-regular fa-check"></i>
                                         Accept
                                     </>
                                 )}
@@ -182,7 +182,7 @@ export function ApplicationCard({
                         )}
                         <Link href={`/portal/applications/${application.id}`} className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
                             View Details
-                            <i className="fa-solid fa-arrow-right"></i>
+                            <i className="fa-duotone fa-regular fa-arrow-right"></i>
                         </Link>
                     </div>
                 </div>

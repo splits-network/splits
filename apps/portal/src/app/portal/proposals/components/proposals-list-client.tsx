@@ -169,7 +169,7 @@ export default function ProposalsListClient() {
     if (error) {
         return (
             <div className="alert alert-error">
-                <i className="fa-solid fa-circle-exclamation"></i>
+                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                 <span>{error}</span>
             </div>
         );
@@ -179,7 +179,7 @@ export default function ProposalsListClient() {
         <div className="space-y-6">
             {showSuccess && (
                 <div className="alert alert-success">
-                    <i className="fa-solid fa-circle-check"></i>
+                    <i className="fa-duotone fa-regular fa-circle-check"></i>
                     <span>
                         {showSuccess === 'accepted'
                             ? 'Proposal accepted successfully! The candidate has been assigned to you for this role.'
@@ -190,7 +190,7 @@ export default function ProposalsListClient() {
                         onClick={() => setShowSuccess(null)}
                         className="btn btn-sm btn-ghost btn-circle"
                     >
-                        <i className="fa-solid fa-xmark"></i>
+                        <i className="fa-duotone fa-regular fa-xmark"></i>
                     </button>
                 </div>
             )}
@@ -233,7 +233,7 @@ export default function ProposalsListClient() {
             {proposals.length === 0 ? (
                 <div className="card bg-base-100 shadow">
                     <div className="card-body items-center text-center py-12">
-                        <i className="fa-solid fa-inbox text-6xl text-base-content/20"></i>
+                        <i className="fa-duotone fa-regular fa-inbox text-6xl text-base-content/20"></i>
                         <h3 className="text-xl font-semibold mt-4">
                             {stateFilter === 'actionable' ? 'No Pending Proposals' : 'No Proposals'}
                         </h3>
@@ -315,7 +315,7 @@ function PaginationControls({
                 disabled={currentPage === 1}
                 onClick={() => onPageChange(currentPage - 1)}
             >
-                <i className="fa-solid fa-chevron-left"></i>
+                <i className="fa-duotone fa-regular fa-chevron-left"></i>
             </button>
 
             {pages.map((page, index) => (
@@ -339,7 +339,7 @@ function PaginationControls({
                 disabled={currentPage === totalPages}
                 onClick={() => onPageChange(currentPage + 1)}
             >
-                <i className="fa-solid fa-chevron-right"></i>
+                <i className="fa-duotone fa-regular fa-chevron-right"></i>
             </button>
         </div>
     );

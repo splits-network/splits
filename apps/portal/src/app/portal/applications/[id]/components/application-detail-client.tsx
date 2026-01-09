@@ -124,7 +124,7 @@ export default function ApplicationDetailClient({
                 <ul>
                     <li>
                         <Link href="/portal/dashboard">
-                            <i className="fa-solid fa-home mr-2"></i>
+                            <i className="fa-duotone fa-regular fa-home mr-2"></i>
                             Dashboard
                         </Link>
                     </li>
@@ -138,7 +138,7 @@ export default function ApplicationDetailClient({
             {/* Relationship Warning */}
             {relationshipWarning && (
                 <div className="alert alert-warning mb-4">
-                    <i className="fa-solid fa-triangle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
                     <div>
                         <h3 className="font-bold">Relationship Status Changed</h3>
                         <div className="text-sm">
@@ -182,7 +182,7 @@ export default function ApplicationDetailClient({
                                 className="btn btn-primary gap-2"
                                 disabled={loading}
                             >
-                                <i className="fa-solid fa-arrow-right-arrow-left"></i>
+                                <i className="fa-duotone fa-regular fa-arrow-right-arrow-left"></i>
                                 Update Stage
                             </button>
                         )}
@@ -191,21 +191,21 @@ export default function ApplicationDetailClient({
                             className="btn btn-outline gap-2"
                             disabled={loading}
                         >
-                            <i className="fa-solid fa-note-sticky"></i>
+                            <i className="fa-duotone fa-regular fa-note-sticky"></i>
                             Add Note
                         </button>
                         <Link
                             href={`/portal/candidates/${candidate.id}`}
                             className="btn btn-outline gap-2"
                         >
-                            <i className="fa-solid fa-user"></i>
+                            <i className="fa-duotone fa-regular fa-user"></i>
                             View Candidate
                         </Link>
                         <Link
                             href={`/portal/roles/${job.id}`}
                             className="btn btn-outline gap-2"
                         >
-                            <i className="fa-solid fa-briefcase"></i>
+                            <i className="fa-duotone fa-regular fa-briefcase"></i>
                             View Job
                         </Link>
                         {application.stage === 'screen' && (
@@ -213,7 +213,7 @@ export default function ApplicationDetailClient({
                                 href={`/applications/${application.id}/review`}
                                 className="btn btn-accent gap-2"
                             >
-                                <i className="fa-solid fa-clipboard-check"></i>
+                                <i className="fa-duotone fa-regular fa-clipboard-check"></i>
                                 Review & Submit
                             </Link>
                         )}
@@ -229,7 +229,7 @@ export default function ApplicationDetailClient({
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title">
-                                <i className="fa-solid fa-briefcase"></i>
+                                <i className="fa-duotone fa-regular fa-briefcase"></i>
                                 Job Details
                             </h2>
                             <div className="space-y-2">
@@ -275,7 +275,7 @@ export default function ApplicationDetailClient({
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title">
-                                <i className="fa-solid fa-user"></i>
+                                <i className="fa-duotone fa-regular fa-user"></i>
                                 Candidate Information
                             </h2>
                             <div className="space-y-2">
@@ -327,7 +327,7 @@ export default function ApplicationDetailClient({
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title">
-                                <i className="fa-solid fa-note-sticky"></i>
+                                <i className="fa-duotone fa-regular fa-note-sticky"></i>
                                 Notes
                             </h2>
 
@@ -360,7 +360,7 @@ export default function ApplicationDetailClient({
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title">
-                                    <i className="fa-solid fa-clipboard-question"></i>
+                                    <i className="fa-duotone fa-regular fa-clipboard-question"></i>
                                     Pre-Screen Responses
                                 </h2>
                                 <div className="space-y-4">
@@ -431,13 +431,13 @@ export default function ApplicationDetailClient({
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title text-lg">
-                                    <i className="fa-solid fa-file"></i>
+                                    <i className="fa-duotone fa-regular fa-file"></i>
                                     Documents
                                 </h2>
                                 <div className="space-y-2">
                                     {documents.map((doc: any) => (
                                         <div key={doc.id} className="flex items-center gap-2">
-                                            <i className="fa-solid fa-file-pdf text-error"></i>
+                                            <i className="fa-duotone fa-regular fa-file-pdf text-error"></i>
                                             <a
                                                 href={doc.url}
                                                 target="_blank"
@@ -464,7 +464,7 @@ export default function ApplicationDetailClient({
                                         className="btn btn-sm btn-block btn-success gap-2"
                                         disabled={loading}
                                     >
-                                        <i className="fa-solid fa-calendar"></i>
+                                        <i className="fa-duotone fa-regular fa-calendar"></i>
                                         Move to Interview
                                     </button>
                                 )}
@@ -474,7 +474,7 @@ export default function ApplicationDetailClient({
                                         className="btn btn-sm btn-block btn-success gap-2"
                                         disabled={loading}
                                     >
-                                        <i className="fa-solid fa-handshake"></i>
+                                        <i className="fa-duotone fa-regular fa-handshake"></i>
                                         Make Offer
                                     </button>
                                 )}
@@ -484,7 +484,7 @@ export default function ApplicationDetailClient({
                                         className="btn btn-sm btn-block btn-success gap-2"
                                         disabled={loading}
                                     >
-                                        <i className="fa-solid fa-check-circle"></i>
+                                        <i className="fa-duotone fa-regular fa-check-circle"></i>
                                         Mark as Hired
                                     </button>
                                 )}
@@ -494,7 +494,7 @@ export default function ApplicationDetailClient({
                                         className="btn btn-sm btn-block btn-error gap-2"
                                         disabled={loading}
                                     >
-                                        <i className="fa-solid fa-xmark"></i>
+                                        <i className="fa-duotone fa-regular fa-xmark"></i>
                                         Reject
                                     </button>
                                 )}
@@ -521,7 +521,7 @@ export default function ApplicationDetailClient({
                                     </div>
                                     {relationship.consent_given && (
                                         <div className="text-success">
-                                            <i className="fa-solid fa-check mr-1"></i>
+                                            <i className="fa-duotone fa-regular fa-check mr-1"></i>
                                             Right to Represent consent given
                                         </div>
                                     )}

@@ -63,7 +63,7 @@ export function DeclineModal({ isOpen, onClose, onSubmit, jobTitle }: DeclineMod
         <div className="modal modal-open">
             <div className="modal-box max-w-2xl">
                 <h3 className="font-bold text-lg mb-4">
-                    <i className="fa-solid fa-times-circle text-error"></i>
+                    <i className="fa-duotone fa-regular fa-times-circle text-error"></i>
                     {' '}Decline Opportunity
                 </h3>
 
@@ -80,7 +80,7 @@ export function DeclineModal({ isOpen, onClose, onSubmit, jobTitle }: DeclineMod
 
                 {error && (
                     <div className="alert alert-error mb-4">
-                        <i className="fa-solid fa-circle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                         <span>{error}</span>
                     </div>
                 )}
@@ -144,7 +144,7 @@ export function DeclineModal({ isOpen, onClose, onSubmit, jobTitle }: DeclineMod
                                 </>
                             ) : (
                                 <>
-                                    <i className="fa-solid fa-times"></i>
+                                    <i className="fa-duotone fa-regular fa-times"></i>
                                     Decline Opportunity
                                 </>
                             )}

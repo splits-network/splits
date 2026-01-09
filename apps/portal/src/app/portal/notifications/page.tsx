@@ -49,7 +49,7 @@ function NotificationCard({
                             w-12 h-12 rounded-full flex items-center justify-center
                             ${!notification.read ? 'bg-primary text-primary-content' : 'bg-base-300'}
                         `}>
-                            <i className={`fa-solid ${getNotificationIcon(notification.category)} text-lg`}></i>
+                            <i className={`fa-duotone fa-regular ${getNotificationIcon(notification.category)} text-lg`}></i>
                         </div>
                     </div>
 
@@ -89,7 +89,7 @@ function NotificationCard({
                                     }}
                                     aria-label="Dismiss"
                                 >
-                                    <i className="fa-solid fa-times"></i>
+                                    <i className="fa-duotone fa-regular fa-times"></i>
                                 </button>
                             </div>
                         </div>
@@ -97,7 +97,7 @@ function NotificationCard({
                             <div className="mt-3">
                                 <span className="text-sm text-primary inline-flex items-center gap-1">
                                     {notification.action_label}
-                                    <i className="fa-solid fa-arrow-right text-xs"></i>
+                                    <i className="fa-duotone fa-regular fa-arrow-right text-xs"></i>
                                 </span>
                             </div>
                         )}
@@ -129,7 +129,7 @@ function NotificationRow({
                         w-10 h-10 rounded-full flex items-center justify-center shrink-0
                         ${!notification.read ? 'bg-primary text-primary-content' : 'bg-base-300'}
                     `}>
-                        <i className={`fa-solid ${getNotificationIcon(notification.category)}`}></i>
+                        <i className={`fa-duotone fa-regular ${getNotificationIcon(notification.category)}`}></i>
                     </div>
                     <div className="min-w-0">
                         <p className={`truncate ${!notification.read ? 'font-semibold' : ''}`}>
@@ -176,7 +176,7 @@ function NotificationRow({
                         }}
                         aria-label="Dismiss"
                     >
-                        <i className="fa-solid fa-times"></i>
+                        <i className="fa-duotone fa-regular fa-times"></i>
                     </button>
                 </div>
             </td>
@@ -320,7 +320,7 @@ export default function NotificationsPage() {
                                 </>
                             ) : (
                                 <>
-                                    <i className="fa-solid fa-check-double"></i>
+                                    <i className="fa-duotone fa-regular fa-check-double"></i>
                                     Mark All Read
                                 </>
                             )}
@@ -371,13 +371,13 @@ export default function NotificationsPage() {
                             className={`btn btn-sm ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
                             onClick={() => setViewMode('grid')}
                         >
-                            <i className="fa-solid fa-grip"></i>
+                            <i className="fa-duotone fa-regular fa-grip"></i>
                         </button>
                         <button
                             className={`btn btn-sm ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
                             onClick={() => setViewMode('table')}
                         >
-                            <i className="fa-solid fa-list"></i>
+                            <i className="fa-duotone fa-regular fa-list"></i>
                         </button>
                     </div>
                 </div>

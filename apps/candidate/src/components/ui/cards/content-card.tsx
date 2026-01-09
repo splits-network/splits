@@ -86,7 +86,7 @@ export function ContentCard({
                             <div className="flex items-center gap-3">
                                 {icon && (
                                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                                        <i className={`fa-solid ${icon} text-primary`}></i>
+                                        <i className={`fa-duotone fa-regular ${icon} text-primary`}></i>
                                     </div>
                                 )}
                                 <div>
@@ -127,7 +127,7 @@ export function ContentCard({
                     <div className="flex items-center gap-3">
                         {icon && (
                             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                                <i className={`fa-solid ${icon} text-primary`}></i>
+                                <i className={`fa-duotone fa-regular ${icon} text-primary`}></i>
                             </div>
                         )}
                         <div>

@@ -237,7 +237,7 @@ export default function ApplicationWizard({ job, candidate, draft, questions, do
 
       {/* Auto-save indicator */}
       <div className="mt-4 text-center text-sm text-base-content/60">
-        <i className="fa-solid fa-save"></i> Changes are automatically saved as you go
+        <i className="fa-duotone fa-regular fa-save"></i> Changes are automatically saved as you go
       </div>
     </div>
   );
@@ -293,7 +293,7 @@ export default function StepDocuments({ documents, selected, primaryResumeId, on
   return (
     <div className="space-y-6">
       <div className="alert alert-info">
-        <i className="fa-solid fa-info-circle"></i>
+        <i className="fa-duotone fa-regular fa-info-circle"></i>
         <span>Select at least one resume to continue. You can also include cover letters and portfolio items.</span>
       </div>
 
@@ -304,7 +304,7 @@ export default function StepDocuments({ documents, selected, primaryResumeId, on
           <div className="card bg-base-200 p-4">
             <p className="text-center mb-4">No resumes uploaded yet</p>
             <label className="btn btn-primary">
-              <i className="fa-solid fa-upload mr-2"></i>
+              <i className="fa-duotone fa-regular fa-upload mr-2"></i>
               Upload Resume
               <input type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={handleUpload} />
             </label>
@@ -333,7 +333,7 @@ export default function StepDocuments({ documents, selected, primaryResumeId, on
                         onClick={() => setPrimaryResume(doc.id)}
                       >
                         {primaryResumeId === doc.id ? (
-                          <><i className="fa-solid fa-star"></i> Primary</>
+                          <><i className="fa-duotone fa-regular fa-star"></i> Primary</>
                         ) : (
                           'Set as Primary'
                         )}
@@ -363,7 +363,7 @@ export default function StepDocuments({ documents, selected, primaryResumeId, on
           disabled={!canProceed}
         >
           Continue to {questions.length > 0 ? 'Questions' : 'Review'}
-          <i className="fa-solid fa-arrow-right"></i>
+          <i className="fa-duotone fa-regular fa-arrow-right"></i>
         </button>
       </div>
     </div>
@@ -487,7 +487,7 @@ export default function StepQuestions({ questions, answers, onChange, onNext, on
   return (
     <div className="space-y-8">
       <div className="alert alert-info">
-        <i className="fa-solid fa-clipboard-question"></i>
+        <i className="fa-duotone fa-regular fa-clipboard-question"></i>
         <span>Please answer all required questions to continue.</span>
       </div>
 
@@ -506,7 +506,7 @@ export default function StepQuestions({ questions, answers, onChange, onNext, on
       {/* Navigation */}
       <div className="flex justify-between pt-6">
         <button className="btn btn-ghost" onClick={onBack}>
-          <i className="fa-solid fa-arrow-left"></i>
+          <i className="fa-duotone fa-regular fa-arrow-left"></i>
           Back to Documents
         </button>
         <button
@@ -515,7 +515,7 @@ export default function StepQuestions({ questions, answers, onChange, onNext, on
           disabled={!allRequiredAnswered}
         >
           Continue to Review
-          <i className="fa-solid fa-arrow-right"></i>
+          <i className="fa-duotone fa-regular fa-arrow-right"></i>
         </button>
       </div>
     </div>
@@ -539,13 +539,13 @@ export default function StepReview({ job, formData, documents, questions, onSubm
   return (
     <div className="space-y-6">
       <div className="alert alert-success">
-        <i className="fa-solid fa-check-circle"></i>
+        <i className="fa-duotone fa-regular fa-check-circle"></i>
         <span>Review your application before submitting</span>
       </div>
 
       {error && (
         <div className="alert alert-error">
-          <i className="fa-solid fa-exclamation-circle"></i>
+          <i className="fa-duotone fa-regular fa-exclamation-circle"></i>
           <span>{error}</span>
         </div>
       )}
@@ -569,7 +569,7 @@ export default function StepReview({ job, formData, documents, questions, onSubm
           <div className="space-y-2">
             {selectedDocs.map(doc => (
               <div key={doc.id} className="flex items-center gap-2">
-                <i className={`fa-solid ${doc.id === primaryResume?.id ? 'fa-star text-warning' : 'fa-file'}`}></i>
+                <i className={`fa-duotone fa-regular ${doc.id === primaryResume?.id ? 'fa-star text-warning' : 'fa-file'}`}></i>
                 <span>{doc.file_name}</span>
                 {doc.id === primaryResume?.id && (
                   <span className="badge badge-sm badge-warning">Primary</span>
@@ -608,7 +608,7 @@ export default function StepReview({ job, formData, documents, questions, onSubm
       {/* Navigation */}
       <div className="flex justify-between pt-6">
         <button className="btn btn-ghost" onClick={onBack} disabled={submitting}>
-          <i className="fa-solid fa-arrow-left"></i>
+          <i className="fa-duotone fa-regular fa-arrow-left"></i>
           Back
         </button>
         <button
@@ -624,7 +624,7 @@ export default function StepReview({ job, formData, documents, questions, onSubm
           ) : (
             <>
               Submit Application
-              <i className="fa-solid fa-paper-plane"></i>
+              <i className="fa-duotone fa-regular fa-paper-plane"></i>
             </>
           )}
         </button>

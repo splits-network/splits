@@ -70,7 +70,7 @@ export function TrendBadge({
     return (
         <span className={`inline-flex items-center font-medium ${colorClass} ${sizeClasses[size]} ${className}`}>
             {showIcon && (
-                <i className={`fa-solid ${icon} text-[0.75em]`}></i>
+                <i className={`fa-duotone fa-regular ${icon} text-[0.75em]`}></i>
             )}
             <span>{isPositive ? '+' : isNegative ? '-' : ''}{formattedValue}</span>
             {label && (

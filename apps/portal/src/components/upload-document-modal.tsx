@@ -90,7 +90,7 @@ export default function UploadDocumentModal({
 
                 {error && (
                     <div className="alert alert-error mb-4">
-                        <i className="fa-solid fa-circle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                         <span>{error}</span>
                     </div>
                 )}
@@ -130,7 +130,7 @@ export default function UploadDocumentModal({
                         />
                         {file && (
                             <div className="mt-2 flex items-center gap-2">
-                                <i className="fa-solid fa-file text-primary"></i>
+                                <i className="fa-duotone fa-regular fa-file text-primary"></i>
                                 <span className="text-sm">{file.name}</span>
                                 <span className="text-xs text-base-content/60">
                                     ({(file.size / (1024 * 1024)).toFixed(2)} MB)
@@ -145,7 +145,7 @@ export default function UploadDocumentModal({
                                         }
                                     }}
                                 >
-                                    <i className="fa-solid fa-times"></i>
+                                    <i className="fa-duotone fa-regular fa-times"></i>
                                 </button>
                             </div>
                         )}
@@ -172,7 +172,7 @@ export default function UploadDocumentModal({
                                 </>
                             ) : (
                                 <>
-                                    <i className="fa-solid fa-upload"></i>
+                                    <i className="fa-duotone fa-regular fa-upload"></i>
                                     Upload
                                 </>
                             )}

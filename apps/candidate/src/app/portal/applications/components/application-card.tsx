@@ -80,19 +80,19 @@ export default function ApplicationCard({ application: app, isActive = true }: A
                     )}
                     <div className="space-y-1">
                         <p className="text-sm font-semibold text-base-content/70 flex items-center gap-2">
-                            <i className="fa-solid fa-building text-primary"></i>
+                            <i className="fa-duotone fa-regular fa-building text-primary"></i>
                             {app.job?.company?.name || 'Unknown Company'}
                         </p>
                         {app.job?.company?.headquarters_location && (
                             <p className="text-xs text-base-content/50 flex items-center gap-1.5">
-                                <i className="fa-solid fa-location-dot text-xs"></i>
+                                <i className="fa-duotone fa-regular fa-location-dot text-xs"></i>
                                 {app.job.company.headquarters_location}
                             </p>
                         )}
                         {app.job?.company?.industry && (
                             <div>
                                 <span className="badge badge-outline badge-xs gap-1">
-                                    <i className="fa-solid fa-industry text-xs"></i>
+                                    <i className="fa-duotone fa-regular fa-industry text-xs"></i>
                                     {app.job.company.industry}
                                 </span>
                             </div>
@@ -104,7 +104,7 @@ export default function ApplicationCard({ application: app, isActive = true }: A
                 {app.recruiter && (
                     <div className="bg-linear-to-r from-info/10 to-info/5 rounded-lg p-3 border border-info/20">
                         <div className="flex items-center gap-2">
-                            <i className="fa-solid fa-user text-info"></i>
+                            <i className="fa-duotone fa-regular fa-user text-info"></i>
                             <span className="font-medium text-info">
                                 {app.recruiter.first_name} {app.recruiter.last_name}
                             </span>
@@ -116,7 +116,7 @@ export default function ApplicationCard({ application: app, isActive = true }: A
                 {app.recruiter_notes && (
                     <div className={`rounded-lg p-3 border ${isActive ? 'alert alert-info' : 'bg-base-200 border-base-300'}`}>
                         <div className="flex items-start gap-2">
-                            <i className="fa-solid fa-comment text-info mt-0.5"></i>
+                            <i className="fa-duotone fa-regular fa-comment text-info mt-0.5"></i>
                             <span className="text-sm">{app.recruiter_notes}</span>
                         </div>
                     </div>
@@ -129,12 +129,12 @@ export default function ApplicationCard({ application: app, isActive = true }: A
                 <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm pb-3 border-b border-base-300">
                     {app.job?.location && (
                         <span className="flex items-center gap-1.5 text-base-content/70">
-                            <i className="fa-solid fa-location-dot text-primary"></i>
+                            <i className="fa-duotone fa-regular fa-location-dot text-primary"></i>
                             <span className="font-medium">{app.job.location}</span>
                         </span>
                     )}
                     <span className="flex items-center gap-1.5 text-base-content/70">
-                        <i className="fa-solid fa-calendar text-primary"></i>
+                        <i className="fa-duotone fa-regular fa-calendar text-primary"></i>
                         <span className="font-medium">Applied {formatDate(app.created_at)}</span>
                     </span>
                 </div>
@@ -150,7 +150,7 @@ export default function ApplicationCard({ application: app, isActive = true }: A
                                 href={`/portal/applications/${app.id}`}
                                 className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform"
                             >
-                                <i className="fa-solid fa-eye"></i>
+                                <i className="fa-duotone fa-regular fa-eye"></i>
                                 View Details
                             </Link>
                         </div>

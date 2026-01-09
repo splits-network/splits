@@ -164,7 +164,7 @@ export default function RoleAssignmentsPage() {
             {/* Header */}
             <div>
                 <Link href="/admin" className="text-sm text-primary hover:underline mb-2 inline-block">
-                    <i className="fa-solid fa-arrow-left mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left mr-2"></i>
                     Back to Admin Dashboard
                 </Link>
                 <h1 className="text-3xl font-bold">Role Assignments</h1>
@@ -234,7 +234,7 @@ export default function RoleAssignmentsPage() {
                                 <span className="loading loading-spinner loading-sm"></span>
                             ) : (
                                 <>
-                                    <i className="fa-solid fa-link"></i>
+                                    <i className="fa-duotone fa-regular fa-link"></i>
                                     Assign Recruiter
                                 </>
                             )}
@@ -282,7 +282,7 @@ export default function RoleAssignmentsPage() {
                                                             onClick={() => unassignRecruiter(selectedJob, recruiterId)}
                                                             className="btn btn-xs btn-error"
                                                         >
-                                                            <i className="fa-solid fa-unlink"></i>
+                                                            <i className="fa-duotone fa-regular fa-unlink"></i>
                                                             Remove
                                                         </button>
                                                     </td>

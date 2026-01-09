@@ -211,7 +211,7 @@ export default function SubmitToJobWizard({
                         </p>
                     </div>
                     <button onClick={onClose} className="btn btn-sm btn-circle btn-ghost">
-                        <i className="fa-solid fa-xmark"></i>
+                        <i className="fa-duotone fa-regular fa-xmark"></i>
                     </button>
                 </div>
 
@@ -231,7 +231,7 @@ export default function SubmitToJobWizard({
                 {/* Error Alert */}
                 {error && (
                     <div className="alert alert-error mb-4">
-                        <i className="fa-solid fa-circle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                         <span>{error}</span>
                     </div>
                 )}
@@ -290,7 +290,7 @@ export default function SubmitToJobWizard({
                                 </div>
                             ) : jobs.length === 0 ? (
                                 <div className="alert">
-                                    <i className="fa-solid fa-info-circle"></i>
+                                    <i className="fa-duotone fa-regular fa-info-circle"></i>
                                     <span>
                                         {debouncedSearch
                                             ? `No jobs found matching "${debouncedSearch}". Try a different search term.`
@@ -337,14 +337,14 @@ export default function SubmitToJobWizard({
                                                         </td>
                                                         <td>
                                                             <div className="flex items-center gap-2">
-                                                                <i className="fa-solid fa-building text-base-content/50"></i>
+                                                                <i className="fa-duotone fa-regular fa-building text-base-content/50"></i>
                                                                 {job.company_name || `Company ${job.company_id.substring(0, 8)}`}
                                                             </div>
                                                         </td>
                                                         <td>
                                                             {job.location ? (
                                                                 <div className="flex items-center gap-2">
-                                                                    <i className="fa-solid fa-location-dot text-base-content/50"></i>
+                                                                    <i className="fa-duotone fa-regular fa-location-dot text-base-content/50"></i>
                                                                     {job.location}
                                                                 </div>
                                                             ) : (
@@ -386,7 +386,7 @@ export default function SubmitToJobWizard({
                                                     onClick={() => setPage(Math.max(1, page - 1))}
                                                     disabled={page === 1}
                                                 >
-                                                    <i className="fa-solid fa-chevron-left"></i>
+                                                    <i className="fa-duotone fa-regular fa-chevron-left"></i>
                                                 </button>
                                                 <button className="join-item btn btn-sm">
                                                     Page {page}
@@ -396,7 +396,7 @@ export default function SubmitToJobWizard({
                                                     onClick={() => setPage(Math.min(totalPages, page + 1))}
                                                     disabled={page === totalPages}
                                                 >
-                                                    <i className="fa-solid fa-chevron-right"></i>
+                                                    <i className="fa-duotone fa-regular fa-chevron-right"></i>
                                                 </button>
                                             </div>
                                         </div>
@@ -411,7 +411,7 @@ export default function SubmitToJobWizard({
                         <div className="space-y-6">
                             {/* Selected Job Summary */}
                             <div className="alert alert-info">
-                                <i className="fa-solid fa-briefcase"></i>
+                                <i className="fa-duotone fa-regular fa-briefcase"></i>
                                 <div>
                                     <div className="font-semibold">{selectedJob.title}</div>
                                     <div className="text-sm">
@@ -444,7 +444,7 @@ export default function SubmitToJobWizard({
                                     </div>
                                 ) : length === 0 ? (
                                     <div className="alert">
-                                        <i className="fa-solid fa-info-circle"></i>
+                                        <i className="fa-duotone fa-regular fa-info-circle"></i>
                                         <span>No documents available for this candidate.</span>
                                     </div>
                                 ) : (
@@ -461,7 +461,7 @@ export default function SubmitToJobWizard({
                                                     onChange={() => toggleDocument(doc.id)}
                                                 />
                                                 <i
-                                                    className={`fa-solid ${doc.file_type === 'application/pdf'
+                                                    className={`fa-duotone fa-regular ${doc.file_type === 'application/pdf'
                                                         ? 'fa-file-pdf text-error'
                                                         : doc.file_type?.startsWith('image/')
                                                             ? 'fa-file-image text-info'
@@ -482,7 +482,7 @@ export default function SubmitToJobWizard({
                     {currentStep === 3 && selectedJob && (
                         <div className="space-y-6">
                             <div className="alert alert-info">
-                                <i className="fa-solid fa-info-circle"></i>
+                                <i className="fa-duotone fa-regular fa-info-circle"></i>
                                 <span>Review the details below. {candidateName} will receive an email notification and must approve this opportunity before it proceeds.</span>
                             </div>
 
@@ -490,7 +490,7 @@ export default function SubmitToJobWizard({
                             <div className="card bg-base-200">
                                 <div className="card-body">
                                     <h4 className="font-semibold mb-2">
-                                        <i className="fa-solid fa-user mr-2"></i>
+                                        <i className="fa-duotone fa-regular fa-user mr-2"></i>
                                         Candidate
                                     </h4>
                                     <div className="text-lg">{candidateName}</div>
@@ -501,24 +501,24 @@ export default function SubmitToJobWizard({
                             <div className="card bg-base-200">
                                 <div className="card-body">
                                     <h4 className="font-semibold mb-2">
-                                        <i className="fa-solid fa-briefcase mr-2"></i>
+                                        <i className="fa-duotone fa-regular fa-briefcase mr-2"></i>
                                         Job
                                     </h4>
                                     <div className="space-y-2">
                                         <div className="text-lg font-semibold">{selectedJob.title}</div>
                                         <div className="flex items-center gap-4 text-sm text-base-content/70">
                                             <span className="flex items-center gap-1">
-                                                <i className="fa-solid fa-building"></i>
+                                                <i className="fa-duotone fa-regular fa-building"></i>
                                                 {selectedJob.company_name || `Company ${selectedJob.company_id.substring(0, 8)}`}
                                             </span>
                                             {selectedJob.location && (
                                                 <span className="flex items-center gap-1">
-                                                    <i className="fa-solid fa-location-dot"></i>
+                                                    <i className="fa-duotone fa-regular fa-location-dot"></i>
                                                     {selectedJob.location}
                                                 </span>
                                             )}
                                             <span className="flex items-center gap-1">
-                                                <i className="fa-solid fa-money-bill"></i>
+                                                <i className="fa-duotone fa-regular fa-money-bill"></i>
                                                 {formatSalary(selectedJob.salary_min, selectedJob.salary_max)}
                                             </span>
                                         </div>
@@ -531,7 +531,7 @@ export default function SubmitToJobWizard({
                                 <div className="card bg-base-200">
                                     <div className="card-body">
                                         <h4 className="font-semibold mb-2">
-                                            <i className="fa-solid fa-message mr-2"></i>
+                                            <i className="fa-duotone fa-regular fa-message mr-2"></i>
                                             Your Pitch
                                         </h4>
                                         <div className="whitespace-pre-wrap text-sm">{notes}</div>
@@ -544,7 +544,7 @@ export default function SubmitToJobWizard({
                                 <div className="card bg-base-200">
                                     <div className="card-body">
                                         <h4 className="font-semibold mb-2">
-                                            <i className="fa-solid fa-paperclip mr-2"></i>
+                                            <i className="fa-duotone fa-regular fa-paperclip mr-2"></i>
                                             Attached Documents ({selectedDocIds.size})
                                         </h4>
                                         <ul className="space-y-1">
@@ -553,7 +553,7 @@ export default function SubmitToJobWizard({
                                                 .map((doc) => (
                                                     <li key={doc.id} className="flex items-center gap-2 text-sm">
                                                         <i
-                                                            className={`fa-solid ${doc.file_type === 'application/pdf'
+                                                            className={`fa-duotone fa-regular ${doc.file_type === 'application/pdf'
                                                                 ? 'fa-file-pdf text-error'
                                                                 : doc.file_type?.startsWith('image/')
                                                                     ? 'fa-file-image text-info'
@@ -579,14 +579,14 @@ export default function SubmitToJobWizard({
                     <div className="flex gap-2">
                         {currentStep > 1 && (
                             <button onClick={handleBack} className="btn" disabled={submitting}>
-                                <i className="fa-solid fa-chevron-left"></i>
+                                <i className="fa-duotone fa-regular fa-chevron-left"></i>
                                 Back
                             </button>
                         )}
                         {currentStep < 3 ? (
                             <button onClick={handleNext} className="btn btn-primary" disabled={!selectedJob}>
                                 Next
-                                <i className="fa-solid fa-chevron-right"></i>
+                                <i className="fa-duotone fa-regular fa-chevron-right"></i>
                             </button>
                         ) : (
                             <button onClick={handleSubmit} className="btn btn-primary" disabled={submitting}>
@@ -597,7 +597,7 @@ export default function SubmitToJobWizard({
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-paper-plane"></i>
+                                        <i className="fa-duotone fa-regular fa-paper-plane"></i>
                                         Send to Candidate
                                     </>
                                 )}

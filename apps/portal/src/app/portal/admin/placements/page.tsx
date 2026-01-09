@@ -84,7 +84,7 @@ export default function PlacementAuditPage() {
             {/* Header */}
             <div>
                 <Link href="/admin" className="text-sm text-primary hover:underline mb-2 inline-block">
-                    <i className="fa-solid fa-arrow-left mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left mr-2"></i>
                     Back to Admin Dashboard
                 </Link>
                 <h1 className="text-3xl font-bold">Placement Audit</h1>
@@ -161,7 +161,7 @@ export default function PlacementAuditPage() {
                 <ErrorState message={error} onRetry={refresh} />
             ) : placements.length === 0 ? (
                 <EmptyState
-                    icon="fa-solid fa-trophy"
+                    icon="fa-duotone fa-regular fa-trophy"
                     title="No placements found"
                     description={
                         search || filters.date_from || filters.date_to
@@ -237,11 +237,11 @@ export default function PlacementAuditPage() {
             {/* Export & Actions */}
             <div className="flex justify-end gap-2">
                 <button className="btn btn-outline" disabled>
-                    <i className="fa-solid fa-download"></i>
+                    <i className="fa-duotone fa-regular fa-download"></i>
                     Export CSV
                 </button>
                 <button className="btn btn-outline" disabled>
-                    <i className="fa-solid fa-file-pdf"></i>
+                    <i className="fa-duotone fa-regular fa-file-pdf"></i>
                     Export PDF
                 </button>
             </div>

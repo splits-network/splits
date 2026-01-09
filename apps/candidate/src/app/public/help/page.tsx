@@ -201,14 +201,14 @@ export default function HelpPage() {
                     How Can We <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-secondary">Help?</span>
                 </h1>
                 <p className="text-xl text-base-content/80 max-w-2xl mx-auto mb-8">
-                    Find answers to common questions about using Applicant 
+                    Find answers to common questions about using Applicant
                 </p>
 
                 {/* Search Bar */}
                 <div className="max-w-2xl mx-auto">
                     <div className="fieldset">
                         <div className="relative">
-                            <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-base-content/50"></i>
+                            <i className="fa-duotone fa-regular fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-base-content/50"></i>
                             <input
                                 type="text"
                                 className="input w-full pl-12 pr-4"
@@ -231,7 +231,7 @@ export default function HelpPage() {
                             className="card bg-base-100 shadow hover:shadow transition-shadow"
                         >
                             <div className="card-body items-center text-center p-6">
-                                <i className={`fa-solid ${category.icon} text-4xl text-primary mb-2`}></i>
+                                <i className={`fa-duotone fa-regular ${category.icon} text-4xl text-primary mb-2`}></i>
                                 <h3 className="font-semibold">{category.title}</h3>
                             </div>
                         </a>
@@ -245,7 +245,7 @@ export default function HelpPage() {
                     <div key={category.id} id={category.id}>
                         <div className="flex items-center gap-3 mb-6">
                             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                <i className={`fa-solid ${category.icon} text-2xl text-primary`}></i>
+                                <i className={`fa-duotone fa-regular ${category.icon} text-2xl text-primary`}></i>
                             </div>
                             <h2 className="text-3xl font-bold">{category.title}</h2>
                         </div>
@@ -270,7 +270,7 @@ export default function HelpPage() {
 
             {searchQuery && filteredCategories.length === 0 && (
                 <div className="text-center py-12">
-                    <i className="fa-solid fa-magnifying-glass text-6xl text-base-content/20 mb-4"></i>
+                    <i className="fa-duotone fa-regular fa-magnifying-glass text-6xl text-base-content/20 mb-4"></i>
                     <h3 className="text-2xl font-bold mb-2">No results found</h3>
                     <p className="text-base-content/60 mb-6">
                         We couldn't find any answers matching "{searchQuery}"
@@ -292,11 +292,11 @@ export default function HelpPage() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Link href="/contact" className="btn btn-primary btn-lg">
-                        <i className="fa-solid fa-envelope mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-envelope mr-2"></i>
                         Contact Support
                     </Link>
                     <a href="mailto:help@applicant.network" className="btn btn-outline btn-lg">
-                        <i className="fa-solid fa-at mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-at mr-2"></i>
                         Email Us
                     </a>
                 </div>

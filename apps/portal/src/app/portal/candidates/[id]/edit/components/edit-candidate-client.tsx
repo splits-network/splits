@@ -123,11 +123,11 @@ export default function EditCandidateClient({ candidateId }: EditCandidateClient
         return (
             <div className="space-y-4">
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
                 <Link href="/portal/candidates" className="btn btn-ghost">
-                    <i className="fa-solid fa-arrow-left"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
                     Back to Candidates
                 </Link>
             </div>
@@ -151,7 +151,7 @@ export default function EditCandidateClient({ candidateId }: EditCandidateClient
 
                     {error && (
                         <div className="alert alert-error mb-4">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <span>{error}</span>
                         </div>
                     )}
@@ -258,7 +258,7 @@ export default function EditCandidateClient({ candidateId }: EditCandidateClient
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-save"></i>
+                                        <i className="fa-duotone fa-regular fa-save"></i>
                                         Save Changes
                                     </>
                                 )}
@@ -272,7 +272,7 @@ export default function EditCandidateClient({ candidateId }: EditCandidateClient
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title text-lg mb-4">
-                                <i className="fa-solid fa-file-lines mr-2"></i>
+                                <i className="fa-duotone fa-regular fa-file-lines mr-2"></i>
                                 Documents
                             </h2>
                             <DocumentList

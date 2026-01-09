@@ -128,7 +128,7 @@ export default function AutomationControlsPage() {
                     </p>
                 </div>
                 <Link href="/admin" className="btn btn-ghost">
-                    <i className="fa-solid fa-arrow-left"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
                     Back to Admin
                 </Link>
             </div>
@@ -136,7 +136,7 @@ export default function AutomationControlsPage() {
             {/* Pending Approvals Alert */}
             {pendingExecutions.length > 0 && (
                 <div className="alert alert-warning">
-                    <i className="fa-solid fa-clock"></i>
+                    <i className="fa-duotone fa-regular fa-clock"></i>
                     <span>
                         <strong>{pendingExecutions.length}</strong> automation{pendingExecutions.length !== 1 ? 's' : ''} pending approval
                     </span>
@@ -149,14 +149,14 @@ export default function AutomationControlsPage() {
                     className={`tab ${activeTab === 'rules' ? 'tab-active' : ''}`}
                     onClick={() => setActiveTab('rules')}
                 >
-                    <i className="fa-solid fa-gears mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-gears mr-2"></i>
                     Automation Rules
                 </button>
                 <button
                     className={`tab ${activeTab === 'executions' ? 'tab-active' : ''}`}
                     onClick={() => setActiveTab('executions')}
                 >
-                    <i className="fa-solid fa-list-check mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-list-check mr-2"></i>
                     Pending Approvals
                     {pendingExecutions.length > 0 && (
                         <span className="badge badge-warning badge-sm ml-2">
@@ -179,7 +179,7 @@ export default function AutomationControlsPage() {
                                 <div className="overflow-x-auto">
                                     {rules.length === 0 ? (
                                         <div className="text-center py-8 text-base-content/70">
-                                            <i className="fa-solid fa-inbox text-4xl mb-4"></i>
+                                            <i className="fa-duotone fa-regular fa-inbox text-4xl mb-4"></i>
                                             <p>No automation rules configured</p>
                                         </div>
                                     ) : (
@@ -219,7 +219,7 @@ export default function AutomationControlsPage() {
                                                         <td>
                                                             {rule.requires_human_approval ? (
                                                                 <span className="badge badge-warning badge-sm">
-                                                                    <i className="fa-solid fa-user-check mr-1"></i>
+                                                                    <i className="fa-duotone fa-regular fa-user-check mr-1"></i>
                                                                     Required
                                                                 </span>
                                                             ) : (
@@ -250,7 +250,7 @@ export default function AutomationControlsPage() {
                                                                     onClick={() => toggleRuleStatus(rule.id, rule.status)}
                                                                     title={rule.status === 'active' ? 'Pause' : 'Activate'}
                                                                 >
-                                                                    <i className={`fa-solid fa-${rule.status === 'active' ? 'pause' : 'play'}`}></i>
+                                                                    <i className={`fa-duotone fa-regular fa-${rule.status === 'active' ? 'pause' : 'play'}`}></i>
                                                                 </button>
                                                             </div>
                                                         </td>
@@ -271,7 +271,7 @@ export default function AutomationControlsPage() {
                                 <div className="overflow-x-auto">
                                     {pendingExecutions.length === 0 ? (
                                         <div className="text-center py-8 text-base-content/70">
-                                            <i className="fa-solid fa-check-circle text-4xl mb-4"></i>
+                                            <i className="fa-duotone fa-regular fa-check-circle text-4xl mb-4"></i>
                                             <p>No pending approvals</p>
                                         </div>
                                     ) : (
@@ -317,14 +317,14 @@ export default function AutomationControlsPage() {
                                                                     className="btn btn-sm btn-success"
                                                                     onClick={() => approveExecution(execution.id)}
                                                                 >
-                                                                    <i className="fa-solid fa-check"></i>
+                                                                    <i className="fa-duotone fa-regular fa-check"></i>
                                                                     Approve
                                                                 </button>
                                                                 <button
                                                                     className="btn btn-sm btn-error"
                                                                     onClick={() => rejectExecution(execution.id)}
                                                                 >
-                                                                    <i className="fa-solid fa-times"></i>
+                                                                    <i className="fa-duotone fa-regular fa-times"></i>
                                                                     Reject
                                                                 </button>
                                                             </div>

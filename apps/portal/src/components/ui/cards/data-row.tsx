@@ -22,7 +22,7 @@ export function DataRow({ label, value, trend, icon }: DataRowProps) {
     return (
         <div className="flex items-center justify-between py-2">
             <span className="text-sm text-base-content/70 flex items-center gap-2">
-                {icon && <i className={`fa-solid ${icon} text-xs`}></i>}
+                {icon && <i className={`fa-duotone fa-regular ${icon} text-xs`}></i>}
                 {label}
             </span>
             <div className="flex items-center gap-2">

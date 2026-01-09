@@ -104,7 +104,7 @@ const [stats, setStats] = useState({
 ```tsx
 <div className="flex flex-col items-center gap-4">
     <Link href="/jobs" className="btn btn-primary btn-lg gap-2 shadow-lg hover:shadow-xl transition-all">
-        <i className="fa-solid fa-magnifying-glass"></i>
+        <i className="fa-duotone fa-regular fa-magnifying-glass"></i>
         Explore Open Positions
     </Link>
     <p className="text-sm text-base-content/60">
@@ -221,7 +221,7 @@ const [stats, setStats] = useState({
 // Command palette style search (Cmd+K / Ctrl+K)
 <div className="hidden lg:flex flex-1 mx-8 max-w-md">
     <label className="input input-sm flex items-center gap-2 w-full bg-base-200/50">
-        <i className="fa-solid fa-search text-base-content/40"></i>
+        <i className="fa-duotone fa-regular fa-search text-base-content/40"></i>
         <input 
             type="text" 
             className="grow" 
@@ -262,7 +262,7 @@ const [stats, setStats] = useState({
     <div className="card bg-gradient-to-r from-primary to-secondary text-white shadow-xl mb-8">
         <div className="card-body">
             <h2 className="card-title text-2xl">
-                <i className="fa-solid fa-wand-magic-sparkles"></i>
+                <i className="fa-duotone fa-regular fa-wand-magic-sparkles"></i>
                 Let's get you started!
             </h2>
             <p className="opacity-90">Complete these steps to maximize your job search success</p>
@@ -309,12 +309,12 @@ const [stats, setStats] = useState({
                 <p className="text-sm text-base-content/70 mb-1">Applications</p>
                 <p className="text-3xl font-bold">{stapplications}</p>
                 <p className="text-xs text-success flex items-center gap-1 mt-1">
-                    <i className="fa-solid fa-arrow-up"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-up"></i>
                     +3 this week
                 </p>
             </div>
             <div className="flex flex-col items-end">
-                <i className="fa-solid fa-file-lines text-4xl text-primary"></i>
+                <i className="fa-duotone fa-regular fa-file-lines text-4xl text-primary"></i>
                 {/* Mini sparkline chart */}
                 <Sparkline data={weeklyApplications} />
             </div>
@@ -330,7 +330,7 @@ const [stats, setStats] = useState({
 <div className="card bg-base-100 shadow">
     <div className="card-body">
         <h2 className="card-title">
-            <i className="fa-solid fa-clock"></i>
+            <i className="fa-duotone fa-regular fa-clock"></i>
             Recent Activity
         </h2>
         <ul className="timeline timeline-vertical timeline-compact">
@@ -340,7 +340,7 @@ const [stats, setStats] = useState({
                         {formatRelativeTime(activity.timestamp)}
                     </div>
                     <div className="timeline-middle">
-                        <i className={`fa-solid ${activity.icon} text-${activity.color}`}></i>
+                        <i className={`fa-duotone fa-regular ${activity.icon} text-${activity.color}`}></i>
                     </div>
                     <div className="timeline-end timeline-box">
                         {activity.message}
@@ -424,7 +424,7 @@ const quickActions = useMemo(() => {
                     className="p-3 hover:bg-base-200 cursor-pointer flex items-center gap-2"
                     onClick={() => applySearch(suggestion.value)}
                 >
-                    <i className={`fa-solid ${suggestion.type === 'job' ? 'fa-briefcase' : 'fa-building'}`}></i>
+                    <i className={`fa-duotone fa-regular ${suggestion.type === 'job' ? 'fa-briefcase' : 'fa-building'}`}></i>
                     <div>
                         <div className="font-medium">{suggestion.title}</div>
                         <div className="text-xs text-base-content/60">{suggestion.subtitle}</div>
@@ -497,16 +497,16 @@ useEffect(() => {
         {/* Key Details */}
         <div className="flex flex-wrap gap-2 mt-3">
             <span className="badge badge-ghost gap-1">
-                <i className="fa-solid fa-location-dot"></i>
+                <i className="fa-duotone fa-regular fa-location-dot"></i>
                 {job.location || 'Remote'}
             </span>
             <span className="badge badge-ghost gap-1">
-                <i className="fa-solid fa-clock"></i>
+                <i className="fa-duotone fa-regular fa-clock"></i>
                 {job.employment_type}
             </span>
             {job.salary_min && job.salary_max && (
                 <span className="badge badge-success badge-outline gap-1">
-                    <i className="fa-solid fa-dollar-sign"></i>
+                    <i className="fa-duotone fa-regular fa-dollar-sign"></i>
                     {formatSalary(job.salary_min)} - {formatSalary(job.salary_max)}
                 </span>
             )}
@@ -554,7 +554,7 @@ useEffect(() => {
     <div className="card-body">
         <div className="flex justify-between items-center">
             <h2 className="card-title">
-                <i className="fa-solid fa-bookmark"></i>
+                <i className="fa-duotone fa-regular fa-bookmark"></i>
                 Saved Jobs
             </h2>
             <Link href="/saved-jobs" className="link link-primary text-sm">
@@ -567,7 +567,7 @@ useEffect(() => {
 
 // Job alert setup
 <div className="alert bg-primary/10 border-primary/20">
-    <i className="fa-solid fa-bell text-primary"></i>
+    <i className="fa-duotone fa-regular fa-bell text-primary"></i>
     <div>
         <h3 className="font-bold">Get notified about new jobs</h3>
         <p className="text-sm">Set up alerts based on your current search</p>
@@ -594,7 +594,7 @@ useEffect(() => {
             {/* Profile completeness */}
             <div className="flex items-center justify-between">
                 <span className="flex items-center gap-2">
-                    <i className={`fa-solid ${profileComplete ? 'fa-check-circle text-success' : 'fa-circle-exclamation text-warning'}`}></i>
+                    <i className={`fa-duotone fa-regular ${profileComplete ? 'fa-check-circle text-success' : 'fa-circle-exclamation text-warning'}`}></i>
                     Profile Complete
                 </span>
                 {!profileComplete && (
@@ -605,7 +605,7 @@ useEffect(() => {
             {/* Resume uploaded */}
             <div className="flex items-center justify-between">
                 <span className="flex items-center gap-2">
-                    <i className={`fa-solid ${hasResume ? 'fa-check-circle text-success' : 'fa-circle-exclamation text-warning'}`}></i>
+                    <i className={`fa-duotone fa-regular ${hasResume ? 'fa-check-circle text-success' : 'fa-circle-exclamation text-warning'}`}></i>
                     Resume Uploaded
                 </span>
                 {!hasResume && (
@@ -618,7 +618,7 @@ useEffect(() => {
             {/* Skills match */}
             <div className="flex items-center justify-between">
                 <span className="flex items-center gap-2">
-                    <i className="fa-solid fa-chart-pie text-info"></i>
+                    <i className="fa-duotone fa-regular fa-chart-pie text-info"></i>
                     Skills Match: {matchPercentage}%
                 </span>
                 <div className="w-24">
@@ -665,7 +665,7 @@ useEffect(() => {
         {/* Success animation */}
         <div className="mb-6">
             <div className="w-24 h-24 mx-auto rounded-full bg-success/20 flex items-center justify-center">
-                <i className="fa-solid fa-check text-5xl text-success animate-bounce"></i>
+                <i className="fa-duotone fa-regular fa-check text-5xl text-success animate-bounce"></i>
             </div>
         </div>
         
@@ -680,15 +680,15 @@ useEffect(() => {
                 <h3 className="font-bold text-sm mb-2">What happens next?</h3>
                 <ul className="text-sm text-left space-y-2">
                     <li className="flex items-center gap-2">
-                        <i className="fa-solid fa-envelope text-primary"></i>
+                        <i className="fa-duotone fa-regular fa-envelope text-primary"></i>
                         Your recruiter will review your application within 24-48 hours
                     </li>
                     <li className="flex items-center gap-2">
-                        <i className="fa-solid fa-bell text-primary"></i>
+                        <i className="fa-duotone fa-regular fa-bell text-primary"></i>
                         You'll receive email updates on your application status
                     </li>
                     <li className="flex items-center gap-2">
-                        <i className="fa-solid fa-comments text-primary"></i>
+                        <i className="fa-duotone fa-regular fa-comments text-primary"></i>
                         Your recruiter may reach out for additional information
                     </li>
                 </ul>
@@ -698,7 +698,7 @@ useEffect(() => {
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/applications" className="btn btn-primary">
-                <i className="fa-solid fa-list-check"></i>
+                <i className="fa-duotone fa-regular fa-list-check"></i>
                 View My Applications
             </Link>
             <Link href="/jobs" className="btn btn-ghost">
@@ -752,7 +752,7 @@ useEffect(() => {
             <span key={skill} className="badge badge-primary gap-1">
                 {skill}
                 <button onClick={() => removeSkill(skill)} className="hover:text-error">
-                    <i className="fa-solid fa-times"></i>
+                    <i className="fa-duotone fa-regular fa-times"></i>
                 </button>
             </span>
         ))}
@@ -810,7 +810,7 @@ useEffect(() => {
         className="btn btn-outline btn-sm gap-2"
         onClick={() => setShowPreview(true)}
     >
-        <i className="fa-solid fa-eye"></i>
+        <i className="fa-duotone fa-regular fa-eye"></i>
         View as Recruiter
     </button>
 </div>
@@ -819,7 +819,7 @@ useEffect(() => {
 <dialog className={`modal ${showPreview ? 'modal-open' : ''}`}>
     <div className="modal-box max-w-3xl">
         <h3 className="font-bold text-lg mb-4">
-            <i className="fa-solid fa-user-tie mr-2"></i>
+            <i className="fa-duotone fa-regular fa-user-tie mr-2"></i>
             Recruiter View
         </h3>
         <ProfilePreview profile={formData} />
@@ -840,19 +840,19 @@ useEffect(() => {
 // Add mobile dock navigation
 <div className="dock dock-bottom lg:hidden">
     <Link href="/portal/dashboard" className={currentPath === '/portal/dashboard' ? 'dock-active' : ''}>
-        <i className="fa-solid fa-gauge"></i>
+        <i className="fa-duotone fa-regular fa-gauge"></i>
         <span className="dock-label">Dashboard</span>
     </Link>
     <Link href="/jobs" className={currentPath.startsWith('/jobs') ? 'dock-active' : ''}>
-        <i className="fa-solid fa-briefcase"></i>
+        <i className="fa-duotone fa-regular fa-briefcase"></i>
         <span className="dock-label">Jobs</span>
     </Link>
     <Link href="/applications" className={currentPath.startsWith('/applications') ? 'dock-active' : ''}>
-        <i className="fa-solid fa-file-lines"></i>
+        <i className="fa-duotone fa-regular fa-file-lines"></i>
         <span className="dock-label">Applications</span>
     </Link>
     <Link href="/profile" className={currentPath === '/profile' ? 'dock-active' : ''}>
-        <i className="fa-solid fa-user"></i>
+        <i className="fa-duotone fa-regular fa-user"></i>
         <span className="dock-label">Profile</span>
     </Link>
 </div>
@@ -890,10 +890,10 @@ useEffect(() => {
 
 // Indicator overlays
 <div className="swipe-indicator-left bg-error/20 text-error">
-    <i className="fa-solid fa-times"></i> Skip
+    <i className="fa-duotone fa-regular fa-times"></i> Skip
 </div>
 <div className="swipe-indicator-right bg-success/20 text-success">
-    <i className="fa-solid fa-bookmark"></i> Save
+    <i className="fa-duotone fa-regular fa-bookmark"></i> Save
 </div>
 ```
 
@@ -1054,13 +1054,13 @@ function OnboardingStep({ completed, icon, title, action }: OnboardingStepProps)
         <div className={`flex items-center justify-between p-3 rounded-lg ${completed ? 'bg-white/10' : 'bg-white/20'}`}>
             <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${completed ? 'bg-success' : 'bg-white/20'}`}>
-                    <i className={`fa-solid ${completed ? 'fa-check' : icon}`}></i>
+                    <i className={`fa-duotone fa-regular ${completed ? 'fa-check' : icon}`}></i>
                 </div>
                 <span className={completed ? 'line-through opacity-70' : ''}>{title}</span>
             </div>
             {!completed && (
                 <Link href={action} className="btn btn-ghost btn-sm">
-                    Start <i className="fa-solid fa-arrow-right"></i>
+                    Start <i className="fa-duotone fa-regular fa-arrow-right"></i>
                 </Link>
             )}
         </div>
@@ -1094,7 +1094,7 @@ function CommandPalette({ isOpen, onClose }) {
             <div className="modal-box max-w-2xl p-0">
                 <div className="p-4 border-b border-base-300">
                     <label className="input flex items-center gap-2">
-                        <i className="fa-solid fa-search"></i>
+                        <i className="fa-duotone fa-regular fa-search"></i>
                         <input
                             type="text"
                             className="grow"

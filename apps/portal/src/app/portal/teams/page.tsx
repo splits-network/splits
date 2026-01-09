@@ -52,7 +52,7 @@ function TeamCard({ team }: { team: Team }) {
 
                 <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2 text-base-content/70">
-                        <i className="fa-solid fa-users w-4"></i>
+                        <i className="fa-duotone fa-regular fa-users w-4"></i>
                         <span>
                             {team.active_member_count} active member{team.active_member_count !== 1 ? 's' : ''}
                             {team.member_count !== team.active_member_count && (
@@ -64,19 +64,19 @@ function TeamCard({ team }: { team: Team }) {
                     </div>
 
                     <div className="flex items-center gap-2 text-base-content/70">
-                        <i className="fa-solid fa-briefcase w-4"></i>
+                        <i className="fa-duotone fa-regular fa-briefcase w-4"></i>
                         <span>{team.total_placements} placement{team.total_placements !== 1 ? 's' : ''}</span>
                     </div>
 
                     <div className="flex items-center gap-2 text-base-content/70">
-                        <i className="fa-solid fa-dollar-sign w-4"></i>
+                        <i className="fa-duotone fa-regular fa-dollar-sign w-4"></i>
                         <span>{formatCurrency(team.total_revenue)} revenue</span>
                     </div>
                 </div>
 
                 <div className="card-actions justify-end mt-4">
                     <span className="text-sm text-primary">
-                        View details <i className="fa-solid fa-arrow-right ml-1"></i>
+                        View details <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                     </span>
                 </div>
             </div>
@@ -111,7 +111,7 @@ function TeamRow({ team }: { team: Team }) {
             </td>
             <td>
                 <div className="flex items-center gap-2">
-                    <i className="fa-solid fa-users text-base-content/50"></i>
+                    <i className="fa-duotone fa-regular fa-users text-base-content/50"></i>
                     <span>{team.active_member_count}</span>
                     {team.member_count !== team.active_member_count && (
                         <span className="text-base-content/50 text-xs">/{team.member_count}</span>
@@ -126,7 +126,7 @@ function TeamRow({ team }: { team: Team }) {
             </td>
             <td>
                 <Link href={`/teams/${team.id}`} className="btn btn-ghost btn-sm">
-                    <i className="fa-solid fa-arrow-right"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-right"></i>
                 </Link>
             </td>
         </tr>
@@ -237,7 +237,7 @@ export default function TeamsPage() {
                     className="btn btn-primary"
                     onClick={() => setShowCreateModal(true)}
                 >
-                    <i className="fa-solid fa-plus"></i>
+                    <i className="fa-duotone fa-regular fa-plus"></i>
                     Create Team
                 </button>
             </div>
@@ -248,23 +248,23 @@ export default function TeamsPage() {
                     <StatCard
                         title="Teams"
                         value={teams.length}
-                        icon="fa-solid fa-users"
+                        icon="fa-duotone fa-regular fa-users"
                     />
                     <StatCard
                         title="Total Members"
                         value={totalMembers}
-                        icon="fa-solid fa-user-group"
+                        icon="fa-duotone fa-regular fa-user-group"
                     />
                     <StatCard
                         title="Total Placements"
                         value={totalPlacements}
-                        icon="fa-solid fa-trophy"
+                        icon="fa-duotone fa-regular fa-trophy"
                         color="success"
                     />
                     <StatCard
                         title="Total Revenue"
                         value={formatCurrency(totalRevenue)}
-                        icon="fa-solid fa-dollar-sign"
+                        icon="fa-duotone fa-regular fa-dollar-sign"
                         color="primary"
                     />
                 </StatCardGrid>
@@ -317,7 +317,7 @@ export default function TeamsPage() {
                             className="btn btn-primary"
                             onClick={() => setShowCreateModal(true)}
                         >
-                            <i className="fa-solid fa-plus"></i>
+                            <i className="fa-duotone fa-regular fa-plus"></i>
                             Create Your First Team
                         </button>
                     }
@@ -392,7 +392,7 @@ export default function TeamsPage() {
 
                             {createError && (
                                 <div className="alert alert-error">
-                                    <i className="fa-solid fa-circle-exclamation"></i>
+                                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                                     <span>{createError}</span>
                                 </div>
                             )}
@@ -418,7 +418,7 @@ export default function TeamsPage() {
                                         </>
                                     ) : (
                                         <>
-                                            <i className="fa-solid fa-check"></i>
+                                            <i className="fa-duotone fa-regular fa-check"></i>
                                             Create Team
                                         </>
                                     )}

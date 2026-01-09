@@ -139,7 +139,7 @@ getCompletionIncentives(tier) → string[]
 3. Profile completeness badge in header (70%+ only):
    ```tsx
    <span className="badge badge-primary gap-1">
-       <i className="fa-solid fa-star"></i>
+       <i className="fa-duotone fa-regular fa-star"></i>
        Strong Profile
    </span>
    ```
@@ -147,7 +147,7 @@ getCompletionIncentives(tier) → string[]
    ```tsx
    <div className="p-3 bg-base-200/50 rounded-lg">
        <div className="text-xs font-semibold text-primary">
-           <i className="fa-solid fa-sparkles"></i>
+           <i className="fa-duotone fa-regular fa-sparkles"></i>
            Featured Story
        </div>
        <div className="text-sm line-clamp-3">
@@ -167,7 +167,7 @@ getCompletionIncentives(tier) → string[]
    <div className="card bg-gradient-to-br from-primary/5 to-secondary/5 
                    shadow-lg border border-primary/20">
        <h2 className="card-title">
-           <i className="fa-solid fa-sparkles text-primary"></i>
+           <i className="fa-duotone fa-regular fa-sparkles text-primary"></i>
            Featured Story
        </h2>
        <div className="prose max-w-none">

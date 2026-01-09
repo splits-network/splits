@@ -56,7 +56,7 @@ export default function InterviewPrepPage() {
                 <div className="container mx-auto px-4">
                     <div className="max-w-3xl">
                         <div className="flex items-center gap-2 mb-4">
-                            <i className="fa-solid fa-user-tie text-3xl"></i>
+                            <i className="fa-duotone fa-regular fa-user-tie text-3xl"></i>
                             <h1 className="text-4xl font-bold">Interview Preparation</h1>
                         </div>
                         <p className="text-xl opacity-90">
@@ -77,7 +77,7 @@ export default function InterviewPrepPage() {
                             <div key={index} className="card bg-base-100 shadow hover:shadow transition-shadow">
                                 <div className="card-body">
                                     <div className={`w-14 h-14 rounded-full bg-${tip.color}/20 flex items-center justify-center mb-4`}>
-                                        <i className={`fa-solid fa-${tip.icon} text-${tip.color} text-2xl`}></i>
+                                        <i className={`fa-duotone fa-regular fa-${tip.icon} text-${tip.color} text-2xl`}></i>
                                     </div>
                                     <h3 className="card-title text-xl mb-2">{tip.title}</h3>
                                     <p className="text-base-content/70">
@@ -101,7 +101,7 @@ export default function InterviewPrepPage() {
                             <ul className="space-y-3">
                                 {commonQuestions.map((question, index) => (
                                     <li key={index} className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg transition-colors">
-                                        <i className="fa-solid fa-circle-check text-success text-lg mt-0.5"></i>
+                                        <i className="fa-duotone fa-regular fa-circle-check text-success text-lg mt-0.5"></i>
                                         <span className="font-medium">{question}</span>
                                     </li>
                                 ))}
@@ -123,7 +123,7 @@ export default function InterviewPrepPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="bg-base-100/10 p-4 rounded-lg">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <i className="fa-solid fa-s text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-s text-2xl"></i>
                                         <h3 className="text-xl font-bold">Situation</h3>
                                     </div>
                                     <p>Describe the context or background</p>
@@ -131,7 +131,7 @@ export default function InterviewPrepPage() {
 
                                 <div className="bg-base-100/10 p-4 rounded-lg">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <i className="fa-solid fa-t text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-t text-2xl"></i>
                                         <h3 className="text-xl font-bold">Task</h3>
                                     </div>
                                     <p>Explain your responsibility or goal</p>
@@ -139,7 +139,7 @@ export default function InterviewPrepPage() {
 
                                 <div className="bg-base-100/10 p-4 rounded-lg">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <i className="fa-solid fa-a text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-a text-2xl"></i>
                                         <h3 className="text-xl font-bold">Action</h3>
                                     </div>
                                     <p>Detail the steps you took</p>
@@ -147,7 +147,7 @@ export default function InterviewPrepPage() {
 
                                 <div className="bg-base-100/10 p-4 rounded-lg">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <i className="fa-solid fa-r text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-r text-2xl"></i>
                                         <h3 className="text-xl font-bold">Result</h3>
                                     </div>
                                     <p>Share the outcomes and impact</p>
@@ -169,7 +169,7 @@ export default function InterviewPrepPage() {
                             </p>
                             <div className="flex gap-2 justify-center">
                                 <a href="/public/jobs" className="btn btn-primary">
-                                    Browse Jobs <i className="fa-solid fa-briefcase"></i>
+                                    Browse Jobs <i className="fa-duotone fa-regular fa-briefcase"></i>
                                 </a>
                                 <a href="/resources/career-guides" className="btn btn-outline">
                                     More Resources

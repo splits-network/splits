@@ -21,7 +21,7 @@ export default function StageChangeDropdown({ currentStage, stages, onStageChang
         <div className="dropdown">
             <label tabIndex={0} className={`badge ${stage?.color} cursor-pointer gap-2`}>
                 {stage?.label}
-                <i className="fa-solid fa-chevron-down text-xs"></i>
+                <i className="fa-duotone fa-regular fa-chevron-down text-xs"></i>
             </label>
             <ul tabIndex={0} className="dropdown-content z-1 menu p-2 shadow bg-base-100 rounded-box w-52 mt-1">
                 {stages.map((s) => (

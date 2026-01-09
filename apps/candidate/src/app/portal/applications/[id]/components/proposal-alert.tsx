@@ -13,7 +13,7 @@ interface ProposalAlertProps {
 export function ProposalAlert({ recruiterName, recruiterPitch, onAccept, onDecline, isDisabled = false }: ProposalAlertProps) {
     return (
         <div className="alert alert-info alert-outline alert-vertical sm:alert-horizontal mb-6">
-            <i className="fa-solid fa-handshake text-2xl"></i>
+            <i className="fa-duotone fa-regular fa-handshake text-2xl"></i>
             <div className="w-full">
                 <h3 className="font-bold text-lg mb-2">
                     {recruiterName} thinks you'd be a great fit for this role!
@@ -31,7 +31,7 @@ export function ProposalAlert({ recruiterName, recruiterPitch, onAccept, onDecli
                     className="btn btn-primary"
                     disabled={isDisabled}
                 >
-                    <i className="fa-solid fa-check"></i>
+                    <i className="fa-duotone fa-regular fa-check"></i>
                     Accept & Apply
                 </button>
                 <button
@@ -39,7 +39,7 @@ export function ProposalAlert({ recruiterName, recruiterPitch, onAccept, onDecli
                     className="btn btn-outline"
                     disabled={isDisabled}
                 >
-                    <i className="fa-solid fa-times"></i>
+                    <i className="fa-duotone fa-regular fa-times"></i>
                     Not Interested
                 </button>
             </div>

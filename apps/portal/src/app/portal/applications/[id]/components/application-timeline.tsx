@@ -113,7 +113,7 @@ export default function ApplicationTimeline({ auditLogs }: ApplicationTimelinePr
         return (
             <div className="card bg-base-100 shadow">
                 <div className="card-body text-center py-8">
-                    <i className="fa-solid fa-clock-rotate-left text-4xl text-base-content/20 mb-2"></i>
+                    <i className="fa-duotone fa-regular fa-clock-rotate-left text-4xl text-base-content/20 mb-2"></i>
                     <p className="text-base-content/70">No activity recorded yet</p>
                 </div>
             </div>
@@ -124,7 +124,7 @@ export default function ApplicationTimeline({ auditLogs }: ApplicationTimelinePr
         <div className="card bg-base-100 shadow">
             <div className="card-body">
                 <h2 className="card-title mb-4">
-                    <i className="fa-solid fa-clock-rotate-left"></i>
+                    <i className="fa-duotone fa-regular fa-clock-rotate-left"></i>
                     Activity Timeline
                 </h2>
 
@@ -145,7 +145,7 @@ export default function ApplicationTimeline({ auditLogs }: ApplicationTimelinePr
                                     <div className="text-xs">{time}</div>
                                 </div>
                                 <div className="timeline-middle">
-                                    <i className={`fa-solid ${actionIcon} ${actionColor}`}></i>
+                                    <i className={`fa-duotone fa-regular ${actionIcon} ${actionColor}`}></i>
                                 </div>
                                 <div className="timeline-end timeline-box mb-4">
                                     <div className="flex items-start justify-between gap-4">
@@ -170,7 +170,7 @@ export default function ApplicationTimeline({ auditLogs }: ApplicationTimelinePr
                                         {(log.old_value || log.new_value || log.metadata) && (
                                             <details className="dropdown dropdown-end">
                                                 <summary className="btn btn-ghost btn-xs">
-                                                    <i className="fa-solid fa-ellipsis-vertical"></i>
+                                                    <i className="fa-duotone fa-regular fa-ellipsis-vertical"></i>
                                                 </summary>
                                                 <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-10">
                                                     <li>
@@ -185,7 +185,7 @@ export default function ApplicationTimeline({ auditLogs }: ApplicationTimelinePr
                                                                 alert(JSON.stringify(details, null, 2));
                                                             }}
                                                         >
-                                                            <i className="fa-solid fa-eye"></i>
+                                                            <i className="fa-duotone fa-regular fa-eye"></i>
                                                             View Details
                                                         </button>
                                                     </li>

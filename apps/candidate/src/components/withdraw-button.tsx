@@ -26,7 +26,7 @@ export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = 
                 disabled
                 title="Cannot withdraw - position is no longer available"
             >
-                <i className="fa-solid fa-xmark"></i>
+                <i className="fa-duotone fa-regular fa-xmark"></i>
                 Withdraw Application
             </button>
         );
@@ -63,7 +63,7 @@ export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = 
         <>
             {error && (
                 <div className="alert alert-error mb-4">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
@@ -74,13 +74,13 @@ export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = 
                     onClick={() => setShowConfirm(true)}
                     disabled={isWithdrawing}
                 >
-                    <i className="fa-solid fa-xmark"></i>
+                    <i className="fa-duotone fa-regular fa-xmark"></i>
                     Withdraw Application
                 </button>
             ) : (
                 <div className="space-y-2">
                     <div className="alert alert-warning">
-                        <i className="fa-solid fa-triangle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
                         <div className="flex-1">
                             <div className="font-semibold">Are you sure?</div>
                             <div className="text-sm">
@@ -101,7 +101,7 @@ export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = 
                                 </>
                             ) : (
                                 <>
-                                    <i className="fa-solid fa-check"></i>
+                                    <i className="fa-duotone fa-regular fa-check"></i>
                                     Yes, Withdraw
                                 </>
                             )}
@@ -111,7 +111,7 @@ export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = 
                             onClick={() => setShowConfirm(false)}
                             disabled={isWithdrawing}
                         >
-                            <i className="fa-solid fa-xmark"></i>
+                            <i className="fa-duotone fa-regular fa-xmark"></i>
                             Cancel
                         </button>
                     </div>

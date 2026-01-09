@@ -18,7 +18,7 @@ export default function ForRecruitersPage() {
             {/* Hero Section */}
             <section className="text-center mb-16">
                 <div className="badge badge-primary badge-lg mb-4">
-                    <i className="fa-solid fa-user-tie mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-user-tie mr-2"></i>
                     For Recruiting Professionals
                 </div>
                 <h1 className="text-5xl md:text-6xl font-bold mb-6">
@@ -29,11 +29,11 @@ export default function ForRecruitersPage() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
                     <a href="https://splits.network" className="btn btn-primary btn-lg" target="_blank" rel="noopener noreferrer">
-                        <i className="fa-solid fa-rocket mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-rocket mr-2"></i>
                         Visit Splits Network
                     </a>
                     <Link href="/how-it-works" className="btn btn-outline btn-lg">
-                        <i className="fa-solid fa-circle-info mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-circle-info mr-2"></i>
                         Learn More
                     </Link>
                 </div>
@@ -46,7 +46,7 @@ export default function ForRecruitersPage() {
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                                <i className="fa-solid fa-users text-3xl text-primary"></i>
+                                <i className="fa-duotone fa-regular fa-users text-3xl text-primary"></i>
                             </div>
                             <h3 className="card-title">Access Top Talent</h3>
                             <p className="text-base-content/80">
@@ -57,7 +57,7 @@ export default function ForRecruitersPage() {
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mb-4">
-                                <i className="fa-solid fa-sack-dollar text-3xl text-secondary"></i>
+                                <i className="fa-duotone fa-regular fa-sack-dollar text-3xl text-secondary"></i>
                             </div>
                             <h3 className="card-title">Competitive Fees</h3>
                             <p className="text-base-content/80">
@@ -68,7 +68,7 @@ export default function ForRecruitersPage() {
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4">
-                                <i className="fa-solid fa-chart-line text-3xl text-accent"></i>
+                                <i className="fa-duotone fa-regular fa-chart-line text-3xl text-accent"></i>
                             </div>
                             <h3 className="card-title">Powerful Tools</h3>
                             <p className="text-base-content/80">
@@ -100,19 +100,19 @@ export default function ForRecruitersPage() {
                                 <div className="card-body">
                                     <ul className="space-y-2">
                                         <li className="flex items-center gap-2">
-                                            <i className="fa-solid fa-check text-success"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success"></i>
                                             <span className="text-sm">Quick profile setup</span>
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <i className="fa-solid fa-check text-success"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success"></i>
                                             <span className="text-sm">Highlight specializations</span>
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <i className="fa-solid fa-check text-success"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success"></i>
                                             <span className="text-sm">Complete verification process</span>
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <i className="fa-solid fa-check text-success"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success"></i>
                                             <span className="text-sm">Set your availability</span>
                                         </li>
                                     </ul>
@@ -126,19 +126,19 @@ export default function ForRecruitersPage() {
                                     <div className="card-body">
                                         <ul className="space-y-2">
                                             <li className="flex items-center gap-2">
-                                                <i className="fa-solid fa-check text-success"></i>
+                                                <i className="fa-duotone fa-regular fa-check text-success"></i>
                                                 <span className="text-sm">Post unlimited job openings</span>
                                             </li>
                                             <li className="flex items-center gap-2">
-                                                <i className="fa-solid fa-check text-success"></i>
+                                                <i className="fa-duotone fa-regular fa-check text-success"></i>
                                                 <span className="text-sm">Receive qualified applications</span>
                                             </li>
                                             <li className="flex items-center gap-2">
-                                                <i className="fa-solid fa-check text-success"></i>
+                                                <i className="fa-duotone fa-regular fa-check text-success"></i>
                                                 <span className="text-sm">Search candidate database</span>
                                             </li>
                                             <li className="flex items-center gap-2">
-                                                <i className="fa-solid fa-check text-success"></i>
+                                                <i className="fa-duotone fa-regular fa-check text-success"></i>
                                                 <span className="text-sm">AI-powered candidate matching</span>
                                             </li>
                                         </ul>
@@ -174,19 +174,19 @@ export default function ForRecruitersPage() {
                                 <div className="card-body">
                                     <ul className="space-y-2">
                                         <li className="flex items-center gap-2">
-                                            <i className="fa-solid fa-check text-success"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success"></i>
                                             <span className="text-sm">Track all placements in one dashboard</span>
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <i className="fa-solid fa-check text-success"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success"></i>
                                             <span className="text-sm">Automated fee calculations</span>
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <i className="fa-solid fa-check text-success"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success"></i>
                                             <span className="text-sm">Fast payment processing</span>
                                         </li>
                                         <li className="flex items-center gap-2">
-                                            <i className="fa-solid fa-check text-success"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success"></i>
                                             <span className="text-sm">Build your success metrics</span>
                                         </li>
                                     </ul>
@@ -204,7 +204,7 @@ export default function ForRecruitersPage() {
                     <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center gap-3 mb-2">
-                                <i className="fa-solid fa-briefcase text-2xl text-primary"></i>
+                                <i className="fa-duotone fa-regular fa-briefcase text-2xl text-primary"></i>
                                 <h3 className="card-title text-lg">Job Management</h3>
                             </div>
                             <p className="text-sm text-base-content/70">
@@ -215,7 +215,7 @@ export default function ForRecruitersPage() {
                     <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center gap-3 mb-2">
-                                <i className="fa-solid fa-user-check text-2xl text-secondary"></i>
+                                <i className="fa-duotone fa-regular fa-user-check text-2xl text-secondary"></i>
                                 <h3 className="card-title text-lg">Candidate Tracking</h3>
                             </div>
                             <p className="text-sm text-base-content/70">
@@ -226,7 +226,7 @@ export default function ForRecruitersPage() {
                     <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center gap-3 mb-2">
-                                <i className="fa-solid fa-comments text-2xl text-accent"></i>
+                                <i className="fa-duotone fa-regular fa-comments text-2xl text-accent"></i>
                                 <h3 className="card-title text-lg">Direct Messaging</h3>
                             </div>
                             <p className="text-sm text-base-content/70">
@@ -237,7 +237,7 @@ export default function ForRecruitersPage() {
                     <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center gap-3 mb-2">
-                                <i className="fa-solid fa-file-invoice-dollar text-2xl text-success"></i>
+                                <i className="fa-duotone fa-regular fa-file-invoice-dollar text-2xl text-success"></i>
                                 <h3 className="card-title text-lg">Payment Tracking</h3>
                             </div>
                             <p className="text-sm text-base-content/70">
@@ -248,7 +248,7 @@ export default function ForRecruitersPage() {
                     <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center gap-3 mb-2">
-                                <i className="fa-solid fa-chart-simple text-2xl text-info"></i>
+                                <i className="fa-duotone fa-regular fa-chart-simple text-2xl text-info"></i>
                                 <h3 className="card-title text-lg">Analytics & Reports</h3>
                             </div>
                             <p className="text-sm text-base-content/70">
@@ -259,7 +259,7 @@ export default function ForRecruitersPage() {
                     <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                         <div className="card-body">
                             <div className="flex items-center gap-3 mb-2">
-                                <i className="fa-solid fa-mobile-screen text-2xl text-warning"></i>
+                                <i className="fa-duotone fa-regular fa-mobile-screen text-2xl text-warning"></i>
                                 <h3 className="card-title text-lg">Mobile Access</h3>
                             </div>
                             <p className="text-sm text-base-content/70">
@@ -283,28 +283,28 @@ export default function ForRecruitersPage() {
                             <div className="divider"></div>
                             <ul className="space-y-4 text-left">
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-success text-xl mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-success text-xl mt-1"></i>
                                     <div>
                                         <strong>Free to Join</strong>
                                         <p className="text-sm text-base-content/70">No signup fees or monthly subscriptions</p>
                                     </div>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-success text-xl mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-success text-xl mt-1"></i>
                                     <div>
                                         <strong>Competitive Placement Fees</strong>
                                         <p className="text-sm text-base-content/70">Earn industry-standard percentages on successful placements</p>
                                     </div>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-success text-xl mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-success text-xl mt-1"></i>
                                     <div>
                                         <strong>Fast Payouts</strong>
                                         <p className="text-sm text-base-content/70">Receive payment within 5 business days of placement verification</p>
                                     </div>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-success text-xl mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-success text-xl mt-1"></i>
                                     <div>
                                         <strong>No Hidden Fees</strong>
                                         <p className="text-sm text-base-content/70">What you see is what you get—100% transparent</p>
@@ -324,7 +324,7 @@ export default function ForRecruitersPage() {
                         <div className="card-body">
                             <div className="flex gap-1 mb-4">
                                 {[...Array(5)].map((_, i) => (
-                                    <i key={i} className="fa-solid fa-star text-warning"></i>
+                                    <i key={i} className="fa-duotone fa-regular fa-star text-warning"></i>
                                 ))}
                             </div>
                             <p className="text-base-content/80 italic mb-4">
@@ -347,7 +347,7 @@ export default function ForRecruitersPage() {
                         <div className="card-body">
                             <div className="flex gap-1 mb-4">
                                 {[...Array(5)].map((_, i) => (
-                                    <i key={i} className="fa-solid fa-star text-warning"></i>
+                                    <i key={i} className="fa-duotone fa-regular fa-star text-warning"></i>
                                 ))}
                             </div>
                             <p className="text-base-content/80 italic mb-4">
@@ -370,7 +370,7 @@ export default function ForRecruitersPage() {
                         <div className="card-body">
                             <div className="flex gap-1 mb-4">
                                 {[...Array(5)].map((_, i) => (
-                                    <i key={i} className="fa-solid fa-star text-warning"></i>
+                                    <i key={i} className="fa-duotone fa-regular fa-star text-warning"></i>
                                 ))}
                             </div>
                             <p className="text-base-content/80 italic mb-4">
@@ -396,15 +396,15 @@ export default function ForRecruitersPage() {
             <section className="text-center bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-12">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Grow Your Practice?</h2>
                 <p className="text-xl text-base-content/80 mb-8 max-w-2xl mx-auto">
-                    Join hundreds of successful recruiters who are building thriving practices on Splits 
+                    Join hundreds of successful recruiters who are building thriving practices on Splits
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <a href="https://splits.network" className="btn btn-primary btn-lg" target="_blank" rel="noopener noreferrer">
-                        <i className="fa-solid fa-rocket mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-rocket mr-2"></i>
                         Join Splits Network
                     </a>
                     <Link href="/contact" className="btn btn-outline btn-lg">
-                        <i className="fa-solid fa-envelope mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-envelope mr-2"></i>
                         Contact Sales
                     </Link>
                 </div>

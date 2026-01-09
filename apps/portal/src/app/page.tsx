@@ -36,11 +36,11 @@ export default async function HomePage() {
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                             <Link href="/sign-up" className="btn btn-primary btn-lg">
-                                <i className="fa-solid fa-user-tie"></i>
+                                <i className="fa-duotone fa-regular fa-user-tie"></i>
                                 Join as a Recruiter
                             </Link>
                             <Link href="#for-companies" className="btn btn-outline btn-lg">
-                                <i className="fa-solid fa-building"></i>
+                                <i className="fa-duotone fa-regular fa-building"></i>
                                 Post Roles as a Company
                             </Link>
                         </div>
@@ -64,7 +64,7 @@ export default async function HomePage() {
                         {/* For Recruiters Track */}
                         <div>
                             <h3 className="text-2xl font-bold mb-8 flex items-center gap-3">
-                                <i className="fa-solid fa-user-tie"></i>
+                                <i className="fa-duotone fa-regular fa-user-tie"></i>
                                 For Recruiters
                             </h3>
                             <div className="space-y-6">
@@ -119,7 +119,7 @@ export default async function HomePage() {
                         {/* For Companies Track */}
                         <div>
                             <h3 className="text-2xl font-bold mb-8 flex items-center gap-3">
-                                <i className="fa-solid fa-building"></i>
+                                <i className="fa-duotone fa-regular fa-building"></i>
                                 For Companies
                             </h3>
                             <div className="space-y-6">
@@ -187,7 +187,7 @@ export default async function HomePage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
-                                    <i className="fa-solid fa-handshake text-primary"></i>
+                                    <i className="fa-duotone fa-regular fa-handshake text-primary"></i>
                                     Split-First by Design
                                 </h3>
                                 <p className="text-base-content/70">
@@ -198,7 +198,7 @@ export default async function HomePage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
-                                    <i className="fa-solid fa-sitemap text-secondary"></i>
+                                    <i className="fa-duotone fa-regular fa-sitemap text-secondary"></i>
                                     Built-in ATS
                                 </h3>
                                 <p className="text-base-content/70">
@@ -209,7 +209,7 @@ export default async function HomePage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
-                                    <i className="fa-solid fa-chart-line text-accent"></i>
+                                    <i className="fa-duotone fa-regular fa-chart-line text-accent"></i>
                                     Real-Time Pipelines
                                 </h3>
                                 <p className="text-base-content/70">
@@ -220,7 +220,7 @@ export default async function HomePage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
-                                    <i className="fa-solid fa-file-invoice-dollar text-primary"></i>
+                                    <i className="fa-duotone fa-regular fa-file-invoice-dollar text-primary"></i>
                                     Transparent Fees & Splits
                                 </h3>
                                 <p className="text-base-content/70">
@@ -231,7 +231,7 @@ export default async function HomePage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
-                                    <i className="fa-solid fa-crown text-secondary"></i>
+                                    <i className="fa-duotone fa-regular fa-crown text-secondary"></i>
                                     Subscription-Friendly
                                 </h3>
                                 <p className="text-base-content/70">
@@ -242,7 +242,7 @@ export default async function HomePage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
-                                    <i className="fa-solid fa-shield-halved text-accent"></i>
+                                    <i className="fa-duotone fa-regular fa-shield-halved text-accent"></i>
                                     Admin Controls
                                 </h3>
                                 <p className="text-base-content/70">
@@ -264,31 +264,31 @@ export default async function HomePage() {
                             </h2>
                             <div className="space-y-4">
                                 <div className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl flex-shrink-0 mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl flex-shrink-0 mt-1"></i>
                                     <p>
                                         Access curated roles you don't have to hunt down yourself
                                     </p>
                                 </div>
                                 <div className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl flex-shrink-0 mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl flex-shrink-0 mt-1"></i>
                                     <p>
                                         Work only the roles that fit your niche and strengths
                                     </p>
                                 </div>
                                 <div className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl flex-shrink-0 mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl flex-shrink-0 mt-1"></i>
                                     <p>
                                         Track all candidates and submissions in a single pipeline
                                     </p>
                                 </div>
                                 <div className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl flex-shrink-0 mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl flex-shrink-0 mt-1"></i>
                                     <p>
                                         See your placements and earnings clearly, with no mystery math
                                     </p>
                                 </div>
                                 <div className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl flex-shrink-0 mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl flex-shrink-0 mt-1"></i>
                                     <p>
                                         Grow your business with a network that brings roles to you
                                     </p>
@@ -296,7 +296,7 @@ export default async function HomePage() {
                             </div>
                             <div className="mt-8">
                                 <Link href="/sign-up" className="btn btn-neutral btn-lg">
-                                    <i className="fa-solid fa-user-tie"></i>
+                                    <i className="fa-duotone fa-regular fa-user-tie"></i>
                                     Become a Network Recruiter
                                 </Link>
                             </div>
@@ -383,31 +383,31 @@ export default async function HomePage() {
                             </h2>
                             <div className="space-y-4">
                                 <div className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl flex-shrink-0 mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl flex-shrink-0 mt-1"></i>
                                     <p>
                                         Manage all your external recruiters in one place
                                     </p>
                                 </div>
                                 <div className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl flex-shrink-0 mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl flex-shrink-0 mt-1"></i>
                                     <p>
                                         Get clear visibility into pipelines for every role
                                     </p>
                                 </div>
                                 <div className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl flex-shrink-0 mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl flex-shrink-0 mt-1"></i>
                                     <p>
                                         Keep fees and terms consistent and transparent
                                     </p>
                                 </div>
                                 <div className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl flex-shrink-0 mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl flex-shrink-0 mt-1"></i>
                                     <p>
                                         Pay only on hire; no retainers unless you choose to set them up
                                     </p>
                                 </div>
                                 <div className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl flex-shrink-0 mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl flex-shrink-0 mt-1"></i>
                                     <p>
                                         Simplify communication, reduce email and spreadsheet chaos
                                     </p>
@@ -415,7 +415,7 @@ export default async function HomePage() {
                             </div>
                             <div className="mt-8">
                                 <Link href="/sign-up" className="btn btn-neutral btn-lg">
-                                    <i className="fa-solid fa-building"></i>
+                                    <i className="fa-duotone fa-regular fa-building"></i>
                                     Post a Role
                                 </Link>
                             </div>
@@ -438,23 +438,23 @@ export default async function HomePage() {
                         <div className="flex flex-col lg:flex-row items-center justify-center gap-6 mb-12">
                             <div className="card bg-primary text-primary-content shadow w-full lg:w-auto">
                                 <div className="card-body items-center text-center">
-                                    <i className="fa-solid fa-building text-4xl mb-2"></i>
+                                    <i className="fa-duotone fa-regular fa-building text-4xl mb-2"></i>
                                     <h3 className="card-title">Company</h3>
                                     <p className="text-sm">Pays placement fee</p>
                                 </div>
                             </div>
-                            <i className="fa-solid fa-arrow-right text-3xl text-primary rotate-90 lg:rotate-0"></i>
+                            <i className="fa-duotone fa-regular fa-arrow-right text-3xl text-primary rotate-90 lg:rotate-0"></i>
                             <div className="card bg-secondary text-secondary-content shadow w-full lg:w-auto">
                                 <div className="card-body items-center text-center">
-                                    <i className="fa-solid fa-handshake text-4xl mb-2"></i>
+                                    <i className="fa-duotone fa-regular fa-handshake text-4xl mb-2"></i>
                                     <h3 className="card-title">Splits Network</h3>
                                     <p className="text-sm">Platform share</p>
                                 </div>
                             </div>
-                            <i className="fa-solid fa-arrow-right text-3xl text-secondary rotate-90 lg:rotate-0"></i>
+                            <i className="fa-duotone fa-regular fa-arrow-right text-3xl text-secondary rotate-90 lg:rotate-0"></i>
                             <div className="card bg-accent text-accent-content shadow w-full lg:w-auto">
                                 <div className="card-body items-center text-center">
-                                    <i className="fa-solid fa-user-tie text-4xl mb-2"></i>
+                                    <i className="fa-duotone fa-regular fa-user-tie text-4xl mb-2"></i>
                                     <h3 className="card-title">Recruiter</h3>
                                     <p className="text-sm">Recruiter share</p>
                                 </div>
@@ -502,7 +502,7 @@ export default async function HomePage() {
                         <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
-                                    <i className="fa-solid fa-sitemap text-primary"></i>
+                                    <i className="fa-duotone fa-regular fa-sitemap text-primary"></i>
                                     ATS Foundation
                                 </h3>
                                 <p className="text-base-content/70">
@@ -513,7 +513,7 @@ export default async function HomePage() {
                         <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
-                                    <i className="fa-solid fa-chart-pie text-secondary"></i>
+                                    <i className="fa-duotone fa-regular fa-chart-pie text-secondary"></i>
                                     Split Placement Engine
                                 </h3>
                                 <p className="text-base-content/70">
@@ -524,7 +524,7 @@ export default async function HomePage() {
                         <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
-                                    <i className="fa-solid fa-users text-accent"></i>
+                                    <i className="fa-duotone fa-regular fa-users text-accent"></i>
                                     Recruiter Network
                                 </h3>
                                 <p className="text-base-content/70">
@@ -535,7 +535,7 @@ export default async function HomePage() {
                         <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
-                                    <i className="fa-solid fa-crown text-primary"></i>
+                                    <i className="fa-duotone fa-regular fa-crown text-primary"></i>
                                     Subscriptions & Plans
                                 </h3>
                                 <p className="text-base-content/70">
@@ -546,7 +546,7 @@ export default async function HomePage() {
                         <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
-                                    <i className="fa-solid fa-bell text-secondary"></i>
+                                    <i className="fa-duotone fa-regular fa-bell text-secondary"></i>
                                     Smart Notifications
                                 </h3>
                                 <p className="text-base-content/70">
@@ -557,7 +557,7 @@ export default async function HomePage() {
                         <div className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <h3 className="card-title">
-                                    <i className="fa-solid fa-shield-halved text-accent"></i>
+                                    <i className="fa-duotone fa-regular fa-shield-halved text-accent"></i>
                                     Admin Console
                                 </h3>
                                 <p className="text-base-content/70">
@@ -583,11 +583,11 @@ export default async function HomePage() {
                             <div className="card-body">
                                 <div className="flex items-center gap-2 mb-4">
                                     <div className="rating">
-                                        <i className="fa-solid fa-star text-warning"></i>
-                                        <i className="fa-solid fa-star text-warning"></i>
-                                        <i className="fa-solid fa-star text-warning"></i>
-                                        <i className="fa-solid fa-star text-warning"></i>
-                                        <i className="fa-solid fa-star text-warning"></i>
+                                        <i className="fa-duotone fa-regular fa-star text-warning"></i>
+                                        <i className="fa-duotone fa-regular fa-star text-warning"></i>
+                                        <i className="fa-duotone fa-regular fa-star text-warning"></i>
+                                        <i className="fa-duotone fa-regular fa-star text-warning"></i>
+                                        <i className="fa-duotone fa-regular fa-star text-warning"></i>
                                     </div>
                                 </div>
                                 <p className="mb-4">
@@ -610,11 +610,11 @@ export default async function HomePage() {
                             <div className="card-body">
                                 <div className="flex items-center gap-2 mb-4">
                                     <div className="rating">
-                                        <i className="fa-solid fa-star text-warning"></i>
-                                        <i className="fa-solid fa-star text-warning"></i>
-                                        <i className="fa-solid fa-star text-warning"></i>
-                                        <i className="fa-solid fa-star text-warning"></i>
-                                        <i className="fa-solid fa-star text-warning"></i>
+                                        <i className="fa-duotone fa-regular fa-star text-warning"></i>
+                                        <i className="fa-duotone fa-regular fa-star text-warning"></i>
+                                        <i className="fa-duotone fa-regular fa-star text-warning"></i>
+                                        <i className="fa-duotone fa-regular fa-star text-warning"></i>
+                                        <i className="fa-duotone fa-regular fa-star text-warning"></i>
                                     </div>
                                 </div>
                                 <p className="mb-4">
@@ -637,11 +637,11 @@ export default async function HomePage() {
                             <div className="card-body">
                                 <div className="flex items-center gap-2 mb-4">
                                     <div className="rating">
-                                        <i className="fa-solid fa-star text-warning"></i>
-                                        <i className="fa-solid fa-star text-warning"></i>
-                                        <i className="fa-solid fa-star text-warning"></i>
-                                        <i className="fa-solid fa-star text-warning"></i>
-                                        <i className="fa-solid fa-star text-warning"></i>
+                                        <i className="fa-duotone fa-regular fa-star text-warning"></i>
+                                        <i className="fa-duotone fa-regular fa-star text-warning"></i>
+                                        <i className="fa-duotone fa-regular fa-star text-warning"></i>
+                                        <i className="fa-duotone fa-regular fa-star text-warning"></i>
+                                        <i className="fa-duotone fa-regular fa-star text-warning"></i>
                                     </div>
                                 </div>
                                 <p className="mb-4">
@@ -764,11 +764,11 @@ export default async function HomePage() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link href="/sign-up" className="btn btn-lg btn-primary">
-                            <i className="fa-solid fa-user-tie"></i>
+                            <i className="fa-duotone fa-regular fa-user-tie"></i>
                             I'm a Recruiter
                         </Link>
                         <Link href="/sign-up" className="btn btn-lg btn-secondary">
-                            <i className="fa-solid fa-building"></i>
+                            <i className="fa-duotone fa-regular fa-building"></i>
                             I'm a Company
                         </Link>
                     </div>

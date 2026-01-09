@@ -166,7 +166,7 @@ export function UploadDocumentsStep({
         <div className="space-y-6">
             <div>
                 <h4 className="text-lg font-semibold mb-2">
-                    <i className="fa-solid fa-file-upload"></i>
+                    <i className="fa-duotone fa-regular fa-file-upload"></i>
                     {' '}Select or Upload Documents
                 </h4>
                 <p className="text-base-content/70 text-sm">
@@ -176,7 +176,7 @@ export function UploadDocumentsStep({
 
             {error && (
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
@@ -207,7 +207,7 @@ export function UploadDocumentsStep({
                                             onChange={() => handleToggleExistingDoc(doc.id)}
                                             className="checkbox checkbox-primary"
                                         />
-                                        <i className="fa-solid fa-file text-primary"></i>
+                                        <i className="fa-duotone fa-regular fa-file text-primary"></i>
                                         <div className="flex-1 min-w-0">
                                             <div className="font-medium truncate">{doc.file_name}</div>
                                             <div className="text-sm text-base-content/60">
@@ -235,7 +235,7 @@ export function UploadDocumentsStep({
                 </div>
             ) : (
                 <div className="alert">
-                    <i className="fa-solid fa-info-circle"></i>
+                    <i className="fa-duotone fa-regular fa-info-circle"></i>
                     <span>You don't have any existing  Upload your first documents below.</span>
                 </div>
             )}
@@ -273,7 +273,7 @@ export function UploadDocumentsStep({
                                         }`}
                                 >
                                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                                        <i className="fa-solid fa-file text-success"></i>
+                                        <i className="fa-duotone fa-regular fa-file text-success"></i>
                                         <div className="flex-1 min-w-0">
                                             <div className="font-medium truncate">{doc.name}</div>
                                             <div className="text-sm text-base-content/60">
@@ -298,7 +298,7 @@ export function UploadDocumentsStep({
                                             onClick={() => handleRemoveNewDocument(index)}
                                             className="btn btn-xs btn-ghost btn-circle text-error"
                                         >
-                                            <i className="fa-solid fa-times"></i>
+                                            <i className="fa-duotone fa-regular fa-times"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -310,7 +310,7 @@ export function UploadDocumentsStep({
 
             {totalDocCount > 0 && hasPrimary && (
                 <div className="alert alert-success">
-                    <i className="fa-solid fa-check-circle"></i>
+                    <i className="fa-duotone fa-regular fa-check-circle"></i>
                     <div>
                         <div className="font-semibold">Ready to Continue</div>
                         <div className="text-sm">
@@ -328,7 +328,7 @@ export function UploadDocumentsStep({
                     disabled={totalDocCount === 0 || !hasPrimary}
                 >
                     Next: Answer Questions
-                    <i className="fa-solid fa-arrow-right"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-right"></i>
                 </button>
             </div>
         </div>

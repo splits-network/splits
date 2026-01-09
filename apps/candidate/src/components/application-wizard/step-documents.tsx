@@ -195,7 +195,7 @@ export default function StepDocuments({
 
                     {error && (
                         <div className="alert alert-error">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <span>{error}</span>
                         </div>
                     )}
@@ -207,14 +207,14 @@ export default function StepDocuments({
                                 className="btn btn-primary btn-block"
                                 onClick={handleUploadClick}
                             >
-                                <i className="fa-solid fa-upload"></i>
+                                <i className="fa-duotone fa-regular fa-upload"></i>
                                 Upload Document
                             </button>
 
                             <div className="divider">OR</div>
 
                             <Link href="/documents" className="btn btn-ghost btn-block">
-                                <i className="fa-solid fa-folder-open"></i>
+                                <i className="fa-duotone fa-regular fa-folder-open"></i>
                                 Manage Documents
                             </Link>
                         </div>
@@ -249,14 +249,14 @@ export default function StepDocuments({
                         className="btn btn-sm btn-ghost"
                         onClick={handleUploadClick}
                     >
-                        <i className="fa-solid fa-plus"></i>
+                        <i className="fa-duotone fa-regular fa-plus"></i>
                         Upload More
                     </button>
                 </div>
 
                 {error && (
                     <div className="alert alert-error">
-                        <i className="fa-solid fa-circle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                         <span>{error}</span>
                     </div>
                 )}
@@ -294,7 +294,7 @@ export default function StepDocuments({
                                                     >
                                                         {primaryResumeId === doc.id ? (
                                                             <>
-                                                                <i className="fa-solid fa-star"></i>
+                                                                <i className="fa-duotone fa-regular fa-star"></i>
                                                                 Primary
                                                             </>
                                                         ) : (
@@ -312,7 +312,7 @@ export default function StepDocuments({
                                                     {deletingDocId === doc.id ? (
                                                         <span className="loading loading-spinner loading-xs"></span>
                                                     ) : (
-                                                        <i className="fa-solid fa-trash"></i>
+                                                        <i className="fa-duotone fa-regular fa-trash"></i>
                                                     )}
                                                 </button>
                                             </div>
@@ -357,7 +357,7 @@ export default function StepDocuments({
                                                 {deletingDocId === doc.id ? (
                                                     <span className="loading loading-spinner loading-xs"></span>
                                                 ) : (
-                                                    <i className="fa-solid fa-trash"></i>
+                                                    <i className="fa-duotone fa-regular fa-trash"></i>
                                                 )}
                                             </button>
                                         </div>
@@ -376,7 +376,7 @@ export default function StepDocuments({
                         onClick={handleNext}
                     >
                         Next: Questions
-                        <i className="fa-solid fa-arrow-right"></i>
+                        <i className="fa-duotone fa-regular fa-arrow-right"></i>
                     </button>
                 </div>
             </div>
@@ -421,7 +421,7 @@ export default function StepDocuments({
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-trash"></i>
+                                        <i className="fa-duotone fa-regular fa-trash"></i>
                                         Delete
                                     </>
                                 )}

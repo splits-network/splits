@@ -308,7 +308,7 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess }: AddRo
                 {/* Error Display */}
                 {error && (
                     <div className="alert alert-error mb-4">
-                        <i className="fa-solid fa-circle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                         <span>{error}</span>
                     </div>
                 )}
@@ -378,7 +378,7 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess }: AddRo
                             disabled={loading || submitting}
                         >
                             Next
-                            <i className="fa-solid fa-arrow-right ml-2"></i>
+                            <i className="fa-duotone fa-regular fa-arrow-right ml-2"></i>
                         </button>
                     ) : (
                         <button
@@ -393,7 +393,7 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess }: AddRo
                                 </>
                             ) : (
                                 <>
-                                    <i className="fa-solid fa-check mr-2"></i>
+                                    <i className="fa-duotone fa-regular fa-check mr-2"></i>
                                     Create Role
                                 </>
                             )}

@@ -299,7 +299,7 @@ export function RolesTrendsChart({ jobs, loading, trendPeriod, onTrendPeriodChan
     if (jobs.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-40 text-base-content/60">
-                <i className="fa-solid fa-chart-line text-2xl mb-2"></i>
+                <i className="fa-duotone fa-regular fa-chart-line text-2xl mb-2"></i>
                 <p className="text-sm">No trend data yet</p>
             </div>
         );
@@ -321,7 +321,7 @@ export function RolesTrendsChart({ jobs, loading, trendPeriod, onTrendPeriodChan
                         className="text-xs text-base-content/50 hover:text-base-content cursor-pointer flex items-center gap-1 transition-colors"
                     >
                         {TIME_PERIODS.find(p => p.value === trendPeriod)?.label || '6M'}
-                        <i className="fa-solid fa-chevron-down text-[10px]"></i>
+                        <i className="fa-duotone fa-regular fa-chevron-down text-[10px]"></i>
                     </div>
                     <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-20 p-1 shadow-lg border border-base-300 mt-1">
                         {TIME_PERIODS.map((period) => (

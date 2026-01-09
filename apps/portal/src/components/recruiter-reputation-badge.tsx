@@ -24,7 +24,7 @@ export default function RecruiterReputationBadge({
 }: RecruiterReputationBadgeProps) {
     const getReputationTier = (hireRate: number, completionRate: number) => {
         const avgRate = (hireRate + completionRate) / 2;
-        
+
         if (avgRate >= 75) return { tier: 'Elite', color: 'badge-success', icon: 'fa-crown' };
         if (avgRate >= 50) return { tier: 'Pro', color: 'badge-primary', icon: 'fa-star' };
         if (avgRate >= 25) return { tier: 'Active', color: 'badge-secondary', icon: 'fa-circle-check' };
@@ -36,7 +36,7 @@ export default function RecruiterReputationBadge({
     if (compact) {
         return (
             <div className={`badge ${tier.color} gap-1`} title={`${tier.tier} Recruiter`}>
-                <i className={`fa-solid ${tier.icon}`}></i>
+                <i className={`fa-duotone fa-regular ${tier.icon}`}></i>
                 {tier.tier}
             </div>
         );
@@ -45,7 +45,7 @@ export default function RecruiterReputationBadge({
     if (!showDetails) {
         return (
             <div className={`badge ${tier.color} gap-2 px-3 py-3`}>
-                <i className={`fa-solid ${tier.icon} text-sm`}></i>
+                <i className={`fa-duotone fa-regular ${tier.icon} text-sm`}></i>
                 <div className="text-left">
                     <div className="font-semibold">{tier.tier} Recruiter</div>
                     <div className="text-xs opacity-70">{reputation.hire_rate}% hire rate</div>
@@ -59,7 +59,7 @@ export default function RecruiterReputationBadge({
             <div className="card-body p-4">
                 <div className="flex items-start gap-3 mb-3">
                     <div className={`w-12 h-12 rounded-full ${tier.color.replace('badge-', 'bg-')} flex items-center justify-center`}>
-                        <i className={`fa-solid ${tier.icon} text-white text-xl`}></i>
+                        <i className={`fa-duotone fa-regular ${tier.icon} text-white text-xl`}></i>
                     </div>
                     <div className="flex-1">
                         <div className="flex items-center gap-2">
@@ -108,7 +108,7 @@ export default function RecruiterReputationBadge({
 
                 {reputation.total_failures > 0 && (
                     <div className="alert alert-warning py-2 mt-3">
-                        <i className="fa-solid fa-triangle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
                         <span className="text-xs">
                             {reputation.total_failures} placement{reputation.total_failures !== 1 ? 's' : ''} failed
                         </span>

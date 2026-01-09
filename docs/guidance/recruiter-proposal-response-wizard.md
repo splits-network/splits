@@ -831,7 +831,7 @@ export default function ProposalAlert({
     return (
         <div className="alert alert-info mb-6 shadow-lg">
             <div className="flex-1">
-                <i className="fa-solid fa-envelope-open-text text-3xl"></i>
+                <i className="fa-duotone fa-regular fa-envelope-open-text text-3xl"></i>
                 <div>
                     <h3 className="font-bold text-lg mb-1">
                         Job Opportunity from {recruiter.first_name} {recruiter.last_name}
@@ -844,7 +844,7 @@ export default function ProposalAlert({
                     {application.recruiter_notes && (
                         <div className="mt-3 p-4 bg-base-100 rounded-lg border border-base-300">
                             <div className="flex items-start gap-2">
-                                <i className="fa-solid fa-quote-left text-primary mt-1"></i>
+                                <i className="fa-duotone fa-regular fa-quote-left text-primary mt-1"></i>
                                 <div className="flex-1">
                                     <div className="text-xs text-base-content/60 mb-1">
                                         Why {recruiter.first_name} thinks this is a good match:
@@ -862,14 +862,14 @@ export default function ProposalAlert({
                     onClick={onDecline} 
                     className="btn btn-ghost gap-2"
                 >
-                    <i className="fa-solid fa-times"></i>
+                    <i className="fa-duotone fa-regular fa-times"></i>
                     Not Interested
                 </button>
                 <button 
                     onClick={onAccept} 
                     className="btn btn-primary gap-2"
                 >
-                    <i className="fa-solid fa-check"></i>
+                    <i className="fa-duotone fa-regular fa-check"></i>
                     Accept & Apply
                 </button>
             </div>
@@ -960,12 +960,12 @@ export default function DeclineModal({
                 <div className="flex justify-between items-start mb-4">
                     <h3 className="font-bold text-lg">Decline Job Opportunity</h3>
                     <button onClick={onClose} className="btn btn-ghost btn-sm btn-circle">
-                        <i className="fa-solid fa-times"></i>
+                        <i className="fa-duotone fa-regular fa-times"></i>
                     </button>
                 </div>
                 
                 <div className="alert mb-4">
-                    <i className="fa-solid fa-info-circle"></i>
+                    <i className="fa-duotone fa-regular fa-info-circle"></i>
                     <span>
                         Are you sure you want to decline <strong>{jobTitle}</strong>? 
                         Your recruiter will be notified of your decision.
@@ -974,7 +974,7 @@ export default function DeclineModal({
                 
                 {error && (
                     <div className="alert alert-error mb-4">
-                        <i className="fa-solid fa-circle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                         <span>{error}</span>
                     </div>
                 )}
@@ -1215,7 +1215,7 @@ export default function ProposalResponseWizard({
                         className="btn btn-ghost btn-sm btn-circle"
                         disabled={submitting}
                     >
-                        <i className="fa-solid fa-times"></i>
+                        <i className="fa-duotone fa-regular fa-times"></i>
                     </button>
                 </div>
                 
@@ -1238,7 +1238,7 @@ export default function ProposalResponseWizard({
                 {/* Error Display */}
                 {error && (
                     <div className="alert alert-error mt-4">
-                        <i className="fa-solid fa-circle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                         <span>{error}</span>
                     </div>
                 )}
@@ -1296,7 +1296,7 @@ export default function ProposalResponseWizard({
                                 className="btn btn-ghost gap-2"
                                 disabled={submitting}
                             >
-                                <i className="fa-solid fa-arrow-left"></i>
+                                <i className="fa-duotone fa-regular fa-arrow-left"></i>
                                 Back
                             </button>
                         )}
@@ -1307,7 +1307,7 @@ export default function ProposalResponseWizard({
                                 disabled={currentStep === 1 && !primaryResumeId}
                             >
                                 Next
-                                <i className="fa-solid fa-arrow-right"></i>
+                                <i className="fa-duotone fa-regular fa-arrow-right"></i>
                             </button>
                         )}
                         {currentStep === 4 && (
@@ -1318,7 +1318,7 @@ export default function ProposalResponseWizard({
                             >
                                 {submitting && <span className="loading loading-spinner loading-sm"></span>}
                                 {submitting ? 'Submitting...' : 'Submit Application'}
-                                {!submitting && <i className="fa-solid fa-paper-plane"></i>}
+                                {!submitting && <i className="fa-duotone fa-regular fa-paper-plane"></i>}
                             </button>
                         )}
                     </div>

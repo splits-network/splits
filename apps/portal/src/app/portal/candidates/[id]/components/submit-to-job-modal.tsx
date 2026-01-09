@@ -64,7 +64,7 @@ export default function SubmitToJobModal({
 
                 {error && (
                     <div className="alert alert-error mb-4">
-                        <i className="fa-solid fa-circle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                         <span>{error}</span>
                     </div>
                 )}
@@ -89,7 +89,7 @@ export default function SubmitToJobModal({
                         </select>
                         {jobs.length === 0 && (
                             <p className="fieldset-label text-warning">
-                                <i className="fa-solid fa-triangle-exclamation mr-1"></i>
+                                <i className="fa-duotone fa-regular fa-triangle-exclamation mr-1"></i>
                                 No active jobs found. Create a job first.
                             </p>
                         )}
@@ -122,7 +122,7 @@ export default function SubmitToJobModal({
                                             checked={selectedDocIds.has(doc.id)}
                                             onChange={() => toggleDocument(doc.id)}
                                         />
-                                        <i className={`fa-solid ${doc.file_type === 'application/pdf' ? 'fa-file-pdf text-error' :
+                                        <i className={`fa-duotone fa-regular ${doc.file_type === 'application/pdf' ? 'fa-file-pdf text-error' :
                                             doc.file_type?.startsWith('image/') ? 'fa-file-image text-info' :
                                                 'fa-file text-base-content/70'
                                             }`}></i>
@@ -158,7 +158,7 @@ export default function SubmitToJobModal({
                                 </>
                             ) : (
                                 <>
-                                    <i className="fa-solid fa-paper-plane"></i>
+                                    <i className="fa-duotone fa-regular fa-paper-plane"></i>
                                     Submit to Job
                                 </>
                             )}

@@ -35,7 +35,7 @@ export function RecruiterTableRow({ recruiter }: RecruiterTableRowProps) {
             >
                 <td>
                     <button className="btn btn-ghost btn-xs btn-circle">
-                        <i className={`fa-solid ${isExpanded ? 'fa-chevron-down' : 'fa-chevron-right'}`}></i>
+                        <i className={`fa-duotone fa-regular ${isExpanded ? 'fa-chevron-down' : 'fa-chevron-right'}`}></i>
                     </button>
                 </td>
                 <td>
@@ -60,7 +60,7 @@ export function RecruiterTableRow({ recruiter }: RecruiterTableRowProps) {
                 <td>
                     {recruiter.location && (
                         <div className="flex items-center gap-1 text-sm">
-                            <i className="fa-solid fa-location-dot"></i>
+                            <i className="fa-duotone fa-regular fa-location-dot"></i>
                             {recruiter.location}
                         </div>
                     )}
@@ -71,9 +71,9 @@ export function RecruiterTableRow({ recruiter }: RecruiterTableRowProps) {
                             {[...Array(5)].map((_, i) => (
                                 <i
                                     key={i}
-                                    className={`fa-solid fa-star text-xs ${i < Math.round(recruiter.reputation_score! / 20)
-                                            ? 'text-warning'
-                                            : 'text-base-300'
+                                    className={`fa-duotone fa-regular fa-star text-xs ${i < Math.round(recruiter.reputation_score! / 20)
+                                        ? 'text-warning'
+                                        : 'text-base-300'
                                         }`}
                                 ></i>
                             ))}
@@ -91,7 +91,7 @@ export function RecruiterTableRow({ recruiter }: RecruiterTableRowProps) {
                             // Navigate to recruiter detail or contact
                         }}
                     >
-                        <i className="fa-solid fa-envelope"></i>
+                        <i className="fa-duotone fa-regular fa-envelope"></i>
                         Contact
                     </button>
                 </td>
@@ -153,7 +153,7 @@ export function RecruiterTableRow({ recruiter }: RecruiterTableRowProps) {
                             {/* Tagline */}
                             {recruiter.tagline && (
                                 <div className="alert alert-info">
-                                    <i className="fa-solid fa-quote-left"></i>
+                                    <i className="fa-duotone fa-regular fa-quote-left"></i>
                                     <span className="italic">{recruiter.tagline}</span>
                                 </div>
                             )}
@@ -161,7 +161,7 @@ export function RecruiterTableRow({ recruiter }: RecruiterTableRowProps) {
                             {/* Contact Actions */}
                             <div className="flex gap-2">
                                 <button className="btn btn-primary">
-                                    <i className="fa-solid fa-envelope"></i>
+                                    <i className="fa-duotone fa-regular fa-envelope"></i>
                                     Send Message
                                 </button>
                                 {recruiter.email && (
@@ -170,7 +170,7 @@ export function RecruiterTableRow({ recruiter }: RecruiterTableRowProps) {
                                         className="btn btn-outline"
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        <i className="fa-solid fa-at"></i>
+                                        <i className="fa-duotone fa-regular fa-at"></i>
                                         Email
                                     </a>
                                 )}

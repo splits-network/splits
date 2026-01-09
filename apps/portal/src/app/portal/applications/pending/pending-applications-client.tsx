@@ -105,7 +105,7 @@ export default function PendingApplicationsClient() {
             {/* Success Alert */}
             {showSuccess && (
                 <div className="alert alert-success mb-6">
-                    <i className="fa-solid fa-circle-check"></i>
+                    <i className="fa-duotone fa-regular fa-circle-check"></i>
                     <span>Application successfully submitted to company!</span>
                 </div>
             )}
@@ -115,7 +115,7 @@ export default function PendingApplicationsClient() {
                 <div className="stats bg-base-100 shadow">
                     <div className="stat py-3">
                         <div className="stat-figure text-warning">
-                            <i className="fa-solid fa-clock text-2xl"></i>
+                            <i className="fa-duotone fa-regular fa-clock text-2xl"></i>
                         </div>
                         <div className="stat-title text-sm">Pending Review</div>
                         <div className="stat-value text-2xl text-warning">{total}</div>
@@ -124,7 +124,7 @@ export default function PendingApplicationsClient() {
                 <div className="stats bg-base-100 shadow">
                     <div className="stat py-3">
                         <div className="stat-figure text-info">
-                            <i className="fa-solid fa-file text-2xl"></i>
+                            <i className="fa-duotone fa-regular fa-file text-2xl"></i>
                         </div>
                         <div className="stat-title text-sm">With Documents</div>
                         <div className="stat-value text-2xl text-info">
@@ -135,7 +135,7 @@ export default function PendingApplicationsClient() {
                 <div className="stats bg-base-100 shadow">
                     <div className="stat py-3">
                         <div className="stat-figure text-success">
-                            <i className="fa-solid fa-clipboard-question text-2xl"></i>
+                            <i className="fa-duotone fa-regular fa-clipboard-question text-2xl"></i>
                         </div>
                         <div className="stat-title text-sm">Questions Answered</div>
                         <div className="stat-value text-2xl text-success">
@@ -146,7 +146,7 @@ export default function PendingApplicationsClient() {
                 <div className="stats bg-base-100 shadow">
                     <div className="stat py-3">
                         <div className="stat-figure text-primary">
-                            <i className="fa-solid fa-calendar-day text-2xl"></i>
+                            <i className="fa-duotone fa-regular fa-calendar-day text-2xl"></i>
                         </div>
                         <div className="stat-title text-sm">Today</div>
                         <div className="stat-value text-2xl text-primary">
@@ -232,37 +232,37 @@ function ApplicationCard({ application }: ApplicationCardProps) {
                     <div className="flex-1">
                         <h3 className="card-title text-2xl mb-2">{candidateName}</h3>
                         <div className="flex items-center gap-2 text-lg font-semibold text-primary mb-3">
-                            <i className="fa-solid fa-briefcase"></i>
+                            <i className="fa-duotone fa-regular fa-briefcase"></i>
                             <span>{jobTitle}</span>
                         </div>
                         <p className="text-base-content/70 mb-3">{companyName}</p>
                         <div className="flex flex-wrap gap-4 text-sm text-base-content/60 mb-4">
                             {location && (
                                 <span>
-                                    <i className="fa-solid fa-location-dot mr-1"></i>
+                                    <i className="fa-duotone fa-regular fa-location-dot mr-1"></i>
                                     {location}
                                 </span>
                             )}
                             <span>
-                                <i className="fa-solid fa-calendar mr-1"></i>
+                                <i className="fa-duotone fa-regular fa-calendar mr-1"></i>
                                 Submitted {formatRelativeTime(application.created_at)}
                             </span>
                             {application.document_count !== undefined && application.document_count > 0 && (
                                 <span>
-                                    <i className="fa-solid fa-file mr-1"></i>
+                                    <i className="fa-duotone fa-regular fa-file mr-1"></i>
                                     {application.document_count} document{application.document_count !== 1 ? 's' : ''}
                                 </span>
                             )}
                             {application.pre_screen_answer_count !== undefined && application.pre_screen_answer_count > 0 && (
                                 <span>
-                                    <i className="fa-solid fa-clipboard-question mr-1"></i>
+                                    <i className="fa-duotone fa-regular fa-clipboard-question mr-1"></i>
                                     {application.pre_screen_answer_count} question{application.pre_screen_answer_count !== 1 ? 's' : ''} answered
                                 </span>
                             )}
                         </div>
                         <div className="flex items-center gap-2">
                             <span className="badge badge-warning">
-                                <i className="fa-solid fa-clock mr-1"></i>
+                                <i className="fa-duotone fa-regular fa-clock mr-1"></i>
                                 Awaiting Review
                             </span>
                         </div>
@@ -272,14 +272,14 @@ function ApplicationCard({ application }: ApplicationCardProps) {
                             href={`/portal/applications/${application.id}/review`}
                             className="btn btn-primary"
                         >
-                            <i className="fa-solid fa-eye"></i>
+                            <i className="fa-duotone fa-regular fa-eye"></i>
                             Review & Submit
                         </Link>
                         <Link
                             href={`/portal/candidates/${application.candidate_id}`}
                             className="btn btn-ghost btn-sm"
                         >
-                            <i className="fa-solid fa-user"></i>
+                            <i className="fa-duotone fa-regular fa-user"></i>
                             View Candidate
                         </Link>
                     </div>

@@ -18,7 +18,7 @@ export default function HowItWorksPage() {
             {/* Hero Section */}
             <section className="text-center mb-16">
                 <div className="badge badge-primary badge-lg mb-4">
-                    <i className="fa-solid fa-route mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-route mr-2"></i>
                     Your Path to Success
                 </div>
                 <h1 className="text-5xl md:text-6xl font-bold mb-6">
@@ -46,19 +46,19 @@ export default function HowItWorksPage() {
                             </p>
                             <ul className="space-y-3">
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-success text-xl mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-success text-xl mt-1"></i>
                                     <span className="text-base-content/80">Quick 5-minute profile setup</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-success text-xl mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-success text-xl mt-1"></i>
                                     <span className="text-base-content/80">Import your resume automatically</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-success text-xl mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-success text-xl mt-1"></i>
                                     <span className="text-base-content/80">Set your job preferences and requirements</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-success text-xl mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-success text-xl mt-1"></i>
                                     <span className="text-base-content/80">100% private until you apply</span>
                                 </li>
                             </ul>
@@ -67,7 +67,7 @@ export default function HowItWorksPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <div className="text-center py-8">
-                                        <i className="fa-solid fa-user-circle text-9xl text-primary opacity-20"></i>
+                                        <i className="fa-duotone fa-regular fa-user-circle text-9xl text-primary opacity-20"></i>
                                     </div>
                                 </div>
                             </div>
@@ -80,7 +80,7 @@ export default function HowItWorksPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <div className="text-center py-8">
-                                        <i className="fa-solid fa-magnifying-glass-plus text-9xl text-secondary opacity-20"></i>
+                                        <i className="fa-duotone fa-regular fa-magnifying-glass-plus text-9xl text-secondary opacity-20"></i>
                                     </div>
                                 </div>
                             </div>
@@ -97,19 +97,19 @@ export default function HowItWorksPage() {
                             </p>
                             <ul className="space-y-3">
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-success text-xl mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-success text-xl mt-1"></i>
                                     <span className="text-base-content/80">Advanced search filters by industry, location, and more</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-success text-xl mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-success text-xl mt-1"></i>
                                     <span className="text-base-content/80">See recruiter profiles and specializations</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-success text-xl mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-success text-xl mt-1"></i>
                                     <span className="text-base-content/80">One-click applications with your profile</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-success text-xl mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-success text-xl mt-1"></i>
                                     <span className="text-base-content/80">Matched with specialized recruiters automatically</span>
                                 </li>
                             </ul>
@@ -130,19 +130,19 @@ export default function HowItWorksPage() {
                             </p>
                             <ul className="space-y-3">
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-success text-xl mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-success text-xl mt-1"></i>
                                     <span className="text-base-content/80">Real-time application tracking and updates</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-success text-xl mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-success text-xl mt-1"></i>
                                     <span className="text-base-content/80">Expert interview preparation and coaching</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-success text-xl mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-success text-xl mt-1"></i>
                                     <span className="text-base-content/80">Salary negotiation support</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-success text-xl mt-1"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-success text-xl mt-1"></i>
                                     <span className="text-base-content/80">Direct communication with your recruiter</span>
                                 </li>
                             </ul>
@@ -151,7 +151,7 @@ export default function HowItWorksPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <div className="text-center py-8">
-                                        <i className="fa-solid fa-trophy text-9xl text-accent opacity-20"></i>
+                                        <i className="fa-duotone fa-regular fa-trophy text-9xl text-accent opacity-20"></i>
                                     </div>
                                 </div>
                             </div>
@@ -168,7 +168,7 @@ export default function HowItWorksPage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body text-center">
                                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                                    <i className="fa-solid fa-shield-halved text-3xl text-primary"></i>
+                                    <i className="fa-duotone fa-regular fa-shield-halved text-3xl text-primary"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-lg">100% Free</h3>
                                 <p className="text-sm text-base-content/70">
@@ -179,7 +179,7 @@ export default function HowItWorksPage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body text-center">
                                 <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-4">
-                                    <i className="fa-solid fa-user-tie text-3xl text-secondary"></i>
+                                    <i className="fa-duotone fa-regular fa-user-tie text-3xl text-secondary"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-lg">Expert Recruiters</h3>
                                 <p className="text-sm text-base-content/70">
@@ -190,7 +190,7 @@ export default function HowItWorksPage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body text-center">
                                 <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
-                                    <i className="fa-solid fa-chart-line text-3xl text-accent"></i>
+                                    <i className="fa-duotone fa-regular fa-chart-line text-3xl text-accent"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-lg">Track Progress</h3>
                                 <p className="text-sm text-base-content/70">
@@ -201,7 +201,7 @@ export default function HowItWorksPage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body text-center">
                                 <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
-                                    <i className="fa-solid fa-comments text-3xl text-success"></i>
+                                    <i className="fa-duotone fa-regular fa-comments text-3xl text-success"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-lg">Direct Communication</h3>
                                 <p className="text-sm text-base-content/70">
@@ -275,7 +275,7 @@ export default function HowItWorksPage() {
                 </div>
                 <div className="text-center mt-8">
                     <Link href="/help" className="btn btn-outline">
-                        <i className="fa-solid fa-circle-question mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-circle-question mr-2"></i>
                         Visit Help Center
                     </Link>
                 </div>
@@ -289,11 +289,11 @@ export default function HowItWorksPage() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Link href="/sign-up" className="btn btn-primary btn-lg">
-                        <i className="fa-solid fa-user-plus mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-user-plus mr-2"></i>
                         Create Free Account
                     </Link>
                     <Link href="/public/jobs" className="btn btn-outline btn-lg">
-                        <i className="fa-solid fa-magnifying-glass mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-magnifying-glass mr-2"></i>
                         Browse Jobs
                     </Link>
                 </div>

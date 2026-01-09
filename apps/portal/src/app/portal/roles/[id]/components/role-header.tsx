@@ -124,7 +124,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
             <div className="card bg-base-200 shadow">
                 <div className="card-body">
                     <div className="alert alert-error">
-                        <i className="fa-solid fa-circle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                         <span>Job not found</span>
                     </div>
                 </div>
@@ -149,53 +149,53 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                                         className={`badge ${badge.class} gap-1 ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-bottom' : ''}`}
                                         data-tip={badge.tooltip}
                                     >
-                                        <i className={`fa-solid ${badge.icon}`}></i>
+                                        <i className={`fa-duotone fa-regular ${badge.icon}`}></i>
                                         {badge.text && <span>{badge.text}</span>}
                                     </div>
                                 ))}
                             </div>
                             <div className="flex flex-wrap items-center gap-4 mt-3 text-base-content/70">
                                 <span className="flex items-center gap-2">
-                                    <i className="fa-solid fa-building"></i>
+                                    <i className="fa-duotone fa-regular fa-building"></i>
                                     {job.company.name}
                                 </span>
                                 {job.location && (
                                     <span className="flex items-center gap-2">
-                                        <i className="fa-solid fa-location-dot"></i>
+                                        <i className="fa-duotone fa-regular fa-location-dot"></i>
                                         {job.location}
                                     </span>
                                 )}
                                 {job.department && (
                                     <span className="flex items-center gap-2">
-                                        <i className="fa-solid fa-briefcase"></i>
+                                        <i className="fa-duotone fa-regular fa-briefcase"></i>
                                         {job.department}
                                     </span>
                                 )}
                                 {job.employment_type && (
                                     <span className="flex items-center gap-2">
-                                        <i className="fa-solid fa-clock"></i>
+                                        <i className="fa-duotone fa-regular fa-clock"></i>
                                         {job.employment_type === 'full_time' ? 'Full-Time' :
                                             job.employment_type === 'contract' ? 'Contract' : 'Temporary'}
                                     </span>
                                 )}
                                 {job.open_to_relocation && (
                                     <span className="flex items-center gap-2">
-                                        <i className="fa-solid fa-plane"></i>
+                                        <i className="fa-duotone fa-regular fa-plane"></i>
                                         Open to Relocation
                                     </span>
                                 )}
                                 {job.show_salary_range && job.salary_min && job.salary_max && (
                                     <span className="flex items-center gap-2">
-                                        <i className="fa-solid fa-dollar-sign"></i>
+                                        <i className="fa-duotone fa-regular fa-dollar-sign"></i>
                                         ${(job.salary_min / 1000).toFixed(0)}k - ${(job.salary_max / 1000).toFixed(0)}k
                                     </span>
                                 )}
                                 <span className="flex items-center gap-2">
-                                    <i className="fa-solid fa-percent"></i>
+                                    <i className="fa-duotone fa-regular fa-percent"></i>
                                     {job.fee_percentage}% fee
                                 </span>
                                 <span className="flex items-center gap-2">
-                                    <i className="fa-solid fa-handshake"></i>
+                                    <i className="fa-duotone fa-regular fa-handshake"></i>
                                     {job.splits_fee_percentage}% recruiter split
                                 </span>
                             </div>
@@ -207,7 +207,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                                 className="btn btn-primary gap-2"
                                 onClick={() => setShowSubmitModal(true)}
                             >
-                                <i className="fa-solid fa-user-plus"></i>
+                                <i className="fa-duotone fa-regular fa-user-plus"></i>
                                 Send Proposal
                             </button>
 
@@ -217,7 +217,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                                         href={`/portal/roles/${roleId}/edit`}
                                         className="btn btn-ghost gap-2"
                                     >
-                                        <i className="fa-solid fa-pen"></i>
+                                        <i className="fa-duotone fa-regular fa-pen"></i>
                                         Edit Role
                                     </Link>
 
@@ -231,7 +231,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                                             {updating ? (
                                                 <span className="loading loading-spinner loading-xs"></span>
                                             ) : (
-                                                <i className="fa-solid fa-ellipsis-vertical"></i>
+                                                <i className="fa-duotone fa-regular fa-ellipsis-vertical"></i>
                                             )}
                                             Status Actions
                                         </button>
@@ -239,7 +239,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                                             {job.status !== 'active' && (
                                                 <li>
                                                     <button onClick={() => handleStatusChange('active')}>
-                                                        <i className="fa-solid fa-play"></i>
+                                                        <i className="fa-duotone fa-regular fa-play"></i>
                                                         Activate
                                                     </button>
                                                 </li>
@@ -247,7 +247,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                                             {job.status === 'active' && (
                                                 <li>
                                                     <button onClick={() => handleStatusChange('paused')}>
-                                                        <i className="fa-solid fa-pause"></i>
+                                                        <i className="fa-duotone fa-regular fa-pause"></i>
                                                         Pause
                                                     </button>
                                                 </li>
@@ -255,7 +255,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                                             {job.status !== 'filled' && (
                                                 <li>
                                                     <button onClick={() => handleStatusChange('filled')}>
-                                                        <i className="fa-solid fa-check"></i>
+                                                        <i className="fa-duotone fa-regular fa-check"></i>
                                                         Mark as Filled
                                                     </button>
                                                 </li>
@@ -263,7 +263,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                                             {job.status !== 'closed' && (
                                                 <li>
                                                     <button onClick={() => handleStatusChange('closed')}>
-                                                        <i className="fa-solid fa-xmark"></i>
+                                                        <i className="fa-duotone fa-regular fa-xmark"></i>
                                                         Close Role
                                                     </button>
                                                 </li>

@@ -187,7 +187,7 @@ function DocumentsContent() {
             {/* Error Display */}
             {(error || actionError) && (
                 <div className="alert alert-error mb-6">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error || actionError}</span>
                 </div>
             )}
@@ -196,7 +196,7 @@ function DocumentsContent() {
             <div className="card bg-linear-to-r from-primary to-secondary text-white shadow mb-8">
                 <div className="card-body">
                     <h2 className="card-title text-2xl mb-4">
-                        <i className="fa-solid fa-cloud-arrow-up"></i>
+                        <i className="fa-duotone fa-regular fa-cloud-arrow-up"></i>
                         Upload Documents
                     </h2>
                     <p className="mb-6">
@@ -207,7 +207,7 @@ function DocumentsContent() {
                         className="btn bg-white text-primary hover:bg-gray-100 w-fit"
                         onClick={handleUploadClick}
                     >
-                        <i className="fa-solid fa-upload"></i>
+                        <i className="fa-duotone fa-regular fa-upload"></i>
                         Upload Documents
                     </button>
                 </div>
@@ -264,7 +264,7 @@ function DocumentsContent() {
                                     <div className="flex items-center gap-4 flex-1">
                                         <div className="avatar avatar-placeholder">
                                             <div className="bg-base-200 text-base-content rounded-lg w-16 h-16 flex items-center justify-center">
-                                                <i className={`fa-solid ${getFileIcon(doc.file_name)} text-3xl`}></i>
+                                                <i className={`fa-duotone fa-regular ${getFileIcon(doc.file_name)} text-3xl`}></i>
                                             </div>
                                         </div>
 
@@ -273,11 +273,11 @@ function DocumentsContent() {
                                             <div className="flex flex-wrap gap-3 text-sm text-base-content/70">
                                                 <span className="badge badge-sm capitalize">{getDocumentTypeLabel(doc.document_type)}</span>
                                                 <span>
-                                                    <i className="fa-solid fa-file-arrow-down mr-1"></i>
+                                                    <i className="fa-duotone fa-regular fa-file-arrow-down mr-1"></i>
                                                     {formatFileSize(doc.file_size)}
                                                 </span>
                                                 <span>
-                                                    <i className="fa-solid fa-calendar mr-1"></i>
+                                                    <i className="fa-duotone fa-regular fa-calendar mr-1"></i>
                                                     Uploaded {doc.created_at ? formatDate(doc.created_at) : 'Unknown'}
                                                 </span>
                                             </div>
@@ -289,7 +289,7 @@ function DocumentsContent() {
                                             className="btn btn-sm btn-primary"
                                             onClick={() => handleDownload(doc)}
                                         >
-                                            <i className="fa-solid fa-download"></i>
+                                            <i className="fa-duotone fa-regular fa-download"></i>
                                             Download
                                         </button>
                                         <button
@@ -300,7 +300,7 @@ function DocumentsContent() {
                                             {deleting === doc.id ? (
                                                 <span className="loading loading-spinner loading-xs"></span>
                                             ) : (
-                                                <i className="fa-solid fa-trash"></i>
+                                                <i className="fa-duotone fa-regular fa-trash"></i>
                                             )}
                                         </button>
                                     </div>
@@ -315,7 +315,7 @@ function DocumentsContent() {
             {!loading && filteredDocuments.length === 0 && (
                 <div className="card bg-base-100 shadow">
                     <div className="card-body text-center py-16">
-                        <i className="fa-solid fa-folder-open text-6xl text-base-content/30 mb-4"></i>
+                        <i className="fa-duotone fa-regular fa-folder-open text-6xl text-base-content/30 mb-4"></i>
                         <h3 className="text-2xl font-bold mb-2">
                             {filterType === 'all' ? 'No Documents Yet' : 'No Documents in This Category'}
                         </h3>
@@ -329,7 +329,7 @@ function DocumentsContent() {
                                 className="btn btn-primary"
                                 onClick={handleUploadClick}
                             >
-                                <i className="fa-solid fa-upload"></i>
+                                <i className="fa-duotone fa-regular fa-upload"></i>
                                 Upload Your First Document
                             </button>
                         )}
@@ -341,7 +341,7 @@ function DocumentsContent() {
             <div className="card bg-info text-info-content shadow mt-8">
                 <div className="card-body">
                     <h3 className="card-title">
-                        <i className="fa-solid fa-lightbulb"></i>
+                        <i className="fa-duotone fa-regular fa-lightbulb"></i>
                         Tips for Better Applications
                     </h3>
                     <ul className="list-disc list-inside space-y-2 ml-4">

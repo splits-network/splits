@@ -62,20 +62,20 @@ export default function BulkActionModal({
                 <h3 className="font-bold text-lg mb-4">
                     {action === 'stage' && (
                         <>
-                            <i className="fa-solid fa-list-check mr-2"></i>
+                            <i className="fa-duotone fa-regular fa-list-check mr-2"></i>
                             Bulk Update Stage
                         </>
                     )}
                     {action === 'reject' && (
                         <>
-                            <i className="fa-solid fa-ban mr-2"></i>
+                            <i className="fa-duotone fa-regular fa-ban mr-2"></i>
                             Bulk Reject Applications
                         </>
                     )}
                 </h3>
 
                 <div className="alert alert-warning mb-4">
-                    <i className="fa-solid fa-triangle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
                     <span>
                         You are about to {action === 'stage' ? 'update' : 'reject'}{' '}
                         <strong>{selectedCount}</strong> application{selectedCount !== 1 ? 's' : ''}.
@@ -149,7 +149,7 @@ export default function BulkActionModal({
                                 </>
                             ) : (
                                 <>
-                                    <i className={`fa-solid ${action === 'stage' ? 'fa-check' : 'fa-ban'}`}></i>
+                                    <i className={`fa-duotone fa-regular ${action === 'stage' ? 'fa-check' : 'fa-ban'}`}></i>
                                     Confirm {action === 'stage' ? 'Update' : 'Rejection'}
                                 </>
                             )}

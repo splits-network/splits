@@ -19,7 +19,7 @@ export default function RolesHeader() {
             </div>
             {canCreateRole && (
                 <Link href="/portal/roles/new" className="btn btn-primary gap-2">
-                    <i className="fa-solid fa-plus"></i>
+                    <i className="fa-duotone fa-regular fa-plus"></i>
                     Create New Role
                 </Link>
             )}

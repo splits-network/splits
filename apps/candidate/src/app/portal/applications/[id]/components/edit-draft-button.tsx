@@ -17,7 +17,7 @@ export default function EditDraftButton({ application, job }: EditDraftButtonPro
                 onClick={() => setShowWizard(true)}
                 className="btn btn-primary w-full"
             >
-                <i className="fa-solid fa-edit"></i>
+                <i className="fa-duotone fa-regular fa-edit"></i>
                 Edit & Submit Application
             </button>
 

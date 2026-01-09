@@ -13,7 +13,7 @@ export default function DeclinedPage() {
                 <div className="card-body text-center">
                     <div className="flex justify-center mb-6">
                         <div className="bg-base-300 rounded-full p-6">
-                            <i className="fa-solid fa-times-circle text-6xl text-base-content/60"></i>
+                            <i className="fa-duotone fa-regular fa-times-circle text-6xl text-base-content/60"></i>
                         </div>
                     </div>
 
@@ -34,7 +34,7 @@ export default function DeclinedPage() {
                     </div>
 
                     <div className="alert alert-info mb-6">
-                        <i className="fa-solid fa-info-circle"></i>
+                        <i className="fa-duotone fa-regular fa-info-circle"></i>
                         <div className="text-left">
                             <p className="font-semibold">Your feedback matters</p>
                             <p className="text-sm">
@@ -46,7 +46,7 @@ export default function DeclinedPage() {
 
                     <div className="card-actions justify-center">
                         <Link href="/" className="btn btn-primary btn-lg">
-                            <i className="fa-solid fa-home"></i>
+                            <i className="fa-duotone fa-regular fa-home"></i>
                             Go to Dashboard
                         </Link>
                     </div>

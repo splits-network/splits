@@ -97,7 +97,7 @@ export default function IndustryTrendsPage() {
                 <div className="container mx-auto px-4">
                     <div className="max-w-3xl">
                         <div className="flex items-center gap-2 mb-4">
-                            <i className="fa-solid fa-trending-up text-3xl"></i>
+                            <i className="fa-duotone fa-regular fa-trending-up text-3xl"></i>
                             <h1 className="text-4xl font-bold">Industry Trends</h1>
                         </div>
                         <p className="text-xl opacity-90">
@@ -118,7 +118,7 @@ export default function IndustryTrendsPage() {
                             <div key={index} className="card bg-base-100 shadow hover:shadow transition-shadow">
                                 <div className="card-body">
                                     <div className={`w-14 h-14 rounded-full bg-${trend.color}/20 flex items-center justify-center mb-4`}>
-                                        <i className={`fa-solid fa-${trend.icon} text-${trend.color} text-2xl`}></i>
+                                        <i className={`fa-duotone fa-regular fa-${trend.icon} text-${trend.color} text-2xl`}></i>
                                     </div>
 
                                     <h3 className="card-title text-xl mb-2">{trend.title}</h3>
@@ -146,7 +146,7 @@ export default function IndustryTrendsPage() {
                                 <div className="card-body">
                                     <div className="flex items-center gap-4 mb-4">
                                         <div className={`w-16 h-16 rounded-full bg-${sector.color}/20 flex items-center justify-center`}>
-                                            <i className={`fa-solid fa-${sector.icon} text-${sector.color} text-3xl`}></i>
+                                            <i className={`fa-duotone fa-regular fa-${sector.icon} text-${sector.color} text-3xl`}></i>
                                         </div>
                                         <div className="flex-1">
                                             <h3 className="text-2xl font-bold">{sector.name}</h3>
@@ -179,7 +179,7 @@ export default function IndustryTrendsPage() {
                                     <div key={index}>
                                         <div className="flex items-center justify-between mb-2">
                                             <div className="flex items-center gap-3">
-                                                <i className={`fa-solid fa-${skill.icon} text-primary text-xl`}></i>
+                                                <i className={`fa-duotone fa-regular fa-${skill.icon} text-primary text-xl`}></i>
                                                 <span className="font-semibold">{skill.name}</span>
                                             </div>
                                             <span className="text-sm text-base-content/60">{skill.demand}% demand</span>
@@ -202,24 +202,24 @@ export default function IndustryTrendsPage() {
                     <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow">
                         <div className="card-body">
                             <h3 className="card-title text-2xl mb-4">
-                                <i className="fa-solid fa-lightbulb"></i>
+                                <i className="fa-duotone fa-regular fa-lightbulb"></i>
                                 Key Takeaways
                             </h3>
                             <ul className="space-y-3">
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Invest in continuous learning and skill development to stay competitive</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Focus on building both technical and soft skills for career resilience</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Consider emerging fields and industries with strong growth potential</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Embrace flexibility and adaptability as core career competencies</span>
                                 </li>
                             </ul>
@@ -239,7 +239,7 @@ export default function IndustryTrendsPage() {
                             </p>
                             <div className="flex gap-2 justify-center">
                                 <a href="/public/jobs" className="btn btn-primary">
-                                    Browse Jobs <i className="fa-solid fa-briefcase"></i>
+                                    Browse Jobs <i className="fa-duotone fa-regular fa-briefcase"></i>
                                 </a>
                                 <a href="/resources/salary-insights" className="btn btn-outline">
                                     Salary Insights

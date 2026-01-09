@@ -92,7 +92,7 @@ export default function PressKitPage() {
                                             <div className="text-4xl font-bold text-primary">Splits Network</div>
                                         </div>
                                         <button className="btn btn-sm btn-primary">
-                                            <i className="fa-solid fa-download"></i>
+                                            <i className="fa-duotone fa-regular fa-download"></i>
                                             Download PNG
                                         </button>
                                     </div>
@@ -104,7 +104,7 @@ export default function PressKitPage() {
                                             <div className="text-4xl font-bold text-neutral-content">Splits Network</div>
                                         </div>
                                         <button className="btn btn-sm btn-primary">
-                                            <i className="fa-solid fa-download"></i>
+                                            <i className="fa-duotone fa-regular fa-download"></i>
                                             Download PNG
                                         </button>
                                     </div>
@@ -151,7 +151,7 @@ export default function PressKitPage() {
                         <div>
                             <h3 className="text-2xl font-bold mb-6">Product Screenshots</h3>
                             <div className="alert alert-info mb-6">
-                                <i className="fa-solid fa-info-circle"></i>
+                                <i className="fa-duotone fa-regular fa-info-circle"></i>
                                 <span>High-resolution product screenshots available upon request</span>
                             </div>
                             <div className="grid md:grid-cols-2 gap-6">
@@ -159,7 +159,7 @@ export default function PressKitPage() {
                                     <div className="card-body">
                                         <h4 className="font-bold">Dashboard View</h4>
                                         <div className="bg-base-300 rounded-lg aspect-video flex items-center justify-center">
-                                            <i className="fa-solid fa-image text-6xl opacity-20"></i>
+                                            <i className="fa-duotone fa-regular fa-image text-6xl opacity-20"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -167,7 +167,7 @@ export default function PressKitPage() {
                                     <div className="card-body">
                                         <h4 className="font-bold">ATS Pipeline</h4>
                                         <div className="bg-base-300 rounded-lg aspect-video flex items-center justify-center">
-                                            <i className="fa-solid fa-image text-6xl opacity-20"></i>
+                                            <i className="fa-duotone fa-regular fa-image text-6xl opacity-20"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -189,13 +189,13 @@ export default function PressKitPage() {
                                         <h3 className="text-xl font-bold mb-4">Press Inquiries</h3>
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-3">
-                                                <i className="fa-solid fa-envelope text-primary"></i>
+                                                <i className="fa-duotone fa-regular fa-envelope text-primary"></i>
                                                 <a href="mailto:press@splits.network" className="link link-hover">
                                                     press@splits.network
                                                 </a>
                                             </div>
                                             <div className="flex items-center gap-3">
-                                                <i className="fa-solid fa-phone text-primary"></i>
+                                                <i className="fa-duotone fa-regular fa-phone text-primary"></i>
                                                 <span>Available upon request</span>
                                             </div>
                                         </div>
@@ -204,13 +204,13 @@ export default function PressKitPage() {
                                         <h3 className="text-xl font-bold mb-4">Partnership Inquiries</h3>
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-3">
-                                                <i className="fa-solid fa-envelope text-secondary"></i>
+                                                <i className="fa-duotone fa-regular fa-envelope text-secondary"></i>
                                                 <a href="mailto:partnerships@splits.network" className="link link-hover">
                                                     partnerships@splits.network
                                                 </a>
                                             </div>
                                             <div className="flex items-center gap-3">
-                                                <i className="fa-solid fa-handshake text-secondary"></i>
+                                                <i className="fa-duotone fa-regular fa-handshake text-secondary"></i>
                                                 <Link href="/partners" className="link link-hover">
                                                     Partner Program
                                                 </Link>
@@ -226,7 +226,7 @@ export default function PressKitPage() {
                                 For additional materials, interview requests, or custom assets, please contact our press team.
                             </p>
                             <a href="mailto:press@splits.network" className="btn btn-primary btn-lg">
-                                <i className="fa-solid fa-envelope"></i>
+                                <i className="fa-duotone fa-regular fa-envelope"></i>
                                 Contact Press Team
                             </a>
                         </div>

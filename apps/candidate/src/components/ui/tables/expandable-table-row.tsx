@@ -112,7 +112,7 @@ export function ExpandableTableRow({
                             }}
                             aria-label={isExpanded ? 'Collapse row' : 'Expand row'}
                         >
-                            <i className={`fa-solid fa-chevron-right transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}></i>
+                            <i className={`fa-duotone fa-regular fa-chevron-right transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}></i>
                         </button>
                     </td>
                 )}
@@ -247,7 +247,7 @@ export function ExpandedDetailItem({
     return (
         <div className={`flex items-start gap-2 ${className}`}>
             {icon && (
-                <i className={`fa-solid ${icon} text-base-content/40 mt-0.5`}></i>
+                <i className={`fa-duotone fa-regular ${icon} text-base-content/40 mt-0.5`}></i>
             )}
             <div>
                 <dt className="text-xs text-base-content/50">{label}</dt>

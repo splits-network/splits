@@ -160,7 +160,7 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
                 aria-label="Notifications"
                 title='Notifications'
             >
-                <i className="fa-solid fa-bell text-lg text-content/50"></i>
+                <i className="fa-duotone fa-regular fa-bell text-lg text-content/50"></i>
                 {unreadCount > 0 && (
                     <span className="badge badge-error badge-sm rounded-full absolute indicator-item text-xs opacity-70">
                         {unreadCount > 99 ? '99+' : unreadCount}
@@ -204,7 +204,7 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
                             </div>
                         ) : notifications.length === 0 ? (
                             <div className="text-center py-8 text-base-content/60">
-                                <i className="fa-solid fa-inbox text-4xl mb-2"></i>
+                                <i className="fa-duotone fa-regular fa-inbox text-4xl mb-2"></i>
                                 <p>No notifications</p>
                             </div>
                         ) : (
@@ -224,7 +224,7 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
                                             w-10 h-10 rounded-full flex items-center justify-center
                                             ${!notification.read ? 'bg-primary text-primary-content' : 'bg-base-300'}
                                         `}>
-                                            <i className={`fa-solid ${getNotificationIcon(notification.category)}`}></i>
+                                            <i className={`fa-duotone fa-regular ${getNotificationIcon(notification.category)}`}></i>
                                         </div>
                                     </div>
 
@@ -240,7 +240,7 @@ export default function NotificationBell({ position = 'end' }: NotificationBellP
                                                 onClick={(e) => handleDismiss(notification.id, e)}
                                                 aria-label="Dismiss"
                                             >
-                                                <i className="fa-solid fa-times"></i>
+                                                <i className="fa-duotone fa-regular fa-times"></i>
                                             </button>
                                         </div>
                                         <p className="text-xs text-base-content/60 mt-1">

@@ -203,7 +203,7 @@ export default function PlacementsPage() {
                                         onClick={() => handleSort('hired_at')}
                                     >
                                         Date
-                                        <i className={`fa-solid ${getSortIcon('hired_at')} ml-2 text-xs`}></i>
+                                        <i className={`fa-duotone fa-regular ${getSortIcon('hired_at')} ml-2 text-xs`}></i>
                                     </th>
                                     <th>Candidate</th>
                                     <th>Role</th>
@@ -213,7 +213,7 @@ export default function PlacementsPage() {
                                         onClick={() => handleSort('salary')}
                                     >
                                         Salary
-                                        <i className={`fa-solid ${getSortIcon('salary')} ml-2 text-xs`}></i>
+                                        <i className={`fa-duotone fa-regular ${getSortIcon('salary')} ml-2 text-xs`}></i>
                                     </th>
                                     <th className="text-right">Fee %</th>
                                     <th className="text-right">Total Fee</th>
@@ -222,7 +222,7 @@ export default function PlacementsPage() {
                                         onClick={() => handleSort('recruiter_share')}
                                     >
                                         Your Share
-                                        <i className={`fa-solid ${getSortIcon('recruiter_share')} ml-2 text-xs`}></i>
+                                        <i className={`fa-duotone fa-regular ${getSortIcon('recruiter_share')} ml-2 text-xs`}></i>
                                     </th>
                                 </tr>
                             </thead>
@@ -290,7 +290,7 @@ function PlacementCard({ placement }: PlacementCardProps) {
 
                 <div className="space-y-2 text-sm">
                     <div className="flex items-start gap-2">
-                        <i className="fa-solid fa-briefcase text-base-content/50 mt-1"></i>
+                        <i className="fa-duotone fa-regular fa-briefcase text-base-content/50 mt-1"></i>
                         <div>
                             <div className="font-medium">{jobTitle}</div>
                             <div className="text-base-content/70">{companyName}</div>
@@ -298,12 +298,12 @@ function PlacementCard({ placement }: PlacementCardProps) {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <i className="fa-solid fa-dollar-sign text-base-content/50"></i>
+                        <i className="fa-duotone fa-regular fa-dollar-sign text-base-content/50"></i>
                         <span>Salary: ${(placement.salary || 0).toLocaleString()}</span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <i className="fa-solid fa-percent text-base-content/50"></i>
+                        <i className="fa-duotone fa-regular fa-percent text-base-content/50"></i>
                         <span>Fee: {placement.fee_percentage || 0}%</span>
                     </div>
                 </div>

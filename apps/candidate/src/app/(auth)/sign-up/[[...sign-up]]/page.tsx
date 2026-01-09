@@ -153,13 +153,13 @@ export default function SignUpPage() {
                         </h2>
 
                         <div className="alert alert-info mb-4">
-                            <i className="fa-solid fa-envelope"></i>
+                            <i className="fa-duotone fa-regular fa-envelope"></i>
                             <span>We sent a verification code to {email}</span>
                         </div>
 
                         {error && (
                             <div className="alert alert-error mb-4">
-                                <i className="fa-solid fa-circle-exclamation"></i>
+                                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                                 <span>{error}</span>
                             </div>
                         )}
@@ -213,7 +213,7 @@ export default function SignUpPage() {
             <div className="card w-full max-w-md bg-base-100 shadow">
                 <div className="card-body">
                     <div className="text-center mb-6">
-                        <i className="fa-solid fa-briefcase text-4xl text-primary mb-2"></i>
+                        <i className="fa-duotone fa-regular fa-briefcase text-4xl text-primary mb-2"></i>
                         <h2 className="card-title text-2xl font-bold justify-center">
                             {isFromInvitation ? 'Complete Your Invitation' : 'Start Your Job Search'}
                         </h2>
@@ -226,14 +226,14 @@ export default function SignUpPage() {
 
                     {isFromInvitation && (
                         <div className="alert alert-info mb-4">
-                            <i className="fa-solid fa-envelope"></i>
+                            <i className="fa-duotone fa-regular fa-envelope"></i>
                             <span>You've been invited by a recruiter. Sign up to continue.</span>
                         </div>
                     )}
 
                     {error && (
                         <div className="alert alert-error mb-4">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <span>{error}</span>
                         </div>
                     )}

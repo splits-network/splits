@@ -60,7 +60,7 @@ export default function SignInPage() {
             <div className="card w-full max-w-md bg-base-100 shadow">
                 <div className="card-body">
                     <div className="text-center mb-6">
-                        <i className="fa-solid fa-briefcase text-4xl text-primary mb-2"></i>
+                        <i className="fa-duotone fa-regular fa-briefcase text-4xl text-primary mb-2"></i>
                         <h2 className="card-title text-2xl font-bold justify-center">
                             Welcome Back
                         </h2>
@@ -69,7 +69,7 @@ export default function SignInPage() {
 
                     {error && (
                         <div className="alert alert-error mb-4">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <span>{error}</span>
                         </div>
                     )}

@@ -96,7 +96,7 @@ export default function JobTableRow({ job, badges = [] }: JobTableRowProps) {
                                                 className={`badge badge-sm ${badge.class} ${badge.animated ? 'animate-pulse' : ''}`}
                                                 title={badge.tooltip}
                                             >
-                                                <i className={`fa-solid ${badge.icon}`}></i>
+                                                <i className={`fa-duotone fa-regular ${badge.icon}`}></i>
                                             </div>
                                         ))}
                                     </div>
@@ -107,25 +107,25 @@ export default function JobTableRow({ job, badges = [] }: JobTableRowProps) {
                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-base-content/60 mt-1">
                                 {job.location && (
                                     <span className="flex items-center gap-1">
-                                        <i className="fa-solid fa-location-dot"></i>
+                                        <i className="fa-duotone fa-regular fa-location-dot"></i>
                                         {job.location}
                                     </span>
                                 )}
                                 {job.employment_type && (
                                     <span className="flex items-center gap-1">
-                                        <i className="fa-solid fa-briefcase"></i>
+                                        <i className="fa-duotone fa-regular fa-briefcase"></i>
                                         {job.employment_type.replace('_', '-')}
                                     </span>
                                 )}
                                 {job.open_to_relocation && (
                                     <span className="flex items-center gap-1 text-success">
-                                        <i className="fa-solid fa-house-laptop"></i>
+                                        <i className="fa-duotone fa-regular fa-house-laptop"></i>
                                         Remote OK
                                     </span>
                                 )}
                                 {job.salary_min && job.salary_max && (
                                     <span className="flex items-center gap-1 text-success font-medium">
-                                        <i className="fa-solid fa-dollar-sign"></i>
+                                        <i className="fa-duotone fa-regular fa-dollar-sign"></i>
                                         {formatSalary(job.salary_min, job.salary_max)}
                                     </span>
                                 )}
@@ -141,7 +141,7 @@ export default function JobTableRow({ job, badges = [] }: JobTableRowProps) {
                             >
                                 View Role
                             </Link>
-                            <i className={`fa-solid fa-chevron-${isExpanded ? 'down' : 'right'} text-base-content/40`}></i>
+                            <i className={`fa-duotone fa-regular fa-chevron-${isExpanded ? 'down' : 'right'} text-base-content/40`}></i>
                         </div>
                     </div>
 
@@ -152,7 +152,7 @@ export default function JobTableRow({ job, badges = [] }: JobTableRowProps) {
                             {job.description && (
                                 <div>
                                     <div className="text-sm font-semibold text-base-content/70 mb-2">
-                                        <i className="fa-solid fa-file-lines mr-2"></i>
+                                        <i className="fa-duotone fa-regular fa-file-lines mr-2"></i>
                                         Description
                                     </div>
                                     <p className="text-sm text-base-content/80 leading-relaxed">
@@ -187,7 +187,7 @@ export default function JobTableRow({ job, badges = [] }: JobTableRowProps) {
                                     <div className="stat bg-base-100 rounded-box p-3">
                                         <div className="stat-title text-xs">Company HQ</div>
                                         <div className="stat-value text-base flex items-center gap-1">
-                                            <i className="fa-solid fa-building text-sm"></i>
+                                            <i className="fa-duotone fa-regular fa-building text-sm"></i>
                                             {job.company.headquarters_location}
                                         </div>
                                     </div>
@@ -197,7 +197,7 @@ export default function JobTableRow({ job, badges = [] }: JobTableRowProps) {
                                 <div className="stat bg-base-100 rounded-box p-3">
                                     <div className="stat-title text-xs">Posted</div>
                                     <div className="stat-value text-base flex items-center gap-1">
-                                        <i className="fa-solid fa-calendar text-sm"></i>
+                                        <i className="fa-duotone fa-regular fa-calendar text-sm"></i>
                                         {formatDate(job.posted_at)}
                                     </div>
                                 </div>
@@ -210,7 +210,7 @@ export default function JobTableRow({ job, badges = [] }: JobTableRowProps) {
                                     className="btn btn-primary gap-2"
                                     onClick={(e) => e.stopPropagation()}
                                 >
-                                    <i className="fa-solid fa-arrow-right"></i>
+                                    <i className="fa-duotone fa-regular fa-arrow-right"></i>
                                     View Full Details
                                 </Link>
                             </div>

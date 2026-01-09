@@ -224,7 +224,7 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
                                 onClick={(e) => e.stopPropagation()}
                                 title="Portfolio"
                             >
-                                <i className="fa-solid fa-globe"></i>
+                                <i className="fa-duotone fa-regular fa-globe"></i>
                                 Portfolio
                             </a>
                         )}
@@ -253,7 +253,7 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
                                 className={`badge badge-sm ${badge.class} gap-1`}
                                 title={badge.tooltip}
                             >
-                                <i className={`fa-solid ${badge.icon}`}></i>
+                                <i className={`fa-duotone fa-regular ${badge.icon}`}></i>
                                 {badge.text}
                             </span>
                         ))}

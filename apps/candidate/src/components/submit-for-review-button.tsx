@@ -44,7 +44,7 @@ export default function SubmitForReviewButton({ applicationId, jobTitle }: Submi
         <>
             {error && (
                 <div className="alert alert-error mb-4">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
@@ -61,7 +61,7 @@ export default function SubmitForReviewButton({ applicationId, jobTitle }: Submi
                     </>
                 ) : (
                     <>
-                        <i className="fa-solid fa-paper-plane"></i>
+                        <i className="fa-duotone fa-regular fa-paper-plane"></i>
                         Submit for Review
                     </>
                 )}

@@ -117,14 +117,14 @@ export default function OwnershipAuditClient() {
                     </p>
                 </div>
                 <button onClick={loadOwnerships} className="btn btn-outline">
-                    <i className="fa-solid fa-rotate"></i>
+                    <i className="fa-duotone fa-regular fa-rotate"></i>
                     Refresh
                 </button>
             </div>
 
             {error && (
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
@@ -200,12 +200,12 @@ export default function OwnershipAuditClient() {
                                             <td>
                                                 {ownership.is_expired ? (
                                                     <span className="badge badge-ghost">
-                                                        <i className="fa-solid fa-clock mr-1"></i>
+                                                        <i className="fa-duotone fa-regular fa-clock mr-1"></i>
                                                         Expired
                                                     </span>
                                                 ) : (
                                                     <span className="badge badge-success">
-                                                        <i className="fa-solid fa-shield-halved mr-1"></i>
+                                                        <i className="fa-duotone fa-regular fa-shield-halved mr-1"></i>
                                                         Active
                                                     </span>
                                                 )}
@@ -227,7 +227,7 @@ export default function OwnershipAuditClient() {
                                             </td>
                                             <td>
                                                 <button className="btn btn-sm btn-ghost">
-                                                    <i className="fa-solid fa-eye"></i>
+                                                    <i className="fa-duotone fa-regular fa-eye"></i>
                                                     View
                                                 </button>
                                             </td>

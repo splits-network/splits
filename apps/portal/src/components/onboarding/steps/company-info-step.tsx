@@ -122,7 +122,7 @@ export function CompanyInfoStep() {
 
                 {state.error && (
                     <div className="alert alert-error">
-                        <i className="fa-solid fa-circle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                         <span>{state.error}</span>
                     </div>
                 )}
@@ -135,7 +135,7 @@ export function CompanyInfoStep() {
                         className="btn"
                         disabled={state.submitting}
                     >
-                        <i className="fa-solid fa-arrow-left"></i>
+                        <i className="fa-duotone fa-regular fa-arrow-left"></i>
                         Back
                     </button>
                     <button
@@ -151,7 +151,7 @@ export function CompanyInfoStep() {
                         ) : (
                             <>
                                 Continue
-                                <i className="fa-solid fa-arrow-right"></i>
+                                <i className="fa-duotone fa-regular fa-arrow-right"></i>
                             </>
                         )}
                     </button>

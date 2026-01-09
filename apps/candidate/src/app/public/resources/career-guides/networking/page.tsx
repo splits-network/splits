@@ -82,10 +82,10 @@ export default function NetworkingGuidePage() {
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto">
                         <Link href="/resources/career-guides" className="btn btn-ghost btn-sm mb-4">
-                            <i className="fa-solid fa-arrow-left"></i> Back to Career Guides
+                            <i className="fa-duotone fa-regular fa-arrow-left"></i> Back to Career Guides
                         </Link>
                         <div className="flex items-center gap-3 mb-4">
-                            <i className="fa-solid fa-users text-4xl"></i>
+                            <i className="fa-duotone fa-regular fa-users text-4xl"></i>
                             <div>
                                 <div className="badge badge-neutral mb-2">Networking</div>
                                 <h1 className="text-4xl font-bold">Building Your Professional Network</h1>
@@ -95,8 +95,8 @@ export default function NetworkingGuidePage() {
                             Learn strategies to grow and maintain meaningful professional connections that advance your career.
                         </p>
                         <div className="flex items-center gap-4 mt-4 text-sm opacity-80">
-                            <span><i className="fa-solid fa-clock"></i> 6 min read</span>
-                            <span><i className="fa-solid fa-user"></i> Career Experts</span>
+                            <span><i className="fa-duotone fa-regular fa-clock"></i> 6 min read</span>
+                            <span><i className="fa-duotone fa-regular fa-user"></i> Career Experts</span>
                         </div>
                     </div>
                 </div>
@@ -126,13 +126,13 @@ export default function NetworkingGuidePage() {
                                 <div key={index} className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <div className={`w-14 h-14 rounded-full bg-${strategy.color}/20 flex items-center justify-center mb-4`}>
-                                            <i className={`fa-solid fa-${strategy.icon} text-${strategy.color} text-2xl`}></i>
+                                            <i className={`fa-duotone fa-regular fa-${strategy.icon} text-${strategy.color} text-2xl`}></i>
                                         </div>
                                         <h3 className="card-title text-xl mb-4">{strategy.title}</h3>
                                         <ul className="space-y-2">
                                             {strategy.tactics.map((tactic, i) => (
                                                 <li key={i} className="flex items-start gap-2 text-sm">
-                                                    <i className="fa-solid fa-check text-success mt-1"></i>
+                                                    <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                                     <span>{tactic}</span>
                                                 </li>
                                             ))}
@@ -147,7 +147,7 @@ export default function NetworkingGuidePage() {
                     <div className="card bg-base-100 shadow mb-12">
                         <div className="card-body">
                             <h2 className="card-title text-2xl mb-4">
-                                <i className="fa-solid fa-microphone text-primary"></i>
+                                <i className="fa-duotone fa-regular fa-microphone text-primary"></i>
                                 Crafting Your Elevator Pitch
                             </h2>
                             <p className="mb-4 text-base-content/70">
@@ -190,7 +190,7 @@ export default function NetworkingGuidePage() {
                                 <div key={index} className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <div className="flex items-start gap-4">
-                                            <i className={`fa-solid fa-${tip.icon} text-3xl text-primary`}></i>
+                                            <i className={`fa-duotone fa-regular fa-${tip.icon} text-3xl text-primary`}></i>
                                             <div>
                                                 <h3 className="card-title text-xl mb-2">{tip.title}</h3>
                                                 <p className="text-base-content/70">{tip.description}</p>
@@ -206,7 +206,7 @@ export default function NetworkingGuidePage() {
                     <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow mb-12">
                         <div className="card-body">
                             <h3 className="card-title text-2xl mb-4">
-                                <i className="fa-solid fa-list-check"></i>
+                                <i className="fa-duotone fa-regular fa-list-check"></i>
                                 30-Day Networking Action Plan
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -238,15 +238,15 @@ export default function NetworkingGuidePage() {
                             <h3 className="card-title text-xl mb-4">Continue Learning</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <Link href="/resources/career-guides/switch-careers" className="btn btn-outline">
-                                    <i className="fa-solid fa-arrows-turn-right"></i>
+                                    <i className="fa-duotone fa-regular fa-arrows-turn-right"></i>
                                     Career Transitions
                                 </Link>
                                 <Link href="/resources/career-guides/personal-branding" className="btn btn-outline">
-                                    <i className="fa-solid fa-badge-check"></i>
+                                    <i className="fa-duotone fa-regular fa-badge-check"></i>
                                     Personal Branding
                                 </Link>
                                 <Link href="/public/jobs" className="btn btn-primary">
-                                    <i className="fa-solid fa-briefcase"></i>
+                                    <i className="fa-duotone fa-regular fa-briefcase"></i>
                                     Browse Jobs
                                 </Link>
                             </div>

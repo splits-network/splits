@@ -66,18 +66,18 @@ export default function StepQuestions({
         return (
             <div className="space-y-6">
                 <div className="alert alert-info">
-                    <i className="fa-solid fa-circle-info"></i>
+                    <i className="fa-duotone fa-regular fa-circle-info"></i>
                     <span>No pre-screening questions for this position.</span>
                 </div>
 
                 <div className="flex justify-between">
                     <button type="button" className="btn" onClick={onBack}>
-                        <i className="fa-solid fa-arrow-left"></i>
+                        <i className="fa-duotone fa-regular fa-arrow-left"></i>
                         Back
                     </button>
                     <button type="button" className="btn btn-primary" onClick={onNext}>
                         Next: Review
-                        <i className="fa-solid fa-arrow-right"></i>
+                        <i className="fa-duotone fa-regular fa-arrow-right"></i>
                     </button>
                 </div>
             </div>
@@ -95,7 +95,7 @@ export default function StepQuestions({
 
             {error && (
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
@@ -201,12 +201,12 @@ export default function StepQuestions({
             {/* Navigation */}
             <div className="flex justify-between">
                 <button type="button" className="btn" onClick={onBack}>
-                    <i className="fa-solid fa-arrow-left"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
                     Back
                 </button>
                 <button type="button" className="btn btn-primary" onClick={handleNext}>
                     Next: Review
-                    <i className="fa-solid fa-arrow-right"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-right"></i>
                 </button>
             </div>
         </div>

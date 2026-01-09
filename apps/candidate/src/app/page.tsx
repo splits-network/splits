@@ -33,25 +33,25 @@ export default async function CandidateHomePage() {
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
                             <Link href="/public/jobs" className="btn btn-primary btn-lg gap-2 shadow hover:shadow transition-all">
-                                <i className="fa-solid fa-magnifying-glass"></i>
+                                <i className="fa-duotone fa-regular fa-magnifying-glass"></i>
                                 Explore Jobs
                             </Link>
                             <Link href="/sign-up" className="btn btn-outline btn-lg gap-2">
-                                <i className="fa-solid fa-user-plus"></i>
+                                <i className="fa-duotone fa-regular fa-user-plus"></i>
                                 Create Your Profile
                             </Link>
                         </div>
                         <div className="flex items-center justify-center gap-8 pt-8 text-sm opacity-70">
                             <div className="flex items-center gap-2">
-                                <i className="fa-solid fa-check-circle text-success"></i>
+                                <i className="fa-duotone fa-regular fa-check-circle text-success"></i>
                                 <span>Free to use</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <i className="fa-solid fa-check-circle text-success"></i>
+                                <i className="fa-duotone fa-regular fa-check-circle text-success"></i>
                                 <span>Expert guidance</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <i className="fa-solid fa-check-circle text-success"></i>
+                                <i className="fa-duotone fa-regular fa-check-circle text-success"></i>
                                 <span>Top companies</span>
                             </div>
                         </div>
@@ -98,7 +98,7 @@ export default async function CandidateHomePage() {
                                 <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center">
                                     <span className="text-3xl font-bold text-primary">1</span>
                                 </div>
-                                <i className="fa-solid fa-user-circle text-5xl text-primary"></i>
+                                <i className="fa-duotone fa-regular fa-user-circle text-5xl text-primary"></i>
                                 <h3 className="card-title text-2xl">Create Your Profile</h3>
                                 <p className="text-base-content/70">
                                     Build a comprehensive profile showcasing your skills, experience, and career goals. Upload your resume and portfolio.
@@ -110,7 +110,7 @@ export default async function CandidateHomePage() {
                                 <div className="w-20 h-20 rounded-full bg-secondary/20 flex items-center justify-center">
                                     <span className="text-3xl font-bold text-secondary">2</span>
                                 </div>
-                                <i className="fa-solid fa-magnifying-glass-chart text-5xl text-secondary"></i>
+                                <i className="fa-duotone fa-regular fa-magnifying-glass-chart text-5xl text-secondary"></i>
                                 <h3 className="card-title text-2xl">Browse & Apply</h3>
                                 <p className="text-base-content/70">
                                     Search thousands of jobs from top companies. Apply with one click and get matched with specialized recruiters.
@@ -122,7 +122,7 @@ export default async function CandidateHomePage() {
                                 <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center">
                                     <span className="text-3xl font-bold text-accent">3</span>
                                 </div>
-                                <i className="fa-solid fa-rocket text-5xl text-accent"></i>
+                                <i className="fa-duotone fa-regular fa-rocket text-5xl text-accent"></i>
                                 <h3 className="card-title text-2xl">Land Your Dream Job</h3>
                                 <p className="text-base-content/70">
                                     Get expert guidance through interviews, negotiate offers, and start your new career with confidence.
@@ -147,7 +147,7 @@ export default async function CandidateHomePage() {
                             <div className="card-body">
                                 <div className="flex items-start gap-4">
                                     <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                        <i className="fa-solid fa-users text-2xl text-primary"></i>
+                                        <i className="fa-duotone fa-regular fa-users text-2xl text-primary"></i>
                                     </div>
                                     <div>
                                         <h3 className="card-title text-lg mb-2">Expert Recruiter Network</h3>
@@ -162,7 +162,7 @@ export default async function CandidateHomePage() {
                             <div className="card-body">
                                 <div className="flex items-start gap-4">
                                     <div className="w-14 h-14 rounded-lg bg-secondary/10 flex items-center justify-center flex-shrink-0">
-                                        <i className="fa-solid fa-bolt text-2xl text-secondary"></i>
+                                        <i className="fa-duotone fa-regular fa-bolt text-2xl text-secondary"></i>
                                     </div>
                                     <div>
                                         <h3 className="card-title text-lg mb-2">One-Click Apply</h3>
@@ -177,7 +177,7 @@ export default async function CandidateHomePage() {
                             <div className="card-body">
                                 <div className="flex items-start gap-4">
                                     <div className="w-14 h-14 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                                        <i className="fa-solid fa-bell text-2xl text-accent"></i>
+                                        <i className="fa-duotone fa-regular fa-bell text-2xl text-accent"></i>
                                     </div>
                                     <div>
                                         <h3 className="card-title text-lg mb-2">Real-Time Updates</h3>
@@ -192,7 +192,7 @@ export default async function CandidateHomePage() {
                             <div className="card-body">
                                 <div className="flex items-start gap-4">
                                     <div className="w-14 h-14 rounded-lg bg-success/10 flex items-center justify-center flex-shrink-0">
-                                        <i className="fa-solid fa-shield-halved text-2xl text-success"></i>
+                                        <i className="fa-duotone fa-regular fa-shield-halved text-2xl text-success"></i>
                                     </div>
                                     <div>
                                         <h3 className="card-title text-lg mb-2">Privacy First</h3>
@@ -207,7 +207,7 @@ export default async function CandidateHomePage() {
                             <div className="card-body">
                                 <div className="flex items-start gap-4">
                                     <div className="w-14 h-14 rounded-lg bg-warning/10 flex items-center justify-center flex-shrink-0">
-                                        <i className="fa-solid fa-chart-line text-2xl text-warning"></i>
+                                        <i className="fa-duotone fa-regular fa-chart-line text-2xl text-warning"></i>
                                     </div>
                                     <div>
                                         <h3 className="card-title text-lg mb-2">Career Insights</h3>
@@ -222,7 +222,7 @@ export default async function CandidateHomePage() {
                             <div className="card-body">
                                 <div className="flex items-start gap-4">
                                     <div className="w-14 h-14 rounded-lg bg-info/10 flex items-center justify-center flex-shrink-0">
-                                        <i className="fa-solid fa-hands-helping text-2xl text-info"></i>
+                                        <i className="fa-duotone fa-regular fa-hands-helping text-2xl text-info"></i>
                                     </div>
                                     <div>
                                         <h3 className="card-title text-lg mb-2">Interview Prep</h3>
@@ -338,11 +338,11 @@ export default async function CandidateHomePage() {
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
                             <Link href="/sign-up" className="btn btn-lg bg-white text-primary hover:bg-gray-100 border-none shadow">
-                                <i className="fa-solid fa-user-plus"></i>
+                                <i className="fa-duotone fa-regular fa-user-plus"></i>
                                 Create Free Account
                             </Link>
                             <Link href="/public/jobs" className="btn btn-lg btn-outline text-white border-white hover:bg-white hover:text-primary">
-                                <i className="fa-solid fa-search"></i>
+                                <i className="fa-duotone fa-regular fa-search"></i>
                                 Browse Jobs First
                             </Link>
                         </div>

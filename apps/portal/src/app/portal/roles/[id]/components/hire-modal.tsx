@@ -53,20 +53,20 @@ export default function HireModal({ application, onClose, onSuccess }: HireModal
         <div className="modal modal-open">
             <div className="modal-box">
                 <h3 className="font-bold text-lg mb-4">
-                    <i className="fa-solid fa-check-circle text-success mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-check-circle text-success mr-2"></i>
                     Mark as Hired
                 </h3>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {error && (
                         <div className="alert alert-error">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <span>{error}</span>
                         </div>
                     )}
 
                     <div className="alert alert-info">
-                        <i className="fa-solid fa-info-circle"></i>
+                        <i className="fa-duotone fa-regular fa-info-circle"></i>
                         <span>This will create a placement record and calculate your earnings.</span>
                     </div>
 
@@ -117,7 +117,7 @@ export default function HireModal({ application, onClose, onSuccess }: HireModal
                                 </>
                             ) : (
                                 <>
-                                    <i className="fa-solid fa-check"></i>
+                                    <i className="fa-duotone fa-regular fa-check"></i>
                                     Confirm Hire
                                 </>
                             )}

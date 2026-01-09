@@ -108,7 +108,7 @@ export default function IntegrationsPage() {
                     </p>
                 </div>
                 <Link href="/integrations/new" className="btn btn-primary">
-                    <i className="fa-solid fa-plus"></i>
+                    <i className="fa-duotone fa-regular fa-plus"></i>
                     Add Integration
                 </Link>
             </div>
@@ -116,7 +116,7 @@ export default function IntegrationsPage() {
             {/* Error Alert */}
             {error && (
                 <div className="alert alert-error mb-6">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
@@ -125,14 +125,14 @@ export default function IntegrationsPage() {
             {integrations.length === 0 ? (
                 <div className="card bg-base-100 shadow">
                     <div className="card-body text-center">
-                        <i className="fa-solid fa-plug text-6xl text-base-content/20 mb-4"></i>
+                        <i className="fa-duotone fa-regular fa-plug text-6xl text-base-content/20 mb-4"></i>
                         <h2 className="card-title justify-center">No integrations yet</h2>
                         <p className="text-base-content/70">
                             Connect your first ATS platform to start syncing data
                         </p>
                         <div className="card-actions justify-center mt-4">
                             <Link href="/integrations/new" className="btn btn-primary">
-                                <i className="fa-solid fa-plus"></i>
+                                <i className="fa-duotone fa-regular fa-plus"></i>
                                 Add Integration
                             </Link>
                         </div>
@@ -148,7 +148,7 @@ export default function IntegrationsPage() {
                                     <div className="flex items-center gap-3">
                                         <div className="avatar avatar-placeholder">
                                             <div className="bg-primary text-primary-content rounded-full w-12">
-                                                <i className={`fa-solid ${getPlatformIcon(integration.platform)} text-xl`}></i>
+                                                <i className={`fa-duotone fa-regular ${getPlatformIcon(integration.platform)} text-xl`}></i>
                                             </div>
                                         </div>
                                         <div>
@@ -162,24 +162,24 @@ export default function IntegrationsPage() {
                                     {/* Actions */}
                                     <div className="dropdown dropdown-end">
                                         <label tabIndex={0} className="btn btn-sm btn-ghost btn-circle">
-                                            <i className="fa-solid fa-ellipsis-vertical"></i>
+                                            <i className="fa-duotone fa-regular fa-ellipsis-vertical"></i>
                                         </label>
                                         <ul tabIndex={0} className="dropdown-content z-10 menu p-2 shadow bg-base-100 rounded-box w-52">
                                             <li>
                                                 <Link href={`/integrations/${integration.id}`}>
-                                                    <i className="fa-solid fa-gear"></i>
+                                                    <i className="fa-duotone fa-regular fa-gear"></i>
                                                     Settings
                                                 </Link>
                                             </li>
                                             <li>
                                                 <button onClick={() => triggerSync(integration.id)}>
-                                                    <i className="fa-solid fa-rotate"></i>
+                                                    <i className="fa-duotone fa-regular fa-rotate"></i>
                                                     Trigger Sync
                                                 </button>
                                             </li>
                                             <li>
                                                 <button onClick={() => toggleSync(integration)}>
-                                                    <i className={`fa-solid ${integration.sync_enabled ? 'fa-pause' : 'fa-play'}`}></i>
+                                                    <i className={`fa-duotone fa-regular ${integration.sync_enabled ? 'fa-pause' : 'fa-play'}`}></i>
                                                     {integration.sync_enabled ? 'Pause' : 'Resume'}
                                                 </button>
                                             </li>
@@ -192,19 +192,19 @@ export default function IntegrationsPage() {
                                     <div className="flex items-center justify-between text-sm">
                                         <span className="text-base-content/70">Sync Jobs</span>
                                         <span className={integration.sync_roles ? 'text-success' : 'text-base-content/40'}>
-                                            <i className={`fa-solid fa-circle-check ${integration.sync_roles ? '' : 'opacity-30'}`}></i>
+                                            <i className={`fa-duotone fa-regular fa-circle-check ${integration.sync_roles ? '' : 'opacity-30'}`}></i>
                                         </span>
                                     </div>
                                     <div className="flex items-center justify-between text-sm">
                                         <span className="text-base-content/70">Sync Candidates</span>
                                         <span className={integration.sync_candidates ? 'text-success' : 'text-base-content/40'}>
-                                            <i className={`fa-solid fa-circle-check ${integration.sync_candidates ? '' : 'opacity-30'}`}></i>
+                                            <i className={`fa-duotone fa-regular fa-circle-check ${integration.sync_candidates ? '' : 'opacity-30'}`}></i>
                                         </span>
                                     </div>
                                     <div className="flex items-center justify-between text-sm">
                                         <span className="text-base-content/70">Sync Applications</span>
                                         <span className={integration.sync_applications ? 'text-success' : 'text-base-content/40'}>
-                                            <i className={`fa-solid fa-circle-check ${integration.sync_applications ? '' : 'opacity-30'}`}></i>
+                                            <i className={`fa-duotone fa-regular fa-circle-check ${integration.sync_applications ? '' : 'opacity-30'}`}></i>
                                         </span>
                                     </div>
                                 </div>

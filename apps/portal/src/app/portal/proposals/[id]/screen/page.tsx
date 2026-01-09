@@ -38,12 +38,12 @@ export default async function ProposalScreenPage({
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <div className="alert alert-error">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <span>{error || 'Proposal not found'}</span>
                         </div>
                         <div className="card-actions justify-start mt-4">
                             <Link href="/proposals" className="btn">
-                                <i className="fa-solid fa-arrow-left"></i>
+                                <i className="fa-duotone fa-regular fa-arrow-left"></i>
                                 Back to Proposals
                             </Link>
                         </div>

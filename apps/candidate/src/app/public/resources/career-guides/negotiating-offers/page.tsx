@@ -193,10 +193,10 @@ export default function NegotiatingOffersGuidePage() {
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto">
                         <Link href="/resources/career-guides" className="btn btn-ghost btn-sm mb-4">
-                            <i className="fa-solid fa-arrow-left"></i> Back to Career Guides
+                            <i className="fa-duotone fa-regular fa-arrow-left"></i> Back to Career Guides
                         </Link>
                         <div className="flex items-center gap-3 mb-4">
-                            <i className="fa-solid fa-handshake text-4xl"></i>
+                            <i className="fa-duotone fa-regular fa-handshake text-4xl"></i>
                             <div>
                                 <div className="badge badge-neutral mb-2">Compensation</div>
                                 <h1 className="text-4xl font-bold">Negotiating Your Job Offer</h1>
@@ -206,8 +206,8 @@ export default function NegotiatingOffersGuidePage() {
                             Master the art of salary and benefits negotiation to get the compensation you deserve.
                         </p>
                         <div className="flex items-center gap-4 mt-4 text-sm opacity-80">
-                            <span><i className="fa-solid fa-clock"></i> 10 min read</span>
-                            <span><i className="fa-solid fa-user"></i> Compensation Experts</span>
+                            <span><i className="fa-duotone fa-regular fa-clock"></i> 10 min read</span>
+                            <span><i className="fa-duotone fa-regular fa-user"></i> Compensation Experts</span>
                         </div>
                     </div>
                 </div>
@@ -236,7 +236,7 @@ export default function NegotiatingOffersGuidePage() {
                             {negotiationSteps.map((phase, phaseIndex) => (
                                 <div key={phaseIndex}>
                                     <div className="flex items-center gap-3 mb-4">
-                                        <i className={`fa-solid fa-${phase.icon} text-2xl text-primary`}></i>
+                                        <i className={`fa-duotone fa-regular fa-${phase.icon} text-2xl text-primary`}></i>
                                         <h3 className="text-2xl font-bold">{phase.phase}</h3>
                                     </div>
 
@@ -249,7 +249,7 @@ export default function NegotiatingOffersGuidePage() {
                                                     <ul className="space-y-2">
                                                         {step.actions.map((action, actionIndex) => (
                                                             <li key={actionIndex} className="flex items-start gap-2">
-                                                                <i className="fa-solid fa-check text-success mt-1"></i>
+                                                                <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                                                 <span className="text-sm">{action}</span>
                                                             </li>
                                                         ))}
@@ -273,7 +273,7 @@ export default function NegotiatingOffersGuidePage() {
                                     <div className="card-body">
                                         <div className="flex items-center justify-between mb-3">
                                             <div className="flex items-center gap-3">
-                                                <i className={`fa-solid fa-${item.icon} text-2xl text-primary`}></i>
+                                                <i className={`fa-duotone fa-regular fa-${item.icon} text-2xl text-primary`}></i>
                                                 <h3 className="card-title text-lg">{item.category}</h3>
                                             </div>
                                             <span className={`badge ${item.negotiable.includes('High') ? 'badge-success' :
@@ -302,7 +302,7 @@ export default function NegotiatingOffersGuidePage() {
                                 <div key={index} className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <h3 className="card-title text-lg mb-3">
-                                            <i className="fa-solid fa-quote-left text-primary"></i>
+                                            <i className="fa-duotone fa-regular fa-quote-left text-primary"></i>
                                             {script.scenario}
                                         </h3>
                                         <div className="bg-primary/10 p-4 rounded-lg border-l-4 border-primary">
@@ -318,7 +318,7 @@ export default function NegotiatingOffersGuidePage() {
                     <div className="card bg-error/10 border border-error/30 shadow mb-12">
                         <div className="card-body">
                             <h2 className="card-title text-2xl mb-4 text-error">
-                                <i className="fa-solid fa-triangle-exclamation"></i>
+                                <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
                                 Common Mistakes to Avoid
                             </h2>
                             <ul className="space-y-3">
@@ -333,7 +333,7 @@ export default function NegotiatingOffersGuidePage() {
                                     'Accepting/declining before getting everything in writing',
                                 ].map((mistake, index) => (
                                     <li key={index} className="flex items-start gap-3">
-                                        <i className="fa-solid fa-xmark text-error text-lg mt-0.5"></i>
+                                        <i className="fa-duotone fa-regular fa-xmark text-error text-lg mt-0.5"></i>
                                         <span>{mistake}</span>
                                     </li>
                                 ))}
@@ -345,24 +345,24 @@ export default function NegotiatingOffersGuidePage() {
                     <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow mb-12">
                         <div className="card-body">
                             <h3 className="card-title text-2xl mb-4">
-                                <i className="fa-solid fa-lightbulb"></i>
+                                <i className="fa-duotone fa-regular fa-lightbulb"></i>
                                 Key Takeaways
                             </h3>
                             <ul className="space-y-3">
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Always negotiate—most employers expect it and respect candidates who do</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Do your research and know your market value before any conversation</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Focus on the total compensation package, not just base salary</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Stay positive, professional, and collaborative throughout the process</span>
                                 </li>
                             </ul>
@@ -375,15 +375,15 @@ export default function NegotiatingOffersGuidePage() {
                             <h3 className="card-title text-xl mb-4">Continue Learning</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <Link href="/resources/salary-insights" className="btn btn-primary">
-                                    <i className="fa-solid fa-chart-line"></i>
+                                    <i className="fa-duotone fa-regular fa-chart-line"></i>
                                     Salary Insights
                                 </Link>
                                 <Link href="/resources/career-guides/interview-prep" className="btn btn-outline">
-                                    <i className="fa-solid fa-user-tie"></i>
+                                    <i className="fa-duotone fa-regular fa-user-tie"></i>
                                     Interview Prep
                                 </Link>
                                 <Link href="/public/jobs" className="btn btn-outline">
-                                    <i className="fa-solid fa-briefcase"></i>
+                                    <i className="fa-duotone fa-regular fa-briefcase"></i>
                                     Browse Jobs
                                 </Link>
                             </div>

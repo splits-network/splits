@@ -21,7 +21,7 @@ export default function IntegrationsPage() {
             <section className="py-12 bg-warning text-warning-content">
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto text-center">
-                        <i className="fa-solid fa-wrench text-5xl mb-4"></i>
+                        <i className="fa-duotone fa-regular fa-wrench text-5xl mb-4"></i>
                         <h2 className="text-2xl font-bold mb-3">Integrations Coming in Phase 2</h2>
                         <p className="text-lg opacity-90">
                             We're building a robust integration ecosystem. In Phase 1, we're focused on delivering
@@ -47,7 +47,7 @@ export default function IntegrationsPage() {
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center">
-                                        <i className="fa-solid fa-envelope text-primary text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-envelope text-primary text-2xl"></i>
                                     </div>
                                     <h3 className="card-title">Email & Communication</h3>
                                 </div>
@@ -74,7 +74,7 @@ export default function IntegrationsPage() {
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-secondary/20 flex items-center justify-center">
-                                        <i className="fa-solid fa-calendar text-secondary text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-calendar text-secondary text-2xl"></i>
                                     </div>
                                     <h3 className="card-title">Calendar & Scheduling</h3>
                                 </div>
@@ -101,7 +101,7 @@ export default function IntegrationsPage() {
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-accent/20 flex items-center justify-center">
-                                        <i className="fa-solid fa-briefcase text-accent text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-briefcase text-accent text-2xl"></i>
                                     </div>
                                     <h3 className="card-title">Job Boards</h3>
                                 </div>
@@ -128,7 +128,7 @@ export default function IntegrationsPage() {
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-primary/20 flex items-center justify-center">
-                                        <i className="fa-solid fa-sitemap text-primary text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-sitemap text-primary text-2xl"></i>
                                     </div>
                                     <h3 className="card-title">External ATS</h3>
                                 </div>
@@ -155,7 +155,7 @@ export default function IntegrationsPage() {
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-success/20 flex items-center justify-center">
-                                        <i className="fa-solid fa-credit-card text-success text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-credit-card text-success text-2xl"></i>
                                     </div>
                                     <h3 className="card-title">Payment Processing</h3>
                                 </div>
@@ -183,7 +183,7 @@ export default function IntegrationsPage() {
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-14 h-14 rounded-lg bg-secondary/20 flex items-center justify-center">
-                                        <i className="fa-solid fa-shield-halved text-secondary text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-shield-halved text-secondary text-2xl"></i>
                                     </div>
                                     <h3 className="card-title">Background Checks</h3>
                                 </div>
@@ -222,23 +222,23 @@ export default function IntegrationsPage() {
                                 </p>
                                 <ul className="space-y-3 mb-8">
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Full REST API with OpenAPI documentation</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Webhook support for real-time events</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>OAuth 2.0 authentication</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>SDKs for popular languages</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Rate limiting and sandbox environment</span>
                                     </li>
                                 </ul>
@@ -272,12 +272,12 @@ export default function IntegrationsPage() {
                                 <div className="card bg-base-200 shadow">
                                     <div className="card-body">
                                         <h3 className="card-title text-2xl mb-4">
-                                            <i className="fa-solid fa-bolt text-warning"></i>
+                                            <i className="fa-duotone fa-regular fa-bolt text-warning"></i>
                                             Automation Examples
                                         </h3>
                                         <div className="space-y-4">
                                             <div className="flex items-start gap-3 p-3 bg-base-100 rounded-lg">
-                                                <i className="fa-solid fa-arrow-right text-primary mt-1"></i>
+                                                <i className="fa-duotone fa-regular fa-arrow-right text-primary mt-1"></i>
                                                 <div>
                                                     <div className="font-bold">New Candidate Alert</div>
                                                     <div className="text-sm text-base-content/60">
@@ -286,7 +286,7 @@ export default function IntegrationsPage() {
                                                 </div>
                                             </div>
                                             <div className="flex items-start gap-3 p-3 bg-base-100 rounded-lg">
-                                                <i className="fa-solid fa-arrow-right text-primary mt-1"></i>
+                                                <i className="fa-duotone fa-regular fa-arrow-right text-primary mt-1"></i>
                                                 <div>
                                                     <div className="font-bold">CRM Sync</div>
                                                     <div className="text-sm text-base-content/60">
@@ -295,7 +295,7 @@ export default function IntegrationsPage() {
                                                 </div>
                                             </div>
                                             <div className="flex items-start gap-3 p-3 bg-base-100 rounded-lg">
-                                                <i className="fa-solid fa-arrow-right text-primary mt-1"></i>
+                                                <i className="fa-duotone fa-regular fa-arrow-right text-primary mt-1"></i>
                                                 <div>
                                                     <div className="font-bold">Invoice Generation</div>
                                                     <div className="text-sm text-base-content/60">
@@ -388,7 +388,7 @@ export default function IntegrationsPage() {
                     <div className="max-w-4xl mx-auto">
                         <div className="card bg-base-100 shadow">
                             <div className="card-body text-center p-12">
-                                <i className="fa-solid fa-lightbulb text-6xl text-warning mb-6"></i>
+                                <i className="fa-duotone fa-regular fa-lightbulb text-6xl text-warning mb-6"></i>
                                 <h2 className="text-3xl font-bold mb-4">Don't See What You Need?</h2>
                                 <p className="text-lg text-base-content/70 mb-8">
                                     We're actively building our integration ecosystem. Let us know which tools are
@@ -396,11 +396,11 @@ export default function IntegrationsPage() {
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                     <a href="mailto:integrations@splits.network" className="btn btn-primary btn-lg">
-                                        <i className="fa-solid fa-envelope"></i>
+                                        <i className="fa-duotone fa-regular fa-envelope"></i>
                                         Request an Integration
                                     </a>
                                     <Link href="/updates" className="btn btn-outline btn-lg">
-                                        <i className="fa-solid fa-rss"></i>
+                                        <i className="fa-duotone fa-regular fa-rss"></i>
                                         View Roadmap
                                     </Link>
                                 </div>
@@ -418,7 +418,7 @@ export default function IntegrationsPage() {
                         Whether you need simple automation or custom integrations, we've got you covered.
                     </p>
                     <Link href="/sign-up" className="btn btn-lg btn-neutral">
-                        <i className="fa-solid fa-code"></i>
+                        <i className="fa-duotone fa-regular fa-code"></i>
                         Get Started
                     </Link>
                 </div>

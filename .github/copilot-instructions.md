@@ -108,7 +108,7 @@ Copilot should assume and suggest the following stack:
   - React + TypeScript.
   - TailwindCSS + DaisyUI for UI and theming.
   - Clerk for auth components (sign-in, sign-up, user profile), these should be custom pages/components, not clerk provided components.
-  - FontAwesome for icons. inline (<i className='fa-solid fa-icon'></>) not react objects
+  - FontAwesome for icons. inline (<i className='fa-duotone fa-regular fa-icon'></>) not react objects
 
 - **Backend**
   - Node.js (current LTS) with **Fastify** in all services.

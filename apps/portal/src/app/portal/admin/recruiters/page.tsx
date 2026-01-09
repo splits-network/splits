@@ -98,7 +98,7 @@ export default function RecruiterManagementPage() {
         if (status === 'pending') {
             return (
                 <span className="badge badge-warning gap-1">
-                    <i className="fa-solid fa-clock"></i>
+                    <i className="fa-duotone fa-regular fa-clock"></i>
                     Pending
                 </span>
             );
@@ -106,7 +106,7 @@ export default function RecruiterManagementPage() {
         if (status === 'active') {
             return (
                 <span className="badge badge-success gap-1">
-                    <i className="fa-solid fa-check"></i>
+                    <i className="fa-duotone fa-regular fa-check"></i>
                     Active
                 </span>
             );
@@ -114,7 +114,7 @@ export default function RecruiterManagementPage() {
         if (status === 'suspended') {
             return (
                 <span className="badge badge-error gap-1">
-                    <i className="fa-solid fa-ban"></i>
+                    <i className="fa-duotone fa-regular fa-ban"></i>
                     Suspended
                 </span>
             );
@@ -138,7 +138,7 @@ export default function RecruiterManagementPage() {
                         <span className="loading loading-spinner loading-xs"></span>
                     ) : (
                         <>
-                            <i className="fa-solid fa-check"></i>
+                            <i className="fa-duotone fa-regular fa-check"></i>
                             Approve
                         </>
                     )}
@@ -156,7 +156,7 @@ export default function RecruiterManagementPage() {
                         <span className="loading loading-spinner loading-xs"></span>
                     ) : (
                         <>
-                            <i className="fa-solid fa-ban"></i>
+                            <i className="fa-duotone fa-regular fa-ban"></i>
                             Suspend
                         </>
                     )}
@@ -174,7 +174,7 @@ export default function RecruiterManagementPage() {
                         <span className="loading loading-spinner loading-xs"></span>
                     ) : (
                         <>
-                            <i className="fa-solid fa-rotate-left"></i>
+                            <i className="fa-duotone fa-regular fa-rotate-left"></i>
                             Reactivate
                         </>
                     )}
@@ -252,7 +252,7 @@ export default function RecruiterManagementPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <Link href="/admin" className="text-sm text-primary hover:underline mb-2 inline-block">
-                        <i className="fa-solid fa-arrow-left mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-arrow-left mr-2"></i>
                         Back to Admin Dashboard
                     </Link>
                     <h1 className="text-3xl font-bold">Recruiter Management</h1>
@@ -295,7 +295,7 @@ export default function RecruiterManagementPage() {
                 <ErrorState message={error} onRetry={refresh} />
             ) : recruiters.length === 0 ? (
                 <EmptyState
-                    icon="fa-solid fa-users"
+                    icon="fa-duotone fa-regular fa-users"
                     title="No recruiters found"
                     description={
                         search || filters.status

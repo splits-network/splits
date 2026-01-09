@@ -68,7 +68,7 @@ export default function Step5PreScreenQuestions({
     return (
         <div className="space-y-4">
             <div className="alert alert-info">
-                <i className="fa-solid fa-circle-info"></i>
+                <i className="fa-duotone fa-regular fa-circle-info"></i>
                 <div>
                     <p className="font-medium">Screen candidates upfront</p>
                     <p className="text-sm opacity-80">
@@ -89,7 +89,7 @@ export default function Step5PreScreenQuestions({
                     className="btn btn-sm btn-ghost"
                     onClick={addQuestion}
                 >
-                    <i className="fa-solid fa-plus mr-1"></i>
+                    <i className="fa-duotone fa-regular fa-plus mr-1"></i>
                     Add Question
                 </button>
             </div>
@@ -160,7 +160,7 @@ function PreScreenQuestionCard({
                         className="btn btn-ghost btn-square"
                         onClick={() => onRemove(index)}
                     >
-                        <i className="fa-solid fa-trash"></i>
+                        <i className="fa-duotone fa-regular fa-trash"></i>
                     </button>
                 </div>
 
@@ -191,7 +191,7 @@ function PreScreenQuestionCard({
                 {requiresOptions && (
                     <div className="space-y-2 pl-4 border-l-2 border-primary/30">
                         <div className="flex items-center gap-2 mb-2">
-                            <i className="fa-solid fa-list text-primary"></i>
+                            <i className="fa-duotone fa-regular fa-list text-primary"></i>
                             <span className="text-sm font-semibold">Answer Options</span>
                             <span className="text-xs text-base-content/50">
                                 (Minimum 2 options required)
@@ -212,7 +212,7 @@ function PreScreenQuestionCard({
                                             className="btn btn-ghost btn-xs btn-square"
                                             onClick={() => onRemoveOption(index, optIdx)}
                                         >
-                                            <i className="fa-solid fa-times"></i>
+                                            <i className="fa-duotone fa-regular fa-times"></i>
                                         </button>
                                     </div>
                                 ))}
@@ -240,14 +240,14 @@ function PreScreenQuestionCard({
                                 onClick={handleAddOption}
                                 disabled={!newOption.trim()}
                             >
-                                <i className="fa-solid fa-plus"></i>
+                                <i className="fa-duotone fa-regular fa-plus"></i>
                             </button>
                         </div>
 
                         {/* Validation Warning */}
                         {(!question.options || question.options.length < 2) && (
                             <div className="alert alert-warning py-2">
-                                <i className="fa-solid fa-exclamation-triangle text-sm"></i>
+                                <i className="fa-duotone fa-regular fa-exclamation-triangle text-sm"></i>
                                 <span className="text-sm">Add at least 2 options for this question type</span>
                             </div>
                         )}

@@ -133,7 +133,7 @@ export function RolesStatusChart({ jobs, loading }: RolesStatusChartProps) {
     if (jobs.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-48 text-base-content/60">
-                <i className="fa-solid fa-chart-pie text-3xl mb-2"></i>
+                <i className="fa-duotone fa-regular fa-chart-pie text-3xl mb-2"></i>
                 <p className="text-sm">No data to display</p>
             </div>
         );

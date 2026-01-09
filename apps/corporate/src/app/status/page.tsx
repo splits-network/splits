@@ -41,7 +41,7 @@ export default function StatusPage() {
                 title: 'Validating services…',
                 color: 'bg-base-300 text-base-content',
                 message: 'We run health checks on every corporate surface before publishing results.',
-                icon: 'fa-solid fa-stethoscope',
+                icon: 'fa-duotone fa-regular fa-stethoscope',
             };
         }
 
@@ -50,7 +50,7 @@ export default function StatusPage() {
                 title: 'All Systems Operational',
                 color: 'bg-primary text-primary-content',
                 message: 'Partner dashboards, lead forms, and analytics are ready for your next campaign.',
-                icon: 'fa-solid fa-circle-check',
+                icon: 'fa-duotone fa-regular fa-circle-check',
             };
         }
 
@@ -59,7 +59,7 @@ export default function StatusPage() {
                 title: 'Investigating anomalies',
                 color: 'bg-error text-error-content',
                 message: 'Our reliability team is mitigating an issue. Track the impacted services below.',
-                icon: 'fa-solid fa-triangle-exclamation',
+                icon: 'fa-duotone fa-regular fa-triangle-exclamation',
             };
         }
 
@@ -67,7 +67,7 @@ export default function StatusPage() {
             title: 'Degraded Performance',
             color: 'bg-warning text-warning-content',
             message: 'Some upstream dependencies are warming up; we will post updates shortly.',
-            icon: 'fa-solid fa-wave-square',
+            icon: 'fa-duotone fa-regular fa-wave-square',
         };
     }, [allHealthy, isLoading, someUnhealthy]);
 
@@ -172,7 +172,7 @@ export default function StatusPage() {
                             <div className="card-body">
                                 <div className="flex flex-wrap items-center justify-between gap-3">
                                     <h2 className="card-title">
-                                        <i className="fa-solid fa-server" />
+                                        <i className="fa-duotone fa-regular fa-server" />
                                         Service-by-service health
                                     </h2>
                                     <span className="text-xs text-base-content/60">Monitoring 24/7/365</span>
@@ -192,7 +192,7 @@ export default function StatusPage() {
                                                 </p>
                                                 {service.error && (
                                                     <p className="mt-1 text-xs text-error">
-                                                        <i className="fa-solid fa-circle-exclamation mr-1" />
+                                                        <i className="fa-duotone fa-regular fa-circle-exclamation mr-1" />
                                                         {service.error}
                                                     </p>
                                                 )}
@@ -220,14 +220,14 @@ export default function StatusPage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title">
-                                    <i className="fa-solid fa-bullhorn" />
+                                    <i className="fa-duotone fa-regular fa-bullhorn" />
                                     Live incident feed
                                 </h2>
                                 {unhealthyServices.length > 0 ? (
                                     <div className="mt-4 space-y-4">
                                         {unhealthyServices.map((service) => (
                                             <div key={service.name} className="alert alert-error">
-                                                <i className="fa-solid fa-triangle-exclamation" />
+                                                <i className="fa-duotone fa-regular fa-triangle-exclamation" />
                                                 <div>
                                                     <p className="font-semibold">{service.name}</p>
                                                     <p className="text-sm">
@@ -257,7 +257,7 @@ export default function StatusPage() {
                         <div className="card bg-base-100 shadow-lg">
                             <div className="card-body">
                                 <h2 className="card-title text-2xl">
-                                    <i className="fa-solid fa-headset text-primary" />
+                                    <i className="fa-duotone fa-regular fa-headset text-primary" />
                                     Contact success team
                                 </h2>
                                 <p className="text-sm text-base-content/70">
@@ -341,7 +341,7 @@ export default function StatusPage() {
                                             </>
                                         ) : (
                                             <>
-                                                <i className="fa-solid fa-paper-plane mr-2" />
+                                                <i className="fa-duotone fa-regular fa-paper-plane mr-2" />
                                                 Send message
                                             </>
                                         )}
@@ -360,7 +360,7 @@ export default function StatusPage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h3 className="card-title text-lg">
-                                    <i className="fa-solid fa-clock text-secondary" />
+                                    <i className="fa-duotone fa-regular fa-clock text-secondary" />
                                     Enterprise support hours
                                 </h3>
                                 <ul className="text-sm text-base-content/70 space-y-1 mt-2">
@@ -377,7 +377,7 @@ export default function StatusPage() {
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h3 className="card-title text-lg">
-                                    <i className="fa-solid fa-circle-info text-accent" />
+                                    <i className="fa-duotone fa-regular fa-circle-info text-accent" />
                                     Quick references
                                 </h3>
                                 <ul className="text-sm text-base-content/70 space-y-2">

@@ -139,14 +139,14 @@ export default function ProfilePage() {
 
             {error && (
                 <div className="alert alert-error mb-6">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
 
             {saveSuccess && (
                 <div className="alert alert-success mb-6">
-                    <i className="fa-solid fa-circle-check"></i>
+                    <i className="fa-duotone fa-regular fa-circle-check"></i>
                     <span>Profile saved successfully!</span>
                 </div>
             )}
@@ -157,7 +157,7 @@ export default function ProfilePage() {
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title mb-4">
-                                <i className="fa-solid fa-user"></i>
+                                <i className="fa-duotone fa-regular fa-user"></i>
                                 Basic Information
                             </h2>
 
@@ -219,7 +219,7 @@ export default function ProfilePage() {
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title mb-4">
-                            <i className="fa-solid fa-briefcase"></i>
+                            <i className="fa-duotone fa-regular fa-briefcase"></i>
                             Current Position
                         </h2>
 
@@ -276,7 +276,7 @@ export default function ProfilePage() {
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title mb-4">
-                            <i className="fa-solid fa-link"></i>
+                            <i className="fa-duotone fa-regular fa-link"></i>
                             Professional Links
                         </h2>
 
@@ -330,7 +330,7 @@ export default function ProfilePage() {
                             </>
                         ) : (
                             <>
-                                <i className="fa-solid fa-save"></i>
+                                <i className="fa-duotone fa-regular fa-save"></i>
                                 Save Profile
                             </>
                         )}

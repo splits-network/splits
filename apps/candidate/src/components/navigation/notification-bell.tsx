@@ -116,7 +116,7 @@ export default function NotificationBell() {
                 aria-label="Notifications"
                 title='Notifications'
             >
-                <i className="fa-solid fa-bell text-xl"></i>
+                <i className="fa-duotone fa-regular fa-bell text-xl"></i>
                 {unreadCount > 0 && (
                     <span className="badge badge-error badge-sm absolute top-1 right-1">
                         {unreadCount > 99 ? '99+' : unreadCount}
@@ -160,7 +160,7 @@ export default function NotificationBell() {
                             </div>
                         ) : length === 0 ? (
                             <div className="text-center py-8 text-base-content/60">
-                                <i className="fa-solid fa-inbox text-4xl mb-2"></i>
+                                <i className="fa-duotone fa-regular fa-inbox text-4xl mb-2"></i>
                                 <p>No notifications</p>
                             </div>
                         ) : (
@@ -180,7 +180,7 @@ export default function NotificationBell() {
                                             w-10 h-10 rounded-full flex items-center justify-center
                                             ${!notification.read ? 'bg-primary text-primary-content' : 'bg-base-300'}
                                         `}>
-                                            <i className={`fa-solid ${getNotificationIcon(notification.category)}`}></i>
+                                            <i className={`fa-duotone fa-regular ${getNotificationIcon(notification.category)}`}></i>
                                         </div>
                                     </div>
 
@@ -196,7 +196,7 @@ export default function NotificationBell() {
                                                 onClick={(e) => handleDismiss(notification.id, e)}
                                                 aria-label="Dismiss"
                                             >
-                                                <i className="fa-solid fa-times"></i>
+                                                <i className="fa-duotone fa-regular fa-times"></i>
                                             </button>
                                         </div>
                                         <p className="text-xs text-base-content/60 mt-1">

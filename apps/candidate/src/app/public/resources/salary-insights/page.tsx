@@ -80,7 +80,7 @@ export default function SalaryInsightsPage() {
                 <div className="container mx-auto px-4">
                     <div className="max-w-3xl">
                         <div className="flex items-center gap-2 mb-4">
-                            <i className="fa-solid fa-chart-line text-3xl"></i>
+                            <i className="fa-duotone fa-regular fa-chart-line text-3xl"></i>
                             <h1 className="text-4xl font-bold">Salary Insights</h1>
                         </div>
                         <p className="text-xl opacity-90">
@@ -100,7 +100,7 @@ export default function SalaryInsightsPage() {
                             <div className="card-body">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className={`w-12 h-12 rounded-full bg-${insight.color}/20 flex items-center justify-center`}>
-                                        <i className={`fa-solid fa-${insight.icon} text-${insight.color} text-xl`}></i>
+                                        <i className={`fa-duotone fa-regular fa-${insight.icon} text-${insight.color} text-xl`}></i>
                                     </div>
                                     <h3 className="card-title text-lg">{insight.role}</h3>
                                 </div>
@@ -117,7 +117,7 @@ export default function SalaryInsightsPage() {
                                             <div className="font-semibold">{insight.range}</div>
                                         </div>
                                         <div className="badge badge-success badge-lg">
-                                            <i className="fa-solid fa-arrow-trend-up mr-1"></i>
+                                            <i className="fa-duotone fa-regular fa-arrow-trend-up mr-1"></i>
                                             {insight.growth}
                                         </div>
                                     </div>
@@ -136,7 +136,7 @@ export default function SalaryInsightsPage() {
                             <div key={index} className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <div className="flex items-start gap-4">
-                                        <i className={`fa-solid fa-${factor.icon} text-3xl text-primary`}></i>
+                                        <i className={`fa-duotone fa-regular fa-${factor.icon} text-3xl text-primary`}></i>
                                         <div>
                                             <h3 className="card-title text-xl mb-2">{factor.title}</h3>
                                             <p className="text-base-content/70">{factor.description}</p>
@@ -160,7 +160,7 @@ export default function SalaryInsightsPage() {
                             </p>
                             <div className="flex gap-2 justify-center">
                                 <a href="/public/jobs" className="btn btn-neutral">
-                                    Browse Jobs <i className="fa-solid fa-briefcase"></i>
+                                    Browse Jobs <i className="fa-duotone fa-regular fa-briefcase"></i>
                                 </a>
                                 <a href="/resources/career-guides" className="btn btn-outline btn-neutral">
                                     Career Guides

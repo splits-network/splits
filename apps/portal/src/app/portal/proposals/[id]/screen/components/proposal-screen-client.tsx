@@ -139,12 +139,12 @@ export default function ProposalScreenClient({
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <div className="alert alert-error">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <span>{error}</span>
                         </div>
                         <div className="card-actions justify-start mt-4">
                             <Link href="/proposals" className="btn">
-                                <i className="fa-solid fa-arrow-left"></i>
+                                <i className="fa-duotone fa-regular fa-arrow-left"></i>
                                 Back to Proposals
                             </Link>
                         </div>
@@ -170,7 +170,7 @@ export default function ProposalScreenClient({
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-base-content/60">
                 <Link href="/proposals" className="hover:text-primary">
-                    <i className="fa-solid fa-arrow-left mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left mr-2"></i>
                     Proposals
                 </Link>
             </div>
@@ -179,7 +179,7 @@ export default function ProposalScreenClient({
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h1 className="text-3xl font-bold">
-                        <i className="fa-solid fa-user-check text-primary mr-3"></i>
+                        <i className="fa-duotone fa-regular fa-user-check text-primary mr-3"></i>
                         Screen Candidate Proposal
                     </h1>
                     <p className="text-base-content/70">
@@ -198,7 +198,7 @@ export default function ProposalScreenClient({
 
             {(jobError || candidateError) && (
                 <div className="alert alert-warning">
-                    <i className="fa-solid fa-triangle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
                     <div>
                         {jobError && <div>{jobError}</div>}
                         {candidateError && <div>{candidateError}</div>}

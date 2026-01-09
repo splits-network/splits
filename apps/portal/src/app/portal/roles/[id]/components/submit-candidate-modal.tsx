@@ -224,14 +224,14 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                         className={`tab ${mode === 'select' ? 'tab-active' : ''}`}
                         onClick={() => setMode('select')}
                     >
-                        <i className="fa-solid fa-user-check mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-user-check mr-2"></i>
                         Select Existing
                     </a>
                     <a
                         className={`tab ${mode === 'new' ? 'tab-active' : ''}`}
                         onClick={() => setMode('new')}
                     >
-                        <i className="fa-solid fa-user-plus mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-user-plus mr-2"></i>
                         Add New
                     </a>
                 </div>
@@ -239,7 +239,7 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {error && (
                         <div className="alert alert-error">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <span>{error}</span>
                         </div>
                     )}
@@ -306,7 +306,7 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                                     </div>
                                 ) : (
                                     <div className="alert">
-                                        <i className="fa-solid fa-info-circle"></i>
+                                        <i className="fa-duotone fa-regular fa-info-circle"></i>
                                         <span>No existing candidates found. Please add a new candidate.</span>
                                     </div>
                                 )}
@@ -447,7 +447,7 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                         />
                         {resumeFile && (
                             <div className="mt-2 flex items-center gap-2">
-                                <i className="fa-solid fa-file text-primary"></i>
+                                <i className="fa-duotone fa-regular fa-file text-primary"></i>
                                 <span className="text-sm">{resumeFile.name}</span>
                                 <button
                                     type="button"
@@ -459,7 +459,7 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                                         }
                                     }}
                                 >
-                                    <i className="fa-solid fa-times"></i>
+                                    <i className="fa-duotone fa-regular fa-times"></i>
                                 </button>
                             </div>
                         )}

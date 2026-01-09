@@ -315,7 +315,7 @@ export default function ApplicationWizardModal({
                         className="btn btn-sm btn-circle btn-ghost"
                         disabled={submitting}
                     >
-                        <i className="fa-solid fa-xmark text-xl"></i>
+                        <i className="fa-duotone fa-regular fa-xmark text-xl"></i>
                     </button>
                 </div>
 
@@ -328,7 +328,7 @@ export default function ApplicationWizardModal({
                         </div>
                     ) : error && !job ? (
                         <div className="alert alert-error">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <div>
                                 <p className="font-bold">Failed to load application</p>
                                 <p>{error}</p>
@@ -339,7 +339,7 @@ export default function ApplicationWizardModal({
                             {/* Error Alert */}
                             {error && (
                                 <div className="alert alert-error">
-                                    <i className="fa-solid fa-circle-exclamation"></i>
+                                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                                     <span>{error}</span>
                                 </div>
                             )}

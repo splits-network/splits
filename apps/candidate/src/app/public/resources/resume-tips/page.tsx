@@ -102,7 +102,7 @@ export default function ResumeTipsPage() {
                 <div className="container mx-auto px-4">
                     <div className="max-w-3xl">
                         <div className="flex items-center gap-2 mb-4">
-                            <i className="fa-solid fa-file-alt text-3xl"></i>
+                            <i className="fa-duotone fa-regular fa-file-alt text-3xl"></i>
                             <h1 className="text-4xl font-bold">Resume Tips</h1>
                         </div>
                         <p className="text-xl opacity-90">
@@ -123,7 +123,7 @@ export default function ResumeTipsPage() {
                             <div key={index} className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <div className="flex items-center gap-3 mb-3">
-                                        <i className={`fa-solid fa-${section.icon} text-2xl text-primary`}></i>
+                                        <i className={`fa-duotone fa-regular fa-${section.icon} text-2xl text-primary`}></i>
                                         <h3 className="card-title text-lg">{section.title}</h3>
                                     </div>
                                     <p className="text-sm text-base-content/70">{section.content}</p>
@@ -143,7 +143,7 @@ export default function ResumeTipsPage() {
                                 <div className="card-body">
                                     <div className="flex items-start gap-4 mb-4">
                                         <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                                            <i className={`fa-solid fa-${tip.icon} text-primary text-xl`}></i>
+                                            <i className={`fa-duotone fa-regular fa-${tip.icon} text-primary text-xl`}></i>
                                         </div>
                                         <div className="flex-1">
                                             <h3 className="text-2xl font-bold mb-2">{tip.title}</h3>
@@ -154,13 +154,13 @@ export default function ResumeTipsPage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                                         <div className="bg-success/10 p-4 rounded-lg border border-success/30">
                                             <h4 className="font-bold text-success mb-3 flex items-center gap-2">
-                                                <i className="fa-solid fa-check-circle"></i>
+                                                <i className="fa-duotone fa-regular fa-check-circle"></i>
                                                 DO:
                                             </h4>
                                             <ul className="space-y-2">
                                                 {tip.dos.map((item, i) => (
                                                     <li key={i} className="flex items-start gap-2 text-sm">
-                                                        <i className="fa-solid fa-check text-success mt-0.5"></i>
+                                                        <i className="fa-duotone fa-regular fa-check text-success mt-0.5"></i>
                                                         <span>{item}</span>
                                                     </li>
                                                 ))}
@@ -169,13 +169,13 @@ export default function ResumeTipsPage() {
 
                                         <div className="bg-error/10 p-4 rounded-lg border border-error/30">
                                             <h4 className="font-bold text-error mb-3 flex items-center gap-2">
-                                                <i className="fa-solid fa-times-circle"></i>
+                                                <i className="fa-duotone fa-regular fa-times-circle"></i>
                                                 DON'T:
                                             </h4>
                                             <ul className="space-y-2">
                                                 {tip.donts.map((item, i) => (
                                                     <li key={i} className="flex items-start gap-2 text-sm">
-                                                        <i className="fa-solid fa-times text-error mt-0.5"></i>
+                                                        <i className="fa-duotone fa-regular fa-times text-error mt-0.5"></i>
                                                         <span>{item}</span>
                                                     </li>
                                                 ))}
@@ -228,7 +228,7 @@ export default function ResumeTipsPage() {
                             </p>
                             <div className="flex gap-2 justify-center">
                                 <a href="/public/jobs" className="btn btn-primary">
-                                    Browse Jobs <i className="fa-solid fa-briefcase"></i>
+                                    Browse Jobs <i className="fa-duotone fa-regular fa-briefcase"></i>
                                 </a>
                                 <a href="/resources/interview-prep" className="btn btn-outline">
                                     Interview Prep

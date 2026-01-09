@@ -100,11 +100,11 @@ export default function PayoutsAdminPage() {
         };
         return (
             <span className={`badge ${colors[status] || 'badge-neutral'} gap-1`}>
-                {status === 'pending' && <i className="fa-solid fa-clock"></i>}
-                {status === 'processing' && <i className="fa-solid fa-spinner fa-spin"></i>}
-                {status === 'completed' && <i className="fa-solid fa-check"></i>}
-                {status === 'failed' && <i className="fa-solid fa-xmark"></i>}
-                {status === 'on_hold' && <i className="fa-solid fa-pause"></i>}
+                {status === 'pending' && <i className="fa-duotone fa-regular fa-clock"></i>}
+                {status === 'processing' && <i className="fa-duotone fa-regular fa-spinner fa-spin"></i>}
+                {status === 'completed' && <i className="fa-duotone fa-regular fa-check"></i>}
+                {status === 'failed' && <i className="fa-duotone fa-regular fa-xmark"></i>}
+                {status === 'on_hold' && <i className="fa-duotone fa-regular fa-pause"></i>}
                 {status}
             </span>
         );
@@ -132,7 +132,7 @@ export default function PayoutsAdminPage() {
             {/* Header */}
             <div>
                 <Link href="/admin" className="text-sm text-primary hover:underline mb-2 inline-block">
-                    <i className="fa-solid fa-arrow-left mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left mr-2"></i>
                     Back to Admin Dashboard
                 </Link>
                 <h1 className="text-3xl font-bold">Payout Management</h1>
@@ -206,7 +206,7 @@ export default function PayoutsAdminPage() {
                 <ErrorState message={error} onRetry={refresh} />
             ) : payouts.length === 0 ? (
                 <EmptyState
-                    icon="fa-solid fa-money-bill-wave"
+                    icon="fa-duotone fa-regular fa-money-bill-wave"
                     title="No payouts found"
                     description={
                         search || filters.status
@@ -269,7 +269,7 @@ export default function PayoutsAdminPage() {
                                                                 <span className="loading loading-spinner loading-xs"></span>
                                                             ) : (
                                                                 <>
-                                                                    <i className="fa-solid fa-play"></i>
+                                                                    <i className="fa-duotone fa-regular fa-play"></i>
                                                                     Process
                                                                 </>
                                                             )}
@@ -279,7 +279,7 @@ export default function PayoutsAdminPage() {
                                                         href={`/admin/payouts/${payout.id}`}
                                                         className="btn btn-ghost btn-xs"
                                                     >
-                                                        <i className="fa-solid fa-eye"></i>
+                                                        <i className="fa-duotone fa-regular fa-eye"></i>
                                                     </Link>
                                                 </div>
                                             </td>

@@ -195,7 +195,7 @@ export default function CompanyDashboard() {
                         </div>
                         <div className="flex gap-2">
                             <Link href="/portal/roles/new" className="btn btn-sm bg-white/20 border-0 hover:bg-white/30 text-white">
-                                <i className="fa-solid fa-plus"></i>
+                                <i className="fa-duotone fa-regular fa-plus"></i>
                                 Post Role
                             </Link>
                         </div>
@@ -251,7 +251,7 @@ export default function CompanyDashboard() {
                         <span className="text-base-content/60">days</span>
                     </div>
                     <div className="flex items-center gap-2 mt-3 text-sm text-base-content/60">
-                        <i className="fa-solid fa-chart-bar text-xs"></i>
+                        <i className="fa-duotone fa-regular fa-chart-bar text-xs"></i>
                         <span>Industry average: 42 days</span>
                     </div>
                 </ContentCard>
@@ -264,7 +264,7 @@ export default function CompanyDashboard() {
                         <span className="text-base-content/60">recruiters</span>
                     </div>
                     <div className="flex items-center gap-2 mt-3 text-sm text-base-content/60">
-                        <i className="fa-solid fa-briefcase text-xs"></i>
+                        <i className="fa-duotone fa-regular fa-briefcase text-xs"></i>
                         <span>Working on your roles</span>
                     </div>
                 </ContentCard>
@@ -280,7 +280,7 @@ export default function CompanyDashboard() {
                         )}
                     </div>
                     <div className="flex items-center gap-2 mt-3 text-sm text-base-content/60">
-                        <i className="fa-solid fa-file-contract text-xs"></i>
+                        <i className="fa-duotone fa-regular fa-file-contract text-xs"></i>
                         <span>{stats?.offers_extended || 0} offers extended</span>
                     </div>
                 </ContentCard>
@@ -295,7 +295,7 @@ export default function CompanyDashboard() {
                         icon="fa-list-check"
                         headerActions={
                             <Link href="/portal/roles/new" className="btn btn-sm btn-primary">
-                                <i className="fa-solid fa-plus"></i>
+                                <i className="fa-duotone fa-regular fa-plus"></i>
                                 Post New Role
                             </Link>
                         }
@@ -307,7 +307,7 @@ export default function CompanyDashboard() {
                                 description="Create your first role to start receiving candidates"
                                 action={
                                     <Link href="/portal/roles/new" className="btn btn-primary">
-                                        <i className="fa-solid fa-plus mr-2"></i>
+                                        <i className="fa-duotone fa-regular fa-plus mr-2"></i>
                                         Create Role
                                     </Link>
                                 }
@@ -332,7 +332,7 @@ export default function CompanyDashboard() {
                                                 <td>
                                                     <div className="font-semibold text-sm">{role.title}</div>
                                                     <div className="text-xs text-base-content/60 flex items-center gap-1">
-                                                        <i className="fa-solid fa-location-dot text-[10px]"></i>
+                                                        <i className="fa-duotone fa-regular fa-location-dot text-[10px]"></i>
                                                         {role.location}
                                                     </div>
                                                 </td>
@@ -357,7 +357,7 @@ export default function CompanyDashboard() {
                                                 </td>
                                                 <td>
                                                     <Link href={`/portal/roles/${role.id}`} className="btn btn-ghost btn-sm btn-square">
-                                                        <i className="fa-solid fa-chevron-right text-base-content/40"></i>
+                                                        <i className="fa-duotone fa-regular fa-chevron-right text-base-content/40"></i>
                                                     </Link>
                                                 </td>
                                             </tr>
@@ -372,7 +372,7 @@ export default function CompanyDashboard() {
                     {roleBreakdown.some(r => r.days_open > 60 && r.applications_count < 5) && (
                         <div className="alert bg-warning/10 border-warning/20 shadow-sm">
                             <div className="w-10 h-10 rounded-xl bg-warning/20 flex items-center justify-center shrink-0">
-                                <i className="fa-solid fa-lightbulb text-warning"></i>
+                                <i className="fa-duotone fa-regular fa-lightbulb text-warning"></i>
                             </div>
                             <div>
                                 <h4 className="font-bold text-warning">Hiring Insights</h4>
@@ -391,19 +391,19 @@ export default function CompanyDashboard() {
                     <ContentCard title="Quick Actions" icon="fa-bolt">
                         <div className="flex flex-col gap-2">
                             <Link href="/portal/roles/new" className="btn btn-primary w-full justify-start gap-3">
-                                <i className="fa-solid fa-plus w-4"></i>
+                                <i className="fa-duotone fa-regular fa-plus w-4"></i>
                                 Post New Role
                             </Link>
                             <Link href="/portal/roles" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-solid fa-briefcase w-4"></i>
+                                <i className="fa-duotone fa-regular fa-briefcase w-4"></i>
                                 Manage Roles
                             </Link>
                             <Link href="/portal/candidates" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-solid fa-users w-4"></i>
+                                <i className="fa-duotone fa-regular fa-users w-4"></i>
                                 View Candidates
                             </Link>
                             <Link href="/portal/placements" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-solid fa-trophy w-4"></i>
+                                <i className="fa-duotone fa-regular fa-trophy w-4"></i>
                                 Placements
                             </Link>
                         </div>
@@ -417,7 +417,7 @@ export default function CompanyDashboard() {
                             recentActivity.length > 5 && (
                                 <Link href="/activity" className="btn btn-sm btn-ghost">
                                     View all
-                                    <i className="fa-solid fa-arrow-right ml-1"></i>
+                                    <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                                 </Link>
                             )
                         }
@@ -443,7 +443,7 @@ export default function CompanyDashboard() {
                                                     activity.type === 'interview_scheduled' ? 'bg-info/10 text-info' :
                                                         'bg-primary/10 text-primary'}
                                         `}>
-                                            <i className={`fa-solid ${getActivityIcon(activity.type)}`}></i>
+                                            <i className={`fa-duotone fa-regular ${getActivityIcon(activity.type)}`}></i>
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-medium line-clamp-2">{activity.message}</p>

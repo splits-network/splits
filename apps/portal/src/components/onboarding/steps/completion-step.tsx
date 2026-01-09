@@ -32,7 +32,7 @@ export function CompletionStep() {
                 {/* Role Summary */}
                 <div className="flex items-center gap-3 pb-4 border-b border-base-300">
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <i className={`fa-solid ${state.selectedRole === 'recruiter' ? 'fa-user-tie' : 'fa-building'} text-xl text-primary`}></i>
+                        <i className={`fa-duotone fa-regular ${state.selectedRole === 'recruiter' ? 'fa-user-tie' : 'fa-building'} text-xl text-primary`}></i>
                     </div>
                     <div>
                         <p className="text-sm text-base-content/70">Role</p>
@@ -95,7 +95,7 @@ export function CompletionStep() {
 
             {/* Info Alert */}
             <div className="alert alert-info">
-                <i className="fa-solid fa-circle-info"></i>
+                <i className="fa-duotone fa-regular fa-circle-info"></i>
                 <div className="flex-1">
                     <p className="font-semibold">What happens next?</p>
                     <p className="text-sm">
@@ -108,7 +108,7 @@ export function CompletionStep() {
 
             {state.error && (
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{state.error}</span>
                 </div>
             )}
@@ -121,7 +121,7 @@ export function CompletionStep() {
                     className="btn"
                     disabled={state.submitting}
                 >
-                    <i className="fa-solid fa-arrow-left"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
                     Back
                 </button>
                 <button
@@ -137,7 +137,7 @@ export function CompletionStep() {
                         </>
                     ) : (
                         <>
-                            <i className="fa-solid fa-check"></i>
+                            <i className="fa-duotone fa-regular fa-check"></i>
                             Complete Setup
                         </>
                     )}

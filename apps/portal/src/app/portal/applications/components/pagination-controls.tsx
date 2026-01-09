@@ -46,7 +46,7 @@ export function PaginationControls({
                 disabled={currentPage === 1 || disabled}
                 aria-label="First page"
             >
-                <i className="fa-solid fa-angles-left"></i>
+                <i className="fa-duotone fa-regular fa-angles-left"></i>
             </button>
             <button
                 className="btn btn-sm"
@@ -54,7 +54,7 @@ export function PaginationControls({
                 disabled={currentPage === 1 || disabled}
                 aria-label="Previous page"
             >
-                <i className="fa-solid fa-angle-left"></i>
+                <i className="fa-duotone fa-regular fa-angle-left"></i>
             </button>
 
             <div className="flex gap-1">
@@ -76,7 +76,7 @@ export function PaginationControls({
                 disabled={currentPage === totalPages || disabled}
                 aria-label="Next page"
             >
-                <i className="fa-solid fa-angle-right"></i>
+                <i className="fa-duotone fa-regular fa-angle-right"></i>
             </button>
             <button
                 className="btn btn-sm"
@@ -84,7 +84,7 @@ export function PaginationControls({
                 disabled={currentPage === totalPages || disabled}
                 aria-label="Last page"
             >
-                <i className="fa-solid fa-angles-right"></i>
+                <i className="fa-duotone fa-regular fa-angles-right"></i>
             </button>
         </div>
     );

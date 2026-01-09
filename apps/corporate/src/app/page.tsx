@@ -73,26 +73,26 @@ export default function HomePage() {
                                 </p>
                                 <ul className="space-y-3 mb-6">
                                     <li className="flex items-start gap-3">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Split-fee recruiting network</span>
                                     </li>
                                     <li className="flex items-start gap-3">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Full ATS & candidate management</span>
                                     </li>
                                     <li className="flex items-start gap-3">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Automated placement tracking</span>
                                     </li>
                                     <li className="flex items-start gap-3">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Real-time collaboration tools</span>
                                     </li>
                                 </ul>
                                 <div className="card-actions">
                                     <a href="https://splits.network" className="btn btn-primary w-full">
                                         Access Splits Platform
-                                        <i className="fa-solid fa-arrow-right"></i>
+                                        <i className="fa-duotone fa-regular fa-arrow-right"></i>
                                     </a>
                                 </div>
                             </div>
@@ -111,26 +111,26 @@ export default function HomePage() {
                                 </p>
                                 <ul className="space-y-3 mb-6">
                                     <li className="flex items-start gap-3">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Secure identity verification</span>
                                     </li>
                                     <li className="flex items-start gap-3">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Real-time application tracking</span>
                                     </li>
                                     <li className="flex items-start gap-3">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Document management</span>
                                     </li>
                                     <li className="flex items-start gap-3">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Direct recruiter communication</span>
                                     </li>
                                 </ul>
                                 <div className="card-actions">
                                     <a href="https://applicant.network" className="btn btn-secondary w-full">
                                         Access Applicant Portal
-                                        <i className="fa-solid fa-arrow-right"></i>
+                                        <i className="fa-duotone fa-regular fa-arrow-right"></i>
                                     </a>
                                 </div>
                             </div>
@@ -180,7 +180,7 @@ export default function HomePage() {
                         <div className="card-body">
                             <div className="space-y-4">
                                 <div className="flex items-center gap-4 justify-center">
-                                    <i className="fa-solid fa-envelope text-2xl text-primary"></i>
+                                    <i className="fa-duotone fa-regular fa-envelope text-2xl text-primary"></i>
                                     <a href="mailto:hello@employment-networks.com" className="link link-primary text-lg">
                                         hello@employment-networks.com
                                     </a>

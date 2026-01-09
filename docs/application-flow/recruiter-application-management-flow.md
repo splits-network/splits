@@ -78,7 +78,7 @@ When a recruiter views a candidate's details page (where an active relationship 
     href={`/portal/roles/${application.job_id}`}
     className="btn btn-sm btn-ghost"
 >
-    <i className="fa-solid fa-arrow-right"></i>
+    <i className="fa-duotone fa-regular fa-arrow-right"></i>
 </Link>
 ```
 
@@ -107,7 +107,7 @@ When a recruiter views a candidate's details page (where an active relationship 
     className="btn btn-primary btn-sm gap-2"
 >
     View Details
-    <i className="fa-solid fa-arrow-right"></i>
+    <i className="fa-duotone fa-regular fa-arrow-right"></i>
 </Link>
 ```
 
@@ -355,7 +355,7 @@ await apiClient.updateApplicationStage(
 ```tsx
 // BEFORE
 <Link href={`/portal/roles/${application.job_id}`}>
-  <i className="fa-solid fa-arrow-right"></i>
+  <i className="fa-duotone fa-regular fa-arrow-right"></i>
 </Link>
 
 // AFTER
@@ -363,7 +363,7 @@ await apiClient.updateApplicationStage(
   href={`/applications/${application.id}`}
   className="btn btn-sm btn-primary"
 >
-  <i className="fa-solid fa-pen-to-square"></i>
+  <i className="fa-duotone fa-regular fa-pen-to-square"></i>
   Manage
 </Link>
 ```
@@ -375,14 +375,14 @@ await apiClient.updateApplicationStage(
     href={`/applications/${application.id}`}
     className="btn btn-sm btn-primary"
   >
-    <i className="fa-solid fa-pen-to-square"></i>
+    <i className="fa-duotone fa-regular fa-pen-to-square"></i>
     Manage
   </Link>
   <Link
     href={`/portal/roles/${application.job_id}`}
     className="btn btn-sm btn-ghost"
   >
-    <i className="fa-solid fa-briefcase"></i>
+    <i className="fa-duotone fa-regular fa-briefcase"></i>
     View Role
   </Link>
 </div>

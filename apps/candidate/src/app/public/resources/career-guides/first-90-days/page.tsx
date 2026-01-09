@@ -177,10 +177,10 @@ export default function First90DaysGuidePage() {
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto">
                         <Link href="/resources/career-guides" className="btn btn-ghost btn-sm mb-4">
-                            <i className="fa-solid fa-arrow-left"></i> Back to Career Guides
+                            <i className="fa-duotone fa-regular fa-arrow-left"></i> Back to Career Guides
                         </Link>
                         <div className="flex items-center gap-3 mb-4">
-                            <i className="fa-solid fa-rocket text-4xl"></i>
+                            <i className="fa-duotone fa-regular fa-rocket text-4xl"></i>
                             <div>
                                 <div className="badge badge-neutral mb-2">Career Growth</div>
                                 <h1 className="text-4xl font-bold">First 90 Days in a New Role</h1>
@@ -190,8 +190,8 @@ export default function First90DaysGuidePage() {
                             Set yourself up for long-term success in your new position from day one.
                         </p>
                         <div className="flex items-center gap-4 mt-4 text-sm opacity-80">
-                            <span><i className="fa-solid fa-clock"></i> 9 min read</span>
-                            <span><i className="fa-solid fa-user"></i> Career Coaches</span>
+                            <span><i className="fa-duotone fa-regular fa-clock"></i> 9 min read</span>
+                            <span><i className="fa-duotone fa-regular fa-user"></i> Career Coaches</span>
                         </div>
                     </div>
                 </div>
@@ -222,7 +222,7 @@ export default function First90DaysGuidePage() {
                                     <div className="card-body">
                                         <div className="flex items-start gap-4 mb-6">
                                             <div className={`w-16 h-16 rounded-full bg-${phase.color}/20 flex items-center justify-center flex-shrink-0`}>
-                                                <i className={`fa-solid fa-${phase.icon} text-${phase.color} text-2xl`}></i>
+                                                <i className={`fa-duotone fa-regular fa-${phase.icon} text-${phase.color} text-2xl`}></i>
                                             </div>
                                             <div>
                                                 <h3 className="text-2xl font-bold">{phase.title}</h3>
@@ -235,7 +235,7 @@ export default function First90DaysGuidePage() {
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                                 {phase.goals.map((goal, goalIndex) => (
                                                     <div key={goalIndex} className="flex items-start gap-2">
-                                                        <i className="fa-solid fa-target text-primary mt-1"></i>
+                                                        <i className="fa-duotone fa-regular fa-target text-primary mt-1"></i>
                                                         <span className="text-sm">{goal}</span>
                                                     </div>
                                                 ))}
@@ -246,13 +246,13 @@ export default function First90DaysGuidePage() {
                                             {phase.actions.map((action, actionIndex) => (
                                                 <div key={actionIndex} className="bg-base-200 p-4 rounded-lg">
                                                     <h5 className="font-bold mb-3">
-                                                        <i className="fa-solid fa-circle-check text-success mr-2"></i>
+                                                        <i className="fa-duotone fa-regular fa-circle-check text-success mr-2"></i>
                                                         {action.category}
                                                     </h5>
                                                     <ul className="space-y-2">
                                                         {action.tasks.map((task, taskIndex) => (
                                                             <li key={taskIndex} className="flex items-start gap-2 text-sm">
-                                                                <i className="fa-solid fa-chevron-right text-base-content/40 mt-1"></i>
+                                                                <i className="fa-duotone fa-regular fa-chevron-right text-base-content/40 mt-1"></i>
                                                                 <span>{task}</span>
                                                             </li>
                                                         ))}
@@ -275,13 +275,13 @@ export default function First90DaysGuidePage() {
                                 <div key={index} className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <div className="flex items-center gap-3 mb-4">
-                                            <i className={`fa-solid fa-${relationship.icon} text-2xl text-primary`}></i>
+                                            <i className={`fa-duotone fa-regular fa-${relationship.icon} text-2xl text-primary`}></i>
                                             <h3 className="card-title text-lg">{relationship.person}</h3>
                                         </div>
                                         <ul className="space-y-2">
                                             {relationship.tips.map((tip, tipIndex) => (
                                                 <li key={tipIndex} className="flex items-start gap-2 text-sm">
-                                                    <i className="fa-solid fa-check text-success mt-1"></i>
+                                                    <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                                     <span>{tip}</span>
                                                 </li>
                                             ))}
@@ -296,7 +296,7 @@ export default function First90DaysGuidePage() {
                     <div className="card bg-base-100 shadow mb-12">
                         <div className="card-body">
                             <h2 className="card-title text-2xl mb-6">
-                                <i className="fa-solid fa-circle-question text-primary"></i>
+                                <i className="fa-duotone fa-regular fa-circle-question text-primary"></i>
                                 Important Questions to Ask
                             </h2>
 
@@ -329,7 +329,7 @@ export default function First90DaysGuidePage() {
                     <div className="card bg-warning/10 border border-warning/30 shadow mb-12">
                         <div className="card-body">
                             <h2 className="card-title text-2xl mb-4 text-warning">
-                                <i className="fa-solid fa-triangle-exclamation"></i>
+                                <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
                                 Common Mistakes to Avoid
                             </h2>
                             <ul className="space-y-3">
@@ -344,7 +344,7 @@ export default function First90DaysGuidePage() {
                                     'Burning out by trying to prove yourself too hard',
                                 ].map((mistake, index) => (
                                     <li key={index} className="flex items-start gap-3">
-                                        <i className="fa-solid fa-xmark text-warning text-lg mt-0.5"></i>
+                                        <i className="fa-duotone fa-regular fa-xmark text-warning text-lg mt-0.5"></i>
                                         <span>{mistake}</span>
                                     </li>
                                 ))}
@@ -356,24 +356,24 @@ export default function First90DaysGuidePage() {
                     <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow mb-12">
                         <div className="card-body">
                             <h3 className="card-title text-2xl mb-4">
-                                <i className="fa-solid fa-lightbulb"></i>
+                                <i className="fa-duotone fa-regular fa-lightbulb"></i>
                                 Key Takeaways
                             </h3>
                             <ul className="space-y-3">
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Focus on learning and listening before trying to make changes</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Build strong relationships across the organization early</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Deliver quick wins while laying groundwork for bigger impact</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Seek regular feedback and adjust your approach accordingly</span>
                                 </li>
                             </ul>
@@ -386,15 +386,15 @@ export default function First90DaysGuidePage() {
                             <h3 className="card-title text-xl mb-4">Next Steps</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <Link href="/resources/career-guides/networking" className="btn btn-outline">
-                                    <i className="fa-solid fa-users"></i>
+                                    <i className="fa-duotone fa-regular fa-users"></i>
                                     Build Your Network
                                 </Link>
                                 <Link href="/resources/career-guides/negotiating-offers" className="btn btn-outline">
-                                    <i className="fa-solid fa-handshake"></i>
+                                    <i className="fa-duotone fa-regular fa-handshake"></i>
                                     Negotiate Offers
                                 </Link>
                                 <Link href="/public/jobs" className="btn btn-primary">
-                                    <i className="fa-solid fa-briefcase"></i>
+                                    <i className="fa-duotone fa-regular fa-briefcase"></i>
                                     Find Your Next Role
                                 </Link>
                             </div>

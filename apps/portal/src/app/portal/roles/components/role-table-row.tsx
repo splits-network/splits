@@ -114,7 +114,7 @@ export function RoleTableRow({ job, allJobs, canManageRole }: RoleTableRowProps)
                             className="btn btn-ghost btn-sm btn-square"
                             title="Edit Role"
                         >
-                            <i className="fa-solid fa-pen text-xs"></i>
+                            <i className="fa-duotone fa-regular fa-pen text-xs"></i>
                         </Link>
                     )}
                     <Link
@@ -142,7 +142,7 @@ export function RoleTableRow({ job, allJobs, canManageRole }: RoleTableRowProps)
                                 className={`badge ${badge.class} gap-1.5 ${badge.animated ? 'animate-pulse' : ''}`}
                                 title={badge.tooltip}
                             >
-                                <i className={`fa-solid ${badge.icon}`}></i>
+                                <i className={`fa-duotone fa-regular ${badge.icon}`}></i>
                                 {badge.text}
                             </span>
                         ))}
@@ -224,7 +224,7 @@ export function RoleTableRow({ job, allJobs, canManageRole }: RoleTableRowProps)
                     className="btn btn-primary btn-sm gap-2"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <i className="fa-solid fa-eye"></i>
+                    <i className="fa-duotone fa-regular fa-eye"></i>
                     View Pipeline
                 </Link>
                 <Link
@@ -232,7 +232,7 @@ export function RoleTableRow({ job, allJobs, canManageRole }: RoleTableRowProps)
                     className="btn btn-outline btn-sm gap-2"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <i className="fa-solid fa-user-plus"></i>
+                    <i className="fa-duotone fa-regular fa-user-plus"></i>
                     Submit Candidate
                 </Link>
                 {canManageRole && (
@@ -241,7 +241,7 @@ export function RoleTableRow({ job, allJobs, canManageRole }: RoleTableRowProps)
                         className="btn btn-ghost btn-sm gap-2"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <i className="fa-solid fa-pen"></i>
+                        <i className="fa-duotone fa-regular fa-pen"></i>
                         Edit Role
                     </Link>
                 )}

@@ -166,20 +166,20 @@ export default function JobsList() {
                                                 </div>
                                                 <div className="flex flex-col">
                                                     <p className="text-base font-semibold text-base-content/70 flex items-center gap-2">
-                                                        <i className="fa-solid fa-building text-primary"></i>
+                                                        <i className="fa-duotone fa-regular fa-building text-primary"></i>
                                                         {job.company?.name || 'Confidential Company'}
                                                     </p>
                                                     {(job.company?.headquarters_location || job.company?.industry) && (
                                                         <div className="mt-1 flex gap-2">
                                                             {job.company?.headquarters_location && (
                                                                 <span className="badge badge-outline badge-sm gap-1">
-                                                                    <i className="fa-solid fa-location-dot text-xs"></i>
+                                                                    <i className="fa-duotone fa-regular fa-location-dot text-xs"></i>
                                                                     {job.company.headquarters_location}
                                                                 </span>
                                                             )}
                                                             {job.company?.industry && (
                                                                 <span className="badge badge-outline badge-sm gap-1">
-                                                                    <i className="fa-solid fa-industry text-xs"></i>
+                                                                    <i className="fa-duotone fa-regular fa-industry text-xs"></i>
                                                                     {job.company.industry}
                                                                 </span>
                                                             )}
@@ -197,7 +197,7 @@ export default function JobsList() {
                                                             className={`badge ${badge.class} gap-1 shadow-lg rounded-e-none ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-left' : ''}`}
                                                             data-tip={badge.tooltip}
                                                         >
-                                                            <i className={`fa-solid mr-1 ${badge.icon}`}></i>
+                                                            <i className={`fa-duotone fa-regular mr-1 ${badge.icon}`}></i>
                                                             {badge.text && <span>{badge.text}</span>}
                                                         </div>
                                                     ))}
@@ -224,19 +224,19 @@ export default function JobsList() {
                                             <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
                                                 {job.location && (
                                                     <span className="flex items-center gap-1.5 text-base-content/70">
-                                                        <i className="fa-solid fa-location-dot text-primary"></i>
+                                                        <i className="fa-duotone fa-regular fa-location-dot text-primary"></i>
                                                         <span className="font-medium">{job.location}</span>
                                                     </span>
                                                 )}
                                                 {job.employment_type && (
                                                     <span className="flex items-center gap-1.5 text-base-content/70">
-                                                        <i className="fa-solid fa-briefcase text-primary"></i>
+                                                        <i className="fa-duotone fa-regular fa-briefcase text-primary"></i>
                                                         <span className="font-medium">{job.employment_type.replace('_', '-')}</span>
                                                     </span>
                                                 )}
                                                 {job.open_to_relocation && (
                                                     <span className="flex items-center gap-1.5 text-base-content/70">
-                                                        <i className="fa-solid fa-house-laptop text-primary"></i>
+                                                        <i className="fa-duotone fa-regular fa-house-laptop text-primary"></i>
                                                         <span className="font-medium">Remote OK</span>
                                                     </span>
                                                 )}
@@ -271,7 +271,7 @@ export default function JobsList() {
                                                 </div>
                                                 <Link href={`/public/jobs/${job.id}`} className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
                                                     View Role
-                                                    <i className="fa-solid fa-arrow-right"></i>
+                                                    <i className="fa-duotone fa-regular fa-arrow-right"></i>
                                                 </Link>
                                             </div>
                                         </div>

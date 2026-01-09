@@ -119,14 +119,14 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
         <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
 
             {success && (
                 <div className="alert alert-success">
-                    <i className="fa-solid fa-circle-check"></i>
+                    <i className="fa-duotone fa-regular fa-circle-check"></i>
                     <span>Company settings saved successfully!</span>
                 </div>
             )}
@@ -134,7 +134,7 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
-                        <i className="fa-solid fa-building"></i>
+                        <i className="fa-duotone fa-regular fa-building"></i>
                         Company Information
                     </h2>
 
@@ -249,7 +249,7 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
-                        <i className="fa-solid fa-cog"></i>
+                        <i className="fa-duotone fa-regular fa-cog"></i>
                         Hiring Preferences
                     </h2>
                     <p className="text-sm text-base-content/70">
@@ -279,7 +279,7 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
                         </>
                     ) : (
                         <>
-                            <i className="fa-solid fa-save"></i>
+                            <i className="fa-duotone fa-regular fa-save"></i>
                             Save Settings
                         </>
                     )}

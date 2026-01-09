@@ -61,7 +61,7 @@ export default async function AcceptInvitationPage({ params }: PageProps) {
             <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
                 <div className="card bg-base-100 shadow max-w-md w-full">
                     <div className="card-body text-center">
-                        <i className="fa-solid fa-circle-xmark text-5xl text-error mb-4"></i>
+                        <i className="fa-duotone fa-regular fa-circle-xmark text-5xl text-error mb-4"></i>
                         <h1 className="card-title text-2xl justify-center">Invitation Not Found</h1>
                         <p className="text-base-content/70">
                             This invitation link is invalid or may have been revoked.
@@ -106,7 +106,7 @@ export default async function AcceptInvitationPage({ params }: PageProps) {
             <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
                 <div className="card bg-base-100 shadow max-w-md w-full">
                     <div className="card-body text-center">
-                        <i className={`fa-solid ${status.icon} text-5xl ${status.color} mb-4`}></i>
+                        <i className={`fa-duotone fa-regular ${status.icon} text-5xl ${status.color} mb-4`}></i>
                         <h1 className="card-title text-2xl justify-center">{status.title}</h1>
                         <p className="text-base-content/70">{status.message}</p>
                         <div className="card-actions justify-center mt-4">
@@ -127,7 +127,7 @@ export default async function AcceptInvitationPage({ params }: PageProps) {
             <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
                 <div className="card bg-base-100 shadow max-w-md w-full">
                     <div className="card-body text-center">
-                        <i className="fa-solid fa-clock text-5xl text-warning mb-4"></i>
+                        <i className="fa-duotone fa-regular fa-clock text-5xl text-warning mb-4"></i>
                         <h1 className="card-title text-2xl justify-center">Invitation Expired</h1>
                         <p className="text-base-content/70">
                             This invitation expired on {expiresAt.toLocaleDateString()}. Please contact the organization administrator for a new invitation.
@@ -156,7 +156,7 @@ export default async function AcceptInvitationPage({ params }: PageProps) {
             <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
                 <div className="card bg-base-100 shadow max-w-md w-full">
                     <div className="card-body text-center">
-                        <i className="fa-solid fa-triangle-exclamation text-5xl text-warning mb-4"></i>
+                        <i className="fa-duotone fa-regular fa-triangle-exclamation text-5xl text-warning mb-4"></i>
                         <h1 className="card-title text-2xl justify-center">Email Mismatch</h1>
                         <p className="text-base-content/70 mb-4">
                             This invitation was sent to <strong>{invitation.email}</strong>, but you're logged in as <strong>{userEmail}</strong>.

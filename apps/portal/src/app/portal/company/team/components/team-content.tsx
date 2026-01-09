@@ -196,20 +196,20 @@ export default function TeamManagementContent({ organizationId }: TeamManagement
         <div className="space-y-6">
             {error && (
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                     <button onClick={() => setError('')} className="btn btn-sm btn-ghost">
-                        <i className="fa-solid fa-xmark"></i>
+                        <i className="fa-duotone fa-regular fa-xmark"></i>
                     </button>
                 </div>
             )}
 
             {success && (
                 <div className="alert alert-success">
-                    <i className="fa-solid fa-circle-check"></i>
+                    <i className="fa-duotone fa-regular fa-circle-check"></i>
                     <span>{success}</span>
                     <button onClick={() => setSuccess('')} className="btn btn-sm btn-ghost">
-                        <i className="fa-solid fa-xmark"></i>
+                        <i className="fa-duotone fa-regular fa-xmark"></i>
                     </button>
                 </div>
             )}
@@ -218,7 +218,7 @@ export default function TeamManagementContent({ organizationId }: TeamManagement
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
-                        <i className="fa-solid fa-user-plus"></i>
+                        <i className="fa-duotone fa-regular fa-user-plus"></i>
                         Invite Team Member
                     </h2>
 
@@ -264,7 +264,7 @@ export default function TeamManagementContent({ organizationId }: TeamManagement
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-paper-plane"></i>
+                                        <i className="fa-duotone fa-regular fa-paper-plane"></i>
                                         Send Invitation
                                     </>
                                 )}
@@ -279,7 +279,7 @@ export default function TeamManagementContent({ organizationId }: TeamManagement
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title">
-                            <i className="fa-solid fa-clock"></i>
+                            <i className="fa-duotone fa-regular fa-clock"></i>
                             Pending Invitations ({invitations.filter(inv => inv.status === 'pending').length})
                         </h2>
 
@@ -299,7 +299,7 @@ export default function TeamManagementContent({ organizationId }: TeamManagement
                                         <tr key={invitation.id}>
                                             <td>
                                                 <div className="flex items-center gap-2">
-                                                    <i className="fa-solid fa-envelope text-warning"></i>
+                                                    <i className="fa-duotone fa-regular fa-envelope text-warning"></i>
                                                     {invitation.email}
                                                 </div>
                                             </td>
@@ -320,7 +320,7 @@ export default function TeamManagementContent({ organizationId }: TeamManagement
                                                     className="btn btn-sm btn-ghost btn-error"
                                                     title="Revoke invitation"
                                                 >
-                                                    <i className="fa-solid fa-ban"></i>
+                                                    <i className="fa-duotone fa-regular fa-ban"></i>
                                                 </button>
                                             </td>
                                         </tr>
@@ -336,7 +336,7 @@ export default function TeamManagementContent({ organizationId }: TeamManagement
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
-                        <i className="fa-solid fa-users"></i>
+                        <i className="fa-duotone fa-regular fa-users"></i>
                         Team Members ({members.length})
                     </h2>
 
@@ -391,7 +391,7 @@ export default function TeamManagementContent({ organizationId }: TeamManagement
                                                             )
                                                         }
                                                     >
-                                                        <i className="fa-solid fa-trash"></i>
+                                                        <i className="fa-duotone fa-regular fa-trash"></i>
                                                         Remove
                                                     </button>
                                                 )}
@@ -403,7 +403,7 @@ export default function TeamManagementContent({ organizationId }: TeamManagement
                         </div>
                     ) : (
                         <div className="text-center py-12">
-                            <i className="fa-solid fa-users text-6xl text-base-content/20"></i>
+                            <i className="fa-duotone fa-regular fa-users text-6xl text-base-content/20"></i>
                             <h3 className="text-xl font-semibold mt-4">No Team Members Yet</h3>
                             <p className="text-base-content/70 mt-2">
                                 Invite colleagues to join your hiring team
@@ -417,7 +417,7 @@ export default function TeamManagementContent({ organizationId }: TeamManagement
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
-                        <i className="fa-solid fa-circle-info"></i>
+                        <i className="fa-duotone fa-regular fa-circle-info"></i>
                         Role Permissions
                     </h2>
 

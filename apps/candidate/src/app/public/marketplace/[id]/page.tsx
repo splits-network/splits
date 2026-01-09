@@ -143,7 +143,7 @@ export default function RecruiterDetailPage() {
         return (
             <div className="container mx-auto p-6">
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
                 <button className="btn mt-4" onClick={() => router.back()}>
@@ -164,14 +164,14 @@ export default function RecruiterDetailPage() {
         <div className="container mx-auto p-6">
             {success && (
                 <div className="alert alert-success mb-4">
-                    <i className="fa-solid fa-circle-check"></i>
+                    <i className="fa-duotone fa-regular fa-circle-check"></i>
                     <span>{success}</span>
                 </div>
             )}
 
             {error && (
                 <div className="alert alert-error mb-4">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
@@ -198,7 +198,7 @@ export default function RecruiterDetailPage() {
                                 )}
                                 {profileBadge && (
                                     <span className={`badge ${profileBadge.color} gap-1`}>
-                                        <i className={`fa-solid ${profileBadge.icon}`}></i>
+                                        <i className={`fa-duotone fa-regular ${profileBadge.icon}`}></i>
                                         {profileBadge.label}
                                     </span>
                                 )}
@@ -210,19 +210,19 @@ export default function RecruiterDetailPage() {
                             <div className="flex flex-wrap gap-4 text-sm text-base-content/70">
                                 {recruiter.location && (
                                     <span className="flex items-center gap-1">
-                                        <i className="fa-solid fa-location-dot"></i>
+                                        <i className="fa-duotone fa-regular fa-location-dot"></i>
                                         {recruiter.location}
                                     </span>
                                 )}
                                 {recruiter.years_experience && (
                                     <span className="flex items-center gap-1">
-                                        <i className="fa-solid fa-briefcase"></i>
+                                        <i className="fa-duotone fa-regular fa-briefcase"></i>
                                         {recruiter.years_experience} years experience
                                     </span>
                                 )}
                                 {recruiter.created_at && (
                                     <span className="flex items-center gap-1">
-                                        <i className="fa-solid fa-calendar"></i>
+                                        <i className="fa-duotone fa-regular fa-calendar"></i>
                                         Member since {new Date(recruiter.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                                     </span>
                                 )}
@@ -233,12 +233,12 @@ export default function RecruiterDetailPage() {
                                     className="btn btn-primary"
                                     onClick={() => setShowConnectModal(true)}
                                 >
-                                    <i className="fa-solid fa-user-plus"></i>
+                                    <i className="fa-duotone fa-regular fa-user-plus"></i>
                                     Connect
                                 </button>
                                 {recruiter.contact_available && (
                                     <button className="btn btn-outline">
-                                        <i className="fa-solid fa-envelope"></i>
+                                        <i className="fa-duotone fa-regular fa-envelope"></i>
                                         Contact
                                     </button>
                                 )}
@@ -254,7 +254,7 @@ export default function RecruiterDetailPage() {
                     <div className="stats bg-base-100 shadow w-full mb-6">
                         <div className="stat">
                             <div className='stat-figure'>
-                                <i className="fa-solid fa-trophy text-primary text-3xl"></i>
+                                <i className="fa-duotone fa-regular fa-trophy text-primary text-3xl"></i>
                             </div>
                             <div className="stat-title">Total Placements</div>
                             <div className="stat-value text-primary">{recruiter.total_placements}</div>
@@ -265,7 +265,7 @@ export default function RecruiterDetailPage() {
                         {recruiter.success_rate !== undefined && (
                             <div className="stat">
                                 <div className='stat-figure'>
-                                    <i className="fa-solid fa-chart-pie text-secondary text-3xl"></i>
+                                    <i className="fa-duotone fa-regular fa-chart-pie text-secondary text-3xl"></i>
                                 </div>
                                 <div className="stat-title">Success Rate</div>
                                 <div className="stat-value text-secondary">{Math.round(recruiter.success_rate * 100)}%</div>
@@ -277,7 +277,7 @@ export default function RecruiterDetailPage() {
                         {recruiter.reputation_score !== undefined && (
                             <div className="stat">
                                 <div className='stat-figure'>
-                                    <i className="fa-solid fa-star text-accent text-3xl"></i>
+                                    <i className="fa-duotone fa-regular fa-star text-accent text-3xl"></i>
                                 </div>
                                 <div className="stat-title">Reputation Score</div>
                                 <div className="stat-value text-accent">{recruiter.reputation_score.toFixed(1)}</div>
@@ -295,7 +295,7 @@ export default function RecruiterDetailPage() {
                         <div className="card bg-gradient-to-br from-primary/5 to-secondary/5 shadow-lg mb-6 border border-primary/20">
                             <div className="card-body">
                                 <h2 className="card-title flex items-center gap-2">
-                                    <i className="fa-solid fa-sparkles text-primary"></i>
+                                    <i className="fa-duotone fa-regular fa-sparkles text-primary"></i>
                                     Featured Story
                                 </h2>
                                 <div className="prose max-w-none text-base-content/90">

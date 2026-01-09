@@ -34,35 +34,35 @@ export default function PricingPage() {
                                 <div className="divider"></div>
                                 <ul className="space-y-3 mb-6">
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Access to open roles</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Submit unlimited candidates</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Full ATS access</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Email notifications</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span><strong>Upto 40% recruiter share</strong> of placement fee</span>
                                     </li>
                                     <li className="flex items-start gap-2 text-base-content/50">
-                                        <i className="fa-solid fa-x mt-1 text-sm"></i>
+                                        <i className="fa-duotone fa-regular fa-x mt-1 text-sm"></i>
                                         <span>Priority role access</span>
                                     </li>
                                     <li className="flex items-start gap-2 text-base-content/50">
-                                        <i className="fa-solid fa-x mt-1 text-sm"></i>
+                                        <i className="fa-duotone fa-regular fa-x mt-1 text-sm"></i>
                                         <span>Performance analytics</span>
                                     </li>
                                     <li className="flex items-start gap-2 text-base-content/50">
-                                        <i className="fa-solid fa-x mt-1 text-sm"></i>
+                                        <i className="fa-duotone fa-regular fa-x mt-1 text-sm"></i>
                                         <span>API access</span>
                                     </li>
                                 </ul>
@@ -85,35 +85,35 @@ export default function PricingPage() {
                                 <div className="divider"></div>
                                 <ul className="space-y-3 mb-6">
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-secondary mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-secondary mt-1"></i>
                                         <span><strong>Everything in Starter</strong></span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-secondary mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-secondary mt-1"></i>
                                         <span><strong>Upto 50% recruiter share</strong> of placement fee</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-secondary mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-secondary mt-1"></i>
                                         <span>Priority access to new roles</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-secondary mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-secondary mt-1"></i>
                                         <span>Performance analytics dashboard</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-secondary mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-secondary mt-1"></i>
                                         <span>Advanced reporting</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-secondary mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-secondary mt-1"></i>
                                         <span>Dedicated support</span>
                                     </li>
                                     <li className="flex items-start gap-2 opacity-50">
-                                        <i className="fa-solid fa-x mt-1 text-sm"></i>
+                                        <i className="fa-duotone fa-regular fa-x mt-1 text-sm"></i>
                                         <span>API access</span>
                                     </li>
                                     <li className="flex items-start gap-2 opacity-50">
-                                        <i className="fa-solid fa-x mt-1 text-sm"></i>
+                                        <i className="fa-duotone fa-regular fa-x mt-1 text-sm"></i>
                                         <span>White-label options</span>
                                     </li>
                                 </ul>
@@ -136,35 +136,35 @@ export default function PricingPage() {
                                 <div className="divider"></div>
                                 <ul className="space-y-3 mb-6">
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span><strong>Everything in Pro</strong></span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span><strong>Upto 60% recruiter share</strong> of placement fee</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Exclusive early access to roles</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Full API access</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>White-label options</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Multi-recruiter team management</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Priority support & account manager</span>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <i className="fa-solid fa-check text-success mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                         <span>Custom integrations</span>
                                     </li>
                                 </ul>
@@ -182,7 +182,7 @@ export default function PricingPage() {
                 <div className="container mx-auto px-4">
                     <div className="text-center mb-12">
                         <h2 className="text-4xl font-bold mb-4">
-                            <i className="fa-solid fa-building text-secondary"></i> For Companies
+                            <i className="fa-duotone fa-regular fa-building text-secondary"></i> For Companies
                         </h2>
                         <p className="text-lg text-base-content/70">
                             Post roles for free, pay only on successful hires
@@ -199,23 +199,23 @@ export default function PricingPage() {
                                         </p>
                                         <ul className="space-y-3">
                                             <li className="flex items-start gap-2">
-                                                <i className="fa-solid fa-check text-success mt-1"></i>
+                                                <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                                 <span>Unlimited role postings</span>
                                             </li>
                                             <li className="flex items-start gap-2">
-                                                <i className="fa-solid fa-check text-success mt-1"></i>
+                                                <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                                 <span>Access to recruiter network</span>
                                             </li>
                                             <li className="flex items-start gap-2">
-                                                <i className="fa-solid fa-check text-success mt-1"></i>
+                                                <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                                 <span>Full ATS pipeline visibility</span>
                                             </li>
                                             <li className="flex items-start gap-2">
-                                                <i className="fa-solid fa-check text-success mt-1"></i>
+                                                <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                                 <span>Candidate management tools</span>
                                             </li>
                                             <li className="flex items-start gap-2">
-                                                <i className="fa-solid fa-check text-success mt-1"></i>
+                                                <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                                 <span>Communication & notifications</span>
                                             </li>
                                         </ul>
@@ -242,7 +242,7 @@ export default function PricingPage() {
                                 <div className="divider"></div>
                                 <div className="text-center">
                                     <Link href="/sign-up" className="btn btn-secondary btn-lg">
-                                        <i className="fa-solid fa-building"></i>
+                                        <i className="fa-duotone fa-regular fa-building"></i>
                                         Post Your First Role
                                     </Link>
                                 </div>
@@ -280,57 +280,57 @@ export default function PricingPage() {
                                 </tr>
                                 <tr>
                                     <td>Access to Roles</td>
-                                    <td className="text-center"><i className="fa-solid fa-check text-success"></i></td>
-                                    <td className="text-center bg-primary/10"><i className="fa-solid fa-check text-success"></i></td>
-                                    <td className="text-center"><i className="fa-solid fa-check text-success"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
+                                    <td className="text-center bg-primary/10"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
                                 </tr>
                                 <tr>
                                     <td>Priority Role Access</td>
-                                    <td className="text-center"><i className="fa-solid fa-check text-success"></i></td>
-                                    <td className="text-center bg-primary/10"><i className="fa-solid fa-check text-success"></i></td>
-                                    <td className="text-center"><i className="fa-solid fa-check text-success"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
+                                    <td className="text-center bg-primary/10"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
                                 </tr>
                                 <tr>
                                     <td>Exclusive Early/Private Access</td>
-                                    <td className="text-center"><i className="fa-solid fa-x text-error text-sm"></i></td>
-                                    <td className="text-center bg-primary/10"><i className="fa-solid fa-x text-error text-sm"></i></td>
-                                    <td className="text-center"><i className="fa-solid fa-check text-success"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-x text-error text-sm"></i></td>
+                                    <td className="text-center bg-primary/10"><i className="fa-duotone fa-regular fa-x text-error text-sm"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
                                 </tr>
                                 <tr>
                                     <td>Unlimited Submissions</td>
-                                    <td className="text-center"><i className="fa-solid fa-check text-success"></i></td>
-                                    <td className="text-center bg-primary/10"><i className="fa-solid fa-check text-success"></i></td>
-                                    <td className="text-center"><i className="fa-solid fa-check text-success"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
+                                    <td className="text-center bg-primary/10"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
                                 </tr>
                                 <tr>
                                     <td>Full ATS Access</td>
-                                    <td className="text-center"><i className="fa-solid fa-check text-success"></i></td>
-                                    <td className="text-center bg-primary/10"><i className="fa-solid fa-check text-success"></i></td>
-                                    <td className="text-center"><i className="fa-solid fa-check text-success"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
+                                    <td className="text-center bg-primary/10"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
                                 </tr>
                                 <tr>
                                     <td>Performance Analytics</td>
-                                    <td className="text-center"><i className="fa-solid fa-x text-error text-sm"></i></td>
-                                    <td className="text-center bg-primary/10"><i className="fa-solid fa-check text-success"></i></td>
-                                    <td className="text-center"><i className="fa-solid fa-check text-success"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-x text-error text-sm"></i></td>
+                                    <td className="text-center bg-primary/10"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
                                 </tr>
                                 <tr>
                                     <td>API Access</td>
-                                    <td className="text-center"><i className="fa-solid fa-x text-error text-sm"></i></td>
-                                    <td className="text-center bg-primary/10"><i className="fa-solid fa-x text-error text-sm"></i></td>
-                                    <td className="text-center"><i className="fa-solid fa-check text-success"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-x text-error text-sm"></i></td>
+                                    <td className="text-center bg-primary/10"><i className="fa-duotone fa-regular fa-x text-error text-sm"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
                                 </tr>
                                 <tr>
                                     <td>Team Management</td>
-                                    <td className="text-center"><i className="fa-solid fa-x text-error text-sm"></i></td>
-                                    <td className="text-center bg-primary/10"><i className="fa-solid fa-x text-error text-sm"></i></td>
-                                    <td className="text-center"><i className="fa-solid fa-check text-success"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-x text-error text-sm"></i></td>
+                                    <td className="text-center bg-primary/10"><i className="fa-duotone fa-regular fa-x text-error text-sm"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
                                 </tr>
                                 <tr>
                                     <td>White-Label Options</td>
-                                    <td className="text-center"><i className="fa-solid fa-x text-error text-sm"></i></td>
-                                    <td className="text-center bg-primary/10"><i className="fa-solid fa-x text-error text-sm"></i></td>
-                                    <td className="text-center"><i className="fa-solid fa-check text-success"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-x text-error text-sm"></i></td>
+                                    <td className="text-center bg-primary/10"><i className="fa-duotone fa-regular fa-x text-error text-sm"></i></td>
+                                    <td className="text-center"><i className="fa-duotone fa-regular fa-check text-success"></i></td>
                                 </tr>
                                 <tr>
                                     <td>Support Level</td>
@@ -424,7 +424,7 @@ export default function PricingPage() {
                         Join Splits Network today and start maximizing your recruiting revenue with transparent, fair fee splits.
                     </p>
                     <Link href="/sign-up" className="btn btn-lg btn-neutral">
-                        <i className="fa-solid fa-user-tie"></i>
+                        <i className="fa-duotone fa-regular fa-user-tie"></i>
                         Start Your Free Trial
                     </Link>
                     <p className="mt-6 text-sm opacity-75">

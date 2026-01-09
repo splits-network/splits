@@ -51,34 +51,34 @@ export default function UpdatesPage() {
                                         </div>
                                         <div className="flex-grow">
                                             <h3 className="text-2xl font-bold mb-3">
-                                                <i className="fa-solid fa-rocket text-primary"></i> Platform Launch
+                                                <i className="fa-duotone fa-regular fa-rocket text-primary"></i> Platform Launch
                                             </h3>
                                             <p className="text-base-content/70 mb-4">
                                                 Splits Network Phase 1 is officially live! Core features include:
                                             </p>
                                             <ul className="grid md:grid-cols-2 gap-2 mb-4">
                                                 <li className="flex items-center gap-2">
-                                                    <i className="fa-solid fa-check text-success"></i>
+                                                    <i className="fa-duotone fa-regular fa-check text-success"></i>
                                                     <span className="text-sm">Full ATS with roles, candidates, stages</span>
                                                 </li>
                                                 <li className="flex items-center gap-2">
-                                                    <i className="fa-solid fa-check text-success"></i>
+                                                    <i className="fa-duotone fa-regular fa-check text-success"></i>
                                                     <span className="text-sm">Split placement tracking</span>
                                                 </li>
                                                 <li className="flex items-center gap-2">
-                                                    <i className="fa-solid fa-check text-success"></i>
+                                                    <i className="fa-duotone fa-regular fa-check text-success"></i>
                                                     <span className="text-sm">Recruiter network management</span>
                                                 </li>
                                                 <li className="flex items-center gap-2">
-                                                    <i className="fa-solid fa-check text-success"></i>
+                                                    <i className="fa-duotone fa-regular fa-check text-success"></i>
                                                     <span className="text-sm">Three-tier subscription model</span>
                                                 </li>
                                                 <li className="flex items-center gap-2">
-                                                    <i className="fa-solid fa-check text-success"></i>
+                                                    <i className="fa-duotone fa-regular fa-check text-success"></i>
                                                     <span className="text-sm">Email notifications</span>
                                                 </li>
                                                 <li className="flex items-center gap-2">
-                                                    <i className="fa-solid fa-check text-success"></i>
+                                                    <i className="fa-duotone fa-regular fa-check text-success"></i>
                                                     <span className="text-sm">Admin console</span>
                                                 </li>
                                             </ul>
@@ -99,22 +99,22 @@ export default function UpdatesPage() {
                                         </div>
                                         <div className="flex-grow">
                                             <h3 className="text-2xl font-bold mb-3">
-                                                <i className="fa-solid fa-flask text-secondary"></i> Beta Testing Phase
+                                                <i className="fa-duotone fa-regular fa-flask text-secondary"></i> Beta Testing Phase
                                             </h3>
                                             <p className="text-base-content/70 mb-4">
                                                 Selected recruiters and companies helped us refine the platform:
                                             </p>
                                             <ul className="space-y-2 text-sm">
                                                 <li className="flex items-start gap-2">
-                                                    <i className="fa-solid fa-arrow-right text-secondary mt-1"></i>
+                                                    <i className="fa-duotone fa-regular fa-arrow-right text-secondary mt-1"></i>
                                                     <span>10+ beta recruiters submitted 50+ candidates</span>
                                                 </li>
                                                 <li className="flex items-start gap-2">
-                                                    <i className="fa-solid fa-arrow-right text-secondary mt-1"></i>
+                                                    <i className="fa-duotone fa-regular fa-arrow-right text-secondary mt-1"></i>
                                                     <span>5 companies posted real roles</span>
                                                 </li>
                                                 <li className="flex items-start gap-2">
-                                                    <i className="fa-solid fa-arrow-right text-secondary mt-1"></i>
+                                                    <i className="fa-duotone fa-regular fa-arrow-right text-secondary mt-1"></i>
                                                     <span>Feedback incorporated into UX improvements</span>
                                                 </li>
                                             </ul>
@@ -132,7 +132,7 @@ export default function UpdatesPage() {
                                         </div>
                                         <div className="flex-grow">
                                             <h3 className="text-2xl font-bold mb-3">
-                                                <i className="fa-solid fa-hammer text-accent"></i> Alpha Development
+                                                <i className="fa-duotone fa-regular fa-hammer text-accent"></i> Alpha Development
                                             </h3>
                                             <p className="text-base-content/70">
                                                 Core architecture built and internal testing completed. Microservices deployed,
@@ -168,7 +168,7 @@ export default function UpdatesPage() {
                                 <div className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <h4 className="card-title">
-                                            <i className="fa-solid fa-money-bill-transfer text-success"></i>
+                                            <i className="fa-duotone fa-regular fa-money-bill-transfer text-success"></i>
                                             Payment Processing
                                         </h4>
                                         <p className="text-base-content/70 text-sm">
@@ -180,7 +180,7 @@ export default function UpdatesPage() {
                                 <div className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <h4 className="card-title">
-                                            <i className="fa-solid fa-plug text-info"></i>
+                                            <i className="fa-duotone fa-regular fa-plug text-info"></i>
                                             Integrations Marketplace
                                         </h4>
                                         <p className="text-base-content/70 text-sm">
@@ -192,7 +192,7 @@ export default function UpdatesPage() {
                                 <div className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <h4 className="card-title">
-                                            <i className="fa-solid fa-chart-line text-primary"></i>
+                                            <i className="fa-duotone fa-regular fa-chart-line text-primary"></i>
                                             Advanced Analytics
                                         </h4>
                                         <p className="text-base-content/70 text-sm">
@@ -204,7 +204,7 @@ export default function UpdatesPage() {
                                 <div className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <h4 className="card-title">
-                                            <i className="fa-solid fa-mobile-screen text-secondary"></i>
+                                            <i className="fa-duotone fa-regular fa-mobile-screen text-secondary"></i>
                                             Mobile Apps
                                         </h4>
                                         <p className="text-base-content/70 text-sm">
@@ -226,7 +226,7 @@ export default function UpdatesPage() {
                                 <div className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <h4 className="card-title">
-                                            <i className="fa-solid fa-brain text-accent"></i>
+                                            <i className="fa-duotone fa-regular fa-brain text-accent"></i>
                                             AI-Powered Matching
                                         </h4>
                                         <p className="text-base-content/70 text-sm">
@@ -238,7 +238,7 @@ export default function UpdatesPage() {
                                 <div className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <h4 className="card-title">
-                                            <i className="fa-solid fa-users-gear text-primary"></i>
+                                            <i className="fa-duotone fa-regular fa-users-gear text-primary"></i>
                                             Multi-Recruiter Splits
                                         </h4>
                                         <p className="text-base-content/70 text-sm">
@@ -250,7 +250,7 @@ export default function UpdatesPage() {
                                 <div className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <h4 className="card-title">
-                                            <i className="fa-solid fa-code text-secondary"></i>
+                                            <i className="fa-duotone fa-regular fa-code text-secondary"></i>
                                             Public API
                                         </h4>
                                         <p className="text-base-content/70 text-sm">
@@ -262,7 +262,7 @@ export default function UpdatesPage() {
                                 <div className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <h4 className="card-title">
-                                            <i className="fa-solid fa-tags text-success"></i>
+                                            <i className="fa-duotone fa-regular fa-tags text-success"></i>
                                             White-Label Options
                                         </h4>
                                         <p className="text-base-content/70 text-sm">
@@ -284,23 +284,23 @@ export default function UpdatesPage() {
                                 <div className="card-body">
                                     <ul className="space-y-3">
                                         <li className="flex items-start gap-2">
-                                            <i className="fa-solid fa-globe mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-globe mt-1"></i>
                                             <span>International expansion with multi-currency support</span>
                                         </li>
                                         <li className="flex items-start gap-2">
-                                            <i className="fa-solid fa-building-columns mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-building-columns mt-1"></i>
                                             <span>Enterprise features for large recruiting firms and staffing agencies</span>
                                         </li>
                                         <li className="flex items-start gap-2">
-                                            <i className="fa-solid fa-graduation-cap mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-graduation-cap mt-1"></i>
                                             <span>Training and certification programs for recruiters</span>
                                         </li>
                                         <li className="flex items-start gap-2">
-                                            <i className="fa-solid fa-trophy mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-trophy mt-1"></i>
                                             <span>Gamification and leaderboards to foster healthy competition</span>
                                         </li>
                                         <li className="flex items-start gap-2">
-                                            <i className="fa-solid fa-handshake mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-handshake mt-1"></i>
                                             <span>Marketplace for specialized recruiting services and consulting</span>
                                         </li>
                                     </ul>
@@ -317,7 +317,7 @@ export default function UpdatesPage() {
                     <div className="max-w-4xl mx-auto">
                         <div className="card bg-primary text-primary-content shadow">
                             <div className="card-body text-center p-12">
-                                <i className="fa-solid fa-lightbulb text-6xl mb-6 opacity-80"></i>
+                                <i className="fa-duotone fa-regular fa-lightbulb text-6xl mb-6 opacity-80"></i>
                                 <h2 className="text-3xl font-bold mb-4">Help Shape Our Roadmap</h2>
                                 <p className="text-lg opacity-90 mb-8">
                                     Your feedback drives our development priorities. Share what features matter
@@ -325,11 +325,11 @@ export default function UpdatesPage() {
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                     <a href="mailto:feedback@splits.network" className="btn btn-lg btn-neutral">
-                                        <i className="fa-solid fa-comment"></i>
+                                        <i className="fa-duotone fa-regular fa-comment"></i>
                                         Submit Feedback
                                     </a>
                                     <a href="mailto:help@splits.network" className="btn btn-lg btn-outline btn-neutral">
-                                        <i className="fa-solid fa-heart"></i>
+                                        <i className="fa-duotone fa-regular fa-heart"></i>
                                         Request a Feature
                                     </a>
                                 </div>
@@ -354,7 +354,7 @@ export default function UpdatesPage() {
                                 className="input input-bordered join-item flex-grow"
                             />
                             <button className="btn btn-primary join-item">
-                                <i className="fa-solid fa-envelope"></i>
+                                <i className="fa-duotone fa-regular fa-envelope"></i>
                                 Subscribe
                             </button>
                         </div>
@@ -372,7 +372,7 @@ export default function UpdatesPage() {
                         <div className="grid md:grid-cols-3 gap-6">
                             <Link href="/status" className="card bg-base-200 shadow hover:shadow transition-shadow">
                                 <div className="card-body text-center">
-                                    <i className="fa-solid fa-heartbeat text-4xl text-success mb-3"></i>
+                                    <i className="fa-duotone fa-regular fa-heartbeat text-4xl text-success mb-3"></i>
                                     <h3 className="card-title justify-center">System Status</h3>
                                     <p className="text-sm text-base-content/70">
                                         Check platform health and uptime
@@ -381,7 +381,7 @@ export default function UpdatesPage() {
                             </Link>
                             <a href="https://docs.splits.network" className="card bg-base-200 shadow hover:shadow transition-shadow">
                                 <div className="card-body text-center">
-                                    <i className="fa-solid fa-book text-4xl text-info mb-3"></i>
+                                    <i className="fa-duotone fa-regular fa-book text-4xl text-info mb-3"></i>
                                     <h3 className="card-title justify-center">Documentation</h3>
                                     <p className="text-sm text-base-content/70">
                                         Read detailed guides and API docs
@@ -410,7 +410,7 @@ export default function UpdatesPage() {
                         Be part of the platform that's redefining split-fee recruiting. Early users help shape the future.
                     </p>
                     <Link href="/sign-up" className="btn btn-lg btn-neutral">
-                        <i className="fa-solid fa-rocket"></i>
+                        <i className="fa-duotone fa-regular fa-rocket"></i>
                         Get Started Today
                     </Link>
                 </div>

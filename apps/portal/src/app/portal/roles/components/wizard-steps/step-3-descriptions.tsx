@@ -12,7 +12,7 @@ export default function Step3Descriptions({
     return (
         <div className="space-y-4">
             <div className="alert alert-info">
-                <i className="fa-solid fa-circle-info"></i>
+                <i className="fa-duotone fa-regular fa-circle-info"></i>
                 <div>
                     <p className="font-medium">Two descriptions for different audiences</p>
                     <p className="text-sm opacity-80">Recruiter-facing notes stay internal. Candidate-facing description is public.</p>

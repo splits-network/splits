@@ -80,7 +80,7 @@ export function UserDropdown() {
                             onClick={() => setIsOpen(false)}
                             className="flex items-center gap-3 px-4 py-2.5 hover:bg-base-200 transition-colors text-sm text-base-content"
                         >
-                            <i className="fa-solid fa-user w-4 text-base-content/60"></i>
+                            <i className="fa-duotone fa-regular fa-user w-4 text-base-content/60"></i>
                             Profile
                         </Link>
                         <Link
@@ -88,7 +88,7 @@ export function UserDropdown() {
                             onClick={() => setIsOpen(false)}
                             className="flex items-center gap-3 px-4 py-2.5 hover:bg-base-200 transition-colors text-sm text-base-content"
                         >
-                            <i className="fa-solid fa-credit-card w-4 text-base-content/60"></i>
+                            <i className="fa-duotone fa-regular fa-credit-card w-4 text-base-content/60"></i>
                             Billing
                         </Link>
                     </div>
@@ -98,7 +98,7 @@ export function UserDropdown() {
                             onClick={handleSignOut}
                             className="flex items-center gap-3 w-full px-4 py-2.5 hover:bg-error/10 transition-colors text-sm text-error"
                         >
-                            <i className="fa-solid fa-right-from-bracket w-4"></i>
+                            <i className="fa-duotone fa-regular fa-right-from-bracket w-4"></i>
                             Sign out
                         </button>
                     </div>

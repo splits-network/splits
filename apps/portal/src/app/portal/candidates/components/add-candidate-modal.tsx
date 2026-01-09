@@ -81,7 +81,7 @@ export default function AddCandidateModal({
                             onClick={handleClose}
                             disabled={submitting}
                         >
-                            <i className="fa-solid fa-times"></i>
+                            <i className="fa-duotone fa-regular fa-times"></i>
                         </button>
                     </div>
 
@@ -93,7 +93,7 @@ export default function AddCandidateModal({
                     {/* Error Alert */}
                     {error && (
                         <div className="alert alert-error mb-4">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <span>{error}</span>
                         </div>
                     )}
@@ -150,7 +150,7 @@ export default function AddCandidateModal({
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-paper-plane"></i>
+                                        <i className="fa-duotone fa-regular fa-paper-plane"></i>
                                         Send Invitation
                                     </>
                                 )}
@@ -160,7 +160,7 @@ export default function AddCandidateModal({
 
                     {/* Info */}
                     <div className="alert alert-info mt-4">
-                        <i className="fa-solid fa-handshake"></i>
+                        <i className="fa-duotone fa-regular fa-handshake"></i>
                         <div className="text-sm">
                             <p><strong>What happens next:</strong></p>
                             <p>The candidate will receive an invitation email to join Splits Network and accept your "right to represent" agreement. Once accepted, they can complete their profile and you can submit them to relevant job roles.</p>

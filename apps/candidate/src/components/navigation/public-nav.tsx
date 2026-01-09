@@ -6,7 +6,7 @@ export default function PublicNav() {
             <div className="container mx-auto">
                 <div className="flex-1">
                     <Link href="/" className="btn btn-ghost text-xl">
-                        <i className="fa-solid fa-briefcase"></i>
+                        <i className="fa-duotone fa-regular fa-briefcase"></i>
                         Applicant Network
                     </Link>
                 </div>

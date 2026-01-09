@@ -130,7 +130,7 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
         return (
             <>
                 <div className="text-center py-6 text-base-content/60">
-                    <i className="fa-solid fa-folder-open text-3xl mb-2"></i>
+                    <i className="fa-duotone fa-regular fa-folder-open text-3xl mb-2"></i>
                     <p className="text-sm">No documents uploaded</p>
                     {showUpload && (
                         <button
@@ -140,7 +140,7 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
                                 setShowUploadModal(true);
                             }}
                         >
-                            <i className="fa-solid fa-upload"></i>
+                            <i className="fa-duotone fa-regular fa-upload"></i>
                             Upload Document
                         </button>
                     )}
@@ -171,7 +171,7 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
                             setShowUploadModal(true);
                         }}
                     >
-                        <i className="fa-solid fa-plus"></i>
+                        <i className="fa-duotone fa-regular fa-plus"></i>
                         Add Document
                     </button>
                 )}
@@ -180,7 +180,7 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
                     return (
                         <div key={doc.id} className="flex items-center justify-between p-3 bg-base-200 rounded-lg hover:bg-base-300 transition-colors">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
-                                <i className={`fa-solid ${getFileIcon(doc.mime_type)} text-xl`}></i>
+                                <i className={`fa-duotone fa-regular ${getFileIcon(doc.mime_type)} text-xl`}></i>
                                 <div className="flex-1 min-w-0">
                                     <div className="font-medium truncate">{displayName}</div>
                                     <div className="text-xs text-base-content/60">
@@ -203,14 +203,14 @@ export default function DocumentList({ entityType, entityId, showUpload = false,
                                     {downloading === doc.id ? (
                                         <span className="loading loading-spinner loading-xs"></span>
                                     ) : (
-                                        <i className="fa-solid fa-download"></i>
+                                        <i className="fa-duotone fa-regular fa-download"></i>
                                     )}
                                 </button>
                                 <button
                                     className="btn btn-ghost btn-sm text-error hover:bg-error hover:text-error-content"
                                     onClick={() => handleDelete(doc.id)}
                                 >
-                                    <i className="fa-solid fa-trash"></i>
+                                    <i className="fa-duotone fa-regular fa-trash"></i>
                                 </button>
                             </div>
                         </div>

@@ -31,7 +31,7 @@ export function SubscriptionPlanStep() {
             <div className="card card-border p-8 text-center bg-base-200">
                 <div className="space-y-4">
                     <div className="w-20 h-20 rounded-full bg-warning/10 flex items-center justify-center mx-auto">
-                        <i className="fa-solid fa-construction text-4xl text-warning"></i>
+                        <i className="fa-duotone fa-regular fa-construction text-4xl text-warning"></i>
                     </div>
                     <div>
                         <h3 className="text-xl font-bold">Coming Soon!</h3>
@@ -45,7 +45,7 @@ export function SubscriptionPlanStep() {
 
             {/* Temporary Info */}
             <div className="alert alert-info">
-                <i className="fa-solid fa-circle-info"></i>
+                <i className="fa-duotone fa-regular fa-circle-info"></i>
                 <div className="flex-1">
                     <p className="font-semibold">Free Access During Setup</p>
                     <p className="text-sm">
@@ -56,7 +56,7 @@ export function SubscriptionPlanStep() {
 
             {state.error && (
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{state.error}</span>
                 </div>
             )}
@@ -69,7 +69,7 @@ export function SubscriptionPlanStep() {
                     className="btn"
                     disabled={state.submitting}
                 >
-                    <i className="fa-solid fa-arrow-left"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
                     Back
                 </button>
                 <button
@@ -79,7 +79,7 @@ export function SubscriptionPlanStep() {
                     disabled={state.submitting}
                 >
                     Continue
-                    <i className="fa-solid fa-arrow-right"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-right"></i>
                 </button>
             </div>
         </div>

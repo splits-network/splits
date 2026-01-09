@@ -46,7 +46,7 @@ export default function BackToDraftButton({ applicationId, jobTitle }: BackToDra
         <>
             {error && (
                 <div className="alert alert-error mb-4">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
@@ -57,13 +57,13 @@ export default function BackToDraftButton({ applicationId, jobTitle }: BackToDra
                     onClick={() => setShowConfirm(true)}
                     disabled={isMoving}
                 >
-                    <i className="fa-solid fa-pen-to-square"></i>
+                    <i className="fa-duotone fa-regular fa-pen-to-square"></i>
                     Move to Draft
                 </button>
             ) : (
                 <div className="space-y-2">
                     <div className="alert alert-info">
-                        <i className="fa-solid fa-info-circle"></i>
+                        <i className="fa-duotone fa-regular fa-info-circle"></i>
                         <div className="flex-1">
                             <div className="font-semibold">Move back to draft?</div>
                             <div className="text-sm">
@@ -84,7 +84,7 @@ export default function BackToDraftButton({ applicationId, jobTitle }: BackToDra
                                 </>
                             ) : (
                                 <>
-                                    <i className="fa-solid fa-check"></i>
+                                    <i className="fa-duotone fa-regular fa-check"></i>
                                     Yes, Move to Draft
                                 </>
                             )}
@@ -94,7 +94,7 @@ export default function BackToDraftButton({ applicationId, jobTitle }: BackToDra
                             onClick={() => setShowConfirm(false)}
                             disabled={isMoving}
                         >
-                            <i className="fa-solid fa-xmark"></i>
+                            <i className="fa-duotone fa-regular fa-xmark"></i>
                             Cancel
                         </button>
                     </div>

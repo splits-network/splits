@@ -162,10 +162,10 @@ export default function PersonalBrandingGuidePage() {
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto">
                         <Link href="/resources/career-guides" className="btn btn-ghost btn-sm mb-4">
-                            <i className="fa-solid fa-arrow-left"></i> Back to Career Guides
+                            <i className="fa-duotone fa-regular fa-arrow-left"></i> Back to Career Guides
                         </Link>
                         <div className="flex items-center gap-3 mb-4">
-                            <i className="fa-solid fa-badge-check text-4xl"></i>
+                            <i className="fa-duotone fa-regular fa-badge-check text-4xl"></i>
                             <div>
                                 <div className="badge badge-neutral mb-2">Personal Brand</div>
                                 <h1 className="text-4xl font-bold">Personal Branding Essentials</h1>
@@ -175,8 +175,8 @@ export default function PersonalBrandingGuidePage() {
                             Build and promote your professional brand to stand out and advance your career.
                         </p>
                         <div className="flex items-center gap-4 mt-4 text-sm opacity-80">
-                            <span><i className="fa-solid fa-clock"></i> 8 min read</span>
-                            <span><i className="fa-solid fa-user"></i> Brand Strategists</span>
+                            <span><i className="fa-duotone fa-regular fa-clock"></i> 8 min read</span>
+                            <span><i className="fa-duotone fa-regular fa-user"></i> Brand Strategists</span>
                         </div>
                     </div>
                 </div>
@@ -207,7 +207,7 @@ export default function PersonalBrandingGuidePage() {
                                     <div className="card-body">
                                         <div className="flex items-start gap-4 mb-6">
                                             <div className={`w-16 h-16 rounded-full bg-${pillar.color}/20 flex items-center justify-center flex-shrink-0`}>
-                                                <i className={`fa-solid fa-${pillar.icon} text-${pillar.color} text-2xl`}></i>
+                                                <i className={`fa-duotone fa-regular fa-${pillar.icon} text-${pillar.color} text-2xl`}></i>
                                             </div>
                                             <div>
                                                 <h3 className="text-2xl font-bold">{pillar.title}</h3>
@@ -219,13 +219,13 @@ export default function PersonalBrandingGuidePage() {
                                             {pillar.steps.map((step, stepIndex) => (
                                                 <div key={stepIndex} className="bg-base-200 p-4 rounded-lg">
                                                     <h4 className="font-bold mb-3 flex items-center gap-2">
-                                                        <i className="fa-solid fa-circle-check text-success"></i>
+                                                        <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
                                                         {step.title}
                                                     </h4>
                                                     <ul className="space-y-2">
                                                         {step.points.map((point, pointIndex) => (
                                                             <li key={pointIndex} className="flex items-start gap-2 text-sm">
-                                                                <i className="fa-solid fa-chevron-right text-base-content/40 mt-1"></i>
+                                                                <i className="fa-duotone fa-regular fa-chevron-right text-base-content/40 mt-1"></i>
                                                                 <span>{point}</span>
                                                             </li>
                                                         ))}
@@ -248,7 +248,7 @@ export default function PersonalBrandingGuidePage() {
                                 <div key={index} className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <div className="flex items-center gap-3 mb-3">
-                                            <i className={`fa-solid fa-${idea.icon} text-2xl text-primary`}></i>
+                                            <i className={`fa-duotone fa-regular fa-${idea.icon} text-2xl text-primary`}></i>
                                             <h3 className="card-title text-lg">{idea.type}</h3>
                                         </div>
                                         <p className="text-sm text-base-content/70 italic">"{idea.example}"</p>
@@ -262,7 +262,7 @@ export default function PersonalBrandingGuidePage() {
                     <div className="card bg-base-100 shadow mb-12">
                         <div className="card-body">
                             <h2 className="card-title text-2xl mb-6">
-                                <i className="fa-solid fa-quote-left text-primary"></i>
+                                <i className="fa-duotone fa-regular fa-quote-left text-primary"></i>
                                 Example Brand Statement
                             </h2>
 
@@ -279,7 +279,7 @@ export default function PersonalBrandingGuidePage() {
                             </div>
 
                             <div className="alert alert-info">
-                                <i className="fa-solid fa-lightbulb"></i>
+                                <i className="fa-duotone fa-regular fa-lightbulb"></i>
                                 <span>Notice how the "After" version is specific, value-focused, and memorable</span>
                             </div>
                         </div>
@@ -289,7 +289,7 @@ export default function PersonalBrandingGuidePage() {
                     <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow mb-12">
                         <div className="card-body">
                             <h3 className="card-title text-2xl mb-6">
-                                <i className="fa-solid fa-calendar-days"></i>
+                                <i className="fa-duotone fa-regular fa-calendar-days"></i>
                                 30-Day Personal Branding Plan
                             </h3>
 
@@ -339,7 +339,7 @@ export default function PersonalBrandingGuidePage() {
                         <div className="card bg-success/10 border border-success/30 shadow">
                             <div className="card-body">
                                 <h3 className="card-title text-success mb-4">
-                                    <i className="fa-solid fa-check-circle"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle"></i>
                                     Do This
                                 </h3>
                                 <ul className="space-y-2">
@@ -352,7 +352,7 @@ export default function PersonalBrandingGuidePage() {
                                         'Be patient—building takes time',
                                     ].map((item, index) => (
                                         <li key={index} className="flex items-start gap-2 text-sm">
-                                            <i className="fa-solid fa-check text-success mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                             <span>{item}</span>
                                         </li>
                                     ))}
@@ -363,7 +363,7 @@ export default function PersonalBrandingGuidePage() {
                         <div className="card bg-error/10 border border-error/30 shadow">
                             <div className="card-body">
                                 <h3 className="card-title text-error mb-4">
-                                    <i className="fa-solid fa-times-circle"></i>
+                                    <i className="fa-duotone fa-regular fa-times-circle"></i>
                                     Avoid This
                                 </h3>
                                 <ul className="space-y-2">
@@ -376,7 +376,7 @@ export default function PersonalBrandingGuidePage() {
                                         'Expecting overnight results',
                                     ].map((item, index) => (
                                         <li key={index} className="flex items-start gap-2 text-sm">
-                                            <i className="fa-solid fa-times text-error mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-times text-error mt-1"></i>
                                             <span>{item}</span>
                                         </li>
                                     ))}
@@ -391,15 +391,15 @@ export default function PersonalBrandingGuidePage() {
                             <h3 className="card-title text-xl mb-4">Continue Building Your Career</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <Link href="/resources/career-guides/networking" className="btn btn-outline">
-                                    <i className="fa-solid fa-users"></i>
+                                    <i className="fa-duotone fa-regular fa-users"></i>
                                     Networking Guide
                                 </Link>
                                 <Link href="/resources/success-stories" className="btn btn-outline">
-                                    <i className="fa-solid fa-star"></i>
+                                    <i className="fa-duotone fa-regular fa-star"></i>
                                     Success Stories
                                 </Link>
                                 <Link href="/public/jobs" className="btn btn-primary">
-                                    <i className="fa-solid fa-briefcase"></i>
+                                    <i className="fa-duotone fa-regular fa-briefcase"></i>
                                     Browse Jobs
                                 </Link>
                             </div>

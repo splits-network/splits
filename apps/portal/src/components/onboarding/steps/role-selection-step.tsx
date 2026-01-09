@@ -33,7 +33,7 @@ export function RoleSelectionStep() {
                 >
                     <div className="flex flex-col items-center text-center space-y-4">
                         <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                            <i className="fa-solid fa-user-tie text-3xl text-primary"></i>
+                            <i className="fa-duotone fa-regular fa-user-tie text-3xl text-primary"></i>
                         </div>
                         <div>
                             <h3 className="text-xl font-bold">Recruiter</h3>
@@ -52,7 +52,7 @@ export function RoleSelectionStep() {
                 >
                     <div className="flex flex-col items-center text-center space-y-4">
                         <div className="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center">
-                            <i className="fa-solid fa-building text-3xl text-secondary"></i>
+                            <i className="fa-duotone fa-regular fa-building text-3xl text-secondary"></i>
                         </div>
                         <div>
                             <h3 className="text-xl font-bold">Company Admin</h3>
@@ -66,7 +66,7 @@ export function RoleSelectionStep() {
 
             {state.error && (
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{state.error}</span>
                 </div>
             )}

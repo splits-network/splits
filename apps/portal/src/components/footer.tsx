@@ -174,7 +174,7 @@ export function Footer() {
             <div className="hidden">
                 <div className="fixed bottom-8 right-8 z-40">
                     <Link href="/sign-up" className="btn btn-primary btn-lg shadow">
-                        <i className="fa-solid fa-rocket"></i>
+                        <i className="fa-duotone fa-regular fa-rocket"></i>
                         Get Started Free
                     </Link>
                 </div>

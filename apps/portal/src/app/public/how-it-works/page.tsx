@@ -32,27 +32,27 @@ export default function HowItWorksPage() {
                     <div className="flex flex-col lg:flex-row items-center justify-center gap-8 max-w-6xl mx-auto">
                         <div className="card bg-primary text-primary-content shadow w-full lg:w-64">
                             <div className="card-body items-center text-center p-6">
-                                <i className="fa-solid fa-building text-5xl mb-3"></i>
+                                <i className="fa-duotone fa-regular fa-building text-5xl mb-3"></i>
                                 <h3 className="card-title text-lg">Company Posts Role</h3>
                                 <p className="text-sm opacity-90">Lists job with fee structure</p>
                             </div>
                         </div>
 
-                        <i className="fa-solid fa-arrow-right text-4xl text-primary rotate-90 lg:rotate-0"></i>
+                        <i className="fa-duotone fa-regular fa-arrow-right text-4xl text-primary rotate-90 lg:rotate-0"></i>
 
                         <div className="card bg-secondary text-secondary-content shadow w-full lg:w-64">
                             <div className="card-body items-center text-center p-6">
-                                <i className="fa-solid fa-user-tie text-5xl mb-3"></i>
+                                <i className="fa-duotone fa-regular fa-user-tie text-5xl mb-3"></i>
                                 <h3 className="card-title text-lg">Recruiter Submits</h3>
                                 <p className="text-sm opacity-90">Presents qualified candidate</p>
                             </div>
                         </div>
 
-                        <i className="fa-solid fa-arrow-right text-4xl text-secondary rotate-90 lg:rotate-0"></i>
+                        <i className="fa-duotone fa-regular fa-arrow-right text-4xl text-secondary rotate-90 lg:rotate-0"></i>
 
                         <div className="card bg-success text-success-content shadow w-full lg:w-64">
                             <div className="card-body items-center text-center p-6">
-                                <i className="fa-solid fa-handshake text-5xl mb-3"></i>
+                                <i className="fa-duotone fa-regular fa-handshake text-5xl mb-3"></i>
                                 <h3 className="card-title text-lg">Hire & Pay</h3>
                                 <p className="text-sm opacity-90">Everyone gets their split</p>
                             </div>
@@ -67,7 +67,7 @@ export default function HowItWorksPage() {
                     <div className="max-w-7xl mx-auto">
                         <div className="text-center mb-16">
                             <h2 className="text-4xl font-bold mb-4">
-                                <i className="fa-solid fa-user-tie text-primary"></i> For Recruiters
+                                <i className="fa-duotone fa-regular fa-user-tie text-primary"></i> For Recruiters
                             </h2>
                             <p className="text-lg text-base-content/70">
                                 Your journey from joining to earning
@@ -211,7 +211,7 @@ export default function HowItWorksPage() {
                     <div className="max-w-7xl mx-auto">
                         <div className="text-center mb-16">
                             <h2 className="text-4xl font-bold mb-4">
-                                <i className="fa-solid fa-building text-secondary"></i> For Companies
+                                <i className="fa-duotone fa-regular fa-building text-secondary"></i> For Companies
                             </h2>
                             <p className="text-lg text-base-content/70">
                                 From posting to hiring in five simple steps
@@ -387,19 +387,19 @@ export default function HowItWorksPage() {
 
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div className="text-center p-6 bg-success/10 rounded-lg border-2 border-success">
-                                        <i className="fa-solid fa-user-tie text-4xl text-success mb-3"></i>
+                                        <i className="fa-duotone fa-regular fa-user-tie text-4xl text-success mb-3"></i>
                                         <div className="text-3xl font-bold text-success mb-2">$18,000</div>
                                         <div className="text-sm">Recruiter Receives</div>
                                     </div>
                                     <div className="text-center p-6 bg-secondary/10 rounded-lg border-2 border-secondary">
-                                        <i className="fa-solid fa-handshake text-4xl text-secondary mb-3"></i>
+                                        <i className="fa-duotone fa-regular fa-handshake text-4xl text-secondary mb-3"></i>
                                         <div className="text-3xl font-bold text-secondary mb-2">$6,000</div>
                                         <div className="text-sm">Platform Share</div>
                                     </div>
                                 </div>
 
                                 <div className="alert alert-info mt-6">
-                                    <i className="fa-solid fa-info-circle"></i>
+                                    <i className="fa-duotone fa-regular fa-info-circle"></i>
                                     <span className="text-sm">
                                         Platform share covers infrastructure, support, payment processing, and continued development.
                                         Your percentage increases with higher subscription tiers.
@@ -420,11 +420,11 @@ export default function HowItWorksPage() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link href="/sign-up" className="btn btn-lg btn-neutral">
-                            <i className="fa-solid fa-user-tie"></i>
+                            <i className="fa-duotone fa-regular fa-user-tie"></i>
                             I'm a Recruiter
                         </Link>
                         <Link href="/sign-up" className="btn btn-lg btn-secondary">
-                            <i className="fa-solid fa-building"></i>
+                            <i className="fa-duotone fa-regular fa-building"></i>
                             I'm a Company
                         </Link>
                     </div>

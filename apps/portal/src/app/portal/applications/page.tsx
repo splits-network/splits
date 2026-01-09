@@ -13,11 +13,11 @@ export default function ApplicationsPage() {
                 </div>
                 <div className="flex flex-wrap gap-3">
                     <Link href="/portal/applications/pending" className="btn btn-ghost gap-2">
-                        <i className="fa-solid fa-inbox"></i>
+                        <i className="fa-duotone fa-regular fa-inbox"></i>
                         Pending Reviews
                     </Link>
                     <Link href="/portal/roles" className="btn btn-primary gap-2">
-                        <i className="fa-solid fa-user-plus"></i>
+                        <i className="fa-duotone fa-regular fa-user-plus"></i>
                         Submit Candidate
                     </Link>
                 </div>

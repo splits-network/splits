@@ -28,7 +28,7 @@ export default function JobsStats({ stats, loading }: JobsStatsProps) {
             <div className="stats bg-base-100 shadow">
                 <div className="stat">
                     <div className="stat-figure text-primary">
-                        <i className="fa-solid fa-briefcase text-3xl"></i>
+                        <i className="fa-duotone fa-regular fa-briefcase text-3xl"></i>
                     </div>
                     <div className="stat-title">Open Roles</div>
                     <div className="stat-value">{stats.totalJobs}</div>
@@ -38,7 +38,7 @@ export default function JobsStats({ stats, loading }: JobsStatsProps) {
             <div className="stats bg-base-100 shadow">
                 <div className="stat">
                     <div className="stat-figure text-info">
-                        <i className="fa-solid fa-house-laptop text-3xl"></i>
+                        <i className="fa-duotone fa-regular fa-house-laptop text-3xl"></i>
                     </div>
                     <div className="stat-title">Remote Friendly</div>
                     <div className="stat-value">{stats.remoteFriendly}</div>
@@ -48,7 +48,7 @@ export default function JobsStats({ stats, loading }: JobsStatsProps) {
             <div className="stats bg-base-100 shadow">
                 <div className="stat">
                     <div className="stat-figure text-success">
-                        <i className="fa-solid fa-calendar-plus text-3xl"></i>
+                        <i className="fa-duotone fa-regular fa-calendar-plus text-3xl"></i>
                     </div>
                     <div className="stat-title">New This Week</div>
                     <div className="stat-value text-success">{stats.newThisWeek}</div>
@@ -58,7 +58,7 @@ export default function JobsStats({ stats, loading }: JobsStatsProps) {
             <div className="stats bg-base-100 shadow">
                 <div className="stat">
                     <div className="stat-figure text-secondary">
-                        <i className="fa-solid fa-dollar-sign text-3xl"></i>
+                        <i className="fa-duotone fa-regular fa-dollar-sign text-3xl"></i>
                     </div>
                     <div className="stat-title">Avg. Salary</div>
                     <div className="stat-value text-secondary">

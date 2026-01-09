@@ -76,7 +76,7 @@ export default function SuccessStoriesPage() {
                 <div className="container mx-auto px-4">
                     <div className="max-w-3xl">
                         <div className="flex items-center gap-2 mb-4">
-                            <i className="fa-solid fa-star text-3xl"></i>
+                            <i className="fa-duotone fa-regular fa-star text-3xl"></i>
                             <h1 className="text-4xl font-bold">Success Stories</h1>
                         </div>
                         <p className="text-xl opacity-90">
@@ -92,7 +92,7 @@ export default function SuccessStoriesPage() {
                     {stats.map((stat, index) => (
                         <div key={index} className="card bg-base-100 shadow">
                             <div className="card-body text-center">
-                                <i className={`fa-solid fa-${stat.icon} text-4xl text-primary mb-2`}></i>
+                                <i className={`fa-duotone fa-regular fa-${stat.icon} text-4xl text-primary mb-2`}></i>
                                 <div className="text-3xl font-bold text-primary">{stat.number}</div>
                                 <div className="text-sm text-base-content/60">{stat.label}</div>
                             </div>
@@ -115,9 +115,9 @@ export default function SuccessStoriesPage() {
                                 </div>
 
                                 <div className="bg-base-200 p-4 rounded-lg mb-4">
-                                    <i className="fa-solid fa-quote-left text-primary opacity-50"></i>
+                                    <i className="fa-duotone fa-regular fa-quote-left text-primary opacity-50"></i>
                                     <p className="italic my-2">{story.quote}</p>
-                                    <i className="fa-solid fa-quote-right text-primary opacity-50 float-right"></i>
+                                    <i className="fa-duotone fa-regular fa-quote-right text-primary opacity-50 float-right"></i>
                                 </div>
 
                                 <p className="text-sm text-base-content/70 mb-4">
@@ -126,11 +126,11 @@ export default function SuccessStoriesPage() {
 
                                 <div className="flex gap-4 pt-4 border-t border-base-300">
                                     <div className="badge badge-success badge-lg">
-                                        <i className="fa-solid fa-dollar-sign mr-1"></i>
+                                        <i className="fa-duotone fa-regular fa-dollar-sign mr-1"></i>
                                         {story.salary}
                                     </div>
                                     <div className="badge badge-info badge-lg">
-                                        <i className="fa-solid fa-clock mr-1"></i>
+                                        <i className="fa-duotone fa-regular fa-clock mr-1"></i>
                                         {story.timeline}
                                     </div>
                                 </div>
@@ -151,7 +151,7 @@ export default function SuccessStoriesPage() {
                             </p>
                             <div className="flex gap-2 justify-center">
                                 <a href="/public/jobs" className="btn btn-neutral">
-                                    Start Your Search <i className="fa-solid fa-arrow-right"></i>
+                                    Start Your Search <i className="fa-duotone fa-regular fa-arrow-right"></i>
                                 </a>
                                 <a href="/sign-up" className="btn btn-outline btn-neutral">
                                     Create Account

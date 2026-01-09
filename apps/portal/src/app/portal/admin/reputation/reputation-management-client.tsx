@@ -158,14 +158,14 @@ export default function ReputationManagementClient() {
                     </p>
                 </div>
                 <button onClick={loadRecruitersWithReputation} className="btn btn-outline">
-                    <i className="fa-solid fa-rotate"></i>
+                    <i className="fa-duotone fa-regular fa-rotate"></i>
                     Refresh All
                 </button>
             </div>
 
             {error && (
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
@@ -280,10 +280,10 @@ export default function ReputationManagementClient() {
                                                         className="btn btn-xs btn-ghost"
                                                         title="Recalculate reputation"
                                                     >
-                                                        <i className="fa-solid fa-rotate"></i>
+                                                        <i className="fa-duotone fa-regular fa-rotate"></i>
                                                     </button>
                                                     <button className="btn btn-xs btn-ghost" title="View details">
-                                                        <i className="fa-solid fa-eye"></i>
+                                                        <i className="fa-duotone fa-regular fa-eye"></i>
                                                     </button>
                                                 </div>
                                             </td>

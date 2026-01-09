@@ -57,7 +57,7 @@ export default function RoleDetailPage() {
         <>
             <div className='flex'>
                 <Link href="/portal/roles" className="btn btn-ghost btn-sm gap-2">
-                    <i className="fa-solid fa-arrow-left"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
                     Back to Roles
                 </Link>
             </div>
@@ -72,7 +72,7 @@ export default function RoleDetailPage() {
                         (job?.job_requirements?.filter(r => r.requirement_type === 'preferred').length && (
                             <div>
                                 <h3 className="font-semibold text-lg mb-3">
-                                    <i className="fa-solid fa-star mr-2 text-warning"></i>
+                                    <i className="fa-duotone fa-regular fa-star mr-2 text-warning"></i>
                                     Preferred Requirements
                                 </h3>
                                 <ul className="list-disc list-inside space-y-2">
@@ -87,7 +87,7 @@ export default function RoleDetailPage() {
                             (job?.job_requirements?.filter(r => r.requirement_type === 'required').length && (
                                 <div>
                                     <h3 className="font-semibold text-lg mb-3">
-                                        <i className="fa-solid fa-check-circle mr-2 text-success"></i>
+                                        <i className="fa-duotone fa-regular fa-check-circle mr-2 text-success"></i>
                                         Required Requirements
                                     </h3>
                                     <ul className="list-disc list-inside space-y-2">

@@ -140,7 +140,7 @@ export default function CookieConsent() {
                 <div className="flex flex-col md:flex-row gap-4 items-center">
                     <div className="flex-1">
                         <div className="flex items-start gap-3 mb-2">
-                            <i className="fa-solid fa-cookie-bite text-3xl text-primary shrink-0 mt-1"></i>
+                            <i className="fa-duotone fa-regular fa-cookie-bite text-3xl text-primary shrink-0 mt-1"></i>
                             <div>
                                 <h3 className="font-bold text-lg mb-1">We Value Your Privacy</h3>
                                 <p className="text-sm text-base-content/80">
@@ -157,7 +157,7 @@ export default function CookieConsent() {
                             onClick={() => setShowPreferences(true)}
                             className="btn btn-ghost btn-sm"
                         >
-                            <i className="fa-solid fa-sliders mr-2"></i>
+                            <i className="fa-duotone fa-regular fa-sliders mr-2"></i>
                             Preferences
                         </button>
                         <button
@@ -170,7 +170,7 @@ export default function CookieConsent() {
                             onClick={handleAcceptAll}
                             className="btn btn-primary btn-sm"
                         >
-                            <i className="fa-solid fa-check mr-2"></i>
+                            <i className="fa-duotone fa-regular fa-check mr-2"></i>
                             Accept All
                         </button>
                     </div>
@@ -197,11 +197,11 @@ function CookiePreferences({ onSave, onClose }: { onSave: (prefs: any) => void; 
                 <div className="card-body">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="card-title text-2xl">
-                            <i className="fa-solid fa-cookie-bite text-primary"></i>
+                            <i className="fa-duotone fa-regular fa-cookie-bite text-primary"></i>
                             Cookie Preferences
                         </h2>
                         <button onClick={onClose} className="btn btn-ghost btn-sm btn-circle">
-                            <i className="fa-solid fa-xmark text-xl"></i>
+                            <i className="fa-duotone fa-regular fa-xmark text-xl"></i>
                         </button>
                     </div>
 
@@ -216,7 +216,7 @@ function CookiePreferences({ onSave, onClose }: { onSave: (prefs: any) => void; 
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <i className="fa-solid fa-lock text-primary"></i>
+                                            <i className="fa-duotone fa-regular fa-lock text-primary"></i>
                                             <h3 className="font-semibold">Strictly Necessary Cookies</h3>
                                         </div>
                                         <p className="text-sm text-base-content/70">
@@ -234,7 +234,7 @@ function CookiePreferences({ onSave, onClose }: { onSave: (prefs: any) => void; 
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <i className="fa-solid fa-sliders text-secondary"></i>
+                                            <i className="fa-duotone fa-regular fa-sliders text-secondary"></i>
                                             <h3 className="font-semibold">Functionality Cookies</h3>
                                         </div>
                                         <p className="text-sm text-base-content/70">
@@ -257,7 +257,7 @@ function CookiePreferences({ onSave, onClose }: { onSave: (prefs: any) => void; 
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <i className="fa-solid fa-chart-line text-accent"></i>
+                                            <i className="fa-duotone fa-regular fa-chart-line text-accent"></i>
                                             <h3 className="font-semibold">Analytics Cookies</h3>
                                         </div>
                                         <p className="text-sm text-base-content/70">
@@ -280,7 +280,7 @@ function CookiePreferences({ onSave, onClose }: { onSave: (prefs: any) => void; 
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <i className="fa-solid fa-bullseye text-info"></i>
+                                            <i className="fa-duotone fa-regular fa-bullseye text-info"></i>
                                             <h3 className="font-semibold">Marketing Cookies</h3>
                                         </div>
                                         <p className="text-sm text-base-content/70">
@@ -303,7 +303,7 @@ function CookiePreferences({ onSave, onClose }: { onSave: (prefs: any) => void; 
                             Cancel
                         </button>
                         <button onClick={handleSave} className="btn btn-primary">
-                            <i className="fa-solid fa-check mr-2"></i>
+                            <i className="fa-duotone fa-regular fa-check mr-2"></i>
                             Save Preferences
                         </button>
                     </div>

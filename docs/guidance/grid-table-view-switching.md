@@ -56,14 +56,14 @@ Place the view toggle buttons in the filters/controls section using DaisyUI's `j
         onClick={() => setViewMode('grid')}
         title="Grid View"
     >
-        <i className="fa-solid fa-grip"></i>
+        <i className="fa-duotone fa-regular fa-grip"></i>
     </button>
     <button 
         className={`btn join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
         onClick={() => setViewMode('table')}
         title="Table View"
     >
-        <i className="fa-solid fa-table"></i>
+        <i className="fa-duotone fa-regular fa-table"></i>
     </button>
 </div>
 ```
@@ -255,14 +255,14 @@ The view toggle should be placed alongside other filters in a consistent layout:
                     onClick={() => setViewMode('grid')}
                     title="Grid View"
                 >
-                    <i className="fa-solid fa-grip"></i>
+                    <i className="fa-duotone fa-regular fa-grip"></i>
                 </button>
                 <button 
                     className={`btn join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
                     onClick={() => setViewMode('table')}
                     title="Table View"
                 >
-                    <i className="fa-solid fa-table"></i>
+                    <i className="fa-duotone fa-regular fa-table"></i>
                 </button>
             </div>
         </div>
@@ -287,7 +287,7 @@ Both grid and table views should share the same empty state:
 {filteredItems.length === 0 && (
     <div className="card bg-base-100 shadow">
         <div className="card-body text-center py-12">
-            <i className="fa-solid fa-icon-name text-6xl text-base-content/20"></i>
+            <i className="fa-duotone fa-regular fa-icon-name text-6xl text-base-content/20"></i>
             <h3 className="text-xl font-semibold mt-4">No Items Found</h3>
             <p className="text-base-content/70 mt-2">
                 {searchQuery ? 'Try adjusting your search' : 'No items have been created yet'}

@@ -77,7 +77,7 @@ export function RecruiterCard({ relationship, showActions = true }: RecruiterCar
                 {/* Relationship dates */}
                 <div className="text-sm text-base-content/70 mt-2">
                     <div className="flex items-center gap-2">
-                        <i className="fa-solid fa-calendar"></i>
+                        <i className="fa-duotone fa-regular fa-calendar"></i>
                         <span>
                             {formatDate(relationship.relationship_start_date)} - {formatDate(relationship.relationship_end_date)}
                         </span>
@@ -87,7 +87,7 @@ export function RecruiterCard({ relationship, showActions = true }: RecruiterCar
                 {/* Expiry warning */}
                 {showExpiryWarning && (
                     <div className="alert alert-warning mt-3">
-                        <i className="fa-solid fa-triangle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
                         <span>Expiring in {relationship.days_until_expiry} days</span>
                     </div>
                 )}
@@ -104,7 +104,7 @@ export function RecruiterCard({ relationship, showActions = true }: RecruiterCar
                 {/* Consent status */}
                 {relationship.status === 'active' && !relationship.consent_given && (
                     <div className="alert alert-info mt-3">
-                        <i className="fa-solid fa-info-circle"></i>
+                        <i className="fa-duotone fa-regular fa-info-circle"></i>
                         <span className="text-sm">
                             Pending consent confirmation
                         </span>
@@ -118,12 +118,12 @@ export function RecruiterCard({ relationship, showActions = true }: RecruiterCar
                             href={`mailto:${relationship.recruiter_email}`}
                             className="btn btn-sm btn-ghost"
                         >
-                            <i className="fa-solid fa-envelope"></i>
+                            <i className="fa-duotone fa-regular fa-envelope"></i>
                             Contact
                         </a>
                         {showExpiryWarning && (
                             <button className="btn btn-sm btn-primary">
-                                <i className="fa-solid fa-rotate"></i>
+                                <i className="fa-duotone fa-regular fa-rotate"></i>
                                 Request Renewal
                             </button>
                         )}

@@ -25,7 +25,7 @@ export default function PartnersPage() {
                         <p className="text-lg text-base-content/70 max-w-3xl mx-auto">
                             We're building more than a platform—we're creating an ecosystem. Whether you're a
                             recruiting firm, technology provider, or industry association, there's a place for you
-                            in our partner 
+                            in our partner
                         </p>
                     </div>
 
@@ -33,7 +33,7 @@ export default function PartnersPage() {
                         <div className="card bg-base-200 shadow">
                             <div className="card-body text-center">
                                 <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
-                                    <i className="fa-solid fa-users text-primary text-2xl"></i>
+                                    <i className="fa-duotone fa-regular fa-users text-primary text-2xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-xl mb-3">Recruiting Firms</h3>
                                 <p className="text-base-content/70 text-sm">
@@ -45,7 +45,7 @@ export default function PartnersPage() {
                         <div className="card bg-base-200 shadow">
                             <div className="card-body text-center">
                                 <div className="w-16 h-16 rounded-full bg-secondary/20 flex items-center justify-center mx-auto mb-4">
-                                    <i className="fa-solid fa-plug text-secondary text-2xl"></i>
+                                    <i className="fa-duotone fa-regular fa-plug text-secondary text-2xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-xl mb-3">Technology Partners</h3>
                                 <p className="text-base-content/70 text-sm">
@@ -57,7 +57,7 @@ export default function PartnersPage() {
                         <div className="card bg-base-200 shadow">
                             <div className="card-body text-center">
                                 <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-4">
-                                    <i className="fa-solid fa-handshake text-accent text-2xl"></i>
+                                    <i className="fa-duotone fa-regular fa-handshake text-accent text-2xl"></i>
                                 </div>
                                 <h3 className="card-title justify-center text-xl mb-3">Associations</h3>
                                 <p className="text-base-content/70 text-sm">
@@ -79,20 +79,20 @@ export default function PartnersPage() {
                             <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
-                                        <i className="fa-solid fa-dollar-sign text-success"></i>
+                                        <i className="fa-duotone fa-regular fa-dollar-sign text-success"></i>
                                         Revenue Opportunities
                                     </h3>
                                     <ul className="space-y-2 mt-4">
                                         <li className="flex items-start gap-2">
-                                            <i className="fa-solid fa-check text-success mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                             <span>Revenue sharing on referrals</span>
                                         </li>
                                         <li className="flex items-start gap-2">
-                                            <i className="fa-solid fa-check text-success mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                             <span>White-label licensing opportunities</span>
                                         </li>
                                         <li className="flex items-start gap-2">
-                                            <i className="fa-solid fa-check text-success mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                             <span>Co-marketing initiatives</span>
                                         </li>
                                     </ul>
@@ -102,20 +102,20 @@ export default function PartnersPage() {
                             <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
-                                        <i className="fa-solid fa-code text-info"></i>
+                                        <i className="fa-duotone fa-regular fa-code text-info"></i>
                                         Technical Support
                                     </h3>
                                     <ul className="space-y-2 mt-4">
                                         <li className="flex items-start gap-2">
-                                            <i className="fa-solid fa-check text-success mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                             <span>Priority API access and support</span>
                                         </li>
                                         <li className="flex items-start gap-2">
-                                            <i className="fa-solid fa-check text-success mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                             <span>Dedicated integration assistance</span>
                                         </li>
                                         <li className="flex items-start gap-2">
-                                            <i className="fa-solid fa-check text-success mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                             <span>Custom development opportunities</span>
                                         </li>
                                     </ul>
@@ -125,20 +125,20 @@ export default function PartnersPage() {
                             <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
-                                        <i className="fa-solid fa-bullhorn text-primary"></i>
+                                        <i className="fa-duotone fa-regular fa-bullhorn text-primary"></i>
                                         Marketing & Visibility
                                     </h3>
                                     <ul className="space-y-2 mt-4">
                                         <li className="flex items-start gap-2">
-                                            <i className="fa-solid fa-check text-success mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                             <span>Featured in partner directory</span>
                                         </li>
                                         <li className="flex items-start gap-2">
-                                            <i className="fa-solid fa-check text-success mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                             <span>Co-branded content opportunities</span>
                                         </li>
                                         <li className="flex items-start gap-2">
-                                            <i className="fa-solid fa-check text-success mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                             <span>Joint webinars and events</span>
                                         </li>
                                     </ul>
@@ -148,20 +148,20 @@ export default function PartnersPage() {
                             <div className="card bg-base-100 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
-                                        <i className="fa-solid fa-graduation-cap text-secondary"></i>
+                                        <i className="fa-duotone fa-regular fa-graduation-cap text-secondary"></i>
                                         Training & Resources
                                     </h3>
                                     <ul className="space-y-2 mt-4">
                                         <li className="flex items-start gap-2">
-                                            <i className="fa-solid fa-check text-success mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                             <span>Partner onboarding program</span>
                                         </li>
                                         <li className="flex items-start gap-2">
-                                            <i className="fa-solid fa-check text-success mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                             <span>Sales and marketing materials</span>
                                         </li>
                                         <li className="flex items-start gap-2">
-                                            <i className="fa-solid fa-check text-success mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                             <span>Ongoing education and updates</span>
                                         </li>
                                     </ul>
@@ -183,12 +183,12 @@ export default function PartnersPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-2xl mb-4">
-                                        <i className="fa-solid fa-building text-primary"></i>
+                                        <i className="fa-duotone fa-regular fa-building text-primary"></i>
                                         Recruiting Firm Partners
                                     </h3>
                                     <p className="text-base-content/70 mb-4">
                                         Perfect for established recruiting firms who want to offer split placement
-                                        capabilities to their recruiters while maintaining their brand 
+                                        capabilities to their recruiters while maintaining their brand
                                     </p>
                                     <div className="grid md:grid-cols-3 gap-4">
                                         <div className="bg-base-100 p-4 rounded-lg">
@@ -217,7 +217,7 @@ export default function PartnersPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-2xl mb-4">
-                                        <i className="fa-solid fa-laptop-code text-secondary"></i>
+                                        <i className="fa-duotone fa-regular fa-laptop-code text-secondary"></i>
                                         Technology Integration Partners
                                     </h3>
                                     <p className="text-base-content/70 mb-4">
@@ -251,7 +251,7 @@ export default function PartnersPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title text-2xl mb-4">
-                                        <i className="fa-solid fa-users-gear text-accent"></i>
+                                        <i className="fa-duotone fa-regular fa-users-gear text-accent"></i>
                                         Industry Association Partners
                                     </h3>
                                     <p className="text-base-content/70 mb-4">
@@ -294,7 +294,7 @@ export default function PartnersPage() {
                             Growing our ecosystem with industry-leading organizations
                         </p>
                         <div className="alert alert-info">
-                            <i className="fa-solid fa-info-circle"></i>
+                            <i className="fa-duotone fa-regular fa-info-circle"></i>
                             <span>
                                 We're actively building our partner  Be among our founding partners and help
                                 shape the future of collaborative recruiting.
@@ -384,7 +384,7 @@ export default function PartnersPage() {
                         Join our partner ecosystem and help shape the future of collaborative recruiting.
                     </p>
                     <a href="mailto:partnerships@splits.network" className="btn btn-lg btn-neutral">
-                        <i className="fa-solid fa-envelope"></i>
+                        <i className="fa-duotone fa-regular fa-envelope"></i>
                         Contact Partnerships Team
                     </a>
                     <p className="mt-6 text-sm opacity-75">

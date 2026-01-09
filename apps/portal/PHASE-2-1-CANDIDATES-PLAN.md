@@ -182,7 +182,7 @@ export default function CandidateHeader({ onCreateClick }: CandidateHeaderProps)
                     className="btn btn-primary gap-2"
                     onClick={onCreateClick}
                 >
-                    <i className="fa-solid fa-plus"></i>
+                    <i className="fa-duotone fa-regular fa-plus"></i>
                     New Candidate
                 </button>
             )}

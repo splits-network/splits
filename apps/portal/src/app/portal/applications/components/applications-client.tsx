@@ -385,7 +385,7 @@ export default function ApplicationsClient() {
                 {selectedItems.size > 0 && isRecruiter && (
                     <div className="alert shadow">
                         <div className="flex-1">
-                            <i className="fa-solid fa-check-square text-xl"></i>
+                            <i className="fa-duotone fa-regular fa-check-square text-xl"></i>
                             <div>
                                 <h3 className="font-bold">{selectedItems.size} application{selectedItems.size !== 1 ? 's' : ''} selected</h3>
                                 <div className="text-xs">Choose an action to apply to all selected applications</div>
@@ -397,7 +397,7 @@ export default function ApplicationsClient() {
                                     onClick={() => handleBulkAction('stage')}
                                     className="btn btn-sm btn-primary gap-2"
                                 >
-                                    <i className="fa-solid fa-list-check"></i>
+                                    <i className="fa-duotone fa-regular fa-list-check"></i>
                                     Update Stage
                                 </button>
                             )}
@@ -405,7 +405,7 @@ export default function ApplicationsClient() {
                                 onClick={() => handleBulkAction('reject')}
                                 className="btn btn-sm btn-error gap-2"
                             >
-                                <i className="fa-solid fa-ban"></i>
+                                <i className="fa-duotone fa-regular fa-ban"></i>
                                 Reject
                             </button>
                             <button
@@ -482,7 +482,7 @@ export default function ApplicationsClient() {
                 {applications.length === 0 && !loading && (
                     <div className="card bg-base-100 shadow">
                         <div className="card-body text-center py-12">
-                            <i className="fa-solid fa-briefcase text-6xl text-base-content/20"></i>
+                            <i className="fa-duotone fa-regular fa-briefcase text-6xl text-base-content/20"></i>
                             <h3 className="text-xl font-semibold mt-4">No Applications Found</h3>
                             <p className="text-base-content/70 mt-2">
                                 {searchQuery || filters.stage

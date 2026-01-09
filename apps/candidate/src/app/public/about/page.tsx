@@ -41,7 +41,7 @@ export default function AboutPage() {
                         <div className="card-body">
                             <div className="flex items-center gap-4 mb-4">
                                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                                    <i className="fa-solid fa-bullseye text-3xl text-primary"></i>
+                                    <i className="fa-duotone fa-regular fa-bullseye text-3xl text-primary"></i>
                                 </div>
                                 <h3 className="text-2xl font-bold">Our Vision</h3>
                             </div>
@@ -60,7 +60,7 @@ export default function AboutPage() {
                     <div className="card bg-base-100 shadow">
                         <div className="card-body items-center text-center">
                             <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                                <i className="fa-solid fa-handshake text-4xl text-primary"></i>
+                                <i className="fa-duotone fa-regular fa-handshake text-4xl text-primary"></i>
                             </div>
                             <h3 className="card-title">Transparency</h3>
                             <p className="text-base-content/80">
@@ -71,7 +71,7 @@ export default function AboutPage() {
                     <div className="card bg-base-100 shadow">
                         <div className="card-body items-center text-center">
                             <div className="w-20 h-20 rounded-full bg-secondary/10 flex items-center justify-center mb-4">
-                                <i className="fa-solid fa-users text-4xl text-secondary"></i>
+                                <i className="fa-duotone fa-regular fa-users text-4xl text-secondary"></i>
                             </div>
                             <h3 className="card-title">Candidate-First</h3>
                             <p className="text-base-content/80">
@@ -82,7 +82,7 @@ export default function AboutPage() {
                     <div className="card bg-base-100 shadow">
                         <div className="card-body items-center text-center">
                             <div className="w-20 h-20 rounded-full bg-accent/10 flex items-center justify-center mb-4">
-                                <i className="fa-solid fa-lightbulb text-4xl text-accent"></i>
+                                <i className="fa-duotone fa-regular fa-lightbulb text-4xl text-accent"></i>
                             </div>
                             <h3 className="card-title">Innovation</h3>
                             <p className="text-base-content/80">
@@ -101,7 +101,7 @@ export default function AboutPage() {
                         <div className="flex gap-4">
                             <div className="flex-shrink-0">
                                 <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center">
-                                    <i className="fa-solid fa-check text-xl text-success"></i>
+                                    <i className="fa-duotone fa-regular fa-check text-xl text-success"></i>
                                 </div>
                             </div>
                             <div>
@@ -114,7 +114,7 @@ export default function AboutPage() {
                         <div className="flex gap-4">
                             <div className="flex-shrink-0">
                                 <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center">
-                                    <i className="fa-solid fa-check text-xl text-success"></i>
+                                    <i className="fa-duotone fa-regular fa-check text-xl text-success"></i>
                                 </div>
                             </div>
                             <div>
@@ -127,7 +127,7 @@ export default function AboutPage() {
                         <div className="flex gap-4">
                             <div className="flex-shrink-0">
                                 <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center">
-                                    <i className="fa-solid fa-check text-xl text-success"></i>
+                                    <i className="fa-duotone fa-regular fa-check text-xl text-success"></i>
                                 </div>
                             </div>
                             <div>
@@ -140,7 +140,7 @@ export default function AboutPage() {
                         <div className="flex gap-4">
                             <div className="flex-shrink-0">
                                 <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center">
-                                    <i className="fa-solid fa-check text-xl text-success"></i>
+                                    <i className="fa-duotone fa-regular fa-check text-xl text-success"></i>
                                 </div>
                             </div>
                             <div>
@@ -163,7 +163,7 @@ export default function AboutPage() {
                 {/* This can be expanded with actual team members */}
                 <div className="text-center">
                     <Link href="/contact" className="btn btn-primary btn-lg">
-                        <i className="fa-solid fa-envelope mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-envelope mr-2"></i>
                         Get in Touch
                     </Link>
                 </div>
@@ -177,11 +177,11 @@ export default function AboutPage() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <Link href="/public/jobs" className="btn btn-primary btn-lg">
-                        <i className="fa-solid fa-magnifying-glass mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-magnifying-glass mr-2"></i>
                         Browse Jobs
                     </Link>
                     <Link href="/sign-up" className="btn btn-outline btn-lg">
-                        <i className="fa-solid fa-user-plus mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-user-plus mr-2"></i>
                         Create Account
                     </Link>
                 </div>

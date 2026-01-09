@@ -242,7 +242,7 @@ export default function RolesList() {
                             className="btn btn-primary w-full"
                             onClick={() => setShowAddModal(true)}
                         >
-                            <i className="fa-solid fa-plus"></i>
+                            <i className="fa-duotone fa-regular fa-plus"></i>
                             Add Role
                         </button>
                     </div>

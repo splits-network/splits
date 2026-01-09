@@ -18,14 +18,14 @@ export default function CandidateDetailModal({ candidate, isOpen, onClose }: Can
                         <h3 className="text-2xl font-bold mb-2">{candidate.full_name}</h3>
                         <div className="flex flex-wrap gap-4 text-sm text-base-content/70">
                             <div className="flex items-center gap-2">
-                                <i className="fa-solid fa-envelope"></i>
+                                <i className="fa-duotone fa-regular fa-envelope"></i>
                                 <a href={`mailto:${candidate.email}`} className="hover:text-primary">
                                     {candidate.email}
                                 </a>
                             </div>
                             {candidate.phone && (
                                 <div className="flex items-center gap-2">
-                                    <i className="fa-solid fa-phone"></i>
+                                    <i className="fa-duotone fa-regular fa-phone"></i>
                                     <a href={`tel:${candidate.phone}`} className="hover:text-primary">
                                         {candidate.phone}
                                     </a>
@@ -34,7 +34,7 @@ export default function CandidateDetailModal({ candidate, isOpen, onClose }: Can
                         </div>
                     </div>
                     <button onClick={onClose} className="btn btn-sm btn-circle btn-ghost">
-                        <i className="fa-solid fa-xmark text-xl"></i>
+                        <i className="fa-duotone fa-regular fa-xmark text-xl"></i>
                     </button>
                 </div>
 
@@ -46,7 +46,7 @@ export default function CandidateDetailModal({ candidate, isOpen, onClose }: Can
                     {(candidate.current_title || candidate.current_company) && (
                         <div>
                             <h4 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                                <i className="fa-solid fa-briefcase text-primary"></i>
+                                <i className="fa-duotone fa-regular fa-briefcase text-primary"></i>
                                 Current Position
                             </h4>
                             <div className="p-4 bg-base-200/50 rounded-lg">
@@ -64,7 +64,7 @@ export default function CandidateDetailModal({ candidate, isOpen, onClose }: Can
                     {candidate.location && (
                         <div>
                             <h4 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                                <i className="fa-solid fa-location-dot text-info"></i>
+                                <i className="fa-duotone fa-regular fa-location-dot text-info"></i>
                                 Location
                             </h4>
                             <p className="text-base-content/80">{candidate.location}</p>
@@ -75,7 +75,7 @@ export default function CandidateDetailModal({ candidate, isOpen, onClose }: Can
                     {candidate.bio && (
                         <div>
                             <h4 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                                <i className="fa-solid fa-user text-success"></i>
+                                <i className="fa-duotone fa-regular fa-user text-success"></i>
                                 About
                             </h4>
                             <div className="p-4 bg-base-200/50 rounded-lg">
@@ -88,7 +88,7 @@ export default function CandidateDetailModal({ candidate, isOpen, onClose }: Can
                     {candidate.skills && (
                         <div>
                             <h4 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                                <i className="fa-solid fa-code text-warning"></i>
+                                <i className="fa-duotone fa-regular fa-code text-warning"></i>
                                 Skills
                             </h4>
                             <div className="p-4 bg-base-200/50 rounded-lg">
@@ -100,7 +100,7 @@ export default function CandidateDetailModal({ candidate, isOpen, onClose }: Can
                     {/* Online Profiles */}
                     <div>
                         <h4 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                            <i className="fa-solid fa-link text-secondary"></i>
+                            <i className="fa-duotone fa-regular fa-link text-secondary"></i>
                             Online Profiles
                         </h4>
                         <div className="space-y-2">
@@ -113,7 +113,7 @@ export default function CandidateDetailModal({ candidate, isOpen, onClose }: Can
                                 >
                                     <i className="fa-brands fa-linkedin text-2xl text-[#0077b5]"></i>
                                     <span className="flex-1">LinkedIn Profile</span>
-                                    <i className="fa-solid fa-arrow-up-right-from-square text-sm"></i>
+                                    <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-sm"></i>
                                 </a>
                             )}
                             {candidate.github_url && (
@@ -125,7 +125,7 @@ export default function CandidateDetailModal({ candidate, isOpen, onClose }: Can
                                 >
                                     <i className="fa-brands fa-github text-2xl"></i>
                                     <span className="flex-1">GitHub Profile</span>
-                                    <i className="fa-solid fa-arrow-up-right-from-square text-sm"></i>
+                                    <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-sm"></i>
                                 </a>
                             )}
                             {candidate.portfolio_url && (
@@ -135,9 +135,9 @@ export default function CandidateDetailModal({ candidate, isOpen, onClose }: Can
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-3 p-3 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors"
                                 >
-                                    <i className="fa-solid fa-globe text-2xl text-primary"></i>
+                                    <i className="fa-duotone fa-regular fa-globe text-2xl text-primary"></i>
                                     <span className="flex-1">Portfolio / Website</span>
-                                    <i className="fa-solid fa-arrow-up-right-from-square text-sm"></i>
+                                    <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-sm"></i>
                                 </a>
                             )}
                             {!candidate.linkedin_url && !candidate.github_url && !candidate.portfolio_url && (
@@ -151,7 +151,7 @@ export default function CandidateDetailModal({ candidate, isOpen, onClose }: Can
                     {/* Timestamps */}
                     {candidate.created_at && (
                         <div className="text-sm text-base-content/60">
-                            <i className="fa-solid fa-calendar mr-2"></i>
+                            <i className="fa-duotone fa-regular fa-calendar mr-2"></i>
                             Added on {new Date(candidate.created_at).toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'long',

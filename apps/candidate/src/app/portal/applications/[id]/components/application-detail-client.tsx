@@ -161,14 +161,14 @@ export function ApplicationDetailClient({ application, job, token }: Application
         <>
             {error && (
                 <div className="alert alert-error mb-6">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
 
             {isJobClosed && (
                 <div className="alert alert-warning mb-6">
-                    <i className="fa-solid fa-triangle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
                     <div>
                         <h3 className="font-bold">This position is no longer available</h3>
                         <p className="text-sm mt-1">The company has closed this position and is not accepting new applications.</p>

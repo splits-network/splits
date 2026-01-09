@@ -68,7 +68,7 @@ export function EmptyState({
     const content = (
         <div className={`flex flex-col items-center justify-center text-center ${sizes.padding} ${className}`}>
             <div className={`${sizes.iconBg} rounded-full bg-base-200 flex items-center justify-center mb-4`}>
-                <i className={`fa-solid ${icon} ${sizes.icon} text-base-content/30`}></i>
+                <i className={`fa-duotone fa-regular ${icon} ${sizes.icon} text-base-content/30`}></i>
             </div>
             <h3 className={`font-semibold text-base-content/80 ${sizes.title}`}>
                 {title}

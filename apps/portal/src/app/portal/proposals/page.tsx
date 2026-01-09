@@ -174,27 +174,27 @@ export default function ProposalsPage() {
                 <StatCard
                     title="Requiring Action"
                     value={summaryLoading ? '...' : (summary?.actionable_count ?? 0)}
-                    icon="fa-solid fa-bell"
+                    icon="fa-duotone fa-regular fa-bell"
                     color="primary"
                     description="Awaiting your response"
                 />
                 <StatCard
                     title="Awaiting Response"
                     value={summaryLoading ? '...' : (summary?.waiting_count ?? 0)}
-                    icon="fa-solid fa-clock"
+                    icon="fa-duotone fa-regular fa-clock"
                     description="Sent to others"
                 />
                 <StatCard
                     title="Urgent"
                     value={summaryLoading ? '...' : (summary?.urgent_count ?? 0)}
-                    icon="fa-solid fa-exclamation-triangle"
+                    icon="fa-duotone fa-regular fa-exclamation-triangle"
                     color="warning"
                     description="Due within 24 hours"
                 />
                 <StatCard
                     title="Overdue"
                     value={summaryLoading ? '...' : (summary?.overdue_count ?? 0)}
-                    icon="fa-solid fa-calendar-xmark"
+                    icon="fa-duotone fa-regular fa-calendar-xmark"
                     color="error"
                     description="Past deadline"
                 />
@@ -209,7 +209,7 @@ export default function ProposalsPage() {
                             className={`tab ${activeTab === 'action' ? 'tab-active' : ''}`}
                             onClick={() => handleTabChange('action')}
                         >
-                            <i className="fa-solid fa-bolt mr-2"></i>
+                            <i className="fa-duotone fa-regular fa-bolt mr-2"></i>
                             Action Required
                             {summary && summary.actionable_count > 0 && (
                                 <span className="badge badge-primary badge-sm ml-2">
@@ -221,7 +221,7 @@ export default function ProposalsPage() {
                             className={`tab ${activeTab === 'waiting' ? 'tab-active' : ''}`}
                             onClick={() => handleTabChange('waiting')}
                         >
-                            <i className="fa-solid fa-clock mr-2"></i>
+                            <i className="fa-duotone fa-regular fa-clock mr-2"></i>
                             Awaiting Response
                             {summary && summary.waiting_count > 0 && (
                                 <span className="badge badge-sm ml-2">
@@ -233,7 +233,7 @@ export default function ProposalsPage() {
                             className={`tab ${activeTab === 'completed' ? 'tab-active' : ''}`}
                             onClick={() => handleTabChange('completed')}
                         >
-                            <i className="fa-solid fa-check-circle mr-2"></i>
+                            <i className="fa-duotone fa-regular fa-check-circle mr-2"></i>
                             Completed
                         </button>
                     </div>

@@ -143,7 +143,7 @@ The landing page (`/app/page.tsx`) is comprehensive but very long (~780 lines) w
                     <p className="italic">"{testimonial.quote}"</p>
                     <div className="rating rating-sm mt-2">
                         {[...Array(5)].map((_, i) => (
-                            <i key={i} className="fa-solid fa-star text-warning" />
+                            <i key={i} className="fa-duotone fa-regular fa-star text-warning" />
                         ))}
                     </div>
                 </div>
@@ -284,12 +284,12 @@ const navGroups = [
 <div className="fixed bottom-6 right-6 z-50">
     <div className="dropdown dropdown-top dropdown-end">
         <label tabIndex={0} className="btn btn-primary btn-circle btn-lg shadow-lg">
-            <i className="fa-solid fa-plus text-xl"></i>
+            <i className="fa-duotone fa-regular fa-plus text-xl"></i>
         </label>
         <ul tabIndex={0} className="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-52 mb-2">
-            <li><a href="/portal/candidates/new"><i className="fa-solid fa-user-plus w-4"></i>New Candidate</a></li>
-            <li><a href="/portal/roles/new"><i className="fa-solid fa-briefcase w-4"></i>New Role</a></li>
-            <li><a href="/applications/quick-submit"><i className="fa-solid fa-paper-plane w-4"></i>Quick Submit</a></li>
+            <li><a href="/portal/candidates/new"><i className="fa-duotone fa-regular fa-user-plus w-4"></i>New Candidate</a></li>
+            <li><a href="/portal/roles/new"><i className="fa-duotone fa-regular fa-briefcase w-4"></i>New Role</a></li>
+            <li><a href="/applications/quick-submit"><i className="fa-duotone fa-regular fa-paper-plane w-4"></i>Quick Submit</a></li>
         </ul>
     </div>
 </div>
@@ -461,7 +461,7 @@ function usePolledStats(fetchFn: () => Promise<any>, interval = 60000) {
 <div className="card bg-base-100 shadow">
     <div className="card-body items-center text-center py-12">
         <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-            <i className="fa-solid fa-rocket text-4xl text-primary"></i>
+            <i className="fa-duotone fa-regular fa-rocket text-4xl text-primary"></i>
         </div>
         <h3 className="text-2xl font-bold mb-2">Welcome to Splits Network!</h3>
         <p className="text-base-content/70 max-w-md mb-6">
@@ -469,11 +469,11 @@ function usePolledStats(fetchFn: () => Promise<any>, interval = 60000) {
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
             <Link href="/portal/roles" className="btn btn-primary">
-                <i className="fa-solid fa-briefcase mr-2"></i>
+                <i className="fa-duotone fa-regular fa-briefcase mr-2"></i>
                 Browse Roles
             </Link>
             <Link href="/portal/candidates/new" className="btn btn-outline">
-                <i className="fa-solid fa-user-plus mr-2"></i>
+                <i className="fa-duotone fa-regular fa-user-plus mr-2"></i>
                 Add Candidate
             </Link>
         </div>
@@ -528,7 +528,7 @@ function usePolledStats(fetchFn: () => Promise<any>, interval = 60000) {
 <div className="collapse collapse-arrow bg-base-100 shadow mb-4">
     <input type="checkbox" />
     <div className="collapse-title font-medium">
-        <i className="fa-solid fa-filter mr-2"></i>
+        <i className="fa-duotone fa-regular fa-filter mr-2"></i>
         Advanced Filters
         {activeFiltersCount > 0 && (
             <span className="badge badge-primary ml-2">{activeFiltersCount}</span>
@@ -617,18 +617,18 @@ function usePolledStats(fetchFn: () => Promise<any>, interval = 60000) {
         <div className="flex flex-wrap gap-2 mt-3">
             {job.location && (
                 <span className="badge badge-ghost gap-1">
-                    <i className="fa-solid fa-location-dot"></i>
+                    <i className="fa-duotone fa-regular fa-location-dot"></i>
                     {job.location}
                 </span>
             )}
             {job.salary_min && job.salary_max && (
                 <span className="badge badge-ghost gap-1">
-                    <i className="fa-solid fa-dollar-sign"></i>
+                    <i className="fa-duotone fa-regular fa-dollar-sign"></i>
                     ${(job.salary_min / 1000).toFixed(0)}k - ${(job.salary_max / 1000).toFixed(0)}k
                 </span>
             )}
             <span className="badge badge-primary badge-outline gap-1">
-                <i className="fa-solid fa-percent"></i>
+                <i className="fa-duotone fa-regular fa-percent"></i>
                 {job.fee_percentage}% fee
             </span>
         </div>
@@ -751,15 +751,15 @@ const [selectedCandidates, setSelectedCandidates] = useState<Set<string>>(new Se
         </div>
         <div className="flex gap-2">
             <button className="btn btn-sm btn-ghost">
-                <i className="fa-solid fa-tag mr-2"></i>
+                <i className="fa-duotone fa-regular fa-tag mr-2"></i>
                 Add Tag
             </button>
             <button className="btn btn-sm btn-ghost">
-                <i className="fa-solid fa-file-export mr-2"></i>
+                <i className="fa-duotone fa-regular fa-file-export mr-2"></i>
                 Export
             </button>
             <button className="btn btn-sm btn-ghost text-error">
-                <i className="fa-solid fa-archive mr-2"></i>
+                <i className="fa-duotone fa-regular fa-archive mr-2"></i>
                 Archive
             </button>
         </div>
@@ -802,7 +802,7 @@ The unified proposals system (`/proposals`) provides:
         {/* Urgency indicator */}
         {proposal.is_urgent && (
             <div className="absolute top-0 right-0 w-0 h-0 border-t-[40px] border-t-error border-l-[40px] border-l-transparent">
-                <i className="fa-solid fa-exclamation absolute -top-8 right-1 text-white text-xs"></i>
+                <i className="fa-duotone fa-regular fa-exclamation absolute -top-8 right-1 text-white text-xs"></i>
             </div>
         )}
         
@@ -810,7 +810,7 @@ The unified proposals system (`/proposals`) provides:
         <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
                 <div className={`p-2 rounded-lg ${getProposalTypeColor(proposal.type)}`}>
-                    <i className={`fa-solid ${getProposalTypeIcon(proposal.type)} text-xl`}></i>
+                    <i className={`fa-duotone fa-regular ${getProposalTypeIcon(proposal.type)} text-xl`}></i>
                 </div>
                 <div>
                     <div className="font-bold">{proposal.title}</div>
@@ -830,7 +830,7 @@ The unified proposals system (`/proposals`) provides:
         {/* Timeline */}
         {proposal.deadline && (
             <div className="flex items-center gap-2 mt-4 text-sm">
-                <i className="fa-solid fa-clock text-warning"></i>
+                <i className="fa-duotone fa-regular fa-clock text-warning"></i>
                 <span>Respond by {formatDate(proposal.deadline)}</span>
                 {getDaysUntil(proposal.deadline) <= 2 && (
                     <span className="badge badge-warning badge-sm">
@@ -929,7 +929,7 @@ import { Line } from 'react-chartjs-2';
 <div className="card bg-base-100 shadow">
     <div className="card-body">
         <h3 className="card-title">
-            <i className="fa-solid fa-chart-line mr-2"></i>
+            <i className="fa-duotone fa-regular fa-chart-line mr-2"></i>
             Earnings Trend
         </h3>
         <div className="h-64">
@@ -979,7 +979,7 @@ import { Line } from 'react-chartjs-2';
             <li>
                 <div className="timeline-start text-sm">{formatDate(placement.submitted_at)}</div>
                 <div className="timeline-middle">
-                    <i className="fa-solid fa-paper-plane text-info"></i>
+                    <i className="fa-duotone fa-regular fa-paper-plane text-info"></i>
                 </div>
                 <div className="timeline-end timeline-box">Candidate Submitted</div>
                 <hr className="bg-info"/>
@@ -988,7 +988,7 @@ import { Line } from 'react-chartjs-2';
                 <hr className="bg-info"/>
                 <div className="timeline-start text-sm">{formatDate(placement.interview_at)}</div>
                 <div className="timeline-middle">
-                    <i className="fa-solid fa-calendar-check text-warning"></i>
+                    <i className="fa-duotone fa-regular fa-calendar-check text-warning"></i>
                 </div>
                 <div className="timeline-end timeline-box">Interview Scheduled</div>
                 <hr className="bg-warning"/>
@@ -997,7 +997,7 @@ import { Line } from 'react-chartjs-2';
                 <hr className="bg-warning"/>
                 <div className="timeline-start text-sm">{formatDate(placement.offer_at)}</div>
                 <div className="timeline-middle">
-                    <i className="fa-solid fa-file-contract text-primary"></i>
+                    <i className="fa-duotone fa-regular fa-file-contract text-primary"></i>
                 </div>
                 <div className="timeline-end timeline-box">Offer Extended</div>
                 <hr className="bg-primary"/>
@@ -1006,7 +1006,7 @@ import { Line } from 'react-chartjs-2';
                 <hr className="bg-success"/>
                 <div className="timeline-start text-sm">{formatDate(placement.hired_at)}</div>
                 <div className="timeline-middle">
-                    <i className="fa-solid fa-trophy text-success"></i>
+                    <i className="fa-duotone fa-regular fa-trophy text-success"></i>
                 </div>
                 <div className="timeline-end timeline-box bg-success text-success-content">Placement Complete!</div>
             </li>
@@ -1066,7 +1066,7 @@ import { Line } from 'react-chartjs-2';
     >
         <div className="card-body items-center text-center">
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                <i className="fa-solid fa-user-tie text-4xl text-primary"></i>
+                <i className="fa-duotone fa-regular fa-user-tie text-4xl text-primary"></i>
             </div>
             <h3 className="card-title">I'm a Recruiter</h3>
             <p className="text-base-content/70">
@@ -1074,21 +1074,21 @@ import { Line } from 'react-chartjs-2';
             </p>
             <ul className="text-left mt-4 space-y-2 text-sm">
                 <li className="flex items-center gap-2">
-                    <i className="fa-solid fa-check text-success"></i>
+                    <i className="fa-duotone fa-regular fa-check text-success"></i>
                     Access thousands of roles
                 </li>
                 <li className="flex items-center gap-2">
-                    <i className="fa-solid fa-check text-success"></i>
+                    <i className="fa-duotone fa-regular fa-check text-success"></i>
                     Transparent fee splits
                 </li>
                 <li className="flex items-center gap-2">
-                    <i className="fa-solid fa-check text-success"></i>
+                    <i className="fa-duotone fa-regular fa-check text-success"></i>
                     Quick payouts
                 </li>
             </ul>
             {selectedRole === 'recruiter' && (
                 <div className="badge badge-primary mt-4">
-                    <i className="fa-solid fa-check mr-1"></i>
+                    <i className="fa-duotone fa-regular fa-check mr-1"></i>
                     Selected
                 </div>
             )}
@@ -1103,7 +1103,7 @@ import { Line } from 'react-chartjs-2';
     >
         <div className="card-body items-center text-center">
             <div className="w-20 h-20 bg-secondary/10 rounded-full flex items-center justify-center mb-4">
-                <i className="fa-solid fa-building text-4xl text-secondary"></i>
+                <i className="fa-duotone fa-regular fa-building text-4xl text-secondary"></i>
             </div>
             <h3 className="card-title">I'm Hiring</h3>
             <p className="text-base-content/70">
@@ -1111,21 +1111,21 @@ import { Line } from 'react-chartjs-2';
             </p>
             <ul className="text-left mt-4 space-y-2 text-sm">
                 <li className="flex items-center gap-2">
-                    <i className="fa-solid fa-check text-success"></i>
+                    <i className="fa-duotone fa-regular fa-check text-success"></i>
                     Network of vetted recruiters
                 </li>
                 <li className="flex items-center gap-2">
-                    <i className="fa-solid fa-check text-success"></i>
+                    <i className="fa-duotone fa-regular fa-check text-success"></i>
                     Only pay on placement
                 </li>
                 <li className="flex items-center gap-2">
-                    <i className="fa-solid fa-check text-success"></i>
+                    <i className="fa-duotone fa-regular fa-check text-success"></i>
                     Full pipeline visibility
                 </li>
             </ul>
             {selectedRole === 'company_admin' && (
                 <div className="badge badge-secondary mt-4">
-                    <i className="fa-solid fa-check mr-1"></i>
+                    <i className="fa-duotone fa-regular fa-check mr-1"></i>
                     Selected
                 </div>
             )}
@@ -1154,26 +1154,26 @@ import { Line } from 'react-chartjs-2';
 {/* Mobile Bottom Navigation - visible only on mobile */}
 <div className="dock lg:hidden">
     <Link href="/portal/dashboard" className={pathname === '/portal/dashboard' ? 'dock-active' : ''}>
-        <i className="fa-solid fa-house"></i>
+        <i className="fa-duotone fa-regular fa-house"></i>
         <span className="dock-label">Home</span>
     </Link>
     <Link href="/portal/roles" className={pathname?.startsWith('/portal/roles') ? 'dock-active' : ''}>
-        <i className="fa-solid fa-briefcase"></i>
+        <i className="fa-duotone fa-regular fa-briefcase"></i>
         <span className="dock-label">Roles</span>
     </Link>
     <Link href="/proposals" className={pathname?.startsWith('/proposals') ? 'dock-active' : ''}>
-        <i className="fa-solid fa-inbox"></i>
+        <i className="fa-duotone fa-regular fa-inbox"></i>
         <span className="dock-label">Inbox</span>
         {actionableCount > 0 && (
             <span className="badge badge-xs badge-error absolute -top-1 -right-1">{actionableCount}</span>
         )}
     </Link>
     <Link href="/portal/placements" className={pathname?.startsWith('/placements') ? 'dock-active' : ''}>
-        <i className="fa-solid fa-trophy"></i>
+        <i className="fa-duotone fa-regular fa-trophy"></i>
         <span className="dock-label">Earnings</span>
     </Link>
     <Link href="/profile" className={pathname?.startsWith('/profile') ? 'dock-active' : ''}>
-        <i className="fa-solid fa-user"></i>
+        <i className="fa-duotone fa-regular fa-user"></i>
         <span className="dock-label">Profile</span>
     </Link>
 </div>
@@ -1232,7 +1232,7 @@ import { Line } from 'react-chartjs-2';
     className="btn btn-ghost btn-circle"
     aria-label="Open sidebar menu"
 >
-    <i className="fa-solid fa-bars" aria-hidden="true"></i>
+    <i className="fa-duotone fa-regular fa-bars" aria-hidden="true"></i>
 </button>
 
 {/* Status badges */}
@@ -1442,7 +1442,7 @@ export function PageHeader({ title, description, actions }: PageHeaderProps) {
     description="View and manage all your submitted candidates"
     actions={
         <Link href="/portal/candidates/new" className="btn btn-primary gap-2">
-            <i className="fa-solid fa-plus"></i>
+            <i className="fa-duotone fa-regular fa-plus"></i>
             New Candidate
         </Link>
     }
@@ -1470,14 +1470,14 @@ export function FilterCard({ children, viewMode, onViewModeChange }: FilterCardP
                             onClick={() => onViewModeChange('grid')}
                             title="Grid View"
                         >
-                            <i className="fa-solid fa-grip"></i>
+                            <i className="fa-duotone fa-regular fa-grip"></i>
                         </button>
                         <button
                             className={`btn join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
                             onClick={() => onViewModeChange('table')}
                             title="Table View"
                         >
-                            <i className="fa-solid fa-table"></i>
+                            <i className="fa-duotone fa-regular fa-table"></i>
                         </button>
                     </div>
                 </div>
@@ -1507,7 +1507,7 @@ export function StatCard({ title, value, description, icon, color = 'primary', t
         <div className="stats shadow bg-base-100">
             <div className="stat">
                 <div className={`stat-figure text-${color}`}>
-                    <i className={`fa-solid ${icon} text-3xl`}></i>
+                    <i className={`fa-duotone fa-regular ${icon} text-3xl`}></i>
                 </div>
                 <div className="stat-title">{title}</div>
                 <div className={`stat-value text-${color}`}>{value}</div>
@@ -1515,7 +1515,7 @@ export function StatCard({ title, value, description, icon, color = 'primary', t
                     <div className="stat-desc">
                         {trend && (
                             <span className={trend.direction === 'up' ? 'text-success' : 'text-error'}>
-                                <i className={`fa-solid fa-arrow-${trend.direction} mr-1`}></i>
+                                <i className={`fa-duotone fa-regular fa-arrow-${trend.direction} mr-1`}></i>
                                 {trend.value}%
                             </span>
                         )}

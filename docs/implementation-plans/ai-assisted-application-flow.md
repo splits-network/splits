@@ -647,7 +647,7 @@ Next Steps:
 ```tsx
 {stage === 'ai_review' && (
   <div className="alert alert-info">
-    <i className="fa-solid fa-robot"></i>
+    <i className="fa-duotone fa-regular fa-robot"></i>
     <div>
       <h4>AI Review in Progress</h4>
       <p>Our AI is analyzing your application. This typically takes less than 30 seconds.</p>
@@ -658,7 +658,7 @@ Next Steps:
 
 {stage === 'submitted' && aiReview && (
   <div className="alert alert-success">
-    <i className="fa-solid fa-check-circle"></i>
+    <i className="fa-duotone fa-regular fa-check-circle"></i>
     <div>
       <h4>Application Submitted</h4>
       <p>AI Fit Score: <strong>{aiReview.fit_score}/100</strong> ({aiReview.recommendation})</p>
@@ -686,7 +686,7 @@ Next Steps:
 <div className="card">
   <div className="card-body">
     <h3 className="card-title">
-      <i className="fa-solid fa-robot"></i> AI Analysis
+      <i className="fa-duotone fa-regular fa-robot"></i> AI Analysis
     </h3>
     
     <div className="stats shadow">
@@ -798,7 +798,7 @@ Next Steps:
     <div className="card bg-base-100 shadow sticky top-4">
       <div className="card-body">
         <h3 className="card-title">
-          <i className="fa-solid fa-robot"></i> AI Analysis
+          <i className="fa-duotone fa-regular fa-robot"></i> AI Analysis
         </h3>
         
         {/* Fit Score */}
@@ -817,7 +817,7 @@ Next Steps:
         {/* Strengths */}
         <div className="divider"></div>
         <h4 className="font-semibold text-success">
-          <i className="fa-solid fa-check"></i> Strengths
+          <i className="fa-duotone fa-regular fa-check"></i> Strengths
         </h4>
         <ul className="text-sm space-y-1">
           {aiReview.strengths.map(s => (
@@ -830,7 +830,7 @@ Next Steps:
           <>
             <div className="divider"></div>
             <h4 className="font-semibold text-warning">
-              <i className="fa-solid fa-exclamation-triangle"></i> Concerns
+              <i className="fa-duotone fa-regular fa-exclamation-triangle"></i> Concerns
             </h4>
             <ul className="text-sm space-y-1">
               {aiReview.concerns.map(c => (
@@ -866,14 +866,14 @@ Next Steps:
             className="btn btn-success btn-block"
             onClick={handleSubmitToCompany}
           >
-            <i className="fa-solid fa-paper-plane"></i>
+            <i className="fa-duotone fa-regular fa-paper-plane"></i>
             Submit to Company
           </button>
           <button 
             className="btn btn-error btn-outline btn-block"
             onClick={handleReject}
           >
-            <i className="fa-solid fa-times"></i>
+            <i className="fa-duotone fa-regular fa-times"></i>
             Decline to Submit
           </button>
         </div>

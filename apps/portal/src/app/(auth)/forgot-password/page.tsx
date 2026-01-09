@@ -73,7 +73,7 @@ export default function ForgotPasswordPage() {
                 <div className="card w-full max-w-md bg-base-100 shadow">
                     <div className="card-body items-center text-center">
                         <div className="text-success text-6xl mb-4">
-                            <i className="fa-solid fa-circle-check"></i>
+                            <i className="fa-duotone fa-regular fa-circle-check"></i>
                         </div>
                         <h2 className="card-title text-2xl font-bold mb-2">
                             Password Reset Successful
@@ -98,13 +98,13 @@ export default function ForgotPasswordPage() {
                         </h2>
 
                         <div className="alert alert-info mb-4">
-                            <i className="fa-solid fa-envelope"></i>
+                            <i className="fa-duotone fa-regular fa-envelope"></i>
                             <span>We sent a reset code to {email}</span>
                         </div>
 
                         {error && (
                             <div className="alert alert-error mb-4">
-                                <i className="fa-solid fa-circle-exclamation"></i>
+                                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                                 <span>{error}</span>
                             </div>
                         )}
@@ -181,7 +181,7 @@ export default function ForgotPasswordPage() {
 
                     {error && (
                         <div className="alert alert-error mb-4">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <span>{error}</span>
                         </div>
                     )}

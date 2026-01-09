@@ -65,7 +65,7 @@ export function ActionCard({
                             {description}
                         </p>
                     </div>
-                    <i className="fa-solid fa-chevron-right text-base-content/30 mt-1"></i>
+                    <i className="fa-duotone fa-regular fa-chevron-right text-base-content/30 mt-1"></i>
                 </div>
                 {badge && <div className="mt-3">{badge}</div>}
             </div>

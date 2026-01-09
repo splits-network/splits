@@ -76,7 +76,7 @@ export default function ActionableProposalsWidget({ compact = true }: Actionable
     if (error) {
         return (
             <div className="alert alert-error">
-                <i className="fa-solid fa-circle-exclamation"></i>
+                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                 <span>{error}</span>
             </div>
         );
@@ -85,7 +85,7 @@ export default function ActionableProposalsWidget({ compact = true }: Actionable
     if (applications.length === 0) {
         return (
             <div className="alert alert-info">
-                <i className="fa-solid fa-circle-check"></i>
+                <i className="fa-duotone fa-regular fa-circle-check"></i>
                 <div>
                     <h3 className="font-bold">All caught up!</h3>
                     <p className="text-sm">No applications awaiting your review right now.</p>
@@ -115,7 +115,7 @@ export default function ActionableProposalsWidget({ compact = true }: Actionable
                             <div className="flex items-start justify-between gap-4">
                                 <div className="grow">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <i className="fa-solid fa-user text-primary"></i>
+                                        <i className="fa-duotone fa-regular fa-user text-primary"></i>
                                         <span className="badge badge-sm badge-info">Awaiting Review</span>
                                     </div>
 
@@ -125,39 +125,39 @@ export default function ActionableProposalsWidget({ compact = true }: Actionable
 
                                     <div className="text-sm text-base-content/70">
                                         <p className="font-medium">
-                                            <i className="fa-solid fa-briefcase mr-2 text-primary"></i>
+                                            <i className="fa-duotone fa-regular fa-briefcase mr-2 text-primary"></i>
                                             {application.job?.title || 'Unknown Role'}
                                         </p>
                                         {application.job?.company?.name && (
                                             <p className="text-xs mt-1 text-base-content/60">
-                                                <i className="fa-solid fa-building mr-1"></i>
+                                                <i className="fa-duotone fa-regular fa-building mr-1"></i>
                                                 {application.job.company.name}
                                             </p>
                                         )}
                                     </div>
 
                                     <div className="text-sm text-primary font-medium mt-2">
-                                        <i className="fa-solid fa-arrow-right mr-1"></i>
+                                        <i className="fa-duotone fa-regular fa-arrow-right mr-1"></i>
                                         Review details & submit to company
                                     </div>
 
                                     <div className="flex flex-wrap gap-3 mt-3 text-xs text-base-content/60">
                                         {submittedAt && (
                                             <span>
-                                                <i className="fa-solid fa-calendar mr-1"></i>
+                                                <i className="fa-duotone fa-regular fa-calendar mr-1"></i>
                                                 Submitted {submittedAt}
                                             </span>
                                         )}
                                         {hasDocuments && (
                                             <span>
-                                                <i className="fa-solid fa-file mr-1"></i>
+                                                <i className="fa-duotone fa-regular fa-file mr-1"></i>
                                                 {application.document_count} document
                                                 {application.document_count !== 1 ? 's' : ''}
                                             </span>
                                         )}
                                         {hasQuestions && (
                                             <span>
-                                                <i className="fa-solid fa-clipboard-question mr-1"></i>
+                                                <i className="fa-duotone fa-regular fa-clipboard-question mr-1"></i>
                                                 {application.pre_screen_answer_count} question
                                                 {application.pre_screen_answer_count !== 1 ? 's' : ''} answered
                                             </span>
@@ -167,7 +167,7 @@ export default function ActionableProposalsWidget({ compact = true }: Actionable
 
                                 <div className="text-right">
                                     <p className="text-sm text-base-content/60 mb-2">
-                                        <i className="fa-solid fa-clock mr-1"></i>
+                                        <i className="fa-duotone fa-regular fa-clock mr-1"></i>
                                         Pending submission
                                     </p>
                                     <span className="badge badge-outline">Step 2 of 3</span>

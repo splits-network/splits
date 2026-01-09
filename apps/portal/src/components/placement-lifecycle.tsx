@@ -68,7 +68,7 @@ export default function PlacementLifecycle({
     const isWithinGuarantee = () => {
         if (status !== 'failed') return null;
         if (!failureDate) return null;
-        
+
         const daysSinceHire = Math.floor((new Date(failureDate).getTime() - new Date(hiredAt).getTime()) / (1000 * 60 * 60 * 24));
         return daysSinceHire <= guaranteeDays;
     };
@@ -76,7 +76,7 @@ export default function PlacementLifecycle({
     if (compact) {
         return (
             <span className={`badge ${getStatusColor(status)} gap-1`}>
-                <i className={`fa-solid ${getStatusIcon(status)}`}></i>
+                <i className={`fa-duotone fa-regular ${getStatusIcon(status)}`}></i>
                 {status.charAt(0).toUpperCase() + status.slice(1)}
             </span>
         );
@@ -88,10 +88,10 @@ export default function PlacementLifecycle({
                 <div className="flex items-start gap-3">
                     <div className="flex-shrink-0">
                         <div className={`w-12 h-12 rounded-full ${getStatusColor(status).replace('badge-', 'bg-')} flex items-center justify-center`}>
-                            <i className={`fa-solid ${getStatusIcon(status)} text-white text-lg`}></i>
+                            <i className={`fa-duotone fa-regular ${getStatusIcon(status)} text-white text-lg`}></i>
                         </div>
                     </div>
-                    
+
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                             <span className="font-semibold text-lg">
@@ -107,27 +107,27 @@ export default function PlacementLifecycle({
 
                         <div className="space-y-2 text-sm text-base-content/70">
                             <div className="flex items-center gap-2">
-                                <i className="fa-solid fa-calendar-check w-4"></i>
+                                <i className="fa-duotone fa-regular fa-calendar-check w-4"></i>
                                 <span>Hired: {formatDate(hiredAt)}</span>
                             </div>
 
                             {startDate && (
                                 <div className="flex items-center gap-2">
-                                    <i className="fa-solid fa-calendar-day w-4"></i>
+                                    <i className="fa-duotone fa-regular fa-calendar-day w-4"></i>
                                     <span>Started: {formatDate(startDate)}</span>
                                 </div>
                             )}
 
                             {status === 'active' && (
                                 <div className="flex items-center gap-2">
-                                    <i className="fa-solid fa-clock w-4"></i>
+                                    <i className="fa-duotone fa-regular fa-clock w-4"></i>
                                     <span>{getDaysInStatus()} days active</span>
                                 </div>
                             )}
 
                             {endDate && status === 'completed' && (
                                 <div className="flex items-center gap-2">
-                                    <i className="fa-solid fa-calendar-check w-4"></i>
+                                    <i className="fa-duotone fa-regular fa-calendar-check w-4"></i>
                                     <span>Completed: {formatDate(endDate)}</span>
                                 </div>
                             )}
@@ -135,15 +135,15 @@ export default function PlacementLifecycle({
                             {status === 'failed' && failureDate && (
                                 <>
                                     <div className="flex items-center gap-2">
-                                        <i className="fa-solid fa-calendar-xmark w-4"></i>
+                                        <i className="fa-duotone fa-regular fa-calendar-xmark w-4"></i>
                                         <span>Failed: {formatDate(failureDate)}</span>
                                     </div>
-                                    
+
                                     {isWithinGuarantee() !== null && (
                                         <div className={`alert ${isWithinGuarantee() ? 'alert-warning' : 'alert-info'} py-2 mt-2`}>
-                                            <i className={`fa-solid ${isWithinGuarantee() ? 'fa-shield-halved' : 'fa-info-circle'}`}></i>
+                                            <i className={`fa-duotone fa-regular ${isWithinGuarantee() ? 'fa-shield-halved' : 'fa-info-circle'}`}></i>
                                             <span className="text-xs">
-                                                {isWithinGuarantee() 
+                                                {isWithinGuarantee()
                                                     ? `Within ${guaranteeDays}-day guarantee period - replacement eligible`
                                                     : `Outside ${guaranteeDays}-day guarantee period`
                                                 }

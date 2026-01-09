@@ -16,8 +16,8 @@ export default function OwnershipBadge({ sourcer, compact = false }: OwnershipBa
         return null;
     }
 
-    const isProtected = sourcer.protection_expires_at 
-        ? new Date(sourcer.protection_expires_at) > new Date() 
+    const isProtected = sourcer.protection_expires_at
+        ? new Date(sourcer.protection_expires_at) > new Date()
         : false;
 
     const formatDate = (date: string) => {
@@ -31,7 +31,7 @@ export default function OwnershipBadge({ sourcer, compact = false }: OwnershipBa
     if (compact) {
         return (
             <div className="badge badge-primary gap-1">
-                <i className="fa-solid fa-shield-halved"></i>
+                <i className="fa-duotone fa-regular fa-shield-halved"></i>
                 {sourcer.sourcer_type === 'tsn' ? 'TSN Sourced' : 'Sourced'}
             </div>
         );
@@ -43,7 +43,7 @@ export default function OwnershipBadge({ sourcer, compact = false }: OwnershipBa
                 <div className="flex items-start gap-3">
                     <div className="flex-shrink-0">
                         <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
-                            <i className="fa-solid fa-shield-halved text-primary-content"></i>
+                            <i className="fa-duotone fa-regular fa-shield-halved text-primary-content"></i>
                         </div>
                     </div>
                     <div className="flex-1 min-w-0">
@@ -57,12 +57,12 @@ export default function OwnershipBadge({ sourcer, compact = false }: OwnershipBa
                         </div>
                         <div className="text-xs text-base-content/70 space-y-1">
                             <div>
-                                <i className="fa-solid fa-calendar-plus mr-1"></i>
+                                <i className="fa-duotone fa-regular fa-calendar-plus mr-1"></i>
                                 Sourced {formatDate(sourcer.sourced_at)}
                             </div>
                             {sourcer.protection_expires_at && (
                                 <div>
-                                    <i className="fa-solid fa-clock mr-1"></i>
+                                    <i className="fa-duotone fa-regular fa-clock mr-1"></i>
                                     {isProtected ? 'Protected until' : 'Protection expired'} {formatDate(sourcer.protection_expires_at)}
                                 </div>
                             )}

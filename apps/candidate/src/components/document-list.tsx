@@ -114,7 +114,7 @@ export default function DocumentList({
         return (
             <>
                 <div className="text-center py-6 text-base-content/60">
-                    <i className="fa-solid fa-folder-open text-3xl mb-2"></i>
+                    <i className="fa-duotone fa-regular fa-folder-open text-3xl mb-2"></i>
                     <p className="text-sm">No documents uploaded</p>
                     {showUpload && (
                         <button
@@ -124,7 +124,7 @@ export default function DocumentList({
                                 setShowUploadModal(true);
                             }}
                         >
-                            <i className="fa-solid fa-upload"></i>
+                            <i className="fa-duotone fa-regular fa-upload"></i>
                             Upload Document
                         </button>
                     )}
@@ -156,7 +156,7 @@ export default function DocumentList({
                                 setShowUploadModal(true);
                             }}
                         >
-                            <i className="fa-solid fa-upload"></i>
+                            <i className="fa-duotone fa-regular fa-upload"></i>
                             Upload Document
                         </button>
                     </div>
@@ -166,7 +166,7 @@ export default function DocumentList({
                     <div key={doc.id} className="card bg-base-200">
                         <div className="card-body p-4">
                             <div className="flex items-center gap-4">
-                                <i className={`fa-solid ${getFileIcon(doc.file_name)} text-2xl`}></i>
+                                <i className={`fa-duotone fa-regular ${getFileIcon(doc.file_name)} text-2xl`}></i>
                                 <div className="flex-1">
                                     <div className="font-medium">{doc.file_name}</div>
                                     <div className="text-sm text-base-content/60">
@@ -184,14 +184,14 @@ export default function DocumentList({
                                         {downloading === doc.id ? (
                                             <span className="loading loading-spinner loading-xs"></span>
                                         ) : (
-                                            <i className="fa-solid fa-download"></i>
+                                            <i className="fa-duotone fa-regular fa-download"></i>
                                         )}
                                     </button>
                                     <button
                                         className="btn btn-ghost btn-sm text-error"
                                         onClick={() => handleDelete(doc.id)}
                                     >
-                                        <i className="fa-solid fa-trash"></i>
+                                        <i className="fa-duotone fa-regular fa-trash"></i>
                                     </button>
                                 </div>
                             </div>

@@ -94,7 +94,7 @@ export default function DocumentViewerModal({ document, isOpen, onClose }: Docum
                             )}
                             {document.is_primary && (
                                 <span className="badge badge-primary badge-sm">
-                                    <i className="fa-solid fa-star mr-1"></i>
+                                    <i className="fa-duotone fa-regular fa-star mr-1"></i>
                                     Primary
                                 </span>
                             )}
@@ -106,10 +106,10 @@ export default function DocumentViewerModal({ document, isOpen, onClose }: Docum
                             className="btn btn-sm btn-ghost"
                             title="Download"
                         >
-                            <i className="fa-solid fa-download"></i>
+                            <i className="fa-duotone fa-regular fa-download"></i>
                         </button>
                         <button onClick={onClose} className="btn btn-sm btn-circle btn-ghost">
-                            <i className="fa-solid fa-xmark text-xl"></i>
+                            <i className="fa-duotone fa-regular fa-xmark text-xl"></i>
                         </button>
                     </div>
                 </div>
@@ -119,7 +119,7 @@ export default function DocumentViewerModal({ document, isOpen, onClose }: Docum
                     {error ? (
                         <div className="flex items-center justify-center h-full p-8">
                             <div className="alert alert-error max-w-md">
-                                <i className="fa-solid fa-circle-exclamation"></i>
+                                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                                 <div>
                                     <div className="font-semibold">Failed to load document</div>
                                     <div className="text-sm mt-1">{error}</div>
@@ -156,7 +156,7 @@ export default function DocumentViewerModal({ document, isOpen, onClose }: Docum
                     ) : (
                         <div className="flex items-center justify-center h-full p-8">
                             <div className="text-center max-w-md">
-                                <i className="fa-solid fa-file text-6xl text-base-content/40 mb-4"></i>
+                                <i className="fa-duotone fa-regular fa-file text-6xl text-base-content/40 mb-4"></i>
                                 <h4 className="text-lg font-semibold mb-2">Preview not available</h4>
                                 <p className="text-base-content/70 mb-6">
                                     This file type cannot be previewed in the browser. Please download the file to view it.
@@ -165,7 +165,7 @@ export default function DocumentViewerModal({ document, isOpen, onClose }: Docum
                                     onClick={handleDownloadClick}
                                     className="btn btn-primary"
                                 >
-                                    <i className="fa-solid fa-download mr-2"></i>
+                                    <i className="fa-duotone fa-regular fa-download mr-2"></i>
                                     Download File
                                 </button>
                             </div>
@@ -177,7 +177,7 @@ export default function DocumentViewerModal({ document, isOpen, onClose }: Docum
                 <div className="p-4 border-t border-base-300 bg-base-100">
                     <div className="flex justify-between items-center">
                         <div className="text-sm text-base-content/60">
-                            <i className="fa-solid fa-circle-info mr-2"></i>
+                            <i className="fa-duotone fa-regular fa-circle-info mr-2"></i>
                             Tip: You can download this document using the button above
                         </div>
                         <button onClick={onClose} className="btn btn-sm">

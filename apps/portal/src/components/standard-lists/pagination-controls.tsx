@@ -86,7 +86,7 @@ export function PaginationControls(props: PaginationControlsProps) {
                             disabled={page === 1 || loading}
                             title="First page"
                         >
-                            <i className="fa-solid fa-angles-left"></i>
+                            <i className="fa-duotone fa-regular fa-angles-left"></i>
                         </button>
                         <button
                             className="join-item btn btn-sm"
@@ -94,7 +94,7 @@ export function PaginationControls(props: PaginationControlsProps) {
                             disabled={page === 1 || loading}
                             title="Previous page"
                         >
-                            <i className="fa-solid fa-angle-left"></i>
+                            <i className="fa-duotone fa-regular fa-angle-left"></i>
                         </button>
                         <button className="join-item btn btn-sm pointer-events-none min-w-[5rem] sm:min-w-[7rem]">
                             <span className="hidden sm:inline">Page </span>{page}<span className="hidden sm:inline"> of </span><span className="sm:hidden">/</span>{totalPages}
@@ -105,7 +105,7 @@ export function PaginationControls(props: PaginationControlsProps) {
                             disabled={page === totalPages || loading}
                             title="Next page"
                         >
-                            <i className="fa-solid fa-angle-right"></i>
+                            <i className="fa-duotone fa-regular fa-angle-right"></i>
                         </button>
                         <button
                             className="join-item btn btn-sm"
@@ -113,7 +113,7 @@ export function PaginationControls(props: PaginationControlsProps) {
                             disabled={page === totalPages || loading}
                             title="Last page"
                         >
-                            <i className="fa-solid fa-angles-right"></i>
+                            <i className="fa-duotone fa-regular fa-angles-right"></i>
                         </button>
                     </div>
                 )}

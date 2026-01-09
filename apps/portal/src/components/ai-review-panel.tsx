@@ -149,7 +149,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h3 className="card-title text-lg">
-                        <i className="fa-solid fa-robot"></i>
+                        <i className="fa-duotone fa-regular fa-robot"></i>
                         AI Analysis
                     </h3>
                     <div className="flex items-center justify-center py-4">
@@ -166,7 +166,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                 <div className="card-body">
                     <div className='flex justify-between'>
                         <h3 className="card-title text-lg">
-                            <i className="fa-solid fa-robot"></i>
+                            <i className="fa-duotone fa-regular fa-robot"></i>
                             AI Analysis
                         </h3>
                         {isAdmin && (
@@ -182,7 +182,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-rotate"></i>
+                                        <i className="fa-duotone fa-regular fa-rotate"></i>
                                         Request New Review
                                     </>
                                 )}
@@ -190,7 +190,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                         )}
                     </div>
                     <div className="alert alert-error">
-                        <i className="fa-solid fa-circle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                         <div>
                             <div className="font-semibold">Unable to Load AI Review</div>
                             <div className="text-sm mt-1">{error}</div>
@@ -207,11 +207,11 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h3 className="card-title text-lg">
-                        <i className="fa-solid fa-robot"></i>
+                        <i className="fa-duotone fa-regular fa-robot"></i>
                         AI Analysis
                     </h3>
                     <div className="alert alert-info">
-                        <i className="fa-solid fa-circle-info"></i>
+                        <i className="fa-duotone fa-regular fa-circle-info"></i>
                         <span>AI analysis is in progress or not available for this application.</span>
                     </div>
                 </div>
@@ -225,7 +225,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                 <div className="card-body">
                     <div className='flex justify-between'>
                         <h3 className="card-title text-lg mb-4">
-                            <i className="fa-solid fa-robot"></i>
+                            <i className="fa-duotone fa-regular fa-robot"></i>
                             AI Analysis
                         </h3>
 
@@ -242,7 +242,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-rotate"></i>
+                                        <i className="fa-duotone fa-regular fa-rotate"></i>
                                         Request New
                                     </>
                                 )}
@@ -275,7 +275,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                         {aiReview.strengths.length > 0 && (
                             <div>
                                 <div className="text-sm font-medium mb-1">
-                                    <i className="fa-solid fa-circle-check text-success mr-1"></i>
+                                    <i className="fa-duotone fa-regular fa-circle-check text-success mr-1"></i>
                                     Top Strengths
                                 </div>
                                 <ul className="text-sm space-y-1">
@@ -289,7 +289,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                         {aiReview.concerns.length > 0 && (
                             <div>
                                 <div className="text-sm font-medium mb-1">
-                                    <i className="fa-solid fa-triangle-exclamation text-warning mr-1"></i>
+                                    <i className="fa-duotone fa-regular fa-triangle-exclamation text-warning mr-1"></i>
                                     Areas to Address
                                 </div>
                                 <ul className="text-sm space-y-1">
@@ -310,7 +310,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
             <div className="card-body">
                 <div className='flex justify-between'>
                     <h3 className="card-title text-lg mb-4">
-                        <i className="fa-solid fa-robot"></i>
+                        <i className="fa-duotone fa-regular fa-robot"></i>
                         AI Analysis
                     </h3>
 
@@ -327,7 +327,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                                 </>
                             ) : (
                                 <>
-                                    <i className="fa-solid fa-rotate"></i>
+                                    <i className="fa-duotone fa-regular fa-rotate"></i>
                                     Request New Review
                                 </>
                             )}
@@ -365,7 +365,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                 {aiReview.strengths.length > 0 && (
                     <div className="mb-4">
                         <h4 className="font-semibold text-base mb-2 flex items-center gap-2">
-                            <i className="fa-solid fa-circle-check text-success"></i>
+                            <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
                             Key Strengths
                         </h4>
                         <ul className="list-disc list-inside space-y-1">
@@ -380,7 +380,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                 {aiReview.concerns.length > 0 && (
                     <div className="mb-4">
                         <h4 className="font-semibold text-base mb-2 flex items-center gap-2">
-                            <i className="fa-solid fa-triangle-exclamation text-warning"></i>
+                            <i className="fa-duotone fa-regular fa-triangle-exclamation text-warning"></i>
                             Areas to Address
                         </h4>
                         <ul className="list-disc list-inside space-y-1">
@@ -441,9 +441,9 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                             <h4 className="font-medium text-sm mb-1">Experience</h4>
                             <div className="flex items-center gap-2">
                                 {aiReview.experience_analysis.meets_requirement ? (
-                                    <i className="fa-solid fa-circle-check text-success"></i>
+                                    <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
                                 ) : (
-                                    <i className="fa-solid fa-circle-xmark text-warning"></i>
+                                    <i className="fa-duotone fa-regular fa-circle-xmark text-warning"></i>
                                 )}
                                 <span className="text-sm">
                                     {aiReview.experience_analysis.candidate_years} yrs (Req: {aiReview.experience_analysis.required_years})

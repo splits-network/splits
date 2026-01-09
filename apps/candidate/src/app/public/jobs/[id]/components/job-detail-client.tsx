@@ -86,7 +86,7 @@ export default function JobDetailClient({
             <div className="container mx-auto px-4 py-8">
                 {/* Back Button */}
                 <Link href="/public/jobs" className="btn btn-ghost mb-6">
-                    <i className="fa-solid fa-arrow-left"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
                     Back to Jobs
                 </Link>
 
@@ -99,25 +99,25 @@ export default function JobDetailClient({
                         <div className="flex flex-wrap gap-4 mb-6">
                             {job.location && (
                                 <div className="badge badge-lg">
-                                    <i className="fa-solid fa-location-dot mr-2"></i>
+                                    <i className="fa-duotone fa-regular fa-location-dot mr-2"></i>
                                     {job.location}
                                 </div>
                             )}
                             {job.employment_type && (
                                 <div className="badge badge-lg">
-                                    <i className="fa-solid fa-briefcase mr-2"></i>
+                                    <i className="fa-duotone fa-regular fa-briefcase mr-2"></i>
                                     {job.employment_type.replace('_', '-')}
                                 </div>
                             )}
                             {job.open_to_relocation && (
                                 <div className="badge badge-lg badge-success">
-                                    <i className="fa-solid fa-house mr-2"></i>
+                                    <i className="fa-duotone fa-regular fa-house mr-2"></i>
                                     Remote
                                 </div>
                             )}
                             {job.posted_at && (
                                 <div className="badge badge-lg">
-                                    <i className="fa-solid fa-calendar mr-2"></i>
+                                    <i className="fa-duotone fa-regular fa-calendar mr-2"></i>
                                     Posted {formatDate(job.posted_at)}
                                 </div>
                             )}
@@ -140,14 +140,14 @@ export default function JobDetailClient({
                                 {existingApplication ? (
                                     <>
                                         <button className="btn btn-primary btn-lg" disabled>
-                                            <i className={`fa-solid ${buttonConfig.icon}`}></i>
+                                            <i className={`fa-duotone fa-regular ${buttonConfig.icon}`}></i>
                                             {buttonConfig.text}
                                         </button>
                                         <Link
                                             href={`/portal/applications/${existingApplication.id}`}
                                             className="btn btn-outline btn-lg"
                                         >
-                                            <i className="fa-solid fa-arrow-right"></i>
+                                            <i className="fa-duotone fa-regular fa-arrow-right"></i>
                                             View Application
                                         </Link>
                                     </>
@@ -157,12 +157,12 @@ export default function JobDetailClient({
                                         className="btn btn-primary btn-lg"
                                         disabled={buttonConfig.disabled}
                                     >
-                                        <i className={`fa-solid ${buttonConfig.icon}`}></i>
+                                        <i className={`fa-duotone fa-regular ${buttonConfig.icon}`}></i>
                                         {buttonConfig.text}
                                     </button>
                                 )}
                                 <button className="btn btn-outline btn-lg">
-                                    <i className="fa-solid fa-bookmark"></i>
+                                    <i className="fa-duotone fa-regular fa-bookmark"></i>
                                     Save
                                 </button>
                             </div>
@@ -175,7 +175,7 @@ export default function JobDetailClient({
                     <div className="card bg-base-100 shadow mb-6">
                         <div className="card-body">
                             <h3 className="card-title text-xl mb-4">
-                                <i className="fa-solid fa-building"></i>
+                                <i className="fa-duotone fa-regular fa-building"></i>
                                 About {job.company?.name || 'Company'}
                             </h3>
                             <p className="whitespace-pre-line">{job.company.description}</p>
@@ -191,7 +191,7 @@ export default function JobDetailClient({
                             <div className="card bg-base-100 shadow h-full">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-4">
-                                        <i className="fa-solid fa-file-lines"></i>
+                                        <i className="fa-duotone fa-regular fa-file-lines"></i>
                                         Job Description
                                     </h3>
                                     <p className="whitespace-pre-line">{job.candidate_description || job.description}</p>
@@ -205,7 +205,7 @@ export default function JobDetailClient({
                             <div className="card bg-base-100 shadow sticky top-4">
                                 <div className="card-body">
                                     <h3 className="card-title text-xl mb-4">
-                                        <i className="fa-solid fa-circle-info"></i>
+                                        <i className="fa-duotone fa-regular fa-circle-info"></i>
                                         Job Details
                                     </h3>
 
@@ -213,7 +213,7 @@ export default function JobDetailClient({
                                         {/* Posted Date (relative) */}
                                         {(job.posted_at || job.created_at) && (
                                             <div className="flex items-start gap-3">
-                                                <i className="fa-solid fa-calendar text-base-content/70 mt-1"></i>
+                                                <i className="fa-duotone fa-regular fa-calendar text-base-content/70 mt-1"></i>
                                                 <div>
                                                     <div className="text-xs text-base-content/70">Posted</div>
                                                     <div className="font-semibold">
@@ -226,7 +226,7 @@ export default function JobDetailClient({
                                         {/* Job Status */}
                                         {job.status && (
                                             <div className="flex items-start gap-3">
-                                                <i className="fa-solid fa-circle-check text-base-content/70 mt-1"></i>
+                                                <i className="fa-duotone fa-regular fa-circle-check text-base-content/70 mt-1"></i>
                                                 <div>
                                                     <div className="text-xs text-base-content/70">Status</div>
                                                     <div className="font-semibold">
@@ -245,7 +245,7 @@ export default function JobDetailClient({
                                         {/* Department */}
                                         {job.department && (
                                             <div className="flex items-start gap-3">
-                                                <i className="fa-solid fa-sitemap text-base-content/70 mt-1"></i>
+                                                <i className="fa-duotone fa-regular fa-sitemap text-base-content/70 mt-1"></i>
                                                 <div>
                                                     <div className="text-xs text-base-content/70">Department</div>
                                                     <div className="font-semibold">{job.department}</div>
@@ -255,7 +255,7 @@ export default function JobDetailClient({
 
                                         {/* Job ID */}
                                         <div className="flex items-start gap-3">
-                                            <i className="fa-solid fa-hashtag text-base-content/70 mt-1"></i>
+                                            <i className="fa-duotone fa-regular fa-hashtag text-base-content/70 mt-1"></i>
                                             <div>
                                                 <div className="text-xs text-base-content/70">Job ID</div>
                                                 <div className="font-mono text-sm">{job.id.slice(0, 8)}</div>
@@ -270,7 +270,7 @@ export default function JobDetailClient({
                                 <div className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <h3 className="card-title text-xl mb-4">
-                                            <i className="fa-solid fa-list-check"></i>
+                                            <i className="fa-duotone fa-regular fa-list-check"></i>
                                             Requirements
                                         </h3>
 
@@ -278,7 +278,7 @@ export default function JobDetailClient({
                                         {job.requirements.filter(r => r.requirement_type === 'mandatory').length > 0 && (
                                             <div className="mb-4">
                                                 <h4 className="font-semibold text-sm text-error mb-2">
-                                                    <i className="fa-solid fa-asterisk text-xs"></i> Required
+                                                    <i className="fa-duotone fa-regular fa-asterisk text-xs"></i> Required
                                                 </h4>
                                                 <ul className="space-y-2">
                                                     {job.requirements
@@ -286,7 +286,7 @@ export default function JobDetailClient({
                                                         .sort((a, b) => a.sort_order - b.sort_order)
                                                         .map((req) => (
                                                             <li key={req.id} className="flex gap-2">
-                                                                <i className="fa-solid fa-check-circle text-error mt-1 shrink-0"></i>
+                                                                <i className="fa-duotone fa-regular fa-check-circle text-error mt-1 shrink-0"></i>
                                                                 <span className="text-sm">{req.description}</span>
                                                             </li>
                                                         ))}
@@ -298,7 +298,7 @@ export default function JobDetailClient({
                                         {job.requirements.filter(r => r.requirement_type === 'preferred').length > 0 && (
                                             <div>
                                                 <h4 className="font-semibold text-sm text-info mb-2">
-                                                    <i className="fa-solid fa-star text-xs"></i> Preferred
+                                                    <i className="fa-duotone fa-regular fa-star text-xs"></i> Preferred
                                                 </h4>
                                                 <ul className="space-y-2">
                                                     {job.requirements
@@ -306,7 +306,7 @@ export default function JobDetailClient({
                                                         .sort((a, b) => a.sort_order - b.sort_order)
                                                         .map((req) => (
                                                             <li key={req.id} className="flex gap-2">
-                                                                <i className="fa-solid fa-circle-plus text-info mt-1 shrink-0"></i>
+                                                                <i className="fa-duotone fa-regular fa-circle-plus text-info mt-1 shrink-0"></i>
                                                                 <span className="text-sm">{req.description}</span>
                                                             </li>
                                                         ))}
@@ -333,14 +333,14 @@ export default function JobDetailClient({
                                     href={`/sign-up?redirect=${encodeURIComponent(`/public/jobs/${job.id}`)}`}
                                     className="btn btn-lg bg-white text-primary hover:bg-gray-100"
                                 >
-                                    <i className="fa-solid fa-user-plus"></i>
+                                    <i className="fa-duotone fa-regular fa-user-plus"></i>
                                     Create Account
                                 </Link>
                                 <Link
                                     href={`/sign-in?redirect=${encodeURIComponent(`/public/jobs/${job.id}`)}`}
                                     className="btn btn-lg btn-outline text-white border-white hover:bg-white hover:text-primary"
                                 >
-                                    <i className="fa-solid fa-right-to-bracket"></i>
+                                    <i className="fa-duotone fa-regular fa-right-to-bracket"></i>
                                     Sign In
                                 </Link>
                             </div>

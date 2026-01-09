@@ -70,7 +70,7 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
             <div className="card bg-base-200 shadow">
                 <div className="card-body">
                     <div className="alert alert-error">
-                        <i className="fa-solid fa-circle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                         <span>Job details not found</span>
                     </div>
                 </div>
@@ -87,7 +87,7 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
                     className={`tab ${activeTab === 'recruiter' ? 'tab-active' : ''}`}
                     onClick={() => setActiveTab('recruiter')}
                 >
-                    <i className="fa-solid fa-user-tie mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-user-tie mr-2"></i>
                     Recruiter Details
                 </button>
                 <button
@@ -95,7 +95,7 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
                     className={`tab ${activeTab === 'candidate' ? 'tab-active' : ''}`}
                     onClick={() => setActiveTab('candidate')}
                 >
-                    <i className="fa-solid fa-user mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-user mr-2"></i>
                     Candidate Details
                 </button>
                 <button
@@ -103,7 +103,7 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
                     className={`tab ${activeTab === 'requirements' ? 'tab-active' : ''}`}
                     onClick={() => setActiveTab('requirements')}
                 >
-                    <i className="fa-solid fa-list-check mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-list-check mr-2"></i>
                     Requirements
                 </button>
                 <button
@@ -111,7 +111,7 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
                     className={`tab ${activeTab === 'pipeline' ? 'tab-active' : ''}`}
                     onClick={() => setActiveTab('pipeline')}
                 >
-                    <i className="fa-solid fa-users mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-users mr-2"></i>
                     Candidate Pipeline <span className='badge badge-info ml-2'>{job.applications?.length}</span>
                 </button>
             </div>
@@ -130,7 +130,7 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
                             </div>
                         ) : (
                             <div className="text-center py-8 text-base-content/60">
-                                <i className="fa-solid fa-info-circle text-4xl mb-3"></i>
+                                <i className="fa-duotone fa-regular fa-info-circle text-4xl mb-3"></i>
                                 <p>No recruiter description provided.</p>
                             </div>
                         )}
@@ -149,7 +149,7 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
                             </div>
                         ) : (
                             <div className="text-center py-8 text-base-content/60">
-                                <i className="fa-solid fa-info-circle text-4xl mb-3"></i>
+                                <i className="fa-duotone fa-regular fa-info-circle text-4xl mb-3"></i>
                                 <p>No candidate description provided.</p>
                             </div>
                         )}
@@ -165,7 +165,7 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
                                 {job.requirements.filter(r => r.requirement_type === 'mandatory').length > 0 && (
                                     <div className="mb-6">
                                         <h3 className="font-semibold text-lg mb-3">
-                                            <i className="fa-solid fa-check-circle mr-2 text-success"></i>
+                                            <i className="fa-duotone fa-regular fa-check-circle mr-2 text-success"></i>
                                             Mandatory Requirements
                                         </h3>
                                         <ul className="list-disc list-inside space-y-2">
@@ -180,7 +180,7 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
                             </>
                         ) : (
                             <div className="text-center py-8 text-base-content/60">
-                                <i className="fa-solid fa-info-circle text-4xl mb-3"></i>
+                                <i className="fa-duotone fa-regular fa-info-circle text-4xl mb-3"></i>
                                 <p>No requirements specified.</p>
                             </div>
                         )}

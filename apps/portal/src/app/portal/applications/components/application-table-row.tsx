@@ -71,14 +71,14 @@ export function ApplicationTableRow({
                     <div className="avatar avatar-placeholder">
                         <div className="bg-primary/10 text-primary rounded-full w-10">
                             <span className="text-sm">
-                                {isMasked ? <i className="fa-solid fa-user-secret"></i> : candidate.full_name[0]}
+                                {isMasked ? <i className="fa-duotone fa-regular fa-user-secret"></i> : candidate.full_name[0]}
                             </span>
                         </div>
                     </div>
                     <div>
                         <div className="font-bold flex items-center gap-2">
                             {isMasked && (
-                                <i className="fa-solid fa-eye-slash text-warning" title="Anonymous"></i>
+                                <i className="fa-duotone fa-regular fa-eye-slash text-warning" title="Anonymous"></i>
                             )}
                             {candidate.full_name}
                         </div>
@@ -151,7 +151,7 @@ export function ApplicationTableRow({
                             {isAccepting ? (
                                 <span className="loading loading-spinner loading-xs"></span>
                             ) : (
-                                <i className="fa-solid fa-check"></i>
+                                <i className="fa-duotone fa-regular fa-check"></i>
                             )}
                         </button>
                     )}
@@ -159,7 +159,7 @@ export function ApplicationTableRow({
                         href={`/portal/applications/${application.id}`}
                         className="btn btn-primary btn-sm"
                     >
-                        <i className="fa-solid fa-arrow-right"></i>
+                        <i className="fa-duotone fa-regular fa-arrow-right"></i>
                     </Link>
                 </div>
             </td>

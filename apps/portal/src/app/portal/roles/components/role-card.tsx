@@ -164,7 +164,7 @@ export function RoleCard({ job, allJobs, userRole, canManageRole }: RoleCardProp
                                 className={`badge badge-sm ${badge.class} gap-1 ${badge.animated ? 'animate-pulse' : ''}`}
                                 title={badge.tooltip}
                             >
-                                <i className={`fa-solid ${badge.icon}`}></i>
+                                <i className={`fa-duotone fa-regular ${badge.icon}`}></i>
                                 {badge.text}
                             </span>
                         ))}
@@ -186,7 +186,7 @@ export function RoleCard({ job, allJobs, userRole, canManageRole }: RoleCardProp
                                 }}
                                 className="btn btn-ghost btn-xs"
                             >
-                                <i className="fa-solid fa-pen"></i>
+                                <i className="fa-duotone fa-regular fa-pen"></i>
                             </span>
                         )}
                         <span className="text-primary text-sm font-medium group-hover:underline">

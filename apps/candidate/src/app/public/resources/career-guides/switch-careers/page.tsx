@@ -96,10 +96,10 @@ export default function SwitchCareersGuidePage() {
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto">
                         <Link href="/resources/career-guides" className="btn btn-ghost btn-sm mb-4">
-                            <i className="fa-solid fa-arrow-left"></i> Back to Career Guides
+                            <i className="fa-duotone fa-regular fa-arrow-left"></i> Back to Career Guides
                         </Link>
                         <div className="flex items-center gap-3 mb-4">
-                            <i className="fa-solid fa-arrows-turn-right text-4xl"></i>
+                            <i className="fa-duotone fa-regular fa-arrows-turn-right text-4xl"></i>
                             <div>
                                 <div className="badge badge-neutral mb-2">Career Change</div>
                                 <h1 className="text-4xl font-bold">How to Switch Careers Successfully</h1>
@@ -109,8 +109,8 @@ export default function SwitchCareersGuidePage() {
                             A comprehensive guide to transitioning into a new career path with confidence and strategic planning.
                         </p>
                         <div className="flex items-center gap-4 mt-4 text-sm opacity-80">
-                            <span><i className="fa-solid fa-clock"></i> 8 min read</span>
-                            <span><i className="fa-solid fa-user"></i> Career Experts</span>
+                            <span><i className="fa-duotone fa-regular fa-clock"></i> 8 min read</span>
+                            <span><i className="fa-duotone fa-regular fa-user"></i> Career Experts</span>
                         </div>
                     </div>
                 </div>
@@ -150,7 +150,7 @@ export default function SwitchCareersGuidePage() {
                                                     <ul className="space-y-2">
                                                         {step.tips.map((tip, i) => (
                                                             <li key={i} className="flex items-start gap-2">
-                                                                <i className="fa-solid fa-check text-success mt-1"></i>
+                                                                <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                                                 <span>{tip}</span>
                                                             </li>
                                                         ))}
@@ -173,7 +173,7 @@ export default function SwitchCareersGuidePage() {
                                 <div key={index} className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <h3 className="card-title text-lg text-error">
-                                            <i className="fa-solid fa-triangle-exclamation"></i>
+                                            <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
                                             {item.challenge}
                                         </h3>
                                         <p className="text-sm text-base-content/70">
@@ -190,24 +190,24 @@ export default function SwitchCareersGuidePage() {
                     <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow mb-12">
                         <div className="card-body">
                             <h3 className="card-title text-2xl mb-4">
-                                <i className="fa-solid fa-lightbulb"></i>
+                                <i className="fa-duotone fa-regular fa-lightbulb"></i>
                                 Key Takeaways
                             </h3>
                             <ul className="space-y-3">
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Start with thorough self-assessment and research before making any moves</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Focus on building transferable skills that bridge your old and new careers</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Network extensively in your target industry before applying to jobs</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Be patient and persistent - career transitions typically take 6-12 months</span>
                                 </li>
                             </ul>
@@ -220,15 +220,15 @@ export default function SwitchCareersGuidePage() {
                             <h3 className="card-title text-xl mb-4">Continue Your Journey</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <Link href="/resources/career-guides/networking" className="btn btn-outline">
-                                    <i className="fa-solid fa-users"></i>
+                                    <i className="fa-duotone fa-regular fa-users"></i>
                                     Building Your Network
                                 </Link>
                                 <Link href="/resources/salary-insights" className="btn btn-outline">
-                                    <i className="fa-solid fa-chart-line"></i>
+                                    <i className="fa-duotone fa-regular fa-chart-line"></i>
                                     Salary Insights
                                 </Link>
                                 <Link href="/public/jobs" className="btn btn-primary">
-                                    <i className="fa-solid fa-briefcase"></i>
+                                    <i className="fa-duotone fa-regular fa-briefcase"></i>
                                     Browse Jobs
                                 </Link>
                             </div>

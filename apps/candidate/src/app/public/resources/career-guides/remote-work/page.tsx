@@ -84,10 +84,10 @@ export default function RemoteWorkGuidePage() {
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto">
                         <Link href="/resources/career-guides" className="btn btn-ghost btn-sm mb-4">
-                            <i className="fa-solid fa-arrow-left"></i> Back to Career Guides
+                            <i className="fa-duotone fa-regular fa-arrow-left"></i> Back to Career Guides
                         </Link>
                         <div className="flex items-center gap-3 mb-4">
-                            <i className="fa-solid fa-house-laptop text-4xl"></i>
+                            <i className="fa-duotone fa-regular fa-house-laptop text-4xl"></i>
                             <div>
                                 <div className="badge badge-neutral mb-2">Remote Work</div>
                                 <h1 className="text-4xl font-bold">Remote Work Best Practices</h1>
@@ -97,8 +97,8 @@ export default function RemoteWorkGuidePage() {
                             Essential tips for staying productive and maintaining work-life balance while working remotely.
                         </p>
                         <div className="flex items-center gap-4 mt-4 text-sm opacity-80">
-                            <span><i className="fa-solid fa-clock"></i> 7 min read</span>
-                            <span><i className="fa-solid fa-user"></i> Remote Work Experts</span>
+                            <span><i className="fa-duotone fa-regular fa-clock"></i> 7 min read</span>
+                            <span><i className="fa-duotone fa-regular fa-user"></i> Remote Work Experts</span>
                         </div>
                     </div>
                 </div>
@@ -129,7 +129,7 @@ export default function RemoteWorkGuidePage() {
                                     <div className="card-body">
                                         <div className="flex items-start gap-4">
                                             <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                                                <i className={`fa-solid fa-${practice.icon} text-primary text-2xl`}></i>
+                                                <i className={`fa-duotone fa-regular fa-${practice.icon} text-primary text-2xl`}></i>
                                             </div>
                                             <div className="flex-1">
                                                 <h3 className="text-2xl font-bold mb-2">{practice.title}</h3>
@@ -138,7 +138,7 @@ export default function RemoteWorkGuidePage() {
                                                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                                     {practice.tips.map((tip, i) => (
                                                         <li key={i} className="flex items-start gap-2">
-                                                            <i className="fa-solid fa-check text-success mt-1"></i>
+                                                            <i className="fa-duotone fa-regular fa-check text-success mt-1"></i>
                                                             <span className="text-sm">{tip}</span>
                                                         </li>
                                                     ))}
@@ -160,7 +160,7 @@ export default function RemoteWorkGuidePage() {
                                 <div key={index} className="card bg-base-100 shadow">
                                     <div className="card-body">
                                         <div className="flex items-center gap-3 mb-4">
-                                            <i className={`fa-solid fa-${toolCategory.icon} text-2xl text-primary`}></i>
+                                            <i className={`fa-duotone fa-regular fa-${toolCategory.icon} text-2xl text-primary`}></i>
                                             <h3 className="card-title text-xl">{toolCategory.category}</h3>
                                         </div>
                                         <div className="flex flex-wrap gap-2">
@@ -178,7 +178,7 @@ export default function RemoteWorkGuidePage() {
                     <div className="card bg-base-100 shadow mb-12">
                         <div className="card-body">
                             <h2 className="card-title text-2xl mb-6">
-                                <i className="fa-solid fa-calendar-day text-primary"></i>
+                                <i className="fa-duotone fa-regular fa-calendar-day text-primary"></i>
                                 Sample Remote Work Day
                             </h2>
 
@@ -195,14 +195,14 @@ export default function RemoteWorkGuidePage() {
                                 ].map((item, index) => (
                                     <div key={index} className="flex items-center gap-4 p-3 hover:bg-base-200 rounded-lg transition-colors">
                                         <div className="w-20 font-mono text-sm text-primary font-bold">{item.time}</div>
-                                        <i className={`fa-solid fa-${item.icon} text-base-content/40`}></i>
+                                        <i className={`fa-duotone fa-regular fa-${item.icon} text-base-content/40`}></i>
                                         <div className="flex-1">{item.activity}</div>
                                     </div>
                                 ))}
                             </div>
 
                             <div className="alert alert-info mt-4">
-                                <i className="fa-solid fa-circle-info"></i>
+                                <i className="fa-duotone fa-regular fa-circle-info"></i>
                                 <span className="text-sm">Adjust this schedule to match your peak productivity hours and team's timezone</span>
                             </div>
                         </div>
@@ -212,24 +212,24 @@ export default function RemoteWorkGuidePage() {
                     <div className="card bg-gradient-to-br from-primary to-secondary text-primary-content shadow mb-12">
                         <div className="card-body">
                             <h3 className="card-title text-2xl mb-4">
-                                <i className="fa-solid fa-lightbulb"></i>
+                                <i className="fa-duotone fa-regular fa-lightbulb"></i>
                                 Key Takeaways
                             </h3>
                             <ul className="space-y-3">
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Create clear boundaries between work and personal life with a dedicated workspace</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Over-communicate with your team to compensate for lack of in-person interaction</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Maintain a consistent routine and schedule to stay productive</span>
                                 </li>
                                 <li className="flex items-start gap-3">
-                                    <i className="fa-solid fa-check-circle text-xl mt-0.5"></i>
+                                    <i className="fa-duotone fa-regular fa-check-circle text-xl mt-0.5"></i>
                                     <span>Prioritize connection with colleagues and protect your mental health</span>
                                 </li>
                             </ul>
@@ -242,15 +242,15 @@ export default function RemoteWorkGuidePage() {
                             <h3 className="card-title text-xl mb-4">Explore More</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <Link href="/public/jobs?q=remote" className="btn btn-primary">
-                                    <i className="fa-solid fa-house-laptop"></i>
+                                    <i className="fa-duotone fa-regular fa-house-laptop"></i>
                                     Remote Jobs
                                 </Link>
                                 <Link href="/resources/career-guides/first-90-days" className="btn btn-outline">
-                                    <i className="fa-solid fa-rocket"></i>
+                                    <i className="fa-duotone fa-regular fa-rocket"></i>
                                     First 90 Days
                                 </Link>
                                 <Link href="/resources/career-guides" className="btn btn-outline">
-                                    <i className="fa-solid fa-book"></i>
+                                    <i className="fa-duotone fa-regular fa-book"></i>
                                     All Guides
                                 </Link>
                             </div>

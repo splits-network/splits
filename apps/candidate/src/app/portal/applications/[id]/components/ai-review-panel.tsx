@@ -47,17 +47,17 @@ const getFitScoreColor = (score: number) => {
 };
 
 const getFitScoreIcon = (score: number) => {
-    if (score >= 90) return 'fa-solid fa-trophy';
-    if (score >= 70) return 'fa-solid fa-chart-line';
-    if (score >= 50) return 'fa-solid fa-chart-simple';
-    return 'fa-solid fa-triangle-exclamation';
+    if (score >= 90) return 'fa-duotone fa-regular fa-trophy';
+    if (score >= 70) return 'fa-duotone fa-regular fa-chart-line';
+    if (score >= 50) return 'fa-duotone fa-regular fa-chart-simple';
+    return 'fa-duotone fa-regular fa-triangle-exclamation';
 };
 
 const getConfidenceIcon = (confidence: number) => {
-    if (confidence >= 90) return 'fa-solid fa-shield-check';
-    if (confidence >= 70) return 'fa-solid fa-shield-halved';
-    if (confidence >= 50) return 'fa-solid fa-shield';
-    return 'fa-solid fa-shield-exclamation';
+    if (confidence >= 90) return 'fa-duotone fa-regular fa-shield-check';
+    if (confidence >= 70) return 'fa-duotone fa-regular fa-shield-halved';
+    if (confidence >= 50) return 'fa-duotone fa-regular fa-shield';
+    return 'fa-duotone fa-regular fa-shield-exclamation';
 };
 
 const getConfidenceColor = (confidence: number) => {
@@ -156,7 +156,7 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
-                        <i className="fa-solid fa-robot"></i>
+                        <i className="fa-duotone fa-regular fa-robot"></i>
                         AI Analysis
                     </h2>
                     <div className="flex items-center justify-center py-8">
@@ -172,11 +172,11 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
-                        <i className="fa-solid fa-robot"></i>
+                        <i className="fa-duotone fa-regular fa-robot"></i>
                         AI Analysis
                     </h2>
                     <div className="alert alert-warning">
-                        <i className="fa-solid fa-triangle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
                         <div>
                             <div className="font-semibold">Unable to Load AI Review</div>
                             <div className="text-sm mt-1">{error}</div>
@@ -195,7 +195,7 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                             </>
                         ) : (
                             <>
-                                <i className="fa-solid fa-rotate"></i>
+                                <i className="fa-duotone fa-regular fa-rotate"></i>
                                 Request New Review
                             </>
                         )}
@@ -210,11 +210,11 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
-                        <i className="fa-solid fa-robot"></i>
+                        <i className="fa-duotone fa-regular fa-robot"></i>
                         AI Analysis
                     </h2>
                     <div className="alert alert-info">
-                        <i className="fa-solid fa-circle-info"></i>
+                        <i className="fa-duotone fa-regular fa-circle-info"></i>
                         <span>Your application is being reviewed by our AI system. You'll receive an email when the analysis is complete.</span>
                     </div>
                 </div>
@@ -226,7 +226,7 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
         <div className="card bg-base-100 shadow">
             <div className="card-body">
                 <h2 className="card-title mb-4">
-                    <i className="fa-solid fa-robot"></i>
+                    <i className="fa-duotone fa-regular fa-robot"></i>
                     AI Analysis
                 </h2>
 
@@ -270,7 +270,7 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                 {aiReview.strengths && aiReview.strengths.length > 0 && (
                     <div className="mt-4">
                         <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                            <i className="fa-solid fa-circle-check text-success"></i>
+                            <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
                             Your Strengths
                         </h3>
                         <ul className="list-disc list-inside space-y-1">
@@ -285,7 +285,7 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                 {aiReview.concerns && aiReview.concerns.length > 0 && (
                     <div className="mt-4">
                         <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                            <i className="fa-solid fa-circle-exclamation text-warning"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation text-warning"></i>
                             Areas to Address
                         </h3>
                         <ul className="list-disc list-inside space-y-1">
@@ -350,9 +350,9 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                             <h4 className="font-medium text-sm mb-1">Experience</h4>
                             <div className="flex items-center gap-2">
                                 {aiReview.experience_analysis.meets_requirement ? (
-                                    <i className="fa-solid fa-circle-check text-success"></i>
+                                    <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
                                 ) : (
-                                    <i className="fa-solid fa-circle-xmark text-warning"></i>
+                                    <i className="fa-duotone fa-regular fa-circle-xmark text-warning"></i>
                                 )}
                                 <span className="text-sm">
                                     {aiReview.experience_analysis.candidate_years} years (Required: {aiReview.experience_analysis.required_years})

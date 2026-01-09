@@ -99,7 +99,7 @@ export default function StepReview({
 
             {error && (
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
@@ -115,7 +115,7 @@ export default function StepReview({
                         </div>
                         {job.location && (
                             <div className="text-sm text-base-content/60">
-                                <i className="fa-solid fa-location-dot"></i> {job.location}
+                                <i className="fa-duotone fa-regular fa-location-dot"></i> {job.location}
                             </div>
                         )}
                     </div>
@@ -129,11 +129,11 @@ export default function StepReview({
                     <div className="space-y-2">
                         {selectedDocs.map((doc) => (
                             <div key={doc.id} className="flex items-center gap-2">
-                                <i className="fa-solid fa-file text-base-content/60"></i>
+                                <i className="fa-duotone fa-regular fa-file text-base-content/60"></i>
                                 <span>{doc.file_name}</span>
                                 {doc.id === primaryResumeId && (
                                     <span className="badge badge-primary badge-sm">
-                                        <i className="fa-solid fa-star"></i>
+                                        <i className="fa-duotone fa-regular fa-star"></i>
                                         Primary
                                     </span>
                                 )}
@@ -176,7 +176,7 @@ export default function StepReview({
 
             {/* Important Notice */}
             <div className="alert">
-                <i className="fa-solid fa-circle-info"></i>
+                <i className="fa-duotone fa-regular fa-circle-info"></i>
                 <div>
                     <div className="font-semibold">Before you submit:</div>
                     <ul className="list-disc list-inside text-sm mt-1">
@@ -195,7 +195,7 @@ export default function StepReview({
                     onClick={onBack}
                     disabled={submitting}
                 >
-                    <i className="fa-solid fa-arrow-left"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
                     Back
                 </button>
                 <div className="flex gap-2">
@@ -212,7 +212,7 @@ export default function StepReview({
                             </>
                         ) : (
                             <>
-                                <i className="fa-solid fa-floppy-disk"></i>
+                                <i className="fa-duotone fa-regular fa-floppy-disk"></i>
                                 Save as Draft
                             </>
                         )}
@@ -230,7 +230,7 @@ export default function StepReview({
                             </>
                         ) : (
                             <>
-                                <i className="fa-solid fa-paper-plane"></i>
+                                <i className="fa-duotone fa-regular fa-paper-plane"></i>
                                 Submit Application
                             </>
                         )}

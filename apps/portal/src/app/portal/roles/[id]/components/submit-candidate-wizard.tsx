@@ -286,7 +286,7 @@ export default function SubmitCandidateWizard({
                         </p>
                     </div>
                     <button onClick={onClose} className="btn btn-sm btn-circle btn-ghost">
-                        <i className="fa-solid fa-xmark"></i>
+                        <i className="fa-duotone fa-regular fa-xmark"></i>
                     </button>
                 </div>
 
@@ -306,7 +306,7 @@ export default function SubmitCandidateWizard({
                 {/* Error Alert */}
                 {error && (
                     <div className="alert alert-error mb-4">
-                        <i className="fa-solid fa-circle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                         <span>{error}</span>
                     </div>
                 )}
@@ -322,14 +322,14 @@ export default function SubmitCandidateWizard({
                                     className={`tab ${mode === 'select' ? 'tab-active' : ''}`}
                                     onClick={() => setMode('select')}
                                 >
-                                    <i className="fa-solid fa-user-check mr-2"></i>
+                                    <i className="fa-duotone fa-regular fa-user-check mr-2"></i>
                                     Select Existing
                                 </a>
                                 <a
                                     className={`tab ${mode === 'new' ? 'tab-active' : ''}`}
                                     onClick={() => setMode('new')}
                                 >
-                                    <i className="fa-solid fa-user-plus mr-2"></i>
+                                    <i className="fa-duotone fa-regular fa-user-plus mr-2"></i>
                                     Add New
                                 </a>
                             </div>
@@ -369,7 +369,7 @@ export default function SubmitCandidateWizard({
                                         </div>
                                     ) : candidates.length === 0 ? (
                                         <div className="alert">
-                                            <i className="fa-solid fa-info-circle"></i>
+                                            <i className="fa-duotone fa-regular fa-info-circle"></i>
                                             <span>
                                                 {debouncedSearch
                                                     ? `No candidates found matching "${debouncedSearch}". Try a different search term or add a new candidate.`
@@ -448,7 +448,7 @@ export default function SubmitCandidateWizard({
                                                             onClick={() => setPage(Math.max(1, page - 1))}
                                                             disabled={page === 1}
                                                         >
-                                                            <i className="fa-solid fa-chevron-left"></i>
+                                                            <i className="fa-duotone fa-regular fa-chevron-left"></i>
                                                         </button>
                                                         <button className="join-item btn btn-sm">
                                                             Page {page}
@@ -458,7 +458,7 @@ export default function SubmitCandidateWizard({
                                                             onClick={() => setPage(Math.min(totalPages, page + 1))}
                                                             disabled={page === totalPages}
                                                         >
-                                                            <i className="fa-solid fa-chevron-right"></i>
+                                                            <i className="fa-duotone fa-regular fa-chevron-right"></i>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -470,7 +470,7 @@ export default function SubmitCandidateWizard({
                                 /* New Candidate Form */
                                 <div className="space-y-4">
                                     <div className="alert alert-info">
-                                        <i className="fa-solid fa-info-circle"></i>
+                                        <i className="fa-duotone fa-regular fa-info-circle"></i>
                                         <span>This candidate will be added to your database and proposed for this role.</span>
                                     </div>
 
@@ -566,7 +566,7 @@ export default function SubmitCandidateWizard({
                         <div className="space-y-6">
                             {/* Selected Candidate Summary */}
                             <div className="alert alert-info">
-                                <i className="fa-solid fa-user"></i>
+                                <i className="fa-duotone fa-regular fa-user"></i>
                                 <div>
                                     <div className="font-semibold">{selectedCandidate.full_name}</div>
                                     <div className="text-sm">{selectedCandidate.email}</div>
@@ -603,7 +603,7 @@ export default function SubmitCandidateWizard({
                                 />
                                 {resumeFile && (
                                     <div className="mt-2 flex items-center gap-2">
-                                        <i className="fa-solid fa-file text-primary"></i>
+                                        <i className="fa-duotone fa-regular fa-file text-primary"></i>
                                         <span className="text-sm">{resumeFile.name}</span>
                                         <button
                                             type="button"
@@ -615,7 +615,7 @@ export default function SubmitCandidateWizard({
                                                 }
                                             }}
                                         >
-                                            <i className="fa-solid fa-times"></i>
+                                            <i className="fa-duotone fa-regular fa-times"></i>
                                         </button>
                                     </div>
                                 )}
@@ -627,7 +627,7 @@ export default function SubmitCandidateWizard({
                     {currentStep === 3 && selectedCandidate && (
                         <div className="space-y-6">
                             <div className="alert alert-info">
-                                <i className="fa-solid fa-info-circle"></i>
+                                <i className="fa-duotone fa-regular fa-info-circle"></i>
                                 <span>Review the details below. {selectedCandidate.full_name} will receive an email notification and must approve this opportunity before it proceeds.</span>
                             </div>
 
@@ -635,13 +635,13 @@ export default function SubmitCandidateWizard({
                             <div className="card bg-base-200">
                                 <div className="card-body">
                                     <h4 className="font-semibold mb-2">
-                                        <i className="fa-solid fa-briefcase mr-2"></i>
+                                        <i className="fa-duotone fa-regular fa-briefcase mr-2"></i>
                                         Role
                                     </h4>
                                     <div className="text-lg font-semibold">{roleTitle}</div>
                                     {companyName && (
                                         <div className="text-sm text-base-content/70">
-                                            <i className="fa-solid fa-building mr-1"></i>
+                                            <i className="fa-duotone fa-regular fa-building mr-1"></i>
                                             {companyName}
                                         </div>
                                     )}
@@ -652,7 +652,7 @@ export default function SubmitCandidateWizard({
                             <div className="card bg-base-200">
                                 <div className="card-body">
                                     <h4 className="font-semibold mb-2">
-                                        <i className="fa-solid fa-user mr-2"></i>
+                                        <i className="fa-duotone fa-regular fa-user mr-2"></i>
                                         Candidate
                                     </h4>
                                     <div className="space-y-2">
@@ -667,7 +667,7 @@ export default function SubmitCandidateWizard({
                                         )}
                                         {selectedCandidate.location && (
                                             <div className="text-sm text-base-content/70">
-                                                <i className="fa-solid fa-location-dot mr-1"></i>
+                                                <i className="fa-duotone fa-regular fa-location-dot mr-1"></i>
                                                 {selectedCandidate.location}
                                             </div>
                                         )}
@@ -680,7 +680,7 @@ export default function SubmitCandidateWizard({
                                 <div className="card bg-base-200">
                                     <div className="card-body">
                                         <h4 className="font-semibold mb-2">
-                                            <i className="fa-solid fa-message mr-2"></i>
+                                            <i className="fa-duotone fa-regular fa-message mr-2"></i>
                                             Your Pitch
                                         </h4>
                                         <div className="whitespace-pre-wrap text-sm">{pitch}</div>
@@ -693,11 +693,11 @@ export default function SubmitCandidateWizard({
                                 <div className="card bg-base-200">
                                     <div className="card-body">
                                         <h4 className="font-semibold mb-2">
-                                            <i className="fa-solid fa-file mr-2"></i>
+                                            <i className="fa-duotone fa-regular fa-file mr-2"></i>
                                             Resume
                                         </h4>
                                         <div className="flex items-center gap-2 text-sm">
-                                            <i className="fa-solid fa-file-pdf text-error"></i>
+                                            <i className="fa-duotone fa-regular fa-file-pdf text-error"></i>
                                             {resumeFile.name}
                                         </div>
                                     </div>
@@ -715,7 +715,7 @@ export default function SubmitCandidateWizard({
                     <div className="flex gap-2">
                         {currentStep > 1 && (
                             <button onClick={handleBack} className="btn" disabled={submitting}>
-                                <i className="fa-solid fa-chevron-left"></i>
+                                <i className="fa-duotone fa-regular fa-chevron-left"></i>
                                 Back
                             </button>
                         )}
@@ -729,7 +729,7 @@ export default function SubmitCandidateWizard({
                                 }
                             >
                                 Next
-                                <i className="fa-solid fa-chevron-right"></i>
+                                <i className="fa-duotone fa-regular fa-chevron-right"></i>
                             </button>
                         ) : (
                             <button
@@ -744,7 +744,7 @@ export default function SubmitCandidateWizard({
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-paper-plane"></i>
+                                        <i className="fa-duotone fa-regular fa-paper-plane"></i>
                                         Send to Candidate
                                     </>
                                 )}

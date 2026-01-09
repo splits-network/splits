@@ -178,7 +178,7 @@ export default function EditRolePage() {
     if (!job) {
         return (
             <div className="alert alert-error">
-                <i className="fa-solid fa-circle-exclamation"></i>
+                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                 <span>Role not found</span>
             </div>
         );
@@ -189,7 +189,7 @@ export default function EditRolePage() {
             {/* Header */}
             <div>
                 <Link href={`/portal/roles/${roleId}`} className="text-sm text-primary hover:underline mb-2 inline-block">
-                    <i className="fa-solid fa-arrow-left mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left mr-2"></i>
                     Back to Role
                 </Link>
                 <h1 className="text-3xl font-bold">Edit Role</h1>
@@ -386,7 +386,7 @@ export default function EditRolePage() {
                         {/* Requirements */}
                         <div className="divider">Requirements</div>
                         <div className="alert alert-info mb-4">
-                            <i className="fa-solid fa-circle-info"></i>
+                            <i className="fa-duotone fa-regular fa-circle-info"></i>
                             <div>
                                 <p className="font-medium">Define what you're looking for in candidates</p>
                                 <p className="text-sm opacity-80">Mandatory requirements are must-haves that candidates should meet. Preferred requirements are nice-to-haves that make a candidate more competitive.</p>
@@ -404,7 +404,7 @@ export default function EditRolePage() {
                                         className="btn btn-sm btn-ghost"
                                         onClick={() => setRequirements([...requirements, { type: 'mandatory', description: '' }])}
                                     >
-                                        <i className="fa-solid fa-plus mr-1"></i>
+                                        <i className="fa-duotone fa-regular fa-plus mr-1"></i>
                                         Add Mandatory
                                     </button>
                                 </div>
@@ -428,7 +428,7 @@ export default function EditRolePage() {
                                                 className="btn btn-ghost btn-square"
                                                 onClick={() => setRequirements(requirements.filter((_, i) => i !== actualIdx))}
                                             >
-                                                <i className="fa-solid fa-trash"></i>
+                                                <i className="fa-duotone fa-regular fa-trash"></i>
                                             </button>
                                         </div>
                                     );
@@ -446,7 +446,7 @@ export default function EditRolePage() {
                                         className="btn btn-sm btn-ghost"
                                         onClick={() => setRequirements([...requirements, { type: 'preferred', description: '' }])}
                                     >
-                                        <i className="fa-solid fa-plus mr-1"></i>
+                                        <i className="fa-duotone fa-regular fa-plus mr-1"></i>
                                         Add Preferred
                                     </button>
                                 </div>
@@ -470,7 +470,7 @@ export default function EditRolePage() {
                                                 className="btn btn-ghost btn-square"
                                                 onClick={() => setRequirements(requirements.filter((_, i) => i !== actualIdx))}
                                             >
-                                                <i className="fa-solid fa-trash"></i>
+                                                <i className="fa-duotone fa-regular fa-trash"></i>
                                             </button>
                                         </div>
                                     );
@@ -481,7 +481,7 @@ export default function EditRolePage() {
                         {/* Pre-Screen Questions */}
                         <div className="divider">Pre-Screen Questions</div>
                         <div className="alert alert-info mb-4">
-                            <i className="fa-solid fa-circle-info"></i>
+                            <i className="fa-duotone fa-regular fa-circle-info"></i>
                             <div>
                                 <p className="font-medium">Screen candidates before review</p>
                                 <p className="text-sm opacity-80">Ask specific questions to gather important information upfront. Question types: <strong>Text</strong> (open-ended), <strong>Yes/No</strong> (binary), <strong>Select</strong> (single choice), <strong>Multi-Select</strong> (multiple choices).</p>
@@ -498,7 +498,7 @@ export default function EditRolePage() {
                                     className="btn btn-sm btn-ghost"
                                     onClick={() => setPreScreenQuestions([...preScreenQuestions, { question: '', question_type: 'text', is_required: true }])}
                                 >
-                                    <i className="fa-solid fa-plus mr-1"></i>
+                                    <i className="fa-duotone fa-regular fa-plus mr-1"></i>
                                     Add Question
                                 </button>
                             </div>
@@ -522,7 +522,7 @@ export default function EditRolePage() {
                                                 className="btn btn-ghost btn-square"
                                                 onClick={() => setPreScreenQuestions(preScreenQuestions.filter((_, i) => i !== idx))}
                                             >
-                                                <i className="fa-solid fa-trash"></i>
+                                                <i className="fa-duotone fa-regular fa-trash"></i>
                                             </button>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
@@ -576,7 +576,7 @@ export default function EditRolePage() {
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-save mr-2"></i>
+                                        <i className="fa-duotone fa-regular fa-save mr-2"></i>
                                         Save Changes
                                     </>
                                 )}

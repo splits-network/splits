@@ -59,7 +59,7 @@ export default function CareerGuidesPage() {
                 <div className="container mx-auto px-4">
                     <div className="max-w-3xl">
                         <div className="flex items-center gap-2 mb-4">
-                            <i className="fa-solid fa-book text-3xl"></i>
+                            <i className="fa-duotone fa-regular fa-book text-3xl"></i>
                             <h1 className="text-4xl font-bold">Career Guides</h1>
                         </div>
                         <p className="text-xl opacity-90">
@@ -76,7 +76,7 @@ export default function CareerGuidesPage() {
                         <div key={index} className="card bg-base-100 shadow hover:shadow transition-shadow">
                             <div className="card-body">
                                 <div className="flex items-start justify-between mb-3">
-                                    <i className={`fa-solid fa-${guide.icon} text-3xl text-primary`}></i>
+                                    <i className={`fa-duotone fa-regular fa-${guide.icon} text-3xl text-primary`}></i>
                                     <span className="badge badge-ghost">{guide.category}</span>
                                 </div>
                                 <h2 className="card-title text-xl mb-2">{guide.title}</h2>
@@ -85,10 +85,10 @@ export default function CareerGuidesPage() {
                                 </p>
                                 <div className="card-actions justify-between items-center mt-4 pt-4 border-t border-base-300">
                                     <span className="text-xs text-base-content/60">
-                                        <i className="fa-solid fa-clock"></i> {guide.readTime}
+                                        <i className="fa-duotone fa-regular fa-clock"></i> {guide.readTime}
                                     </span>
                                     <Link href={guide.href} className="btn btn-primary btn-sm">
-                                        Read Guide <i className="fa-solid fa-arrow-right"></i>
+                                        Read Guide <i className="fa-duotone fa-regular fa-arrow-right"></i>
                                     </Link>
                                 </div>
                             </div>
@@ -107,7 +107,7 @@ export default function CareerGuidesPage() {
                                 Browse thousands of opportunities from top companies.
                             </p>
                             <Link href="/public/jobs" className="btn btn-neutral">
-                                Explore Jobs <i className="fa-solid fa-briefcase"></i>
+                                Explore Jobs <i className="fa-duotone fa-regular fa-briefcase"></i>
                             </Link>
                         </div>
                     </div>

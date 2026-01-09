@@ -84,7 +84,7 @@ export function MyRecruitersSection() {
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title text-lg">
-                        <i className="fa-solid fa-user-tie"></i>
+                        <i className="fa-duotone fa-regular fa-user-tie"></i>
                         My Recruiters
                     </h2>
                     <div className="flex items-center justify-center py-12">
@@ -100,11 +100,11 @@ export function MyRecruitersSection() {
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title text-lg">
-                        <i className="fa-solid fa-user-tie"></i>
+                        <i className="fa-duotone fa-regular fa-user-tie"></i>
                         My Recruiters
                     </h2>
                     <div className="alert alert-error">
-                        <i className="fa-solid fa-circle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                         <span>{error}</span>
                     </div>
                 </div>
@@ -118,7 +118,7 @@ export function MyRecruitersSection() {
         <div className="card bg-base-100 shadow">
             <div className="card-body">
                 <h2 className="card-title text-lg">
-                    <i className="fa-solid fa-user-tie"></i>
+                    <i className="fa-duotone fa-regular fa-user-tie"></i>
                     My Recruiters
                 </h2>
 
@@ -131,7 +131,7 @@ export function MyRecruitersSection() {
                     </div>
                 ) : (
                     <div className="alert mt-4">
-                        <i className="fa-solid fa-info-circle"></i>
+                        <i className="fa-duotone fa-regular fa-info-circle"></i>
                         <div className="flex flex-col gap-1">
                             <span className="font-semibold">No active recruiter relationships</span>
                             <span className="text-sm">
@@ -149,7 +149,7 @@ export function MyRecruitersSection() {
                             className="btn btn-ghost btn-sm w-full justify-between"
                         >
                             <span>
-                                <i className={`fa-solid fa-chevron-${showHistorical ? 'down' : 'right'} mr-2`}></i>
+                                <i className={`fa-duotone fa-regular fa-chevron-${showHistorical ? 'down' : 'right'} mr-2`}></i>
                                 Past Relationships ({recruiters.expired.length + recruiters.terminated.length})
                             </span>
                         </button>
@@ -195,7 +195,7 @@ export function MyRecruitersSection() {
                 {/* Help Text */}
                 <div className="mt-6 pt-4 border-t border-base-300">
                     <p className="text-sm text-base-content/60">
-                        <i className="fa-solid fa-lightbulb mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-lightbulb mr-2"></i>
                         Recruiter relationships last 12 months and can be renewed. Contact your recruiter if you have questions.
                     </p>
                 </div>

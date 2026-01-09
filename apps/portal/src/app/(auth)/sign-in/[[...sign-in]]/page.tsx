@@ -88,7 +88,7 @@ export default function SignInPage() {
                         </h2>
 
                         <div className="alert alert-info mb-4">
-                            <i className="fa-solid fa-circle-info"></i>
+                            <i className="fa-duotone fa-regular fa-circle-info"></i>
                             <span>You're already signed in to your account.</span>
                         </div>
 
@@ -101,7 +101,7 @@ export default function SignInPage() {
                                 onClick={() => router.push('/portal/dashboard')}
                                 className="btn btn-primary w-full"
                             >
-                                <i className="fa-solid fa-home"></i>
+                                <i className="fa-duotone fa-regular fa-home"></i>
                                 Go to Dashboard
                             </button>
                             <button
@@ -116,7 +116,7 @@ export default function SignInPage() {
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-right-from-bracket"></i>
+                                        <i className="fa-duotone fa-regular fa-right-from-bracket"></i>
                                         Sign Out
                                     </>
                                 )}
@@ -141,7 +141,7 @@ export default function SignInPage() {
 
                     {error && (
                         <div className="alert alert-error mb-4">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <span>{error}</span>
                         </div>
                     )}

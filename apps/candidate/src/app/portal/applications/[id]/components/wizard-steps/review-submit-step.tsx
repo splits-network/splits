@@ -71,7 +71,7 @@ export function ReviewSubmitStep({
         <div className="space-y-6">
             <div>
                 <h4 className="text-lg font-semibold mb-2">
-                    <i className="fa-solid fa-check-circle"></i>
+                    <i className="fa-duotone fa-regular fa-check-circle"></i>
                     {' '}Review Your Application
                 </h4>
                 <p className="text-base-content/70 text-sm">
@@ -83,7 +83,7 @@ export function ReviewSubmitStep({
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h5 className="font-semibold flex items-center gap-2">
-                        <i className="fa-solid fa-file text-primary"></i>
+                        <i className="fa-duotone fa-regular fa-file text-primary"></i>
                         Documents ({totalDocCount})
                     </h5>
 
@@ -96,7 +96,7 @@ export function ReviewSubmitStep({
                             {/* Primary Document */}
                             {primaryDocument && (
                                 <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/10">
-                                    <i className="fa-solid fa-star text-primary"></i>
+                                    <i className="fa-duotone fa-regular fa-star text-primary"></i>
                                     <div className="flex-1">
                                         <div className="font-medium">
                                             {'name' in primaryDocument
@@ -119,7 +119,7 @@ export function ReviewSubmitStep({
                                         key={doc.id}
                                         className="flex items-center gap-3 p-3 rounded-lg bg-base-200"
                                     >
-                                        <i className="fa-solid fa-file text-base-content/60"></i>
+                                        <i className="fa-duotone fa-regular fa-file text-base-content/60"></i>
                                         <div className="flex-1">
                                             <div className="font-medium">{doc.file_name}</div>
                                             <div className="text-sm text-base-content/60">
@@ -139,7 +139,7 @@ export function ReviewSubmitStep({
                                         key={index}
                                         className="flex items-center gap-3 p-3 rounded-lg bg-base-200"
                                     >
-                                        <i className="fa-solid fa-file-arrow-up text-success"></i>
+                                        <i className="fa-duotone fa-regular fa-file-arrow-up text-success"></i>
                                         <div className="flex-1">
                                             <div className="font-medium">{doc.name}</div>
                                             <div className="text-sm text-base-content/60">
@@ -159,7 +159,7 @@ export function ReviewSubmitStep({
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h5 className="font-semibold flex items-center gap-2">
-                            <i className="fa-solid fa-clipboard-question text-primary"></i>
+                            <i className="fa-duotone fa-regular fa-clipboard-question text-primary"></i>
                             Pre-screening Answers ({answeredQuestions.length})
                         </h5>
                         <div className="space-y-4">
@@ -181,7 +181,7 @@ export function ReviewSubmitStep({
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h5 className="font-semibold flex items-center gap-2">
-                            <i className="fa-solid fa-note-sticky text-primary"></i>
+                            <i className="fa-duotone fa-regular fa-note-sticky text-primary"></i>
                             Your Notes
                         </h5>
                         <div className="text-base-content/70 p-3 rounded-lg bg-base-200 whitespace-pre-wrap">
@@ -193,7 +193,7 @@ export function ReviewSubmitStep({
 
             {/* Submission Warning */}
             <div className="alert alert-warning">
-                <i className="fa-solid fa-exclamation-triangle"></i>
+                <i className="fa-duotone fa-regular fa-exclamation-triangle"></i>
                 <div>
                     <div className="font-semibold">Before you submit</div>
                     <div className="text-sm">
@@ -211,7 +211,7 @@ export function ReviewSubmitStep({
                     className="btn btn-outline"
                     disabled={submitting}
                 >
-                    <i className="fa-solid fa-arrow-left"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
                     Back
                 </button>
                 <button
@@ -227,7 +227,7 @@ export function ReviewSubmitStep({
                         </>
                     ) : (
                         <>
-                            <i className="fa-solid fa-paper-plane"></i>
+                            <i className="fa-duotone fa-regular fa-paper-plane"></i>
                             Submit Application
                         </>
                     )}

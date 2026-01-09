@@ -38,7 +38,7 @@ export default function StageUpdateModal({
         <div className="modal modal-open">
             <div className="modal-box max-w-2xl">
                 <h3 className="font-bold text-lg mb-4">
-                    <i className="fa-solid fa-arrow-right-arrow-left mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-right-arrow-left mr-2"></i>
                     Update Application Stage
                 </h3>
 
@@ -46,7 +46,7 @@ export default function StageUpdateModal({
                     <div className="space-y-4">
                         {/* Current Stage Info */}
                         <div className="alert alert-info">
-                            <i className="fa-solid fa-info-circle"></i>
+                            <i className="fa-duotone fa-regular fa-info-circle"></i>
                             <div>
                                 <p className="text-sm">
                                     Current stage: <strong>{STAGES.find(s => s.value === currentStage)?.label}</strong>
@@ -83,13 +83,13 @@ export default function StageUpdateModal({
                                         type="button"
                                         onClick={() => setSelectedStage(stage.value)}
                                         className={`btn btn-sm ${isSelected
-                                                ? 'btn-primary'
-                                                : isCurrent
-                                                    ? 'btn-outline'
-                                                    : 'btn-ghost'
+                                            ? 'btn-primary'
+                                            : isCurrent
+                                                ? 'btn-outline'
+                                                : 'btn-ghost'
                                             }`}
                                     >
-                                        <i className={`fa-solid ${stage.icon}`}></i>
+                                        <i className={`fa-duotone fa-regular ${stage.icon}`}></i>
                                         {stage.label}
                                     </button>
                                 );
@@ -115,7 +115,7 @@ export default function StageUpdateModal({
                         {/* Warning for Terminal Stages */}
                         {(selectedStage === 'hired' || selectedStage === 'rejected') && (
                             <div className={`alert ${selectedStage === 'hired' ? 'alert-success' : 'alert-warning'}`}>
-                                <i className={`fa-solid ${selectedStage === 'hired' ? 'fa-check-circle' : 'fa-exclamation-triangle'}`}></i>
+                                <i className={`fa-duotone fa-regular ${selectedStage === 'hired' ? 'fa-check-circle' : 'fa-exclamation-triangle'}`}></i>
                                 <div>
                                     <p className="text-sm font-semibold">
                                         {selectedStage === 'hired' ? 'Final Stage' : 'Application Will Be Closed'}
@@ -152,7 +152,7 @@ export default function StageUpdateModal({
                                 </>
                             ) : (
                                 <>
-                                    <i className="fa-solid fa-save"></i>
+                                    <i className="fa-duotone fa-regular fa-save"></i>
                                     Update Stage
                                 </>
                             )}

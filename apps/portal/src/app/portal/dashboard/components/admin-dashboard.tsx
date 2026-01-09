@@ -131,7 +131,7 @@ export default function AdminDashboard() {
                         </div>
                         <div className="flex gap-2">
                             <Link href="/admin/metrics" className="btn btn-sm bg-white/20 border-0 hover:bg-white/30 text-white">
-                                <i className="fa-solid fa-chart-bar"></i>
+                                <i className="fa-duotone fa-regular fa-chart-bar"></i>
                                 View Metrics
                             </Link>
                         </div>
@@ -149,8 +149,8 @@ export default function AdminDashboard() {
                                 ${alert.severity === 'error' ? 'bg-error/20' :
                                     alert.severity === 'warning' ? 'bg-warning/20' : 'bg-info/20'}
                             `}>
-                                <i className={`fa-solid fa-bell ${alert.severity === 'error' ? 'text-error' :
-                                        alert.severity === 'warning' ? 'text-warning' : 'text-info'
+                                <i className={`fa-duotone fa-regular fa-bell ${alert.severity === 'error' ? 'text-error' :
+                                    alert.severity === 'warning' ? 'text-warning' : 'text-info'
                                     }`}></i>
                             </div>
                             <div className="flex-1">
@@ -159,7 +159,7 @@ export default function AdminDashboard() {
                             </div>
                             <Link href={alert.link} className="btn btn-sm">
                                 Review
-                                <i className="fa-solid fa-arrow-right ml-1"></i>
+                                <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                             </Link>
                         </div>
                     ))}
@@ -213,7 +213,7 @@ export default function AdminDashboard() {
                     headerActions={
                         <Link href="/admin/revenue" className="btn btn-sm btn-ghost text-success">
                             View Report
-                            <i className="fa-solid fa-arrow-right ml-1"></i>
+                            <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                         </Link>
                     }
                 >
@@ -239,7 +239,7 @@ export default function AdminDashboard() {
                     headerActions={
                         <Link href="/admin/payouts" className="btn btn-sm btn-ghost text-primary">
                             Review
-                            <i className="fa-solid fa-arrow-right ml-1"></i>
+                            <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                         </Link>
                     }
                 >
@@ -252,13 +252,13 @@ export default function AdminDashboard() {
                         <div className="flex items-center gap-2 text-sm">
                             {(stats?.pending_approvals || 0) > 0 && (
                                 <span className="badge badge-warning badge-sm gap-1">
-                                    <i className="fa-solid fa-clock text-xs"></i>
+                                    <i className="fa-duotone fa-regular fa-clock text-xs"></i>
                                     {stats?.pending_approvals || 0} awaiting approval
                                 </span>
                             )}
                             {(stats?.fraud_alerts || 0) > 0 && (
                                 <span className="badge badge-error badge-sm gap-1">
-                                    <i className="fa-solid fa-shield-halved text-xs"></i>
+                                    <i className="fa-duotone fa-regular fa-shield-halved text-xs"></i>
                                     {stats?.fraud_alerts || 0} alerts
                                 </span>
                             )}
@@ -274,7 +274,7 @@ export default function AdminDashboard() {
                 headerActions={
                     <Link href="/admin/metrics" className="btn btn-sm btn-ghost">
                         View Detailed Metrics
-                        <i className="fa-solid fa-arrow-right ml-1"></i>
+                        <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                     </Link>
                 }
             >
@@ -323,7 +323,7 @@ export default function AdminDashboard() {
                             recentActivity.length > 10 && (
                                 <Link href="/admin/activity" className="btn btn-sm btn-ghost">
                                     View all
-                                    <i className="fa-solid fa-arrow-right ml-1"></i>
+                                    <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                                 </Link>
                             )
                         }
@@ -349,7 +349,7 @@ export default function AdminDashboard() {
                                                         activity.type === 'alert' ? 'bg-error/10 text-error' :
                                                             'bg-info/10 text-info'}
                                         `}>
-                                            <i className={`fa-solid ${getActivityIcon(activity.type)}`}></i>
+                                            <i className={`fa-duotone fa-regular ${getActivityIcon(activity.type)}`}></i>
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <p className="font-medium">{activity.message}</p>
@@ -357,7 +357,7 @@ export default function AdminDashboard() {
                                         </div>
                                         {activity.link && (
                                             <Link href={activity.link} className="btn btn-ghost btn-sm btn-square">
-                                                <i className="fa-solid fa-chevron-right text-base-content/40"></i>
+                                                <i className="fa-duotone fa-regular fa-chevron-right text-base-content/40"></i>
                                             </Link>
                                         )}
                                     </div>
@@ -373,19 +373,19 @@ export default function AdminDashboard() {
                     <ContentCard title="Phase 3 Tools" icon="fa-bolt">
                         <div className="flex flex-col gap-2">
                             <Link href="/admin/payouts" className="btn btn-primary w-full justify-start gap-3">
-                                <i className="fa-solid fa-money-bill-transfer w-4"></i>
+                                <i className="fa-duotone fa-regular fa-money-bill-transfer w-4"></i>
                                 Payout Management
                             </Link>
                             <Link href="/admin/automation" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-solid fa-robot w-4"></i>
+                                <i className="fa-duotone fa-regular fa-robot w-4"></i>
                                 Automation Controls
                             </Link>
                             <Link href="/admin/fraud" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-solid fa-shield-halved w-4"></i>
+                                <i className="fa-duotone fa-regular fa-shield-halved w-4"></i>
                                 Fraud Detection
                             </Link>
                             <Link href="/admin/decision-log" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-solid fa-clipboard-list w-4"></i>
+                                <i className="fa-duotone fa-regular fa-clipboard-list w-4"></i>
                                 Decision Log
                             </Link>
                         </div>
@@ -395,19 +395,19 @@ export default function AdminDashboard() {
                     <ContentCard title="Platform Management" icon="fa-cog">
                         <div className="flex flex-col gap-2">
                             <Link href="/admin/users" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-solid fa-users w-4"></i>
+                                <i className="fa-duotone fa-regular fa-users w-4"></i>
                                 Users
                             </Link>
                             <Link href="/admin/companies" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-solid fa-building w-4"></i>
+                                <i className="fa-duotone fa-regular fa-building w-4"></i>
                                 Companies
                             </Link>
                             <Link href="/admin/roles" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-solid fa-briefcase w-4"></i>
+                                <i className="fa-duotone fa-regular fa-briefcase w-4"></i>
                                 All Roles
                             </Link>
                             <Link href="/admin/metrics" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
-                                <i className="fa-solid fa-chart-bar w-4"></i>
+                                <i className="fa-duotone fa-regular fa-chart-bar w-4"></i>
                                 Metrics
                             </Link>
                         </div>

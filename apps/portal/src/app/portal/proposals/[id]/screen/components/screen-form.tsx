@@ -141,7 +141,7 @@ export default function ScreenForm({
         <div className="space-y-6">
             {error && (
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
@@ -149,7 +149,7 @@ export default function ScreenForm({
             {/* Response Deadline Warning */}
             {dueStatus.urgent && (
                 <div className={`alert ${dueStatus.color === 'text-error' ? 'alert-error' : 'alert-warning'}`}>
-                    <i className="fa-solid fa-clock"></i>
+                    <i className="fa-duotone fa-regular fa-clock"></i>
                     <div>
                         <div className="font-semibold">
                             {dueStatus.text === 'Overdue' ? 'Response Overdue!' : 'Urgent Response Needed'}
@@ -169,18 +169,18 @@ export default function ScreenForm({
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title text-xl">
-                            <i className="fa-solid fa-comment-dots text-info mr-2"></i>
+                            <i className="fa-duotone fa-regular fa-comment-dots text-info mr-2"></i>
                             Proposal Context
                         </h2>
                         <div className="divider my-2"></div>
                         <div className="flex items-start gap-3">
                             <div className="flex-1">
                                 <div className="text-sm text-base-content/60 mb-2">
-                                    <i className="fa-solid fa-calendar-plus mr-1"></i>
+                                    <i className="fa-duotone fa-regular fa-calendar-plus mr-1"></i>
                                     Proposed {formatDate(proposal.proposed_at)}
                                     <span className="mx-2">•</span>
                                     <span className={dueStatus.color}>
-                                        <i className="fa-solid fa-clock mr-1"></i>
+                                        <i className="fa-duotone fa-regular fa-clock mr-1"></i>
                                         {dueStatus.text}
                                     </span>
                                 </div>
@@ -197,7 +197,7 @@ export default function ScreenForm({
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title text-xl">
-                        <i className="fa-solid fa-briefcase text-primary mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-briefcase text-primary mr-2"></i>
                         Position & Candidate
                     </h2>
                     <div className="divider my-2"></div>
@@ -218,23 +218,23 @@ export default function ScreenForm({
                                     <p className="text-base-content/70 mb-2">{job.company?.name}</p>
                                     {job.location && (
                                         <p className="text-sm text-base-content/60">
-                                            <i className="fa-solid fa-location-dot mr-1"></i> {job.location}
+                                            <i className="fa-duotone fa-regular fa-location-dot mr-1"></i> {job.location}
                                         </p>
                                     )}
                                     {job.salary_min && job.salary_max && (
                                         <p className="text-sm text-base-content/60 mt-1">
-                                            <i className="fa-solid fa-dollar-sign mr-1"></i>
+                                            <i className="fa-duotone fa-regular fa-dollar-sign mr-1"></i>
                                             ${job.salary_min.toLocaleString()} - ${job.salary_max.toLocaleString()}
                                         </p>
                                     )}
                                     <div className="text-xs text-primary mt-2 flex items-center gap-1">
-                                        <i className="fa-solid fa-eye"></i>
+                                        <i className="fa-duotone fa-regular fa-eye"></i>
                                         <span>Click to view full details</span>
                                     </div>
                                 </button>
                             ) : (
                                 <div className="p-4 bg-base-200/50 rounded-lg text-center text-base-content/60">
-                                    <i className="fa-solid fa-briefcase text-2xl mb-2"></i>
+                                    <i className="fa-duotone fa-regular fa-briefcase text-2xl mb-2"></i>
                                     <p>Job information unavailable</p>
                                 </div>
                             )}
@@ -256,12 +256,12 @@ export default function ScreenForm({
                                     <p className="text-base-content/70 mb-2">{candidate.email}</p>
                                     {candidate.phone && (
                                         <p className="text-sm text-base-content/60 mb-1">
-                                            <i className="fa-solid fa-phone mr-1"></i> {candidate.phone}
+                                            <i className="fa-duotone fa-regular fa-phone mr-1"></i> {candidate.phone}
                                         </p>
                                     )}
                                     {candidate.current_title && (
                                         <p className="text-sm text-base-content/60 mb-1">
-                                            <i className="fa-solid fa-briefcase mr-1"></i> {candidate.current_title}
+                                            <i className="fa-duotone fa-regular fa-briefcase mr-1"></i> {candidate.current_title}
                                             {candidate.current_company && ` at ${candidate.current_company}`}
                                         </p>
                                     )}
@@ -271,13 +271,13 @@ export default function ScreenForm({
                                         </div>
                                     )}
                                     <div className="text-xs text-primary mt-2 flex items-center gap-1">
-                                        <i className="fa-solid fa-eye"></i>
+                                        <i className="fa-duotone fa-regular fa-eye"></i>
                                         <span>Click to view full profile</span>
                                     </div>
                                 </button>
                             ) : (
                                 <div className="p-4 bg-base-200/50 rounded-lg text-center text-base-content/60">
-                                    <i className="fa-solid fa-user text-2xl mb-2"></i>
+                                    <i className="fa-duotone fa-regular fa-user text-2xl mb-2"></i>
                                     <p>Candidate information unavailable</p>
                                 </div>
                             )}
@@ -290,7 +290,7 @@ export default function ScreenForm({
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title text-xl">
-                        <i className="fa-solid fa-file-pdf text-error mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-file-pdf text-error mr-2"></i>
                         Application Documents
                     </h2>
                     <div className="divider my-2"></div>
@@ -304,7 +304,7 @@ export default function ScreenForm({
                             {documentsList.map((doc: any) => (
                                 <div key={doc.id} className="flex items-center justify-between p-4 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors">
                                     <div className="flex items-center gap-4 flex-1 min-w-0">
-                                        <i className="fa-solid fa-file-pdf text-3xl text-error flex-shrink-0"></i>
+                                        <i className="fa-duotone fa-regular fa-file-pdf text-3xl text-error flex-shrink-0"></i>
                                         <div className="flex-1 min-w-0">
                                             <div className="font-medium truncate">{doc.file_name}</div>
                                             <div className="text-sm text-base-content/60 flex items-center gap-2 flex-wrap">
@@ -317,7 +317,7 @@ export default function ScreenForm({
                                                 )}
                                                 {doc.is_primary && (
                                                     <span className="badge badge-primary badge-sm ml-2">
-                                                        <i className="fa-solid fa-star mr-1"></i>
+                                                        <i className="fa-duotone fa-regular fa-star mr-1"></i>
                                                         Primary Resume
                                                     </span>
                                                 )}
@@ -333,14 +333,14 @@ export default function ScreenForm({
                                             className="btn btn-sm btn-ghost"
                                             title="View document"
                                         >
-                                            <i className="fa-solid fa-eye"></i>
+                                            <i className="fa-duotone fa-regular fa-eye"></i>
                                         </button>
                                         <button
                                             onClick={() => handleDownloadDocument(doc)}
                                             className="btn btn-sm btn-ghost flex-shrink-0"
                                             title="Download document"
                                         >
-                                            <i className="fa-solid fa-download"></i>
+                                            <i className="fa-duotone fa-regular fa-download"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -348,7 +348,7 @@ export default function ScreenForm({
                         </div>
                     ) : (
                         <div className="text-center py-12">
-                            <i className="fa-solid fa-inbox text-5xl text-base-content/20 mb-4"></i>
+                            <i className="fa-duotone fa-regular fa-inbox text-5xl text-base-content/20 mb-4"></i>
                             <p className="text-base-content/60 text-lg">No documents were attached to this application.</p>
                         </div>
                     )}
@@ -359,12 +359,12 @@ export default function ScreenForm({
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h2 className="card-title text-xl">
-                        <i className="fa-solid fa-pen-to-square text-success mr-2"></i>
+                        <i className="fa-duotone fa-regular fa-pen-to-square text-success mr-2"></i>
                         Your Response
                     </h2>
                     <div className="divider my-2"></div>
                     <div className="alert alert-info mb-4">
-                        <i className="fa-solid fa-lightbulb"></i>
+                        <i className="fa-duotone fa-regular fa-lightbulb"></i>
                         <span className="text-sm">
                             {responseNotes.trim()
                                 ? 'Add notes about your decision. Required for declining, optional for accepting.'
@@ -388,7 +388,7 @@ export default function ScreenForm({
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <div className="alert alert-warning mb-4">
-                        <i className="fa-solid fa-triangle-exclamation"></i>
+                        <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
                         <div>
                             <div className="font-semibold">Important Decision</div>
                             <p className="text-sm mt-1">
@@ -406,7 +406,7 @@ export default function ScreenForm({
                             onClick={() => router.back()}
                             disabled={submitting}
                         >
-                            <i className="fa-solid fa-arrow-left"></i>
+                            <i className="fa-duotone fa-regular fa-arrow-left"></i>
                             Back
                         </button>
                         <div className="flex flex-col sm:flex-row gap-3">
@@ -423,7 +423,7 @@ export default function ScreenForm({
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-times"></i>
+                                        <i className="fa-duotone fa-regular fa-times"></i>
                                         Decline Proposal
                                     </>
                                 )}
@@ -441,7 +441,7 @@ export default function ScreenForm({
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-check"></i>
+                                        <i className="fa-duotone fa-regular fa-check"></i>
                                         Accept Proposal
                                     </>
                                 )}

@@ -49,7 +49,7 @@ export default function AdminDashboardClient() {
     if (error) {
         return (
             <div className="alert alert-error">
-                <i className="fa-solid fa-circle-exclamation"></i>
+                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                 <span>{error}</span>
             </div>
         );
@@ -70,7 +70,7 @@ export default function AdminDashboardClient() {
                 <StatCard
                     title="Total Recruiters"
                     value={loading ? '...' : stats?.totalRecruiters ?? 0}
-                    icon="fa-solid fa-users"
+                    icon="fa-duotone fa-regular fa-users"
                     color="primary"
                     description={loading ? undefined : `${stats?.activeRecruiters ?? 0} active, ${stats?.pendingRecruiters ?? 0} pending`}
                     href="/portal/admin/recruiters"
@@ -78,7 +78,7 @@ export default function AdminDashboardClient() {
                 <StatCard
                     title="Active Jobs"
                     value={loading ? '...' : stats?.activeJobs ?? 0}
-                    icon="fa-solid fa-briefcase"
+                    icon="fa-duotone fa-regular fa-briefcase"
                     color="secondary"
                     description={loading ? undefined : `${stats?.totalJobs ?? 0} total jobs`}
                     href="/portal/roles"
@@ -86,7 +86,7 @@ export default function AdminDashboardClient() {
                 <StatCard
                     title="Applications"
                     value={loading ? '...' : stats?.totalApplications ?? 0}
-                    icon="fa-solid fa-file-lines"
+                    icon="fa-duotone fa-regular fa-file-lines"
                     color="accent"
                     description="All time"
                     href="/portal/applications"
@@ -94,7 +94,7 @@ export default function AdminDashboardClient() {
                 <StatCard
                     title="Placements"
                     value={loading ? '...' : stats?.totalPlacements ?? 0}
-                    icon="fa-solid fa-handshake"
+                    icon="fa-duotone fa-regular fa-handshake"
                     color="success"
                     description="Successful hires"
                     href="/portal/placements"
@@ -108,12 +108,12 @@ export default function AdminDashboardClient() {
                     <ActionCard
                         title="Recruiter Management"
                         description="Approve and manage recruiters"
-                        icon="fa-solid fa-user-check"
+                        icon="fa-duotone fa-regular fa-user-check"
                         href="/portal/admin/recruiters"
                         color="primary"
                         badge={!loading && stats && stats.pendingRecruiters > 0 ? (
                             <span className="badge badge-warning gap-1.5">
-                                <i className="fa-solid fa-clock text-xs"></i>
+                                <i className="fa-duotone fa-regular fa-clock text-xs"></i>
                                 {stats.pendingRecruiters} pending approval
                             </span>
                         ) : undefined}
@@ -121,14 +121,14 @@ export default function AdminDashboardClient() {
                     <ActionCard
                         title="Role Assignments"
                         description="Assign recruiters to roles"
-                        icon="fa-solid fa-link"
+                        icon="fa-duotone fa-regular fa-link"
                         href="/portal/admin/assignments"
                         color="secondary"
                     />
                     <ActionCard
                         title="Placement Audit"
                         description="Review all placements"
-                        icon="fa-solid fa-chart-line"
+                        icon="fa-duotone fa-regular fa-chart-line"
                         href="/portal/admin/placements"
                         color="success"
                     />
@@ -142,14 +142,14 @@ export default function AdminDashboardClient() {
                     <ActionCard
                         title="Ownership Audit"
                         description="Review candidate ownership and sourcing conflicts"
-                        icon="fa-solid fa-shield-halved"
+                        icon="fa-duotone fa-regular fa-shield-halved"
                         href="/portal/admin/ownership"
                         color="accent"
                     />
                     <ActionCard
                         title="Reputation Management"
                         description="Monitor and manage recruiter reputation scores"
-                        icon="fa-solid fa-star"
+                        icon="fa-duotone fa-regular fa-star"
                         href="/portal/admin/reputation"
                         color="warning"
                     />
@@ -163,42 +163,42 @@ export default function AdminDashboardClient() {
                     <ActionCard
                         title="Payout Management"
                         description="Process and reconcile recruiter payouts"
-                        icon="fa-solid fa-money-bill-transfer"
+                        icon="fa-duotone fa-regular fa-money-bill-transfer"
                         href="/portal/admin/payouts"
                         color="success"
                     />
                     <ActionCard
                         title="Automation Controls"
                         description="Manage automation rules and executions"
-                        icon="fa-solid fa-robot"
+                        icon="fa-duotone fa-regular fa-robot"
                         href="/portal/admin/automation"
                         color="info"
                     />
                     <ActionCard
                         title="Fraud Detection"
                         description="Review and resolve fraud signals"
-                        icon="fa-solid fa-shield-halved"
+                        icon="fa-duotone fa-regular fa-shield-halved"
                         href="/portal/admin/fraud"
                         color="error"
                     />
                     <ActionCard
                         title="Marketplace Health"
                         description="Platform metrics and health indicators"
-                        icon="fa-solid fa-chart-line"
+                        icon="fa-duotone fa-regular fa-chart-line"
                         href="/portal/admin/metrics"
                         color="primary"
                     />
                     <ActionCard
                         title="AI Match Suggestions"
                         description="Review candidate-role match suggestions"
-                        icon="fa-solid fa-wand-magic-sparkles"
+                        icon="fa-duotone fa-regular fa-wand-magic-sparkles"
                         href="/portal/admin/ai-matches"
                         color="secondary"
                     />
                     <ActionCard
                         title="Decision Audit Log"
                         description="AI and human decision tracking"
-                        icon="fa-solid fa-clipboard-list"
+                        icon="fa-duotone fa-regular fa-clipboard-list"
                         href="/portal/admin/decision-log"
                         color="accent"
                     />

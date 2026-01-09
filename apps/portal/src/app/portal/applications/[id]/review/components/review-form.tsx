@@ -98,7 +98,7 @@ export default function ReviewForm({
         <div className="space-y-6">
             {error && (
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
@@ -108,7 +108,7 @@ export default function ReviewForm({
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title text-xl">
-                                <i className="fa-solid fa-briefcase text-primary mr-2"></i>
+                                <i className="fa-duotone fa-regular fa-briefcase text-primary mr-2"></i>
                                 Position
                             </h2>
                             <div className="divider my-2"></div>
@@ -116,7 +116,7 @@ export default function ReviewForm({
                             <p className="text-base-content/70 mb-2">{job.company?.name}</p>
                             {job.location && (
                                 <p className="text-sm text-base-content/60">
-                                    <i className="fa-solid fa-location-dot mr-1"></i> {job.location}
+                                    <i className="fa-duotone fa-regular fa-location-dot mr-1"></i> {job.location}
                                 </p>
                             )}
                             <button
@@ -124,7 +124,7 @@ export default function ReviewForm({
                                 className="text-left hover:bg-base-200/50 p-3 rounded-lg transition-colors w-full"
                             >
                                 <div className="text-primary mt-2 flex items-center gap-1">
-                                    <i className="fa-solid fa-eye"></i>
+                                    <i className="fa-duotone fa-regular fa-eye"></i>
                                     <span>Click to view full details</span>
                                 </div>
                             </button>
@@ -135,7 +135,7 @@ export default function ReviewForm({
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title text-xl">
-                                <i className="fa-solid fa-user text-primary mr-2"></i>
+                                <i className="fa-duotone fa-regular fa-user text-primary mr-2"></i>
                                 Candidate
                             </h2>
                             <div className="divider my-2"></div>
@@ -143,12 +143,12 @@ export default function ReviewForm({
                             <p className="text-base-content/70 mb-2">{candidate.email}</p>
                             {candidate.location && (
                                 <p className="text-sm text-base-content/60">
-                                    <i className="fa-solid fa-location-dot mr-1"></i> {candidate.location}
+                                    <i className="fa-duotone fa-regular fa-location-dot mr-1"></i> {candidate.location}
                                 </p>
                             )}
                             {candidate.phone && (
                                 <p className="text-sm text-base-content/60 mb-1">
-                                    <i className="fa-solid fa-phone mr-1"></i> {candidate.phone}
+                                    <i className="fa-duotone fa-regular fa-phone mr-1"></i> {candidate.phone}
                                 </p>
                             )}
                             {candidate.linkedin_url && (
@@ -158,7 +158,7 @@ export default function ReviewForm({
                             )}
                             {candidate.portfolio_url && (
                                 <div className="text-sm text-primary inline-flex items-center gap-1">
-                                    <i className="fa-solid fa-globe"></i> Portfolio Website
+                                    <i className="fa-duotone fa-regular fa-globe"></i> Portfolio Website
                                 </div>
                             )}
                             {candidate.github_url && (
@@ -171,7 +171,7 @@ export default function ReviewForm({
                                 className="text-left hover:bg-base-200/50 p-3 rounded-lg transition-colors w-full"
                             >
                                 <div className="text-primary mt-2 flex items-center gap-1">
-                                    <i className="fa-solid fa-eye"></i>
+                                    <i className="fa-duotone fa-regular fa-eye"></i>
                                     <span>Click to view full profile</span>
                                 </div>
                             </button>
@@ -183,7 +183,7 @@ export default function ReviewForm({
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title text-xl">
-                                    <i className="fa-solid fa-clipboard-question text-info mr-2"></i>
+                                    <i className="fa-duotone fa-regular fa-clipboard-question text-info mr-2"></i>
                                     Pre-Screening Answers
                                 </h2>
                                 <div className="divider my-2"></div>
@@ -207,7 +207,7 @@ export default function ReviewForm({
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <div className="alert alert-info">
-                                <i className="fa-solid fa-circle-info"></i>
+                                <i className="fa-duotone fa-regular fa-circle-info"></i>
                                 <div>
                                     <div className="font-semibold">Ready to submit?</div>
                                     <p className="text-sm mt-1">
@@ -232,7 +232,7 @@ export default function ReviewForm({
                                         </>
                                     ) : (
                                         <>
-                                            <i className="fa-solid fa-paper-plane"></i>
+                                            <i className="fa-duotone fa-regular fa-paper-plane"></i>
                                             Submit to Company
                                         </>
                                     )}
@@ -247,13 +247,13 @@ export default function ReviewForm({
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title text-xl">
-                                <i className="fa-solid fa-file-pdf text-error mr-2"></i>
+                                <i className="fa-duotone fa-regular fa-file-pdf text-error mr-2"></i>
                                 Documents
                             </h2>
                             <div className="divider my-2"></div>
                             {length === 0 ? (
                                 <div className="text-center py-8 text-base-content/60">
-                                    <i className="fa-solid fa-folder-open text-4xl mb-2"></i>
+                                    <i className="fa-duotone fa-regular fa-folder-open text-4xl mb-2"></i>
                                     <p>No documents attached</p>
                                 </div>
                             ) : (
@@ -261,7 +261,7 @@ export default function ReviewForm({
                                     {documents.map((doc: any) => (
                                         <div key={doc.id} className="flex items-center justify-between p-4 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors">
                                             <div className="flex items-center gap-4 flex-1 min-w-0">
-                                                <i className="fa-solid fa-file-pdf text-3xl text-error shrink-0"></i>
+                                                <i className="fa-duotone fa-regular fa-file-pdf text-3xl text-error shrink-0"></i>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="font-medium truncate">{doc.file_name}</div>
                                                     <div className="text-sm text-base-content/60 flex items-center gap-2 flex-wrap">
@@ -274,7 +274,7 @@ export default function ReviewForm({
                                                         )}
                                                         {doc.is_primary && (
                                                             <span className="badge badge-primary badge-sm ml-2">
-                                                                <i className="fa-solid fa-star mr-1"></i>
+                                                                <i className="fa-duotone fa-regular fa-star mr-1"></i>
                                                                 Primary
                                                             </span>
                                                         )}
@@ -290,14 +290,14 @@ export default function ReviewForm({
                                                     className="btn btn-sm btn-ghost"
                                                     title="View document"
                                                 >
-                                                    <i className="fa-solid fa-eye"></i>
+                                                    <i className="fa-duotone fa-regular fa-eye"></i>
                                                 </button>
                                                 <button
                                                     onClick={() => handleDownloadDocument(doc)}
                                                     className="btn btn-sm btn-ghost shrink-0"
                                                     title="Download document"
                                                 >
-                                                    <i className="fa-solid fa-download"></i>
+                                                    <i className="fa-duotone fa-regular fa-download"></i>
                                                 </button>
                                             </div>
                                         </div>
@@ -312,7 +312,7 @@ export default function ReviewForm({
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title text-xl">
-                                    <i className="fa-solid fa-note-sticky text-warning mr-2"></i>
+                                    <i className="fa-duotone fa-regular fa-note-sticky text-warning mr-2"></i>
                                     Candidate's Notes
                                 </h2>
                                 <div className="divider my-2"></div>
@@ -327,12 +327,12 @@ export default function ReviewForm({
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title text-xl">
-                                <i className="fa-solid fa-pen-to-square text-success mr-2"></i>
+                                <i className="fa-duotone fa-regular fa-pen-to-square text-success mr-2"></i>
                                 Add Your Notes (Optional)
                             </h2>
                             <div className="divider my-2"></div>
                             <div className="alert alert-info mb-4">
-                                <i className="fa-solid fa-lightbulb"></i>
+                                <i className="fa-duotone fa-regular fa-lightbulb"></i>
                                 <span className="text-sm">
                                     Add any additional context, achievements, or recommendations before submitting to the company.
                                 </span>

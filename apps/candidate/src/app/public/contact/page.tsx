@@ -39,7 +39,7 @@ export default function ContactPage() {
                 <div className="card bg-base-100 shadow">
                     <div className="card-body text-center">
                         <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
-                            <i className="fa-solid fa-check-circle text-5xl text-success"></i>
+                            <i className="fa-duotone fa-regular fa-check-circle text-5xl text-success"></i>
                         </div>
                         <h2 className="card-title justify-center text-3xl">Message Sent!</h2>
                         <p className="text-base-content/80 mb-6">
@@ -77,7 +77,7 @@ export default function ContactPage() {
 
                         {error && (
                             <div className="alert alert-error mb-4">
-                                <i className="fa-solid fa-circle-exclamation"></i>
+                                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                                 <span>{error}</span>
                             </div>
                         )}
@@ -151,7 +151,7 @@ export default function ContactPage() {
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-paper-plane mr-2"></i>
+                                        <i className="fa-duotone fa-regular fa-paper-plane mr-2"></i>
                                         Send Message
                                     </>
                                 )}
@@ -165,7 +165,7 @@ export default function ContactPage() {
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h3 className="card-title">
-                                <i className="fa-solid fa-envelope text-primary"></i>
+                                <i className="fa-duotone fa-regular fa-envelope text-primary"></i>
                                 Email Us
                             </h3>
                             <div className="space-y-2">
@@ -185,7 +185,7 @@ export default function ContactPage() {
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h3 className="card-title">
-                                <i className="fa-solid fa-clock text-secondary"></i>
+                                <i className="fa-duotone fa-regular fa-clock text-secondary"></i>
                                 Support Hours
                             </h3>
                             <div className="space-y-2 text-base-content/80">
@@ -202,7 +202,7 @@ export default function ContactPage() {
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h3 className="card-title">
-                                <i className="fa-solid fa-location-dot text-accent"></i>
+                                <i className="fa-duotone fa-regular fa-location-dot text-accent"></i>
                                 Office Location
                             </h3>
                             <p className="text-base-content/80">
@@ -217,7 +217,7 @@ export default function ContactPage() {
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h3 className="card-title">
-                                <i className="fa-solid fa-share-nodes text-info"></i>
+                                <i className="fa-duotone fa-regular fa-share-nodes text-info"></i>
                                 Follow Us
                             </h3>
                             <div className="flex gap-4 mt-2">
@@ -270,7 +270,7 @@ export default function ContactPage() {
                     Check out our Help Center for answers to frequently asked questions.
                 </p>
                 <a href="/help" className="btn btn-primary btn-lg">
-                    <i className="fa-solid fa-circle-question mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-circle-question mr-2"></i>
                     Visit Help Center
                 </a>
             </section>

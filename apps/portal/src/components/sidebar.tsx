@@ -62,7 +62,7 @@ function NavItem({ item, isActive, badge }: { item: NavItem; isActive: boolean; 
                 ? 'bg-primary text-primary-content'
                 : 'bg-base-200/50 text-base-content/60 group-hover:bg-base-300/70 group-hover:text-base-content'
                 }`}>
-                <i className={`fa-solid ${item.icon} text-sm`}></i>
+                <i className={`fa-duotone fa-regular ${item.icon} text-sm`}></i>
             </span>
 
             <span className="flex-1">{item.label}</span>
@@ -225,7 +225,7 @@ export function Sidebar() {
                     </nav>
                     <div className='flex justify-evenly'>
                         <div className="flex items-center justify-center gap-2 py-2">
-                            <i className="fa-solid fa-sun text-yellow-500"></i>
+                            <i className="fa-duotone fa-regular fa-sun text-yellow-500"></i>
                             <input
                                 type="checkbox"
                                 checked={isDark}
@@ -233,7 +233,7 @@ export function Sidebar() {
                                 className="toggle"
                                 title="Toggle Theme"
                             />
-                            <i className="fa-solid fa-moon text-blue-400"></i>
+                            <i className="fa-duotone fa-regular fa-moon text-blue-400"></i>
                         </div>
                         <NotificationBell position="right" />
                     </div>
@@ -259,13 +259,13 @@ export function Sidebar() {
                             </div>
                             <details className="dropdown dropdown-top dropdown-right">
                                 <summary className="btn btn-ghost btn-sm px-2">
-                                    <i className="fa-solid fa-ellipsis-vertical text-base-content/60"></i>
+                                    <i className="fa-duotone fa-regular fa-ellipsis-vertical text-base-content/60"></i>
                                 </summary>
                                 <ul className="dropdown-content menu bg-base-100 rounded-box shadow p-2 w-56 z-[1]">
                                     <li>
                                         <Link href="/portal/profile" className="justify-between">
                                             <span className="flex items-center gap-2">
-                                                <i className="fa-solid fa-user text-base-content/70"></i>
+                                                <i className="fa-duotone fa-regular fa-user text-base-content/70"></i>
                                                 Profile
                                             </span>
                                         </Link>
@@ -273,7 +273,7 @@ export function Sidebar() {
                                     <li>
                                         <Link href="/portal/billing" className="justify-between">
                                             <span className="flex items-center gap-2">
-                                                <i className="fa-solid fa-credit-card text-base-content/70"></i>
+                                                <i className="fa-duotone fa-regular fa-credit-card text-base-content/70"></i>
                                                 Billing
                                             </span>
                                         </Link>
@@ -286,7 +286,7 @@ export function Sidebar() {
                                             className="text-error"
                                         >
                                             <span className="flex items-center gap-2">
-                                                <i className="fa-solid fa-arrow-right-from-bracket"></i>
+                                                <i className="fa-duotone fa-regular fa-arrow-right-from-bracket"></i>
                                                 Sign out
                                             </span>
                                         </button>
@@ -309,7 +309,7 @@ export function Sidebar() {
                                 className={pathname === item.href || pathname.startsWith(item.href + '/') ? 'dock-active' : ''}
                                 title={item.label}
                             >
-                                <i className={`fa-solid ${item.icon}`}></i>
+                                <i className={`fa-duotone fa-regular ${item.icon}`}></i>
                                 <span className="dock-label">{item.label}</span>
                             </button>
                         ));
@@ -321,7 +321,7 @@ export function Sidebar() {
                         dockItems.push(
                             <details key="menu" className="dropdown dropdown-top dropdown-center">
                                 <summary className="btn btn-ghost btn-circle dock-item" title="More options">
-                                    <i className="fa-solid fa-ellipsis text-lg"></i>
+                                    <i className="fa-duotone fa-regular fa-ellipsis text-lg"></i>
                                 </summary>
                                 <ul className="dropdown-content menu bg-base-100 rounded-box shadow p-2 w-52 z-[1]">
                                     {allMoreItems.map((item) => (
@@ -336,7 +336,7 @@ export function Sidebar() {
                                                 }}
                                                 className={`flex items-center gap-3 ${pathname === item.href || pathname.startsWith(item.href) ? 'active' : ''}`}
                                             >
-                                                <i className={`fa-solid ${item.icon}`}></i>
+                                                <i className={`fa-duotone fa-regular ${item.icon}`}></i>
                                                 {item.label}
                                             </button>
                                         </li>

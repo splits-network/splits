@@ -88,7 +88,7 @@ export default function FraudSignalsPage() {
                 ) : signals.length === 0 ? (
                     <div className="card bg-base-100 shadow">
                         <div className="card-body text-center text-base-content/60">
-                            <i className="fa-solid fa-shield-halved text-4xl mb-2"></i>
+                            <i className="fa-duotone fa-regular fa-shield-halved text-4xl mb-2"></i>
                             <p>No fraud signals found</p>
                         </div>
                     </div>
@@ -168,14 +168,14 @@ export default function FraudSignalsPage() {
                                                 className="btn btn-success btn-sm"
                                                 onClick={() => resolveSignal(signal.id, false)}
                                             >
-                                                <i className="fa-solid fa-check"></i>
+                                                <i className="fa-duotone fa-regular fa-check"></i>
                                                 Resolve
                                             </button>
                                             <button
                                                 className="btn btn-ghost btn-sm"
                                                 onClick={() => resolveSignal(signal.id, true)}
                                             >
-                                                <i className="fa-solid fa-times"></i>
+                                                <i className="fa-duotone fa-regular fa-times"></i>
                                                 False Positive
                                             </button>
                                         </div>

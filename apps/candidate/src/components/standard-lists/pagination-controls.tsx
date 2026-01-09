@@ -62,14 +62,14 @@ export function PaginationControls({
                         onClick={() => onPageChange(1)}
                         disabled={page === 1 || loading}
                     >
-                        <i className="fa-solid fa-angles-left"></i>
+                        <i className="fa-duotone fa-regular fa-angles-left"></i>
                     </button>
                     <button
                         className="join-item btn btn-sm"
                         onClick={() => onPageChange(page - 1)}
                         disabled={page === 1 || loading}
                     >
-                        <i className="fa-solid fa-angle-left"></i>
+                        <i className="fa-duotone fa-regular fa-angle-left"></i>
                     </button>
                     <button className="join-item btn btn-sm pointer-events-none">
                         Page {page} of {totalPages}
@@ -79,14 +79,14 @@ export function PaginationControls({
                         onClick={() => onPageChange(page + 1)}
                         disabled={page === totalPages || loading}
                     >
-                        <i className="fa-solid fa-angle-right"></i>
+                        <i className="fa-duotone fa-regular fa-angle-right"></i>
                     </button>
                     <button
                         className="join-item btn btn-sm"
                         onClick={() => onPageChange(totalPages)}
                         disabled={page === totalPages || loading}
                     >
-                        <i className="fa-solid fa-angles-right"></i>
+                        <i className="fa-duotone fa-regular fa-angles-right"></i>
                     </button>
                 </div>
             </div>

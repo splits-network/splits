@@ -54,7 +54,7 @@ export default function Step4Requirements({
     return (
         <div className="space-y-6">
             <div className="alert alert-info">
-                <i className="fa-solid fa-circle-info"></i>
+                <i className="fa-duotone fa-regular fa-circle-info"></i>
                 <div>
                     <p className="font-medium">Define what you're looking for</p>
                     <p className="text-sm opacity-80">Mandatory requirements are must-haves. Preferred requirements make candidates more competitive.</p>
@@ -73,7 +73,7 @@ export default function Step4Requirements({
                         className="btn btn-sm btn-ghost"
                         onClick={addMandatory}
                     >
-                        <i className="fa-solid fa-plus mr-1"></i>
+                        <i className="fa-duotone fa-regular fa-plus mr-1"></i>
                         Add Mandatory
                     </button>
                 </div>
@@ -97,7 +97,7 @@ export default function Step4Requirements({
                                     className="btn btn-ghost btn-square"
                                     onClick={() => removeMandatory(idx)}
                                 >
-                                    <i className="fa-solid fa-trash"></i>
+                                    <i className="fa-duotone fa-regular fa-trash"></i>
                                 </button>
                             </div>
                         ))
@@ -117,7 +117,7 @@ export default function Step4Requirements({
                         className="btn btn-sm btn-ghost"
                         onClick={addPreferred}
                     >
-                        <i className="fa-solid fa-plus mr-1"></i>
+                        <i className="fa-duotone fa-regular fa-plus mr-1"></i>
                         Add Preferred
                     </button>
                 </div>
@@ -141,7 +141,7 @@ export default function Step4Requirements({
                                     className="btn btn-ghost btn-square"
                                     onClick={() => removePreferred(idx)}
                                 >
-                                    <i className="fa-solid fa-trash"></i>
+                                    <i className="fa-duotone fa-regular fa-trash"></i>
                                 </button>
                             </div>
                         ))

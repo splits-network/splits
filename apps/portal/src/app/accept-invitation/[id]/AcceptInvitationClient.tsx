@@ -111,13 +111,13 @@ export default function AcceptInvitationClient({ invitation, userId }: Props) {
             <div className="card bg-base-100 shadow max-w-md w-full">
                 <div className="card-body">
                     <div className="text-center mb-6">
-                        <i className="fa-solid fa-envelope-open-text text-5xl text-primary mb-4"></i>
+                        <i className="fa-duotone fa-regular fa-envelope-open-text text-5xl text-primary mb-4"></i>
                         <h1 className="card-title text-2xl justify-center">You've Been Invited!</h1>
                     </div>
 
                     {error && (
                         <div className="alert alert-error mb-4">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <span>{error}</span>
                         </div>
                     )}
@@ -179,7 +179,7 @@ export default function AcceptInvitationClient({ invitation, userId }: Props) {
                                 </>
                             ) : (
                                 <>
-                                    <i className="fa-solid fa-check"></i>
+                                    <i className="fa-duotone fa-regular fa-check"></i>
                                     Accept Invitation
                                 </>
                             )}

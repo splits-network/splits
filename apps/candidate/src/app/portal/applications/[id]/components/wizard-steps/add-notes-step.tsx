@@ -14,7 +14,7 @@ export function AddNotesStep({ notes, onUpdate, onNext, onBack }: AddNotesStepPr
         <div className="space-y-6">
             <div>
                 <h4 className="text-lg font-semibold mb-2">
-                    <i className="fa-solid fa-note-sticky"></i>
+                    <i className="fa-duotone fa-regular fa-note-sticky"></i>
                     {' '}Add Notes (Optional)
                 </h4>
                 <p className="text-base-content/70 text-sm">
@@ -39,7 +39,7 @@ export function AddNotesStep({ notes, onUpdate, onNext, onBack }: AddNotesStepPr
             </div>
 
             <div className="alert alert-info">
-                <i className="fa-solid fa-lightbulb"></i>
+                <i className="fa-duotone fa-regular fa-lightbulb"></i>
                 <div>
                     <div className="font-semibold">Tips for Strong Notes</div>
                     <ul className="text-sm mt-2 space-y-1 list-disc list-inside">
@@ -53,12 +53,12 @@ export function AddNotesStep({ notes, onUpdate, onNext, onBack }: AddNotesStepPr
 
             <div className="flex justify-between">
                 <button type="button" onClick={onBack} className="btn btn-outline">
-                    <i className="fa-solid fa-arrow-left"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
                     Back
                 </button>
                 <button type="button" onClick={onNext} className="btn btn-primary">
                     Next: Review & Submit
-                    <i className="fa-solid fa-arrow-right"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-right"></i>
                 </button>
             </div>
         </div>

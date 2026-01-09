@@ -80,7 +80,7 @@ export default function DecisionAuditLogPage() {
                     </p>
                 </div>
                 <Link href="/admin" className="btn btn-ghost">
-                    <i className="fa-solid fa-arrow-left"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
                     Back to Admin
                 </Link>
             </div>
@@ -89,7 +89,7 @@ export default function DecisionAuditLogPage() {
             <div className="stats shadow w-full">
                 <div className="stat">
                     <div className="stat-figure text-primary">
-                        <i className="fa-solid fa-robot text-3xl"></i>
+                        <i className="fa-duotone fa-regular fa-robot text-3xl"></i>
                     </div>
                     <div className="stat-title">AI Decisions</div>
                     <div className="stat-value text-primary">
@@ -100,7 +100,7 @@ export default function DecisionAuditLogPage() {
 
                 <div className="stat">
                     <div className="stat-figure text-secondary">
-                        <i className="fa-solid fa-user text-3xl"></i>
+                        <i className="fa-duotone fa-regular fa-user text-3xl"></i>
                     </div>
                     <div className="stat-title">Human Overrides</div>
                     <div className="stat-value text-secondary">
@@ -111,7 +111,7 @@ export default function DecisionAuditLogPage() {
 
                 <div className="stat">
                     <div className="stat-figure text-accent">
-                        <i className="fa-solid fa-clock text-3xl"></i>
+                        <i className="fa-duotone fa-regular fa-clock text-3xl"></i>
                     </div>
                     <div className="stat-title">Recent</div>
                     <div className="stat-value text-accent">{logs.length}</div>
@@ -164,7 +164,7 @@ export default function DecisionAuditLogPage() {
                         </div>
                     ) : logs.length === 0 ? (
                         <div className="text-center py-12 text-base-content/70">
-                            <i className="fa-solid fa-clipboard-list text-4xl mb-4"></i>
+                            <i className="fa-duotone fa-regular fa-clipboard-list text-4xl mb-4"></i>
                             <p>No decision logs found</p>
                         </div>
                     ) : (
@@ -188,7 +188,7 @@ export default function DecisionAuditLogPage() {
                                             <tr key={log.id}>
                                                 <td>
                                                     <span className={`badge ${badge.color} gap-2`}>
-                                                        <i className={`fa-solid ${badge.icon}`}></i>
+                                                        <i className={`fa-duotone fa-regular ${badge.icon}`}></i>
                                                         {log.decision_type.replace(/_/g, ' ')}
                                                     </span>
                                                 </td>
@@ -219,7 +219,7 @@ export default function DecisionAuditLogPage() {
                                                 <td>
                                                     {log.human_override ? (
                                                         <span className="badge badge-warning badge-sm gap-1">
-                                                            <i className="fa-solid fa-hand"></i>
+                                                            <i className="fa-duotone fa-regular fa-hand"></i>
                                                             Override
                                                         </span>
                                                     ) : (
@@ -243,7 +243,7 @@ export default function DecisionAuditLogPage() {
                                                 <td>
                                                     <details className="dropdown dropdown-end">
                                                         <summary className="btn btn-ghost btn-sm">
-                                                            <i className="fa-solid fa-ellipsis-vertical"></i>
+                                                            <i className="fa-duotone fa-regular fa-ellipsis-vertical"></i>
                                                         </summary>
                                                         <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 z-10">
                                                             <li>
@@ -252,7 +252,7 @@ export default function DecisionAuditLogPage() {
                                                                         alert(JSON.stringify(log.decision_data, null, 2));
                                                                     }}
                                                                 >
-                                                                    <i className="fa-solid fa-eye"></i>
+                                                                    <i className="fa-duotone fa-regular fa-eye"></i>
                                                                     View Details
                                                                 </button>
                                                             </li>
@@ -263,7 +263,7 @@ export default function DecisionAuditLogPage() {
                                                                             alert(log.ai_reasoning?.join('\n'));
                                                                         }}
                                                                     >
-                                                                        <i className="fa-solid fa-brain"></i>
+                                                                        <i className="fa-duotone fa-regular fa-brain"></i>
                                                                         View AI Reasoning
                                                                     </button>
                                                                 </li>

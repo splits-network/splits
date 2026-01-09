@@ -64,12 +64,12 @@ export default async function ApplicationReviewPage({
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <div className="alert alert-error">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <span>{error}</span>
                         </div>
                         <div className="card-actions justify-start mt-4">
                             <Link href="/portal/applications/pending" className="btn">
-                                <i className="fa-solid fa-arrow-left"></i>
+                                <i className="fa-duotone fa-regular fa-arrow-left"></i>
                                 Back to Pending Applications
                             </Link>
                         </div>
@@ -84,7 +84,7 @@ export default async function ApplicationReviewPage({
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-base-content/60">
                 <Link href="/portal/applications/pending" className="hover:text-primary">
-                    <i className="fa-solid fa-arrow-left mr-2"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left mr-2"></i>
                     Pending Applications
                 </Link>
             </div>
@@ -93,7 +93,7 @@ export default async function ApplicationReviewPage({
             <div className="card bg-base-100 shadow">
                 <div className="card-body">
                     <h1 className="text-3xl font-bold">
-                        <i className="fa-solid fa-clipboard-check text-primary mr-3"></i>
+                        <i className="fa-duotone fa-regular fa-clipboard-check text-primary mr-3"></i>
                         Review Application
                     </h1>
                     <p className="text-base-content/70">

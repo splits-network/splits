@@ -179,7 +179,7 @@ export default function IntegrationDetailPage() {
         return (
             <div className="container mx-auto p-6">
                 <div className="alert alert-error">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>Integration not found</span>
                 </div>
             </div>
@@ -191,7 +191,7 @@ export default function IntegrationDetailPage() {
             {/* Header */}
             <div className="flex items-center gap-4 mb-6">
                 <Link href="/integrations" className="btn btn-ghost btn-circle">
-                    <i className="fa-solid fa-arrow-left"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
                 </Link>
                 <div className="flex-1">
                     <h1 className="text-3xl font-bold capitalize">{integration.platform} Integration</h1>
@@ -207,7 +207,7 @@ export default function IntegrationDetailPage() {
             {/* Error Alert */}
             {error && (
                 <div className="alert alert-error mb-6">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
@@ -243,15 +243,15 @@ export default function IntegrationDetailPage() {
                             <h2 className="card-title">Quick Actions</h2>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <button className="btn btn-primary" onClick={() => triggerSync('inbound')}>
-                                    <i className="fa-solid fa-download"></i>
+                                    <i className="fa-duotone fa-regular fa-download"></i>
                                     Import from {integration.platform}
                                 </button>
                                 <button className="btn btn-secondary" onClick={() => triggerSync('outbound')}>
-                                    <i className="fa-solid fa-upload"></i>
+                                    <i className="fa-duotone fa-regular fa-upload"></i>
                                     Export to {integration.platform}
                                 </button>
                                 <button className="btn btn-ghost" onClick={testConnection}>
-                                    <i className="fa-solid fa-circle-check"></i>
+                                    <i className="fa-duotone fa-regular fa-circle-check"></i>
                                     Test Connection
                                 </button>
                             </div>
@@ -406,7 +406,7 @@ export default function IntegrationDetailPage() {
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-save"></i>
+                                        <i className="fa-duotone fa-regular fa-save"></i>
                                         Save Settings
                                     </>
                                 )}
@@ -424,7 +424,7 @@ export default function IntegrationDetailPage() {
 
                         {logs.length === 0 ? (
                             <div className="text-center py-8 text-base-content/60">
-                                <i className="fa-solid fa-inbox text-4xl mb-4"></i>
+                                <i className="fa-duotone fa-regular fa-inbox text-4xl mb-4"></i>
                                 <p>No sync logs yet</p>
                             </div>
                         ) : (
@@ -451,7 +451,7 @@ export default function IntegrationDetailPage() {
                                                 </td>
                                                 <td className="text-sm">{log.action}</td>
                                                 <td>
-                                                    <i className={`fa-solid ${log.direction === 'inbound' ? 'fa-download' : 'fa-upload'}`}></i>
+                                                    <i className={`fa-duotone fa-regular ${log.direction === 'inbound' ? 'fa-download' : 'fa-upload'}`}></i>
                                                     {' '}{log.direction}
                                                 </td>
                                                 <td>
@@ -462,7 +462,7 @@ export default function IntegrationDetailPage() {
                                                 <td className="text-sm">
                                                     {log.error_message && (
                                                         <span className="text-error" title={log.error_message}>
-                                                            <i className="fa-solid fa-circle-exclamation"></i>
+                                                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                                                         </span>
                                                     )}
                                                     {log.retry_count > 0 && (

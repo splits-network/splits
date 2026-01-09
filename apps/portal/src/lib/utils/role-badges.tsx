@@ -66,7 +66,7 @@ export function getRoleBadges(
         const allCounts = allRoles
             .map(r => r.application_count || 0)
             .filter(count => count > 0);
-        
+
         if (isHotRole(role.application_count, allCounts)) {
             badges.push({
                 icon: 'fa-fire',
@@ -90,7 +90,7 @@ export function renderRoleBadge(badge: RoleBadge) {
         'data-tip': badge.tooltip,
         children: (
             <>
-                <i className={`fa-solid ${badge.icon}`}></i>
+                <i className={`fa-duotone fa-regular ${badge.icon}`}></i>
                 {badge.text && <span>{badge.text}</span>}
             </>
         ),

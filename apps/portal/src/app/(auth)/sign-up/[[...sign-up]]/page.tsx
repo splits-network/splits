@@ -157,7 +157,7 @@ export default function SignUpPage() {
                         </h2>
 
                         <div className="alert alert-info mb-4">
-                            <i className="fa-solid fa-circle-info"></i>
+                            <i className="fa-duotone fa-regular fa-circle-info"></i>
                             <span>You're already signed in to your account.</span>
                         </div>
 
@@ -170,7 +170,7 @@ export default function SignUpPage() {
                                 onClick={() => router.push('/portal/dashboard')}
                                 className="btn btn-primary w-full"
                             >
-                                <i className="fa-solid fa-home"></i>
+                                <i className="fa-duotone fa-regular fa-home"></i>
                                 Go to Dashboard
                             </button>
                             <button
@@ -185,7 +185,7 @@ export default function SignUpPage() {
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-right-from-bracket"></i>
+                                        <i className="fa-duotone fa-regular fa-right-from-bracket"></i>
                                         Sign Out & Create New Account
                                     </>
                                 )}
@@ -210,13 +210,13 @@ export default function SignUpPage() {
                         </h2>
 
                         <div className="alert alert-info mb-4">
-                            <i className="fa-solid fa-envelope"></i>
+                            <i className="fa-duotone fa-regular fa-envelope"></i>
                             <span>We sent a verification code to {email}</span>
                         </div>
 
                         {error && (
                             <div className="alert alert-error mb-4">
-                                <i className="fa-solid fa-circle-exclamation"></i>
+                                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                                 <span>{error}</span>
                             </div>
                         )}
@@ -278,14 +278,14 @@ export default function SignUpPage() {
 
                     {invitationId && (
                         <div className="alert alert-info mb-4">
-                            <i className="fa-solid fa-envelope-open-text"></i>
+                            <i className="fa-duotone fa-regular fa-envelope-open-text"></i>
                             <span>Complete sign-up to accept your invitation</span>
                         </div>
                     )}
 
                     {error && (
                         <div className="alert alert-error mb-4">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <span>{error}</span>
                         </div>
                     )}

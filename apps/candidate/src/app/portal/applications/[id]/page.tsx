@@ -137,7 +137,7 @@ export default async function ApplicationDetailPage({
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title mb-4">
-                                <i className="fa-solid fa-briefcase"></i>
+                                <i className="fa-duotone fa-regular fa-briefcase"></i>
                                 Job Details
                             </h2>
 
@@ -148,7 +148,7 @@ export default async function ApplicationDetailPage({
                                         <div>
                                             <div className="text-sm text-base-content/60 mb-1">Location</div>
                                             <div className="flex items-center gap-2 font-medium">
-                                                <i className="fa-solid fa-location-dot text-primary"></i>
+                                                <i className="fa-duotone fa-regular fa-location-dot text-primary"></i>
                                                 {job.location}
                                             </div>
                                         </div>
@@ -158,7 +158,7 @@ export default async function ApplicationDetailPage({
                                         <div>
                                             <div className="text-sm text-base-content/60 mb-1">Employment Type</div>
                                             <div className="flex items-center gap-2 font-medium">
-                                                <i className="fa-solid fa-clock text-primary"></i>
+                                                <i className="fa-duotone fa-regular fa-clock text-primary"></i>
                                                 {job.employment_type === 'full_time' ? 'Full Time' :
                                                     job.employment_type === 'contract' ? 'Contract' :
                                                         job.employment_type === 'temporary' ? 'Temporary' :
@@ -171,7 +171,7 @@ export default async function ApplicationDetailPage({
                                         <div>
                                             <div className="text-sm text-base-content/60 mb-1">Salary Range</div>
                                             <div className="flex items-center gap-2 font-medium">
-                                                <i className="fa-solid fa-dollar-sign text-primary"></i>
+                                                <i className="fa-duotone fa-regular fa-dollar-sign text-primary"></i>
                                                 {job.salary_min && job.salary_max ? (
                                                     `$${job.salary_min.toLocaleString()} - $${job.salary_max.toLocaleString()}`
                                                 ) : job.salary_min ? (
@@ -188,7 +188,7 @@ export default async function ApplicationDetailPage({
                                         <div>
                                             <div className="text-sm text-base-content/60 mb-1">Department</div>
                                             <div className="flex items-center gap-2 font-medium">
-                                                <i className="fa-solid fa-building text-primary"></i>
+                                                <i className="fa-duotone fa-regular fa-building text-primary"></i>
                                                 {job.department}
                                             </div>
                                         </div>
@@ -198,7 +198,7 @@ export default async function ApplicationDetailPage({
                                         <div>
                                             <div className="text-sm text-base-content/60 mb-1">Relocation</div>
                                             <div className="flex items-center gap-2 font-medium">
-                                                <i className={`fa-solid ${job.open_to_relocation ? 'fa-check-circle text-success' : 'fa-times-circle text-base-content/40'}`}></i>
+                                                <i className={`fa-duotone fa-regular ${job.open_to_relocation ? 'fa-check-circle text-success' : 'fa-times-circle text-base-content/40'}`}></i>
                                                 {job.open_to_relocation ? 'Open to Relocation' : 'No Relocation'}
                                             </div>
                                         </div>
@@ -209,7 +209,7 @@ export default async function ApplicationDetailPage({
                                 {(job.candidate_description || job.recruiter_description || job.description) && (
                                     <div>
                                         <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                                            <i className="fa-solid fa-align-left text-primary"></i>
+                                            <i className="fa-duotone fa-regular fa-align-left text-primary"></i>
                                             About This Role
                                         </h3>
                                         <div className="prose max-w-none">
@@ -224,7 +224,7 @@ export default async function ApplicationDetailPage({
                                 {job.requirements && job.requirements.length > 0 && (
                                     <div>
                                         <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                                            <i className="fa-solid fa-list-check text-primary"></i>
+                                            <i className="fa-duotone fa-regular fa-list-check text-primary"></i>
                                             Requirements
                                         </h3>
 
@@ -238,7 +238,7 @@ export default async function ApplicationDetailPage({
                                                         .sort((a: any, b: any) => a.sort_order - b.sort_order)
                                                         .map((req: any) => (
                                                             <li key={req.id} className="flex items-start gap-2">
-                                                                <i className="fa-solid fa-circle-check text-error mt-1 shrink-0"></i>
+                                                                <i className="fa-duotone fa-regular fa-circle-check text-error mt-1 shrink-0"></i>
                                                                 <span>{req.description}</span>
                                                             </li>
                                                         ))}
@@ -256,7 +256,7 @@ export default async function ApplicationDetailPage({
                                                         .sort((a: any, b: any) => a.sort_order - b.sort_order)
                                                         .map((req: any) => (
                                                             <li key={req.id} className="flex items-start gap-2">
-                                                                <i className="fa-solid fa-circle-plus text-info mt-1 shrink-0"></i>
+                                                                <i className="fa-duotone fa-regular fa-circle-plus text-info mt-1 shrink-0"></i>
                                                                 <span>{req.description}</span>
                                                             </li>
                                                         ))}
@@ -274,7 +274,7 @@ export default async function ApplicationDetailPage({
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title mb-4">
-                                    <i className="fa-solid fa-file"></i>
+                                    <i className="fa-duotone fa-regular fa-file"></i>
                                     Documents
                                 </h2>
 
@@ -282,7 +282,7 @@ export default async function ApplicationDetailPage({
                                     {application.map((doc: any) => (
                                         <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg bg-base-200 hover:bg-base-300 transition-colors">
                                             <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                <i className={`fa-solid ${doc.document_type === 'resume' ? 'fa-file-text' :
+                                                <i className={`fa-duotone fa-regular ${doc.document_type === 'resume' ? 'fa-file-text' :
                                                     doc.document_type === 'cover_letter' ? 'fa-file-lines' :
                                                         'fa-file'
                                                     } text-primary`}></i>
@@ -309,7 +309,7 @@ export default async function ApplicationDetailPage({
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title mb-4">
-                                    <i className="fa-solid fa-clipboard-question"></i>
+                                    <i className="fa-duotone fa-regular fa-clipboard-question"></i>
                                     Pre-screen Answers
                                 </h2>
 
@@ -338,7 +338,7 @@ export default async function ApplicationDetailPage({
                             <div className="card-body">
 
                                 <h2 className="card-title mb-4">
-                                    <i className="fa-solid fa-building text-primary"></i>
+                                    <i className="fa-duotone fa-regular fa-building text-primary"></i>
                                     About {company.name || 'the Company'}
                                 </h2>
 
@@ -348,19 +348,19 @@ export default async function ApplicationDetailPage({
                                         <div className="flex flex-wrap gap-4 text-sm">
                                             {company.industry && (
                                                 <div className="flex items-center gap-2">
-                                                    <i className="fa-solid fa-industry text-base-content/60"></i>
+                                                    <i className="fa-duotone fa-regular fa-industry text-base-content/60"></i>
                                                     <span>{company.industry}</span>
                                                 </div>
                                             )}
                                             {company.company_size && (
                                                 <div className="flex items-center gap-2">
-                                                    <i className="fa-solid fa-users text-base-content/60"></i>
+                                                    <i className="fa-duotone fa-regular fa-users text-base-content/60"></i>
                                                     <span>{company.company_size}</span>
                                                 </div>
                                             )}
                                             {company.headquarters_location && (
                                                 <div className="flex items-center gap-2">
-                                                    <i className="fa-solid fa-map-marker-alt text-base-content/60"></i>
+                                                    <i className="fa-duotone fa-regular fa-map-marker-alt text-base-content/60"></i>
                                                     <span>{company.headquarters_location}</span>
                                                 </div>
                                             )}
@@ -381,7 +381,7 @@ export default async function ApplicationDetailPage({
                                                 rel="noopener noreferrer"
                                                 className="btn btn-sm btn-outline"
                                             >
-                                                <i className="fa-solid fa-external-link-alt"></i>
+                                                <i className="fa-duotone fa-regular fa-external-link-alt"></i>
                                                 Company Website
                                             </a>
                                         </div>
@@ -394,7 +394,7 @@ export default async function ApplicationDetailPage({
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title mb-4">
-                                <i className="fa-solid fa-info-circle"></i>
+                                <i className="fa-duotone fa-regular fa-info-circle"></i>
                                 Application Info
                             </h2>
 
@@ -427,7 +427,7 @@ export default async function ApplicationDetailPage({
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title mb-4">
-                                <i className="fa-solid fa-ellipsis"></i>
+                                <i className="fa-duotone fa-regular fa-ellipsis"></i>
                                 Actions
                             </h2>
 
@@ -465,7 +465,7 @@ export default async function ApplicationDetailPage({
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title mb-4">
-                                    <i className="fa-solid fa-note-sticky"></i>
+                                    <i className="fa-duotone fa-regular fa-note-sticky"></i>
                                     Notes
                                 </h2>
 
@@ -473,7 +473,7 @@ export default async function ApplicationDetailPage({
                                     <div className="mb-4">
                                         <div className="text-sm text-base-content/60 mb-2">Your Notes</div>
                                         <div className="alert">
-                                            <i className="fa-solid fa-user"></i>
+                                            <i className="fa-duotone fa-regular fa-user"></i>
                                             <span>{application.notes}</span>
                                         </div>
                                     </div>
@@ -483,7 +483,7 @@ export default async function ApplicationDetailPage({
                                     <div>
                                         <div className="text-sm text-base-content/60 mb-2">Recruiter Notes</div>
                                         <div className="alert alert-info">
-                                            <i className="fa-solid fa-circle-info"></i>
+                                            <i className="fa-duotone fa-regular fa-circle-info"></i>
                                             <span>{application.recruiter_notes}</span>
                                         </div>
                                     </div>
@@ -510,7 +510,7 @@ export default async function ApplicationDetailPage({
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title mb-4">
-                                    <i className="fa-solid fa-user-tie"></i>
+                                    <i className="fa-duotone fa-regular fa-user-tie"></i>
                                     Your Recruiter
                                 </h2>
 

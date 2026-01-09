@@ -160,7 +160,7 @@ export function DataTable<T = unknown>({
                                     <span className="inline-flex items-center gap-1">
                                         {column.label}
                                         {column.sortable && (
-                                            <i className={`fa-solid ${getSortIcon(column.key, sortBy, sortOrder)} ml-1 text-xs opacity-50`}></i>
+                                            <i className={`fa-duotone fa-regular ${getSortIcon(column.key, sortBy, sortOrder)} ml-1 text-xs opacity-50`}></i>
                                         )}
                                     </span>
                                 )}
@@ -187,7 +187,7 @@ export function DataTable<T = unknown>({
                             >
                                 {emptyState || (
                                     <div className="text-base-content/50">
-                                        <i className="fa-solid fa-inbox text-3xl mb-2"></i>
+                                        <i className="fa-duotone fa-regular fa-inbox text-3xl mb-2"></i>
                                         <p>No data available</p>
                                     </div>
                                 )}

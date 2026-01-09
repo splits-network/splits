@@ -256,7 +256,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
     if (error) {
         return (
             <div className="alert alert-error">
-                <i className="fa-solid fa-circle-exclamation"></i>
+                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                 <span>{error}</span>
             </div>
         );
@@ -265,7 +265,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
     if (!candidate) {
         return (
             <div className="alert alert-warning">
-                <i className="fa-solid fa-triangle-exclamation"></i>
+                <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
                 <span>Candidate not found</span>
             </div>
         );
@@ -297,31 +297,31 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                                     <div className="flex gap-2">
                                         {candidate.verification_status && (
                                             <span className={`badge ${getVerificationStatusBadge(candidate.verification_status)} gap-1`}>
-                                                <i className={`fa-solid ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
+                                                <i className={`fa-duotone fa-regular ${getVerificationStatusIcon(candidate.verification_status)}`}></i>
                                                 {candidate.verification_status.charAt(0).toUpperCase() + candidate.verification_status.slice(1)}
                                             </span>
                                         )}
                                         {candidate.is_new && (
                                             <span className="badge badge-info gap-1" title="Recently added candidate">
-                                                <i className="fa-solid fa-sparkles"></i>
+                                                <i className="fa-duotone fa-regular fa-sparkles"></i>
                                                 New
                                             </span>
                                         )}
                                         {candidate.has_other_active_recruiters && (
                                             <span className="badge badge-warning gap-1" title={`${candidate.other_active_recruiters_count} other recruiter${candidate.other_active_recruiters_count > 1 ? 's' : ''} working with this candidate`}>
-                                                <i className="fa-solid fa-users"></i>
+                                                <i className="fa-duotone fa-regular fa-users"></i>
                                                 Assigned
                                             </span>
                                         )}
                                         {candidate.is_sourcer && (
                                             <span className="badge badge-primary gap-1" title="You sourced this candidate">
-                                                <i className="fa-solid fa-star"></i>
+                                                <i className="fa-duotone fa-regular fa-star"></i>
                                                 Sourcer
                                             </span>
                                         )}
                                         {candidate.has_active_relationship && (
                                             <span className="badge badge-success gap-1" title="Active relationship">
-                                                <i className="fa-solid fa-handshake"></i>
+                                                <i className="fa-duotone fa-regular fa-handshake"></i>
                                                 Active
                                             </span>
                                         )}
@@ -329,14 +329,14 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                                 </div>
                                 <div className="flex items-center gap-4 mt-2 text-base-content/70">
                                     <div className="flex items-center gap-2">
-                                        <i className="fa-solid fa-envelope"></i>
+                                        <i className="fa-duotone fa-regular fa-envelope"></i>
                                         <a href={`mailto:${candidate.email}`} className="link link-hover">
                                             {candidate.email}
                                         </a>
                                     </div>
                                     {candidate.phone && (
                                         <div className="flex items-center gap-2">
-                                            <i className="fa-solid fa-phone"></i>
+                                            <i className="fa-duotone fa-regular fa-phone"></i>
                                             <span>{candidate.phone}</span>
                                         </div>
                                     )}
@@ -358,19 +358,19 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                                     <div className="flex items-center gap-4 mt-2 text-sm text-base-content/70">
                                         {candidate.current_title && (
                                             <div className="flex items-center gap-1">
-                                                <i className="fa-solid fa-briefcase"></i>
+                                                <i className="fa-duotone fa-regular fa-briefcase"></i>
                                                 <span>{candidate.current_title}</span>
                                             </div>
                                         )}
                                         {candidate.current_company && (
                                             <div className="flex items-center gap-1">
-                                                <i className="fa-solid fa-building"></i>
+                                                <i className="fa-duotone fa-regular fa-building"></i>
                                                 <span>{candidate.current_company}</span>
                                             </div>
                                         )}
                                         {candidate.location && (
                                             <div className="flex items-center gap-1">
-                                                <i className="fa-solid fa-location-dot"></i>
+                                                <i className="fa-duotone fa-regular fa-location-dot"></i>
                                                 <span>{candidate.location}</span>
                                             </div>
                                         )}
@@ -388,11 +388,11 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                                         onClick={() => setShowSubmitWizard(true)}
                                         className="btn btn-success gap-2"
                                     >
-                                        <i className="fa-solid fa-paper-plane"></i>
+                                        <i className="fa-duotone fa-regular fa-paper-plane"></i>
                                         Send Job Opportunity
                                     </button>
                                     <Link href={`/portal/candidates/${candidateId}/edit`} className="btn btn-primary gap-2">
-                                        <i className="fa-solid fa-edit"></i>
+                                        <i className="fa-duotone fa-regular fa-edit"></i>
                                         Edit
                                     </Link>
                                 </>
@@ -402,7 +402,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                                     onClick={() => setShowVerificationModal(true)}
                                     className="btn btn-outline gap-2"
                                 >
-                                    <i className="fa-solid fa-shield-check"></i>
+                                    <i className="fa-duotone fa-regular fa-shield-check"></i>
                                     Verify
                                 </button>
                             )}
@@ -416,7 +416,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                     <div className="card bg-base-100 shadow mb-6">
                         <div className="card-body">
                             <h2 className="card-title text-lg mb-4">
-                                <i className="fa-solid fa-user-circle mr-2"></i>
+                                <i className="fa-duotone fa-regular fa-user-circle mr-2"></i>
                                 Bio
                             </h2>
                             {candidate.bio ? (
@@ -430,7 +430,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                     <div className='card bg-base-100 shadow'>
                         <div className="card-body">
                             <h2 className="card-title text-lg mb-4">
-                                <i className="fa-solid fa-briefcase mr-2"></i>
+                                <i className="fa-duotone fa-regular fa-briefcase mr-2"></i>
                                 Applications ({applications.length})
                             </h2>
 
@@ -443,13 +443,13 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                                 </div>
                             ) : applicationsError ? (
                                 <div className="alert alert-error">
-                                    <i className="fa-solid fa-circle-exclamation"></i>
+                                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                                     <span>{applicationsError}</span>
                                 </div>
                             ) : applications.length === 0 ? (
                                 <div className="card bg-base-200">
                                     <div className="card-body items-center text-center py-12">
-                                        <i className="fa-solid fa-inbox text-6xl text-base-content/20"></i>
+                                        <i className="fa-duotone fa-regular fa-inbox text-6xl text-base-content/20"></i>
                                         <h3 className="text-xl font-semibold mt-4">No Applications</h3>
                                         <p className="text-base-content/70 mt-2">
                                             This candidate hasn't been submitted to any roles yet.
@@ -471,7 +471,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                                                                 {application.job?.title || 'Unknown Role'}
                                                             </Link>
                                                             <span className={`badge ${getApplicationStageBadge(application.stage)}`}>
-                                                                <i className={`fa-solid ${getApplicationStageIcon(application.stage)} mr-1`}></i>
+                                                                <i className={`fa-duotone fa-regular ${getApplicationStageIcon(application.stage)} mr-1`}></i>
                                                                 {application.stage.charAt(0).toUpperCase() + application.stage.slice(1)}
                                                             </span>
                                                         </div>
@@ -479,18 +479,18 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                                                             <div className="flex items-center gap-4 text-sm text-base-content/70 mb-3">
                                                                 {application.job.location && (
                                                                     <div className="flex items-center gap-1">
-                                                                        <i className="fa-solid fa-location-dot"></i>
+                                                                        <i className="fa-duotone fa-regular fa-location-dot"></i>
                                                                         <span>{application.job.location}</span>
                                                                     </div>
                                                                 )}
                                                                 {application.job.department && (
                                                                     <div className="flex items-center gap-1">
-                                                                        <i className="fa-solid fa-building"></i>
+                                                                        <i className="fa-duotone fa-regular fa-building"></i>
                                                                         <span>{application.job.department}</span>
                                                                     </div>
                                                                 )}
                                                                 <div className="flex items-center gap-1">
-                                                                    <i className="fa-solid fa-percent"></i>
+                                                                    <i className="fa-duotone fa-regular fa-percent"></i>
                                                                     <span>{application.job.fee_percentage}% fee</span>
                                                                 </div>
                                                             </div>
@@ -503,11 +503,11 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                                                         )}
                                                         <div className="flex items-center gap-4 text-xs text-base-content/60 mt-3">
                                                             <div>
-                                                                <i className="fa-solid fa-calendar-plus mr-1"></i>
+                                                                <i className="fa-duotone fa-regular fa-calendar-plus mr-1"></i>
                                                                 Submitted {formatDate(application.created_at)}
                                                             </div>
                                                             <div>
-                                                                <i className="fa-solid fa-clock mr-1"></i>
+                                                                <i className="fa-duotone fa-regular fa-clock mr-1"></i>
                                                                 Updated {formatDate(application.updated_at)}
                                                             </div>
                                                         </div>
@@ -517,7 +517,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                                                             href={`/portal/applications/${application.id}`}
                                                             className="btn btn-sm btn-ghost"
                                                         >
-                                                            <i className="fa-solid fa-arrow-right"></i>
+                                                            <i className="fa-duotone fa-regular fa-arrow-right"></i>
                                                         </Link>
                                                     </div>
                                                 </div>
@@ -536,7 +536,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title text-lg">
-                                    <i className="fa-solid fa-handshake mr-2"></i>
+                                    <i className="fa-duotone fa-regular fa-handshake mr-2"></i>
                                     Recruiter Relationship
                                 </h2>
                                 <div className="flex items-center justify-between">
@@ -549,17 +549,17 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                                         </div>
                                         <div className="flex items-center gap-4 text-sm text-base-content/70">
                                             <div>
-                                                <i className="fa-solid fa-calendar-plus mr-1"></i>
+                                                <i className="fa-duotone fa-regular fa-calendar-plus mr-1"></i>
                                                 Started: {formatDate(relationship.relationship_start_date)}
                                             </div>
                                             <div>
-                                                <i className="fa-solid fa-calendar-xmark mr-1"></i>
+                                                <i className="fa-duotone fa-regular fa-calendar-xmark mr-1"></i>
                                                 Expires: {formatDate(relationship.relationship_end_date)}
                                             </div>
                                         </div>
                                         {relationship.status === 'active' && isRelationshipExpiringSoon(relationship.relationship_end_date) && (
                                             <div className="alert alert-warning mt-2">
-                                                <i className="fa-solid fa-triangle-exclamation"></i>
+                                                <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
                                                 <span>Relationship expires in less than 30 days. Consider renewing.</span>
                                             </div>
                                         )}
@@ -573,7 +573,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title text-lg mb-4">
-                                <i className="fa-solid fa-file-lines mr-2"></i>
+                                <i className="fa-duotone fa-regular fa-file-lines mr-2"></i>
                                 Documents
                             </h2>
                             <DocumentList
@@ -590,7 +590,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <h2 className="card-title text-lg">
-                                    <i className="fa-solid fa-clock-rotate-left mr-2"></i>
+                                    <i className="fa-duotone fa-regular fa-clock-rotate-left mr-2"></i>
                                     Activity Timeline
                                 </h2>
                                 {applicationsLoading ? (

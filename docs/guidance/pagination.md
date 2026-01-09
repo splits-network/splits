@@ -593,7 +593,7 @@ export function PaginationControls({
                 disabled={currentPage === 1}
                 onClick={() => onPageChange(currentPage - 1)}
             >
-                <i className="fa-solid fa-chevron-left"></i>
+                <i className="fa-duotone fa-regular fa-chevron-left"></i>
             </button>
 
             {pages.map((page, idx) => (
@@ -615,7 +615,7 @@ export function PaginationControls({
                 disabled={currentPage === totalPages}
                 onClick={() => onPageChange(currentPage + 1)}
             >
-                <i className="fa-solid fa-chevron-right"></i>
+                <i className="fa-duotone fa-regular fa-chevron-right"></i>
             </button>
         </div>
     );

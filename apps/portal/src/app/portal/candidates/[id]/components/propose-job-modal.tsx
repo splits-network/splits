@@ -65,7 +65,7 @@ export default function ProposeJobModal({
                 <form onSubmit={handleSubmit}>
                     {error && (
                         <div className="alert alert-error mb-4">
-                            <i className="fa-solid fa-circle-exclamation"></i>
+                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <span>{error}</span>
                         </div>
                     )}

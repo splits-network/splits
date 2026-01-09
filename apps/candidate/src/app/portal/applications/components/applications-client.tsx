@@ -120,7 +120,7 @@ export default function ApplicationsClient() {
             {/* Error Display */}
             {error && (
                 <div className="alert alert-error mb-6">
-                    <i className="fa-solid fa-circle-exclamation"></i>
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
                 </div>
             )}
@@ -130,7 +130,7 @@ export default function ApplicationsClient() {
                 <div className="stats bg-base-100 shadow">
                     <div className="stat">
                         <div className="stat-figure text-primary">
-                            <i className="fa-solid fa-file-lines text-4xl"></i>
+                            <i className="fa-duotone fa-regular fa-file-lines text-4xl"></i>
                         </div>
                         <div className="stat-title">Total Applications</div>
                         <div className="stat-value text-primary">{stats.total}</div>
@@ -140,7 +140,7 @@ export default function ApplicationsClient() {
                 <div className="stats bg-base-100 shadow">
                     <div className="stat">
                         <div className="stat-figure text-success">
-                            <i className="fa-solid fa-circle-check text-4xl"></i>
+                            <i className="fa-duotone fa-regular fa-circle-check text-4xl"></i>
                         </div>
                         <div className="stat-title">Active</div>
                         <div className="stat-value text-success">{stats.active}</div>
@@ -150,7 +150,7 @@ export default function ApplicationsClient() {
                 <div className="stats bg-base-100 shadow">
                     <div className="stat">
                         <div className="stat-figure text-info">
-                            <i className="fa-solid fa-comments text-4xl"></i>
+                            <i className="fa-duotone fa-regular fa-comments text-4xl"></i>
                         </div>
                         <div className="stat-title">Interviewing</div>
                         <div className="stat-value text-info">{stats.interviewing}</div>
@@ -160,7 +160,7 @@ export default function ApplicationsClient() {
                 <div className="stats bg-base-100 shadow">
                     <div className="stat">
                         <div className="stat-figure text-warning">
-                            <i className="fa-solid fa-trophy text-4xl"></i>
+                            <i className="fa-duotone fa-regular fa-trophy text-4xl"></i>
                         </div>
                         <div className="stat-title">Offers</div>
                         <div className="stat-value text-warning">{stats.offers}</div>
@@ -214,14 +214,14 @@ export default function ApplicationsClient() {
                                 onClick={() => setViewMode('grid')}
                                 title="Grid View"
                             >
-                                <i className="fa-solid fa-grip"></i>
+                                <i className="fa-duotone fa-regular fa-grip"></i>
                             </button>
                             <button
                                 className={`btn join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
                                 onClick={() => setViewMode('table')}
                                 title="Table View"
                             >
-                                <i className="fa-solid fa-table"></i>
+                                <i className="fa-duotone fa-regular fa-table"></i>
                             </button>
                         </div>
                     </div>
@@ -287,7 +287,7 @@ export default function ApplicationsClient() {
                                                     <td>
                                                         {app.job?.location && (
                                                             <span className="text-sm">
-                                                                <i className="fa-solid fa-location-dot mr-1"></i>
+                                                                <i className="fa-duotone fa-regular fa-location-dot mr-1"></i>
                                                                 {app.job.location}
                                                             </span>
                                                         )}
@@ -316,14 +316,14 @@ export default function ApplicationsClient() {
                                                                 className="btn btn-sm btn-ghost"
                                                                 title="View Details"
                                                             >
-                                                                <i className="fa-solid fa-eye"></i>
+                                                                <i className="fa-duotone fa-regular fa-eye"></i>
                                                             </Link>
                                                             <Link
                                                                 href={`/jobs/${app.job_id}`}
                                                                 className="btn btn-sm btn-ghost"
                                                                 title="View Job"
                                                             >
-                                                                <i className="fa-solid fa-briefcase"></i>
+                                                                <i className="fa-duotone fa-regular fa-briefcase"></i>
                                                             </Link>
                                                         </div>
                                                     </td>
@@ -380,7 +380,7 @@ export default function ApplicationsClient() {
                                                     <td>
                                                         {app.job?.location && (
                                                             <span className="text-sm">
-                                                                <i className="fa-solid fa-location-dot mr-1"></i>
+                                                                <i className="fa-duotone fa-regular fa-location-dot mr-1"></i>
                                                                 {app.job.location}
                                                             </span>
                                                         )}
@@ -406,13 +406,13 @@ export default function ApplicationsClient() {
                     {applications.length === 0 && (
                         <div className="card bg-base-100 shadow">
                             <div className="card-body text-center py-12">
-                                <i className="fa-solid fa-inbox text-6xl text-base-content/20 mb-4"></i>
+                                <i className="fa-duotone fa-regular fa-inbox text-6xl text-base-content/20 mb-4"></i>
                                 <h3 className="text-2xl font-bold mb-2">No Applications Yet</h3>
                                 <p className="text-base-content/70 mb-6">
                                     Start applying to jobs to track your applications here
                                 </p>
                                 <Link href="/public/jobs" className="btn btn-primary">
-                                    <i className="fa-solid fa-search"></i>
+                                    <i className="fa-duotone fa-regular fa-search"></i>
                                     Browse Jobs
                                 </Link>
                             </div>
@@ -428,7 +428,7 @@ export default function ApplicationsClient() {
                                     disabled={page <= 1}
                                     onClick={prevPage}
                                 >
-                                    <i className="fa-solid fa-chevron-left"></i>
+                                    <i className="fa-duotone fa-regular fa-chevron-left"></i>
                                 </button>
                                 <button className="join-item btn">
                                     Page {page} of {pagination.total_pages}
@@ -438,7 +438,7 @@ export default function ApplicationsClient() {
                                     disabled={page >= pagination.total_pages}
                                     onClick={nextPage}
                                 >
-                                    <i className="fa-solid fa-chevron-right"></i>
+                                    <i className="fa-duotone fa-regular fa-chevron-right"></i>
                                 </button>
                             </div>
                         </div>

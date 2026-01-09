@@ -127,7 +127,7 @@ export default function VerificationModal({
 
                         {/* Status Descriptions */}
                         <div className="alert alert-info">
-                            <i className="fa-solid fa-info-circle"></i>
+                            <i className="fa-duotone fa-regular fa-info-circle"></i>
                             <div className="text-sm">
                                 <strong>Status meanings:</strong>
                                 <ul className="list-disc list-inside mt-1 space-y-1">
@@ -142,7 +142,7 @@ export default function VerificationModal({
                         {/* Error Message */}
                         {error && (
                             <div className="alert alert-error">
-                                <i className="fa-solid fa-circle-exclamation"></i>
+                                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                                 <span>{error}</span>
                             </div>
                         )}

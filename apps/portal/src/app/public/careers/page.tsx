@@ -22,7 +22,7 @@ export default function CareersPage() {
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto text-center">
                         <div className="mb-12">
-                            <i className="fa-solid fa-rocket text-8xl text-primary opacity-20"></i>
+                            <i className="fa-duotone fa-regular fa-rocket text-8xl text-primary opacity-20"></i>
                         </div>
                         <h2 className="text-4xl font-bold mb-6">Careers Page Coming Soon</h2>
                         <p className="text-xl text-base-content/70 mb-8 max-w-2xl mx-auto">
@@ -30,7 +30,7 @@ export default function CareersPage() {
                             individuals to join our team. Check back soon for open positions!
                         </p>
                         <div className="alert alert-info max-w-2xl mx-auto mb-8">
-                            <i className="fa-solid fa-info-circle"></i>
+                            <i className="fa-duotone fa-regular fa-info-circle"></i>
                             <span>
                                 Want to be notified when we start hiring? Send your resume and areas of interest
                                 to careers@splits.network
@@ -49,7 +49,7 @@ export default function CareersPage() {
                             <div className="card bg-base-100 shadow">
                                 <div className="card-body text-center">
                                     <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
-                                        <i className="fa-solid fa-rocket text-primary text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-rocket text-primary text-2xl"></i>
                                     </div>
                                     <h3 className="card-title justify-center text-xl mb-3">Impact</h3>
                                     <p className="text-base-content/70">
@@ -60,7 +60,7 @@ export default function CareersPage() {
                             <div className="card bg-base-100 shadow">
                                 <div className="card-body text-center">
                                     <div className="w-16 h-16 rounded-full bg-secondary/20 flex items-center justify-center mx-auto mb-4">
-                                        <i className="fa-solid fa-users text-secondary text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-users text-secondary text-2xl"></i>
                                     </div>
                                     <h3 className="card-title justify-center text-xl mb-3">Culture</h3>
                                     <p className="text-base-content/70">
@@ -71,7 +71,7 @@ export default function CareersPage() {
                             <div className="card bg-base-100 shadow">
                                 <div className="card-body text-center">
                                     <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-4">
-                                        <i className="fa-solid fa-chart-line text-accent text-2xl"></i>
+                                        <i className="fa-duotone fa-regular fa-chart-line text-accent text-2xl"></i>
                                     </div>
                                     <h3 className="card-title justify-center text-xl mb-3">Growth</h3>
                                     <p className="text-base-content/70">
@@ -93,7 +93,7 @@ export default function CareersPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
-                                        <i className="fa-solid fa-code text-primary"></i>
+                                        <i className="fa-duotone fa-regular fa-code text-primary"></i>
                                         Engineering
                                     </h3>
                                     <p className="text-sm text-base-content/70 mt-2">
@@ -104,7 +104,7 @@ export default function CareersPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
-                                        <i className="fa-solid fa-palette text-secondary"></i>
+                                        <i className="fa-duotone fa-regular fa-palette text-secondary"></i>
                                         Design
                                     </h3>
                                     <p className="text-sm text-base-content/70 mt-2">
@@ -115,7 +115,7 @@ export default function CareersPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
-                                        <i className="fa-solid fa-box text-accent"></i>
+                                        <i className="fa-duotone fa-regular fa-box text-accent"></i>
                                         Product
                                     </h3>
                                     <p className="text-sm text-base-content/70 mt-2">
@@ -126,7 +126,7 @@ export default function CareersPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
-                                        <i className="fa-solid fa-chart-line text-success"></i>
+                                        <i className="fa-duotone fa-regular fa-chart-line text-success"></i>
                                         Go-to-Market
                                     </h3>
                                     <p className="text-sm text-base-content/70 mt-2">
@@ -137,7 +137,7 @@ export default function CareersPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
-                                        <i className="fa-solid fa-headset text-info"></i>
+                                        <i className="fa-duotone fa-regular fa-headset text-info"></i>
                                         Support
                                     </h3>
                                     <p className="text-sm text-base-content/70 mt-2">
@@ -148,7 +148,7 @@ export default function CareersPage() {
                             <div className="card bg-base-200 shadow">
                                 <div className="card-body">
                                     <h3 className="card-title">
-                                        <i className="fa-solid fa-briefcase text-warning"></i>
+                                        <i className="fa-duotone fa-regular fa-briefcase text-warning"></i>
                                         Operations
                                     </h3>
                                     <p className="text-sm text-base-content/70 mt-2">
@@ -170,7 +170,7 @@ export default function CareersPage() {
                             <div className="card bg-base-100 text-base-content shadow">
                                 <div className="card-body">
                                     <div className="flex items-start gap-4">
-                                        <i className="fa-solid fa-lightbulb text-primary text-2xl mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-lightbulb text-primary text-2xl mt-1"></i>
                                         <div>
                                             <h3 className="font-bold text-lg mb-2">Ownership & Initiative</h3>
                                             <p className="text-base-content/70">
@@ -183,7 +183,7 @@ export default function CareersPage() {
                             <div className="card bg-base-100 text-base-content shadow">
                                 <div className="card-body">
                                     <div className="flex items-start gap-4">
-                                        <i className="fa-solid fa-comments text-secondary text-2xl mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-comments text-secondary text-2xl mt-1"></i>
                                         <div>
                                             <h3 className="font-bold text-lg mb-2">Clear Communication</h3>
                                             <p className="text-base-content/70">
@@ -196,7 +196,7 @@ export default function CareersPage() {
                             <div className="card bg-base-100 text-base-content shadow">
                                 <div className="card-body">
                                     <div className="flex items-start gap-4">
-                                        <i className="fa-solid fa-user-group text-accent text-2xl mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-user-group text-accent text-2xl mt-1"></i>
                                         <div>
                                             <h3 className="font-bold text-lg mb-2">Customer Empathy</h3>
                                             <p className="text-base-content/70">
@@ -209,7 +209,7 @@ export default function CareersPage() {
                             <div className="card bg-base-100 text-base-content shadow">
                                 <div className="card-body">
                                     <div className="flex items-start gap-4">
-                                        <i className="fa-solid fa-graduation-cap text-success text-2xl mt-1"></i>
+                                        <i className="fa-duotone fa-regular fa-graduation-cap text-success text-2xl mt-1"></i>
                                         <div>
                                             <h3 className="font-bold text-lg mb-2">Continuous Learning</h3>
                                             <p className="text-base-content/70">
@@ -229,10 +229,10 @@ export default function CareersPage() {
                 <div className="container mx-auto px-4 text-center">
                     <h2 className="text-4xl font-bold mb-6">Interested in Joining?</h2>
                     <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
-                        Send your resume and tell us what excites you about Splits 
+                        Send your resume and tell us what excites you about Splits
                     </p>
                     <a href="mailto:careers@splits.network" className="btn btn-lg btn-neutral">
-                        <i className="fa-solid fa-envelope"></i>
+                        <i className="fa-duotone fa-regular fa-envelope"></i>
                         Email careers@splits.network
                     </a>
                     <p className="mt-6 text-sm opacity-75">

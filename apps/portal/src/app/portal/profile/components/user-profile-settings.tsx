@@ -167,7 +167,7 @@ export function UserProfileSettings() {
 
     if (loading) {
         return (
-            <div className="card bg-base-100 shadow">
+            <div className="card bg-base-200 shadow">
                 <div className="card-body">
                     <div className="flex items-center justify-center py-8">
                         <span className="loading loading-spinner loading-lg"></span>
@@ -178,13 +178,13 @@ export function UserProfileSettings() {
     }
 
     return (
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+        <>
             {/* Profile Information Card */}
-            <div className="card bg-base-100 shadow">
+            <div className="card bg-base-200 shadow">
                 <form onSubmit={handleSubmit}>
                     <div className="card-body">
                         <h2 className="card-title">
-                            <i className="fa-solid fa-user"></i>
+                            <i className="fa-duotone fa-regular fa-user"></i>
                             Profile & Account
                         </h2>
                         <p className="text-sm text-base-content/70">
@@ -193,14 +193,14 @@ export function UserProfileSettings() {
 
                         {error && (
                             <div className="alert alert-error mt-4">
-                                <i className="fa-solid fa-circle-exclamation"></i>
+                                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                                 <span>{error}</span>
                             </div>
                         )}
 
                         {success && (
                             <div className="alert alert-success mt-4">
-                                <i className="fa-solid fa-circle-check"></i>
+                                <i className="fa-duotone fa-regular fa-circle-check"></i>
                                 <span>{success}</span>
                             </div>
                         )}
@@ -254,7 +254,7 @@ export function UserProfileSettings() {
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-save"></i>
+                                        <i className="fa-duotone fa-regular fa-save"></i>
                                         Save Changes
                                     </>
                                 )}
@@ -265,10 +265,10 @@ export function UserProfileSettings() {
             </div>
 
             {/* Security Settings Section */}
-            <div className="card bg-base-100 shadow">
+            <div className="card bg-base-200 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
-                        <i className="fa-solid fa-shield-halved"></i>
+                        <i className="fa-duotone fa-regular fa-shield-halved"></i>
                         Security
                     </h2>
                     <p className="text-sm text-base-content/70 mb-4">
@@ -277,7 +277,7 @@ export function UserProfileSettings() {
 
                     {passwordSuccess && (
                         <div className="alert alert-success">
-                            <i className="fa-solid fa-circle-check"></i>
+                            <i className="fa-duotone fa-regular fa-circle-check"></i>
                             <span>{passwordSuccess}</span>
                         </div>
                     )}
@@ -293,10 +293,10 @@ export function UserProfileSettings() {
                         </div>
                         {!showPasswordChange && (
                             <button
-                                className="btn btn-sm btn-outline"
+                                className="btn btn-sm btn-outline bg-base-100"
                                 onClick={() => setShowPasswordChange(true)}
                             >
-                                <i className="fa-solid fa-key"></i>
+                                <i className="fa-duotone fa-regular fa-key"></i>
                                 Change Password
                             </button>
                         )}
@@ -306,7 +306,7 @@ export function UserProfileSettings() {
                         <form onSubmit={handlePasswordChange} className="mt-4 space-y-4">
                             {passwordError && (
                                 <div className="alert alert-error">
-                                    <i className="fa-solid fa-circle-exclamation"></i>
+                                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                                     <span>{passwordError}</span>
                                 </div>
                             )}
@@ -379,7 +379,7 @@ export function UserProfileSettings() {
                                         </>
                                     ) : (
                                         <>
-                                            <i className="fa-solid fa-check"></i>
+                                            <i className="fa-duotone fa-regular fa-check"></i>
                                             Update Password
                                         </>
                                     )}
@@ -396,7 +396,7 @@ export function UserProfileSettings() {
                                 Two-Factor Authentication
                                 {clerkUser?.twoFactorEnabled && (
                                     <span className="badge badge-success badge-sm">
-                                        <i className="fa-solid fa-check mr-1"></i>
+                                        <i className="fa-duotone fa-regular fa-check mr-1"></i>
                                         Enabled
                                     </span>
                                 )}
@@ -408,15 +408,15 @@ export function UserProfileSettings() {
                             </p>
                         </div>
                         <button
-                            className="btn btn-sm btn-outline"
+                            className="btn btn-sm btn-outline bg-base-100"
                             onClick={() => window.open('/user-profile#security', '_blank')}
                         >
-                            <i className="fa-solid fa-shield"></i>
+                            <i className="fa-duotone fa-regular fa-shield"></i>
                             {clerkUser?.twoFactorEnabled ? 'Manage 2FA' : 'Enable 2FA'}
                         </button>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }
