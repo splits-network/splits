@@ -117,7 +117,6 @@ export class ApplicationRepository {
         console.log('SELECT clause:', selectClause);
 
         const { data, error } = await this.supabase
-
             .from('applications')
             .select(selectClause)
             .eq('id', id)
@@ -126,9 +125,6 @@ export class ApplicationRepository {
         if (error) {
             console.error('findApplication error:', error);
             if (error.code === 'PGRST116') return null;
-            throw error;
-        }
-        if (error) {
             if (error.code === 'PGRST116') return null;
             throw error;
         }
@@ -144,15 +140,15 @@ export class ApplicationRepository {
             return data;
         }
 
-        if (accessContext.candidateId && data.candidate_id === accessContext.candidateId) {
+        if (accessContext.candidateId && (data as any).candidate_id === accessContext.candidateId) {
             return data;
         }
 
-        if (accessContext.recruiterId && data.recruiter_id === accessContext.recruiterId) {
+        if (accessContext.recruiterId && (data as any).recruiter_id === accessContext.recruiterId) {
             return data;
         }
 
-        const companyOrgId = data.job?.company?.identity_organization_id;
+        const companyOrgId = (data as any).job?.company?.identity_organization_id;
         if (
             companyOrgId &&
             accessContext.organizationIds.length > 0 &&
@@ -257,18 +253,19 @@ export class ApplicationRepository {
      * Get documents for an application (polymorphic association)
      * Documents use entity_type + entity_id pattern
      */
-    async getDocumentsForApplication(applicationId: string): Promise<any[]> {
-        const { data, error } = await this.supabase
+    // this appears to be a duplicate of a method in the same file. Commenting out.
+    // async getDocumentsForApplication(applicationId: string): Promise<any[]> {
+    //     const { data, error } = await this.supabase
 
-            .from('documents')
-            .select('id, filename, storage_path, content_type, file_size, created_at')
-            .eq('entity_type', 'application')
-            .eq('entity_id', applicationId)
-            .is('deleted_at', null);
+    //         .from('documents')
+    //         .select('id, filename, storage_path, content_type, file_size, created_at')
+    //         .eq('entity_type', 'application')
+    //         .eq('entity_id', applicationId)
+    //         .is('deleted_at', null);
 
-        if (error) throw error;
-        return data || [];
-    }
+    //     if (error) throw error;
+    //     return data || [];
+    // }
 
     /**
      * Build select clause with optional includes
