@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient, apiClient } from '@/lib/api-client';
@@ -180,17 +180,26 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     const [limit, setLimitState] = useState(initialState.limit);
 
     // View mode state (persisted to localStorage)
-    const [viewMode, setViewModeState] = useState<'grid' | 'table'>(() => {
-        if (typeof window !== 'undefined' && viewModeKey) {
+    // Always initialize with 'grid' to avoid hydration mismatch
+    const [viewMode, setViewModeState] = useState<'grid' | 'table'>('grid');
+
+    // Load view mode from localStorage after hydration
+    useEffect(() => {
+        if (viewModeKey && typeof window !== 'undefined') {
             const saved = localStorage.getItem(viewModeKey);
-            return (saved === 'grid' || saved === 'table') ? saved : 'grid';
+            if (saved === 'grid' || saved === 'table') {
+                setViewModeState(saved);
+            }
         }
-        return 'grid';
-    });
+    }, [viewModeKey]);
 
     // Refs for debouncing
     const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
     const isInitialMount = useRef(true);
+
+    // Create stable keys for callback dependencies
+    const filtersKey = useMemo(() => JSON.stringify(filters), [filters]);
+    const defaultFiltersKey = useMemo(() => JSON.stringify(defaultFilters), [defaultFilters]);
 
     // Update URL when state changes
     const updateUrl = useCallback(() => {
@@ -225,7 +234,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
 
         // Use replace to avoid adding to history on every state change
         router.replace(newUrl, { scroll: false });
-    }, [syncToUrl, pathname, router, page, limit, searchQuery, sortBy, sortOrder, filters, defaultLimit, defaultSortBy, defaultSortOrder, defaultFilters]);
+    }, [syncToUrl, pathname, router, page, limit, searchQuery, sortBy, sortOrder, filtersKey, defaultFiltersKey, defaultLimit, defaultSortBy, defaultSortOrder]);
 
     // Fetch data
     const fetchData = useCallback(async () => {
@@ -390,7 +399,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
             fetchData();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [autoFetch, page, limit, searchQuery, sortBy, sortOrder, JSON.stringify(filters)]);
+    }, [autoFetch, page, limit, searchQuery, sortBy, sortOrder, filtersKey]);
 
     // Update URL when state changes (after initial mount)
     useEffect(() => {
