@@ -68,7 +68,7 @@ export default async function ApplicationReviewPage({
                             <span>{error}</span>
                         </div>
                         <div className="card-actions justify-start mt-4">
-                            <Link href="/portal/application/pending" className="btn">
+                            <Link href="/portal/applications/pending" className="btn">
                                 <i className="fa-solid fa-arrow-left"></i>
                                 Back to Pending Applications
                             </Link>
@@ -83,7 +83,7 @@ export default async function ApplicationReviewPage({
         <div className="space-y-6">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-base-content/60">
-                <Link href="/portal/application/pending" className="hover:text-primary">
+                <Link href="/portal/applications/pending" className="hover:text-primary">
                     <i className="fa-solid fa-arrow-left mr-2"></i>
                     Pending Applications
                 </Link>

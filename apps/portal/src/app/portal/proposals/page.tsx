@@ -156,7 +156,7 @@ export default function ProposalsPage() {
 
     // Handle proposal click
     const handleProposalClick = (proposalId: string) => {
-        router.push(`/portal/application/${proposalId}`);
+        router.push(`/portal/applications/${proposalId}`);
     };
 
     return (

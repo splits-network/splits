@@ -156,7 +156,7 @@ export function ApplicationTableRow({
                         </button>
                     )}
                     <Link
-                        href={`/portal/application/${application.id}`}
+                        href={`/portal/applications/${application.id}`}
                         className="btn btn-primary btn-sm"
                     >
                         <i className="fa-solid fa-arrow-right"></i>

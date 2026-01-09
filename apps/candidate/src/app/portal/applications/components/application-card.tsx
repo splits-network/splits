@@ -147,7 +147,7 @@ export default function ApplicationCard({ application: app, isActive = true }: A
                         </div>
                         <div className="flex gap-2">
                             <Link
-                                href={`/portal/application/${app.id}`}
+                                href={`/portal/applications/${app.id}`}
                                 className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform"
                             >
                                 <i className="fa-solid fa-eye"></i>

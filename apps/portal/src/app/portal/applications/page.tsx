@@ -12,7 +12,7 @@ export default function ApplicationsPage() {
                     </p>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                    <Link href="/portal/application/pending" className="btn btn-ghost gap-2">
+                    <Link href="/portal/applications/pending" className="btn btn-ghost gap-2">
                         <i className="fa-solid fa-inbox"></i>
                         Pending Reviews
                     </Link>

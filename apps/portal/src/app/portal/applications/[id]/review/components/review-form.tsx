@@ -87,7 +87,7 @@ export default function ReviewForm({
             });
 
             // Success - redirect to pending list with success message
-            router.push('/portal/application/pending?success=true');
+            router.push('/portal/applications/pending?success=true');
         } catch (err: any) {
             setError(err.message || 'Failed to submit application');
             setSubmitting(false);
@@ -261,7 +261,7 @@ export default function ReviewForm({
                                     {documents.map((doc: any) => (
                                         <div key={doc.id} className="flex items-center justify-between p-4 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors">
                                             <div className="flex items-center gap-4 flex-1 min-w-0">
-                                                <i className="fa-solid fa-file-pdf text-3xl text-error flex-shrink-0"></i>
+                                                <i className="fa-solid fa-file-pdf text-3xl text-error shrink-0"></i>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="font-medium truncate">{doc.file_name}</div>
                                                     <div className="text-sm text-base-content/60 flex items-center gap-2 flex-wrap">
@@ -281,7 +281,7 @@ export default function ReviewForm({
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="flex gap-2 flex-shrink-0">
+                                            <div className="flex gap-2 shrink-0">
                                                 <button
                                                     onClick={() => {
                                                         setSelectedDocument(doc);
@@ -294,7 +294,7 @@ export default function ReviewForm({
                                                 </button>
                                                 <button
                                                     onClick={() => handleDownloadDocument(doc)}
-                                                    className="btn btn-sm btn-ghost flex-shrink-0"
+                                                    className="btn btn-sm btn-ghost shrink-0"
                                                     title="Download document"
                                                 >
                                                     <i className="fa-solid fa-download"></i>

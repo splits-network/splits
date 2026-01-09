@@ -269,7 +269,7 @@ function ApplicationCard({ application }: ApplicationCardProps) {
                     </div>
                     <div className="flex flex-col gap-2">
                         <Link
-                            href={`/portal/application/${application.id}/review`}
+                            href={`/portal/applications/${application.id}/review`}
                             className="btn btn-primary"
                         >
                             <i className="fa-solid fa-eye"></i>

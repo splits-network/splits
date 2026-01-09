@@ -180,7 +180,7 @@ export function ApplicationCard({
                                 )}
                             </button>
                         )}
-                        <Link href={`/portal/application/${application.id}`} className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
+                        <Link href={`/portal/applications/${application.id}`} className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
                             View Details
                             <i className="fa-solid fa-arrow-right"></i>
                         </Link>

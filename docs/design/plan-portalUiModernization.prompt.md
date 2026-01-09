@@ -24,7 +24,7 @@ Build foundational card components that all pages will use:
 
 - **`BaseCard`** — Core wrapper with consistent shadow hierarchy (`shadow-sm` → `shadow` → `shadow-xl` on hover), border-radius (`rounded-xl`), background (`bg-base-100`), and padding scales
 - **`StatCard`** — Unified stat display with icon, value, label, trend indicator slot, consistent sizing
-- **`EntityCard`** — Template for candidate/application/role cards with gradient header, avatar, status ribbons, hover lift effect
+- **`EntityCard`** — Template for candidate/applications/role cards with gradient header, avatar, status ribbons, hover lift effect
 - **`ContentCard`** — Simple content container with optional title, description, and footer actions
 - **`EmptyState`** — Consistent empty state pattern with icon, title, description, action button
 

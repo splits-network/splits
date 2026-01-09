@@ -75,7 +75,7 @@ const mapApplicationToActivity = (application: any): RecentActivity => {
         job_title: jobTitle,
         candidate_name: candidateName,
         timestamp: formatActivityTimestamp(application.updated_at || application.created_at),
-        link: `/portal/application/${application.id}`,
+        link: `/portal/applications/${application.id}`,
     };
 };
 

@@ -228,7 +228,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
             alert(`Job opportunity sent to ${candidate?.full_name || 'candidate'}! They'll receive an email notification and can review and approve the opportunity.`);
 
             // Redirect to the new application detail page
-            router.push(`/portal/application/${applicationId}`);
+            router.push(`/portal/applications/${applicationId}`);
         } catch (err: any) {
             console.error('Failed to propose job to candidate:', err);
             throw new Error(err.message || 'Failed to send job opportunity to candidate');
@@ -514,7 +514,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                                                     </div>
                                                     <div className="shrink-0">
                                                         <Link
-                                                            href={`/portal/application/${application.id}`}
+                                                            href={`/portal/applications/${application.id}`}
                                                             className="btn btn-sm btn-ghost"
                                                         >
                                                             <i className="fa-solid fa-arrow-right"></i>

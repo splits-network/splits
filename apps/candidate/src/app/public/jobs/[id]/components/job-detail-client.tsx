@@ -144,7 +144,7 @@ export default function JobDetailClient({
                                             {buttonConfig.text}
                                         </button>
                                         <Link
-                                            href={`/portal/application/${existingApplication.id}`}
+                                            href={`/portal/applications/${existingApplication.id}`}
                                             className="btn btn-outline btn-lg"
                                         >
                                             <i className="fa-solid fa-arrow-right"></i>

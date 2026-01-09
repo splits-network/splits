@@ -157,7 +157,7 @@ export default async function DashboardPage() {
                         {recentApplications.length > 0 ? (
                             <div className="space-y-4">
                                 {recentApplications.map((app) => (
-                                    <Link key={app.id} href={`/portal/application/${app.id}`}>
+                                    <Link key={app.id} href={`/portal/applications/${app.id}`}>
                                         <div className="p-4 bg-base-200 rounded-lg hover:bg-base-300 transition-colors cursor-pointer">
                                             <h3 className="font-semibold mb-1">{app.job_title}</h3>
                                             <p className="text-sm text-base-content/70 mb-2">

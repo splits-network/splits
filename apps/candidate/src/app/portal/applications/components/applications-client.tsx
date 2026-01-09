@@ -312,7 +312,7 @@ export default function ApplicationsClient() {
                                                     <td>
                                                         <div className="flex gap-2 justify-end">
                                                             <Link
-                                                                href={`/portal/application/${app.id}`}
+                                                                href={`/portal/applications/${app.id}`}
                                                                 className="btn btn-sm btn-ghost"
                                                                 title="View Details"
                                                             >
