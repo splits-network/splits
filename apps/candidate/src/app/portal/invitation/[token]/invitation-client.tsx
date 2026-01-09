@@ -56,7 +56,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
         // If not signed in, redirect to sign-up (not sign-in) since invited candidates are typically new
         // Use redirect param to return user to invitation page after authentication
         if (!isSignedIn) {
-            const redirectUrl = `/invitation/${token}`;
+            const redirectUrl = `/portal/invitation/${token}`;
             // Use replace instead of push to avoid back-button issues
             router.replace(`/sign-up?redirect=${encodeURIComponent(redirectUrl)}`);
             return;
@@ -138,7 +138,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             await client.post(`/recruiter-candidates/invitations/${token}/accept`);
 
             // Redirect to success page
-            router.push(`/invitation/${token}/accepted`);
+            router.push(`/portal/invitation/${token}/accepted`);
         } catch (err) {
             if (err instanceof Response) {
                 const data = await err.json();
@@ -169,7 +169,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             });
 
             // Redirect to declined page
-            router.push(`/invitation/${token}/declined`);
+            router.push(`/portal/invitation/${token}/declined`);
         } catch (err) {
             if (err instanceof Response) {
                 const data = await err.json();
