@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useStandardList } from '@/hooks/use-standard-list';
 import {
     PaginationControls,
@@ -8,31 +7,41 @@ import {
     ErrorState,
     EmptyState
 } from '@/components/standard-lists';
-import JobTableRow from './job-table-row';
-import JobsStats from './jobs-stats';
+import { DataTable, type TableColumn } from '@/components/ui/tables';
+import { JobTableRow } from './job-table-row';
 import JobsFilters from './jobs-filters';
-import { formatSalary, formatDate, getRoleBadges } from '@/lib/utils';
+import JobCard from './job-card';
+import { StatCard, StatCardGrid } from '@/components/ui';
 
 interface Job {
     id: string;
     title: string;
-    description: string | null;
-    location: string | null;
-    employment_type: string | null;
-    salary_min: number | null;
-    salary_max: number | null;
-    category: string | null;
-    open_to_relocation: boolean;
-    posted_at: string;
+    description?: string | null;
+    candidate_description?: string | null;
+    location?: string | null;
+    employment_type?: string | null;
+    salary_min?: number | null;
+    salary_max?: number | null;
+    category?: string | null;
+    department?: string;
+    open_to_relocation?: boolean;
+    updated_at?: string;
+    created_at?: string | Date;
+    status?: string;
     application_count?: number;
-    created_at: string | Date;
     company?: {
         id: string;
         name: string;
-        logo_url: string | null;
-        headquarters_location: string | null;
-        industry: string | null;
+        logo_url?: string | null;
+        headquarters_location?: string | null;
+        industry?: string | null;
     };
+    requirements?: Array<{
+        id: string;
+        requirement_type: 'mandatory' | 'preferred';
+        description: string;
+        sort_order: number;
+    }>;
 }
 
 interface JobFilters {
@@ -46,14 +55,24 @@ interface JobStats {
     avgSalary: number | null;
 }
 
+// Define table columns
+const jobColumns: TableColumn[] = [
+    { key: 'title', label: 'Job Title', sortable: true },
+    { key: 'company.name', label: 'Company', sortable: true },
+    { key: 'location', label: 'Location', sortable: true },
+    { key: 'salary_min', label: 'Salary', sortable: true },
+    { key: 'updated_at', label: 'Posted', sortable: true },
+    { key: 'actions', label: 'Actions', align: 'right' },
+];
+
 function buildStats(jobs: Job[], totalJobs: number): JobStats {
     const remoteFriendly = jobs.filter(j => j.open_to_relocation).length;
 
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     const newThisWeek = jobs.filter(j => {
-        if (!j.posted_at) return false;
-        const posted = new Date(j.posted_at);
+        if (!j.updated_at) return false;
+        const posted = new Date(j.updated_at);
         return posted >= oneWeekAgo;
     }).length;
 
@@ -73,15 +92,24 @@ export default function JobsList() {
         error,
         searchInput,
         setSearchInput,
+        clearSearch,
+        sortBy,
+        sortOrder,
+        handleSort,
         viewMode,
         setViewMode,
         page,
+        limit,
+        setLimit,
         goToPage,
         totalPages,
         total,
+        refresh,
     } = useStandardList<Job, JobFilters>({
         endpoint: '/jobs',
-        defaultLimit: 25,
+        defaultLimit: 24,
+        defaultSortBy: 'updated_at',
+        defaultSortOrder: 'desc',
         syncToUrl: true,
         viewModeKey: 'jobsViewMode',
         autoFetch: true,
@@ -90,229 +118,127 @@ export default function JobsList() {
     const stats = jobs.length > 0 ? buildStats(jobs, pagination?.total || 0) : null;
 
     return (
-        <div className="space-y-6">
-            {/* Stats Cards */}
-            <JobsStats stats={stats} loading={loading && !jobs.length} />
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between">
+            <div className='w-full md-flex-1 md-mr-4 space-y-6'>
+                <div className='card bg-base-200'>
+                    <StatCardGrid className='m-2 shadow-lg'>
+                        <StatCard
+                            title="Total Jobs"
+                            value={stats ? stats.totalJobs.toLocaleString() : '—'}
+                            loading={loading && !jobs.length}
+                            icon="fa-briefcase"
+                        />
+                        <StatCard
+                            title="Remote Friendly"
+                            value={stats ? stats.remoteFriendly.toLocaleString() : '—'}
+                            loading={loading && !jobs.length}
+                            icon="fa-house-laptop"
+                        />
+                        <StatCard
+                            title="New This Week"
+                            value={stats ? stats.newThisWeek.toLocaleString() : '—'}
+                            loading={loading && !jobs.length}
+                            icon="fa-calendar-plus"
+                        />
+                        <StatCard
+                            title="Avg. Salary"
+                            value={stats && stats.avgSalary ? `$${stats.avgSalary.toLocaleString()}` : '—'}
+                            loading={loading && !jobs.length}
+                            icon="fa-dollar-sign"
+                        />
+                    </StatCardGrid>
 
-            {/* Search and View Toggle */}
-            <JobsFilters
-                searchInput={searchInput}
-                onSearchChange={setSearchInput}
-                viewMode={viewMode}
-                onViewModeChange={setViewMode}
-            />
+                </div>
 
-            {/* Results Count */}
-            <div className="text-sm text-base-content/70">
-                {loading ? (
-                    'Loading jobs...'
-                ) : total > 0 ? (
-                    <>
-                        Showing {((page - 1) * (pagination?.limit || 25)) + 1}-{Math.min(page * (pagination?.limit || 25), total)} of {total} {total === 1 ? 'job' : 'jobs'}
-                        {searchInput && ' (filtered)'}
-                    </>
-                ) : (
-                    'No jobs to display yet.'
+
+                {/* Error State */}
+                {error && <ErrorState message={error} onRetry={refresh} />}
+
+                {/* Loading State */}
+                {loading && !jobs.length && <LoadingState />}
+
+                {/* Empty State */}
+                {!loading && jobs.length === 0 && (
+                    <EmptyState
+                        icon="fa-briefcase"
+                        title="No Jobs Found"
+                        description={
+                            searchInput
+                                ? 'Try different search terms or clear your search.'
+                                : 'Check back soon for new opportunities.'
+                        }
+                        action={
+                            searchInput
+                                ? {
+                                    label: 'Clear search',
+                                    onClick: clearSearch,
+                                }
+                                : undefined
+                        }
+                    />
+                )}
+
+                {/* Grid View */}
+                {viewMode === 'grid' && jobs.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                        {jobs.map((job) => (
+                            <JobCard key={job.id} job={job} />
+                        ))}
+                    </div>
+                )}
+
+                {/* Table View */}
+                {viewMode === 'table' && jobs.length > 0 && (
+                    <DataTable
+                        columns={jobColumns}
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSort={handleSort}
+                        showExpandColumn={true}
+                        isEmpty={jobs.length === 0}
+                        loading={loading}
+                    >
+                        {jobs.map((job) => (
+                            <JobTableRow key={job.id} job={job} />
+                        ))}
+                    </DataTable>
+                )}
+
+                {/* Pagination */}
+                {jobs.length > 0 && totalPages > 1 && (
+                    <PaginationControls
+                        page={page}
+                        totalPages={totalPages}
+                        total={total}
+                        limit={limit}
+                        onPageChange={goToPage}
+                        onLimitChange={setLimit}
+                    />
+                )}
+
+            </div>
+            <div className="w-full md:w-64 lg:w-72 xl:w-80 shrink-0 mt-6 md:mt-0 space-y-6">
+
+                {/* Search and View Toggle */}
+                <JobsFilters
+                    searchInput={searchInput}
+                    onSearchChange={setSearchInput}
+                    viewMode={viewMode}
+                    onViewModeChange={setViewMode}
+                />
+
+                {/* Results Count */}
+                {!loading && jobs.length > 0 && (
+                    <div className="mb-4 text-sm text-base-content/70">
+                        Showing {jobs.length} of {total} jobs
+                        {searchInput && (
+                            <span className="ml-2">
+                                • Sorted by relevance
+                            </span>
+                        )}
+                    </div>
                 )}
             </div>
-
-            {/* Error State */}
-            {error && <ErrorState message={error} />}
-
-            {/* Loading State */}
-            {loading && !jobs.length && <LoadingState />}
-
-            {/* Empty State */}
-            {!loading && jobs.length === 0 && (
-                <EmptyState
-                    icon="fa-briefcase"
-                    title="No Jobs Found"
-                    description={searchInput ? 'Try adjusting your search terms.' : 'Check back soon for new opportunities.'}
-                />
-            )}
-
-            {/* Results */}
-            {!loading && jobs.length > 0 && (
-                <>
-                    {viewMode === 'grid' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {jobs.map(job => {
-                                const badges = getRoleBadges(job, jobs);
-                                return (
-                                    <div
-                                        key={job.id}
-                                        className="group card bg-base-100 border border-base-300 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden"
-                                    >
-                                        {/* Company header with solid background */}
-                                        <div className="relative h-24 bg-linear-90 from-secondary/20 to-transparent flex items-center">
-                                            {/* Company logo and info */}
-                                            <div className="flex items-center gap-4 p-2">
-                                                <div className={`avatar avatar-placeholder`}>
-                                                    <div className={`bg-base-100 text-primary text-3xl font-bold w-16 p-2 rounded-full shadow-lg`}>
-                                                        {job.company?.logo_url ? (
-                                                            <img
-                                                                src={job.company.logo_url}
-                                                                alt={`${job.company.name} logo`}
-                                                                className="w-20 h-20 object-contain rounded-lg"
-                                                                onError={(e) => {
-                                                                    e.currentTarget.style.display = 'none';
-                                                                    e.currentTarget.nextElementSibling?.removeAttribute('hidden');
-                                                                }}
-                                                            />
-                                                        ) : (
-                                                            (job.company?.name || 'C')[0].toUpperCase()
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <p className="text-base font-semibold text-base-content/70 flex items-center gap-2">
-                                                        <i className="fa-duotone fa-regular fa-building text-primary"></i>
-                                                        {job.company?.name || 'Confidential Company'}
-                                                    </p>
-                                                    {(job.company?.headquarters_location || job.company?.industry) && (
-                                                        <div className="mt-1 flex gap-2">
-                                                            {job.company?.headquarters_location && (
-                                                                <span className="badge badge-outline badge-sm gap-1">
-                                                                    <i className="fa-duotone fa-regular fa-location-dot text-xs"></i>
-                                                                    {job.company.headquarters_location}
-                                                                </span>
-                                                            )}
-                                                            {job.company?.industry && (
-                                                                <span className="badge badge-outline badge-sm gap-1">
-                                                                    <i className="fa-duotone fa-regular fa-industry text-xs"></i>
-                                                                    {job.company.industry}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Status badges */}
-                                            {badges.length > 0 && (
-                                                <div className="absolute top-3 right-0 flex flex-col gap-2">
-                                                    {badges.map((badge, idx) => (
-                                                        <div
-                                                            key={idx}
-                                                            className={`badge ${badge.class} gap-1 shadow-lg rounded-e-none ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-left' : ''}`}
-                                                            data-tip={badge.tooltip}
-                                                        >
-                                                            <i className={`fa-duotone fa-regular mr-1 ${badge.icon}`}></i>
-                                                            {badge.text && <span>{badge.text}</span>}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="card-body pb-6 space-y-4">
-                                            {/* Job title */}
-                                            <div className="">
-                                                <h3 className="text-xl font-bold leading-tight group-hover:text-primary transition-colors line-clamp-2">
-                                                    {job.title}
-                                                </h3>
-                                            </div>
-
-                                            {/* Description preview */}
-                                            {job.description && (
-                                                <p className="text-sm text-base-content/60 line-clamp-2 leading-relaxed">
-                                                    {job.description}
-                                                </p>
-                                            )}
-
-                                            {/* Job metadata */}
-                                            <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-                                                {job.location && (
-                                                    <span className="flex items-center gap-1.5 text-base-content/70">
-                                                        <i className="fa-duotone fa-regular fa-location-dot text-primary"></i>
-                                                        <span className="font-medium">{job.location}</span>
-                                                    </span>
-                                                )}
-                                                {job.employment_type && (
-                                                    <span className="flex items-center gap-1.5 text-base-content/70">
-                                                        <i className="fa-duotone fa-regular fa-briefcase text-primary"></i>
-                                                        <span className="font-medium">{job.employment_type.replace('_', '-')}</span>
-                                                    </span>
-                                                )}
-                                                {job.open_to_relocation && (
-                                                    <span className="flex items-center gap-1.5 text-base-content/70">
-                                                        <i className="fa-duotone fa-regular fa-house-laptop text-primary"></i>
-                                                        <span className="font-medium">Remote OK</span>
-                                                    </span>
-                                                )}
-                                            </div>
-
-                                            {/* Category tag */}
-                                            {job.category && (
-                                                <div className="pt-2">
-                                                    <span className="badge badge-outline badge-primary badge-sm">
-                                                        {job.category}
-                                                    </span>
-                                                </div>
-                                            )}
-
-                                            {/* Footer with salary and action */}
-                                            <div className="flex items-center justify-between pt-4 border-t border-base-300">
-                                                <div className="flex-1">
-                                                    {job.salary_min && job.salary_max ? (
-                                                        <div className="font-semibold text-base text-success">
-                                                            {formatSalary(job.salary_min, job.salary_max)}
-                                                        </div>
-                                                    ) : (
-                                                        <div className="text-sm text-base-content/50">
-                                                            Salary not disclosed
-                                                        </div>
-                                                    )}
-                                                    {job.posted_at && (
-                                                        <div className="text-xs text-base-content/50 mt-0.5">
-                                                            Posted {formatDate(job.posted_at)}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <Link href={`/public/jobs/${job.id}`} className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
-                                                    View Role
-                                                    <i className="fa-duotone fa-regular fa-arrow-right"></i>
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-
-                    {viewMode === 'table' && (
-                        <div className="card bg-base-100 shadow overflow-hidden">
-                            <div className="overflow-x-auto">
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Role Details</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {jobs.map(job => {
-                                            const badges = getRoleBadges(job, jobs);
-                                            return <JobTableRow key={job.id} job={job} badges={badges} />;
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Pagination */}
-                    {totalPages > 1 && (
-                        <PaginationControls
-                            page={page}
-                            totalPages={totalPages}
-                            total={total}
-                            limit={pagination?.limit || 25}
-                            onPageChange={goToPage}
-                        />
-                    )}
-                </>
-            )}
         </div>
     );
 }

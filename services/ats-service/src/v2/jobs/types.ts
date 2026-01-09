@@ -13,6 +13,7 @@ export interface JobFilters extends PaginationParams, SortParams {
     employment_type?: string;
     company_id?: string;
     job_owner_filter?: 'all' | 'assigned'; // 'all' = all active jobs, 'assigned' = jobs where recruiter is job_owner_id
+    filters?: Record<string, any>;
 }
 
 export interface JobUpdate {

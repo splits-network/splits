@@ -26,7 +26,7 @@ interface Job {
     salary_max?: number;
     employment_type?: string;
     open_to_relocation?: boolean;
-    posted_at?: string;
+    updated_at?: string;
     created_at?: string;
     status?: string;
     description?: string;

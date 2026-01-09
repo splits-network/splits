@@ -46,7 +46,7 @@ After extracting marketplace and jobs pages into modular components, all TypeScr
 ```typescript
 // ❌ Old interface
 interface Job {
-    posted_at: string | Date;  // Type mismatch
+    updated_at: string | Date;  // Type mismatch
     description?: string | null;  // Optional incorrect
     location?: string | null;  // Optional incorrect
     company: {
@@ -58,7 +58,7 @@ interface Job {
 
 // ✅ New interface (matches JobTableRow exactly)
 interface Job {
-    posted_at: string;  // String only
+    updated_at: string;  // String only
     description: string | null;  // Not optional
     location: string | null;  // Not optional
     company: {

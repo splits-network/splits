@@ -28,7 +28,7 @@ interface Job {
     salary_max?: number;
     employment_type?: string;
     open_to_relocation?: boolean;
-    posted_at?: string;
+    updated_at?: string;
     created_at?: string;
     status?: string;
     description?: string;
@@ -115,10 +115,10 @@ export default function JobDetailClient({
                                     Remote
                                 </div>
                             )}
-                            {job.posted_at && (
+                            {job.updated_at && (
                                 <div className="badge badge-lg">
                                     <i className="fa-duotone fa-regular fa-calendar mr-2"></i>
-                                    Posted {formatDate(job.posted_at)}
+                                    Posted {formatDate(job.updated_at)}
                                 </div>
                             )}
                         </div>
@@ -211,13 +211,13 @@ export default function JobDetailClient({
 
                                     <div className="space-y-3">
                                         {/* Posted Date (relative) */}
-                                        {(job.posted_at || job.created_at) && (
+                                        {(job.updated_at || job.created_at) && (
                                             <div className="flex items-start gap-3">
                                                 <i className="fa-duotone fa-regular fa-calendar text-base-content/70 mt-1"></i>
                                                 <div>
                                                     <div className="text-xs text-base-content/70">Posted</div>
                                                     <div className="font-semibold">
-                                                        {formatRelativeTime(job.posted_at || job.created_at!)}
+                                                        {formatRelativeTime(job.updated_at || job.created_at!)}
                                                     </div>
                                                 </div>
                                             </div>
