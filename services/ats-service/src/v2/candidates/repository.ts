@@ -90,6 +90,13 @@ export class CandidateRepository {
         const scope = filters.scope || (params as any).scope || 'all';
         const { scope: _scope, ...columnFilters } = filters;
 
+        // Apply role-based access control FIRST
+        // Candidates can ONLY see their own candidate record
+        if (accessContext.candidateId && !accessContext.recruiterId) {
+            // User is a candidate (no recruiter role) - filter to only their own candidate
+            query = query.eq('user_id', accessContext.identityUserId);
+        }
+
         // Apply column-based filters (actual database columns only)
         for (const key of Object.keys(columnFilters)) {
             const value = columnFilters[key];

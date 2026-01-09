@@ -75,9 +75,9 @@ export class DocumentRepositoryV2 {
 
         // For internal service calls, skip access context and return all documents
         const isInternalService = clerkUserId === 'internal-service';
-        
+
         let query = this.supabase
-            
+
             .from('documents')
             .select('*', { count: 'exact' });
 
@@ -103,13 +103,13 @@ export class DocumentRepositoryV2 {
         // For internal services, no access filtering
         if (!isInternalService) {
             const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-            
+
             if (!accessContext.isPlatformAdmin) {
                 // If requesting documents for a specific entity, check access to that entity
                 if (filters.entity_type && filters.entity_id) {
                     const hasAccess = await this.canAccessEntity(
-                        filters.entity_type, 
-                        filters.entity_id, 
+                        filters.entity_type,
+                        filters.entity_id,
                         accessContext
                     );
                     if (!hasAccess) {
@@ -132,7 +132,7 @@ export class DocumentRepositoryV2 {
                 }
             }
         }
-        
+
         const { data, error, count } = await query
             .order('created_at', { ascending: false })
             .range(offset, offset + limit - 1);
@@ -149,7 +149,7 @@ export class DocumentRepositoryV2 {
                 total: count || rows.length,
             };
         }
-        
+
         // Filter rows based on access control for regular users
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
         const filteredRows = accessContext.isPlatformAdmin
@@ -173,7 +173,7 @@ export class DocumentRepositoryV2 {
         const isInternalService = clerkUserId === 'internal-service';
 
         const { data, error } = await this.supabase
-            
+
             .from('documents')
             .select('*')
             .eq('id', id)
@@ -208,12 +208,22 @@ export class DocumentRepositoryV2 {
             throw new Error('Unable to resolve identity user for document upload');
         }
 
+        // Debug: log the access context for this user
+        console.log(`[DOCUMENT] Creating document for user:`, {
+            clerkUserId,
+            identityUserId: accessContext.identityUserId,
+            candidateId: accessContext.candidateId,
+            role: accessContext.role,
+            requestedEntityType: input.entity_type,
+            requestedEntityId: input.entity_id,
+        });
+
         if (!this.canModifyEntity(input.entity_type, input.entity_id, accessContext)) {
             throw new Error('Not authorized to upload document for this entity');
         }
 
         const { data, error } = await this.supabase
-            
+
             .from('documents')
             .insert({
                 entity_type: input.entity_type,
@@ -261,7 +271,7 @@ export class DocumentRepositoryV2 {
         }
 
         const { data, error } = await this.supabase
-            
+
             .from('documents')
             .update(updateData)
             .eq('id', id)
@@ -283,7 +293,7 @@ export class DocumentRepositoryV2 {
         }
 
         const { error } = await this.supabase
-            
+
             .from('documents')
             .update({
                 deleted_at: new Date().toISOString(),
@@ -315,37 +325,37 @@ export class DocumentRepositoryV2 {
         if (context.recruiterId && entityType === 'candidate') {
             // Check if recruiter has access to this candidate via assignments
             const { data: assignment } = await this.supabase
-                
+
                 .from('recruiter_candidates')
                 .select('id')
                 .eq('recruiter_user_id', context.recruiterId)
                 .eq('candidate_id', entityId)
                 .eq('status', 'active')
                 .maybeSingle();
-            
+
             if (assignment) {
                 return true;
             }
-            
+
             // Also check if recruiter has access via job assignments
             const { data: roleAssignments } = await this.supabase
-                
+
                 .from('role_assignments')
                 .select('job_id')
                 .eq('recruiter_user_id', context.recruiterId)
                 .eq('status', 'active');
-            
+
             if (roleAssignments && roleAssignments.length > 0) {
                 // Check if candidate has applications to any of recruiter's assigned jobs
                 const jobIds = roleAssignments.map(ra => ra.job_id);
                 const { data: candidateApplications } = await this.supabase
-                    
+
                     .from('applications')
                     .select('id')
                     .eq('candidate_id', entityId)
                     .in('job_id', jobIds)
                     .limit(1);
-                
+
                 if (candidateApplications && candidateApplications.length > 0) {
                     return true;
                 }
@@ -355,7 +365,7 @@ export class DocumentRepositoryV2 {
         // Check application access for both company users and recruiters
         if (entityType === 'application') {
             const { data: application } = await this.supabase
-                
+
                 .from('applications')
                 .select('candidate_id, job_id')
                 .eq('id', entityId)
@@ -370,7 +380,7 @@ export class DocumentRepositoryV2 {
                 // Company users can access application documents for their company jobs
                 if (context.organizationIds.length > 0) {
                     const { data: job } = await this.supabase
-                        
+
                         .from('jobs')
                         .select('company_id')
                         .eq('id', application.job_id)
@@ -384,14 +394,14 @@ export class DocumentRepositoryV2 {
                 // Recruiters can access application documents if they have access to the candidate
                 if (context.recruiterId) {
                     const { data: assignment } = await this.supabase
-                        
+
                         .from('recruiter_candidates')
                         .select('id')
                         .eq('recruiter_user_id', context.recruiterId)
                         .eq('candidate_id', application.candidate_id)
                         .eq('status', 'active')
                         .maybeSingle();
-                    
+
                     if (assignment) {
                         return true;
                     }
@@ -415,12 +425,12 @@ export class DocumentRepositoryV2 {
         // Candidates can see documents attached to their applications
         if (context.candidateId && row.entity_type === 'application') {
             const { data: application } = await this.supabase
-                
+
                 .from('applications')
                 .select('candidate_id')
                 .eq('id', row.entity_id)
                 .maybeSingle();
-            
+
             if (application && application.candidate_id === context.candidateId) {
                 return true;
             }
@@ -477,6 +487,17 @@ export class DocumentRepositoryV2 {
         // Candidates can upload to their own profile
         if (context.candidateId && entityType === 'candidate' && entityId === context.candidateId) {
             return true;
+        }
+
+        // Debug logging - log what we're comparing
+        if (entityType === 'candidate') {
+            console.warn(`[DOCUMENT_AUTH] Candidate authorization check:`, {
+                contextCandidateId: context.candidateId,
+                requestedEntityId: entityId,
+                match: context.candidateId === entityId,
+                contextRole: context.role,
+                isPlatformAdmin: context.isPlatformAdmin,
+            });
         }
 
         // Company users can upload to company entities

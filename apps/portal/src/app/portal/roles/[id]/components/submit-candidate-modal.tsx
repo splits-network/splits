@@ -463,7 +463,7 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                                 </button>
                             </div>
                         )}
-                    </div>
+                    </fieldset>
 
                     <div className="modal-action">
                         <button

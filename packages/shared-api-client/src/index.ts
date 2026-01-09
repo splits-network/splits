@@ -105,9 +105,9 @@ function getApiBaseUrl(): string {
         if (process.env.NEXT_PUBLIC_API_GATEWAY_URL) {
             return normalizeBaseUrl(process.env.NEXT_PUBLIC_API_GATEWAY_URL);
         }
-        
+
         const isInDocker = process.env.RUNNING_IN_DOCKER === 'true';
-        return isInDocker 
+        return isInDocker
             ? 'http://api-gateway:3000'
             : 'http://localhost:3000';
     }
@@ -156,7 +156,7 @@ export class SplitsApiClient {
         options: RequestInit = {}
     ): Promise<T> {
         const url = `${this.baseUrl}/api/v2${endpoint}`;
-        
+
         const headers: Record<string, string> = {
             ...options.headers as Record<string, string>,
         };
@@ -192,19 +192,19 @@ export class SplitsApiClient {
         }
 
         const json = await response.json();
-        
+
         // Unwrap API Gateway response envelope
         if (json && typeof json === 'object' && 'data' in json) {
             return json as T; // Keep pagination metadata
         }
-        
+
         return json as T;
     }
 
     private async handleError(response: Response): Promise<never> {
         let errorMessage = 'An error occurred';
         let errorCode: string | undefined;
-        
+
         try {
             const errorData: any = await response.json();
             if (errorData?.error && typeof errorData.error === 'object') {
@@ -217,37 +217,37 @@ export class SplitsApiClient {
         } catch {
             errorMessage = response.statusText || errorMessage;
         }
-        
+
         throw new ApiError(errorMessage, response.status, errorCode);
     }
 
     /**
      * HTTP GET request with query parameters
      */
- async get<T = any>(
-    endpoint: string, 
-    params?: Record<string, any>
-): Promise<T> {
-    let url = endpoint;
-    if (params) {
-        const searchParams = new URLSearchParams();
-        Object.entries(params).forEach(([key, value]) => {
-            if (value !== undefined && value !== null) {
-                // JSON stringify objects (like filters) but keep primitives as strings
-                if (typeof value === 'object' && value !== null) {
-                    searchParams.append(key, JSON.stringify(value));
-                } else {
-                    searchParams.append(key, String(value));
+    async get<T = any>(
+        endpoint: string,
+        params?: Record<string, any>
+    ): Promise<T> {
+        let url = endpoint;
+        if (params) {
+            const searchParams = new URLSearchParams();
+            Object.entries(params).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    // JSON stringify objects (like filters) but keep primitives as strings
+                    if (typeof value === 'object' && value !== null) {
+                        searchParams.append(key, JSON.stringify(value));
+                    } else {
+                        searchParams.append(key, String(value));
+                    }
                 }
+            });
+            const query = searchParams.toString();
+            if (query) {
+                url = `${endpoint}?${query}`;
             }
-        });
-        const query = searchParams.toString();
-        if (query) {
-            url = `${endpoint}?${query}`;
         }
+        return this.request<T>(url, { method: 'GET' });
     }
-    return this.request<T>(url, { method: 'GET' });
-}
 
     /**
      * HTTP POST request
