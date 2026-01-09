@@ -12,7 +12,7 @@ export class ApplicationServiceV2 {
     constructor(
         private repository: ApplicationRepository,
         private eventPublisher?: EventPublisher
-    ) {}
+    ) { }
 
     async getApplications(
         clerkUserId: string,
@@ -36,102 +36,21 @@ export class ApplicationServiceV2 {
     }
 
     async getApplication(id: string, clerkUserId?: string, includes: string[] = []): Promise<any> {
-        const application = await this.repository.findApplication(id, clerkUserId);
+        // Convert includes array to comma-separated string for repository
+        const includeStr = includes.length > 0 ? includes.join(',') : undefined;
+
+        // Repository handles most includes in the SELECT clause
+        const application = await this.repository.findApplication(id, clerkUserId, includeStr);
         if (!application) {
             throw new Error(`Application ${id} not found`);
         }
 
-        if (!includes || includes.length === 0) {
-            return application;
+        // Handle documents separately (polymorphic association can't be joined)
+        if (includes.includes('documents') || includes.includes('document')) {
+            application.documents = await this.repository.getDocumentsForApplication(id);
         }
 
-        const includeSet = new Set(
-            includes
-                .map(include => include?.toLowerCase?.().trim())
-                .filter((value): value is string => Boolean(value))
-        );
-
-        const enrichedApplication: any = { ...application };
-        const tasks: Promise<void>[] = [];
-
-        const hasInclude = (...keys: string[]) => keys.some(key => includeSet.has(key));
-
-        if (hasInclude('candidate') && application.candidate_id) {
-            tasks.push(
-                this.repository
-                    .getCandidateById(application.candidate_id)
-                    .then(candidate => {
-                        if (candidate) {
-                            enrichedApplication.candidate = candidate;
-                        }
-                    })
-            );
-        }
-
-        if (hasInclude('job') && application.job_id) {
-            tasks.push(
-                this.repository.getJobById(application.job_id).then(job => {
-                    if (job) {
-                        enrichedApplication.job = job;
-                    }
-                })
-            );
-        }
-
-        if (hasInclude('recruiter') && application.recruiter_id) {
-            tasks.push(
-                this.repository.getRecruiterById(application.recruiter_id).then(recruiter => {
-                    if (recruiter) {
-                        enrichedApplication.recruiter = recruiter;
-                    }
-                })
-            );
-        }
-
-        if (hasInclude('documents', 'document')) {
-            tasks.push(
-                this.repository.getDocumentsForApplication(application.id).then(docs => {
-                    enrichedApplication.documents = docs;
-                })
-            );
-        }
-
-        if (hasInclude('pre_screen_answers', 'pre-screen-answers')) {
-            tasks.push(
-                this.repository
-                    .getPreScreenAnswersForApplication(application.id)
-                    .then(answers => {
-                        enrichedApplication.pre_screen_answers = answers;
-                    })
-            );
-        }
-
-        if (hasInclude('audit_log', 'audit')) {
-            tasks.push(
-                this.repository.getAuditLogsForApplication(application.id).then(logs => {
-                    enrichedApplication.audit_log = logs;
-                })
-            );
-        }
-
-        if (hasInclude('job_requirements') && application.job_id) {
-            tasks.push(
-                this.repository.getJobRequirements(application.job_id).then(requirements => {
-                    enrichedApplication.job_requirements = requirements;
-                })
-            );
-        }
-
-        if (hasInclude('ai_review', 'ai-review')) {
-            tasks.push(
-                this.repository.getAIReviewForApplication(application.id).then(review => {
-                    enrichedApplication.ai_review = review || null;
-                })
-            );
-        }
-
-        await Promise.all(tasks);
-        return enrichedApplication;
+        return application;
     }
 
     async createApplication(data: any, clerkUserId?: string): Promise<any> {
@@ -139,7 +58,7 @@ export class ApplicationServiceV2 {
         if (!data.job_id) {
             throw new Error('Job ID is required');
         }
-        
+
         // Auto-resolve candidate_id from clerkUserId if not provided
         let candidateId = data.candidate_id;
         if (!candidateId && clerkUserId) {
@@ -148,7 +67,7 @@ export class ApplicationServiceV2 {
                 candidateId = candidateContext.candidate.id;
             }
         }
-        
+
         if (!candidateId) {
             throw new Error('Candidate ID is required and could not be resolved from user context');
         }
@@ -195,6 +114,25 @@ export class ApplicationServiceV2 {
                 )
             );
         }
+
+        // Create audit log entry for application creation
+        await this.repository.createAuditLog({
+            application_id: application.id,
+            action: 'created',
+            performed_by_user_id: clerkUserId || 'system',
+            performed_by_role: hasRecruiter ? 'recruiter' : 'candidate',
+            new_value: {
+                stage: application.stage,
+                job_id: application.job_id,
+                candidate_id: application.candidate_id,
+                recruiter_id: application.recruiter_id || null,
+            },
+            metadata: {
+                has_recruiter: hasRecruiter,
+                document_count: document_ids?.length || 0,
+                has_pre_screen_answers: !!(pre_screen_answers?.length),
+            },
+        });
 
         // Emit event
         if (this.eventPublisher) {
@@ -280,6 +218,25 @@ export class ApplicationServiceV2 {
         }
 
         const updatedApplication = await this.repository.updateApplication(id, persistedUpdates);
+
+        // Create audit log entry for stage changes
+        if (updates.stage && updates.stage !== currentApplication.stage) {
+            await this.repository.createAuditLog({
+                application_id: id,
+                action: 'stage_changed',
+                performed_by_user_id: clerkUserId || 'system',
+                performed_by_role: userRole || 'unknown',
+                old_value: { stage: currentApplication.stage },
+                new_value: { stage: updates.stage },
+                metadata: {
+                    job_id: updatedApplication.job_id,
+                    candidate_id: updatedApplication.candidate_id,
+                    recruiter_id: updatedApplication.recruiter_id,
+                    decline_reason: decline_reason || null,
+                    decline_details: decline_details || null,
+                },
+            });
+        }
 
         // Publish events
         if (this.eventPublisher) {

@@ -34,19 +34,13 @@ export class ApplicationRepository {
         console.log('Filters applied:', filters);
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
 
+        // Build select clause with optional includes
+        const selectClause = this.buildSelectClause(params.include);
+
         // Build query with enriched data
         let query = this.supabase
             .from('applications')
-            .select(`
-                *,
-                candidate:candidates(id, full_name, email, phone),
-                job:jobs!inner(
-                    id, 
-                    title, 
-                    status,
-                    company:companies!inner(id, name, identity_organization_id)
-                )
-            `, { count: 'exact' });
+            .select(selectClause, { count: 'exact' });
 
 
         if (accessContext.candidateId) {
@@ -116,24 +110,24 @@ export class ApplicationRepository {
         };
     }
 
-    async findApplication(id: string, clerkUserId?: string): Promise<any | null> {
+    async findApplication(id: string, clerkUserId?: string, include?: string): Promise<any | null> {
+        // Build select clause with optional includes
+        const selectClause = this.buildSelectClause(include);
+        console.log('findApplication - id:', id, 'include:', include);
+        console.log('SELECT clause:', selectClause);
+
         const { data, error } = await this.supabase
 
             .from('applications')
-            .select(`
-                *,
-                candidate:candidates(id, full_name, email, phone, location),
-                job:jobs(
-                    id, 
-                    title, 
-                    description,
-                    status,
-                    company:companies(id, name, description)
-                ),
-                ai_review:ai_reviews(fit_score, recommendation)
-            `)
+            .select(selectClause)
             .eq('id', id)
             .single();
+
+        if (error) {
+            console.error('findApplication error:', error);
+            if (error.code === 'PGRST116') return null;
+            throw error;
+        }
         if (error) {
             if (error.code === 'PGRST116') return null;
             throw error;
@@ -257,6 +251,77 @@ export class ApplicationRepository {
 
         if (error) throw error;
         return data ?? null;
+    }
+
+    /**
+     * Get documents for an application (polymorphic association)
+     * Documents use entity_type + entity_id pattern
+     */
+    async getDocumentsForApplication(applicationId: string): Promise<any[]> {
+        const { data, error } = await this.supabase
+
+            .from('documents')
+            .select('id, filename, storage_path, content_type, file_size, created_at')
+            .eq('entity_type', 'application')
+            .eq('entity_id', applicationId)
+            .is('deleted_at', null);
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    /**
+     * Build select clause with optional includes
+     * Supports: candidate, job, recruiter, documents, pre_screen_answers, audit_log, job_requirements, ai_review
+     */
+    private buildSelectClause(include?: string): string {
+        // Base fields - always include related candidate and job with company
+        const baseFields = `*,
+            candidate:candidates(id, full_name, email, phone, location),
+            job:jobs(id, title, description, status, company:companies(id, name, description, identity_organization_id))`;
+
+        if (!include) {
+            return baseFields;
+        }
+
+        const includes = include.split(',').map(i => i.trim());
+        let selectClause = baseFields;
+
+        for (const inc of includes) {
+            switch (inc) {
+                case 'recruiter':
+                    // Join with network schema recruiters table
+                    selectClause += `,recruiter:recruiters(id, name, email, bio, specialization, status)`;
+                    break;
+                case 'documents':
+                case 'document':
+                    // Documents use polymorphic association (entity_type + entity_id)
+                    // Cannot use Supabase join syntax - must query separately in service layer
+                    // Skip in SELECT clause
+                    break;
+                case 'pre_screen_answers':
+                case 'pre-screen-answers':
+                    // Join with pre-screen answers (one-to-many relationship via application_id)
+                    selectClause += `,pre_screen_answers:job_pre_screen_answers!application_id(id, question_id, answer, created_at, question:job_pre_screen_questions(question, question_type, is_required))`;
+                    break;
+                case 'audit_log':
+                case 'audit':
+                    // Audit log - comprehensive activity trail
+                    selectClause += `,audit_log:application_audit_log!application_id(id, action, performed_by_user_id, performed_by_role, company_id, old_value, new_value, metadata, ip_address, user_agent, created_at)`;
+                    break;
+                case 'job_requirements':
+                    // Requirements are part of the job - already fetched with job.requirements
+                    // This is a separate query via getJobRequirements if needed
+                    break;
+                case 'ai_review':
+                case 'ai-review':
+                    // Join with AI reviews (one-to-one relationship via application_id)
+                    selectClause += `,ai_review:ai_reviews!application_id(id, fit_score, recommendation, strengths, concerns, overall_assessment, created_at)`;
+                    break;
+            }
+        }
+
+        return selectClause;
     }
 
     async getRecruiterById(recruiterId: string): Promise<any | null> {

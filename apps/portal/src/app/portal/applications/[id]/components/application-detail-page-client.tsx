@@ -100,26 +100,10 @@ export default function ApplicationDetailPageClient() {
                 const organizationId = profile?.organization_ids?.[0];
 
                 if (organizationId) {
-                    try {
-                        // Get company for this organization
-                        const companiesRes: any = await client.get(`/companies?identity_organization_id=${organizationId}&limit=1`);
-                        const companies = companiesRes.data || [];
-
-                        if (companies.length > 0) {
-                            const userCompanyId = companies[0].id;
-
-                            // Check if application's job belongs to user's company
-                            if (appData.job?.company_id !== userCompanyId) {
-                                setError('You do not have permission to view this application');
-                                return;
-                            }
-                        } else {
-                            setError('No company found for your organization');
-                            return;
-                        }
-                    } catch (err) {
-                        console.error('Error checking company permissions:', err);
-                        setError('Failed to verify permissions');
+                    // Check if application's job belongs to user's organization
+                    // The job's company.identity_organization_id should match the user's organization
+                    if (appData.job?.company?.identity_organization_id !== organizationId) {
+                        setError('You do not have permission to view this application');
                         return;
                     }
                 }
