@@ -27,7 +27,6 @@ export interface Notification {
     error_message?: string | null;
     sent_at?: string | null;
     created_at: string;
-    updated_at: string;
 }
 
 export interface NotificationFilters {

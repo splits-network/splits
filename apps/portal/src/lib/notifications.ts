@@ -1,9 +1,9 @@
 /**
  * Notification API Client
  * Typed utilities for fetching and managing in-app notifications
+ * 
  */
 
-import { ApiClient } from './api-client';
 
 export interface InAppNotification {
     id: string;
@@ -34,60 +34,6 @@ export interface UnreadCountResponse {
 }
 
 /**
- * Fetch notifications for the current user
- */
-const API_PATH = '/notifications';
-
-export async function fetchNotifications(
-    token: string,
-    options?: {
-        unreadOnly?: boolean;
-        limit?: number;
-    }
-): Promise<InAppNotification[]> {
-    const apiClient = new ApiClient(token);
-    const params = new URLSearchParams();
-    if (options?.unreadOnly) params.set('unreadOnly', 'true');
-    if (options?.limit) params.set('limit', options.limit.toString());
-
-    const response: NotificationListResponse = await apiClient.get(`${API_PATH}?${params.toString()}`);
-    return response.data;
-}
-
-/**
- * Get unread notification count (for badge)
- */
-export async function fetchUnreadCount(token: string): Promise<number> {
-    const apiClient = new ApiClient(token);
-    const response: UnreadCountResponse = await apiClient.get(`${API_PATH}/unread-count`);
-    return response.data.count;
-}
-
-/**
- * Mark a notification as read
- */
-export async function markAsRead(token: string, notificationId: string): Promise<void> {
-    const apiClient = new ApiClient(token);
-    await apiClient.patch(`${API_PATH}/${notificationId}`, { read: true });
-}
-
-/**
- * Mark all notifications as read
- */
-export async function markAllAsRead(token: string): Promise<void> {
-    const apiClient = new ApiClient(token);
-    await apiClient.post(`${API_PATH}/mark-all-read`, {});
-}
-
-/**
- * Dismiss a notification (hide from UI)
- */
-export async function dismissNotification(token: string, notificationId: string): Promise<void> {
-    const apiClient = new ApiClient(token);
-    await apiClient.delete(`${API_PATH}/${notificationId}`);
-}
-
-/**
  * Format notification time (e.g., "2 minutes ago", "1 hour ago")
  */
 export function formatNotificationTime(timestamp: string): string {
@@ -102,7 +48,7 @@ export function formatNotificationTime(timestamp: string): string {
     if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
     if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
     if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-    
+
     return then.toLocaleDateString();
 }
 

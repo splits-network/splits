@@ -5,15 +5,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { useStandardList, PaginationControls, SearchInput, EmptyState, LoadingState, ErrorState } from '@/hooks/use-standard-list';
-import { ApiClient } from '@/lib/api-client';
+import { createAuthenticatedClient } from '@/lib/api-client';
 import {
     InAppNotification,
     formatNotificationTime,
     getNotificationIcon,
     getPriorityColor,
-    markAsRead,
-    markAllAsRead,
-    dismissNotification
 } from '@/lib/notifications';
 
 // Notification filters interface
@@ -206,7 +203,7 @@ export default function NotificationsPage() {
         const token = await getToken();
         if (!token) throw new Error('Not authenticated');
 
-        const apiClient = new ApiClient(token);
+        const client = createAuthenticatedClient(token);
         const queryParams = new URLSearchParams();
 
         if (params.page) queryParams.set('page', params.page.toString());
@@ -216,7 +213,7 @@ export default function NotificationsPage() {
         if (params.unread_only) queryParams.set('unread_only', 'true');
         if (params.priority) queryParams.set('priority', params.priority);
 
-        const response = await apiClient.get(`/notifications?${queryParams.toString()}`);
+        const response = await client.get(`/notifications?${queryParams.toString()}`);
         return response as { data: InAppNotification[]; pagination: { total: number; page: number; limit: number; total_pages: number } };
     }, [getToken]);
 
@@ -246,7 +243,8 @@ export default function NotificationsPage() {
         // Mark as read if unread
         if (!notification.read) {
             try {
-                await markAsRead(token, notification.id);
+                const client = createAuthenticatedClient(token);
+                await client.patch(`/notifications/${notification.id}`, { read: true });
                 refetch();
             } catch (err) {
                 console.error('Failed to mark notification as read:', err);
@@ -265,7 +263,8 @@ export default function NotificationsPage() {
         if (!token) return;
 
         try {
-            await dismissNotification(token, notificationId);
+            const client = createAuthenticatedClient(token);
+            await client.delete(`/notifications/${notificationId}`);
             refetch();
         } catch (err) {
             console.error('Failed to dismiss notification:', err);
@@ -279,7 +278,8 @@ export default function NotificationsPage() {
 
         setMarkingAllRead(true);
         try {
-            await markAllAsRead(token);
+            const client = createAuthenticatedClient(token);
+            await client.post('/notifications/mark-all-read', {});
             refetch();
         } catch (err) {
             console.error('Failed to mark all as read:', err);

@@ -2,16 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 import {
-    fetchNotifications,
-    markAsRead,
-    markAllAsRead,
-    dismissNotification,
     formatNotificationTime,
     getNotificationIcon,
     getPriorityColor,
     InAppNotification,
 } from '@/lib/notifications';
+import { createAuthenticatedClient } from '@/lib/api-client';
 
 // ===== TYPES =====
 
@@ -21,6 +19,7 @@ type FilterMode = 'all' | 'unread';
 
 export default function NotificationsPage() {
     const router = useRouter();
+    const { getToken } = useAuth();
     const [notifications, setNotifications] = useState<InAppNotification[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -36,10 +35,19 @@ export default function NotificationsPage() {
         setLoading(true);
         setError(null);
         try {
-            const data = await fetchNotifications({
-                unreadOnly: filter === 'unread',
-                limit: 100,
-            });
+            const token = await getToken();
+            if (!token) throw new Error('User not authenticated');
+
+            const client = createAuthenticatedClient(token);
+            const data = await client.get('/notifications', {
+                params: {
+                    filters: {
+                        unread_only: filter === 'unread' ? true : undefined,
+                    },
+                    limit: 100,
+                },
+            }).then(res => res.data as InAppNotification[]);
+
             setNotifications(data);
         } catch (err: any) {
             console.error('Failed to fetch notifications:', err);
@@ -53,7 +61,11 @@ export default function NotificationsPage() {
         // Mark as read if unread
         if (!notification.read) {
             try {
-                await markAsRead(notification.id);
+                const token = await getToken();
+                if (!token) throw new Error('User not authenticated');
+
+                const client = createAuthenticatedClient(token);
+                await client.patch(`/notifications/${notification.id}`, { read: true });
                 setNotifications((prev) =>
                     prev.map((n) =>
                         n.id === notification.id ? { ...n, read: true } : n
@@ -72,7 +84,11 @@ export default function NotificationsPage() {
 
     const handleMarkAllRead = async () => {
         try {
-            await markAllAsRead();
+            const token = await getToken();
+            if (!token) throw new Error('User not authenticated');
+
+            const client = createAuthenticatedClient(token);
+            await client.post('/notifications/mark-all-read', {});
             setNotifications((prev) =>
                 prev.map((n) => ({ ...n, read: true }))
             );
@@ -84,7 +100,11 @@ export default function NotificationsPage() {
     const handleDismiss = async (notificationId: string, event: React.MouseEvent) => {
         event.stopPropagation();
         try {
-            await dismissNotification(notificationId);
+            const token = await getToken();
+            if (!token) throw new Error('User not authenticated');
+
+            const client = createAuthenticatedClient(token);
+            await client.delete(`/notifications/${notificationId}`);
             setNotifications((prev) =>
                 prev.filter((n) => n.id !== notificationId)
             );

@@ -1,7 +1,9 @@
 /**
  * Notification API Client
  * Typed utilities for fetching and managing in-app notifications
+ * 
  */
+
 
 export interface InAppNotification {
     id: string;
@@ -32,93 +34,6 @@ export interface UnreadCountResponse {
 }
 
 /**
- * Fetch notifications for the current user
- */
-const API_PATH = '/api/v2/notifications';
-
-export async function fetchNotifications(options?: {
-    unreadOnly?: boolean;
-    limit?: number;
-}): Promise<InAppNotification[]> {
-    const params = new URLSearchParams();
-    if (options?.unreadOnly) params.set('unreadOnly', 'true');
-    if (options?.limit) params.set('limit', options.limit.toString());
-
-    const response = await fetch(`${API_PATH}?${params.toString()}`, {
-        credentials: 'include',
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to fetch notifications: ${response.statusText}`);
-    }
-
-    const json: NotificationListResponse = await response.json();
-    return json.data;
-}
-
-/**
- * Get unread notification count (for badge)
- */
-export async function fetchUnreadCount(): Promise<number> {
-    const response = await fetch(`${API_PATH}/unread-count`, {
-        credentials: 'include',
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to fetch unread count: ${response.statusText}`);
-    }
-
-    const json: UnreadCountResponse = await response.json();
-    return json.data.count;
-}
-
-/**
- * Mark a notification as read
- */
-export async function markAsRead(notificationId: string): Promise<void> {
-    const response = await fetch(`${API_PATH}/${notificationId}`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ read: true }),
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to mark notification as read: ${response.statusText}`);
-    }
-}
-
-/**
- * Mark all notifications as read
- */
-export async function markAllAsRead(): Promise<void> {
-    const response = await fetch(`${API_PATH}/mark-all-read`, {
-        method: 'POST',
-        credentials: 'include',
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to mark all as read: ${response.statusText}`);
-    }
-}
-
-/**
- * Dismiss a notification (hide from UI)
- */
-export async function dismissNotification(notificationId: string): Promise<void> {
-    const response = await fetch(`${API_PATH}/${notificationId}`, {
-        method: 'DELETE',
-        credentials: 'include',
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to dismiss notification: ${response.statusText}`);
-    }
-}
-
-/**
  * Format notification time (e.g., "2 minutes ago", "1 hour ago")
  */
 export function formatNotificationTime(timestamp: string): string {
@@ -133,7 +48,7 @@ export function formatNotificationTime(timestamp: string): string {
     if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
     if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
     if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-    
+
     return then.toLocaleDateString();
 }
 

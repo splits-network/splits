@@ -36,7 +36,6 @@ export class NotificationRepositoryV2 {
             error_message: row.error_message,
             sent_at: row.sent_at,
             created_at: row.created_at,
-            updated_at: row.updated_at,
         };
     }
 
@@ -49,7 +48,7 @@ export class NotificationRepositoryV2 {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            
+
             .from('notification_log')
             .select('*', { count: 'exact' });
 
@@ -94,7 +93,7 @@ export class NotificationRepositoryV2 {
 
     async findNotification(id: string): Promise<Notification | null> {
         const { data, error } = await this.supabase
-            
+
             .from('notification_log')
             .select('*')
             .eq('id', id)
@@ -111,9 +110,7 @@ export class NotificationRepositoryV2 {
     }
 
     async updateNotification(id: string, updates: NotificationUpdate): Promise<Notification> {
-        const payload: Record<string, any> = {
-            updated_at: new Date().toISOString(),
-        };
+        const payload: Record<string, any> = {};
 
         if (typeof updates.status !== 'undefined') {
             payload.status = updates.status;
@@ -164,7 +161,7 @@ export class NotificationRepositoryV2 {
         }
 
         const { data, error } = await this.supabase
-            
+
             .from('notification_log')
             .update(payload)
             .eq('id', id)
@@ -180,11 +177,10 @@ export class NotificationRepositoryV2 {
 
     async dismissNotification(id: string): Promise<void> {
         const { error } = await this.supabase
-            
+
             .from('notification_log')
             .update({
                 dismissed: true,
-                updated_at: new Date().toISOString(),
             })
             .eq('id', id);
 
@@ -195,12 +191,11 @@ export class NotificationRepositoryV2 {
 
     async markAllAsRead(recipientUserId: string): Promise<void> {
         const { error } = await this.supabase
-            
+
             .from('notification_log')
             .update({
                 read: true,
                 read_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
             })
             .eq('recipient_user_id', recipientUserId)
             .eq('read', false);
@@ -212,7 +207,7 @@ export class NotificationRepositoryV2 {
 
     async countUnread(recipientUserId: string): Promise<number> {
         const { count, error } = await this.supabase
-            
+
             .from('notification_log')
             .select('id', { count: 'exact', head: true })
             .eq('recipient_user_id', recipientUserId)
