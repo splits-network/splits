@@ -100,6 +100,7 @@ export default function SignUpPage() {
                                 email: encodeURIComponent(email)
                             }
                         });
+
                         if (candidate.data && candidate.data.length > 0) {
                             await apiClient.patch(`/candidates/${candidate.id}`, {
                                 user_id: newUser.data.id,

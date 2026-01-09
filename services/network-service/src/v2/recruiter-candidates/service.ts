@@ -197,6 +197,9 @@ export class RecruiterCandidateServiceV2 {
             consent_given_at: new Date().toISOString(),
             consent_ip_address: metadata.ip_address || null,
             consent_user_agent: metadata.user_agent || null,
+            relationship_start_date: new Date().toISOString(),
+            relationship_end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(), // 1 year from now
+            relationship_status: 'active',
         });
 
         // V2: Use events for cross-service communication
@@ -254,6 +257,9 @@ export class RecruiterCandidateServiceV2 {
             declined_reason: metadata.reason || null,
             consent_ip_address: metadata.ip_address || null,
             consent_user_agent: metadata.user_agent || null,
+            relationship_status: 'declined',
+            relationship_start_date: null,
+            relationship_end_date: null,
         });
 
         await this.eventPublisher.publish('candidate.consent_declined', {
@@ -289,13 +295,13 @@ export class RecruiterCandidateServiceV2 {
         const updatedRelationship = await this.repository.resendInvitation(id);
 
         await this.eventPublisher.publish('candidate.invited', {
-                relationship_id: updatedRelationship.id,
-                recruiter_id: updatedRelationship.recruiter_id,
-                candidate_id: updatedRelationship.candidate_id,
-                invitation_token: updatedRelationship.invitation_token,
-                invitation_expires_at: updatedRelationship.invitation_expires_at,
-                resend: true,
-            });
+            relationship_id: updatedRelationship.id,
+            recruiter_id: updatedRelationship.recruiter_id,
+            candidate_id: updatedRelationship.candidate_id,
+            invitation_token: updatedRelationship.invitation_token,
+            invitation_expires_at: updatedRelationship.invitation_expires_at,
+            resend: true,
+        });
 
         return updatedRelationship;
     }
@@ -316,10 +322,10 @@ export class RecruiterCandidateServiceV2 {
         });
 
         await this.eventPublisher.publish('candidate.invitation_cancelled', {
-                relationship_id: updatedRelationship.id,
-                recruiter_id: updatedRelationship.recruiter_id,
-                candidate_id: updatedRelationship.candidate_id,
-            });
+            relationship_id: updatedRelationship.id,
+            recruiter_id: updatedRelationship.recruiter_id,
+            candidate_id: updatedRelationship.candidate_id,
+        });
 
         return updatedRelationship;
     }
