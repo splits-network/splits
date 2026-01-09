@@ -78,7 +78,7 @@ export default function PlacementsPage() {
         setViewMode,
         refresh,
     } = useStandardList<Placement, PlacementFilters>({
-        endpoint: '/portal/placements',
+        endpoint: '/placements',
         defaultFilters,
         defaultSortBy: 'hired_at',
         defaultSortOrder: 'desc',
