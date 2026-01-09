@@ -1,9 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useDebouncedCallback } from '@/hooks/use-debounce';
+import { MarketplaceProfile } from '@splits-network/shared-types';
+import {
+    calculateProfileCompleteness,
+    getCompletionTierBadge,
+    getTopPriorityFields,
+    getCompletionIncentives
+} from '@/lib/utils/profile-completeness';
 
 interface MarketplaceSettings {
     marketplace_enabled: boolean;
@@ -13,7 +20,8 @@ interface MarketplaceSettings {
     location: string;
     tagline: string;
     years_experience: number;
-    marketplace_profile: Record<string, any>;
+    bio: string; // Add bio field
+    marketplace_profile: MarketplaceProfile;
     show_success_metrics: boolean;
     show_contact_info: boolean;
 }
@@ -54,6 +62,7 @@ export function MarketplaceSettings() {
         location: '',
         tagline: '',
         years_experience: 0,
+        bio: '',
         marketplace_profile: {},
         show_success_metrics: false,
         show_contact_info: true,
@@ -94,6 +103,7 @@ export function MarketplaceSettings() {
                 location: data.location || '',
                 tagline: data.tagline || '',
                 years_experience: data.years_experience || 0,
+                bio: data.bio || '',
                 marketplace_profile: data.marketplace_profile || {},
                 show_success_metrics: data.show_success_metrics ?? false,
                 show_contact_info: data.show_contact_info !== false,
@@ -130,6 +140,7 @@ export function MarketplaceSettings() {
                 location: updatedSettings.location,
                 tagline: updatedSettings.tagline,
                 years_experience: updatedSettings.years_experience,
+                bio: updatedSettings.bio,
                 marketplace_profile: updatedSettings.marketplace_profile,
                 show_success_metrics: updatedSettings.show_success_metrics,
                 show_contact_info: updatedSettings.show_contact_info,
@@ -172,6 +183,25 @@ export function MarketplaceSettings() {
         updateSettings({ specialties: newSpecialties });
     };
 
+    // Calculate profile completeness
+    const completeness = useMemo(() => {
+        return calculateProfileCompleteness(settings);
+    }, [settings]);
+
+    const tierBadge = getCompletionTierBadge(completeness.tier);
+    const topPriorities = getTopPriorityFields(completeness.missingFields, 3);
+    const incentives = getCompletionIncentives(completeness.tier);
+
+    // Helper to update bio_rich in marketplace_profile
+    const updateBioRich = (bio_rich: string) => {
+        updateSettings({
+            marketplace_profile: {
+                ...settings.marketplace_profile,
+                bio_rich,
+            },
+        });
+    };
+
     if (loading) {
         return (
             <div className="card bg-base-100 shadow">
@@ -186,6 +216,78 @@ export function MarketplaceSettings() {
 
     return (
         <div className="space-y-6">
+            {/* Profile Completeness Indicator */}
+            <div className="card bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20">
+                <div className="card-body">
+                    <div className="flex items-center gap-6">
+                        {/* Progress Ring */}
+                        <div className="flex-shrink-0">
+                            <div
+                                className="radial-progress text-primary"
+                                style={{ "--value": completeness.percentage, "--size": "6rem", "--thickness": "0.5rem" } as any}
+                            >
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold">{completeness.percentage}%</div>
+                                    <div className="text-xs text-base-content/70">Complete</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Completeness Info */}
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                                <h3 className="text-xl font-bold">Profile Strength</h3>
+                                <span className={`badge ${tierBadge.color} gap-1`}>
+                                    <i className={`fa-solid ${tierBadge.icon}`}></i>
+                                    {tierBadge.label}
+                                </span>
+                            </div>
+
+                            {/* Category Breakdown */}
+                            <div className="grid grid-cols-3 gap-2 mb-3">
+                                <div className="text-center">
+                                    <div className="text-xs text-base-content/70">Basic</div>
+                                    <div className="text-sm font-semibold">{completeness.categoryScores.basic}%</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-xs text-base-content/70">Marketplace</div>
+                                    <div className="text-sm font-semibold">{completeness.categoryScores.marketplace}%</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-xs text-base-content/70">Metrics</div>
+                                    <div className="text-sm font-semibold">{completeness.categoryScores.metrics}%</div>
+                                </div>
+                            </div>
+
+                            {/* Top Priorities */}
+                            {topPriorities.length > 0 && (
+                                <div className="mb-2">
+                                    <div className="text-xs font-semibold text-base-content/70 mb-1">Top Priorities:</div>
+                                    <div className="flex flex-wrap gap-1">
+                                        {topPriorities.map(field => (
+                                            <span key={field.name} className="badge badge-sm badge-outline gap-1">
+                                                <i className="fa-solid fa-circle-exclamation"></i>
+                                                {field.label}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Incentives */}
+                            <div className="text-xs text-base-content/70">
+                                {incentives.map((incentive, idx) => (
+                                    <div key={idx} className="flex items-start gap-1">
+                                        <i className={`fa-solid ${completeness.tier === 'complete' ? 'fa-check' : 'fa-star'} text-xs mt-0.5`}></i>
+                                        <span>{incentive}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* Save Status */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm">
@@ -293,6 +395,21 @@ export function MarketplaceSettings() {
                                     onChange={(e) => updateSettings({ years_experience: parseInt(e.target.value) || 0 })}
                                 />
                             </div>
+
+                            <div className="fieldset">
+                                <label className="label">Profile Summary (Card Preview)</label>
+                                <textarea
+                                    className="textarea w-full h-24"
+                                    placeholder="Brief overview of your recruiting expertise and approach (shows on marketplace cards)"
+                                    maxLength={500}
+                                    value={settings.bio}
+                                    onChange={(e) => updateSettings({ bio: e.target.value })}
+                                />
+                                <label className="label">
+                                    <span className="label-text-alt">Short bio displayed on marketplace cards</span>
+                                    <span className="label-text-alt">{settings.bio.length}/500 characters</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
@@ -345,6 +462,65 @@ export function MarketplaceSettings() {
                                     </button>
                                 ))}
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Detailed Bio (Rich Text) */}
+                    <div className="card bg-base-100 shadow">
+                        <div className="card-body">
+                            <div className="flex items-center justify-between mb-2">
+                                <h2 className="card-title">Detailed Bio</h2>
+                                <span className="badge badge-primary badge-sm gap-1">
+                                    <i className="fa-solid fa-sparkles"></i>
+                                    Boost Profile +10%
+                                </span>
+                            </div>
+                            <p className="text-sm text-base-content/70 mb-4">
+                                Share your story, achievements, and what makes you unique. Supports Markdown formatting.
+                            </p>
+
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">
+                                    Your Story
+                                    <span className="text-base-content/60 font-normal text-sm ml-2">
+                                        ({(settings.marketplace_profile?.bio_rich || '').length} characters)
+                                    </span>
+                                </legend>
+                                <textarea
+                                    className="textarea w-full h-48 font-mono text-sm"
+                                    placeholder={`Tell candidates about yourself...\n\nExample:\n- **15+ years** in tech recruitment\n- Specialized in C-level placements\n- Former software engineer, understands technical roles deeply\n- Track record: 50+ successful placements at top startups\n\nUse **bold**, *italic*, and bullet points to make it engaging!`}
+                                    value={settings.marketplace_profile?.bio_rich || ''}
+                                    onChange={(e) => updateBioRich(e.target.value)}
+                                />
+                                <p className="fieldset-label">
+                                    <i className="fa-solid fa-lightbulb"></i>
+                                    Tip: Use Markdown for formatting (**, *, bullets). This will appear prominently on your marketplace profile.
+                                </p>
+                            </fieldset>
+
+                            {/* Preview */}
+                            {settings.marketplace_profile?.bio_rich && settings.marketplace_profile.bio_rich.length > 0 && (
+                                <div className="mt-4">
+                                    <div className="text-sm font-semibold mb-2">Preview:</div>
+                                    <div className="card bg-base-200 p-4">
+                                        <div className="prose prose-sm max-w-none">
+                                            {/* Simple markdown preview - basic formatting */}
+                                            {settings.marketplace_profile.bio_rich.split('\n').map((line, idx) => {
+                                                // Bold
+                                                line = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                                                // Italic
+                                                line = line.replace(/\*(.+?)\*/g, '<em>$1</em>');
+                                                // Bullet points
+                                                if (line.trim().startsWith('- ')) {
+                                                    return <li key={idx} dangerouslySetInnerHTML={{ __html: line.replace(/^- /, '') }} />;
+                                                }
+                                                // Paragraphs
+                                                return line.trim() ? <p key={idx} dangerouslySetInnerHTML={{ __html: line }} /> : <br key={idx} />;
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 

@@ -66,7 +66,7 @@ export default function RootLayout({
                     />
                     <script src="https://kit.fontawesome.com/728c8ddec8.js" crossOrigin="anonymous"></script>
                 </head>
-                <body className="flex flex-col min-h-screen bg-base-200">
+                <body className="flex flex-col min-h-screen bg-base-300">
                     <ToastProvider>
                         <Header />
                         <main className="flex-1">

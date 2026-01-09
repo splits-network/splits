@@ -175,7 +175,7 @@ export default function NotificationBell() {
                                     onClick={() => handleNotificationClick(notification)}
                                 >
                                     {/* Icon */}
-                                    <div className="flex-shrink-0">
+                                    <div className="shrink-0">
                                         <div className={`
                                             w-10 h-10 rounded-full flex items-center justify-center
                                             ${!notification.read ? 'bg-primary text-primary-content' : 'bg-base-300'}
@@ -211,7 +211,7 @@ export default function NotificationBell() {
 
                                     {/* Unread indicator */}
                                     {!notification.read && (
-                                        <div className="flex-shrink-0">
+                                        <div className="shrink-0">
                                             <div className="w-2 h-2 rounded-full bg-primary"></div>
                                         </div>
                                     )}

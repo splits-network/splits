@@ -17,6 +17,19 @@ export function registerAssignmentRoutes(
             const query = request.query as any;
 
             const pagination = validatePaginationParams(query.page, query.limit);
+
+            // Parse filters object if present (comes as JSON string from query params)
+            let parsedFilters: Record<string, any> = {};
+            if (query.filters) {
+                try {
+                    parsedFilters = typeof query.filters === 'string'
+                        ? JSON.parse(query.filters)
+                        : query.filters;
+                } catch (e) {
+                    console.error('Failed to parse filters:', e);
+                }
+            }
+
             const filters = {
                 ...pagination,
                 status: query.status,
@@ -24,6 +37,7 @@ export function registerAssignmentRoutes(
                 job_id: query.job_id,
                 sort_by: query.sort_by,
                 sort_order: query.sort_order,
+                filters: parsedFilters,
             };
 
             const result = await config.assignmentService.getAssignments(clerkUserId, filters);

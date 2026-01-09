@@ -18,7 +18,7 @@ interface DocumentFilters {
 
 function DocumentsLoading() {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-base-200 to-base-300 p-6">
+        <div className="min-h-screen bg-linear-to-br from-base-200 to-base-300 p-6">
             <div className="max-w-6xl mx-auto">
                 <div className="flex justify-center items-center h-64">
                     <span className="loading loading-spinner loading-lg"></span>

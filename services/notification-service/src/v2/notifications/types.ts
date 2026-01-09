@@ -41,6 +41,7 @@ export interface NotificationFilters {
     search?: string;
     page?: number;
     limit?: number;
+    filters?: Record<string, any>;
 }
 
 export interface NotificationCreateInput {

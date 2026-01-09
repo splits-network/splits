@@ -39,29 +39,29 @@ export interface UseStandardListReturn<T, F extends Record<string, any> = Record
     // Data
     data: T[];
     pagination: PaginationResponse;
-    
+
     // Loading/Error state
     loading: boolean;
     error: string | null;
-    
+
     // Search
     searchInput: string;
     searchQuery: string;
     setSearchInput: (value: string) => void;
     clearSearch: () => void;
-    
+
     // Filters
     filters: F;
     setFilters: (filters: F) => void;
     setFilter: <K extends keyof F>(key: K, value: F[K]) => void;
     clearFilters: () => void;
-    
+
     // Sorting
     sortBy: string;
     sortOrder: 'asc' | 'desc';
     handleSort: (field: string) => void;
     getSortIcon: (field: string) => string;
-    
+
     // Pagination
     page: number;
     limit: number;
@@ -71,11 +71,11 @@ export interface UseStandardListReturn<T, F extends Record<string, any> = Record
     nextPage: () => void;
     prevPage: () => void;
     setLimit: (limit: number) => void;
-    
+
     // View mode
     viewMode: 'grid' | 'table';
     setViewMode: (mode: 'grid' | 'table') => void;
-    
+
     // Actions
     refresh: () => Promise<void>;
     reset: () => void;
@@ -109,7 +109,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    
+
     // Auth
     const { getToken } = useAuth();
 
@@ -197,13 +197,13 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         if (!syncToUrl) return;
 
         const params = new URLSearchParams();
-        
+
         if (page !== DEFAULT_PAGE) params.set('page', String(page));
         if (limit !== defaultLimit) params.set('limit', String(limit));
         if (searchQuery) params.set('search', searchQuery);
         if (sortBy !== defaultSortBy) params.set('sort_by', sortBy);
         if (sortOrder !== defaultSortOrder) params.set('sort_order', sortOrder);
-        
+
         // Only add filters if they differ from defaults
         const hasNonDefaultFilters = Object.keys(filters).some(
             key => filters[key] !== undefined && filters[key] !== defaultFilters[key]
@@ -222,7 +222,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
 
         const queryString = params.toString();
         const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
-        
+
         // Use replace to avoid adding to history on every state change
         router.replace(newUrl, { scroll: false });
     }, [syncToUrl, pathname, router, page, limit, searchQuery, sortBy, sortOrder, filters, defaultLimit, defaultSortBy, defaultSortOrder, defaultFilters]);
@@ -289,7 +289,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     // Debounced search
     const setSearchInput = useCallback((value: string) => {
         setSearchInputState(value);
-        
+
         if (searchTimeoutRef.current) {
             clearTimeout(searchTimeoutRef.current);
         }
@@ -406,29 +406,29 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         // Data
         data,
         pagination,
-        
+
         // Loading/Error
         loading,
         error,
-        
+
         // Search
         searchInput,
         searchQuery,
         setSearchInput,
         clearSearch,
-        
+
         // Filters
         filters,
         setFilters,
         setFilter,
         clearFilters,
-        
+
         // Sorting
         sortBy,
         sortOrder,
         handleSort,
         getSortIcon,
-        
+
         // Pagination
         page,
         limit,
@@ -438,11 +438,11 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         nextPage,
         prevPage,
         setLimit,
-        
+
         // View mode
         viewMode,
         setViewMode,
-        
+
         // Actions
         refresh: fetchData,
         reset,

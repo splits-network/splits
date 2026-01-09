@@ -16,7 +16,7 @@ export function registerCompanyRoutes(
             const { clerkUserId } = requireUserContext(request);
             const filters = request.query as any;
             const result = await config.companyService.getCompanies(clerkUserId, filters);
-            return reply.send({ data: result.data, pagination: result.pagination });
+            return reply.send(result);
         } catch (error: any) {
             return reply.code(400).send({ error: { message: error.message } });
         }

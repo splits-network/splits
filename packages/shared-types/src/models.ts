@@ -138,7 +138,7 @@ export interface MaskedCandidate {
     _masked: true; // Flag to indicate this is masked data
 }
 
-export type ApplicationStage = 
+export type ApplicationStage =
     | 'withdrawn'  // Candidate withdrew
     | 'recruiter_proposed'  // Recruiter sent job opportunity, awaiting candidate decision
     | 'recruiter_request' // Recruiter requsts candidate to update or change something in the application
@@ -150,7 +150,7 @@ export type ApplicationStage =
     | 'offer'       // Offer extended
     | 'hired'       // Candidate accepted offer
     | 'rejected'    // Rejected by recruiter or company
-;
+    ;
 // Audit log for tracking application actions
 export interface ApplicationAuditLog {
     id: string;
@@ -186,24 +186,24 @@ export interface AIExperienceAnalysis {
 export interface AIReview {
     id: string;
     application_id: string;
-    
+
     // AI Analysis Results
     fit_score: number; // 0-100
     recommendation: AIRecommendation;
     overall_summary: string;
     confidence_level: number; // 0-100
-    
+
     // Detailed Analysis
     strengths: string[];
     concerns: string[];
     skills_match: AISkillsMatch;
-    
+
     // Experience Analysis
     experience_analysis: AIExperienceAnalysis;
-    
+
     // Location
     location_compatibility: LocationCompatibility;
-    
+
     // Metadata
     model_version: string;
     processing_time_ms: number;
@@ -265,6 +265,21 @@ export type RecruiterStatus = 'pending' | 'active' | 'suspended';
 
 export type MarketplaceVisibility = 'public' | 'limited' | 'hidden';
 
+/**
+ * Structured marketplace profile data
+ * Allows recruiters to add rich content beyond basic fields
+ */
+export interface MarketplaceProfile {
+    bio_rich?: string;  // Rich text/markdown bio (Phase 1)
+    // Future Phase 2 fields:
+    // achievements?: { title: string; description: string; year: number }[];
+    // certifications?: { name: string; issuer: string; year: number }[];
+    // specializations?: { area: string; yearsExperience: number }[];
+    // Future Phase 3 fields:
+    // portfolio_items?: { title: string; description: string; url?: string }[];
+    // media_urls?: string[];
+}
+
 export interface Recruiter {
     id: string;
     user_id: string;
@@ -280,7 +295,7 @@ export interface Recruiter {
     updated_at: Date;
     // Marketplace-specific fields (opt-in)
     marketplace_enabled?: boolean;
-    marketplace_profile?: Record<string, any>;
+    marketplace_profile?: MarketplaceProfile;
     marketplace_visibility?: MarketplaceVisibility;
     show_success_metrics?: boolean;
     show_contact_info?: boolean;
@@ -397,7 +412,7 @@ export interface RecruiterCandidate {
     updated_at: Date;
 }
 // Candidate-Role Assignment State Machine
-export type CandidateRoleAssignmentState = 
+export type CandidateRoleAssignmentState =
     | 'proposed'
     | 'accepted'
     | 'declined'
@@ -502,28 +517,28 @@ export interface Payout {
     id: string;
     placement_id: string;
     recruiter_id: string;
-    
+
     // Amounts
     placement_fee: number;
     recruiter_share_percentage: number;
     payout_amount: number;
-    
+
     // Stripe details
     stripe_transfer_id?: string;
     stripe_payout_id?: string;
     stripe_connect_account_id?: string;
-    
+
     // Status tracking
     status: PayoutStatus;
     processing_started_at?: Date;
     completed_at?: Date;
     failed_at?: Date;
     failure_reason?: string;
-    
+
     // Escrow/Holdback
     holdback_amount: number;
     holdback_released_at?: Date;
-    
+
     // Audit
     created_at: Date;
     updated_at: Date;
@@ -628,24 +643,24 @@ export interface FraudSignal {
     signal_type: string; // duplicate_submission, suspicious_pattern, velocity_anomaly, etc.
     severity: FraudSignalSeverity;
     status: FraudSignalStatus;
-    
+
     // Affected entities
     recruiter_id?: string;
     job_id?: string;
     candidate_id?: string;
     application_id?: string;
     placement_id?: string;
-    
+
     // Signal data
     signal_data: Record<string, any>;
     confidence_score: number; // 0-100
-    
+
     // Resolution
     reviewed_by?: string;
     reviewed_at?: Date;
     resolution_notes?: string;
     action_taken?: string;
-    
+
     created_at: Date;
     updated_at: Date;
 }
@@ -659,60 +674,60 @@ export interface AutomationRule {
     description: string;
     rule_type: string; // stage_transition, notification, payout_trigger, etc.
     status: AutomationRuleStatus;
-    
+
     // Rule definition
     trigger_conditions: Record<string, any>;
     actions: Record<string, any>[];
-    
+
     // Safety
     requires_human_approval: boolean;
     max_executions_per_day?: number;
-    
+
     // Stats
     times_triggered: number;
     times_executed: number;
     last_triggered_at?: Date;
     last_executed_at?: Date;
-    
+
     created_by: string;
     created_at: Date;
     updated_at: Date;
 }
 
 // Automation Executions
-export type AutomationExecutionStatus = 
-    | 'pending' 
-    | 'pending_approval' 
-    | 'approved' 
-    | 'executing' 
-    | 'completed' 
-    | 'failed' 
+export type AutomationExecutionStatus =
+    | 'pending'
+    | 'pending_approval'
+    | 'approved'
+    | 'executing'
+    | 'completed'
+    | 'failed'
     | 'rejected';
 
 export interface AutomationExecution {
     id: string;
     rule_id: string;
-    
+
     // Trigger details
     trigger_data: Record<string, any>;
     triggered_by: string;
-    
+
     // Execution status
     status: AutomationExecutionStatus;
     requires_human_approval: boolean;
-    
+
     // Approval workflow
     approved_by?: string;
     approved_at?: Date;
     rejected_by?: string;
     rejected_at?: Date;
     rejection_reason?: string;
-    
+
     // Execution results
     executed_at?: Date;
     action_result?: Record<string, any>;
     error_message?: string;
-    
+
     created_at: Date;
     updated_at: Date;
 }
@@ -733,16 +748,16 @@ export interface NotificationLog {
     subject: string;
     template: string;
     payload?: Record<string, any>;
-    
+
     // Channel and delivery
     channel: NotificationChannel;
     status: NotificationStatus;
     sent_at?: Date;
     error_message?: string;
-    
+
     // Email-specific fields
     resend_message_id?: string;
-    
+
     // In-app specific fields
     read: boolean;
     read_at?: Date;
@@ -751,6 +766,6 @@ export interface NotificationLog {
     action_label?: string;
     priority: NotificationPriority;
     category?: string;
-    
+
     created_at: Date;
 }

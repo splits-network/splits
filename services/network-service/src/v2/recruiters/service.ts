@@ -11,7 +11,7 @@ export class RecruiterServiceV2 {
     constructor(
         private repository: RecruiterRepository,
         private eventPublisher: EventPublisherV2
-    ) {}
+    ) { }
 
     async getRecruiters(
         clerkUserId: string | undefined,
@@ -27,8 +27,8 @@ export class RecruiterServiceV2 {
         );
     }
 
-    async getRecruiter(id: string, clerkUserId: string | undefined): Promise<any> {
-        const recruiter = await this.repository.findRecruiter(id, clerkUserId);
+    async getRecruiter(id: string, clerkUserId: string | undefined, include?: string): Promise<any> {
+        const recruiter = await this.repository.findRecruiter(id, clerkUserId, include);
         if (!recruiter) {
             throw { statusCode: 404, message: 'Recruiter not found' };
         }
@@ -115,9 +115,9 @@ export class RecruiterServiceV2 {
         await this.repository.deleteRecruiter(id);
 
         // Publish event
-        await this.eventPublisher.publish('recruiter.deleted',{
-                recruiterId: id,
-            });
+        await this.eventPublisher.publish('recruiter.deleted', {
+            recruiterId: id,
+        });
     }
 
     // Private helpers

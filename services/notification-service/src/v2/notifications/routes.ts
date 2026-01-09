@@ -34,6 +34,19 @@ export async function registerNotificationRoutes(
             const { clerkUserId } = requireUserContext(request);
             const query = request.query as Record<string, any>;
             const pagination = validatePaginationParams(query);
+
+            // Parse filters object if present (comes as JSON string from query params)
+            let parsedFilters: Record<string, any> = {};
+            if (query.filters) {
+                try {
+                    parsedFilters = typeof query.filters === 'string'
+                        ? JSON.parse(query.filters)
+                        : query.filters;
+                } catch (e) {
+                    console.error('Failed to parse filters:', e);
+                }
+            }
+
             const result = await notificationService.listNotifications(clerkUserId, {
                 event_type: query.event_type,
                 recipient_user_id: query.recipient_user_id,
@@ -43,6 +56,7 @@ export async function registerNotificationRoutes(
                 priority: query.priority,
                 unread_only: query.unread_only === 'true' || query.unread_only === true,
                 search: query.search,
+                filters: parsedFilters,
                 page: pagination.page,
                 limit: pagination.limit,
             });

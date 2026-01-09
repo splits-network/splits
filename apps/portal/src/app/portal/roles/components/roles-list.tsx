@@ -16,6 +16,7 @@ import { useUserProfile } from '@/contexts';
 import { RoleCard, type Job } from './role-card';
 import { RoleTableRow } from './role-table-row';
 import { RolesTrendsChart, TIME_PERIODS, calculateStatTrends } from '../../../../components/charts/roles-trends-chart';
+import AddRoleWizardModal from './add-role-wizard-modal';
 
 // ===== TYPES =====
 
@@ -97,6 +98,9 @@ export default function RolesList() {
 
     // Time period state for trends (shared with chart)
     const [trendPeriod, setTrendPeriod] = useState(6);
+
+    // Modal state for adding new role
+    const [showAddModal, setShowAddModal] = useState(false);
 
     // Calculate stat trends based on selected time period
     const statTrends = useMemo(() =>
@@ -226,8 +230,23 @@ export default function RolesList() {
                     loading={loading}
                 />
             </div>
-            <div className="w-full md:w-64 lg:w-72 xl:w-80 shrink-0 mt-6 md:mt-0">
-                {/* Sidebar could go here */}
+            <div className="w-full md:w-64 lg:w-72 xl:w-80 shrink-0 mt-6 md:mt-0 space-y-6">
+                {/* Add Roles Sidebar */}
+                <div className="card bg-base-200 shadow">
+                    <div className="card-body p-4">
+                        <h3 className="font-semibold text-lg mb-2">Add New Role</h3>
+                        <p className="text-base-content/70 mb-4">
+                            Quickly add a new role to your database.
+                        </p>
+                        <button
+                            className="btn btn-primary w-full"
+                            onClick={() => setShowAddModal(true)}
+                        >
+                            <i className="fa-solid fa-plus"></i>
+                            Add Role
+                        </button>
+                    </div>
+                </div>
 
                 {/* Filters and View Toggle */}
                 <div className="card bg-base-200 shadow">
@@ -286,6 +305,18 @@ export default function RolesList() {
                     </div>
                 </div>
             </div>
+
+            {/* Add Role Modal */}
+            {showAddModal && (
+                <AddRoleWizardModal
+                    isOpen={showAddModal}
+                    onClose={() => setShowAddModal(false)}
+                    onSuccess={() => {
+                        setShowAddModal(false);
+                        refresh(); // Refresh the list
+                    }}
+                />
+            )}
         </div>
     );
 }

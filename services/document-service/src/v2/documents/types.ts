@@ -8,13 +8,13 @@ export type ProcessingStatus = 'pending' | 'processing' | 'processed' | 'failed'
 export interface Document {
     id: string;
     entity_type:
-        | 'candidate'
-        | 'job'
-        | 'application'
-        | 'company'
-        | 'contract'
-        | 'placement'
-        | 'system';
+    | 'candidate'
+    | 'job'
+    | 'application'
+    | 'company'
+    | 'contract'
+    | 'placement'
+    | 'system';
     entity_id: string;
     document_type?: string | null;
     file_name: string;
@@ -40,6 +40,7 @@ export interface DocumentFilters {
     search?: string;
     page?: number;
     limit?: number;
+    filters?: Record<string, any>;
 }
 
 export interface DocumentCreateInput {

@@ -110,6 +110,20 @@ export function registerAIReviewRoutes(app: FastifyInstance, config: RouteConfig
         const clerkUserId = request.headers['x-clerk-user-id'] as string | undefined;
         if (!requireUserContext(clerkUserId, reply)) return;
 
+        const query = request.query as Record<string, any>;
+
+        // Parse filters object if present (comes as JSON string from query params)
+        let parsedFilters: Record<string, any> = {};
+        if (query.filters) {
+            try {
+                parsedFilters = typeof query.filters === 'string'
+                    ? JSON.parse(query.filters)
+                    : query.filters;
+            } catch (e) {
+                console.error('Failed to parse filters:', e);
+            }
+        }
+
         const filters = {
             application_id: request.query.application_id,
             job_id: request.query.job_id,
@@ -118,6 +132,7 @@ export function registerAIReviewRoutes(app: FastifyInstance, config: RouteConfig
             recommendation: request.query.recommendation as any,
             page: request.query.page ? Number(request.query.page) : 1,
             limit: request.query.limit ? Number(request.query.limit) : 25,
+            ...parsedFilters,
         };
 
         const { data, total } = await service.getReviews(filters);

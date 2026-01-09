@@ -4,7 +4,6 @@ import RolesHeader from './components/roles-header';
 export default function RolesPage() {
     return (
         <div className="space-y-6">
-            <RolesHeader />
             <RolesList />
         </div>
     );

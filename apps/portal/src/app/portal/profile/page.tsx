@@ -2,7 +2,7 @@
 
 import { UserProfileSettings } from './components/user-profile-settings';
 import { ProfileSettings } from './components/profile-settings';
-import { MarketplaceSettings } from './components/marketplace-settings';
+import { MarketplaceSettings } from '@/components/settings/marketplace-settings';
 import { useUserProfile } from '@/contexts';
 
 export default function SettingsPage() {

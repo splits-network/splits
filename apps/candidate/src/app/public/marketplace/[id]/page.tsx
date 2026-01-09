@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { apiClient, createAuthenticatedClient } from '@/lib/api-client';
+import { MarketplaceProfile } from '@splits-network/shared-types';
 
 interface MarketplaceRecruiter {
     id: string;
@@ -15,7 +16,7 @@ interface MarketplaceRecruiter {
     specialties?: string[];
     location?: string;
     years_experience?: number;
-    marketplace_profile?: Record<string, any>;
+    marketplace_profile?: MarketplaceProfile;
     bio?: string;
     contact_available?: boolean;
     total_placements?: number;
@@ -24,6 +25,39 @@ interface MarketplaceRecruiter {
     status?: string;
     marketplace_visibility?: string;
     created_at: string;
+}
+
+// Lightweight profile completeness check (simplified for candidate view)
+function getProfileCompleteness(recruiter: MarketplaceRecruiter): number {
+    let score = 0;
+    const checks = [
+        { condition: !!recruiter.tagline && recruiter.tagline.length > 0, weight: 10 },
+        { condition: !!recruiter.location && recruiter.location.length > 0, weight: 8 },
+        { condition: typeof recruiter.years_experience === 'number' && recruiter.years_experience > 0, weight: 8 },
+        { condition: !!recruiter.bio && recruiter.bio.length > 20, weight: 12 },
+        { condition: !!recruiter.industries && recruiter.industries.length > 0, weight: 10 },
+        { condition: !!recruiter.specialties && recruiter.specialties.length > 0, weight: 12 },
+        { condition: !!recruiter.marketplace_profile?.bio_rich && recruiter.marketplace_profile.bio_rich.length > 50, weight: 15 },
+        { condition: recruiter.total_placements !== undefined && recruiter.total_placements > 0, weight: 10 },
+        { condition: recruiter.success_rate !== undefined && recruiter.success_rate > 0, weight: 10 },
+        { condition: recruiter.reputation_score !== undefined && recruiter.reputation_score > 0, weight: 5 },
+    ];
+
+    checks.forEach(check => {
+        if (check.condition) score += check.weight;
+    });
+
+    const totalWeight = checks.reduce((sum, c) => sum + c.weight, 0);
+    return Math.round((score / totalWeight) * 100);
+}
+
+function getProfileBadge(completeness: number) {
+    if (completeness >= 90) {
+        return { label: 'Complete Profile', color: 'badge-success', icon: 'fa-certificate' };
+    } else if (completeness >= 70) {
+        return { label: 'Strong Profile', color: 'badge-primary', icon: 'fa-star' };
+    }
+    return null; // Don't show badge for incomplete profiles
 }
 
 export default function RecruiterDetailPage() {
@@ -123,6 +157,9 @@ export default function RecruiterDetailPage() {
         return null;
     }
 
+    const completeness = getProfileCompleteness(recruiter);
+    const profileBadge = getProfileBadge(completeness);
+
     return (
         <div className="container mx-auto p-6">
             {success && (
@@ -152,12 +189,18 @@ export default function RecruiterDetailPage() {
                         </div>
 
                         <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
                                 {recruiter.user_name && (
                                     <h1 className="text-3xl font-bold">{recruiter.user_name}</h1>
                                 )}
                                 {recruiter.status === 'active' && (
                                     <span className="badge badge-success badge-sm">Active</span>
+                                )}
+                                {profileBadge && (
+                                    <span className={`badge ${profileBadge.color} gap-1`}>
+                                        <i className={`fa-solid ${profileBadge.icon}`}></i>
+                                        {profileBadge.label}
+                                    </span>
                                 )}
                             </div>
                             {recruiter.tagline && (
@@ -247,6 +290,38 @@ export default function RecruiterDetailPage() {
 
             <div className='flex flex-col md:flex-row gap-6'>
                 <div className='basis-2/3'>
+                    {/* Rich Bio - Featured Story */}
+                    {recruiter.marketplace_profile?.bio_rich && (
+                        <div className="card bg-gradient-to-br from-primary/5 to-secondary/5 shadow-lg mb-6 border border-primary/20">
+                            <div className="card-body">
+                                <h2 className="card-title flex items-center gap-2">
+                                    <i className="fa-solid fa-sparkles text-primary"></i>
+                                    Featured Story
+                                </h2>
+                                <div className="prose max-w-none text-base-content/90">
+                                    {/* Simple markdown rendering */}
+                                    {recruiter.marketplace_profile.bio_rich.split('\n').map((paragraph, idx) => {
+                                        // Handle bullets
+                                        if (paragraph.trim().startsWith('- ') || paragraph.trim().startsWith('* ')) {
+                                            return (
+                                                <li key={idx} className="ml-4">
+                                                    {paragraph.replace(/^[-*]\s/, '')}
+                                                </li>
+                                            );
+                                        }
+                                        // Handle bold and italic
+                                        const formatted = paragraph
+                                            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                                            .replace(/\*(.+?)\*/g, '<em>$1</em>');
+                                        return paragraph.trim() ? (
+                                            <p key={idx} dangerouslySetInnerHTML={{ __html: formatted }} />
+                                        ) : null;
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Bio */}
                     {recruiter.bio && (
                         <div className="card bg-base-100 shadow mb-6">

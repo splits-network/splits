@@ -25,6 +25,7 @@ export interface MatchFilters {
     min_score?: number;
     page?: number;
     limit?: number;
+    filters?: Record<string, any>;
 }
 
 export type MatchUpdate = Partial<Omit<CandidateJobMatch, 'id' | 'created_at' | 'updated_at'>>;

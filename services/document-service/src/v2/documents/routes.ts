@@ -35,9 +35,22 @@ export async function registerDocumentRoutes(
             const query = request.query as Record<string, any>;
             const pagination = validatePaginationParams(query);
 
+            // Parse filters object if present (comes as JSON string from query params)
+            let parsedFilters: Record<string, any> = {};
+            if (query.filters) {
+                try {
+                    parsedFilters = typeof query.filters === 'string'
+                        ? JSON.parse(query.filters)
+                        : query.filters;
+                } catch (e) {
+                    console.error('Failed to parse filters:', e);
+                }
+            }
+
             const result = await service.listDocuments(clerkUserId, {
                 entity_type: query.entity_type,
                 entity_id: query.entity_id,
+                filters: parsedFilters,
                 document_type: query.document_type,
                 status: query.status,
                 uploaded_by: query.uploaded_by,

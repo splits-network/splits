@@ -207,7 +207,7 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
                                 href={candidate.linkedin_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="badge badge-sm badge-outline hover:badge-primary gap-1"
+                                className="badge badge-sm badge-outline gap-1 transition-colors hover:bg-[#0A66C2] hover:text-white hover:border-[#0A66C2]"
                                 onClick={(e) => e.stopPropagation()}
                                 title="LinkedIn Profile"
                             >
@@ -220,7 +220,7 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
                                 href={candidate.portfolio_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="badge badge-sm badge-outline hover:badge-primary gap-1"
+                                className="badge badge-sm badge-outline gap-1 transition-colors group-hover:badge-accent"
                                 onClick={(e) => e.stopPropagation()}
                                 title="Portfolio"
                             >
@@ -233,7 +233,7 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
                                 href={candidate.github_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="badge badge-sm badge-outline hover:badge-primary gap-1"
+                                className="badge badge-sm badge-outline gap-1 transition-colors hover:bg-[#238636] hover:text-white hover:border-[#238636]"
                                 onClick={(e) => e.stopPropagation()}
                                 title="GitHub"
                             >

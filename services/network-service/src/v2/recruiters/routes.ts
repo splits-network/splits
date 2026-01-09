@@ -18,6 +18,19 @@ export function registerRecruiterRoutes(
             const query = request.query as any;
 
             const pagination = validatePaginationParams(query.page, query.limit);
+
+            // Parse filters object if present (comes as JSON string from query params)
+            let parsedFilters: Record<string, any> = {};
+            if (query.filters) {
+                try {
+                    parsedFilters = typeof query.filters === 'string'
+                        ? JSON.parse(query.filters)
+                        : query.filters;
+                } catch (e) {
+                    console.error('Failed to parse filters:', e);
+                }
+            }
+
             const filters = {
                 ...pagination,
                 search: query.search,
@@ -25,11 +38,14 @@ export function registerRecruiterRoutes(
                 specialization: query.specialization,
                 sort_by: query.sort_by,
                 sort_order: query.sort_order,
+                filters: parsedFilters, // Include the filters object for repository
+                include: query.include,
             };
 
             const result = await config.recruiterService.getRecruiters(clerkUserId, filters);
             return reply.send(result);
         } catch (error: any) {
+            console.error('Error in GET /api/v2/recruiters:', error);
             return reply
                 .code(error.statusCode || 500)
                 .send({ error: error.message || 'Internal server error' });
@@ -40,7 +56,8 @@ export function registerRecruiterRoutes(
         try {
             const { clerkUserId } = getOptionalUserContext(request);
             const { id } = request.params as { id: string };
-            const recruiter = await config.recruiterService.getRecruiter(id, clerkUserId);
+            const query = request.query as { include?: string };
+            const recruiter = await config.recruiterService.getRecruiter(id, clerkUserId, query.include);
             return reply.send({ data: recruiter });
         } catch (error: any) {
             return reply

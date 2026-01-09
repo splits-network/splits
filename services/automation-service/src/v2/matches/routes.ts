@@ -27,6 +27,19 @@ export async function registerMatchRoutes(
             const { clerkUserId } = requireUserContext(request);
             const query = request.query as Record<string, any>;
             const pagination = validatePaginationParams(query);
+
+            // Parse filters object if present (comes as JSON string from query params)
+            let parsedFilters: Record<string, any> = {};
+            if (query.filters) {
+                try {
+                    parsedFilters = typeof query.filters === 'string'
+                        ? JSON.parse(query.filters)
+                        : query.filters;
+                } catch (e) {
+                    console.error('Failed to parse filters:', e);
+                }
+            }
+
             const filters: MatchFilters = {
                 candidate_id: query.candidate_id,
                 job_id: query.job_id,
@@ -34,6 +47,7 @@ export async function registerMatchRoutes(
                 min_score: query.min_score ? Number(query.min_score) : undefined,
                 page: pagination.page,
                 limit: pagination.limit,
+                filters: parsedFilters,
             };
             const result = await service.listMatches(clerkUserId, filters);
             return reply.send(result);

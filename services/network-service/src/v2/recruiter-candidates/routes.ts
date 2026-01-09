@@ -17,6 +17,19 @@ export function registerRecruiterCandidateRoutes(
             const query = request.query as any;
 
             const pagination = validatePaginationParams(query.page, query.limit);
+
+            // Parse filters object if present (comes as JSON string from query params)
+            let parsedFilters: Record<string, any> = {};
+            if (query.filters) {
+                try {
+                    parsedFilters = typeof query.filters === 'string'
+                        ? JSON.parse(query.filters)
+                        : query.filters;
+                } catch (e) {
+                    console.error('Failed to parse filters:', e);
+                }
+            }
+
             const filters = {
                 ...pagination,
                 recruiter_id: query.recruiter_id,
@@ -24,6 +37,7 @@ export function registerRecruiterCandidateRoutes(
                 status: query.status,
                 sort_by: query.sort_by,
                 sort_order: query.sort_order,
+                filters: parsedFilters,
             };
 
             const result = await config.recruiterCandidateService.getRecruiterCandidates(

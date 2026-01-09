@@ -5,21 +5,14 @@ interface ViewModeToggleProps {
 
 export function ViewModeToggle({ viewMode, onViewModeChange }: ViewModeToggleProps) {
     return (
-        <div className="join">
-            <button
-                className={`join-item btn btn-sm ${viewMode === 'grid' ? 'btn-active' : ''}`}
-                onClick={() => onViewModeChange('grid')}
-                title="Grid view"
-            >
-                <i className="fa-solid fa-grip"></i>
-            </button>
-            <button
-                className={`join-item btn btn-sm ${viewMode === 'table' ? 'btn-active' : ''}`}
-                onClick={() => onViewModeChange('table')}
-                title="Table view"
-            >
-                <i className="fa-solid fa-list"></i>
-            </button>
-        </div>
+        <label className='flex cursor-pointer gap-2'>
+            <input
+                type="checkbox"
+                className="toggle toggle-sm"
+                checked={viewMode === 'table'}
+                onChange={() => onViewModeChange(viewMode === 'table' ? 'grid' : 'table')}
+            />
+            <span>{viewMode === 'table' ? 'Table View' : 'Grid View'}</span>
+        </label>
     );
 }
