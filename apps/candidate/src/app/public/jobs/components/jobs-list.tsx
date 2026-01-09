@@ -149,7 +149,7 @@ export default function JobsListClient({
             if (locationQuery) params.location = locationQuery;
             if (typeFilter) params.employment_type = typeFilter;
 
-            const response = await apiClient.get<JobsResponse>('/jobs', { params });
+            const response = await apiClient.get<JobsResponse>('/public/jobs', { params });
             const fetchedJobs = response.data || [] as Job[];
             const pagination = response.pagination;
             const totalCount = pagination?.total ?? fetchedJobs.length;
@@ -513,7 +513,7 @@ export default function JobsListClient({
                                                         </div>
                                                     )}
                                                 </div>
-                                                <Link href={`/jobs/${job.id}`} className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
+                                                <Link href={`/public/jobs/${job.id}`} className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform">
                                                     View Role
                                                     <i className="fa-solid fa-arrow-right"></i>
                                                 </Link>
@@ -576,7 +576,7 @@ export default function JobsListClient({
                                                     <td>{job.posted_at ? formatDate(job.posted_at) : '—'}</td>
                                                     <td>
                                                         <div className="flex justify-end">
-                                                            <Link href={`/jobs/${job.id}`} className="btn btn-primary btn-sm">
+                                                            <Link href={`/public/jobs/${job.id}`} className="btn btn-primary btn-sm">
                                                                 View
                                                             </Link>
                                                         </div>

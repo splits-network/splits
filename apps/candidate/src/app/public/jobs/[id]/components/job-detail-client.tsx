@@ -58,7 +58,7 @@ export default function JobDetailClient({
                 text: 'Get Started',
                 icon: 'fa-rocket',
                 action: () => {
-                    window.location.href = `/sign-in?redirect=${encodeURIComponent(`/jobs/${job.id}`)}`;
+                    window.location.href = `/sign-in?redirect=${encodeURIComponent(`/public/jobs/${job.id}`)}`;
                 },
             };
         }
@@ -330,14 +330,14 @@ export default function JobDetailClient({
                             </p>
                             <div className="flex gap-4 justify-center">
                                 <Link
-                                    href={`/sign-up?redirect=${encodeURIComponent(`/jobs/${job.id}`)}`}
+                                    href={`/sign-up?redirect=${encodeURIComponent(`/public/jobs/${job.id}`)}`}
                                     className="btn btn-lg bg-white text-primary hover:bg-gray-100"
                                 >
                                     <i className="fa-solid fa-user-plus"></i>
                                     Create Account
                                 </Link>
                                 <Link
-                                    href={`/sign-in?redirect=${encodeURIComponent(`/jobs/${job.id}`)}`}
+                                    href={`/sign-in?redirect=${encodeURIComponent(`/public/jobs/${job.id}`)}`}
                                     className="btn btn-lg btn-outline text-white border-white hover:bg-white hover:text-primary"
                                 >
                                     <i className="fa-solid fa-right-to-bracket"></i>
