@@ -175,7 +175,7 @@ export default function ApplicationWizardModal({
             // Note: onSuccess callback is NOT called here to avoid double toasts
             // The applications page will show a success toast based on URL param
             onClose();
-            router.push(`/portal/applications?success=true&application=${applicationId}`);
+            router.push(`/portal/applications/${applicationId}?success=true&`);
         } catch (err: any) {
             console.error('Failed to submit application:', err);
             setError(err.message || 'Failed to submit application');

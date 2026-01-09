@@ -468,7 +468,6 @@ export class ApplicationRepository {
         isPrimary: boolean
     ): Promise<void> {
         const { data: originalDoc, error: fetchError } = await this.supabase
-
             .from('documents')
             .select('*')
             .eq('id', documentId)
@@ -479,7 +478,6 @@ export class ApplicationRepository {
         }
 
         const { error: insertError } = await this.supabase
-
             .from('documents')
             .insert({
                 entity_type: 'application',
