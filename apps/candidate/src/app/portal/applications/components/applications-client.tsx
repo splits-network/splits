@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 import { useStandardList } from '@/hooks/use-standard-list';
 import { formatDate } from '@/lib/utils';
 import { useToast } from '@/lib/toast-context';
@@ -47,7 +47,9 @@ const DEFAULT_FILTERS: ApplicationFilters = {};
 
 export default function ApplicationsClient() {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const { success, info } = useToast();
+    const toastShownRef = useRef(false);
 
     const {
         data: applications,
@@ -74,18 +76,26 @@ export default function ApplicationsClient() {
         viewModeKey: 'candidateApplicationsViewMode',
     });
 
-    // Handle success/draft query params from redirects
+    // Handle success/draft query params from redirects (only once)
     useEffect(() => {
+        if (toastShownRef.current) return;
+
         const successParam = searchParams.get('success');
         const draftParam = searchParams.get('draft');
 
         if (successParam === 'true') {
             success("Application submitted successfully! You'll receive an email once it has been reviewed.");
+            toastShownRef.current = true;
+            // Clean up URL
+            router.replace('/portal/applications');
         }
         if (draftParam === 'true') {
             info('Application saved as draft! You can edit and submit it anytime.');
+            toastShownRef.current = true;
+            // Clean up URL
+            router.replace('/portal/applications');
         }
-    }, [searchParams, success, info]);
+    }, [searchParams, success, info, router]);
 
     // Split applications into active and archived
     const activeApps = applications.filter(app =>

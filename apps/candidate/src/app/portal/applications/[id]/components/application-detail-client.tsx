@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
 import { ProposalAlert } from './proposal-alert';
 import { DeclineModal } from './decline-modal';
 import { ProposalResponseWizard, type WizardData } from './proposal-response-wizard';
@@ -16,11 +17,28 @@ interface ApplicationDetailClientProps {
 
 export function ApplicationDetailClient({ application, job, token }: ApplicationDetailClientProps) {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { getToken } = useAuth();
+    const { success } = useToast();
+    const toastShownRef = useRef(false);
     const [showDeclineModal, setShowDeclineModal] = useState(false);
     const [showWizard, setShowWizard] = useState(false);
     const [preScreenQuestions, setPreScreenQuestions] = useState<any[] | null>(null);
     const [error, setError] = useState<string | null>(null);
+
+    // Handle success query param from wizard submission (only once)
+    useEffect(() => {
+        if (toastShownRef.current) return;
+
+        const successParam = searchParams.get('success');
+
+        if (successParam === 'true') {
+            success("Application submitted successfully! You'll receive an email once it has been reviewed.");
+            toastShownRef.current = true;
+            // Clean up URL by removing query param
+            router.replace(`/portal/applications/${application.id}`);
+        }
+    }, [searchParams, success, router, application.id]);
 
     const isProposed = application.stage === 'recruiter_proposed';
     const isJobActive = job?.status === 'active';

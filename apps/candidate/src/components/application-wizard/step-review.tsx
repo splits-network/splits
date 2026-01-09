@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 interface PreScreenQuestion {
     id: string;
@@ -39,7 +38,6 @@ export default function StepReview({
     onSubmit,
     onSaveAsDraft,
 }: StepReviewProps) {
-    const router = useRouter();
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -66,8 +64,7 @@ export default function StepReview({
 
         try {
             await onSubmit();
-            // Success - redirect to applications list
-            router.push('/portal/applications?success=true');
+            // Success - parent modal will handle navigation
         } catch (err: any) {
             setError(err.message || 'Failed to submit application. Please try again.');
             setSubmitting(false);
@@ -80,8 +77,7 @@ export default function StepReview({
 
         try {
             await onSaveAsDraft();
-            // Success - redirect to applications list
-            router.push('/portal/applications?draft=true');
+            // Success - parent modal will handle navigation
         } catch (err: any) {
             setError(err.message || 'Failed to save draft. Please try again.');
             setSubmitting(false);

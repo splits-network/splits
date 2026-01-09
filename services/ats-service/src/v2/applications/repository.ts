@@ -350,7 +350,7 @@ export class ApplicationRepository {
         question_id: string;
         answer: any;
     }): Promise<any> {
-        // Use UPSERT to handle resubmissions - update answer if it exists
+        // Use UPSERT to handle application updates - update answer if it exists
         const { data, error } = await this.supabase
 
             .from('job_pre_screen_answers')
