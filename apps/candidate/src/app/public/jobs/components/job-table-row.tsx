@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatSalary, formatRelativeTime } from '@/lib/utils';
+import { ExpandableTableRow, ExpandedDetailSection, ExpandedDetailGrid, ExpandedDetailItem } from '@/components/ui/tables';
 
 interface Job {
     id: string;
@@ -31,7 +31,6 @@ interface JobTableRowProps {
 }
 
 export function JobTableRow({ job }: JobTableRowProps) {
-    const [isExpanded, setIsExpanded] = useState(false);
     const router = useRouter();
 
     // Compute company initials for avatar (matching card component)
@@ -72,165 +71,195 @@ export function JobTableRow({ job }: JobTableRowProps) {
 
     const freshnessBadge = getFreshnessBadge();
 
-    return (
+    // Main row cells
+    const cells = (
         <>
-            {/* Collapsed Row */}
-            <tr
-                className="hover cursor-pointer"
-                onClick={() => setIsExpanded(!isExpanded)}
-            >
-                <td>
-                    <button className="btn btn-ghost btn-xs btn-circle">
-                        <i className={`fa-duotone fa-regular ${isExpanded ? 'fa-chevron-down' : 'fa-chevron-right'}`}></i>
-                    </button>
-                </td>
-                <td>
-                    <div className="flex items-center gap-3">
-                        <div className="avatar avatar-placeholder">
-                            <div className="bg-secondary text-secondary-content rounded-full w-10 h-10">
-                                {job.company?.logo_url ? (
-                                    <img src={job.company.logo_url} alt={job.company.name} className='object-contain w-full h-full' />
-                                ) : (
-                                    <span className="text-sm">
-                                        {companyInitials}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                        <div>
-                            <div className="font-bold">{job.title}</div>
-                            {freshnessBadge && (
-                                <span className={`badge ${freshnessBadge.color} badge-xs mt-1`}>
-                                    {freshnessBadge.label}
+            <td>
+                <div className="flex items-center gap-3">
+                    {/* Company Avatar */}
+                    <div className="avatar avatar-placeholder shrink-0">
+                        <div className="bg-secondary text-secondary-content rounded-full w-10 h-10">
+                            {job.company?.logo_url ? (
+                                <img src={job.company.logo_url} alt={job.company.name} className='object-contain w-full h-full' />
+                            ) : (
+                                <span className="text-sm">
+                                    {companyInitials}
                                 </span>
                             )}
                         </div>
                     </div>
-                </td>
-                <td>
-                    <div className="text-sm">
-                        {job.company?.name || 'Company'}
+                    <div>
+                        <div className="font-bold">{job.title}</div>
+                        {freshnessBadge && (
+                            <span className={`badge ${freshnessBadge.color} badge-xs mt-1`}>
+                                {freshnessBadge.label}
+                            </span>
+                        )}
                     </div>
-                    {job.company?.industry && (
-                        <div className="text-xs text-base-content/60">
-                            {job.company.industry}
-                        </div>
-                    )}
-                </td>
-                <td>
-                    {job.location && (
-                        <div className="flex items-center gap-1 text-sm">
-                            <i className="fa-duotone fa-regular fa-location-dot"></i>
-                            {job.location}
-                        </div>
-                    )}
-                    {job.open_to_relocation && (
-                        <span className="badge badge-outline badge-xs mt-1 gap-1">
-                            <i className="fa-duotone fa-regular fa-location-arrow text-xs"></i>
-                            Relocation OK
-                        </span>
-                    )}
-                </td>
-                <td>
-                    <div className="text-sm">
-                        {formatSalary(job.salary_min ?? 0, job.salary_max ?? 0)}
-                    </div>
+                </div>
+            </td>
+            <td>
+                <div className="text-sm">
+                    {job.company?.name || 'Company'}
+                </div>
+                {job.company?.industry && (
                     <div className="text-xs text-base-content/60">
-                        {formatEmploymentType(job.employment_type ?? undefined)}
+                        {job.company.industry}
                     </div>
-                </td>
-                <td>
-                    <div className="text-sm">
-                        {formatRelativeTime((job.updated_at || job.created_at) ?? new Date().toISOString())}
+                )}
+            </td>
+            <td>
+                {job.location && (
+                    <div className="flex items-center gap-1 text-sm">
+                        <i className="fa-duotone fa-regular fa-location-dot"></i>
+                        {job.location}
                     </div>
-                </td>
-                <td>
-                    <button
-                        className="btn btn-sm btn-primary"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            viewJob();
-                        }}
-                    >
-                        <i className="fa-duotone fa-regular fa-briefcase"></i>
-                        View Job
-                    </button>
-                </td>
-            </tr>
-
-            {/* Expanded Row */}
-            {isExpanded && (
-                <tr>
-                    <td colSpan={7} className="bg-base-200">
-                        <div className="p-4 space-y-4">
-                            {/* Description */}
-                            {(job.candidate_description || job.description) && (
-                                <div>
-                                    <h4 className="font-semibold mb-2 flex items-center gap-2">
-                                        <i className="fa-duotone fa-regular fa-file-lines"></i>
-                                        Description
-                                    </h4>
-                                    <p className="text-sm text-base-content/70">
-                                        {job.candidate_description || job.description}
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Details Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                {/* Company HQ */}
-                                {job.company?.headquarters_location && (
-                                    <div className="flex items-start gap-2">
-                                        <i className="fa-duotone fa-regular fa-building text-primary mt-1"></i>
-                                        <div>
-                                            <div className="text-xs text-base-content/60">Company HQ</div>
-                                            <div className="text-sm font-medium">
-                                                {job.company.headquarters_location}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Category */}
-                                {job.category && (
-                                    <div className="flex items-start gap-2">
-                                        <i className="fa-duotone fa-regular fa-tags text-primary mt-1"></i>
-                                        <div>
-                                            <div className="text-xs text-base-content/60">Category</div>
-                                            <div className="text-sm font-medium">{job.category}</div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Employment Type */}
-                                <div className="flex items-start gap-2">
-                                    <i className="fa-duotone fa-regular fa-briefcase text-primary mt-1"></i>
-                                    <div>
-                                        <div className="text-xs text-base-content/60">Employment Type</div>
-                                        <div className="text-sm font-medium">
-                                            {formatEmploymentType(job.employment_type ?? undefined)}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex gap-2 pt-2">
-                                <button
-                                    className="btn btn-primary gap-2"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        viewJob();
-                                    }}
-                                >
-                                    <i className="fa-duotone fa-regular fa-arrow-right"></i>
-                                    View Full Details
-                                </button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            )}
+                )}
+                {job.open_to_relocation && (
+                    <span className="badge badge-outline badge-xs mt-1 gap-1">
+                        <i className="fa-duotone fa-regular fa-location-arrow text-xs"></i>
+                        Relocation OK
+                    </span>
+                )}
+            </td>
+            <td>
+                <div className="text-sm">
+                    {formatSalary(job.salary_min ?? 0, job.salary_max ?? 0)}
+                </div>
+                <div className="text-xs text-base-content/60">
+                    {formatEmploymentType(job.employment_type ?? undefined)}
+                </div>
+            </td>
+            <td>
+                <div className="text-sm">
+                    {formatRelativeTime((job.updated_at || job.created_at) ?? new Date().toISOString())}
+                </div>
+            </td>
+            <td onClick={(e) => e.stopPropagation()}>
+                <button
+                    className="btn btn-sm btn-primary"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        viewJob();
+                    }}
+                >
+                    <i className="fa-duotone fa-regular fa-briefcase"></i>
+                    View Job
+                </button>
+            </td>
         </>
+    );
+
+    // Expanded content for additional details
+    const expandedContent = (
+        <div className="space-y-4">
+            {/* Description */}
+            {(job.candidate_description || job.description) && (
+                <ExpandedDetailSection title="Description">
+                    <p className="text-sm text-base-content/70">
+                        {job.candidate_description || job.description}
+                    </p>
+                </ExpandedDetailSection>
+            )}
+
+            {/* Job Details */}
+            <ExpandedDetailSection title="Job Details">
+                <ExpandedDetailGrid>
+                    {/* Location */}
+                    {job.location && (
+                        <ExpandedDetailItem
+                            label="Location"
+                            value={
+                                <div className="flex items-center gap-1">
+                                    <i className="fa-duotone fa-regular fa-location-dot"></i>
+                                    {job.location}
+                                    {job.open_to_relocation && (
+                                        <span className="badge badge-outline badge-xs ml-2 gap-1">
+                                            <i className="fa-duotone fa-regular fa-location-arrow text-xs"></i>
+                                            Relocation OK
+                                        </span>
+                                    )}
+                                </div>
+                            }
+                        />
+                    )}
+
+                    {/* Salary */}
+                    <ExpandedDetailItem
+                        label="Salary"
+                        value={formatSalary(job.salary_min ?? 0, job.salary_max ?? 0)}
+                    />
+
+                    {/* Employment Type */}
+                    <ExpandedDetailItem
+                        label="Employment Type"
+                        value={formatEmploymentType(job.employment_type ?? undefined)}
+                    />
+
+                    {/* Category */}
+                    {job.category && (
+                        <ExpandedDetailItem
+                            label="Category"
+                            value={job.category}
+                        />
+                    )}
+
+                    {/* Posted Date */}
+                    <ExpandedDetailItem
+                        label="Posted"
+                        value={formatRelativeTime((job.updated_at || job.created_at) ?? new Date().toISOString())}
+                    />
+                </ExpandedDetailGrid>
+            </ExpandedDetailSection>
+
+            {/* Company Information */}
+            {job.company && (
+                <ExpandedDetailSection title="Company Information">
+                    <ExpandedDetailGrid>
+                        <ExpandedDetailItem
+                            label="Company"
+                            value={job.company.name}
+                        />
+
+                        {job.company.industry && (
+                            <ExpandedDetailItem
+                                label="Industry"
+                                value={job.company.industry}
+                            />
+                        )}
+
+                        {job.company.headquarters_location && (
+                            <ExpandedDetailItem
+                                label="Company HQ"
+                                value={job.company.headquarters_location}
+                            />
+                        )}
+                    </ExpandedDetailGrid>
+                </ExpandedDetailSection>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 pt-2 border-t border-base-300">
+                <button
+                    className="btn btn-primary gap-2"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        viewJob();
+                    }}
+                >
+                    <i className="fa-duotone fa-regular fa-arrow-right"></i>
+                    View Full Details
+                </button>
+            </div>
+        </div>
+    );
+
+    return (
+        <ExpandableTableRow
+            rowId={`job-${job.id}`}
+            cells={cells}
+            expandedContent={expandedContent}
+            showToggle={true}
+        />
     );
 }
