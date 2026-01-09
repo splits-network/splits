@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
+import { createAuthenticatedClient, apiClient } from '@/lib/api-client';
 import type { StandardListParams, StandardListResponse, PaginationResponse } from '@splits-network/shared-types';
 
 // ===== TYPES =====
@@ -233,13 +233,11 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
             setLoading(true);
             setError(null);
 
-            const token = await getToken();
-            if (!token) {
-                setError('Not authenticated');
-                return;
-            }
+            // Try to get token, but don't require it (for public pages)
+            const token = await getToken().catch(() => null);
 
-            const client = createAuthenticatedClient(token);
+            // Use authenticated client if token available, otherwise use public client
+            const client = token ? createAuthenticatedClient(token) : apiClient;
 
             const params: StandardListParams = {
                 page,

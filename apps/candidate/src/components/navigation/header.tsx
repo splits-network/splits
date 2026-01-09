@@ -321,7 +321,7 @@ export default function Header() {
                         onChange={handleThemeChange}
                         className="theme-controller"
                     />
-                    <i className="fa-duotone fa-regular fa-sun swap-off text-xl"></i>
+                    <i className="fa-duotone fa-regular fa-sun-bright swap-off text-xl"></i>
                     <i className="fa-duotone fa-regular fa-moon swap-on text-xl"></i>
                 </label>
 

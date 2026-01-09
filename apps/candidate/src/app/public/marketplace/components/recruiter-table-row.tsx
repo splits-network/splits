@@ -1,30 +1,50 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { MarketplaceProfile } from '@splits-network/shared-types';
 
-interface Recruiter {
+interface MarketplaceRecruiter {
     id: string;
     user_id: string;
-    name?: string;
-    email?: string;
     tagline?: string;
-    specialization?: string;
+    industries?: string[];
+    specialties?: string[];
     location?: string;
     years_experience?: number;
+    marketplace_profile?: MarketplaceProfile;
     bio?: string;
+    contact_available?: boolean;
     total_placements?: number;
     success_rate?: number;
     reputation_score?: number;
     created_at: string;
+    users?: {
+        id: string;
+        name?: string;
+        email?: string;
+    };
 }
 
 interface RecruiterTableRowProps {
-    recruiter: Recruiter;
+    recruiter: MarketplaceRecruiter;
 }
 
 export function RecruiterTableRow({ recruiter }: RecruiterTableRowProps) {
     const [isExpanded, setIsExpanded] = useState(false);
+    const router = useRouter();
+
+    // Compute initials for avatar (matching card component)
+    const initials = (() => {
+        const names = recruiter.users?.name?.split(' ') || [];
+        const firstInitial = names[0]?.[0]?.toUpperCase() || '';
+        const lastInitial = names[names.length - 1]?.[0]?.toUpperCase() || '';
+        return names.length > 1 ? firstInitial + lastInitial : firstInitial;
+    })();
+
+    const viewRecruiter = () => {
+        router.push(`/public/marketplace/${recruiter.id}`);
+    };
 
     return (
         <>
@@ -40,18 +60,27 @@ export function RecruiterTableRow({ recruiter }: RecruiterTableRowProps) {
                 </td>
                 <td>
                     <div className="flex items-center gap-3">
-                        <div className="avatar placeholder">
-                            <div className="bg-neutral text-neutral-content rounded-full w-10 h-10">
+                        <div className="avatar avatar-placeholder">
+                            <div className="bg-primary text-primary-content rounded-full w-10 h-10">
                                 <span className="text-sm">
-                                    {recruiter.name?.charAt(0).toUpperCase() || 'R'}
+                                    {initials}
                                 </span>
                             </div>
                         </div>
                         <div>
-                            <div className="font-bold">{recruiter.name || 'Anonymous Recruiter'}</div>
-                            {recruiter.specialization && (
-                                <div className="badge badge-sm badge-ghost mt-1">
-                                    {recruiter.specialization}
+                            <div className="font-bold">{recruiter.users?.name || 'Anonymous Recruiter'}</div>
+                            {recruiter.specialties && recruiter.specialties.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                    {recruiter.specialties.slice(0, 2).map(specialty => (
+                                        <span key={specialty} className="badge badge-sm badge-ghost">
+                                            {specialty}
+                                        </span>
+                                    ))}
+                                    {recruiter.specialties.length > 2 && (
+                                        <span className="badge badge-sm badge-ghost">
+                                            +{recruiter.specialties.length - 2}
+                                        </span>
+                                    )}
                                 </div>
                             )}
                         </div>
@@ -88,11 +117,11 @@ export function RecruiterTableRow({ recruiter }: RecruiterTableRowProps) {
                         className="btn btn-sm btn-primary"
                         onClick={(e) => {
                             e.stopPropagation();
-                            // Navigate to recruiter detail or contact
+                            viewRecruiter();
                         }}
                     >
-                        <i className="fa-duotone fa-regular fa-envelope"></i>
-                        Contact
+                        <i className="fa-duotone fa-regular fa-user"></i>
+                        View Profile
                     </button>
                 </td>
             </tr>
@@ -102,21 +131,66 @@ export function RecruiterTableRow({ recruiter }: RecruiterTableRowProps) {
                 <tr>
                     <td colSpan={5} className="bg-base-200">
                         <div className="p-4 space-y-4">
+                            {/* Tagline */}
+                            {recruiter.tagline && (
+                                <div className="alert alert-info">
+                                    <i className="fa-duotone fa-regular fa-quote-left"></i>
+                                    <span className="italic">{recruiter.tagline}</span>
+                                </div>
+                            )}
+
                             {/* Bio */}
                             {recruiter.bio && (
                                 <div>
-                                    <h4 className="font-semibold mb-2">About</h4>
+                                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                                        <i className="fa-duotone fa-regular fa-user-circle"></i>
+                                        About
+                                    </h4>
                                     <p className="text-sm text-base-content/70">{recruiter.bio}</p>
+                                </div>
+                            )}
+
+                            {/* Industries */}
+                            {recruiter.industries && recruiter.industries.length > 0 && (
+                                <div>
+                                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                                        <i className="fa-duotone fa-regular fa-industry"></i>
+                                        Industries
+                                    </h4>
+                                    <div className="flex flex-wrap gap-1">
+                                        {recruiter.industries.map(industry => (
+                                            <span key={industry} className="badge badge-sm">
+                                                {industry}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Specialties */}
+                            {recruiter.specialties && recruiter.specialties.length > 0 && (
+                                <div>
+                                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                                        <i className="fa-duotone fa-regular fa-briefcase"></i>
+                                        Specialties
+                                    </h4>
+                                    <div className="flex flex-wrap gap-1">
+                                        {recruiter.specialties.map(specialty => (
+                                            <span key={specialty} className="badge badge-sm badge-outline">
+                                                {specialty}
+                                            </span>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
 
                             {/* Stats */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {recruiter.years_experience !== undefined && (
+                                {recruiter.years_experience !== undefined && recruiter.years_experience > 0 && (
                                     <div className="stat bg-base-100 rounded-lg p-3">
                                         <div className="stat-title text-xs">Experience</div>
                                         <div className="stat-value text-lg">
-                                            {recruiter.years_experience} yrs
+                                            {recruiter.years_experience}+ yrs
                                         </div>
                                     </div>
                                 )}
@@ -130,7 +204,7 @@ export function RecruiterTableRow({ recruiter }: RecruiterTableRowProps) {
                                     </div>
                                 )}
 
-                                {recruiter.success_rate !== undefined && (
+                                {recruiter.success_rate !== undefined && recruiter.success_rate > 0 && (
                                     <div className="stat bg-base-100 rounded-lg p-3">
                                         <div className="stat-title text-xs">Success Rate</div>
                                         <div className="stat-value text-lg">
@@ -139,7 +213,7 @@ export function RecruiterTableRow({ recruiter }: RecruiterTableRowProps) {
                                     </div>
                                 )}
 
-                                {recruiter.reputation_score !== undefined && (
+                                {recruiter.reputation_score !== undefined && recruiter.reputation_score > 0 && (
                                     <div className="stat bg-base-100 rounded-lg p-3">
                                         <div className="stat-title text-xs">Rating</div>
                                         <div className="stat-value text-lg">
@@ -150,28 +224,26 @@ export function RecruiterTableRow({ recruiter }: RecruiterTableRowProps) {
                                 )}
                             </div>
 
-                            {/* Tagline */}
-                            {recruiter.tagline && (
-                                <div className="alert alert-info">
-                                    <i className="fa-duotone fa-regular fa-quote-left"></i>
-                                    <span className="italic">{recruiter.tagline}</span>
-                                </div>
-                            )}
-
                             {/* Contact Actions */}
                             <div className="flex gap-2">
-                                <button className="btn btn-primary">
-                                    <i className="fa-duotone fa-regular fa-envelope"></i>
-                                    Send Message
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        viewRecruiter();
+                                    }}
+                                >
+                                    <i className="fa-duotone fa-regular fa-user"></i>
+                                    View Full Profile
                                 </button>
-                                {recruiter.email && (
+                                {recruiter.contact_available && recruiter.users?.email && (
                                     <a
-                                        href={`mailto:${recruiter.email}`}
+                                        href={`mailto:${recruiter.users.email}`}
                                         className="btn btn-outline"
                                         onClick={(e) => e.stopPropagation()}
                                     >
-                                        <i className="fa-duotone fa-regular fa-at"></i>
-                                        Email
+                                        <i className="fa-duotone fa-regular fa-envelope"></i>
+                                        Contact
                                     </a>
                                 )}
                             </div>

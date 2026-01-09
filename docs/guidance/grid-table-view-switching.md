@@ -17,7 +17,7 @@ User preference is persisted in `localStorage` so the selected view mode is reme
 - **React Hooks**: `useState`, `useEffect` for state management
 - **Custom Hook**: `useViewMode` for view mode persistence
 - **DaisyUI Components**: `btn`, `join`, `card`, `table`, `badge`
-- **FontAwesome Icons**: `fa-grip` (grid), `fa-table` (table)
+- **FontAwesome Icons**: `fa-grid-2` (grid), `fa-table` (table)
 
 ---
 
@@ -56,7 +56,7 @@ Place the view toggle buttons in the filters/controls section using DaisyUI's `j
         onClick={() => setViewMode('grid')}
         title="Grid View"
     >
-        <i className="fa-duotone fa-regular fa-grip"></i>
+        <i className="fa-duotone fa-regular fa-grid-2"></i>
     </button>
     <button 
         className={`btn join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
@@ -72,7 +72,7 @@ Place the view toggle buttons in the filters/controls section using DaisyUI's `j
 - Buttons are grouped using `join` for visual consistency
 - Active button uses `btn-primary`, inactive uses `btn-ghost`
 - Include `title` attributes for accessibility
-- Use FontAwesome icons: `fa-grip` for grid, `fa-table` for table
+- Use FontAwesome icons: `fa-grid-2` for grid, `fa-table` for table
 
 ### 4. Implement Conditional Rendering
 
@@ -255,7 +255,7 @@ The view toggle should be placed alongside other filters in a consistent layout:
                     onClick={() => setViewMode('grid')}
                     title="Grid View"
                 >
-                    <i className="fa-duotone fa-regular fa-grip"></i>
+                    <i className="fa-duotone fa-regular fa-grid-2"></i>
                 </button>
                 <button 
                     className={`btn join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}

@@ -2,6 +2,7 @@
 
 import { useStandardList } from '@/hooks/use-standard-list';
 import { PaginationControls, LoadingState, ErrorState, EmptyState } from '@/components/standard-lists';
+import { DataTable, type TableColumn } from '@/components/ui/tables';
 import RecruiterCard from './recruiter-card';
 import { RecruiterTableRow } from './recruiter-table-row';
 import MarketplaceFilters from './marketplace-filters';
@@ -35,6 +36,14 @@ interface RecruiterFilters {
 
 // Define default filters outside component to maintain stable reference
 const DEFAULT_FILTERS: RecruiterFilters = { marketplace_enabled: true };
+
+// Define table columns
+const recruiterColumns: TableColumn[] = [
+    { key: 'users.name', label: 'Recruiter', sortable: true },
+    { key: 'location', label: 'Location', sortable: true },
+    { key: 'reputation_score', label: 'Rating & Placements', sortable: true },
+    { key: 'actions', label: 'Actions', align: 'right' },
+];
 
 export default function MarketplaceList() {
     const {
@@ -113,37 +122,19 @@ export default function MarketplaceList() {
 
                 {/* Table View */}
                 {viewMode === 'table' && recruiters.length > 0 && (
-                    <div className="overflow-x-auto mb-6">
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th className="w-12"></th>
-                                    <th
-                                        className="cursor-pointer hover:bg-base-200"
-                                        onClick={() => handleSort('name')}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            Recruiter
-                                            {sortBy === 'name' && (
-                                                <i
-                                                    className={`fa-duotone fa-regular fa-sort-${sortOrder === 'asc' ? 'up' : 'down'
-                                                        }`}
-                                                ></i>
-                                            )}
-                                        </div>
-                                    </th>
-                                    <th>Location</th>
-                                    <th>Rating & Placements</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {recruiters.map((recruiter) => (
-                                    <RecruiterTableRow key={recruiter.id} recruiter={recruiter} />
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                    <DataTable
+                        columns={recruiterColumns}
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSort={handleSort}
+                        showExpandColumn={true}
+                        isEmpty={recruiters.length === 0}
+                        loading={loading}
+                    >
+                        {recruiters.map((recruiter) => (
+                            <RecruiterTableRow key={recruiter.id} recruiter={recruiter} />
+                        ))}
+                    </DataTable>
                 )}
 
                 {/* Pagination */}

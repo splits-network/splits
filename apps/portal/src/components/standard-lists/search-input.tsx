@@ -17,21 +17,16 @@ export function SearchInput({
     className = '',
 }: SearchInputProps) {
     return (
-        <div className={`relative ${className}`}>
-            <label className='input'>
-                <span className="sr-only">Search</span>
-                <i className="fa-duotone fa-regular fa-search absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50"></i>
-                <input
-                    type="text"
-                    placeholder={placeholder}
-                    className="inputw-full pl-10 pr-10"
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    name="search-input"
-                />
-            </label>
-            {/* Currently disabled as its not working properly with the list filtering */}
-            {/* {loading ? (
+        <label className='input'>
+            <i className="fa-duotone fa-regular fa-search"></i>
+            <input
+                type="text"
+                placeholder={placeholder}
+                className=""
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+            />
+            {loading ? (
                 <span className="loading loading-spinner loading-sm absolute right-3 top-1/2 -translate-y-1/2"></span>
             ) : value && onClear ? (
                 <button
@@ -40,7 +35,7 @@ export function SearchInput({
                 >
                     <i className="fa-duotone fa-regular fa-times"></i>
                 </button>
-            ) : null} */}
-        </div>
+            ) : null}
+        </label>
     );
 }

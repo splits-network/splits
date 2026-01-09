@@ -371,7 +371,7 @@ export default function NotificationsPage() {
                             className={`btn btn-sm ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
                             onClick={() => setViewMode('grid')}
                         >
-                            <i className="fa-duotone fa-regular fa-grip"></i>
+                            <i className="fa-duotone fa-regular fa-grid-2"></i>
                         </button>
                         <button
                             className={`btn btn-sm ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}

@@ -225,7 +225,7 @@ export function Sidebar() {
                     </nav>
                     <div className='flex justify-evenly'>
                         <div className="flex items-center justify-center gap-2 py-2">
-                            <i className="fa-duotone fa-regular fa-sun text-yellow-500"></i>
+                            <i className="fa-duotone fa-regular fa-sun-bright text-yellow-500"></i>
                             <input
                                 type="checkbox"
                                 checked={isDark}

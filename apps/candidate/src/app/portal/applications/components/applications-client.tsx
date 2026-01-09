@@ -214,7 +214,7 @@ export default function ApplicationsClient() {
                                 onClick={() => setViewMode('grid')}
                                 title="Grid View"
                             >
-                                <i className="fa-duotone fa-regular fa-grip"></i>
+                                <i className="fa-duotone fa-regular fa-grid-2"></i>
                             </button>
                             <button
                                 className={`btn join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}

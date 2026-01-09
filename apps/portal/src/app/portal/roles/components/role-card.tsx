@@ -90,7 +90,7 @@ export function RoleCard({ job, allJobs, userRole, canManageRole }: RoleCardProp
                                         <img
                                             src={job.company.logo_url}
                                             alt={job.company.name}
-                                            className="w-full h-full object-cover rounded-lg"
+                                            className="w-full h-full object-contain rounded-lg"
                                             onError={(e) => {
                                                 e.currentTarget.style.display = 'none';
                                                 e.currentTarget.parentElement!.innerHTML = (job.company?.name || 'C')[0].toUpperCase();

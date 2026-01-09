@@ -29,7 +29,7 @@ export function ViewModeToggle({ viewMode, setViewMode, onViewModeChange }: View
                 onChange={() => handleChange(isTableView ? 'grid' : 'table')}
             />
             {/* Grid icon - shown when swap is off (unchecked) */}
-            <i className="swap-off fa-duotone fa-regular fa-grip text-base"></i>
+            <i className="swap-off fa-duotone fa-regular fa-grid-2 text-base"></i>
             {/* Table icon - shown when swap is on (checked) */}
             <i className="swap-on fa-duotone fa-regular fa-list text-base"></i>
         </label>
