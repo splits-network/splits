@@ -118,7 +118,7 @@ export default function JobsList() {
     const stats = jobs.length > 0 ? buildStats(jobs, pagination?.total || 0) : null;
 
     return (
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div className='w-full md-flex-1 md-mr-4 space-y-6'>
                 <div className='card bg-base-200'>
                     <StatCardGrid className='m-2 shadow-lg'>

@@ -89,7 +89,7 @@ export function JobTableRow({ job }: JobTableRowProps) {
                         <div className="avatar avatar-placeholder">
                             <div className="bg-secondary text-secondary-content rounded-full w-10 h-10">
                                 {job.company?.logo_url ? (
-                                    <img src={job.company.logo_url} alt={job.company.name} />
+                                    <img src={job.company.logo_url} alt={job.company.name} className='object-contain w-full h-full' />
                                 ) : (
                                     <span className="text-sm">
                                         {companyInitials}

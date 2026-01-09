@@ -16,16 +16,18 @@ export default function JobsFilters({
     onViewModeChange,
 }: JobsFiltersProps) {
     return (
-        <div className="card bg-base-100 shadow">
+        <div className="card bg-base-200 shadow">
             <div className="card-body p-4">
-                <div className="flex flex-col md:flex-row gap-4">
-                    <div className="flex-1">
-                        <SearchInput
-                            value={searchInput}
-                            onChange={onSearchChange}
-                            placeholder="Search by title, skills, location, salary (e.g., 'Director remote 100k')..."
-                        />
-                    </div>
+                <h3 className="card-title text-lg">
+                    Filters & View
+                    <span className="text-base-content/30">•••</span>
+                </h3>
+                <div className="flex flex-wrap gap-4 items-center">
+                    <SearchInput
+                        value={searchInput}
+                        onChange={onSearchChange}
+                        placeholder="Search by title, skills, location, salary (e.g., 'Director remote 100k')..."
+                    />
                     <ViewModeToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
                 </div>
             </div>
