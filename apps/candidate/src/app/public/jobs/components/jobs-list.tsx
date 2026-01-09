@@ -149,7 +149,7 @@ export default function JobsListClient({
             if (locationQuery) params.location = locationQuery;
             if (typeFilter) params.employment_type = typeFilter;
 
-            const response = await apiClient.get<JobsResponse>('/public/jobs', { params });
+            const response = await apiClient.get<JobsResponse>('/jobs', { params });
             const fetchedJobs = response.data || [] as Job[];
             const pagination = response.pagination;
             const totalCount = pagination?.total ?? fetchedJobs.length;
