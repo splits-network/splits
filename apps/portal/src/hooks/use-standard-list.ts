@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
@@ -67,11 +67,11 @@ export interface UseStandardListReturn<T, F extends Record<string, any> = Record
     /** @deprecated Use `data` instead */
     items: T[];
     pagination: PaginationResponse;
-    
+
     // Loading/Error state
     loading: boolean;
     error: string | null;
-    
+
     // Search
     searchInput: string;
     /** @deprecated Use `searchInput` instead */
@@ -85,19 +85,19 @@ export interface UseStandardListReturn<T, F extends Record<string, any> = Record
     /** @deprecated Use `setSearchInput` instead */
     setSearchTerm: (value: string) => void;
     clearSearch: () => void;
-    
+
     // Filters
     filters: F;
     setFilters: (filters: F) => void;
     setFilter: <K extends keyof F>(key: K, value: F[K]) => void;
     clearFilters: () => void;
-    
+
     // Sorting
     sortBy: string;
     sortOrder: 'asc' | 'desc';
     handleSort: (field: string) => void;
     getSortIcon: (field: string) => string;
-    
+
     // Pagination
     page: number;
     limit: number;
@@ -109,11 +109,11 @@ export interface UseStandardListReturn<T, F extends Record<string, any> = Record
     nextPage: () => void;
     prevPage: () => void;
     setLimit: (limit: number) => void;
-    
+
     // View mode
     viewMode: 'grid' | 'table';
     setViewMode: (mode: 'grid' | 'table') => void;
-    
+
     // Actions
     refresh: () => Promise<void>;
     /** @deprecated Use `refresh` instead */
@@ -154,7 +154,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    
+
     // Auth
     const { getToken } = useAuth();
 
@@ -225,30 +225,39 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     const [limit, setLimitState] = useState(initialState.limit);
 
     // View mode state (persisted to localStorage)
-    const [viewMode, setViewModeState] = useState<'grid' | 'table'>(() => {
-        if (typeof window !== 'undefined' && effectiveViewModeKey) {
+    // Always initialize with 'grid' to avoid hydration mismatch
+    const [viewMode, setViewModeState] = useState<'grid' | 'table'>('grid');
+
+    // Load view mode from localStorage after hydration
+    useEffect(() => {
+        if (effectiveViewModeKey && typeof window !== 'undefined') {
             const saved = localStorage.getItem(effectiveViewModeKey);
-            return (saved === 'grid' || saved === 'table') ? saved : 'grid';
+            if (saved === 'grid' || saved === 'table') {
+                setViewModeState(saved);
+            }
         }
-        return 'grid';
-    });
+    }, [effectiveViewModeKey]);
 
     // Refs for debouncing
     const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
     const isInitialMount = useRef(true);
+
+    // Create stable keys for callback dependencies
+    const filtersKey = useMemo(() => JSON.stringify(filters), [filters]);
+    const defaultFiltersKey = useMemo(() => JSON.stringify(defaultFilters), [defaultFilters]);
 
     // Update URL when state changes
     const updateUrl = useCallback(() => {
         if (!syncToUrl) return;
 
         const params = new URLSearchParams();
-        
+
         if (page !== DEFAULT_PAGE) params.set('page', String(page));
         if (limit !== defaultLimit) params.set('limit', String(limit));
         if (searchQuery) params.set('search', searchQuery);
         if (sortBy !== defaultSortBy) params.set('sort_by', sortBy);
         if (sortOrder !== defaultSortOrder) params.set('sort_order', sortOrder);
-        
+
         // Only add filters if they differ from defaults
         const hasNonDefaultFilters = Object.keys(filters).some(
             key => filters[key] !== undefined && filters[key] !== defaultFilters[key]
@@ -267,10 +276,10 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
 
         const queryString = params.toString();
         const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
-        
+
         // Use replace to avoid adding to history on every state change
         router.replace(newUrl, { scroll: false });
-    }, [syncToUrl, pathname, router, page, limit, searchQuery, sortBy, sortOrder, filters, defaultLimit, defaultSortBy, defaultSortOrder, defaultFilters]);
+    }, [syncToUrl, pathname, router, page, limit, searchQuery, sortBy, sortOrder, filtersKey, defaultFiltersKey, defaultLimit, defaultSortBy, defaultSortOrder]);
 
     // Fetch data
     const fetchData = useCallback(async () => {
@@ -354,7 +363,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     // Debounced search
     const setSearchInput = useCallback((value: string) => {
         setSearchInputState(value);
-        
+
         if (searchTimeoutRef.current) {
             clearTimeout(searchTimeoutRef.current);
         }
@@ -472,11 +481,11 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         data,
         items: data, // Alias for backward compatibility
         pagination,
-        
+
         // Loading/Error
         loading,
         error,
-        
+
         // Search
         searchInput,
         search: searchInput, // Alias for backward compatibility
@@ -486,19 +495,19 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         setSearch: setSearchInput, // Alias for backward compatibility
         setSearchTerm: setSearchInput, // Alias for backward compatibility
         clearSearch,
-        
+
         // Filters
         filters,
         setFilters,
         setFilter,
         clearFilters,
-        
+
         // Sorting
         sortBy,
         sortOrder,
         handleSort,
         getSortIcon,
-        
+
         // Pagination
         page,
         limit,
@@ -509,11 +518,11 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         nextPage,
         prevPage,
         setLimit,
-        
+
         // View mode
         viewMode,
         setViewMode,
-        
+
         // Actions
         refresh: fetchData,
         refetch: fetchData, // Alias for backward compatibility
