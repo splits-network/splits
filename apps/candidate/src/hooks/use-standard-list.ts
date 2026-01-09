@@ -389,7 +389,8 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         if (autoFetch) {
             fetchData();
         }
-    }, [fetchData, autoFetch]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [autoFetch, page, limit, searchQuery, sortBy, sortOrder, JSON.stringify(filters)]);
 
     // Update URL when state changes (after initial mount)
     useEffect(() => {
