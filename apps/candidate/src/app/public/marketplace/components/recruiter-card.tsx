@@ -28,7 +28,7 @@ export default function RecruiterCard({ recruiter }: RecruiterCardProps) {
 
 
     const viewRecruiter = () => {
-        router.push(`/marketplace/${recruiter.id}`);
+        router.push(`/public/marketplace/${recruiter.id}`);
     };
 
     return (

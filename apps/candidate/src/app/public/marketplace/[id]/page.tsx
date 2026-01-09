@@ -87,7 +87,7 @@ export default function RecruiterDetailPage() {
             setShowConnectModal(false);
             setConnectionMessage('');
             setTimeout(() => {
-                router.push('/connections');
+                router.push('/public/connections');
             }, 2000);
         } catch (err: any) {
             console.error('Failed to send connection request:', err);
