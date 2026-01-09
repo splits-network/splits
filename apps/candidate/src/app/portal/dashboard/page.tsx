@@ -207,7 +207,7 @@ export default async function DashboardPage() {
                                 Update Profile
                             </Link>
                             <Link
-                                href="/documents"
+                                href="/portal/documents"
                                 className="btn btn-outline btn-block justify-start"
                             >
                                 <i className="fa-solid fa-upload"></i>
