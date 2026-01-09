@@ -96,7 +96,7 @@ function DocumentsContent() {
             }
 
             const client = createAuthenticatedClient(token);
-            const response = await client.get('/candidates', { limit: 1 });
+            const response = await client.get('/candidates', { params: { limit: 1 } });
             const profile = response.data?.[0];
             if (profile?.id) {
                 setCandidateId(profile.id);

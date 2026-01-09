@@ -213,7 +213,7 @@ export class DocumentRepositoryV2 {
             clerkUserId,
             identityUserId: accessContext.identityUserId,
             candidateId: accessContext.candidateId,
-            role: accessContext.role,
+            roles: accessContext.roles,
             requestedEntityType: input.entity_type,
             requestedEntityId: input.entity_id,
         });
@@ -495,7 +495,7 @@ export class DocumentRepositoryV2 {
                 contextCandidateId: context.candidateId,
                 requestedEntityId: entityId,
                 match: context.candidateId === entityId,
-                contextRole: context.role,
+                contextRoles: context.roles,
                 isPlatformAdmin: context.isPlatformAdmin,
             });
         }
