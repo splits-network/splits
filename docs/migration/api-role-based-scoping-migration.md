@@ -621,7 +621,7 @@ async getProposalsForUser(
 
 **Frontend Changes**:
 ```typescript
-// apps/portal/src/app/(authenticated)/proposals/page.tsx
+// apps/portal/src/app/portal/proposals/page.tsx
 async function loadProposals() {
   const client = await createAuthenticatedClient();
   const res = await client.get('/api/proposals');  // No role logic!
@@ -724,7 +724,7 @@ private async verifyAccess(
 
 **Frontend Changes**:
 ```typescript
-// apps/portal/src/app/(authenticated)/applications/page.tsx
+// apps/portal/src/app/portal/applications/page.tsx
 async function loadApplications() {
   const client = await createAuthenticatedClient();
   const res = await client.get('/api/applications', {
@@ -733,7 +733,7 @@ async function loadApplications() {
   return res.data;
 }
 
-// apps/portal/src/app/(authenticated)/applications/[id]/page.tsx
+// apps/portal/src/app/portal/applications/[id]/page.tsx
 async function loadApplication(id: string) {
   const client = await createAuthenticatedClient();
   const res = await client.get(`/api/applications/${id}`);  // Backend checks access
@@ -893,7 +893,7 @@ async function loadPublicJobs() {
   return data;
 }
 
-// apps/portal/src/app/(authenticated)/roles/page.tsx (Authenticated)
+// apps/portal/src/app/portal/roles/page.tsx portal
 async function loadJobs() {
   const client = await createAuthenticatedClient();
   const res = await client.get('/api/jobs');  // Auth applied, role-based data
@@ -948,7 +948,7 @@ async getJobsForUser(
 
 **Frontend Changes**:
 ```typescript
-// apps/portal/src/app/(authenticated)/roles/page.tsx
+// apps/portal/src/app/portal/roles/page.tsx
 async function loadJobs() {
   const client = await createAuthenticatedClient();
   const res = await client.get('/api/jobs');  // No role logic!
@@ -1268,7 +1268,7 @@ app.get('/api/jobs/my-jobs', {
 
 ## Public + Authenticated Endpoint Pattern
 
-Some endpoints need to handle **both** unauthenticated (public) and authenticated (role-scoped) access.
+Some endpoints need to handle **both** unauthenticated public and authenticated (role-scoped) access.
 
 ### Pattern: Conditional Data Based on Auth State
 

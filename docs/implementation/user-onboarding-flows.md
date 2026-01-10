@@ -460,7 +460,7 @@ apps/portal/src/
 │   │   └── sign-up/
 │   │       └── [[...sign-up]]/
 │   │           └── page.tsx                   # Basic Clerk sign-up page
-│   ├── (authenticated)/
+│   ├── portal/
 │   │   └── dashboard/
 │   │       └── page.tsx                        # Dashboard with wizard trigger
 │   └── ...
@@ -541,7 +541,7 @@ export const OnboardingProvider = ({ children }) => {
 The dashboard page checks onboarding status and triggers the modal:
 
 ```typescript
-// app/(authenticated)/portal/dashboard/page.tsx
+// app/portal/portal/dashboard/page.tsx
 'use client';
 
 import { OnboardingProvider } from '@/components/onboarding/onboarding-provider';

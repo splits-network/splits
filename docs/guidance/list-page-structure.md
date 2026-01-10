@@ -1,6 +1,6 @@
 # List Page Structure Guidance
 
-This document defines the standard blueprint for list-style pages across the Splits Network applications (Portal, Candidate, Corporate). Use it whenever you build a page whose primary job is to surface a filterable collection with optional card/table views. The Roles experience (`apps/portal/src/app/(authenticated)/roles/page.tsx` + `components/roles-list.tsx`) is the canonical example and every new list page should be compared against it.
+This document defines the standard blueprint for list-style pages across the Splits Network applications (Portal, Candidate, Corporate). Use it whenever you build a page whose primary job is to surface a filterable collection with optional card/table views. The Roles experience (`apps/portal/src/app/portal/roles/page.tsx` + `components/roles-list.tsx`) is the canonical example and every new list page should be compared against it.
 
 ---
 
@@ -8,8 +8,8 @@ This document defines the standard blueprint for list-style pages across the Spl
 
 | Layer | File | Responsibilities |
 |-------|------|------------------|
-| Server entry | `apps/portal/src/app/(authenticated)/roles/page.tsx` | Fetch user auth context, decide whether privileged CTAs (Create button) should render, and compose the hero/header shell. |
-| Client orchestration | `apps/portal/src/app/(authenticated)/roles/components/roles-list.tsx` | Fetch/present list data, stats, filters, view toggles, loading + empty states, and permission-aware actions. |
+| Server entry | `apps/portal/src/app/portal/roles/page.tsx` | Fetch user auth context, decide whether privileged CTAs (Create button) should render, and compose the hero/header shell. |
+| Client orchestration | `apps/portal/src/app/portal/roles/components/roles-list.tsx` | Fetch/present list data, stats, filters, view toggles, loading + empty states, and permission-aware actions. |
 | Shared hooks | `apps/portal/src/hooks/use-view-mode.ts` | Persist grid/table preference across sessions. |
 
 Treat this stack as the source of truth. Deviations must be documented here before being coded elsewhere.
@@ -108,7 +108,7 @@ Treat this stack as the source of truth. Deviations must be documented here befo
 
 ## Implementation Workflow
 
-1. **Define server entry** under the appropriate `(authenticated)` segment. Fetch the signed-in user role and expose anything required for the header or initial props.
+1. **Define server entry** under the appropriate `portal` segment. Fetch the signed-in user role and expose anything required for the header or initial props.
 2. **Scaffold the client list component** with `useAuth`, `createAuthenticatedClient`, and the standard state slices. Keep fetchers private to the component.
 3. **Add the stats deck** with persona-aware descriptions; load it lazily after the primary role/company context is known.
 4. **Build the controls card** following the select + search + view toggle order. Plug `useViewMode` in early to avoid layout layout thrash.

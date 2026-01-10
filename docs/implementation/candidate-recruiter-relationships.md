@@ -117,7 +117,7 @@ interface RecruiterRelationship {
 
 ```
 apps/candidate/src/
-├── app/(authenticated)/profile/
+├── app/portal/profile/
 │   └── page.tsx (update)
 ├── components/
 │   └── recruiters/

@@ -13,7 +13,7 @@ export interface UserFilters {
 
 export interface UserUpdate {
     email?: string;
-    full_name?: string;
+    name?: string;
     avatar_url?: string;
     status?: string;
 }

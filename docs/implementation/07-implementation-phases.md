@@ -339,7 +339,7 @@ Build candidate-facing application wizard.
 
 **Files from [05-ui-components.md](./05-ui-components.md):**
 
-- [ ] Create `apps/candidate/src/app/(authenticated)/jobs/[id]/apply/page.tsx`
+- [ ] Create `apps/candidate/src/app/portal/jobs/[id]/apply/page.tsx`
 - [ ] Create `application-wizard.tsx` (main orchestrator)
 - [ ] Create `components/step-indicator.tsx`
 - [ ] Create `components/step-tsx`
@@ -421,7 +421,7 @@ Build recruiter interface for reviewing and approving applications.
 
 #### 6.1 Pending Applications List
 
-**File:** `apps/portal/src/app/(authenticated)/applications/pending/page.tsx`
+**File:** `apps/portal/src/app/portal/applications/pending/page.tsx`
 
 - [x] Fetch pending applications for recruiter
 - [x] Display list with candidate name, job, submission date
@@ -432,8 +432,8 @@ Build recruiter interface for reviewing and approving applications.
 #### 6.2 Application Review Page
 
 **Files:**
-- `apps/portal/src/app/(authenticated)/applications/[id]/review/page.tsx`
-- `apps/portal/src/app/(authenticated)/applications/[id]/review/review-form.tsx`
+- `apps/portal/src/app/portal/applications/[id]/review/page.tsx`
+- `apps/portal/src/app/portal/applications/[id]/review/review-form.tsx`
 
 - [x] Display job details
 - [x] Display candidate profile summary
@@ -482,7 +482,7 @@ Enable companies to request pre-screen for direct applications.
 
 #### 7.1 Applications List with Pre-Screen Tab
 
-**File:** `apps/portal/src/app/(authenticated)/roles/[id]/components/candidate-pipeline.tsx`
+**File:** `apps/portal/src/app/portal/roles/[id]/components/candidate-pipeline.tsx`
 
 - [x] Add "Needs Pre-Screen" tab
 - [x] Filter applications where `recruiter_id IS NULL`
@@ -491,7 +491,7 @@ Enable companies to request pre-screen for direct applications.
 
 #### 7.2 Pre-Screen Request Modal
 
-**Component:** Request Pre-Screen Modal (`apps/portal/src/app/(authenticated)/roles/[id]/components/pre-screen-request-modal.tsx`)
+**Component:** Request Pre-Screen Modal (`apps/portal/src/app/portal/roles/[id]/components/pre-screen-request-modal.tsx`)
 
 - [x] Show recruiter assignment options:
   - Auto-assign (system selects)

@@ -29,6 +29,41 @@ export class ApplicationServiceV2 {
             limit,
         });
 
+        // Handle includes that require separate queries
+        if (filters.include) {
+            const includes = filters.include.split(',').map((i: any) => i.trim());
+
+            // Batch fetch AI reviews if requested
+            if (includes.includes('ai_review') || includes.includes('ai-review')) {
+                const applicationIds = data.map((app: any) => app.id);
+                const aiReviews = await this.repository.batchGetAIReviews(applicationIds);
+
+                // Map reviews to applications
+                const reviewMap = new Map(aiReviews.map(review => [review.application_id, review]));
+                data.forEach((app: any) => {
+                    app.ai_review = reviewMap.get(app.id) || null;
+                });
+            }
+
+            // Handle documents if requested
+            if (includes.includes('documents') || includes.includes('document')) {
+                const applicationIds = data.map((app: any) => app.id);
+                const documents = await this.repository.batchGetDocuments(applicationIds);
+
+                // Map documents to applications
+                const docMap = new Map<string, any[]>();
+                documents.forEach((doc: any) => {
+                    if (!docMap.has(doc.entity_id)) {
+                        docMap.set(doc.entity_id, []);
+                    }
+                    docMap.get(doc.entity_id)!.push(doc);
+                });
+                data.forEach((app: any) => {
+                    app.documents = docMap.get(app.id) || [];
+                });
+            }
+        }
+
         return {
             data,
             pagination: pagination
@@ -48,6 +83,11 @@ export class ApplicationServiceV2 {
         // Handle documents separately (polymorphic association can't be joined)
         if (includes.includes('documents') || includes.includes('document')) {
             application.documents = await this.repository.getDocumentsForApplication(id);
+        }
+
+        // Handle AI review separately (one-to-one relationship fetched separately)
+        if (includes.includes('ai_review') || includes.includes('ai-review')) {
+            application.ai_review = await this.repository.getAIReviewForApplication(id);
         }
 
         return application;

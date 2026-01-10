@@ -148,7 +148,7 @@ Splits Network implements a role-based access control (RBAC) system with four pr
 **Implementation Files:**
 - Admin Detection: [services/api-gateway/src/rbac.ts#L68-L71](../../services/api-gateway/src/rbac.ts)
 - No RBAC Filtering: [services/api-gateway/src/routes/roles/routes.ts#L36-L39](../../services/api-gateway/src/routes/roles/routes.ts)
-- Platform Admin UI: [apps/portal/src/app/(authenticated)/admin/](../../apps/portal/src/app/(authenticated)/admin/)
+- Platform Admin UI: [apps/portal/src/app/portal/admin/](../../apps/portal/src/app/portal/admin/)
 
 **Admin Dashboard Sections:**
 - Recruiter Directory & Management

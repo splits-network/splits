@@ -64,7 +64,7 @@ When a recruiter views a candidate's details page (where an active relationship 
 ### What Exists
 
 #### 1. Candidate Details Page
-**Location:** [`apps/portal/src/app/(authenticated)/candidates/[id]/candidate-detail-client.tsx`](../../apps/portal/src/app/(authenticated)/candidates/[id]/candidate-detail-client.tsx)
+**Location:** [`apps/portal/src/app/portal/candidates/[id]/candidate-detail-client.tsx`](../../apps/portal/src/app/portal/candidates/[id]/candidate-detail-client.tsx)
 
 **Current Behavior:**
 - Displays list of all applications for a candidate
@@ -83,7 +83,7 @@ When a recruiter views a candidate's details page (where an active relationship 
 ```
 
 #### 2. Application Review Flow (Screen Stage)
-**Location:** [`apps/portal/src/app/(authenticated)/applications/[id]/review/`](../../apps/portal/src/app/(authenticated)/applications/[id]/review/)
+**Location:** [`apps/portal/src/app/portal/applications/[id]/review/`](../../apps/portal/src/app/portal/applications/[id]/review/)
 
 **Current Capabilities:**
 - ✅ Reviews applications in 'screen' stage
@@ -92,7 +92,7 @@ When a recruiter views a candidate's details page (where an active relationship 
 - **Limitation:** Only works for `stage='screen'` - no management for other stages
 
 #### 3. Applications List Page
-**Location:** [`apps/portal/src/app/(authenticated)/applications/`](../../apps/portal/src/app/(authenticated)/applications/)
+**Location:** [`apps/portal/src/app/portal/applications/`](../../apps/portal/src/app/portal/applications/)
 
 **Current Capabilities:**
 - ✅ Lists all applications for recruiter
@@ -159,7 +159,7 @@ This page should provide:
 - Actions: Update stage, Add notes, View candidate, View job
 
 #### 2. **Stage Management Interface**
-Currently only available in the job pipeline view ([`roles/[id]/components/candidate-pipeline.tsx`](../../apps/portal/src/app/(authenticated)/roles/[id]/components/candidate-pipeline.tsx)), but not from:
+Currently only available in the job pipeline view ([`roles/[id]/components/candidate-pipeline.tsx`](../../apps/portal/src/app/portal/roles/[id]/components/candidate-pipeline.tsx)), but not from:
 - Candidate details page
 - Applications list page
 - Individual application view
@@ -244,7 +244,7 @@ Recruiter Dashboard
 ### Phase 1: Create Application Detail Page (CRITICAL)
 
 #### Task 1.1: Create Base Page Structure
-**File:** `apps/portal/src/app/(authenticated)/applications/[id]/page.tsx`
+**File:** `apps/portal/src/app/portal/applications/[id]/page.tsx`
 
 **Requirements:**
 - Server component for data fetching
@@ -255,7 +255,7 @@ Recruiter Dashboard
 **Estimated Time:** 2 hours
 
 #### Task 1.2: Create Client Component
-**File:** `apps/portal/src/app/(authenticated)/applications/[id]/application-detail-client.tsx`
+**File:** `apps/portal/src/app/portal/applications/[id]/application-detail-client.tsx`
 
 **Sections:**
 1. **Header**
@@ -349,7 +349,7 @@ await apiClient.updateApplicationStage(
 ### Phase 2: Update Candidate Details Page Links
 
 #### Task 2.1: Change Application Link Destination
-**File:** `apps/portal/src/app/(authenticated)/candidates/[id]/candidate-detail-client.tsx`
+**File:** `apps/portal/src/app/portal/candidates/[id]/candidate-detail-client.tsx`
 
 **Change:** Line ~428
 ```tsx
@@ -523,7 +523,7 @@ If relationship has expired or been terminated, show warning but still allow vie
 ## File Structure
 
 ```
-apps/portal/src/app/(authenticated)/applications/
+apps/portal/src/app/portal/applications/
 ├── page.tsx                          # ✅ Applications list (exists)
 ├── applications-list-client.tsx      # ✅ List component (exists)
 ├── pending/
@@ -624,9 +624,9 @@ apps/portal/src/components/
 ## References
 
 ### Existing Code
-- Candidate Details: [`apps/portal/src/app/(authenticated)/candidates/[id]/candidate-detail-client.tsx`](../../apps/portal/src/app/(authenticated)/candidates/[id]/candidate-detail-client.tsx)
-- Applications List: [`apps/portal/src/app/(authenticated)/applications/applications-list-client.tsx`](../../apps/portal/src/app/(authenticated)/applications/applications-list-client.tsx)
-- Review Page: [`apps/portal/src/app/(authenticated)/applications/[id]/review/page.tsx`](../../apps/portal/src/app/(authenticated)/applications/[id]/review/page.tsx)
+- Candidate Details: [`apps/portal/src/app/portal/candidates/[id]/candidate-detail-client.tsx`](../../apps/portal/src/app/portal/candidates/[id]/candidate-detail-client.tsx)
+- Applications List: [`apps/portal/src/app/portal/applications/applications-list-client.tsx`](../../apps/portal/src/app/portal/applications/applications-list-client.tsx)
+- Review Page: [`apps/portal/src/app/portal/applications/[id]/review/page.tsx`](../../apps/portal/src/app/portal/applications/[id]/review/page.tsx)
 - API Client: [`apps/portal/src/lib/api-client.ts`](../../apps/portal/src/lib/api-client.ts)
 
 ### Documentation

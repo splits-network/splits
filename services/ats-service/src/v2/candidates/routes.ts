@@ -55,6 +55,8 @@ export function registerCandidateRoutes(
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as any;
+            console.log('PATCH /api/v2/candidates/:id - body:', JSON.stringify(request.body));
+            console.log('PATCH /api/v2/candidates/:id - id:', id, 'clerkUserId:', clerkUserId);
             const candidate = await config.candidateService.updateCandidate(
                 id,
                 request.body as CandidateUpdate,
@@ -62,6 +64,7 @@ export function registerCandidateRoutes(
             );
             return reply.send({ data: candidate });
         } catch (error: any) {
+            console.error('PATCH /api/v2/candidates/:id ERROR:', error.message, error.stack);
             return reply.code(400).send({ error: { message: error.message } });
         }
     });

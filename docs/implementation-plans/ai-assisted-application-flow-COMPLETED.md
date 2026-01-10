@@ -248,7 +248,7 @@ async reviewApplication(applicationId: string): Promise<AIReview>
 **Status:** ✅ Implemented and styled
 
 #### Application Detail Page Updates
-**File:** `apps/candidate/src/app/(authenticated)/applications/[id]/page.tsx`
+**File:** `apps/candidate/src/app/portal/applications/[id]/page.tsx`
 
 **Changes:**
 - Added 'ai_review' to stage color mapping (yellow badge)
@@ -262,7 +262,7 @@ async reviewApplication(applicationId: string): Promise<AIReview>
 **Status:** ✅ Implemented
 
 #### Applications List Page Updates
-**File:** `apps/candidate/src/app/(authenticated)/applications/page.tsx`
+**File:** `apps/candidate/src/app/portal/applications/page.tsx`
 
 **Changes:**
 - Added 'ai_review' stage handling
@@ -287,7 +287,7 @@ async reviewApplication(applicationId: string): Promise<AIReview>
 **Status:** ✅ Implemented
 
 #### Applications List Updates
-**File:** `apps/portal/src/app/(authenticated)/applications/components/applications-list-client2.tsx`
+**File:** `apps/portal/src/app/portal/applications/components/applications-list-client2.tsx`
 
 **Changes:**
 - Added AI score filtering state
@@ -299,7 +299,7 @@ async reviewApplication(applicationId: string): Promise<AIReview>
 **Status:** ✅ Implemented
 
 #### Application Filters Updates
-**File:** `apps/portal/src/app/(authenticated)/applications/components/application-filters.tsx`
+**File:** `apps/portal/src/app/portal/applications/components/application-filters.tsx`
 
 **Changes:**
 - Added AI Score filter dropdown
@@ -309,7 +309,7 @@ async reviewApplication(applicationId: string): Promise<AIReview>
 **Status:** ✅ Implemented
 
 #### Application Table Row Updates
-**File:** `apps/portal/src/app/(authenticated)/applications/components/application-table-row.tsx`
+**File:** `apps/portal/src/app/portal/applications/components/application-table-row.tsx`
 
 **Changes:**
 - Added AI Score column display
@@ -320,7 +320,7 @@ async reviewApplication(applicationId: string): Promise<AIReview>
 **Status:** ✅ Implemented
 
 #### Application Card Updates
-**File:** `apps/portal/src/app/(authenticated)/applications/components/application-card.tsx`
+**File:** `apps/portal/src/app/portal/applications/components/application-card.tsx`
 
 **Changes:**
 - Added AI score display with robot icon
@@ -330,7 +330,7 @@ async reviewApplication(applicationId: string): Promise<AIReview>
 **Status:** ✅ Implemented
 
 #### Application Detail Client Updates
-**File:** `apps/portal/src/app/(authenticated)/applications/[id]/components/application-detail-client.tsx`
+**File:** `apps/portal/src/app/portal/applications/[id]/components/application-detail-client.tsx`
 
 **Changes:**
 - Added 'ai_review' to stage labels and colors
@@ -352,7 +352,7 @@ async reviewApplication(applicationId: string): Promise<AIReview>
 - ✅ `services/notification-service/src/consumers/applications/consumer.ts` - **0 issues**
 - ✅ `apps/candidate/src/components/ai-review-panel.tsx` - **0 issues**
 - ✅ `apps/portal/src/components/ai-review-panel.tsx` - **0 issues**
-- ✅ `apps/portal/src/app/(authenticated)/applications` - **0 issues**
+- ✅ `apps/portal/src/app/portal/applications` - **0 issues**
 
 **Result:** ✅ **Zero security vulnerabilities introduced**
 

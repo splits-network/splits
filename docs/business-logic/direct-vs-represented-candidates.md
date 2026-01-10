@@ -240,7 +240,7 @@ Before a recruiter can submit applications for a candidate, an **exclusive 12-mo
 - Confidentiality and communication expectations
 - Right to decline any opportunity
 
-**See:** `apps/candidate/src/app/(authenticated)/invitation/[token]/invitation-client.tsx`
+**See:** `apps/candidate/src/app/portal/invitation/[token]/invitation-client.tsx`
 
 ---
 

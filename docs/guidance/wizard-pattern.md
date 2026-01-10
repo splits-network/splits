@@ -893,7 +893,7 @@ const handleNext = () => {
 
 ## Example: Complete Wizard Component
 
-See `apps/portal/src/app/(authenticated)/candidates/[id]/components/submit-to-job-wizard.tsx` for a production-ready implementation following all these patterns.
+See `apps/portal/src/app/portal/candidates/[id]/components/submit-to-job-wizard.tsx` for a production-ready implementation following all these patterns.
 
 **Features demonstrated**:
 - 3-step wizard (Select Job → Enter Details → Review)
@@ -942,4 +942,4 @@ When creating a new wizard:
 
 **Last Updated**: December 28, 2025  
 **Version**: 1.0  
-**Reference Implementation**: `apps/portal/src/app/(authenticated)/candidates/[id]/components/submit-to-job-wizard.tsx`
+**Reference Implementation**: `apps/portal/src/app/portal/candidates/[id]/components/submit-to-job-wizard.tsx`

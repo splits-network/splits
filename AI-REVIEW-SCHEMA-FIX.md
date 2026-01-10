@@ -116,7 +116,7 @@ To verify the fix works:
 
 - **AI Service Repository**: `services/ai-service/src/v2/reviews/repository.ts`
 - **Shared Types**: `packages/shared-types/src/models.ts`
-- **Frontend Component**: `apps/candidate/src/app/(authenticated)/applications/[id]/components/ai-review-panel.tsx`
+- **Frontend Component**: `apps/candidate/src/app/portal/applications/[id]/components/ai-review-panel.tsx`
 - **Database Table**: `ai_reviews`
 
 ## Notes

@@ -49,7 +49,7 @@ Build foundational card components that all pages will use:
 
 ### 4. Upgrade dashboard pages
 
-**Location:** `apps/portal/src/app/(authenticated)/portal/dashboard/components/`
+**Location:** `apps/portal/src/app/portal/portal/dashboard/components/`
 
 - Replace all inline stat cards with unified `StatCard` components
 - Add trend indicators to all metrics
@@ -62,11 +62,11 @@ Update to use shared `EntityCard` component:
 
 | Card | Location | Status |
 |------|----------|--------|
-| `CandidateCard` | `apps/portal/src/app/(authenticated)/candidates/components/candidate-card.tsx` | Already modern, extract to shared |
-| `ApplicationCard` | `apps/portal/src/app/(authenticated)/applications/components/application-card.tsx` | Already modern, align with shared |
-| `RoleCard` | `apps/portal/src/app/(authenticated)/roles/components/roles-list.tsx` (inline) | Extract to shared component |
-| `UnifiedProposalCard` | `apps/portal/src/app/(authenticated)/proposals/components/unified-proposal-card.tsx` | Update styling to match system |
-| Invitation cards | `apps/portal/src/app/(authenticated)/invitations/components/invitations-client.tsx` | Full rebuild using new components |
+| `CandidateCard` | `apps/portal/src/app/portal/candidates/components/candidate-card.tsx` | Already modern, extract to shared |
+| `ApplicationCard` | `apps/portal/src/app/portal/applications/components/application-card.tsx` | Already modern, align with shared |
+| `RoleCard` | `apps/portal/src/app/portal/roles/components/roles-list.tsx` (inline) | Extract to shared component |
+| `UnifiedProposalCard` | `apps/portal/src/app/portal/proposals/components/unified-proposal-card.tsx` | Update styling to match system |
+| Invitation cards | `apps/portal/src/app/portal/invitations/components/invitations-client.tsx` | Full rebuild using new components |
 
 ### 6. Transform list pages into dashboards
 
@@ -93,10 +93,10 @@ Use `ExpandableTableRow` component with chevron toggles.
 ### 8. Refine settings/form pages
 
 **Pages to update:**
-- `apps/portal/src/app/(authenticated)/profile/page.tsx`
-- `apps/portal/src/app/(authenticated)/billing/page.tsx`
-- `apps/portal/src/app/(authenticated)/company/settings/page.tsx`
-- `apps/portal/src/app/(authenticated)/company/team/page.tsx`
+- `apps/portal/src/app/portal/profile/page.tsx`
+- `apps/portal/src/app/portal/billing/page.tsx`
+- `apps/portal/src/app/portal/company/settings/page.tsx`
+- `apps/portal/src/app/portal/company/team/page.tsx`
 
 - Use unified `ContentCard` for all form sections
 - Add header metric cards (profile completeness, activity stats)
@@ -202,6 +202,6 @@ apps/portal/src/components/ui/
 
 - `apps/portal/src/app/globals.css` — Design tokens, animations
 - `apps/portal/src/components/sidebar.tsx` — Full redesign
-- `apps/portal/src/app/(authenticated)/portal/dashboard/components/*.tsx` — All dashboard variants
-- `apps/portal/src/app/(authenticated)/*/page.tsx` — All list pages
-- `apps/portal/src/app/(authenticated)/*/components/*-card.tsx` — All entity cards
+- `apps/portal/src/app/portal/portal/dashboard/components/*.tsx` — All dashboard variants
+- `apps/portal/src/app/portal/*/page.tsx` — All list pages
+- `apps/portal/src/app/portal/*/components/*-card.tsx` — All entity cards

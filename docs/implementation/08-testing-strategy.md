@@ -207,7 +207,7 @@ describe('AssignmentService', () => {
 
 ### 2.3 UI Component Tests
 
-**File:** `apps/candidate/src/app/(authenticated)/jobs/[id]/apply/__tests__/application-wizard.test.tsx`
+**File:** `apps/candidate/src/app/portal/jobs/[id]/apply/__tests__/application-wizard.test.tsx`
 
 ```typescript
 describe('ApplicationWizard', () => {

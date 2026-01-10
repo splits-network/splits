@@ -284,11 +284,11 @@ apps/portal/src/components/ui/
   - add reduced-motion rules
 - `apps/portal/src/components/sidebar.tsx`  
   - implement AppShell sidebar spec
-- Key table/list pages under `apps/portal/src/app/(authenticated)/...`
+- Key table/list pages under `apps/portal/src/app/portal/...`
 
 ### Create
 - `apps/portal/src/components/ui/*` (primitives listed above)
-- `apps/portal/src/app/(authenticated)/ui-kitchen-sink/page.tsx` (internal-only route)
+- `apps/portal/src/app/portal/ui-kitchen-sink/page.tsx` (internal-only route)
 
 ---
 

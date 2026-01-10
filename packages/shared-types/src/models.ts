@@ -122,6 +122,22 @@ export interface Candidate {
     verification_metadata?: Record<string, any>; // Additional verification details
     verified_at?: Date;
     verified_by_user_id?: string;
+
+    // Marketplace enhancement fields
+    marketplace_visibility?: 'public' | 'private' | 'hidden';
+    marketplace_profile?: MarketplaceProfile; // Rich bio and other structured content
+    show_email?: boolean;
+    show_phone?: boolean;
+    show_location?: boolean;
+    show_current_company?: boolean;
+    show_salary_expectations?: boolean;
+    desired_salary_min?: number;
+    desired_salary_max?: number;
+    desired_job_type?: string;
+    open_to_remote?: boolean;
+    open_to_relocation?: boolean;
+    availability?: string;
+
     created_at: Date;
     updated_at: Date;
 }

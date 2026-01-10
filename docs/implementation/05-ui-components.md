@@ -17,7 +17,7 @@ React component specifications for the candidate application wizard and recruite
 
 #### File Structure
 ```
-apps/candidate/src/app/(authenticated)/jobs/[id]/apply/
+apps/candidate/src/app/portal/jobs/[id]/apply/
 ├── page.tsx                      # Main application page
 ├── application-wizard.tsx        # Wizard orchestrator
 ├── components/
@@ -640,7 +640,7 @@ export default function StepReview({ job, formData, documents, questions, onSubm
 
 ### 2.1 Pending Applications Page
 
-**File:** `apps/portal/src/app/(authenticated)/applications/pending/page.tsx`
+**File:** `apps/portal/src/app/portal/applications/pending/page.tsx`
 
 ```tsx
 import { getPendingApplications } from '@/lib/api-client';
@@ -662,7 +662,7 @@ export default async function PendingApplicationsPage() {
 
 ### 2.2 Application Review Component
 
-**File:** `apps/portal/src/app/(authenticated)/applications/[id]/review/page.tsx`
+**File:** `apps/portal/src/app/portal/applications/[id]/review/page.tsx`
 
 ```tsx
 'use client';

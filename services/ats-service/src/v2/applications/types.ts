@@ -9,6 +9,7 @@ export interface ApplicationFilters extends PaginationParams, SortParams {
     stage?: string;
     job_id?: string;
     candidate_id?: string;
+    include?: string;
 }
 
 export interface ApplicationUpdate {

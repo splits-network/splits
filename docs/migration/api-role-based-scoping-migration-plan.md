@@ -27,7 +27,7 @@ This plan provides detailed, step-by-step instructions for migrating from fronte
 
 **Performance Target**: 10-50ms response times (vs 200-500ms+) = **10-25x improvement**
 
-**Important**: Some endpoints (like `/api/jobs`) must handle **both** unauthenticated (public) and authenticated (role-scoped) access. These endpoints use conditional logic based on authentication state, **NOT** separate `/api/public/*` routes. However, dedicated public route files (like `jobs/public-routes.ts`) should be consolidated into the main `routes.ts` file for consistency.
+**Important**: Some endpoints (like `/api/jobs`) must handle **both** unauthenticated public and authenticated (role-scoped) access. These endpoints use conditional logic based on authentication state, **NOT** separate `/api/public/*` routes. However, dedicated public route files (like `jobs/public-routes.ts`) should be consolidated into the main `routes.ts` file for consistency.
 
 ---
 
@@ -1217,7 +1217,7 @@ Same testing pattern as previous resources.
    const proposals = await client.get('/api/proposals');
    ```
 
-2. File to update: `apps/portal/src/app/(authenticated)/proposals/page.tsx`
+2. File to update: `apps/portal/src/app/portal/proposals/page.tsx`
 
 **Verification**:
 - [ ] No role checks in component
@@ -1228,7 +1228,7 @@ Same testing pattern as previous resources.
 
 #### Task 2.1.2: Update Proposal Detail Page
 
-1. File: `apps/portal/src/app/(authenticated)/proposals/[id]/page.tsx`
+1. File: `apps/portal/src/app/portal/proposals/[id]/page.tsx`
 2. Remove role-based logic, use single endpoint
 
 **Verification**:
@@ -1248,7 +1248,7 @@ Same pattern as proposals:
 - Use single API endpoint
 - Simplify loading logic
 
-File: `apps/portal/src/app/(authenticated)/applications/page.tsx`
+File: `apps/portal/src/app/portal/applications/page.tsx`
 
 **Verification**:
 - [ ] Simplified code
@@ -1258,7 +1258,7 @@ File: `apps/portal/src/app/(authenticated)/applications/page.tsx`
 
 #### Task 2.2.2: Update Application Detail Page
 
-File: `apps/portal/src/app/(authenticated)/applications/[id]/page.tsx`
+File: `apps/portal/src/app/portal/applications/[id]/page.tsx`
 
 **Verification**:
 - [ ] Simplified code
@@ -1272,7 +1272,7 @@ File: `apps/portal/src/app/(authenticated)/applications/[id]/page.tsx`
 
 #### Task 2.3.1: Update Jobs List Page
 
-File: `apps/portal/src/app/(authenticated)/roles/page.tsx`
+File: `apps/portal/src/app/portal/roles/page.tsx`
 
 **Verification**:
 - [ ] Simplified code
@@ -1282,7 +1282,7 @@ File: `apps/portal/src/app/(authenticated)/roles/page.tsx`
 
 #### Task 2.3.2: Update Job Detail Page
 
-File: `apps/portal/src/app/(authenticated)/roles/[id]/page.tsx`
+File: `apps/portal/src/app/portal/roles/[id]/page.tsx`
 
 **Verification**:
 - [ ] Simplified code
@@ -1296,7 +1296,7 @@ File: `apps/portal/src/app/(authenticated)/roles/[id]/page.tsx`
 
 #### Task 2.4.1: Update Candidates List Page
 
-File: `apps/portal/src/app/(authenticated)/candidates/page.tsx`
+File: `apps/portal/src/app/portal/candidates/page.tsx`
 
 **Verification**:
 - [ ] Simplified code
@@ -1306,7 +1306,7 @@ File: `apps/portal/src/app/(authenticated)/candidates/page.tsx`
 
 #### Task 2.4.2: Update Candidate Detail Page
 
-File: `apps/portal/src/app/(authenticated)/candidates/[id]/page.tsx`
+File: `apps/portal/src/app/portal/candidates/[id]/page.tsx`
 
 **Verification**:
 - [ ] Simplified code

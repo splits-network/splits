@@ -191,7 +191,7 @@ Routes exist in API Gateway (`services/api-gateway/src/routes/documents/routes.t
 
 ### 3.1 Candidate App (`apps/candidate`)
 
-#### **Applications Page** (`app/(authenticated)/applications/page.tsx`)
+#### **Applications Page** (`app/portal/applications/page.tsx`)
 **Status:** ✅ EXISTS  
 **Features:**
 - Displays candidate's applications
@@ -202,7 +202,7 @@ Routes exist in API Gateway (`services/api-gateway/src/routes/documents/routes.t
 
 **API Call:** `getApplications(token)` from `/lib/api.ts`
 
-#### **Documents Page** (`app/(authenticated)/documents/page.tsx`)
+#### **Documents Page** (`app/portal/documents/page.tsx`)
 **Status:** ✅ EXISTS  
 **Features:**
 - Upload resume, cover letter, portfolio, other
@@ -214,14 +214,14 @@ Routes exist in API Gateway (`services/api-gateway/src/routes/documents/routes.t
 
 **Storage:** Uses existing document service
 
-#### **Job Detail Page** (`app/(public)/jobs/[id]/page.tsx`)
+#### **Job Detail Page** (`app/public/jobs/[id]/page.tsx`)
 **Status:** ✅ EXISTS  
 **Current:** Shows "Create Account" and "Sign In" CTAs  
 **Missing:** "Apply Now" button and application flow
 
 ### 3.2 Portal App (`apps/portal`)
 
-#### **Proposals Page** (`app/(authenticated)/proposals/page.tsx`)
+#### **Proposals Page** (`app/portal/proposals/page.tsx`)
 **Status:** ✅ EXISTS  
 **Purpose:** Recruiter view of candidate-role proposals (Phase 2)  
 **Features:**

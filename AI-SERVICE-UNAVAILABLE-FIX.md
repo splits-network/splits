@@ -42,7 +42,7 @@ Implemented **graceful degradation** in both the Portal and Candidate apps:
 - Panel becomes invisible when service is down - no broken UI, no error messages
 - Still shows errors for legitimate issues (auth, network timeouts, etc.)
 
-#### 2. Candidate App (`apps/candidate/src/app/(authenticated)/applications/[id]/components/ai-review-panel.tsx`)
+#### 2. Candidate App (`apps/candidate/src/app/portal/applications/[id]/components/ai-review-panel.tsx`)
 - Applied same graceful degradation logic
 - Service unavailability errors are silently suppressed
 - Panel becomes invisible when AI service is down
@@ -120,7 +120,7 @@ Monitor these endpoints for availability:
 ## Files Modified
 
 1. `apps/portal/src/components/ai-review-panel.tsx` - Added graceful error handling
-2. `apps/candidate/src/app/(authenticated)/applications/[id]/components/ai-review-panel.tsx` - Added graceful error handling
+2. `apps/candidate/src/app/portal/applications/[id]/components/ai-review-panel.tsx` - Added graceful error handling
 
 ## Technical Details
 

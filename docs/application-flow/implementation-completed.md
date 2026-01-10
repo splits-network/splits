@@ -10,7 +10,7 @@ Successfully implemented the missing application detail page for recruiter appli
 ## What Was Built
 
 ### 1. Server Component (`page.tsx`)
-**File:** `apps/portal/src/app/(authenticated)/applications/[id]/page.tsx`
+**File:** `apps/portal/src/app/portal/applications/[id]/page.tsx`
 
 **Features:**
 - Authentication and authorization via Clerk
@@ -29,7 +29,7 @@ Successfully implemented the missing application detail page for recruiter appli
 - Clean prop passing to client component
 
 ### 2. Client Component (`application-detail-client.tsx`)
-**File:** `apps/portal/src/app/(authenticated)/applications/[id]/application-detail-client.tsx`
+**File:** `apps/portal/src/app/portal/applications/[id]/application-detail-client.tsx`
 
 **Features:**
 - **Header Section:**
@@ -70,7 +70,7 @@ Successfully implemented the missing application detail page for recruiter appli
   - Acceptance timestamps
 
 ### 3. Stage Update Modal (`stage-update-modal.tsx`)
-**File:** `apps/portal/src/app/(authenticated)/applications/[id]/stage-update-modal.tsx`
+**File:** `apps/portal/src/app/portal/applications/[id]/stage-update-modal.tsx`
 
 **Features:**
 - Visual stage selection with icons
@@ -82,7 +82,7 @@ Successfully implemented the missing application detail page for recruiter appli
 - Validation (prevent selecting current stage)
 
 ### 4. Navigation Fix
-**File:** `apps/portal/src/app/(authenticated)/candidates/[id]/candidate-detail-client.tsx`
+**File:** `apps/portal/src/app/portal/candidates/[id]/candidate-detail-client.tsx`
 
 **Change:** Line ~426
 - **Before:** `href={`/portal/roles/${application.job_id}`}`
@@ -130,12 +130,12 @@ Now clicking on an application from the candidate detail page correctly navigate
 ## Files Modified/Created
 
 ### Created (3 files)
-1. `apps/portal/src/app/(authenticated)/applications/[id]/page.tsx` (104 lines)
-2. `apps/portal/src/app/(authenticated)/applications/[id]/application-detail-client.tsx` (450+ lines)
-3. `apps/portal/src/app/(authenticated)/applications/[id]/stage-update-modal.tsx` (150+ lines)
+1. `apps/portal/src/app/portal/applications/[id]/page.tsx` (104 lines)
+2. `apps/portal/src/app/portal/applications/[id]/application-detail-client.tsx` (450+ lines)
+3. `apps/portal/src/app/portal/applications/[id]/stage-update-modal.tsx` (150+ lines)
 
 ### Modified (1 file)
-1. `apps/portal/src/app/(authenticated)/candidates/[id]/candidate-detail-client.tsx` (Line 426)
+1. `apps/portal/src/app/portal/candidates/[id]/candidate-detail-client.tsx` (Line 426)
 
 ## Testing Checklist
 

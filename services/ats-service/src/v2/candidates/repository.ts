@@ -25,6 +25,81 @@ export class CandidateRepository {
         });
     }
 
+    /**
+     * Build select clause with optional includes
+     * Supports: applications, recruiter_candidates, documents, user
+     */
+    private buildSelectClause(include?: string): string {
+        // Base fields - always include recruiter relationships for access control
+        const baseFields = `*,
+            recruiter_relationships:recruiter_candidates(
+                id,
+                recruiter_id,
+                status
+            )`;
+
+        if (!include) {
+            return baseFields;
+        }
+
+        const includes = include.split(',').map(i => i.trim());
+        let selectClause = baseFields;
+
+        for (const inc of includes) {
+            if (inc === 'applications') {
+                selectClause += `,
+                    applications:applications(
+                        id,
+                        job_id,
+                        stage,
+                        status,
+                        created_at,
+                        updated_at,
+                        job:jobs(
+                            id,
+                            title,
+                            location,
+                            company:companies(
+                                id,
+                                name,
+                                identity_organization_id
+                            )
+                        )
+                    )`;
+            } else if (inc === 'recruiter_candidates') {
+                // Enhanced recruiter relationship data
+                selectClause += `,
+                    recruiter_candidates(
+                        id,
+                        recruiter_id,
+                        relationship_start_date,
+                        relationship_end_date,
+                        status,
+                        recruiter:recruiters(
+                            id,
+                            user_id,
+                            name,
+                            email
+                        )
+                    )`;
+            } else if (inc === 'documents') {
+                // Note: documents use polymorphic entity_type/entity_id
+                // Must be fetched separately or via subquery
+                console.warn('Documents include requires separate query due to polymorphic association');
+            } else if (inc === 'user') {
+                selectClause += `,
+                    user:users!user_id(
+                        id,
+                        email,
+                        name,
+                        clerk_user_id
+                    )`;
+            }
+        }
+
+        return selectClause;
+    }
+
     async findCandidates(
         clerkUserId: string,
         params: StandardListParams = {}
@@ -37,51 +112,12 @@ export class CandidateRepository {
 
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
 
-        // Build the select query with JOINs for recruiter relationships
-        // This allows us to check if candidate has active relationships in a single query
-        let select = `
-            *,
-            recruiter_relationships:recruiter_candidates(
-                id,
-                recruiter_id,
-                status
-            )
-        `;
-
-        if (params.include) {
-            const tables = params.include.split(',');
-            const relations = tables.map(table => {
-                if (table === 'applications') {
-                    return `
-                        ,applications:applications(
-                            id,
-                            job:jobs(
-                                id,
-                                title,
-                                company:companies(identity_organization_id)
-                            )
-                        )
-                    `;
-                } else if (table === 'recruiter_candidates') {
-                    return `
-                        ,recruiter_candidates(
-                            id,
-                            recruiter_id,
-                            relationship_start_date,
-                            relationship_end_date,
-                            status
-                        )
-                    `;
-                }
-                return table;
-            });
-            // Append include relations to the base select
-            select = select + relations.join(',');
-        }
+        // Build select clause with optional includes
+        const selectClause = this.buildSelectClause(params.include);
 
         let query = this.supabase
             .from('candidates')
-            .select(select, { count: 'exact' });
+            .select(selectClause, { count: 'exact' });
 
         filters = typeof params.filters === 'string' ? parseFilters(params.filters) : (params.filters || {});
 
@@ -176,10 +212,13 @@ export class CandidateRepository {
         };
     }
 
-    async findCandidate(id: string, clerkUserId?: string): Promise<any | null> {
+    async findCandidate(id: string, clerkUserId?: string, include?: string): Promise<any | null> {
+        // Build select clause with optional includes
+        const selectClause = this.buildSelectClause(include);
+
         const { data, error } = await this.supabase
             .from('candidates')
-            .select('*')
+            .select(selectClause)
             .eq('id', id)
             .single();
 
@@ -210,6 +249,7 @@ export class CandidateRepository {
     }
 
     async updateCandidate(id: string, updates: CandidateUpdate): Promise<any> {
+        console.log('CandidateRepository.updateCandidate - updates:', JSON.stringify(updates));
         const { data, error } = await this.supabase
             .from('candidates')
             .update({ ...updates, updated_at: new Date().toISOString() })
@@ -295,28 +335,28 @@ export class CandidateRepository {
 
         const safeLimit = Math.max(1, Math.min(limit, 25));
 
+        // Use consistent select clause for applications
+        const selectClause = `
+            id,
+            job_id,
+            stage,
+            status,
+            created_at,
+            updated_at,
+            job:jobs(
+                id,
+                title,
+                location,
+                company:companies(
+                    id,
+                    name
+                )
+            )`;
+
         const { data, error } = await this.supabase
 
             .from('applications')
-            .select(
-                `
-                id,
-                job_id,
-                stage,
-                status,
-                created_at,
-                updated_at,
-                job:jobs(
-                    id,
-                    title,
-                    location,
-                    company:companies(
-                        id,
-                        name
-                    )
-                )
-            `
-            )
+            .select(selectClause)
             .eq('candidate_id', candidateId)
             .order('created_at', { ascending: false })
             .range(0, safeLimit - 1);

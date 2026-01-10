@@ -1,12 +1,20 @@
+import { ReactNode } from 'react';
+
+interface ActionConfig {
+    label: string;
+    onClick: () => void;
+}
 
 interface EmptyStateProps {
     icon?: string;
     title: string;
     description?: string;
-    action?: {
-        label: string;
-        onClick: () => void;
-    };
+    /** Can be either an action config object or a custom ReactNode */
+    action?: ActionConfig | ReactNode;
+}
+
+function isActionConfig(action: ActionConfig | ReactNode): action is ActionConfig {
+    return action !== null && typeof action === 'object' && 'label' in action && 'onClick' in action;
 }
 
 export function EmptyState({ icon = 'fa-inbox', title, description, action }: EmptyStateProps) {
@@ -20,9 +28,13 @@ export function EmptyState({ icon = 'fa-inbox', title, description, action }: Em
                 <p className="text-base-content/70 max-w-md mb-4">{description}</p>
             )}
             {action && (
-                <button className="btn btn-primary" onClick={action.onClick}>
-                    {action.label}
-                </button>
+                isActionConfig(action) ? (
+                    <button className="btn btn-primary" onClick={action.onClick}>
+                        {action.label}
+                    </button>
+                ) : (
+                    action
+                )
             )}
         </div>
     );

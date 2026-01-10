@@ -93,7 +93,7 @@ ADD COLUMN IF NOT EXISTS skills TEXT[];
 
 ### Step 1: Update Profile Page Structure
 
-**File**: `apps/candidate/src/app/(authenticated)/profile/page.tsx`
+**File**: `apps/candidate/src/app/portal/profile/page.tsx`
 
 Changes:
 1. Replace `first_name` + `last_name` with `full_name`

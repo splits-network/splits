@@ -184,7 +184,7 @@ function getUserContext(request: FastifyRequest) {
   - [x] Ensure no manual user ID extraction from tokens ✅
 
 #### 5.3 Application Submission Flow
-- [x] `apps/candidate/src/app/(authenticated)/applications/` (or similar)
+- [x] `apps/candidate/src/app/portal/applications/` (or similar)
   - [x] Verify application submission uses Authorization token only ✅
   - [x] Remove any email-based identification in submission ✅
 

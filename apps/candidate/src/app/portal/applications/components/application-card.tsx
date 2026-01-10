@@ -1,8 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import { useState, useRef, useEffect } from 'react';
 import { formatDate } from '@/lib/utils';
 import { getStatusColor, formatStage } from '@/lib/application-utils';
+import { EntityCard, DataList, DataRow, VerticalDataRow, InteractiveDataRow } from '@/components/ui';
+import AIReviewPanel from '../[id]/components/ai-review-panel';
 
 interface ApplicationCardProps {
     application: {
@@ -10,11 +13,17 @@ interface ApplicationCardProps {
         stage: string;
         created_at: string;
         updated_at: string;
+        ai_reviewed?: boolean;
         job_id: string;
         recruiter_notes?: string;
         job?: {
             title?: string;
             location?: string;
+            candidate_description?: string;
+            job_requirements?: {
+                requirement_type: string;
+                description: string;
+            }[];
             company?: {
                 name?: string;
                 industry?: string;
@@ -23,140 +32,259 @@ interface ApplicationCardProps {
             };
         };
         recruiter?: {
-            first_name?: string;
-            last_name?: string;
+            user?: {
+                name?: string;
+                email?: string;
+            };
         };
-    };
-    isActive?: boolean;
+        ai_review?: {
+            fit_score: number;
+            recommendation: 'strong_fit' | 'good_fit' | 'fair_fit' | 'poor_fit';
+        };
+    }
 }
 
-export default function ApplicationCard({ application: app, isActive = true }: ApplicationCardProps) {
+export default function ApplicationCard({ application: app }: ApplicationCardProps) {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const modalRef = useRef<HTMLDialogElement>(null);
+
+    // Handle modal open/close
+    useEffect(() => {
+        if (isModalOpen && modalRef.current) {
+            modalRef.current.showModal();
+        }
+    }, [isModalOpen]);
+
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        modalRef.current?.close();
+    };
+
+    // Compute initials for company logo
+    const companyInitial = (app.job?.company?.name || 'C')[0].toUpperCase();
+
     return (
-        <div className={`group card bg-base-100 border border-base-300 hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col ${!isActive ? 'opacity-70' : ''}`}>
-            {/* Company header with gradient background */}
-            <div className="relative h-24 bg-linear-90 from-secondary/20 to-transparent flex items-center">
-
-                {/* Company logo placeholder */}
-                <div className="flex items-center gap-4 p-2">
-                    <div className={`avatar avatar-placeholder`}>
-                        <div className={`bg-base-100 text-primary text-3xl font-bold w-16 p-2 rounded-full shadow-lg`}>
-                            {app.job?.company?.logo_url ? (
-                                <img
-                                    src={app.job?.company.logo_url}
-                                    alt={`${app.job?.company.name} logo`}
-                                    className="w-20 h-20 object-contain rounded-lg"
-                                    onError={(e) => {
-                                        e.currentTarget.style.display = 'none';
-                                        e.currentTarget.nextElementSibling?.removeAttribute('hidden');
-                                    }}
-                                />
-                            ) : (
-                                (app.job?.company?.name || 'C')[0].toUpperCase()
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Status badge */}
-                <div className="absolute top-3 right-3">
-                    <div className={`badge ${getStatusColor(app.stage)} shadow-lg font-semibold`}>
-                        {formatStage(app.stage)}
-                    </div>
-                </div>
-            </div>
-
-            <div className="card-body pt-12 pb-6 space-y-4 flex-1 flex flex-col">
-                {/* Job title and company */}
-                <div className="space-y-2">
-                    {isActive ? (
-                        <Link
-                            href={`/jobs/${app.job_id}`}
-                            className="text-xl font-bold leading-tight group-hover:text-primary transition-colors line-clamp-2"
-                        >
-                            {app.job?.title || 'Unknown Position'}
-                        </Link>
-                    ) : (
-                        <h3 className="text-xl font-bold leading-tight line-clamp-2">{app.job?.title || 'Unknown Position'}</h3>
-                    )}
-                    <div className="space-y-1">
-                        <p className="text-sm font-semibold text-base-content/70 flex items-center gap-2">
-                            <i className="fa-duotone fa-regular fa-building text-primary"></i>
-                            {app.job?.company?.name || 'Unknown Company'}
-                        </p>
-                        {app.job?.company?.headquarters_location && (
-                            <p className="text-xs text-base-content/50 flex items-center gap-1.5">
-                                <i className="fa-duotone fa-regular fa-location-dot text-xs"></i>
-                                {app.job.company.headquarters_location}
-                            </p>
-                        )}
-                        {app.job?.company?.industry && (
-                            <div>
-                                <span className="badge badge-outline badge-xs gap-1">
-                                    <i className="fa-duotone fa-regular fa-industry text-xs"></i>
-                                    {app.job.company.industry}
-                                </span>
+        <EntityCard className="group hover:shadow-lg transition-all duration-200">
+            <EntityCard.Header>
+                <div className="flex items-center gap-3 min-w-0">
+                    <div className='flex justify-between w-full items-center'>
+                        <div className="flex items-center gap-3 min-w-0">
+                            {/* Company Logo/Avatar */}
+                            <div className="avatar avatar-placeholder shrink-0">
+                                <div className="bg-primary/10 text-primary rounded-full w-12 flex items-center justify-center font-bold text-lg">
+                                    {app.job?.company?.logo_url ? (
+                                        <img
+                                            src={app.job.company.logo_url}
+                                            alt={`${app.job?.company.name} logo`}
+                                            className="w-full h-full object-cover rounded-full"
+                                            onError={(e) => {
+                                                e.currentTarget.style.display = 'none';
+                                                if (e.currentTarget.nextElementSibling) {
+                                                    (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex';
+                                                }
+                                            }}
+                                        />
+                                    ) : null}
+                                    <span className={app.job?.company?.logo_url ? 'hidden' : ''}>
+                                        {companyInitial}
+                                    </span>
+                                </div>
                             </div>
-                        )}
+                            {/* Job Title and Company */}
+                            <div className="min-w-0 flex-1">
+                                <h3 className="font-bold text-base leading-tight truncate">
+                                    {app.job?.title || 'Unknown Position'}
+                                </h3>
+                                <p className="text-sm text-base-content/60 truncate">
+                                    {app.job?.company?.name || 'Unknown Company'}
+                                </p>
+                            </div>
+                        </div>
+                        {/* Status Badge */}
+                        <div className="flex items-center gap-2 ml-4">
+                            <div className={`badge ${getStatusColor(app.stage)} badge-sm font-semibold whitespace-nowrap`}>
+                                {formatStage(app.stage)}
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </EntityCard.Header>
 
-                {/* Recruiter info */}
-                {app.recruiter && (
-                    <div className="bg-linear-to-r from-info/10 to-info/5 rounded-lg p-3 border border-info/20">
-                        <div className="flex items-center gap-2">
-                            <i className="fa-duotone fa-regular fa-user text-info"></i>
-                            <span className="font-medium text-info">
-                                {app.recruiter.first_name} {app.recruiter.last_name}
-                            </span>
+            <EntityCard.Body>
+                {/* Data Rows */}
+                <DataList compact={false}>
+                    <InteractiveDataRow
+                        icon="fa-briefcase"
+                        label="Description"
+                    >
+                        <div onClick={handleOpenModal} className="text-sm font-medium cursor-pointer text-primary hover:underline">
+                            <i className='fa-duotone fa-regular fa-eye mr-2'></i>
+                            View Job Description
                         </div>
-                    </div>
-                )}
-
-                {/* Recruiter notes */}
-                {app.recruiter_notes && (
-                    <div className={`rounded-lg p-3 border ${isActive ? 'alert alert-info' : 'bg-base-200 border-base-300'}`}>
-                        <div className="flex items-start gap-2">
-                            <i className="fa-duotone fa-regular fa-comment text-info mt-0.5"></i>
-                            <span className="text-sm">{app.recruiter_notes}</span>
-                        </div>
-                    </div>
-                )}
-
-                {/* Spacer to push footer to bottom */}
-                <div className="flex-1"></div>
-
-                {/* Application details */}
-                <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm pb-3 border-b border-base-300">
-                    {app.job?.location && (
-                        <span className="flex items-center gap-1.5 text-base-content/70">
-                            <i className="fa-duotone fa-regular fa-location-dot text-primary"></i>
-                            <span className="font-medium">{app.job.location}</span>
-                        </span>
+                    </InteractiveDataRow>
+                    <DataRow
+                        icon="fa-location-dot"
+                        label="Location"
+                        value={app.job?.location || app.job?.company?.headquarters_location || 'Not specified'}
+                    />
+                    {app.job?.company?.industry && (
+                        <DataRow
+                            icon="fa-industry"
+                            label="Industry"
+                            value={app.job.company.industry}
+                        />
                     )}
-                    <span className="flex items-center gap-1.5 text-base-content/70">
-                        <i className="fa-duotone fa-regular fa-calendar text-primary"></i>
-                        <span className="font-medium">Applied {formatDate(app.created_at)}</span>
+                    {app.recruiter?.user?.name && (
+                        <DataRow
+                            icon="fa-user"
+                            label="Recruiter"
+                            value={app.recruiter.user.name}
+                        />
+                    )}
+                    {app.recruiter_notes && (
+                        <VerticalDataRow
+                            icon="fa-comment"
+                            label="Notes"
+                            value={app.recruiter_notes}
+                        />
+                    )}
+                    <DataRow
+                        icon="fa-calendar"
+                        label="Applied"
+                        value={formatDate(app.created_at)}
+                    />
+                    {app.ai_reviewed && (
+                        <DataRow
+                            icon="fa-sparkles"
+                            label="AI Reviewed"
+                        >
+                            <span className="badge badge-sm badge-success gap-1">
+                                <i className="fa-duotone fa-regular fa-check"></i>
+                                Reviewed
+                            </span>
+                        </DataRow>
+                    )}
+                    {app.ai_review && (
+                        <DataRow
+                            icon="fa-robot"
+                            label="AI Fit Score"
+                        >
+                            <div className="flex items-center gap-2">
+                                {app.ai_review.recommendation && (
+                                    <span className={`badge badge-sm ${app.ai_review.recommendation === 'strong_fit' ? 'badge-success' :
+                                        app.ai_review.recommendation === 'good_fit' ? 'badge-info' :
+                                            app.ai_review.recommendation === 'fair_fit' ? 'badge-warning' : 'badge-error'
+                                        } gap-1`}>
+                                        {app.ai_review.recommendation === 'strong_fit' && 'Strong Fit'}
+                                        {app.ai_review.recommendation === 'good_fit' && 'Good Fit'}
+                                        {app.ai_review.recommendation === 'fair_fit' && 'Fair Fit'}
+                                        {app.ai_review.recommendation === 'poor_fit' && 'Poor Fit'}
+                                    </span>
+                                )}
+                                <div
+                                    className={`radial-progress ${app.ai_review.fit_score >= 75 ? 'text-success' :
+                                        app.ai_review.fit_score >= 50 ? 'text-warning' :
+                                            'text-error'
+                                        }`}
+                                    style={{ '--value': `${app.ai_review.fit_score}`, '--size': '2rem' } as React.CSSProperties}
+                                >
+                                    {app.ai_review.fit_score}
+                                </div>
+                            </div>
+                        </DataRow>
+                    )}
+                </DataList>
+            </EntityCard.Body>
+
+            <EntityCard.Footer>
+                <div className="flex items-center justify-between w-full">
+                    <span className="text-xs text-base-content/50">
+                        Updated {formatDate(app.updated_at)}
+                    </span>
+                    <span className="text-primary text-sm font-medium group-hover:underline">
+                        View Details
+                        <i className="fa-duotone fa-regular fa-arrow-right ml-1.5"></i>
                     </span>
                 </div>
+            </EntityCard.Footer>
 
-                {/* Footer with updated date and actions */}
-                {isActive && (
-                    <div className="flex items-center justify-between pt-3 mt-auto">
-                        <div className="text-xs text-base-content/50">
-                            Updated {formatDate(app.updated_at)}
+            {/* Job Details Modal */}
+            <dialog ref={modalRef} className="modal">
+                <div className="modal-box max-w-6xl max-h-[90vh] overflow-y-auto bg-base-300">
+                    <form method="dialog" className='flex items-center '>
+                        <button
+                            type="button"
+                            onClick={handleCloseModal}
+                            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                        >
+                            <i className="fa-duotone fa-regular fa-xmark text-lg"></i>
+                        </button>
+                    </form>
+
+                    <h3 className="font-bold text-2xl mb-4">
+                        {app.job?.title || 'Job Details'}
+                    </h3>
+
+                    <div className="flex flex-col md:flex-row gap-6">
+                        {/* Company Section */}
+                        <div className='flex flex-col basis-2/3'>
+                            <div className='card bg-base-100'>
+                                {app.job?.candidate_description && (
+                                    <div className="card card-border">
+                                        <div className="card-body">
+                                            <h4 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                                                <i className="fa-duotone fa-regular fa-file-lines"></i>
+                                                Job Description
+                                            </h4>
+                                            <p className="text-sm whitespace-pre-wrap">{app.job?.candidate_description}</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                        <div className="flex gap-2">
-                            <Link
-                                href={`/portal/applications/${app.id}`}
-                                className="btn btn-primary btn-sm gap-2 group-hover:scale-105 transition-transform"
-                            >
-                                <i className="fa-duotone fa-regular fa-eye"></i>
-                                View Details
-                            </Link>
+                        <div className='flex flex-col basis-1/3 gap-4'>
+                            {/* Job Section */}
+                            <div className="card bg-base-200">
+                                <div className="card-body">
+                                    <h4 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                                        <i className="fa-duotone fa-regular fa-briefcase"></i>
+                                        Requirements
+                                    </h4>
+                                    <DataList compact={false}>
+                                        {app.job?.job_requirements && app.job.job_requirements.length > 0 ? (
+                                            app.job.job_requirements.toSorted((a, b) => a.requirement_type.localeCompare(b.requirement_type)).map((req, index) => (
+                                                <VerticalDataRow
+                                                    key={index}
+                                                    icon="fa-check"
+                                                    label={req.requirement_type.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                                                    labelColor="text-error"
+                                                    value={req.description}
+                                                />
+                                            ))
+                                        ) : (
+                                            <p className="text-sm text-base-content/60">No specific requirements listed.</p>
+                                        )}
+                                    </DataList>
+                                </div>
+                            </div>
+
+                            <div className="modal-action">
+                                <button type="button" onClick={handleCloseModal} className="btn">
+                                    Close
+                                </button>
+                                <Link href={`/portal/applications/${app.id}`} className="btn btn-primary">
+                                    View Full Application
+                                    <i className="fa-duotone fa-regular fa-arrow-right ml-1.5"></i>
+                                </Link>
+                            </div>
                         </div>
                     </div>
-                )}
-            </div>
-        </div>
+                </div>
+            </dialog>
+        </EntityCard>
     );
 }

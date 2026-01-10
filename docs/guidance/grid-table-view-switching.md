@@ -362,7 +362,7 @@ const [viewMode, setViewMode] = useViewMode('myEntityViewMode', 'grid');
 
 ## Complete Example
 
-See [`apps/portal/src/app/(authenticated)/roles/components/RolesList.tsx`](../../../apps/portal/src/app/(authenticated)/roles/components/RolesList.tsx) for a complete reference implementation.
+See [`apps/portal/src/app/portal/roles/components/RolesList.tsx`](../../../apps/portal/src/app/portal/roles/components/RolesList.tsx) for a complete reference implementation.
 
 ### Key Features Implemented
 
@@ -444,7 +444,7 @@ When adding view switching to a new page:
 ## References
 
 - [`useViewMode` hook](../../apps/portal/src/hooks/useViewMode.ts)
-- [Roles page implementation](../../apps/portal/src/app/(authenticated)/roles/components/RolesList.tsx)
+- [Roles page implementation](../../apps/portal/src/app/portal/roles/components/RolesList.tsx)
 - [Form controls guidance](./form-controls.md)
 - [DaisyUI Documentation](https://daisyui.com/components/)
 - [TailwindCSS Grid](https://tailwindcss.com/docs/grid-template-columns)

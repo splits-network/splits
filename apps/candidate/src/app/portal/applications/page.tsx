@@ -28,7 +28,9 @@ function ApplicationsLoading() {
 export default function ApplicationsPage() {
     return (
         <Suspense fallback={<ApplicationsLoading />}>
-            <ApplicationsClient />
+            <div className="space-y-6">
+                <ApplicationsClient />
+            </div>
         </Suspense>
     );
 }

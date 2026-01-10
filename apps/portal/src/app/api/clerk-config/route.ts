@@ -4,8 +4,8 @@ import { loadClerkConfig } from '@splits-network/shared-config';
 export async function GET() {
     try {
         const config = loadClerkConfig();
-        
-        // Only return the publishable key (public)
+
+        // Only return the publishable key public
         return NextResponse.json({
             publishableKey: config.publishableKey,
         });

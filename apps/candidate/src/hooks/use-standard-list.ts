@@ -3,14 +3,38 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient, apiClient } from '@/lib/api-client';
+import { createAuthenticatedClient } from '@/lib/api-client';
 import type { StandardListParams, StandardListResponse, PaginationResponse } from '@splits-network/shared-types';
+
+// Re-export UI components for convenience
+export { SearchInput } from '@/components/standard-lists/search-input';
+export { PaginationControls } from '@/components/standard-lists/pagination-controls';
+export { EmptyState } from '@/components/standard-lists/empty-state';
+export { LoadingState } from '@/components/standard-lists/loading-state';
+export { ErrorState } from '@/components/standard-lists/error-state';
+export { ViewModeToggle } from '@/components/standard-lists/view-mode-toggle';
 
 // ===== TYPES =====
 
+export interface FetchParams<F = Record<string, any>> {
+    page: number;
+    limit: number;
+    search?: string;
+    sort_by?: string;
+    sort_order?: 'asc' | 'desc';
+    filters?: F;
+}
+
+export interface FetchResponse<T> {
+    data: T[];
+    pagination: PaginationResponse;
+}
+
 export interface UseStandardListOptions<T, F extends Record<string, any> = Record<string, any>> {
-    /** API endpoint to fetch from (e.g., '/candidates', '/jobs') */
-    endpoint: string;
+    /** API endpoint to fetch from (e.g., '/candidates', '/jobs') - used with built-in fetching */
+    endpoint?: string;
+    /** Custom fetch function - alternative to endpoint */
+    fetchFn?: (params: FetchParams<F>) => Promise<FetchResponse<T>>;
     /** Default filters to apply */
     defaultFilters?: F;
     /** Default sort field */
@@ -27,6 +51,8 @@ export interface UseStandardListOptions<T, F extends Record<string, any> = Recor
     syncToUrl?: boolean;
     /** Storage key for view mode preference */
     viewModeKey?: string;
+    /** @deprecated Use `viewModeKey` instead */
+    storageKey?: string;
     /** Fields that can be searched */
     searchableFields?: string[];
     /** Fields that can be sorted */
@@ -38,6 +64,8 @@ export interface UseStandardListOptions<T, F extends Record<string, any> = Recor
 export interface UseStandardListReturn<T, F extends Record<string, any> = Record<string, any>> {
     // Data
     data: T[];
+    /** @deprecated Use `data` instead */
+    items: T[];
     pagination: PaginationResponse;
 
     // Loading/Error state
@@ -46,8 +74,16 @@ export interface UseStandardListReturn<T, F extends Record<string, any> = Record
 
     // Search
     searchInput: string;
+    /** @deprecated Use `searchInput` instead */
+    search: string;
+    /** @deprecated Use `searchInput` instead */
+    searchTerm: string;
     searchQuery: string;
     setSearchInput: (value: string) => void;
+    /** @deprecated Use `setSearchInput` instead */
+    setSearch: (value: string) => void;
+    /** @deprecated Use `setSearchInput` instead */
+    setSearchTerm: (value: string) => void;
     clearSearch: () => void;
 
     // Filters
@@ -68,6 +104,8 @@ export interface UseStandardListReturn<T, F extends Record<string, any> = Record
     totalPages: number;
     total: number;
     goToPage: (page: number) => void;
+    /** @deprecated Use `goToPage` instead */
+    setPage: (page: number) => void;
     nextPage: () => void;
     prevPage: () => void;
     setLimit: (limit: number) => void;
@@ -78,6 +116,8 @@ export interface UseStandardListReturn<T, F extends Record<string, any> = Record
 
     // Actions
     refresh: () => Promise<void>;
+    /** @deprecated Use `refresh` instead */
+    refetch: () => Promise<void>;
     reset: () => void;
 }
 
@@ -94,6 +134,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
 ): UseStandardListReturn<T, F> {
     const {
         endpoint,
+        fetchFn,
         defaultFilters = {} as F,
         defaultSortBy = 'created_at',
         defaultSortOrder = 'desc',
@@ -102,8 +143,12 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         transformData,
         syncToUrl = true,
         viewModeKey,
+        storageKey, // Deprecated alias for viewModeKey
         autoFetch = true,
     } = options;
+
+    // Support deprecated storageKey as fallback
+    const effectiveViewModeKey = viewModeKey ?? storageKey;
 
     // Router hooks for URL sync
     const router = useRouter();
@@ -185,13 +230,13 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
 
     // Load view mode from localStorage after hydration
     useEffect(() => {
-        if (viewModeKey && typeof window !== 'undefined') {
-            const saved = localStorage.getItem(viewModeKey);
+        if (effectiveViewModeKey && typeof window !== 'undefined') {
+            const saved = localStorage.getItem(effectiveViewModeKey);
             if (saved === 'grid' || saved === 'table') {
                 setViewModeState(saved);
             }
         }
-    }, [viewModeKey]);
+    }, [effectiveViewModeKey]);
 
     // Refs for debouncing
     const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
@@ -242,39 +287,61 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
             setLoading(true);
             setError(null);
 
-            // Try to get token, but don't require it (for public pages)
-            const token = await getToken().catch(() => null);
-
-            // Use authenticated client if token available, otherwise use public client
-            const client = token ? createAuthenticatedClient(token) : apiClient;
-
-            const params: StandardListParams = {
-                page,
-                limit,
-                sort_by: sortBy,
-                sort_order: sortOrder,
-            };
-
-            if (searchQuery) {
-                params.search = searchQuery;
-            }
-
-            if (include) {
-                params.include = include;
-            }
-
-            // Add filters (excluding undefined values)
+            // Build params for fetching
             const activeFilters: Record<string, any> = {};
             Object.keys(filters).forEach(key => {
                 if (filters[key] !== undefined && filters[key] !== null && filters[key] !== '') {
                     activeFilters[key] = filters[key];
                 }
             });
-            if (Object.keys(activeFilters).length > 0) {
-                params.filters = activeFilters;
-            }
 
-            const response = await client.get<StandardListResponse<T>>(endpoint, { params });
+            const fetchParams: FetchParams<F> = {
+                page,
+                limit,
+                sort_by: sortBy,
+                sort_order: sortOrder,
+                ...(searchQuery && { search: searchQuery }),
+                ...(Object.keys(activeFilters).length > 0 && { filters: activeFilters as F }),
+            };
+
+            let response: FetchResponse<T>;
+
+            if (fetchFn) {
+                // Use custom fetch function
+                response = await fetchFn(fetchParams);
+            } else if (endpoint) {
+                // Use built-in fetch with endpoint
+                const token = await getToken();
+                if (!token) {
+                    setError('Not authenticated');
+                    return;
+                }
+
+                const client = createAuthenticatedClient(token);
+
+                const params: StandardListParams = {
+                    page,
+                    limit,
+                    sort_by: sortBy,
+                    sort_order: sortOrder,
+                };
+
+                if (searchQuery) {
+                    params.search = searchQuery;
+                }
+
+                if (include) {
+                    params.include = include;
+                }
+
+                if (Object.keys(activeFilters).length > 0) {
+                    params.filters = activeFilters;
+                }
+
+                response = await client.get<StandardListResponse<T>>(endpoint, { params });
+            } else {
+                throw new Error('Either endpoint or fetchFn must be provided');
+            }
 
             let items = response.data || [];
             if (transformData) {
@@ -286,12 +353,12 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
                 setPagination(response.pagination);
             }
         } catch (err: any) {
-            console.error(`Failed to fetch from ${endpoint}:`, err);
+            console.error(`Failed to fetch:`, err);
             setError(err.message || `Failed to load data`);
         } finally {
             setLoading(false);
         }
-    }, [getToken, endpoint, page, limit, searchQuery, sortBy, sortOrder, filters, include, transformData]);
+    }, [getToken, endpoint, fetchFn, page, limit, searchQuery, sortBy, sortOrder, filters, include, transformData]);
 
     // Debounced search
     const setSearchInput = useCallback((value: string) => {
@@ -368,10 +435,10 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     // View mode handler (with localStorage persistence)
     const setViewMode = useCallback((mode: 'grid' | 'table') => {
         setViewModeState(mode);
-        if (typeof window !== 'undefined' && viewModeKey) {
-            localStorage.setItem(viewModeKey, mode);
+        if (typeof window !== 'undefined' && effectiveViewModeKey) {
+            localStorage.setItem(effectiveViewModeKey, mode);
         }
-    }, [viewModeKey]);
+    }, [effectiveViewModeKey]);
 
     // Reset to defaults
     const reset = useCallback(() => {
@@ -398,8 +465,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         if (autoFetch) {
             fetchData();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [autoFetch, page, limit, searchQuery, sortBy, sortOrder, filtersKey]);
+    }, [fetchData, autoFetch]);
 
     // Update URL when state changes (after initial mount)
     useEffect(() => {
@@ -413,6 +479,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     return {
         // Data
         data,
+        items: data, // Alias for backward compatibility
         pagination,
 
         // Loading/Error
@@ -421,8 +488,12 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
 
         // Search
         searchInput,
+        search: searchInput, // Alias for backward compatibility
+        searchTerm: searchInput, // Alias for backward compatibility
         searchQuery,
         setSearchInput,
+        setSearch: setSearchInput, // Alias for backward compatibility
+        setSearchTerm: setSearchInput, // Alias for backward compatibility
         clearSearch,
 
         // Filters
@@ -443,6 +514,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         totalPages: pagination.total_pages,
         total: pagination.total,
         goToPage,
+        setPage: goToPage, // Alias for backward compatibility
         nextPage,
         prevPage,
         setLimit,
@@ -453,6 +525,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
 
         // Actions
         refresh: fetchData,
+        refetch: fetchData, // Alias for backward compatibility
         reset,
     };
 }

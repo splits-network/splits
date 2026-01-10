@@ -6,7 +6,7 @@ export default function AuthenticatedLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="bg-base-300">
+        <div className="bg-base-300 p-6">
             <ServiceStatusBanner />
             {children}
         </div>

@@ -31,7 +31,6 @@ export class ApplicationRepository {
         const offset = (page - 1) * limit;
         let filters: Record<string, any> = {};
         filters = typeof params.filters === 'string' ? parseFilters(params.filters) : (params.filters || {});
-        console.log('Filters applied:', filters);
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
 
         // Build select clause with optional includes
@@ -275,7 +274,7 @@ export class ApplicationRepository {
         // Base fields - always include related candidate and job with company
         const baseFields = `*,
             candidate:candidates(id, full_name, email, phone, location),
-            job:jobs(*, company:companies(id, name, description, identity_organization_id), job_requirements:job_requirements(*))`;
+            job:jobs(*, company:companies(id, name, website, industry, identity_organization_id), job_requirements:job_requirements(*))`;
 
         if (!include) {
             return baseFields;
@@ -312,8 +311,9 @@ export class ApplicationRepository {
                     break;
                 case 'ai_review':
                 case 'ai-review':
-                    // Join with AI reviews (one-to-one relationship via application_id)
-                    selectClause += `,ai_review:ai_reviews!application_id(id, fit_score, recommendation, strengths, concerns, overall_assessment, created_at)`;
+                    // AI reviews use one-to-one relationship but must be queried separately
+                    // Cannot use Supabase join syntax - must query in service layer
+                    // Skip in SELECT clause
                     break;
             }
         }
@@ -601,5 +601,52 @@ export class ApplicationRepository {
             });
 
         if (error) throw error;
+    }
+
+    /**
+     * Batch fetch AI reviews for multiple applications
+     */
+    async batchGetAIReviews(applicationIds: string[]): Promise<any[]> {
+        if (!applicationIds || applicationIds.length === 0) {
+            return [];
+        }
+
+        const { data, error } = await this.supabase
+
+            .from('ai_reviews')
+            .select('*')
+            .in('application_id', applicationIds);
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    /**
+     * Batch fetch documents for multiple applications
+     */
+    async batchGetDocuments(applicationIds: string[]): Promise<any[]> {
+        if (!applicationIds || applicationIds.length === 0) {
+            return [];
+        }
+
+        const { data, error } = await this.supabase
+
+            .from('documents')
+            .select('*')
+            .eq('entity_type', 'application')
+            .in('entity_id', applicationIds)
+            .is('deleted_at', null)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        return (data || []).map(doc => ({
+            ...doc,
+            file_name: doc.filename,
+            file_size: doc.file_size,
+            file_url: doc.storage_path,
+            uploaded_at: doc.created_at,
+            is_primary: doc.metadata?.is_primary || false,
+        }));
     }
 }

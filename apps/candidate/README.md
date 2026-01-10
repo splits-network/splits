@@ -77,11 +77,11 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for full deployment instructions including:
 apps/candidate/
 ├── src/
 │   ├── app/                    # Next.js App Router pages
-│   │   ├── (public)/           # Public routes (no auth)
+│   │   ├── public/           # Public routes (no auth)
 │   │   │   ├── jobs/           # Job browsing and search
 │   │   │   ├── sign-in/        # Authentication pages
 │   │   │   └── sign-up/
-│   │   ├── (authenticated)/    # Protected candidate routes
+│   │   ├── portal/    # Protected candidate routes
 │   │   │   ├── dashboard/      # Candidate dashboard
 │   │   │   ├── profile/        # Profile management
 │   │   │   ├── applications/   # Application tracking

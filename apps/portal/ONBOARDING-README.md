@@ -129,7 +129,7 @@ apps/portal/src/components/onboarding/
 The onboarding system is automatically integrated into the authenticated layout:
 
 ```tsx
-// apps/portal/src/app/(authenticated)/layout.tsx
+// apps/portal/src/app/portal/layout.tsx
 import { AuthenticatedLayoutClient } from './layout-client';
 
 export default async function AuthenticatedLayout({ children }) {

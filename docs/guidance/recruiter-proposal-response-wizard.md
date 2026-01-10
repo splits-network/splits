@@ -43,7 +43,7 @@ This document provides a comprehensive technical implementation guide for the ca
 - Application model includes `recruiter_notes` field for recruiter's pitch
 
 ✅ **Frontend:**
-- Application detail page (`apps/candidate/src/app/(authenticated)/applications/[id]/page.tsx`)
+- Application detail page (`apps/candidate/src/app/portal/applications/[id]/page.tsx`)
 - Displays job details, company info, recruiter info
 - Shows application status badge
 - Breadcrumb navigation
@@ -718,7 +718,7 @@ app.patch('/api/applications/:id/complete', {
 
 ```
 apps/candidate/src/
-├── app/(authenticated)/applications/[id]/
+├── app/portal/applications/[id]/
 │   ├── page.tsx                                    [MODIFY]
 │   └── components/
 │       ├── proposal-alert.tsx                      [CREATE]
@@ -739,7 +739,7 @@ apps/candidate/src/
 
 ### 1. Modify Application Detail Page
 
-**File:** `apps/candidate/src/app/(authenticated)/applications/[id]/page.tsx`
+**File:** `apps/candidate/src/app/portal/applications/[id]/page.tsx`
 
 **Changes:**
 1. Add import for new components
@@ -806,7 +806,7 @@ const [showDeclineModal, setShowDeclineModal] = useState(false);
 
 ### 2. ProposalAlert Component
 
-**File:** `apps/candidate/src/app/(authenticated)/applications/[id]/components/proposal-alert.tsx`
+**File:** `apps/candidate/src/app/portal/applications/[id]/components/proposal-alert.tsx`
 
 ```tsx
 'use client';
@@ -882,7 +882,7 @@ export default function ProposalAlert({
 
 ### 3. DeclineModal Component
 
-**File:** `apps/candidate/src/app/(authenticated)/applications/[id]/components/decline-modal.tsx`
+**File:** `apps/candidate/src/app/portal/applications/[id]/components/decline-modal.tsx`
 
 ```tsx
 'use client';
@@ -1037,7 +1037,7 @@ export default function DeclineModal({
 
 ### 4. ProposalResponseWizard Component
 
-**File:** `apps/candidate/src/app/(authenticated)/applications/[id]/components/proposal-response-wizard.tsx`
+**File:** `apps/candidate/src/app/portal/applications/[id]/components/proposal-response-wizard.tsx`
 
 This is the main wizard component following the pattern from [`wizard-pattern.md`](wizard-pattern.md).
 
@@ -1337,7 +1337,7 @@ Due to length, I'll provide the interface/structure for each step. Full implemen
 
 #### Step 1: Upload Documents
 
-**File:** `apps/candidate/src/app/(authenticated)/applications/[id]/components/wizard-steps/upload-documents-step.tsx`
+**File:** `apps/candidate/src/app/portal/applications/[id]/components/wizard-steps/upload-documents-step.tsx`
 
 ```tsx
 interface Props {
@@ -1359,7 +1359,7 @@ export default function UploadDocumentsStep({ ... }: Props) {
 
 #### Step 2: Answer Questions
 
-**File:** `apps/candidate/src/app/(authenticated)/applications/[id]/components/wizard-steps/answer-questions-step.tsx`
+**File:** `apps/candidate/src/app/portal/applications/[id]/components/wizard-steps/answer-questions-step.tsx`
 
 ```tsx
 interface Props {
@@ -1380,7 +1380,7 @@ export default function AnswerQuestionsStep({ ... }: Props) {
 
 #### Step 3: Add Notes
 
-**File:** `apps/candidate/src/app/(authenticated)/applications/[id]/components/wizard-steps/add-notes-step.tsx`
+**File:** `apps/candidate/src/app/portal/applications/[id]/components/wizard-steps/add-notes-step.tsx`
 
 ```tsx
 interface Props {
@@ -1398,7 +1398,7 @@ export default function AddNotesStep({ ... }: Props) {
 
 #### Step 4: Review & Submit
 
-**File:** `apps/candidate/src/app/(authenticated)/applications/[id]/components/wizard-steps/review-submit-step.tsx`
+**File:** `apps/candidate/src/app/portal/applications/[id]/components/wizard-steps/review-submit-step.tsx`
 
 ```tsx
 interface Props {
@@ -1627,7 +1627,7 @@ describe('Application Routes - Proposal Response', () => {
 #### Component Tests
 
 ```typescript
-// apps/candidate/src/app/(authenticated)/applications/[id]/components/proposal-alert.test.tsx
+// apps/candidate/src/app/portal/applications/[id]/components/proposal-alert.test.tsx
 
 describe('ProposalAlert', () => {
     it('should render recruiter name and job title', () => {
@@ -1647,7 +1647,7 @@ describe('ProposalAlert', () => {
     });
 });
 
-// apps/candidate/src/app/(authenticated)/applications/[id]/components/decline-modal.test.tsx
+// apps/candidate/src/app/portal/applications/[id]/components/decline-modal.test.tsx
 
 describe('DeclineModal', () => {
     it('should require reason selection', () => {
@@ -1663,7 +1663,7 @@ describe('DeclineModal', () => {
     });
 });
 
-// apps/candidate/src/app/(authenticated)/applications/[id]/components/proposal-response-wizard.test.tsx
+// apps/candidate/src/app/portal/applications/[id]/components/proposal-response-wizard.test.tsx
 
 describe('ProposalResponseWizard', () => {
     it('should accept proposal on mount', async () => {

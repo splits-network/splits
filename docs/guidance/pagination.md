@@ -763,7 +763,7 @@ When implementing pagination, verify:
 - Repository: `services/{service}/src/repository.ts`
 - Routes: `services/{service}/src/routes/*.ts`
 - Gateway: `services/api-gateway/src/routes/{domain}/routes.ts`
-- Client: `apps/portal/src/app/(authenticated)/{page}/components/*.tsx`
+- Client: `apps/portal/src/app/portal/{page}/components/*.tsx`
 
 ---
 

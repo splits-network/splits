@@ -342,10 +342,10 @@ When Copilot generates React/Next.js code:
 
 1. **Routing**
    - Use Next.js 16 **App Router** (`app/` directory, server components first where reasonable).
-   - All authenticated routes MUST be placed in the `(authenticated)` route group folder: `app/(authenticated)/`.
+   - All authenticated routes MUST be placed in the `portal` route group folder: `app/portal/`.
    - Keep routes grouped by domain:
-     - `(authenticated)/portal/dashboard`, `(authenticated)/roles`, `(authenticated)/roles/[id]`, `(authenticated)/candidates`, `(authenticated)/placements`, `(authenticated)/admin`, etc.
-   - NEVER create duplicate route groups like `(dashboard)` - always use `(authenticated)` for protected pages.
+     - `portal/portal/dashboard`, `portal/roles`, `portal/roles/[id]`, `portal/candidates`, `portal/placements`, `portal/admin`, etc.
+   - NEVER create duplicate route groups like `(dashboard)` - always use `portal` for protected pages.
 
 2. **Data Fetching & Performance** ⚠️ **CRITICAL FOR PAGE SPEED**
    - Use fetch / Axios to call **`/api/v2/*`** routes through `api-gateway`, not individual services
