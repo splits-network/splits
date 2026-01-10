@@ -18,7 +18,7 @@ export default function ProfileCompletenessIndicator({ completeness, tierConfig 
             <div className="card-body">
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
                     {/* Progress Ring */}
-                    <div className="flex-shrink-0 mx-auto md:mx-0">
+                    <div className="shrink-0 mx-auto md:mx-0">
                         <div
                             className={`radial-progress text-${tierConfig.color}`}
                             style={{ '--value': completeness.percentage, '--size': '10rem', '--thickness': '0.5rem' } as any}

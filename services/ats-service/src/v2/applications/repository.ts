@@ -161,6 +161,8 @@ export class ApplicationRepository {
 
     async createApplication(application: any, clerkUserId?: string): Promise<any> {
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+        console.log('Creating application with access context:', accessContext);
+        console.log('Application data:', application);
 
         // If candidate is submitting (not recruiter), lookup their active recruiter
         let recruiterId = accessContext.recruiterId || null;
@@ -177,13 +179,15 @@ export class ApplicationRepository {
                 recruiterId = recruiterRelationship.recruiter_id;
             }
         }
-
+        console.log('Resolved recruiter ID for application:', recruiterId);
         const { data, error } = await this.supabase
 
             .from('applications')
             .insert({ ...application, recruiter_id: recruiterId })
             .select()
             .single();
+
+        console.log('Create application result:', { data, error });
 
         if (error) throw error;
         return data;
@@ -588,7 +592,6 @@ export class ApplicationRepository {
         metadata?: any;
     }): Promise<void> {
         const { error } = await this.supabase
-
             .from('application_audit_log')
             .insert({
                 application_id: log.application_id,

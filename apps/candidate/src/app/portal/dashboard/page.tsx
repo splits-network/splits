@@ -1,6 +1,17 @@
-import { currentUser, auth } from '@clerk/nextjs/server';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useAuth, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import type { ApiResponse } from '@splits-network/shared-api-client';
+import {
+    StatCard,
+    StatCardGrid,
+    ContentCard,
+    EmptyState
+} from '@/components/ui/cards';
+import { calculateProfileCompleteness, type ProfileCompleteness } from '@/lib/utils/profile-completeness';
 
 interface DashboardStats {
     applications: number;
@@ -17,180 +28,288 @@ interface RecentApplication {
     applied_at: string;
 }
 
-export default async function DashboardPage() {
-    const user = await currentUser();
-    const { getToken } = await auth();
+interface Application {
+    id: string;
+    stage: string;
+    created_at: string;
+    job?: {
+        title?: string;
+        company?: {
+            name?: string;
+        };
+    };
+}
 
-    // Fetch real data from API
-    let stats: DashboardStats = {
+interface RecruiterRelationship {
+    id: string;
+    status: string;
+}
+
+interface Candidate {
+    id: string;
+    name: string;
+    email: string;
+    location?: string;
+    skills?: string[];
+    years_of_experience?: number;
+    desired_salary?: string;
+    documents?: any[];
+}
+
+export default function DashboardPage() {
+    const { getToken } = useAuth();
+    const { user } = useUser();
+
+    const [stats, setStats] = useState<DashboardStats>({
         applications: 0,
         interviews: 0,
         offers: 0,
         active_relationships: 0,
-    };
-    let recentApplications: RecentApplication[] = [];
+    });
+    const [recentApplications, setRecentApplications] = useState<RecentApplication[]>([]);
+    const [profileCompletion, setProfileCompletion] = useState<ProfileCompleteness | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [statsLoading, setStatsLoading] = useState(true);
+    const [applicationsLoading, setApplicationsLoading] = useState(true);
+    const [profileLoading, setProfileLoading] = useState(true);
+    const [loadError, setLoadError] = useState<string | null>(null);
 
-    try {
-        const token = await getToken();
-        if (token) {
-            const client = createAuthenticatedClient(token);
-
-            // Fetch applications and calculate stats from them
-            const applicationsResponse = await client.get('/applications');
-            const allApplications = applicationsResponse.data || [];
-
-            // Calculate stats from applications
-            stats.applications = allApplications.length;
-            stats.interviews = allApplications.filter((app: any) =>
-                app.stage === 'interview' || app.stage === 'final_interview'
-            ).length;
-            stats.offers = allApplications.filter((app: any) =>
-                app.stage === 'offer'
-            ).length;
-
-            // Fetch recruiter relationships to get active count
+    // Load stats and applications data
+    useEffect(() => {
+        async function loadDashboardData() {
             try {
-                const recruitersResponse = await client.get('/recruiter-candidates');
-                const relationships = recruitersResponse.data || [];
-                stats.active_relationships = relationships.filter((rel: any) =>
-                    rel.status === 'active'
-                ).length;
-            } catch (err) {
-                console.error('Failed to load recruiter relationships:', err);
-            }
+                const token = await getToken();
+                if (!token) return;
 
-            // Get recent applications (last 5)
-            recentApplications = allApplications
-                .sort((a: any, b: any) =>
-                    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-                )
-                .slice(0, 5)
-                .map((app: any) => ({
-                    id: app.id,
-                    job_title: app.job?.title || 'Unknown Position',
-                    company: app.job?.company_name || 'Unknown Company',
-                    status: app.stage || 'applied',
-                    applied_at: app.created_at,
-                }));
+                const client = createAuthenticatedClient(token);
+
+                // Fetch applications with job data included
+                const applicationsResponse = await client.get<ApiResponse<Application[]>>(
+                    '/applications',
+                    { params: { include: 'job,company' } }
+                );
+                const allApplications = applicationsResponse.data || [];
+
+                // Calculate stats from applications
+                const newStats = {
+                    applications: allApplications.length,
+                    interviews: allApplications.filter(app =>
+                        app.stage === 'interview' || app.stage === 'final_interview'
+                    ).length,
+                    offers: allApplications.filter(app =>
+                        app.stage === 'offer'
+                    ).length,
+                    active_relationships: 0,
+                };
+
+                // Fetch recruiter relationships
+                try {
+                    const recruitersResponse = await client.get<ApiResponse<RecruiterRelationship[]>>(
+                        '/recruiter-candidates'
+                    );
+                    const relationships = recruitersResponse.data || [];
+                    newStats.active_relationships = relationships.filter(rel =>
+                        rel.status === 'active'
+                    ).length;
+                } catch (err) {
+                    console.error('Failed to load recruiter relationships:', err);
+                }
+
+                setStats(newStats);
+                setStatsLoading(false);
+
+                // Get recent applications (last 5)
+                const recent = allApplications
+                    .sort((a, b) =>
+                        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                    )
+                    .slice(0, 5)
+                    .map(app => ({
+                        id: app.id,
+                        job_title: app.job?.title || 'Unknown Position',
+                        company: app.job?.company?.name || 'Unknown Company',
+                        status: app.stage || 'applied',
+                        applied_at: app.created_at,
+                    }));
+
+                setRecentApplications(recent);
+                setApplicationsLoading(false);
+                setLoading(false);
+            } catch (error) {
+                console.error('Failed to load dashboard data:', error);
+                setLoadError(error instanceof Error ? error.message : 'Failed to load dashboard data');
+                setLoading(false);
+                setStatsLoading(false);
+                setApplicationsLoading(false);
+            }
         }
-    } catch (error) {
-        console.error('Failed to load dashboard data:', error);
-    }
+
+        loadDashboardData();
+    }, [getToken]);
+
+    // Load profile completion separately
+    useEffect(() => {
+        async function loadProfileCompletion() {
+            try {
+                const token = await getToken();
+                if (!token) return;
+
+                const client = createAuthenticatedClient(token);
+
+                // Fetch candidate profile
+                const candidateResponse = await client.get<ApiResponse<Candidate[]>>(
+                    '/candidates',
+                    { params: { limit: 1 } }
+                );
+                const candidates = candidateResponse.data || [];
+
+                if (candidates.length > 0) {
+                    const profile = candidates[0];
+                    const completion = calculateProfileCompleteness(profile);
+                    setProfileCompletion(completion);
+                }
+
+                setProfileLoading(false);
+            } catch (error) {
+                console.error('Failed to load profile completion:', error);
+                setProfileLoading(false);
+            }
+        }
+
+        loadProfileCompletion();
+    }, [getToken]);
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            {/* Welcome Header */}
-            <div className="mb-8">
-                <h1 className="text-4xl font-bold mb-2">
-                    Welcome back, {user?.firstName || 'there'}!
-                </h1>
-                <p className="text-lg text-base-content/70">
-                    Here's an overview of your job search
-                </p>
+        <div className="container mx-auto px-4 py-8 animate-fade-in space-y-6 ">
+            {/* Error Alert */}
+            {loadError && (
+                <div className="alert alert-error">
+                    <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
+                    <div>
+                        <h3 className="font-bold">Failed to load dashboard data</h3>
+                        <div className="text-sm">{loadError}</div>
+                    </div>
+                </div>
+            )}
+
+            {/* Welcome Header - Solid Background (No Gradient) */}
+            <div className="card bg-primary text-primary-content shadow-lg">
+                <div className="card-body p-6 md:p-8">
+                    <h1 className="text-3xl md:text-4xl font-bold mb-2">
+                        Welcome back, {user?.firstName || 'there'}!
+                    </h1>
+                    <p className="text-lg text-primary-content/90">
+                        Here's an overview of your job search
+                    </p>
+                </div>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-base-content/70 mb-1">Applications</p>
-                                <p className="text-3xl font-bold">{stats.applications}</p>
-                            </div>
-                            <i className="fa-duotone fa-regular fa-file-lines text-4xl text-primary"></i>
-                        </div>
-                    </div>
-                </div>
+            <div className="card bg-base-200">
+                <StatCardGrid className='bg-base-100 stats-vertical lg-stats-horizontal m-2 shadow-lg'>
+                    <StatCard
+                        value={stats.applications}
+                        title="Applications"
+                        description="Total submitted"
+                        icon="fa-file-lines"
+                        color="primary"
+                        href="/portal/applications"
+                        loading={statsLoading}
+                        animate={true}
+                    />
+                    <StatCard
+                        value={stats.interviews}
+                        title="Interviews"
+                        description="In progress"
+                        icon="fa-calendar-check"
+                        color="success"
+                        href="/portal/applications"
+                        loading={statsLoading}
+                        animate={true}
+                    />
+                    <StatCard
+                        value={stats.offers}
+                        title="Offers"
+                        description="Received"
+                        icon="fa-trophy"
+                        color="warning"
+                        href="/portal/applications"
+                        loading={statsLoading}
+                        animate={true}
+                    />
+                    <StatCard
+                        value={stats.active_relationships}
+                        title="Active Recruiters"
+                        description="Working with you"
+                        icon="fa-users"
+                        color="info"
+                        href="/portal/recruiters"
+                        loading={statsLoading}
+                        animate={true}
+                    />
+                </StatCardGrid>
+                <div className='p-4 pt-0'>
 
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-base-content/70 mb-1">Interviews</p>
-                                <p className="text-3xl font-bold">{stats.interviews}</p>
-                            </div>
-                            <i className="fa-duotone fa-regular fa-calendar-check text-4xl text-success"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-base-content/70 mb-1">Offers</p>
-                                <p className="text-3xl font-bold">{stats.offers}</p>
-                            </div>
-                            <i className="fa-duotone fa-regular fa-trophy text-4xl text-warning"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-base-content/70 mb-1">Active Recruiters</p>
-                                <p className="text-3xl font-bold">{stats.active_relationships}</p>
-                            </div>
-                            <i className="fa-duotone fa-regular fa-users text-4xl text-info"></i>
-                        </div>
-                    </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Recent Applications */}
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="card-title">
-                                <i className="fa-duotone fa-regular fa-clock-rotate-left"></i>
-                                Recent Applications
-                            </h2>
-                            <Link href="/portal/application" className="link link-primary text-sm">
-                                View All
-                            </Link>
-                        </div>
-
-                        {recentApplications.length > 0 ? (
-                            <div className="space-y-4">
-                                {recentApplications.map((app) => (
-                                    <Link key={app.id} href={`/portal/applications/${app.id}`}>
-                                        <div className="p-4 bg-base-200 rounded-lg hover:bg-base-300 transition-colors cursor-pointer">
-                                            <h3 className="font-semibold mb-1">{app.job_title}</h3>
-                                            <p className="text-sm text-base-content/70 mb-2">
-                                                {app.company}
-                                            </p>
-                                            <div className="flex items-center justify-between">
-                                                <span className="badge badge-primary">{app.status}</span>
-                                                <span className="text-xs text-base-content/70">
-                                                    Applied {new Date(app.applied_at).toLocaleDateString()}
-                                                </span>
-                                            </div>
+                <ContentCard
+                    title="Recent Applications"
+                    icon="fa-clock-rotate-left"
+                    headerActions={
+                        <Link href="/portal/applications" className="link link-primary text-sm">
+                            View All
+                        </Link>
+                    }
+                    loading={applicationsLoading}
+                >
+                    {recentApplications.length > 0 ? (
+                        <div className="flex flex-col gap-4">
+                            {recentApplications.map((app) => (
+                                <Link key={app.id} href={`/portal/applications/${app.id}`}>
+                                    <div className="p-4 bg-base-100 rounded-xl hover:bg-base-200/70 transition-all cursor-pointer group">
+                                        <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
+                                            {app.job_title}
+                                        </h3>
+                                        <p className="text-sm text-base-content/70 mb-2">
+                                            {app.company}
+                                        </p>
+                                        <div className="flex items-center justify-between">
+                                            <span className="badge badge-primary badge-sm">{app.status}</span>
+                                            <span className="text-xs text-base-content/70">
+                                                Applied {new Date(app.applied_at).toLocaleDateString()}
+                                            </span>
                                         </div>
-                                    </Link>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-center py-8 text-base-content/70">
-                                <i className="fa-duotone fa-regular fa-inbox text-4xl mb-2 opacity-30"></i>
-                                <p>No applications yet</p>
-                                <p className="text-sm mt-1">Start applying to jobs to see them here</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    ) : (
+                        <EmptyState
+                            icon="fa-inbox"
+                            title="No applications yet"
+                            description="Start applying to jobs to see them here"
+                            size="sm"
+                            card={false}
+                            action={
+                                <Link href="/public/jobs" className="btn btn-primary btn-sm">
+                                    <i className="fa-duotone fa-regular fa-search"></i>
+                                    Browse Jobs
+                                </Link>
+                            }
+                        />
+                    )}
+                </ContentCard>
 
-                {/* Quick Actions */}
-                <div className="card bg-base-100 shadow">
-                    <div className="card-body">
-                        <h2 className="card-title mb-4">
-                            <i className="fa-duotone fa-regular fa-bolt"></i>
-                            Quick Actions
-                        </h2>
-
+                {/* Right Column */}
+                <div className="space-y-6">
+                    {/* Quick Actions */}
+                    <ContentCard
+                        title="Quick Actions"
+                        icon="fa-bolt"
+                    >
                         <div className="space-y-3">
                             <Link
                                 href="/public/jobs"
@@ -214,29 +333,65 @@ export default async function DashboardPage() {
                                 Upload Resume
                             </Link>
                             <Link
-                                href="/portal/application"
+                                href="/portal/applications"
                                 className="btn btn-outline btn-block justify-start"
                             >
                                 <i className="fa-duotone fa-regular fa-list"></i>
                                 View Applications
                             </Link>
                         </div>
-                    </div>
-                </div>
-            </div>
+                    </ContentCard>
 
-            {/* Profile Completion */}
-            <div className="card bg-primary text-white shadow mt-6">
-                <div className="card-body">
-                    <h2 className="card-title mb-4">Complete Your Profile</h2>
-                    <p className="mb-4">
-                        A complete profile helps you stand out to employers. You're 60% complete!
-                    </p>
-                    <progress className="progress progress-warning w-full mb-4" value="60" max="100"></progress>
-                    <Link href="/portal/profile" className="btn bg-white text-primary hover:bg-gray-100 w-fit">
-                        Complete Profile
-                        <i className="fa-duotone fa-regular fa-arrow-right"></i>
-                    </Link>
+                    {/* Profile Completion */}
+                    <ContentCard
+                        title="Profile Completion"
+                        icon="fa-chart-line"
+                        loading={profileLoading}
+                    >:
+                        {profileCompletion && (
+                            <>
+                                <div className="flex items-center gap-6 mb-4">
+                                    <div className="radial-progress text-primary" style={{ '--value': profileCompletion.percentage } as React.CSSProperties} role="progressbar">
+                                        <span className="text-2xl font-bold">{profileCompletion.percentage}%</span>
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="font-semibold">Completion Level:</span>
+                                            <span className={`badge ${profileCompletion.tier === 'complete' ? 'badge-success' :
+                                                profileCompletion.tier === 'strong' ? 'badge-info' :
+                                                    profileCompletion.tier === 'basic' ? 'badge-warning' :
+                                                        'badge-error'
+                                                }`}>
+                                                {profileCompletion.tier.charAt(0).toUpperCase() + profileCompletion.tier.slice(1)}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-base-content/70">
+                                            A complete profile helps you stand out to recruiters
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {profileCompletion.missingFields.length > 0 && (
+                                    <div className="mb-4">
+                                        <p className="text-sm font-semibold mb-2">Top Priorities:</p>
+                                        <ul className="space-y-1">
+                                            {profileCompletion.missingFields.slice(0, 3).map((field, index) => (
+                                                <li key={index} className="text-sm text-base-content/70 flex items-center gap-2">
+                                                    <i className="fa-duotone fa-regular fa-circle-dot text-primary text-xs"></i>
+                                                    {field.label}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                <Link href="/portal/profile" className="btn btn-primary btn-block">
+                                    Complete Profile
+                                    <i className="fa-duotone fa-regular fa-arrow-right"></i>
+                                </Link>
+                            </>
+                        )}
+                    </ContentCard>
                 </div>
             </div>
         </div>

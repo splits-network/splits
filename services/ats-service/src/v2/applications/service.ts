@@ -101,10 +101,13 @@ export class ApplicationServiceV2 {
 
         // Auto-resolve candidate_id from clerkUserId if not provided
         let candidateId = data.candidate_id;
+        let identityUserId = data.user_id;
+
         if (!candidateId && clerkUserId) {
             const candidateContext = await this.getCandidateContext(clerkUserId);
             if (candidateContext) {
                 candidateId = candidateContext.candidate.id;
+                identityUserId = candidateContext.identityUser.id;
             }
         }
 
@@ -154,12 +157,11 @@ export class ApplicationServiceV2 {
                 )
             );
         }
-
         // Create audit log entry for application creation
         await this.repository.createAuditLog({
             application_id: application.id,
             action: 'created',
-            performed_by_user_id: clerkUserId || 'system',
+            performed_by_user_id: identityUserId || 'system',
             performed_by_role: hasRecruiter ? 'recruiter' : 'candidate',
             new_value: {
                 stage: application.stage,
@@ -183,7 +185,7 @@ export class ApplicationServiceV2 {
                 recruiter_id: application.recruiter_id || null,
                 has_recruiter: !!application.recruiter_id,
                 stage: application.stage,
-                created_by: clerkUserId,
+                created_by: identityUserId,
             });
         }
 
