@@ -86,7 +86,7 @@ export default async function ApplicationDetailPage({
     let recruiter: any = null;
 
     try {
-        const includes = ['job', 'recruiter', 'documents', 'pre_screen_answers'];
+        const includes = ['job', 'recruiter', 'documents', 'job_requirements', 'pre_screen_answers'];
         const client = createAuthenticatedClient(token);
         const response = await client.get(`/applications/${id}`, {
             params: { include: includes.join(',') }
@@ -103,7 +103,7 @@ export default async function ApplicationDetailPage({
     }
 
     const company = job.company || {};
-
+    console.log('application:', application);
     return (
         <div className="container mx-auto px-4 py-8">
             {/* Breadcrumbs */}
@@ -221,7 +221,7 @@ export default async function ApplicationDetailPage({
                                 )}
 
                                 {/* Requirements */}
-                                {job.requirements && job.requirements.length > 0 && (
+                                {job.job_requirements && job.job_requirements.length > 0 && (
                                     <div>
                                         <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
                                             <i className="fa-duotone fa-regular fa-list-check text-primary"></i>
@@ -229,11 +229,11 @@ export default async function ApplicationDetailPage({
                                         </h3>
 
                                         {/* Mandatory Requirements */}
-                                        {job.requirements.filter((r: any) => r.requirement_type === 'mandatory').length > 0 && (
+                                        {job.job_requirements.filter((r: any) => r.requirement_type === 'mandatory').length > 0 && (
                                             <div className="mb-4">
                                                 <div className="text-sm font-medium text-error mb-2">Required</div>
                                                 <ul className="space-y-2">
-                                                    {job.requirements
+                                                    {job.job_requirements
                                                         .filter((r: any) => r.requirement_type === 'mandatory')
                                                         .sort((a: any, b: any) => a.sort_order - b.sort_order)
                                                         .map((req: any) => (
@@ -247,11 +247,11 @@ export default async function ApplicationDetailPage({
                                         )}
 
                                         {/* Preferred Requirements */}
-                                        {job.requirements.filter((r: any) => r.requirement_type === 'preferred').length > 0 && (
+                                        {job.job_requirements.filter((r: any) => r.requirement_type === 'preferred').length > 0 && (
                                             <div>
                                                 <div className="text-sm font-medium text-info mb-2">Preferred</div>
                                                 <ul className="space-y-2">
-                                                    {job.requirements
+                                                    {job.job_requirements
                                                         .filter((r: any) => r.requirement_type === 'preferred')
                                                         .sort((a: any, b: any) => a.sort_order - b.sort_order)
                                                         .map((req: any) => (
@@ -268,41 +268,6 @@ export default async function ApplicationDetailPage({
                             </div>
                         </div>
                     </div>
-
-                    {/* Documents */}
-                    {application.documents && application.length > 0 && (
-                        <div className="card bg-base-100 shadow">
-                            <div className="card-body">
-                                <h2 className="card-title mb-4">
-                                    <i className="fa-duotone fa-regular fa-file"></i>
-                                    Documents
-                                </h2>
-
-                                <div className="space-y-2">
-                                    {application.map((doc: any) => (
-                                        <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg bg-base-200 hover:bg-base-300 transition-colors">
-                                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                <i className={`fa-duotone fa-regular ${doc.document_type === 'resume' ? 'fa-file-text' :
-                                                    doc.document_type === 'cover_letter' ? 'fa-file-lines' :
-                                                        'fa-file'
-                                                    } text-primary`}></i>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="font-medium truncate">{doc.file_name}</div>
-                                                    <div className="text-sm text-base-content/60">
-                                                        {doc.document_type.replace('_', ' ').toUpperCase()}
-                                                        {doc.file_size && ` • ${(doc.file_size / 1024).toFixed(1)} KB`}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            {doc.metadata?.is_primary && (
-                                                <span className="badge badge-primary badge-sm">Primary</span>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
 
                     {/* Pre-screen Answers */}
                     {application.pre_screen_answers && application.pre_screen_answers.length > 0 && (
@@ -460,6 +425,41 @@ export default async function ApplicationDetailPage({
                         </div>
                     </div>
 
+                    {/* Documents */}
+                    {application.documents && application.documents.length > 0 && (
+                        <div className="card bg-base-100 shadow">
+                            <div className="card-body">
+                                <h2 className="card-title mb-4">
+                                    <i className="fa-duotone fa-regular fa-file"></i>
+                                    Documents
+                                </h2>
+
+                                <div className="space-y-2">
+                                    {application.documents.map((doc: any) => (
+                                        <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg bg-base-200 hover:bg-base-300 transition-colors">
+                                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                <i className={`fa-duotone fa-regular ${doc.document_type === 'resume' ? 'fa-file-text' :
+                                                    doc.document_type === 'cover_letter' ? 'fa-file-lines' :
+                                                        'fa-file'
+                                                    } text-primary`}></i>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="font-medium truncate">{doc.file_name}</div>
+                                                    <div className="text-sm text-base-content/60">
+                                                        {doc.document_type.replace('_', ' ').toUpperCase()}
+                                                        {doc.file_size && ` • ${(doc.file_size / 1024).toFixed(1)} KB`}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {doc.metadata?.is_primary && (
+                                                <span className="badge badge-primary badge-sm">Primary</span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Application Notes */}
                     {(application.notes || application.recruiter_notes) && (
                         <div className="card bg-base-100 shadow">
@@ -515,10 +515,10 @@ export default async function ApplicationDetailPage({
                                 </h2>
 
                                 <div className="space-y-3">
-                                    {(recruiter.recruiter_name || recruiter.tagline) && (
+                                    {(recruiter.user.name || recruiter.tagline) && (
                                         <div>
                                             <div className="text-sm text-base-content/60">Recruiter</div>
-                                            <div className="font-semibold text-lg">{recruiter.recruiter_name || recruiter.tagline}</div>
+                                            <div className="font-semibold text-lg">{recruiter.user.name || recruiter.tagline}</div>
                                         </div>
                                     )}
 
@@ -554,11 +554,11 @@ export default async function ApplicationDetailPage({
                                         </div>
                                     )}
 
-                                    {recruiter.email && (
+                                    {recruiter.user.email && (
                                         <div>
                                             <div className="text-sm text-base-content/60">Email</div>
-                                            <a href={`mailto:${recruiter.email}`} className="link link-primary">
-                                                {recruiter.email}
+                                            <a href={`mailto:${recruiter.user.email}`} className="link link-primary">
+                                                {recruiter.user.email}
                                             </a>
                                         </div>
                                     )}

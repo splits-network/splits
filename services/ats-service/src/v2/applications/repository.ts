@@ -275,7 +275,7 @@ export class ApplicationRepository {
         // Base fields - always include related candidate and job with company
         const baseFields = `*,
             candidate:candidates(id, full_name, email, phone, location),
-            job:jobs(id, title, description, status, company:companies(id, name, description, identity_organization_id))`;
+            job:jobs(*, company:companies(id, name, description, identity_organization_id), job_requirements:job_requirements(*))`;
 
         if (!include) {
             return baseFields;
@@ -287,8 +287,8 @@ export class ApplicationRepository {
         for (const inc of includes) {
             switch (inc) {
                 case 'recruiter':
-                    // Join with network schema recruiters table
-                    selectClause += `,recruiter:recruiters(id, name, email, bio, specialization, status)`;
+                    // Join with network schema recruiters table and identity users for contact info
+                    selectClause += `,recruiter:recruiters(id, bio, phone, specialties, status, user_id, user:users(name, email))`;
                     break;
                 case 'documents':
                 case 'document':

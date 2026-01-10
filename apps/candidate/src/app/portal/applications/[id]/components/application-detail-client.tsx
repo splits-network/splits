@@ -172,7 +172,7 @@ export function ApplicationDetailClient({ application, job, token }: Application
     }
 
     const recruiterName = application.recruiter
-        ? `${application.recruiter.first_name} ${application.recruiter.last_name}`
+        ? `${application.recruiter.user.name}`
         : 'Your recruiter';
 
     return (

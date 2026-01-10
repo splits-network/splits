@@ -169,7 +169,7 @@ export default function NotificationBell() {
                             </button>
                         )}
                         <Link
-                            href="/notifications"
+                            href="/portal/notifications"
                             className="btn btn-ghost btn-xs"
                             onMouseDown={(e) => e.preventDefault()}
                         >
@@ -250,7 +250,7 @@ export default function NotificationBell() {
                 {notifications.length > 0 && (
                     <div className="p-2 border-t border-base-300 text-center">
                         <Link
-                            href="/notifications"
+                            href="/portal/notifications"
                             className="btn btn-ghost btn-sm btn-block"
                             onMouseDown={(e) => e.preventDefault()}
                         >
