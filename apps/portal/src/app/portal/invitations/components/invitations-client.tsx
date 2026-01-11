@@ -70,6 +70,7 @@ export default function InvitationsPageClient() {
 
         const client = createAuthenticatedClient(token);
 
+        params.include = 'candidate';
         // V2 endpoint with enriched candidate data in single query
         const response = await client.get('/recruiter-candidates', { params });
 
@@ -255,6 +256,8 @@ export default function InvitationsPageClient() {
             </div>
         );
     }
+
+    console.log('InvitationsPageClient render', { invitations, filteredInvitations, statusFilter });
 
     return (
         <div className="space-y-6">

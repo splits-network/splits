@@ -37,6 +37,7 @@ export function registerRecruiterCandidateRoutes(
                 status: query.status,
                 sort_by: query.sort_by,
                 sort_order: query.sort_order,
+                include: query.include,
                 filters: parsedFilters,
             };
 
@@ -55,7 +56,8 @@ export function registerRecruiterCandidateRoutes(
     app.get('/api/v2/recruiter-candidates/:id', async (request, reply) => {
         try {
             const { id } = request.params as { id: string };
-            const record = await config.recruiterCandidateService.getRecruiterCandidate(id);
+            const query = request.query as any;
+            const record = await config.recruiterCandidateService.getRecruiterCandidate(id, query.include);
             return reply.send({ data: record });
         } catch (error: any) {
             return reply

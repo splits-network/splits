@@ -17,6 +17,37 @@ export class RecruiterCandidateRepository {
         });
     }
 
+    /**
+     * Build select clause with optional includes
+     * Supports: recruiter, candidate
+     */
+    private buildSelectClause(include?: string): string {
+        // Base fields - always include relationship data
+        const baseFields = '*';
+
+        if (!include) {
+            return baseFields;
+        }
+
+        const includes = include.split(',').map(i => i.trim().toLowerCase());
+        let selectClause = baseFields;
+
+        for (const inc of includes) {
+            switch (inc) {
+                case 'recruiter':
+                    // Join with recruiters table and identity users for contact info
+                    selectClause += ',recruiter:recruiters!recruiter_id(id, user_id, bio, status, user:users(name, email))';
+                    break;
+                case 'candidate':
+                    // Join with candidates table and identity users for contact info
+                    selectClause += ',candidate:candidates!candidate_id(id, user_id, full_name, phone, location, linkedin_url, user:users!candidates_user_id_fkey(name, email))';
+                    break;
+            }
+        }
+
+        return selectClause;
+    }
+
     async findRecruiterCandidates(
         clerkUserId: string,
         filters: RecruiterCandidateFilters = {}
@@ -37,11 +68,14 @@ export class RecruiterCandidateRepository {
             }
         }
 
+        // Build select clause with includes
+        const selectClause = this.buildSelectClause(filters.include);
+
         // Build query with enriched data
         let query = this.supabase
-            
+
             .from('recruiter_candidates')
-            .select('*', { count: 'exact' });
+            .select(selectClause, { count: 'exact' });
 
         if (scopedFilters.recruiter_id) {
             query = query.eq('recruiter_id', scopedFilters.recruiter_id);
@@ -65,22 +99,21 @@ export class RecruiterCandidateRepository {
 
         const { data, error, count } = await query;
 
+        console.log('findRecruiterCandidates error:', error);
         if (error) throw error;
-
-        const relationships = data || [];
-        await this.enrichRecruiterDetails(relationships);
-
         return {
-            data: relationships,
+            data: data || [],
             total: count || 0,
         };
     }
 
-    async findRecruiterCandidate(id: string): Promise<any | null> {
+    async findRecruiterCandidate(id: string, include?: string): Promise<any | null> {
+        const selectClause = this.buildSelectClause(include);
+
         const { data, error } = await this.supabase
-            
+
             .from('recruiter_candidates')
-            .select('*')
+            .select(selectClause)
             .eq('id', id)
             .single();
 
@@ -88,17 +121,13 @@ export class RecruiterCandidateRepository {
             if (error.code === 'PGRST116') return null;
             throw error;
         }
-        if (!data) {
-            return null;
-        }
 
-        await this.enrichRecruiterDetails([data]);
         return data;
     }
 
     async createRecruiterCandidate(relationship: any): Promise<any> {
         const { data, error } = await this.supabase
-            
+
             .from('recruiter_candidates')
             .insert(relationship)
             .select()
@@ -110,7 +139,7 @@ export class RecruiterCandidateRepository {
 
     async updateRecruiterCandidate(id: string, updates: RecruiterCandidateUpdate): Promise<any> {
         const { data, error } = await this.supabase
-            
+
             .from('recruiter_candidates')
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id)
@@ -124,7 +153,7 @@ export class RecruiterCandidateRepository {
     async deleteRecruiterCandidate(id: string): Promise<void> {
         // First, get the current record to check its state
         const { data: existing, error: fetchError } = await this.supabase
-            
+
             .from('recruiter_candidates')
             .select('consent_given, candidate_id')
             .eq('id', id)
@@ -136,7 +165,7 @@ export class RecruiterCandidateRepository {
         // Hard delete if invitation not accepted and no candidate relationship
         if (!existing.consent_given && !existing.candidate_id) {
             const { error } = await this.supabase
-                
+
                 .from('recruiter_candidates')
                 .delete()
                 .eq('id', id);
@@ -145,7 +174,7 @@ export class RecruiterCandidateRepository {
         } else {
             // Soft delete for accepted relationships or those with candidate data
             const { error } = await this.supabase
-                
+
                 .from('recruiter_candidates')
                 .update({ status: 'terminated', updated_at: new Date().toISOString() })
                 .eq('id', id);
@@ -156,12 +185,12 @@ export class RecruiterCandidateRepository {
 
     async findByInvitationToken(token: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            
+
             .from('recruiter_candidates')
             .select('*')
             .eq('invitation_token', token)
             .maybeSingle();
-            
+
         if (error) throw error;
         return data;
     }
@@ -172,7 +201,7 @@ export class RecruiterCandidateRepository {
         invitationExpiresAt.setDate(invitationExpiresAt.getDate() + 7);
 
         const { data, error } = await this.supabase
-            
+
             .from('recruiter_candidates')
             .update({
                 invitation_token: invitationToken,
@@ -189,87 +218,5 @@ export class RecruiterCandidateRepository {
 
     private generateInvitationToken(): string {
         return randomBytes(32).toString('hex');
-    }
-
-    async enrichSingleRelationship(relationship: any): Promise<any> {
-        if (!relationship) {
-            return relationship;
-        }
-        const records = [relationship];
-        await this.enrichRecruiterDetails(records);
-        return records[0];
-    }
-
-    private async enrichRecruiterDetails(records: any[]): Promise<void> {
-        if (!records.length) {
-            return;
-        }
-
-        const recruiterIds = Array.from(
-            new Set(
-                records
-                    .map((rel) => rel.recruiter_id)
-                    .filter((id): id is string => Boolean(id))
-            )
-        );
-
-        if (!recruiterIds.length) {
-            return;
-        }
-
-        const { data: recruiters } = await this.supabase
-            
-            .from('recruiters')
-            .select('id, user_id, bio, status')
-            .in('id', recruiterIds);
-
-        if (!recruiters || recruiters.length === 0) {
-            return;
-        }
-
-        const recruiterMap = new Map<string, (typeof recruiters)[number]>();
-        const userIds = new Set<string>();
-        recruiters.forEach((recruiter) => {
-            recruiterMap.set(recruiter.id, recruiter);
-            if (recruiter.user_id) {
-                userIds.add(recruiter.user_id);
-            }
-        });
-
-        const userMap = new Map<string, { id: string; name?: string; email?: string }>();
-        if (userIds.size > 0) {
-            const { data: users } = await this.supabase
-                
-                .from('users')
-                .select('id, name, email')
-                .in('id', Array.from(userIds));
-
-            users?.forEach((user) => userMap.set(user.id, user));
-        }
-
-        records.forEach((rel) => {
-            const recruiter = recruiterMap.get(rel.recruiter_id);
-            if (!recruiter) {
-                return;
-            }
-
-            const recruiterUser = recruiter.user_id ? userMap.get(recruiter.user_id) : undefined;
-
-            if (!rel.recruiter_name && recruiterUser?.name) {
-                rel.recruiter_name = recruiterUser.name;
-            }
-
-            if (!rel.recruiter_email && recruiterUser?.email) {
-                rel.recruiter_email = recruiterUser.email;
-            }
-
-            if (!rel.recruiter_bio && recruiter.bio) {
-                rel.recruiter_bio = recruiter.bio;
-            }
-
-            if (!rel.recruiter_status && recruiter.status) {
-                rel.recruiter_status = recruiter.status;
-            }
-        });
     }
 }

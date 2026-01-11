@@ -30,8 +30,8 @@ export class RecruiterCandidateServiceV2 {
         );
     }
 
-    async getRecruiterCandidate(id: string): Promise<any> {
-        const relationship = await this.repository.findRecruiterCandidate(id);
+    async getRecruiterCandidate(id: string, include?: string): Promise<any> {
+        const relationship = await this.repository.findRecruiterCandidate(id, include);
         if (!relationship) {
             throw { statusCode: 404, message: 'Recruiter-Candidate relationship not found' };
         }
