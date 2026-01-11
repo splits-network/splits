@@ -251,12 +251,16 @@ export class StatsRepository {
                 .select('id, hired_at, application:applications!inner(job:jobs!inner(company_id))')
                 .in('application.job.company_id', companyIds),
         ]);
-
-        if (activeRolesResult.error) throw activeRolesResult.error;
-        if (totalApplicationsResult.error) throw totalApplicationsResult.error;
-        if (interviewsScheduledResult.error) throw interviewsScheduledResult.error;
-        if (offersExtendedResult.error) throw offersExtendedResult.error;
-        if (placementsResult.error) throw placementsResult.error;
+        try {
+            if (activeRolesResult.error) throw activeRolesResult.error;
+            if (totalApplicationsResult.error) throw totalApplicationsResult.error;
+            if (interviewsScheduledResult.error) throw interviewsScheduledResult.error;
+            if (offersExtendedResult.error) throw offersExtendedResult.error;
+            if (placementsResult.error) throw placementsResult.error;
+        } catch (e) {
+            console.error('Error fetching company stats:', e);
+            return DEFAULT_COMPANY_STATS;
+        }
 
         const placementsData = placementsResult.data || [];
 

@@ -62,7 +62,6 @@ export class CompanyServiceV2 {
         const userContext = await this.accessResolver.resolve(clerkUserId);
         const company = await this.repository.createCompany({
             ...data,
-            status: data.status || 'active',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         });

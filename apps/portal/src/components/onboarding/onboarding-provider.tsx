@@ -172,12 +172,19 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                     slug: orgSlug,
                 });
 
+                const { data: company } = await apiClient.post('/companies', {
+                    identity_organization_id: organization.id,
+                    name: organizationName,
+                    website: companyInfo?.website || null,
+                    industry: companyInfo?.industry || null,
+                    company_size: companyInfo?.size || null,
+                });
+
                 // Step 2: Create membership
                 await apiClient.post('/memberships', {
                     user_id: userData.id,
                     organization_id: organization.id,
                     role: selectedRole,
-                    status: 'active',
                 });
 
                 // Step 3: Update user onboarding status
