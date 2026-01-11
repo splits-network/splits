@@ -4,7 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client'; import { useToast } from '@/lib/toast-context';
+import { createAuthenticatedClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
+import { MarkdownEditor } from '@/components/markdown-editor';
+
 interface Job {
     id: string;
     title: string;
