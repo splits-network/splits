@@ -187,7 +187,9 @@ export class RecruiterCandidateRepository {
         const { data, error } = await this.supabase
 
             .from('recruiter_candidates')
-            .select('*')
+            .select(`*
+                ,recruiter:recruiters!recruiter_id(id, user_id, bio, status, user:users(name, email))
+                ,candidate:candidates!candidate_id(id, user_id, full_name, phone, location, linkedin_url, user:users!candidates_user_id_fkey(name, email))`)
             .eq('invitation_token', token)
             .maybeSingle();
 

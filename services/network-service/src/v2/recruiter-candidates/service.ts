@@ -155,9 +155,6 @@ export class RecruiterCandidateServiceV2 {
             throw { statusCode: 409, message: 'This invitation has already been declined.' };
         }
 
-        // Enrich with recruiter details
-        const enrichedRelationship = await this.repository.enrichSingleRelationship(relationship);
-
         return {
             relationship_id: relationship.id,
             recruiter_id: relationship.recruiter_id,
@@ -165,9 +162,9 @@ export class RecruiterCandidateServiceV2 {
             invited_at: relationship.invited_at,
             expires_at: relationship.invitation_expires_at,
             status: 'pending',
-            recruiter_name: enrichedRelationship.recruiter_name,
-            recruiter_email: enrichedRelationship.recruiter_email,
-            recruiter_bio: enrichedRelationship.recruiter_bio,
+            recruiter_name: relationship.recruiter.name,
+            recruiter_email: relationship.recruiter.email,
+            recruiter_bio: relationship.recruiter.bio,
         };
     }
 

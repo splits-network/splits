@@ -174,7 +174,9 @@ export default function InvitationsPageClient() {
             if (!token) throw new Error('Not authenticated');
 
             const client = createAuthenticatedClient(token);
-            await client.post(`/recruiter-candidates/${invitationId}/resend-invitation`);
+            await client.patch(`/recruiter-candidates/${invitationId}`, {
+                resend_invitation: true
+            });
 
             await refetch();
             toast.success('Invitation resent successfully');
@@ -206,7 +208,9 @@ export default function InvitationsPageClient() {
             if (!token) throw new Error('Not authenticated');
 
             const client = createAuthenticatedClient(token);
-            await client.delete(`/recruiter-candidates/${invitation.id}`);
+            await client.patch(`/recruiter-candidates/${invitation.id}`, {
+                cancel_invitation: true
+            });
 
             await refetch();
             toast.success('Invitation cancelled');
