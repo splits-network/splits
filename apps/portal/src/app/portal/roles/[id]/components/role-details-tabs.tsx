@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { MarkdownRenderer } from '@/components/markdown-renderer';
 import CandidatePipeline from './candidate-pipeline';
 
 interface Job {
@@ -124,9 +125,10 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
                         {(job.recruiter_description || job.description) ? (
                             <div>
                                 <h3 className="font-semibold text-lg mb-3">Description</h3>
-                                <p className="text-base-content/80 whitespace-pre-wrap">
-                                    {job.recruiter_description || job.description}
-                                </p>
+                                <MarkdownRenderer
+                                    content={job.recruiter_description || job.description || ''}
+                                    className="text-base-content/80"
+                                />
                             </div>
                         ) : (
                             <div className="text-center py-8 text-base-content/60">
@@ -143,9 +145,10 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
                         {job.candidate_description ? (
                             <div>
                                 <h3 className="font-semibold text-lg mb-3">Description</h3>
-                                <p className="text-base-content/80 whitespace-pre-wrap">
-                                    {job.candidate_description}
-                                </p>
+                                <MarkdownRenderer
+                                    content={job.candidate_description}
+                                    className="text-base-content/80"
+                                />
                             </div>
                         ) : (
                             <div className="text-center py-8 text-base-content/60">

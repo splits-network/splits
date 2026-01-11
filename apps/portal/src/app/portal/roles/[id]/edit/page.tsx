@@ -361,27 +361,23 @@ export default function EditRolePage() {
 
                         {/* Descriptions */}
                         <div className="divider">Job Descriptions</div>
-                        <fieldset className="fieldset">
-                            <legend className="fieldset-legend">Recruiter-Facing Description</legend>
-                            <textarea
-                                className="textarea w-full h-32"
-                                value={formData.recruiter_description}
-                                onChange={(e) => setFormData({ ...formData, recruiter_description: e.target.value })}
-                                placeholder="Internal notes, hiring manager details, and context for recruiters..."
-                            ></textarea>
-                            <p className="fieldset-label">Only visible to recruiters</p>
-                        </fieldset>
+                        <MarkdownEditor
+                            label="Recruiter-Facing Description"
+                            value={formData.recruiter_description}
+                            onChange={(value) => setFormData({ ...formData, recruiter_description: value })}
+                            placeholder="Internal notes, hiring manager details, and context for recruiters..."
+                            helperText="Only visible to recruiters. Use **bold**, *italic*, and bullet points (- item) for formatting."
+                            rows={10}
+                        />
 
-                        <fieldset className="fieldset">
-                            <legend className="fieldset-legend">Candidate-Facing Description</legend>
-                            <textarea
-                                className="textarea w-full h-32"
-                                value={formData.candidate_description}
-                                onChange={(e) => setFormData({ ...formData, candidate_description: e.target.value })}
-                                placeholder="Public job posting text that candidates will see..."
-                            ></textarea>
-                            <p className="fieldset-label">Visible to candidates</p>
-                        </fieldset>
+                        <MarkdownEditor
+                            label="Candidate-Facing Description"
+                            value={formData.candidate_description}
+                            onChange={(value) => setFormData({ ...formData, candidate_description: value })}
+                            placeholder="Public job posting text that candidates will see..."
+                            helperText="Visible to candidates. Use **bold**, *italic*, and bullet points (- item) to make it engaging."
+                            rows={10}
+                        />
 
                         {/* Requirements */}
                         <div className="divider">Requirements</div>

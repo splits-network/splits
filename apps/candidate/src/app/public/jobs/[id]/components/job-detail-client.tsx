@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { formatSalary, formatDate, formatRelativeTime } from '@/lib/utils';
 import ApplicationWizardModal from '@/components/application-wizard-modal';
 import { JobAnalyticsChart } from '@/components/ui/charts/job-analytics-chart';
+import { MarkdownRenderer } from '@/components/markdown-renderer';
 
 interface JobRequirement {
     id: string;
@@ -178,7 +179,7 @@ export default function JobDetailClient({
                                 <i className="fa-duotone fa-regular fa-building"></i>
                                 About {job.company?.name || 'Company'}
                             </h3>
-                            <p className="whitespace-pre-line">{job.company.description}</p>
+                            <MarkdownRenderer content={job.company.description} />
                         </div>
                     </div>
                 )}
@@ -194,7 +195,7 @@ export default function JobDetailClient({
                                         <i className="fa-duotone fa-regular fa-file-lines"></i>
                                         Job Description
                                     </h3>
-                                    <p className="whitespace-pre-line">{job.candidate_description || job.description}</p>
+                                    <MarkdownRenderer content={job.candidate_description || job.description || ''} />
                                 </div>
                             </div>
                         </div>
