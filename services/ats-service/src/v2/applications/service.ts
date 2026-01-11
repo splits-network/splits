@@ -111,8 +111,8 @@ export class ApplicationServiceV2 {
             }
         }
 
-        if (!candidateId) {
-            throw new Error('Candidate ID is required and could not be resolved from user context');
+        if (!candidateId || !identityUserId) {
+            throw new Error('Candidate ID & Identity User ID is required and could not be resolved from user context');
         }
 
         // Extract document-related fields that shouldn't be persisted to applications table
@@ -203,6 +203,24 @@ export class ApplicationServiceV2 {
             throw new Error(`Application ${id} not found`);
         }
 
+
+
+        // Auto-resolve candidate_id from clerkUserId if not provided
+        let candidateId = undefined;
+        let identityUserId = undefined;
+
+        if (!candidateId && clerkUserId) {
+            const candidateContext = await this.getCandidateContext(clerkUserId);
+            if (candidateContext) {
+                candidateId = candidateContext.candidate.id;
+                identityUserId = candidateContext.identityUser.id;
+            }
+        }
+
+        if (!candidateId || !identityUserId) {
+            throw new Error('Candidate ID & Identity User ID is required and could not be resolved from user context');
+        }
+
         const {
             document_ids,
             primary_resume_id,
@@ -211,6 +229,7 @@ export class ApplicationServiceV2 {
             decline_details,
             ...persistedUpdates
         } = updates;
+
 
         // Validate stage transitions
         if (updates.stage && updates.stage !== currentApplication.stage) {
@@ -266,7 +285,7 @@ export class ApplicationServiceV2 {
             await this.repository.createAuditLog({
                 application_id: id,
                 action: 'stage_changed',
-                performed_by_user_id: clerkUserId || 'system',
+                performed_by_user_id: identityUserId,
                 performed_by_role: userRole || 'unknown',
                 old_value: { stage: currentApplication.stage },
                 new_value: { stage: updates.stage },
@@ -291,7 +310,7 @@ export class ApplicationServiceV2 {
                     recruiter_id: updatedApplication.recruiter_id,
                     old_stage: currentApplication.stage,
                     new_stage: updates.stage,
-                    changed_by: clerkUserId,
+                    changed_by: identityUserId,
                 });
             }
 
@@ -301,7 +320,7 @@ export class ApplicationServiceV2 {
                 job_id: updatedApplication.job_id,
                 candidate_id: updatedApplication.candidate_id,
                 updated_fields: Object.keys(persistedUpdates),
-                updated_by: clerkUserId,
+                updated_by: identityUserId,
             });
         }
 
@@ -313,13 +332,28 @@ export class ApplicationServiceV2 {
         if (!application) {
             throw new Error(`Application ${id} not found`);
         }
+        // Auto-resolve candidate_id from clerkUserId if not provided
+        let candidateId = undefined;
+        let identityUserId = undefined;
+
+        if (!candidateId && clerkUserId) {
+            const candidateContext = await this.getCandidateContext(clerkUserId);
+            if (candidateContext) {
+                candidateId = candidateContext.candidate.id;
+                identityUserId = candidateContext.identityUser.id;
+            }
+        }
+
+        if (!candidateId || !identityUserId) {
+            throw new Error('Candidate ID & Identity User ID is required and could not be resolved from user context');
+        }
 
         await this.repository.deleteApplication(id);
 
         if (this.eventPublisher) {
             await this.eventPublisher.publish('application.deleted', {
                 applicationId: id,
-                deletedBy: clerkUserId,
+                deletedBy: identityUserId,
             });
         }
     }
