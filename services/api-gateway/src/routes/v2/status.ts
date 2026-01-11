@@ -61,7 +61,7 @@ export function registerStatusRoutes(app: FastifyInstance, eventPublisher: Event
         },
         async (request, reply) => {
             const body = request.body as StatusContactRequest;
-
+            console.log('Received status contact request:', body);
             const name = sanitize(body.name);
             const email = sanitize(body.email).toLowerCase();
             const topic = sanitize(body.topic) || 'general';

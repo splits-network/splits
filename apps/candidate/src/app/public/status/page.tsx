@@ -87,7 +87,7 @@ export default function StatusPage() {
         setFormFeedback(null);
 
         try {
-            const response = await fetch('/api/status-contact', {
+            const response = await fetch('/api/v2/status-contact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),

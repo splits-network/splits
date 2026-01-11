@@ -76,7 +76,7 @@ export function ServiceStatusBanner() {
                         </div>
                     </span>
                     <div>
-                        <Link href="/status" className="btn btn-sm btn-ghost">
+                        <Link href="/public/status" className="btn btn-sm btn-ghost">
                             View Status
                         </Link>
                         <button

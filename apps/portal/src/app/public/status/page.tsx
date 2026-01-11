@@ -81,14 +81,14 @@ export default function StatusPage() {
         setFormFeedback(null);
 
         try {
-            const response = await fetch('/api/status-contact', {
+            const response = await fetch('/api/v2/status-contact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
             });
 
             const responseBody = await response.json().catch(() => ({}));
-
+            console.log('Response body:', response);
             if (!response.ok) {
                 throw new Error(
                     responseBody.error || 'We could not capture that note. Please try again shortly.'

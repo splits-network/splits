@@ -136,7 +136,7 @@ export function Footer() {
                                 </a>
                             </li>
                             <li>
-                                <Link href="/status" className="link link-hover text-base-content/70 hover:text-base-content">
+                                <Link href="/public/status" className="link link-hover text-base-content/70 hover:text-base-content">
                                     System Status
                                 </Link>
                             </li>

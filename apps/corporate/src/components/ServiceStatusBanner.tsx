@@ -76,7 +76,7 @@ export function ServiceStatusBanner() {
                         </div>
                     </span>
                     <div>
-                        <Link href="https://splits.network/status" target="_blank" className="btn btn-sm btn-ghost">
+                        <Link href="https://splits.network/public/status" target="_blank" className="btn btn-sm btn-ghost">
                             View Status
                         </Link>
                         <button

@@ -370,7 +370,7 @@ export default function UpdatesPage() {
                 <div className="container mx-auto px-4">
                     <div className="max-w-5xl mx-auto">
                         <div className="grid md:grid-cols-3 gap-6">
-                            <Link href="/status" className="card bg-base-200 shadow hover:shadow transition-shadow">
+                            <Link href="/public/status" className="card bg-base-200 shadow hover:shadow transition-shadow">
                                 <div className="card-body text-center">
                                     <i className="fa-duotone fa-regular fa-heartbeat text-4xl text-success mb-3"></i>
                                     <h3 className="card-title justify-center">System Status</h3>
