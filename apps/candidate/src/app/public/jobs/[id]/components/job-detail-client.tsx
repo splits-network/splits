@@ -158,7 +158,7 @@ export default function JobDetailClient({
                                     </span>
                                 )}
                                 {job.salary_min && job.salary_max && (
-                                    <span className="flex items-center gap-1">
+                                    <span className="flex items-center gap-1 text-accent">
                                         <i className="fa-duotone fa-regular fa-dollar-sign"></i>
                                         {formatSalary(job.salary_min, job.salary_max)}
                                     </span>
@@ -168,57 +168,6 @@ export default function JobDetailClient({
                     </div>
                     <div className='p-4 pt-0'>
                         <JobAnalyticsChart jobId={job.id} />
-                    </div>
-                </div>
-                <div className="card bg-base-200 shadow mb-6">
-                    <div className="card-body">
-
-                        <div className="flex flex-wrap gap-4 mb-6">
-
-                            <span className="flex items-center gap-2">
-                                <i className="fa-duotone fa-regular fa-building"></i>
-                            </span>
-
-                            {job.location && (
-                                <span className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-location-dot mr-2"></i>
-                                    {job.location}
-                                </span>
-                            )}
-                            {job.employment_type && (
-                                <span className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-briefcase mr-2"></i>
-                                    {job.employment_type.replace('_', '-')}
-                                </span>
-                            )}
-                            {job.open_to_relocation && (
-                                <span className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-house mr-2"></i>
-                                    Remote
-                                </span>
-                            )}
-                            {job.updated_at && (
-                                <span className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-calendar mr-2"></i>
-                                    Posted {formatDate(job.updated_at)}
-                                </span>
-                            )}
-                        </div>
-
-                        <div className="divider"></div>
-
-                        <div className="flex justify-between items-center">
-                            <div>
-                                {job.salary_min && job.salary_max && (
-                                    <>
-                                        <p className="text-sm text-base-content/70 mb-1">Salary Range</p>
-                                        <p className="text-2xl font-bold text-primary">
-                                            {formatSalary(job.salary_min, job.salary_max)}
-                                        </p>
-                                    </>
-                                )}
-                            </div>
-                        </div>
                     </div>
                 </div>
                 {/* About Company */}
