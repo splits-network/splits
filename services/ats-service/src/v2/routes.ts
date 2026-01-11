@@ -46,7 +46,7 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     const candidateService = new CandidateServiceV2(candidateRepository, candidateRepository.getSupabase(), config.eventPublisher);
 
     const applicationRepository = new ApplicationRepository(config.supabaseUrl, config.supabaseKey);
-    const applicationService = new ApplicationServiceV2(applicationRepository, config.eventPublisher);
+    const applicationService = new ApplicationServiceV2(applicationRepository, applicationRepository.getSupabase(), config.eventPublisher);
 
     const placementRepository = new PlacementRepository(config.supabaseUrl, config.supabaseKey);
     const placementService = new PlacementServiceV2(placementRepository.getSupabase(), placementRepository, config.eventPublisher);

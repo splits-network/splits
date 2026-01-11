@@ -22,6 +22,10 @@ export class ApplicationRepository {
         });
     }
 
+    getSupabase(): SupabaseClient {
+        return this.supabase;
+    }
+
     async findApplications(
         clerkUserId: string,
         params: StandardListParams = {}
@@ -487,7 +491,7 @@ export class ApplicationRepository {
             .select('id')
             .eq('clerk_user_id', clerkUserId)
             .maybeSingle();
-
+        console.log('findCandidateByClerkUserId - identityUser:', identityUser, 'error:', identityError);
         if (identityError) throw identityError;
         if (!identityUser) {
             return null;
@@ -499,7 +503,7 @@ export class ApplicationRepository {
             .select('*')
             .eq('user_id', identityUser.id)
             .maybeSingle();
-
+        console.log('findCandidateByClerkUserId - candidate:', data, 'error:', error);
         if (error) throw error;
         return data ?? null;
     }

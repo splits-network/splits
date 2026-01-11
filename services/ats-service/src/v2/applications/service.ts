@@ -7,12 +7,18 @@ import { ApplicationRepository } from './repository';
 import { ApplicationFilters, ApplicationUpdate } from './types';
 import { EventPublisher } from '../shared/events';
 import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
+import { AccessContextResolver } from '@splits-network/shared-access-context';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export class ApplicationServiceV2 {
+    private accessResolver: AccessContextResolver;
     constructor(
         private repository: ApplicationRepository,
+        supabase: SupabaseClient,
         private eventPublisher?: EventPublisher
-    ) { }
+    ) {
+        this.accessResolver = new AccessContextResolver(supabase);
+    }
 
     async getApplications(
         clerkUserId: string,
@@ -101,17 +107,21 @@ export class ApplicationServiceV2 {
 
         // Auto-resolve candidate_id from clerkUserId if not provided
         let candidateId = data.candidate_id;
-        let identityUserId = data.user_id;
+        let recruiterId = data.recruiter_id;
+        let identityUserId = undefined;
 
-        if (!candidateId && clerkUserId) {
-            const candidateContext = await this.getCandidateContext(clerkUserId);
-            if (candidateContext) {
-                candidateId = candidateContext.candidate.id;
-                identityUserId = candidateContext.identityUser.id;
-            }
+        const userContext = await this.accessResolver.resolve(clerkUserId);
+        identityUserId = userContext.identityUserId;
+
+        if (!candidateId && userContext?.candidateId) {
+            candidateId = userContext.candidateId;
         }
 
-        if (!candidateId || !identityUserId) {
+        if (!recruiterId && userContext?.recruiterId) {
+            recruiterId = userContext.recruiterId;
+        }
+
+        if (!candidateId || !userContext?.identityUserId) {
             throw new Error('Candidate ID & Identity User ID is required and could not be resolved from user context');
         }
 
@@ -121,12 +131,13 @@ export class ApplicationServiceV2 {
         // Determine initial stage:
         // - recruiter_proposed: Recruiter submitted on behalf of candidate
         // - ai_review: Direct candidate application (no recruiter)
-        const hasRecruiter = !!data.recruiter_id;
+        const hasRecruiter = !!recruiterId;
         const initialStage = data.stage || (hasRecruiter ? 'recruiter_proposed' : 'ai_review');
 
         const application = await this.repository.createApplication({
             ...applicationData,
             candidate_id: candidateId,
+            recruiter_id: recruiterId,
             stage: initialStage,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -166,8 +177,8 @@ export class ApplicationServiceV2 {
             new_value: {
                 stage: application.stage,
                 job_id: application.job_id,
-                candidate_id: application.candidate_id,
-                recruiter_id: application.recruiter_id || null,
+                candidate_id: candidateId,
+                recruiter_id: recruiterId || null,
             },
             metadata: {
                 has_recruiter: hasRecruiter,
@@ -181,9 +192,9 @@ export class ApplicationServiceV2 {
             await this.eventPublisher.publish('application.created', {
                 application_id: application.id,
                 job_id: application.job_id,
-                candidate_id: application.candidate_id,
-                recruiter_id: application.recruiter_id || null,
-                has_recruiter: !!application.recruiter_id,
+                candidate_id: candidateId,
+                recruiter_id: recruiterId || null,
+                has_recruiter: hasRecruiter,
                 stage: application.stage,
                 created_by: identityUserId,
             });
@@ -420,10 +431,12 @@ export class ApplicationServiceV2 {
             return null;
         }
         const candidate = await this.repository.findCandidateByClerkUserId(clerkUserId);
+        console.log('Found candidate for Clerk User ID:', clerkUserId, candidate);
         if (!candidate) {
             return null;
         }
         const identityUser = await this.repository.findUserByClerkUserId(clerkUserId);
+        console.log('Found identity user for Clerk User ID:', clerkUserId, identityUser);
         if (!identityUser) {
             return null;
         }
