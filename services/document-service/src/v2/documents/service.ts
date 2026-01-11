@@ -5,6 +5,8 @@ import { DocumentFilters, DocumentUpdate, DocumentCreateInput } from './types';
 import { buildPaginationResponse } from '../shared/helpers';
 import { DocumentRepositoryV2 } from './repository';
 import { EventPublisher } from '../shared/events';
+import { AccessContextResolver } from '@splits-network/shared-access-context';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_MIME_TYPES = [
@@ -21,11 +23,16 @@ interface CreateDocumentPayload extends DocumentCreateInput {
 }
 
 export class DocumentServiceV2 {
+    private accessResolver: AccessContextResolver;
+
     constructor(
+        supabase: SupabaseClient,
         private repository: DocumentRepositoryV2,
         private storage: StorageClient,
         private eventPublisher?: EventPublisher
-    ) {}
+    ) {
+        this.accessResolver = new AccessContextResolver(supabase);
+    }
 
     private async validateFile(
         file: Buffer,
@@ -114,6 +121,7 @@ export class DocumentServiceV2 {
             payload.originalFileName
         );
 
+        const userContext = await this.accessResolver.resolve(clerkUserId);
         await this.storage.uploadFile(
             storageBucket,
             storagePath,
@@ -145,7 +153,7 @@ export class DocumentServiceV2 {
                 mime_type: document.mime_type,
                 file_size: document.file_size,
                 uploaded_at: document.created_at,
-                uploaded_by: clerkUserId,
+                uploaded_by: userContext.identityUserId,
             });
         }
 

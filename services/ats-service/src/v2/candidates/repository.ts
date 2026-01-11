@@ -25,6 +25,10 @@ export class CandidateRepository {
         });
     }
 
+    getSupabase(): SupabaseClient {
+        return this.supabase;
+    }
+
     /**
      * Build select clause with optional includes
      * Supports: applications, recruiter_candidates, documents, user

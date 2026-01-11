@@ -215,11 +215,12 @@ app.post(
             });
         }
         
+        const userContext = await this.accessResolver.resolve(clerkUserId);
         // Accept proposal (changes stage to draft)
         const result = await service.acceptRecruiterProposal({
             applicationId: request.params.id,
             candidateId: candidate.id,
-            candidateUserId: clerkUserId,
+            candidateUserId: userContext.identityUserId,
         });
         
         request.log.info({
@@ -383,11 +384,12 @@ app.post(
             });
         }
         
+        const userContext = await this.accessResolver.resolve(clerkUserId);
         // Decline proposal
         const result = await service.declineRecruiterProposal({
             applicationId: request.params.id,
             candidateId: candidate.id,
-            candidateUserId: clerkUserId,
+            candidateUserId: userContext.identityUserId,
             reason,
             details,
         });
@@ -554,11 +556,12 @@ app.patch(
             });
         }
         
+        const userContext = await this.accessResolver.resolve(clerkUserId);
         // Complete application
         const result = await service.completeCandidateApplication({
             applicationId: request.params.id,
             candidateId: candidate.id,
-            candidateUserId: clerkUserId,
+            candidateUserId: userContext.identityUserId,
             documentIds: document_ids,
             primaryResumeId: primary_resume_id,
             preScreenAnswers: pre_screen_answers,

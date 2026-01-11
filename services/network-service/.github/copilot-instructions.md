@@ -151,6 +151,7 @@ async update(id: string, clerkUserId: string, data: RecruiterUpdate) {
     // Validate input
     this.validateRecruiterData(data);
     
+        const userContext = await this.accessResolver.resolve(clerkUserId);
     // Update via repository
     const recruiter = await this.repository.update(id, clerkUserId, data);
     
@@ -158,7 +159,7 @@ async update(id: string, clerkUserId: string, data: RecruiterUpdate) {
     await this.eventPublisher?.publish('recruiter.updated', {
         recruiterId: id,
         changes: Object.keys(data),
-        updatedBy: clerkUserId
+        updatedBy: userContext.identityUserId,
     });
     
     return recruiter;

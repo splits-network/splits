@@ -158,6 +158,7 @@ async create(clerkUserId: string, data: MatchCreate) {
     // Validate input
     this.validateMatchData(data);
     
+        const userContext = await this.accessResolver.resolve(clerkUserId);
     // Create via repository
     const match = await this.repository.create(clerkUserId, data);
     
@@ -166,7 +167,7 @@ async create(clerkUserId: string, data: MatchCreate) {
         matchId: match.id,
         candidateId: match.candidate_id,
         jobId: match.job_id,
-        createdBy: clerkUserId
+        createdBy: userContext.identityUserId,
     });
     
     return match;

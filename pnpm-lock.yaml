@@ -35,12 +35,18 @@ importers:
       '@splits-network/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
+      chart.js:
+        specifier: ^4.5.1
+        version: 4.5.1
       next:
         specifier: ^16.1.0
         version: 16.1.0(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       react:
         specifier: ^19.2.1
         version: 19.2.1
+      react-chartjs-2:
+        specifier: ^5.3.1
+        version: 5.3.1(chart.js@4.5.1)(react@19.2.1)
       react-dom:
         specifier: ^19.2.1
         version: 19.2.1(react@19.2.1)

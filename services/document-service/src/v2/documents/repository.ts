@@ -42,6 +42,10 @@ export class DocumentRepositoryV2 {
         this.supabase = createClient(supabaseUrl, supabaseKey);
     }
 
+    getSupabase(): SupabaseClient {
+        return this.supabase;
+    }
+
     private mapRow(row: DocumentRow): Document {
         return {
             id: row.id,

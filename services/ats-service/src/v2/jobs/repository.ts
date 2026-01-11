@@ -22,6 +22,10 @@ export class JobRepository {
         });
     }
 
+    getSupabase(): SupabaseClient {
+        return this.supabase;
+    }
+
     /**
      * Find jobs with role-based scoping
      * Resolves organization from user's memberships, then filters jobs
@@ -240,7 +244,6 @@ export class JobRepository {
 
     async createJob(job: any): Promise<any> {
         const { data, error } = await this.supabase
-
             .from('jobs')
             .insert(job)
             .select()

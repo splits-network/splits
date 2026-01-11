@@ -7,12 +7,19 @@ import { PlacementRepository } from './repository';
 import { PlacementFilters, PlacementUpdate } from './types';
 import { EventPublisher } from '../shared/events';
 import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
+import { AccessContextResolver } from '@splits-network/shared-access-context';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export class PlacementServiceV2 {
+    private accessResolver: AccessContextResolver;
+
     constructor(
+        supabase: SupabaseClient,
         private repository: PlacementRepository,
         private eventPublisher?: EventPublisher
-    ) {}
+    ) {
+        this.accessResolver = new AccessContextResolver(supabase);
+    }
 
     async getPlacements(
         clerkUserId: string,
@@ -69,6 +76,7 @@ export class PlacementServiceV2 {
             throw new Error('Fee percentage must be between 0 and 100');
         }
 
+        const userContext = await this.accessResolver.resolve(clerkUserId);
         const placement = await this.repository.createPlacement({
             ...data,
             status: data.status || 'pending',
@@ -87,7 +95,7 @@ export class PlacementServiceV2 {
                 salary: placement.salary,
                 fee_percentage: placement.fee_percentage,
                 recruiter_share: placement.recruiter_share,
-                created_by: clerkUserId,
+                created_by: userContext.identityUserId,
             });
         }
 
@@ -128,6 +136,7 @@ export class PlacementServiceV2 {
             throw new Error('Salary must be positive');
         }
 
+        const userContext = await this.accessResolver.resolve(clerkUserId);
         const updatedPlacement = await this.repository.updatePlacement(id, updates);
 
         // Emit events based on what changed
@@ -137,14 +146,14 @@ export class PlacementServiceV2 {
                     placement_id: id,
                     previous_status: currentPlacement.status,
                     new_status: updates.status,
-                    changed_by: clerkUserId,
+                    changed_by: userContext.identityUserId,
                 });
             }
 
             await this.eventPublisher.publish('placement.updated', {
                 placement_id: id,
                 updated_fields: Object.keys(updates),
-                updated_by: clerkUserId,
+                updated_by: userContext.identityUserId,
             });
         }
 
@@ -157,12 +166,13 @@ export class PlacementServiceV2 {
             throw new Error(`Placement ${id} not found`);
         }
 
+        const userContext = await this.accessResolver.resolve(clerkUserId);
         await this.repository.deletePlacement(id);
 
         if (this.eventPublisher) {
             await this.eventPublisher.publish('placement.deleted', {
                 placement_id: id,
-                deleted_by: clerkUserId,
+                deleted_by: userContext.identityUserId,
             });
         }
     }

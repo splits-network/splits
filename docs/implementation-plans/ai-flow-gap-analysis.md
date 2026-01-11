@@ -58,6 +58,7 @@ result = await submitApplication(
 
 **Event Published:**
 ```typescript
+const userContext = await this.accessResolver.resolve(clerkUserId);
 // services/ats-service/src/v2/applications/service.ts:201
 await this.eventPublisher.publish('application.created', {
     application_id: application.id,
@@ -66,7 +67,7 @@ await this.eventPublisher.publish('application.created', {
     recruiter_id: application.recruiter_id || null,
     has_recruiter: !!application.recruiter_id,
     stage: application.stage,  // Will be 'ai_review'
-    created_by: clerkUserId,
+    created_by: userContext.identityUserId,
 });
 ```
 

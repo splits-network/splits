@@ -37,19 +37,19 @@ interface RegisterConfig {
 
 export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     const jobRepository = new JobRepository(config.supabaseUrl, config.supabaseKey);
-    const jobService = new JobServiceV2(jobRepository, config.eventPublisher);
+    const jobService = new JobServiceV2(jobRepository, jobRepository.getSupabase(), config.eventPublisher);
 
     const companyRepository = new CompanyRepository(config.supabaseUrl, config.supabaseKey);
-    const companyService = new CompanyServiceV2(companyRepository, config.eventPublisher);
+    const companyService = new CompanyServiceV2(companyRepository, companyRepository.getSupabase(), config.eventPublisher);
 
     const candidateRepository = new CandidateRepository(config.supabaseUrl, config.supabaseKey);
-    const candidateService = new CandidateServiceV2(candidateRepository, config.eventPublisher);
+    const candidateService = new CandidateServiceV2(candidateRepository, candidateRepository.getSupabase(), config.eventPublisher);
 
     const applicationRepository = new ApplicationRepository(config.supabaseUrl, config.supabaseKey);
     const applicationService = new ApplicationServiceV2(applicationRepository, config.eventPublisher);
 
     const placementRepository = new PlacementRepository(config.supabaseUrl, config.supabaseKey);
-    const placementService = new PlacementServiceV2(placementRepository, config.eventPublisher);
+    const placementService = new PlacementServiceV2(placementRepository.getSupabase(), placementRepository, config.eventPublisher);
 
     const statsRepository = new StatsRepository(config.supabaseUrl, config.supabaseKey);
     const statsService = new StatsServiceV2(statsRepository);

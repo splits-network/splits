@@ -612,6 +612,7 @@ export class JobServiceV2 {
             }
         }
 
+        const userContext = await this.accessResolver.resolve(clerkUserId);
         // 3. Apply updates
         const updatedJob = await this.repository.updateJob(id, updates);
 
@@ -622,7 +623,7 @@ export class JobServiceV2 {
                     jobId: id,
                     previousStatus: currentJob.status,
                     newStatus: updates.status,
-                    changedBy: clerkUserId,
+                    changedBy: userContext.identityUserId,
                 });
             }
 
@@ -630,7 +631,7 @@ export class JobServiceV2 {
             await this.eventPublisher.publish('job.updated', {
                 jobId: id,
                 updatedFields: Object.keys(updates),
-                updatedBy: clerkUserId,
+                updatedBy: userContext.identityUserId,
             });
         }
 

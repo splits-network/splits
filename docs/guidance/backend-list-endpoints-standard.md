@@ -457,6 +457,7 @@ export class ExampleServiceV2 {
         const validatedParams = this.validateListParams(params);
         
         // Delegate to repository
+        const userContext = await this.accessResolver.resolve(clerkUserId);
         const result = await this.repository.findItems(clerkUserId, validatedParams);
         
         // Optional: Enrich data or apply business logic
@@ -464,7 +465,7 @@ export class ExampleServiceV2 {
         
         // Optional: Publish analytics event
         await this.eventPublisher?.publish('items.listed', {
-            userId: clerkUserId,
+            userId: userContext.identityUserId,
             count: result.data.length,
             filters: params.filters
         });

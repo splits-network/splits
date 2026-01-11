@@ -7,12 +7,19 @@ import { CandidateRepository } from './repository';
 import { CandidateFilters, CandidateUpdate, CandidateDashboardStats, RecentCandidateApplication } from './types';
 import { EventPublisher } from '../shared/events';
 import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
+import { AccessContextResolver } from '@splits-network/shared-access-context';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export class CandidateServiceV2 {
+    private accessResolver: AccessContextResolver;
+
     constructor(
         private repository: CandidateRepository,
+        supabase: SupabaseClient,
         private eventPublisher?: EventPublisher
-    ) { }
+    ) {
+        this.accessResolver = new AccessContextResolver(supabase);
+    }
 
     async getCandidates(
         clerkUserId: string,
@@ -58,6 +65,7 @@ export class CandidateServiceV2 {
             throw new Error('Invalid email format');
         }
 
+        const userContext = await this.accessResolver.resolve(clerkUserId);
         const candidate = await this.repository.createCandidate({
             ...data,
             created_at: new Date().toISOString(),
@@ -69,7 +77,7 @@ export class CandidateServiceV2 {
             await this.eventPublisher.publish('candidate.created', {
                 candidateId: candidate.id,
                 email: candidate.email,
-                createdBy: clerkUserId,
+                createdBy: userContext.identityUserId,
             });
         }
 
@@ -87,14 +95,14 @@ export class CandidateServiceV2 {
         }
 
         if (clerkUserId) {
-            const accessContext = await this.repository.getAccessContext(clerkUserId);
+            const userContext = await this.accessResolver.resolve(clerkUserId);
             const canManage =
-                accessContext.isPlatformAdmin ||
-                accessContext.recruiterId !== null ||
-                accessContext.roles.some(role =>
+                userContext.isPlatformAdmin ||
+                userContext.recruiterId !== null ||
+                userContext.roles.some(role =>
                     ['company_admin', 'hiring_manager', 'platform_admin'].includes(role)
                 );
-            const isOwnProfile = accessContext.candidateId === id;
+            const isOwnProfile = userContext.candidateId === id;
 
             if (!canManage && !isOwnProfile) {
                 throw new Error('You do not have permission to update this candidate');
@@ -102,7 +110,7 @@ export class CandidateServiceV2 {
 
             // Authorization check: only recruiters and platform admins can update verification status
             if (updates.verification_status !== undefined) {
-                const canVerify = accessContext.isPlatformAdmin || accessContext.recruiterId !== null;
+                const canVerify = userContext.isPlatformAdmin || userContext.recruiterId !== null;
                 if (!canVerify) {
                     throw new Error('Only recruiters and platform admins can update verification status');
                 }
@@ -111,7 +119,6 @@ export class CandidateServiceV2 {
                 if (!updates.verified_by_user_id) {
                     // Get the internal user_id from users for verified_by_user_id
                     const { data: verifierUser } = await this.repository['supabase']
-
                         .from('users')
                         .select('id')
                         .eq('clerk_user_id', clerkUserId)
@@ -140,6 +147,7 @@ export class CandidateServiceV2 {
             throw new Error('First name cannot be empty');
         }
 
+        const userContext = await this.accessResolver.resolve(clerkUserId);
         const updatedCandidate = await this.repository.updateCandidate(id, updates);
 
         // Emit event
@@ -147,7 +155,7 @@ export class CandidateServiceV2 {
             await this.eventPublisher.publish('candidate.updated', {
                 candidateId: id,
                 updatedFields: Object.keys(updates),
-                updatedBy: clerkUserId,
+                updatedBy: userContext.identityUserId,
             });
         }
 
@@ -160,12 +168,13 @@ export class CandidateServiceV2 {
             throw new Error(`Candidate ${id} not found`);
         }
 
+        const userContext = await this.accessResolver.resolve(clerkUserId);
         await this.repository.deleteCandidate(id);
 
         if (this.eventPublisher) {
             await this.eventPublisher.publish('candidate.deleted', {
                 candidateId: id,
-                deletedBy: clerkUserId,
+                deletedBy: userContext.identityUserId,
             });
         }
     }
@@ -187,10 +196,11 @@ export class CandidateServiceV2 {
         clerkUserId: string,
         limit = 5
     ): Promise<RecentCandidateApplication[]> {
-        const accessContext = await this.repository.getAccessContext(clerkUserId);
-        if (!accessContext.candidateId) {
+
+        const userContext = await this.accessResolver.resolve(clerkUserId);
+        if (!userContext.candidateId) {
             return [];
         }
-        return this.repository.getRecentCandidateApplications(accessContext.candidateId, limit);
+        return this.repository.getRecentCandidateApplications(userContext.candidateId, limit);
     }
 }

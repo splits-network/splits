@@ -139,6 +139,7 @@ async createDocument(clerkUserId: string, data: DocumentCreate) {
     const storagePath = await this.storage.uploadFile(data.file, data.originalFileName);
     
     // Create document record
+        const userContext = await this.accessResolver.resolve(clerkUserId);
     const document = await this.repository.create(clerkUserId, {
         ...data,
         storage_path: storagePath
@@ -149,7 +150,7 @@ async createDocument(clerkUserId: string, data: DocumentCreate) {
         documentId: document.id,
         entityType: document.entity_type,
         entityId: document.entity_id,
-        uploadedBy: clerkUserId
+        uploadedBy: userContext.identityUserId,
     });
     
     return document;

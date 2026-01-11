@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { formatSalary, formatDate, formatRelativeTime } from '@/lib/utils';
 import ApplicationWizardModal from '@/components/application-wizard-modal';
+import { JobAnalyticsChart } from '@/components/ui/charts/job-analytics-chart';
 
 interface JobRequirement {
     id: string;
@@ -91,35 +92,116 @@ export default function JobDetailClient({
                 </Link>
 
                 {/* Job Header */}
-                <div className="card bg-base-100 shadow mb-6">
+                <div className="card bg-base-200 shadow mb-6">
+                    <div className='card bg-base-100 m-2 shadow-lg'>
+                        <div className='card-body'>
+                            <div className='flex flex-col md:flex-row gap-4 items-center md:items-start md:justify-between'>
+                                <div className='flex flex-col md:flex-row gap-4 items-center'>
+                                    <div className="card-avatar">
+                                        {job.company?.logo_url ? (
+                                            <img
+                                                src={job.company.logo_url}
+                                                alt={`${job.company.name} Logo`}
+                                                className="w-16 h-16 object-contain rounded"
+                                            />
+                                        ) : (
+                                            <div className="w-16 h-16 bg-base-300 flex items-center justify-center rounded">
+                                                <i className="fa-duotone fa-regular fa-building text-3xl text-base-content/50"></i>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className='flex flex-col items-center md:items-start '>
+                                        <h1 className="text-3xl font-bold">{job.title}</h1>
+                                        <div className='text-lg text-base-content/60'>{job.company?.name || 'Company'}</div>
+                                    </div>
+                                </div>
+                                <div className='flex flex-col md:flex-row justify-center gap-3'>
+                                    <button
+                                        className={`btn ${buttonConfig.disabled ? 'btn-disabled' : 'btn-primary'} flex items-center gap-2`}
+                                        onClick={buttonConfig.action}
+                                        disabled={buttonConfig.disabled}
+                                    >
+                                        <i className={`fa-duotone fa-regular ${buttonConfig.icon}`}></i>
+                                        {buttonConfig.text}
+                                    </button>
+
+                                    <button className="btn btn-outline">
+                                        <i className="fa-duotone fa-regular fa-bookmark"></i>
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+                            {/* Job details */}
+                            <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+                                {job.location && (
+                                    <span className="flex items-center gap-2">
+                                        <i className="fa-duotone fa-regular fa-location-dot"></i>
+                                        {job.location}
+                                    </span>
+                                )}
+                                {job.open_to_relocation && (
+                                    <span className="flex items-center gap-2">
+                                        <i className="fa-duotone fa-regular fa-butterfly"></i>
+                                        Relocation
+                                    </span>
+                                )}
+                                {job.employment_type && (
+                                    <span className="flex items-center gap-2">
+                                        <i className="fa-duotone fa-regular fa-briefcase"></i>
+                                        {job.employment_type.replace('_', '-')}
+                                    </span>
+                                )}
+                                {job.updated_at && (
+                                    <span className="flex items-center gap-2">
+                                        <i className="fa-duotone fa-regular fa-calendar"></i>
+                                        Posted {formatRelativeTime(job.updated_at || job.created_at!)}
+                                    </span>
+                                )}
+                                {job.salary_min && job.salary_max && (
+                                    <span className="flex items-center gap-1">
+                                        <i className="fa-duotone fa-regular fa-dollar-sign"></i>
+                                        {formatSalary(job.salary_min, job.salary_max)}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    <div className='p-4 pt-0'>
+                        <JobAnalyticsChart jobId={job.id} />
+                    </div>
+                </div>
+                <div className="card bg-base-200 shadow mb-6">
                     <div className="card-body">
-                        <h1 className="text-4xl font-bold mb-4">{job.title}</h1>
-                        <h2 className="text-2xl font-semibold mb-4">{job.company?.name || 'Company'}</h2>
 
                         <div className="flex flex-wrap gap-4 mb-6">
+
+                            <span className="flex items-center gap-2">
+                                <i className="fa-duotone fa-regular fa-building"></i>
+                            </span>
+
                             {job.location && (
-                                <div className="badge badge-lg">
+                                <span className="flex items-center gap-2">
                                     <i className="fa-duotone fa-regular fa-location-dot mr-2"></i>
                                     {job.location}
-                                </div>
+                                </span>
                             )}
                             {job.employment_type && (
-                                <div className="badge badge-lg">
+                                <span className="flex items-center gap-2">
                                     <i className="fa-duotone fa-regular fa-briefcase mr-2"></i>
                                     {job.employment_type.replace('_', '-')}
-                                </div>
+                                </span>
                             )}
                             {job.open_to_relocation && (
-                                <div className="badge badge-lg badge-success">
+                                <span className="flex items-center gap-2">
                                     <i className="fa-duotone fa-regular fa-house mr-2"></i>
                                     Remote
-                                </div>
+                                </span>
                             )}
                             {job.updated_at && (
-                                <div className="badge badge-lg">
+                                <span className="flex items-center gap-2">
                                     <i className="fa-duotone fa-regular fa-calendar mr-2"></i>
                                     Posted {formatDate(job.updated_at)}
-                                </div>
+                                </span>
                             )}
                         </div>
 
@@ -136,40 +218,9 @@ export default function JobDetailClient({
                                     </>
                                 )}
                             </div>
-                            <div className="flex gap-2">
-                                {existingApplication ? (
-                                    <>
-                                        <button className="btn btn-primary btn-lg" disabled>
-                                            <i className={`fa-duotone fa-regular ${buttonConfig.icon}`}></i>
-                                            {buttonConfig.text}
-                                        </button>
-                                        <Link
-                                            href={`/portal/applications/${existingApplication.id}`}
-                                            className="btn btn-outline btn-lg"
-                                        >
-                                            <i className="fa-duotone fa-regular fa-arrow-right"></i>
-                                            View Application
-                                        </Link>
-                                    </>
-                                ) : (
-                                    <button
-                                        onClick={buttonConfig.action}
-                                        className="btn btn-primary btn-lg"
-                                        disabled={buttonConfig.disabled}
-                                    >
-                                        <i className={`fa-duotone fa-regular ${buttonConfig.icon}`}></i>
-                                        {buttonConfig.text}
-                                    </button>
-                                )}
-                                <button className="btn btn-outline btn-lg">
-                                    <i className="fa-duotone fa-regular fa-bookmark"></i>
-                                    Save
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>
-
                 {/* About Company */}
                 {job.company?.description && (
                     <div className="card bg-base-100 shadow mb-6">

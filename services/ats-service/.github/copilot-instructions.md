@@ -166,6 +166,7 @@ async create(clerkUserId: string, data: JobCreate) {
     // Validate input
     this.validateJobData(data);
     
+        const userContext = await this.accessResolver.resolve(clerkUserId);
     // Create via repository
     const job = await this.repository.create(clerkUserId, data);
     
@@ -173,7 +174,7 @@ async create(clerkUserId: string, data: JobCreate) {
     await this.eventPublisher?.publish('job.created', {
         jobId: job.id,
         companyId: job.company_id,
-        createdBy: clerkUserId
+        createdBy: userContext.identityUserId,
     });
     
     return job;

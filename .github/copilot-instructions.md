@@ -570,13 +570,14 @@ export class CandidateServiceV2 {
       await this.validateEmailUnique(updates.email);
     }
     
+    const userContext = await this.accessResolver.resolve(clerkUserId);
     const updated = await this.repository.update(id, clerkUserId, updates);
     
     // Publish events after successful update
     await this.events.publish('candidate.updated', {
       candidateId: id,
       changes: Object.keys(updates),
-      updatedBy: clerkUserId
+      updatedBy: userContext.identityUserId
     });
     
     return updated;

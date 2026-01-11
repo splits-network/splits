@@ -7,12 +7,19 @@ import { JobRepository } from './repository';
 import { EventPublisher } from '../shared/events';
 import { JobFilters, JobUpdate } from './types';
 import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
+import { AccessContextResolver } from '@splits-network/shared-access-context';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export class JobServiceV2 {
+    private accessResolver: AccessContextResolver;
+
     constructor(
         private repository: JobRepository,
+        supabase: SupabaseClient,
         private eventPublisher?: EventPublisher
-    ) {}
+    ) {
+        this.accessResolver = new AccessContextResolver(supabase);
+    }
 
     /**
      * Get jobs with role-based scoping and pagination
@@ -63,8 +70,11 @@ export class JobServiceV2 {
             throw new Error('Company ID is required');
         }
 
+        const userContext = await this.accessResolver.resolve(clerkUserId);
+
         const job = await this.repository.createJob({
             ...data,
+            job_owner_id: userContext.identityUserId,
             status: data.status || 'draft',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -72,12 +82,12 @@ export class JobServiceV2 {
 
         // Emit event
         if (this.eventPublisher) {
-                await this.eventPublisher.publish('job.created', {
-                    jobId: job.id,
-                    companyId: job.company_id,
-                    status: job.status,
-                    createdBy: clerkUserId,
-                });
+            await this.eventPublisher.publish('job.created', {
+                jobId: job.id,
+                companyId: job.company_id,
+                status: job.status,
+                createdBy: userContext.identityUserId,
+            });
         }
 
         return job;
@@ -135,6 +145,7 @@ export class JobServiceV2 {
             }
         }
 
+        const userContext = await this.accessResolver.resolve(clerkUserId);
         // 3. Apply updates
         const updatedJob = await this.repository.updateJob(id, updates);
 
@@ -145,16 +156,16 @@ export class JobServiceV2 {
                     jobId: id,
                     previousStatus: currentJob.status,
                     newStatus: updates.status,
-                    changedBy: clerkUserId,
+                    changedBy: userContext.identityUserId,
                 });
             }
 
             // Generic update event
-                await this.eventPublisher.publish('job.updated', {
-                    jobId: id,
-                    updatedFields: Object.keys(updates),
-                    updatedBy: clerkUserId,
-                });
+            await this.eventPublisher.publish('job.updated', {
+                jobId: id,
+                updatedFields: Object.keys(updates),
+                updatedBy: userContext.identityUserId,
+            });
         }
 
         return updatedJob;
@@ -169,13 +180,14 @@ export class JobServiceV2 {
             throw new Error(`Job ${id} not found`);
         }
 
+        const userContext = await this.accessResolver.resolve(clerkUserId);
         await this.repository.deleteJob(id);
 
         if (this.eventPublisher) {
-                await this.eventPublisher.publish('job.deleted', {
-                    jobId: id,
-                    deletedBy: clerkUserId,
-                });
+            await this.eventPublisher.publish('job.deleted', {
+                jobId: id,
+                deletedBy: userContext.identityUserId,
+            });
         }
     }
 

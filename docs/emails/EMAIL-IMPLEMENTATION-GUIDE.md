@@ -244,6 +244,7 @@ export class InterviewServiceV2 {
 
   async createInterview(data: CreateInterviewInput, clerkUserId: string) {
     // Create interview in database
+        const userContext = await this.accessResolver.resolve(clerkUserId);
     const interview = await this.repository.create(data, clerkUserId);
     
     // Publish event with snake_case field names
@@ -254,7 +255,7 @@ export class InterviewServiceV2 {
       candidate_id: interview.candidate_id,
       recruiter_id: interview.recruiter_id,
       scheduled_at: interview.scheduled_at,
-      scheduled_by: clerkUserId
+      scheduled_by: userContext.identityUserId,
     });
     
     return interview;

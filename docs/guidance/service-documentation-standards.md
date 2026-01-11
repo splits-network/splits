@@ -159,9 +159,10 @@ if (context.candidateId) {
 
 ### Event Publishing Pattern
 ```typescript
+const userContext = await this.accessResolver.resolve(clerkUserId);
 await this.eventPublisher.publish('resource.updated', {
   resource_id: id,
-  updated_by: clerkUserId,
+  updated_by: userContext.identityUserId,
   changes: Object.keys(updates)
 });
 ```

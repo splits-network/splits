@@ -27,7 +27,7 @@ export async function registerDocumentRoutes(
     }
 
     const repository = new DocumentRepositoryV2(config.supabaseUrl, config.supabaseKey);
-    const service = new DocumentServiceV2(repository, config.storage, config.eventPublisher);
+    const service = new DocumentServiceV2(repository.getSupabase(), repository, config.storage, config.eventPublisher);
 
     app.get('/api/v2/documents', async (request, reply) => {
         try {

@@ -146,6 +146,7 @@ async update(id: string, clerkUserId: string, data: SubscriptionUpdate) {
         await this.updateStripeSubscription(id, data.plan_id);
     }
     
+        const userContext = await this.accessResolver.resolve(clerkUserId);
     // Update via repository
     const subscription = await this.repository.update(id, clerkUserId, data);
     
@@ -153,7 +154,7 @@ async update(id: string, clerkUserId: string, data: SubscriptionUpdate) {
     await this.eventPublisher?.publish('subscription.updated', {
         subscriptionId: id,
         changes: Object.keys(data),
-        updatedBy: clerkUserId
+        updatedBy: userContext.identityUserId,
     });
     
     return subscription;

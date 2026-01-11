@@ -416,10 +416,11 @@ export function registerRoutes(app: FastifyInstance, services: ServiceRegistry) 
      organizationId: string | null,
      filters: PaginationFilters
    ): Promise<Proposal[]> {
+        const userContext = await this.accessResolver.resolve(clerkUserId);
      // Call database function - role resolution via JOINs, no service calls!
      const { data, error } = await this.supabase
        .rpc('get_proposals_for_user', {
-         p_clerk_user_id: clerkUserId,
+         p_clerk_user_id: userContext.identityUserId,
          p_organization_id: organizationId,
          p_limit: filters.limit,
          p_offset: filters.offset,
