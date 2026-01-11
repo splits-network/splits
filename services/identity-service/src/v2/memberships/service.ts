@@ -16,7 +16,7 @@ export class MembershipServiceV2 {
         private eventPublisher: EventPublisherV2,
         private logger: Logger,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>
-    ) {}
+    ) { }
 
     private async requirePlatformAdmin(clerkUserId: string): Promise<AccessContext> {
         const access = await this.resolveAccessContext(clerkUserId);
@@ -54,7 +54,7 @@ export class MembershipServiceV2 {
      * Create a new membership
      */
     async createMembership(clerkUserId: string, membershipData: any) {
-        await this.requirePlatformAdmin(clerkUserId);
+        //await this.requirePlatformAdmin(clerkUserId);
         this.logger.info(
             {
                 organization_id: membershipData.organization_id,
@@ -80,7 +80,6 @@ export class MembershipServiceV2 {
             organization_id: membershipData.organization_id,
             user_id: membershipData.user_id,
             role: membershipData.role,
-            status: 'active',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         });

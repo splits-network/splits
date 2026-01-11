@@ -17,7 +17,7 @@ export class UserServiceV2 {
         private eventPublisher: EventPublisherV2,
         private logger: Logger,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>
-    ) {}
+    ) { }
 
     /**
      * Sync Clerk user data with internal database
@@ -45,7 +45,7 @@ export class UserServiceV2 {
 
                 if (hasChanges) {
                     await this.repository.updateUser(existingUser.id, updates);
-                    
+
                     // Publish user updated event
                     await this.eventPublisher.publish('user.updated', {
                         userId: existingUser.id,
@@ -153,7 +153,7 @@ export class UserServiceV2 {
      */
     async createUser(clerkUserId: string, userData: any) {
         this.logger.info({ email: userData.email }, 'UserService.createUser');
-        
+
         if (!userData.email) {
             throw new Error('Email is required');
         }
@@ -161,7 +161,7 @@ export class UserServiceV2 {
         if (!userData.clerk_user_id) {
             throw new Error('Clerk user ID is required');
         }
-        
+
         const user = await this.repository.createUser({
             id: uuidv4(),
             email: userData.email,
@@ -172,7 +172,7 @@ export class UserServiceV2 {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         });
-        
+
 
         await this.eventPublisher.publish('user.created', {
             user_id: user.id,
@@ -203,7 +203,7 @@ export class UserServiceV2 {
 
         // Check if user already exists
         const existingUser = await this.repository.findUserByClerkId(clerkUserId);
-        
+
         if (existingUser) {
             throw new Error('User already registered');
         }
@@ -220,7 +220,7 @@ export class UserServiceV2 {
         };
 
         const user = await this.repository.create(clerkUserId, createData);
-        
+
         // Publish event for other services
         await this.eventPublisher?.publish('user.registered', {
             userId: user.id,

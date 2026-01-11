@@ -16,4 +16,7 @@ export interface UserUpdate {
     name?: string;
     avatar_url?: string;
     status?: string;
+    onboarding_status?: string;
+    onboarding_step?: number;
+    onboarding_completed_at?: string;
 }

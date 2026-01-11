@@ -16,6 +16,7 @@ export function registerStatsRoutes(app: FastifyInstance, config: RegisterStatsR
                 const stats = await config.statsService.getStats(clerkUserId, request.query || {});
                 return reply.send({ data: stats });
             } catch (error: any) {
+                console.error('[Stats Error]', error?.message || error);
                 return reply
                     .code(error?.message?.includes('required') ? 403 : 400)
                     .send({ error: { message: error?.message || 'Failed to load stats' } });

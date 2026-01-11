@@ -136,28 +136,56 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
                 const apiClient = new ApiClient(token);
 
-                // Get current user data using V2 API
-                const userResponse = await apiClient.get('/users', { params: { limit: 1 } });
-                if (!userResponse?.data) throw new Error('No user data found');
-
-                // Handle both array and single object responses
-                const userData = Array.isArray(userResponse.data) ? userResponse.data[0] : userResponse.data;
+                // Get current user data
+                const response = await apiClient.get('/users', { params: { limit: 1 } });
+                if (!response?.data) throw new Error('No user data found');
+                const userData = Array.isArray(response.data) ? response.data[0] : response.data;
                 if (!userData) throw new Error('No user data found');
 
-                // Update user with onboarding completion data using standard PATCH endpoint
-                const updatePayload: any = {
-                    onboarding_status: 'completed',
-                    onboarding_step: 4,
-                };
+                // Sequential API calls following V2 architecture
 
-                // Include role and profile/company data
+                // Step 1: Create organization
+                let organizationName: string;
+                let organizationType: 'recruiter' | 'company';
+
                 if (selectedRole === 'recruiter') {
-                    updatePayload.recruiter_profile = recruiterProfile;
+                    organizationName = userData.name || userData.email?.split('@')[0] || 'Recruiter';
+                    organizationType = 'recruiter';
                 } else if (selectedRole === 'company_admin') {
-                    updatePayload.company_info = companyInfo;
+                    if (!companyInfo?.name) {
+                        throw new Error('Company name is required');
+                    }
+                    organizationName = companyInfo.name;
+                    organizationType = 'company';
+                } else {
+                    throw new Error('Invalid role');
                 }
 
-                await apiClient.patch(`/users/${userData.id}`, updatePayload);
+                const orgSlug = organizationName
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+
+                const { data: organization } = await apiClient.post('/organizations', {
+                    name: organizationName,
+                    type: organizationType,
+                    slug: orgSlug,
+                });
+
+                // Step 2: Create membership
+                await apiClient.post('/memberships', {
+                    user_id: userData.id,
+                    organization_id: organization.id,
+                    role: selectedRole,
+                    status: 'active',
+                });
+
+                // Step 3: Update user onboarding status
+                await apiClient.patch(`/users/${userData.id}`, {
+                    onboarding_status: 'completed',
+                    onboarding_step: 4,
+                    onboarding_completed_at: new Date().toISOString(),
+                });
 
                 // Move to completion step
                 setState(prev => ({

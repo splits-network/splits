@@ -28,7 +28,7 @@ export function registerUserRoutes(
                 search: params.search,
                 sort_by: params.sort_by,
                 sort_order: params.sort_order,
-                filters: params.filters ??  undefined,
+                filters: params.filters ?? undefined,
             };
 
             const result = await userService.findUsers(clerkUserId, listParams);
@@ -82,7 +82,7 @@ export function registerUserRoutes(
         try {
             const { clerkUserId } = requireUserContext(request);
             const body = request.body as any;
-            
+
             // Security: User can only register themselves
             if (body.clerk_user_id && body.clerk_user_id !== clerkUserId) {
                 reply.code(403).send({ error: { message: 'Can only register your own account' } });

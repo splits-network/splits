@@ -11,13 +11,31 @@ const IDENTITY_RESOURCES: ResourceDefinition[] = [
         basePath: '/users',
         tag: 'users',
     },
+    {
+        name: 'organizations',
+        service: 'identity',
+        basePath: '/organizations',
+        tag: 'organizations',
+    },
+    {
+        name: 'memberships',
+        service: 'identity',
+        basePath: '/memberships',
+        tag: 'memberships',
+    },
+    {
+        name: 'invitations',
+        service: 'identity',
+        basePath: '/invitations',
+        tag: 'invitations',
+    },
 ];
 
 export function registerIdentityRoutes(app: FastifyInstance, services: ServiceRegistry) {
     // Register /me route BEFORE generic CRUD routes so it takes precedence over /:id
     registerUserMeRoute(app, services);
     registerUserRegistrationRoute(app, services);
-    
+
     // Register generic CRUD routes for users
     IDENTITY_RESOURCES.forEach(resource => registerResourceRoutes(app, services, resource));
     registerConsentRoutes(app, services);

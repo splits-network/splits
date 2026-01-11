@@ -21,12 +21,12 @@ export class UserRepository {
         let filters: Record<string, any> = {}
 
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-        
+
         filters = typeof params.filters === 'string' ? parseFilters(params.filters) : (params.filters || {});
-        
+
         let query = this.supabase.from('users').select('*', { count: 'exact' }).eq('clerk_user_id', clerkUserId);
 
-        for(const key of Object.keys(filters)) {
+        for (const key of Object.keys(filters)) {
             const value = filters[key];
             if (value !== undefined && value !== null) {
                 query = query.eq(key, value);
@@ -56,7 +56,7 @@ export class UserRepository {
         query = query.range(offset, offset + limit - 1);
 
         const { data, count, error } = await query;
-        
+
         if (error) throw error;
 
         return {
