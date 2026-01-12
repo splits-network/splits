@@ -10,6 +10,8 @@ import { useUser, useAuth } from '@clerk/nextjs';
 import { OnboardingState, OnboardingContextType, UserRole } from './types';
 import { ApiClient, createAuthenticatedClient } from '@/lib/api-client';
 import { useUserProfile } from '@/contexts';
+import { PhoneNumber } from '@clerk/nextjs/server';
+import { spec } from 'node:test/reporters';
 
 const OnboardingContext = createContext<OnboardingContextType | null>(null);
 
@@ -148,44 +150,66 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 let organizationName: string;
                 let organizationType: 'recruiter' | 'company';
 
+                if (selectedRole === 'recruiter' && !recruiterProfile) {
+                    setState(prev => ({ ...prev, error: 'Recruiter profile is required', submitting: false }));
+                    return;
+                }
                 if (selectedRole === 'recruiter') {
-                    organizationName = userData.name || userData.email?.split('@')[0] || 'Recruiter';
-                    organizationType = 'recruiter';
+                    try {
+                        const { data: recruiter } = await apiClient.post('/recruiters', {
+                            user_id: userData.id,
+                            bio: recruiterProfile?.bio,
+                            phone: recruiterProfile?.phone,
+                            industries: recruiterProfile?.industries || [],
+                            specialties: recruiterProfile?.specialties || [],
+                            location: recruiterProfile?.location || [],
+                            tagline: recruiterProfile?.tagline || null,
+                            years_experience: recruiterProfile?.years_experience || null,
+                        });
+                    } catch (error: any) {
+                        setState(prev => ({
+                            ...prev,
+                            error: error.message || 'Failed to complete onboarding',
+                            submitting: false,
+                        }));
+                    }
+                    // organizationName = userData.name || userData.email?.split('@')[0] || 'Recruiter';
+                    // organizationType = 'recruiter';
                 } else if (selectedRole === 'company_admin') {
                     if (!companyInfo?.name) {
                         throw new Error('Company name is required');
                     }
                     organizationName = companyInfo.name;
                     organizationType = 'company';
+                    const orgSlug = organizationName
+                        .toLowerCase()
+                        .replace(/[^a-z0-9]+/g, '-')
+                        .replace(/^-+|-+$/g, '');
+
+                    const { data: organization } = await apiClient.post('/organizations', {
+                        name: organizationName,
+                        type: organizationType,
+                        slug: orgSlug,
+                    });
+
+                    const { data: company } = await apiClient.post('/companies', {
+                        identity_organization_id: organization.id,
+                        name: organizationName,
+                        website: companyInfo?.website || null,
+                        industry: companyInfo?.industry || null,
+                        company_size: companyInfo?.size || null,
+                    });
+
+                    // Step 2: Create membership
+                    await apiClient.post('/memberships', {
+                        user_id: userData.id,
+                        organization_id: organization.id,
+                        role: selectedRole,
+                    });
                 } else {
                     throw new Error('Invalid role');
                 }
 
-                const orgSlug = organizationName
-                    .toLowerCase()
-                    .replace(/[^a-z0-9]+/g, '-')
-                    .replace(/^-+|-+$/g, '');
-
-                const { data: organization } = await apiClient.post('/organizations', {
-                    name: organizationName,
-                    type: organizationType,
-                    slug: orgSlug,
-                });
-
-                const { data: company } = await apiClient.post('/companies', {
-                    identity_organization_id: organization.id,
-                    name: organizationName,
-                    website: companyInfo?.website || null,
-                    industry: companyInfo?.industry || null,
-                    company_size: companyInfo?.size || null,
-                });
-
-                // Step 2: Create membership
-                await apiClient.post('/memberships', {
-                    user_id: userData.id,
-                    organization_id: organization.id,
-                    role: selectedRole,
-                });
 
                 // Step 3: Update user onboarding status
                 await apiClient.patch(`/users/${userData.id}`, {

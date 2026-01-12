@@ -38,23 +38,17 @@ export class RecruiterServiceV2 {
     async createRecruiter(
         data: {
             user_id: string;
-            name: string;
-            email: string;
-            phone?: string;
-            specialization?: string;
             bio?: string;
+            phone?: string;
+            industries?: string[];
+            specialization?: string;
+            location?: string;
+            taglines?: string[];
+            years_experience?: number;
             status?: string;
         },
         clerkUserId: string
     ): Promise<any> {
-        // Validation: name and email are required
-        if (!data.name || data.name.trim().length === 0) {
-            throw { statusCode: 400, message: 'Name is required' };
-        }
-        if (!data.email || !this.isValidEmail(data.email)) {
-            throw { statusCode: 400, message: 'Valid email is required' };
-        }
-
         // Check if recruiter already exists for this user
         const existing = await this.repository.findRecruiterByUserId(data.user_id);
         if (existing) {
@@ -63,7 +57,7 @@ export class RecruiterServiceV2 {
 
         const recruiter = await this.repository.createRecruiter({
             ...data,
-            status: data.status || 'pending',
+            status: data.status || 'active',  //may be changed to 'pending' based on requirements 
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         });

@@ -141,6 +141,15 @@ export class StatsRepository {
             return sum;
         }, 0);
 
+        console.log('Recruiter Stats:', {
+            active_roles: activeRolesResult.count || 0,
+            candidates_in_process: pipelineResult.count || 0,
+            offers_pending: offersPendingResult.count || 0,
+            placements_this_month: placementsThisMonth,
+            placements_this_year: placementsThisYear,
+            total_earnings_ytd: totalEarningsYTD,
+            pending_payouts: pendingPayouts,
+        });
         return {
             active_roles: activeRolesResult.count || 0,
             candidates_in_process: pipelineResult.count || 0,
