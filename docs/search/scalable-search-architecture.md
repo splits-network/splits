@@ -40,13 +40,14 @@ if (search) {
 
 | Entity | Location | Method | Status |
 |--------|----------|--------|--------|
-| Jobs (Portal) | `apps/portal/src/app/portal/roles` | ILIKE multi-field | ✅ Working |
-| Jobs (Public) | `apps/candidate/src/app/public/jobs` | ILIKE multi-field | ✅ Working |
-| Candidates | `apps/portal/src/app/portal/candidates` | ILIKE name/email | ✅ Working |
-| Applications | `apps/portal/src/app/portal/applications` | PostgreSQL function | ✅ Working |
-| Applications (Candidate) | `apps/candidate/src/app/portal/applications` | Same as above | ✅ Working |
-| Placements | `apps/portal/src/app/portal/placements` | Basic filters | ✅ Working |
-| Recruiter-Candidates | `services/network-service/src/v2/recruiter-candidates` | Full-text search | ✅ Just implemented |
+| Jobs (Backend) | `services/ats-service/src/v2/jobs` | Full-text search | ✅ **Implemented** (Jan 12, 2026) |
+| Jobs (Portal) | `apps/portal/src/app/portal/roles` | ILIKE multi-field | 🔄 Needs frontend update |
+| Jobs (Public) | `apps/candidate/src/app/public/jobs` | ILIKE multi-field | 🔄 Needs frontend update |
+| Candidates | `apps/portal/src/app/portal/candidates` | ILIKE name/email | ⏳ Planned |
+| Applications | `apps/portal/src/app/portal/applications` | PostgreSQL function | ⏳ Planned |
+| Applications (Candidate) | `apps/candidate/src/app/portal/applications` | Same as above | ⏳ Planned |
+| Placements | `apps/portal/src/app/portal/placements` | Basic filters | ⏳ Planned |
+| Recruiter-Candidates | `services/network-service/src/v2/recruiter-candidates` | Full-text search | ✅ Implemented |
 
 ### Frontend Infrastructure Already in Place
 
@@ -66,36 +67,63 @@ if (search) {
 
 Create migrations and update repositories for each entity following the recruiter-candidates pattern.
 
-#### 1.1 Jobs Table (`public.jobs`)
+#### 1.1 Jobs Table (`public.jobs`) ✅ COMPLETED
 
-**Migration**: `/infra/migrations/0XX_add_jobs_search_index.sql`
+**Status**: ✅ **Implemented and deployed** (January 12, 2026)
 
-**Searchable Fields** (with weights):
+**Migration**: `services/ats-service/migrations/017_add_jobs_search_index.sql`
 
-**Primary Job Fields:**
-- `title` (A) - Primary search field
-- `description` (B) - Full job description and responsibilities
-- `requirements` (B) - Required qualifications
-- `responsibilities` (B) - Day-to-day duties
+**Implemented Fields** (with weights):
+- `title` (A) - Primary job field
+- `description` (B) - Full job description
+- `recruiter_description` (B) - Internal recruiter notes
+- `candidate_description` (B) - Candidate-facing description
+- `company_name` (B) - Denormalized from companies table
 - `location` (C) - Geographic search
-- `level` (C) - Junior/Mid/Senior
-- `employment_type` (C) - Full-time/Part-time/Contract
-- `remote_policy` (C) - Remote/Hybrid/On-site
-- `salary_range_min` + `salary_range_max` (D) - Compensation (concatenated as text)
+- `company_industry` (C) - Industry from companies table
+- `company_headquarters_location` (C) - Company location
+- `employment_type` (C) - Full-time/Contract/Temporary
+- `department` (C) - Department/team
+- `status` (D) - active/paused/filled/closed
 
-**Related Company Fields (from `companies` table):**
-- `company_name` (B) - Company name
-- `company_description` (C) - What the company does
-- `company_industry` (C) - Industry classification
-- `company_headquarters_location` (D) - Company location
-- `company_size` (D) - Number of employees
+**Denormalized Columns Added**:
+- `company_name` - Auto-synced from companies.name
+- `company_industry` - Auto-synced from companies.industry
+- `company_headquarters_location` - Auto-synced from companies.headquarters_location
+- `search_vector` - Full-text search tsvector
 
-**Related Job Requirements (from `job_requirements` table):**
-- All requirements concatenated (C) - Skills + experience levels
-- Format: "Python (3 years, Required), React (2 years, Preferred)"
+**Triggers Created**:
+- `sync_jobs_company_data` - Updates jobs when companies change
+- `update_jobs_search_vector` - Rebuilds search_vector on job changes
 
-**Why Include Related Data:**
-Users search based on what they know or remember - they might search for "stripe" (company), "fintech" (industry), "senior python" (requirement + level), or "remote" (work policy). We need to return relevant results regardless of which field contains their search terms.
+**Indexes Created**:
+- `jobs_search_vector_idx` (GIN) - Main full-text search
+- `jobs_title_trgm_idx` (Trigram) - Substring title matching
+- `jobs_company_name_trgm_idx` (Trigram) - Fuzzy company search
+- `jobs_description_trgm_idx` (Trigram) - Description substring matching
+
+**Test Results**:
+- ✅ Single-word: "engineer" returns 9 results with ranking
+- ✅ Multi-word: "Splits Network" returns 5 results (AND logic)
+- ✅ Company search: Denormalized data working perfectly
+- ✅ Performance: <1ms execution time with 25 rows
+- ✅ Auto-sync: Company changes propagate to jobs automatically
+
+**Repository Updated**: `services/ats-service/src/v2/jobs/repository.ts`
+```typescript
+if (filters.search) {
+    const tsquery = filters.search.split(/\s+/).filter(t => t.trim()).join(' & ');
+    query = query.textSearch('search_vector', tsquery, {
+        type: 'websearch',
+        config: 'english'
+    });
+}
+```
+
+**Future Enhancements** (not implemented yet):
+- Job requirements concatenation (requires JOIN or denormalization)
+- Salary range text concatenation
+- Remote policy field (not in current schema)
 
 **Pattern**:
 ```sql

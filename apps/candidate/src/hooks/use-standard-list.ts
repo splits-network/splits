@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
+import { ApiClient, createAuthenticatedClient } from '@/lib/api-client';
 import type { StandardListParams, StandardListResponse, PaginationResponse } from '@splits-network/shared-types';
 
 // Re-export UI components for convenience
@@ -59,6 +59,8 @@ export interface UseStandardListOptions<T, F extends Record<string, any> = Recor
     sortableFields?: string[];
     /** Auto-fetch on mount */
     autoFetch?: boolean;
+    /** Require authentication (default: true). Set to false for public routes */
+    requireAuth?: boolean;
 }
 
 export interface UseStandardListReturn<T, F extends Record<string, any> = Record<string, any>> {
@@ -145,6 +147,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         viewModeKey,
         storageKey, // Deprecated alias for viewModeKey
         autoFetch = true,
+        requireAuth = true,
     } = options;
 
     // Support deprecated storageKey as fallback
@@ -311,14 +314,6 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
                 response = await fetchFn(fetchParams);
             } else if (endpoint) {
                 // Use built-in fetch with endpoint
-                const token = await getToken();
-                if (!token) {
-                    setError('Not authenticated');
-                    return;
-                }
-
-                const client = createAuthenticatedClient(token);
-
                 const params: StandardListParams = {
                     page,
                     limit,
@@ -338,7 +333,20 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
                     params.filters = activeFilters;
                 }
 
-                response = await client.get<StandardListResponse<T>>(endpoint, { params });
+                // Handle authentication based on requireAuth option
+                if (requireAuth) {
+                    const token = await getToken();
+                    if (!token) {
+                        setError('Not authenticated');
+                        return;
+                    }
+                    const client = createAuthenticatedClient(token);
+                    response = await client.get<StandardListResponse<T>>(endpoint, { params });
+                } else {
+                    // Public endpoint - no auth required
+                    const client = new ApiClient(); // Works without token for public endpoints
+                    response = await client.get<StandardListResponse<T>>(endpoint, { params });
+                }
             } else {
                 throw new Error('Either endpoint or fetchFn must be provided');
             }

@@ -92,7 +92,7 @@ export default function JobCard({ job }: JobCardProps) {
                     <div className='flex items-center gap-3 min-w-0'>
                         {/* Company Logo/Avatar */}
                         <div className="avatar avatar-placeholder">
-                            <div className="bg-secondary text-secondary-content rounded-full w-10 h-10">
+                            <div className="bg-base-200 text-base-content rounded-lg w-10 h-10">
                                 {job.company?.logo_url ? (
                                     <img src={job.company.logo_url} alt={job.company.name} className='object-contain w-full h-full' />
                                 ) : (

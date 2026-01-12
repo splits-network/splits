@@ -113,6 +113,7 @@ export default function JobsList() {
         syncToUrl: true,
         viewModeKey: 'jobsViewMode',
         autoFetch: true,
+        requireAuth: false,
     });
 
     const stats = jobs.length > 0 ? buildStats(jobs, pagination?.total || 0) : null;
@@ -180,7 +181,7 @@ export default function JobsList() {
 
                 {/* Grid View */}
                 {viewMode === 'grid' && jobs.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
                         {jobs.map((job) => (
                             <JobCard key={job.id} job={job} />
                         ))}

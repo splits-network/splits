@@ -161,14 +161,14 @@ async function main() {
     app.addHook('onRequest', async (request, reply) => {
         // Generate or use existing correlation ID
         const correlationId = (request.headers['x-correlation-id'] as string) || randomUUID();
-        
+
         // Store correlation ID and start time in request context
         (request as any).correlationId = correlationId;
         (request as any).startTime = Date.now();
-        
+
         // Add correlation ID to response headers
         reply.header('x-correlation-id', correlationId);
-        
+
         // Log incoming request
         logger.info({
             correlationId,
@@ -187,7 +187,7 @@ async function main() {
         const correlationId = (request as any).correlationId;
         const startTime = (request as any).startTime;
         const responseTime = Date.now() - startTime;
-        
+
         logger.info({
             correlationId,
             method: request.method,
@@ -212,13 +212,13 @@ async function main() {
         const correlationId = (request as any).correlationId;
         const startTime = (request as any).startTime;
         const responseTime = Date.now() - startTime;
-        
+
         // Enhanced logging for API calls
-        
+
         // Log auth headers for debugging
         const authHeader = request.headers.authorization;
         const clerkUserId = (request as any).auth?.clerkUserId;
-        
+
         if (authHeader || clerkUserId) {
             console.log(`[API Auth] User: ${clerkUserId || 'anonymous'} - Auth: ${authHeader ? 'present' : 'missing'} - Role resolved by service`);
         }
@@ -250,33 +250,33 @@ async function main() {
         if (request.url === '/health' || request.url.startsWith('/health?')) {
             return;
         }
-        
+
         // Skip auth for swagger docs endpoints
         if (request.url.startsWith('/docs')) {
             return;
         }
-        
+
         // Skip auth for webhook endpoints (verified by signature)
         if (request.url.includes('/webhooks/')) {
             return;
         }
-        
+
         // Skip auth for internal service calls (authenticated by service key)
         const internalServiceKey = request.headers['x-internal-service-key'] as string;
         if (internalServiceKey) {
             return;
         }
-        
+
         // Skip auth for public API endpoints (candidate website, marketplace browsing, etc.)
         if (request.url.startsWith('/api/public/') || request.url.startsWith('/api/marketplace/')) {
             return;
         }
-        
+
         // Skip auth for public V2 job endpoints (optional authentication)
         // GET /api/v2/jobs - list all jobs (or filter by company if authenticated)
         // GET /api/v2/jobs/:id - get job details
         if (request.method === 'GET' && (
-            request.url.startsWith('/api/v2/jobs') || 
+            request.url.startsWith('/api/v2/jobs') ||
             request.url.match(/^\/api\/v2\/jobs\/[^/]+(\?|$)/)
         )) {
             // Try to authenticate if token is present, but don't fail if missing
@@ -288,7 +288,7 @@ async function main() {
             }
             return;
         }
-        
+
         // Skip auth for public V2 recruiters endpoints (marketplace browsing)
         // GET /api/v2/recruiters - list all recruiters for marketplace browsing
         // GET /api/v2/recruiters/:id - view recruiter details for marketplace
@@ -307,7 +307,7 @@ async function main() {
             }
             return;
         }
-        
+
         if (request.url.startsWith('/api/v2/status-contact')) {
             return;
         }
@@ -339,7 +339,7 @@ async function main() {
         try {
             // Check Redis connectivity
             await redis.ping();
-            
+
             return reply.status(200).send({
                 status: 'healthy',
                 service: 'api-gateway',

@@ -122,34 +122,19 @@ export class JobRepository {
             query = query.eq('status', 'active');
         }
 
-        // Apply filters with multi-criteria search parsing
+        // Apply full-text search
         let useRelevanceSort = false;
         if (filters.search) {
-            const searchTerms = this.parseSearchQuery(filters.search);
+            console.log('Applying full-text search on jobs:', filters.search);
 
-            // Build multi-field search with relevance scoring
-            const searchConditions: string[] = [];
+            // Convert search query to tsquery format (AND logic for multiple words)
+            const tsquery = filters.search.split(/\s+/).filter(t => t.trim()).join(' & ');
 
-            // Search in title (highest weight)
-            searchConditions.push(`title.ilike.%${filters.search}%`);
-
-            // Search in description
-            searchConditions.push(`description.ilike.%${filters.search}%`);
-
-            // Search in location
-            if (searchTerms.location) {
-                searchConditions.push(`location.ilike.%${searchTerms.location}%`);
-            }
-
-            // Search in requirements and skills
-            if (searchTerms.skills && searchTerms.skills.length > 0) {
-                searchTerms.skills.forEach(skill => {
-                    searchConditions.push(`title.ilike.%${skill}%`);
-                    searchConditions.push(`description.ilike.%${skill}%`);
-                });
-            }
-
-            query = query.or(searchConditions.join(','));
+            // Use PostgreSQL full-text search with search_vector column
+            query = query.textSearch('search_vector', tsquery, {
+                type: 'websearch',
+                config: 'english'
+            });
 
             // Use relevance-based sorting when search is active (unless explicitly overridden)
             if (!filters.sort_by) {
@@ -275,62 +260,5 @@ export class JobRepository {
             .eq('id', id);
 
         if (error) throw error;
-    }
-
-    /**
-     * Parse search query into structured search terms
-     * Extracts: skills/keywords, years of experience, location, salary
-     */
-    private parseSearchQuery(search: string): {
-        skills: string[];
-        years?: number;
-        location?: string;
-        salaryMin?: number;
-        salaryMax?: number;
-    } {
-        const terms = search.toLowerCase().trim();
-        const result: any = {
-            skills: []
-        };
-
-        // Extract years of experience (e.g., "5 years", "10+ years")
-        const yearsMatch = terms.match(/(\d+)\+?\s*(?:years?|yrs?)/i);
-        if (yearsMatch) {
-            result.years = parseInt(yearsMatch[1]);
-        }
-
-        // Extract salary range (e.g., "100k", "150k-200k", "$120,000")
-        const salaryMatch = terms.match(/\$?(\d+)(?:,\d{3})*(?:k)?(?:\s*-\s*\$?(\d+)(?:,\d{3})*(?:k)?)?/i);
-        if (salaryMatch) {
-            const min = parseInt(salaryMatch[1].replace(/,/g, ''));
-            result.salaryMin = min < 1000 ? min * 1000 : min; // Handle "100k" vs "100000"
-            if (salaryMatch[2]) {
-                const max = parseInt(salaryMatch[2].replace(/,/g, ''));
-                result.salaryMax = max < 1000 ? max * 1000 : max;
-            }
-        }
-
-        // Extract location keywords (common cities/states/remote)
-        const locationKeywords = ['california', 'ca', 'san francisco', 'sf', 'new york', 'ny', 'nyc',
-            'texas', 'tx', 'austin', 'seattle', 'boston', 'chicago', 'remote',
-            'hybrid', 'onsite', 'los angeles', 'la', 'denver', 'portland'];
-        for (const location of locationKeywords) {
-            if (terms.includes(location)) {
-                result.location = location;
-                break;
-            }
-        }
-
-        // Split into individual skill keywords (filter out stop words)
-        const stopWords = ['the', 'and', 'or', 'for', 'with', 'years', 'year', 'yrs', 'yr',
-            'remote', 'hybrid', 'onsite', 'position', 'job', 'role'];
-        const words = terms.split(/\s+/).filter(word =>
-            word.length > 2 &&
-            !stopWords.includes(word) &&
-            !word.match(/^[\$\d,k-]+$/) // Filter out salary/number patterns
-        );
-        result.skills = words;
-
-        return result;
     }
 }
