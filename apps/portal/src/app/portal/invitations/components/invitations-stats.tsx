@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { StatCard, StatCardGrid } from '@/components/ui/cards';
+import { InvitationsTrendsChart } from '@/components/charts/invitations-trends-chart';
 
 interface RecruiterCandidate {
     id: string;
@@ -76,7 +77,7 @@ export default async function InvitationsStats() {
                 />
             </StatCardGrid>
             <div className='p-4 pt-0'>
-                {/* Chart placeholder - to be implemented */}
+                <InvitationsTrendsChart />
             </div>
         </div>
     );

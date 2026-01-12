@@ -24,7 +24,7 @@ export class RecruiterCandidateServiceV2 {
 
         return buildPaginationResponse(
             result.data,
-            result.total,
+            result.pagination.total || 0,
             filters.page || 1,
             filters.limit || 25
         );
