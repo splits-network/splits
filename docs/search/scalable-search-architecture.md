@@ -79,7 +79,7 @@ Create migrations and update repositories for each entity following the recruite
 
 **Migrations**: 
 - `services/ats-service/migrations/017_add_jobs_search_index.sql` (initial)
-- `services/ats-service/migrations/023_enhance_jobs_search_with_requirements_fixed.sql` (enhancement)
+- `services/ats-service/migrations/024_fix_jobs_search_requirements_vector_only.sql` (requirements - vector only)
 
 **Implemented Fields** (with weights):
 - `title` (A) - Primary job field
@@ -87,7 +87,7 @@ Create migrations and update repositories for each entity following the recruite
 - `recruiter_description` (B) - Internal recruiter notes
 - `candidate_description` (B) - Candidate-facing description
 - `company_name` (B) - Denormalized from companies table
-- `requirements_text` (B) - **NEW**: Aggregated job requirements from job_requirements table
+- `job_requirements` (B) - **NEW**: Queried inline from job_requirements table (vector only, no denormalization)
 - `location` (C) - Geographic search
 - `company_industry` (C) - Industry from companies table
 - `company_headquarters_location` (C) - Company location
@@ -99,14 +99,11 @@ Create migrations and update repositories for each entity following the recruite
 - `company_name` - Auto-synced from companies.name
 - `company_industry` - Auto-synced from companies.industry
 - `company_headquarters_location` - Auto-synced from companies.headquarters_location
-- `requirements_text` - **NEW**: Aggregated from job_requirements using string_agg(), format: "type: description | type: description"
-- `search_vector` - Full-text search tsvector
+- `search_vector` - Full-text search tsvector (includes requirements via inline query)
 
 **Triggers Created**:
 - `sync_jobs_company_data` - Updates jobs when companies change
-- `sync_jobs_requirements_data_insert` - **NEW**: Updates jobs when requirements are added
-- `sync_jobs_requirements_data_update` - **NEW**: Updates jobs when requirements are modified
-- `sync_jobs_requirements_data_delete` - **NEW**: Updates jobs when requirements are removed
+- `update_job_search_on_requirements_change` - **NEW**: Single trigger handles all requirements changes (INSERT/UPDATE/DELETE)
 - `update_jobs_search_vector` - Rebuilds search_vector on job changes
 
 **Indexes Created**:
@@ -119,9 +116,9 @@ Create migrations and update repositories for each entity following the recruite
 - ✅ Single-word: "engineer" returns 9 results with ranking
 - ✅ Multi-word: "Splits Network" returns 5 results (AND logic)
 - ✅ Company search: Denormalized data working perfectly
-- ✅ **Requirements search**: "recruiting" returns 5 jobs (top rank 0.753), requirements text fully searchable
+- ✅ **Requirements search**: "recruiting" returns 5 jobs (top rank 0.753), requirements fully searchable via inline query
 - ✅ **Multi-word requirements**: "7 & years & experience" returns 3 jobs (top rank 0.996)
-- ✅ Performance: 0.277ms execution time using GIN bitmap index scan
+- ✅ Performance: 0.399ms execution time (vector-only approach, no denormalization overhead)
 - ✅ Auto-sync: Company changes AND requirement changes propagate to jobs automatically
 
 **Repository Updated**: `services/ats-service/src/v2/jobs/repository.ts`
