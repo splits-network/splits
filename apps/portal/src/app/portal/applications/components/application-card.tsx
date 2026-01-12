@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { DataRow, DataList, KeyMetric, MetricCard } from '@/components/ui/cards';
+import { DataRow, DataList, KeyMetric, MetricCard, VerticalDataRow } from '@/components/ui/cards';
 import { formatRelativeTime } from '@/lib/utils';
 import { getApplicationStageBadge } from '@/lib/utils/badge-styles';
 import type { ApplicationStage } from '@splits-network/shared-types';
@@ -185,25 +185,25 @@ export function ApplicationCard({
                 />
                 {/* Data Rows */}
                 <DataList compact>
-                    <DataRow
+                    <VerticalDataRow
                         icon="fa-building"
                         label="Company"
                         value={companyName}
                     />
-                    <DataRow
+                    <VerticalDataRow
                         icon="fa-briefcase"
                         label="Position"
                         value={application.job.title}
                     />
                     {!isMasked && (
-                        <DataRow
+                        <VerticalDataRow
                             icon="fa-envelope"
                             label="Email"
                             value={application.candidate.email}
                         />
                     )}
                     {application.recruiter && (
-                        <DataRow
+                        <VerticalDataRow
                             icon="fa-user-tie"
                             label="Recruiter"
                             value={application.recruiter.name}

@@ -53,7 +53,56 @@ export class ApplicationRepository {
         } else if (!accessContext.isPlatformAdmin) {
             if (accessContext.organizationIds.length > 0) {
                 console.log('Applying organization access filter for organizations:', accessContext.organizationIds);
-                query = query.in('job.company.identity_organization_id', accessContext.organizationIds);
+
+                // First, get all companies that belong to the user's organizations
+                const { data: companies, error: companyError } = await this.supabase
+                    .from('companies')
+                    .select('id')
+                    .in('identity_organization_id', accessContext.organizationIds);
+
+                if (companyError) throw companyError;
+
+                const companyIds = companies?.map(c => c.id) || [];
+
+                if (companyIds.length === 0) {
+                    // No companies found for these organizations
+                    return {
+                        data: [],
+                        pagination: {
+                            page: 1,
+                            limit,
+                            total: 0,
+                            total_pages: 0
+                        }
+                    };
+                }
+
+                // Get all jobs that belong to these companies
+                const { data: jobs, error: jobError } = await this.supabase
+                    .from('jobs')
+                    .select('id')
+                    .in('company_id', companyIds);
+
+                if (jobError) throw jobError;
+
+                const jobIds = jobs?.map(j => j.id) || [];
+
+                if (jobIds.length === 0) {
+                    // No jobs found for these companies
+                    return {
+                        data: [],
+                        pagination: {
+                            page: 1,
+                            limit,
+                            total: 0,
+                            total_pages: 0
+                        }
+                    };
+                }
+
+                // Now filter applications by these job IDs
+                query = query.in('job_id', jobIds);
+
                 // Company admins and hiring managers only see applications in company-relevant stages
                 query = query.in('stage', ['submitted', 'interview', 'offer', 'hired', 'rejected']);
             } else {
