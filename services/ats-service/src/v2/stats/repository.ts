@@ -58,7 +58,6 @@ export class StatsRepository {
         // First, get job IDs assigned to this recruiter via role_assignments (in network schema)
         // Jobs don't have recruiter_id - recruiters are assigned to jobs via role_assignments
         const assignedJobsResult = await this.supabase
-            .schema('network')
             .from('role_assignments')
             .select('job_id')
             .eq('recruiter_id', recruiterId)
@@ -75,7 +74,6 @@ export class StatsRepository {
             // Count active jobs from assigned job IDs
             assignedJobIds.length > 0
                 ? this.supabase
-                    .schema('ats')
                     .from('jobs')
                     .select('id', { count: 'exact', head: true })
                     .in('id', assignedJobIds)
@@ -83,13 +81,11 @@ export class StatsRepository {
                 : Promise.resolve({ count: 0, error: null }),
             // applications.recruiter_id exists in ats schema
             this.supabase
-                .schema('ats')
                 .from('applications')
                 .select('id', { count: 'exact', head: true })
                 .eq('recruiter_id', recruiterId)
                 .in('stage', PIPELINE_STAGES),
             this.supabase
-                .schema('ats')
                 .from('applications')
                 .select('id', { count: 'exact', head: true })
                 .eq('recruiter_id', recruiterId)
@@ -97,7 +93,6 @@ export class StatsRepository {
                 .or('accepted_by_company.eq.false,accepted_by_company.is.null'),
             // placements.recruiter_id exists in ats schema
             this.supabase
-                .schema('ats')
                 .from('placements')
                 .select('id, hired_at, recruiter_share, state, guarantee_expires_at')
                 .eq('recruiter_id', recruiterId),
@@ -141,15 +136,6 @@ export class StatsRepository {
             return sum;
         }, 0);
 
-        console.log('Recruiter Stats:', {
-            active_roles: activeRolesResult.count || 0,
-            candidates_in_process: pipelineResult.count || 0,
-            offers_pending: offersPendingResult.count || 0,
-            placements_this_month: placementsThisMonth,
-            placements_this_year: placementsThisYear,
-            total_earnings_ytd: totalEarningsYTD,
-            pending_payouts: pendingPayouts,
-        });
         return {
             active_roles: activeRolesResult.count || 0,
             candidates_in_process: pipelineResult.count || 0,
@@ -170,27 +156,23 @@ export class StatsRepository {
             await Promise.all([
                 // Total applications
                 this.supabase
-                    .schema('ats')
                     .from('applications')
                     .select('id', { count: 'exact', head: true })
                     .eq('candidate_id', candidateId),
                 // Active applications (in process stages)
                 this.supabase
-                    .schema('ats')
                     .from('applications')
                     .select('id', { count: 'exact', head: true })
                     .eq('candidate_id', candidateId)
                     .in('stage', PIPELINE_STAGES),
                 // Interviews scheduled
                 this.supabase
-                    .schema('ats')
                     .from('applications')
                     .select('id', { count: 'exact', head: true })
                     .eq('candidate_id', candidateId)
                     .eq('stage', 'interview'),
                 // Offers received
                 this.supabase
-                    .schema('ats')
                     .from('applications')
                     .select('id', { count: 'exact', head: true })
                     .eq('candidate_id', candidateId)
@@ -228,34 +210,29 @@ export class StatsRepository {
         ] = await Promise.all([
             // Active roles
             this.supabase
-                .schema('ats')
                 .from('jobs')
                 .select('id', { count: 'exact', head: true })
                 .in('company_id', companyIds)
                 .in('status', ACTIVE_ROLE_STATUSES),
             // Total applications
             this.supabase
-                .schema('ats')
                 .from('applications')
                 .select('id, job:jobs!inner(company_id)', { count: 'exact', head: true })
                 .in('job.company_id', companyIds),
             // Interviews scheduled
             this.supabase
-                .schema('ats')
                 .from('applications')
                 .select('id, job:jobs!inner(company_id)', { count: 'exact', head: true })
                 .in('job.company_id', companyIds)
                 .eq('stage', 'interview'),
             // Offers extended
             this.supabase
-                .schema('ats')
                 .from('applications')
                 .select('id, job:jobs!inner(company_id)', { count: 'exact', head: true })
                 .in('job.company_id', companyIds)
                 .eq('stage', 'offer'),
             // Placements for time-to-hire and counts
             this.supabase
-                .schema('ats')
                 .from('placements')
                 .select('id, hired_at, application:applications!inner(job:jobs!inner(company_id))')
                 .in('application.job.company_id', companyIds),
@@ -292,7 +269,6 @@ export class StatsRepository {
         // Count active recruiters from role_assignments (not jobs.recruiter_id which doesn't exist)
         // First get job IDs for these companies
         const companyJobsResult = await this.supabase
-            .schema('ats')
             .from('jobs')
             .select('id')
             .in('company_id', companyIds)
@@ -304,7 +280,6 @@ export class StatsRepository {
         let activeRecruitersCount = 0;
         if (companyJobIds.length > 0) {
             const activeRecruitersResult = await this.supabase
-                .schema('network')
                 .from('role_assignments')
                 .select('recruiter_id')
                 .in('job_id', companyJobIds)

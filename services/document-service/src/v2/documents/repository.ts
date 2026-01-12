@@ -212,16 +212,6 @@ export class DocumentRepositoryV2 {
             throw new Error('Unable to resolve identity user for document upload');
         }
 
-        // Debug: log the access context for this user
-        console.log(`[DOCUMENT] Creating document for user:`, {
-            clerkUserId,
-            identityUserId: accessContext.identityUserId,
-            candidateId: accessContext.candidateId,
-            roles: accessContext.roles,
-            requestedEntityType: input.entity_type,
-            requestedEntityId: input.entity_id,
-        });
-
         if (!this.canModifyEntity(input.entity_type, input.entity_id, accessContext)) {
             throw new Error('Not authorized to upload document for this entity');
         }

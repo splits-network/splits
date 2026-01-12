@@ -88,7 +88,7 @@ export default function StatusPage() {
             });
 
             const responseBody = await response.json().catch(() => ({}));
-            console.log('Response body:', response);
+
             if (!response.ok) {
                 throw new Error(
                     responseBody.error || 'We could not capture that note. Please try again shortly.'

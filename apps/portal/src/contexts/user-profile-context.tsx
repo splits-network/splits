@@ -99,7 +99,7 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
     useEffect(() => {
         fetchProfile();
     }, [fetchProfile]);
-    console.log(profile);
+
     // Derived role checks
     const roles = profile?.roles || [];
     const isAdmin = Boolean(profile?.is_platform_admin || roles.includes('platform_admin'));

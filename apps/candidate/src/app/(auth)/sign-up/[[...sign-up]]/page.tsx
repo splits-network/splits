@@ -92,8 +92,6 @@ export default function SignUpPage() {
                             name: `${user.firstName || firstName} ${user.lastName || lastName}`.trim(),
                         });
 
-                        console.log('User created successfully in identity service', newUser);
-
                         // Check ATS service for existing candidates with this email
                         const candidate = await apiClient.get(`/candidates`, {
                             params: {
@@ -115,7 +113,6 @@ export default function SignUpPage() {
 
                         }
 
-                        console.log('Candidate profile setup completed');
                     }
                 } catch (userCreationError) {
                     // Log error but don't block the flow - webhook will catch this later

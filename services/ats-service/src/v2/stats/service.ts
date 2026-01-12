@@ -43,7 +43,7 @@ function parseRange(range?: string): StatsRange {
 }
 
 export class StatsServiceV2 {
-    constructor(private repository: StatsRepository) {}
+    constructor(private repository: StatsRepository) { }
 
     async getStats(clerkUserId: string, params: StatsQueryParams): Promise<StatsResponse> {
         const scope = this.normalizeScope(params.scope || params.type || 'recruiter');

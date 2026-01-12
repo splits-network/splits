@@ -12,7 +12,7 @@ export class ApplicationsEventConsumer {
         private logger: Logger,
         private dataLookup: DataLookupHelper,
         private contactLookup: ContactLookupHelper
-    ) {}
+    ) { }
 
     async handleApplicationAccepted(event: DomainEvent): Promise<void> {
         try {
@@ -68,7 +68,6 @@ export class ApplicationsEventConsumer {
         try {
             const { application_id, old_stage, new_stage, job_id, candidate_id, recruiter_id } = event.payload;
 
-            console.log('[APPLICATIONS-CONSUMER] 🔄 Stage changed:', { application_id, old_stage, new_stage });
             this.logger.info({ application_id, old_stage, new_stage }, 'Processing stage changed notification');
 
             const context = await this.dataLookup.getApplicationContext(application_id);
@@ -90,8 +89,7 @@ export class ApplicationsEventConsumer {
 
             switch (new_stage) {
                 case 'recruiter_request':
-                    console.log('[APPLICATIONS-CONSUMER] 📝 Recruiter request stage - notifying candidate');
-                    
+
                     // Candidate should be notified that their recruiter has requested changes
                     if (candidateEmail) {
                         let recruiterName = 'Your recruiter';
@@ -101,7 +99,7 @@ export class ApplicationsEventConsumer {
                                 recruiterName = recruiterContact.name;
                             }
                         }
-                        
+
                         await this.emailService.sendRecruiterRequestChanges(candidateEmail, {
                             candidateName: candidate.full_name,
                             recruiterName,
@@ -115,8 +113,7 @@ export class ApplicationsEventConsumer {
                     break;
 
                 case 'screen':
-                    console.log('[APPLICATIONS-CONSUMER] 📞 Screen stage - notifying candidate and recruiter');
-                    
+
                     if (candidateEmail) {
                         await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
                             candidateName: candidate.full_name,
@@ -128,7 +125,7 @@ export class ApplicationsEventConsumer {
                             userId: candidateUserId || undefined,
                         });
                     }
-                    
+
                     if (effectiveRecruiterId) {
                         const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
                         if (recruiterContact) {
@@ -146,8 +143,7 @@ export class ApplicationsEventConsumer {
                     break;
 
                 case 'submitted':
-                    console.log('[APPLICATIONS-CONSUMER] 📤 Submitted stage - notifying candidate, recruiter, and company');
-                    
+
                     if (candidateEmail) {
                         await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
                             candidateName: candidate.full_name,
@@ -159,7 +155,7 @@ export class ApplicationsEventConsumer {
                             userId: candidateUserId || undefined,
                         });
                     }
-                    
+
                     const companyAdmins = await this.contactLookup.getCompanyAdminContacts(job.company_id);
                     for (const admin of companyAdmins) {
                         await this.emailService.sendApplicationCreated(admin.email, {
@@ -169,7 +165,7 @@ export class ApplicationsEventConsumer {
                             applicationId: application_id,
                         });
                     }
-                    
+
                     if (effectiveRecruiterId) {
                         const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
                         if (recruiterContact) {
@@ -187,8 +183,7 @@ export class ApplicationsEventConsumer {
                     break;
 
                 case 'interview':
-                    console.log('[APPLICATIONS-CONSUMER] 🎤 Interview stage - notifying all parties');
-                    
+
                     if (candidateEmail) {
                         await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
                             candidateName: candidate.full_name,
@@ -200,7 +195,7 @@ export class ApplicationsEventConsumer {
                             userId: candidateUserId || undefined,
                         });
                     }
-                    
+
                     if (effectiveRecruiterId) {
                         const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
                         if (recruiterContact) {
@@ -218,8 +213,7 @@ export class ApplicationsEventConsumer {
                     break;
 
                 case 'offer':
-                    console.log('[APPLICATIONS-CONSUMER] 🎉 Offer stage - notifying candidate and recruiter');
-                    
+
                     if (candidateEmail) {
                         await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
                             candidateName: candidate.full_name,
@@ -231,7 +225,7 @@ export class ApplicationsEventConsumer {
                             userId: candidateUserId || undefined,
                         });
                     }
-                    
+
                     if (effectiveRecruiterId) {
                         const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
                         if (recruiterContact) {
@@ -249,8 +243,7 @@ export class ApplicationsEventConsumer {
                     break;
 
                 case 'hired':
-                    console.log('[APPLICATIONS-CONSUMER] ✅ Hired stage - notifying everyone');
-                    
+
                     if (candidateEmail) {
                         await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
                             candidateName: candidate.full_name,
@@ -262,7 +255,7 @@ export class ApplicationsEventConsumer {
                             userId: candidateUserId || undefined,
                         });
                     }
-                    
+
                     if (effectiveRecruiterId) {
                         const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
                         if (recruiterContact) {
@@ -277,7 +270,7 @@ export class ApplicationsEventConsumer {
                             });
                         }
                     }
-                    
+
                     const companyAdminsHired = await this.contactLookup.getCompanyAdminContacts(job.company_id);
                     for (const admin of companyAdminsHired) {
                         await this.emailService.sendApplicationStageChanged(admin.email, {
@@ -292,8 +285,7 @@ export class ApplicationsEventConsumer {
                     break;
 
                 case 'rejected':
-                    console.log('[APPLICATIONS-CONSUMER] ❌ Rejected stage - notifying candidate and recruiter');
-                    
+
                     if (candidateEmail) {
                         await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
                             candidateName: candidate.full_name,
@@ -305,7 +297,7 @@ export class ApplicationsEventConsumer {
                             userId: candidateUserId || undefined,
                         });
                     }
-                    
+
                     if (effectiveRecruiterId) {
                         const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
                         if (recruiterContact) {
@@ -323,8 +315,7 @@ export class ApplicationsEventConsumer {
                     break;
 
                 case 'withdrawn':
-                    console.log('[APPLICATIONS-CONSUMER] 🚫 Withdrawn stage - notifying recruiter and company');
-                    
+
                     if (effectiveRecruiterId) {
                         const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
                         if (recruiterContact) {
@@ -339,7 +330,7 @@ export class ApplicationsEventConsumer {
                             });
                         }
                     }
-                    
+
                     if (old_stage === 'submitted' || old_stage === 'interview' || old_stage === 'offer') {
                         const companyAdminsWithdrawn = await this.contactLookup.getCompanyAdminContacts(job.company_id);
                         for (const admin of companyAdminsWithdrawn) {
@@ -356,7 +347,6 @@ export class ApplicationsEventConsumer {
                     break;
 
                 default:
-                    console.log('[APPLICATIONS-CONSUMER] ℹ️ Other stage change - notifying recruiter only');
                     if (effectiveRecruiterId) {
                         const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
                         if (recruiterContact) {
@@ -387,13 +377,6 @@ export class ApplicationsEventConsumer {
         try {
             const { application_id, job_id, candidate_id, candidate_user_id, recruiter_id, has_recruiter, stage } = event.payload;
 
-            console.log('[APPLICATIONS-CONSUMER] 🎯 Starting to handle application.created event:', {
-                application_id,
-                has_recruiter,
-                stage,
-                candidate_user_id,
-                recruiter_id,
-            });
             this.logger.info({ application_id, has_recruiter, stage, candidate_user_id }, 'Handling candidate application submission');
 
             const job = await this.dataLookup.getJob(job_id);
@@ -447,12 +430,10 @@ export class ApplicationsEventConsumer {
 
             // Scenario 2: Candidate submits with recruiter (stage === 'screen')
             if (has_recruiter && stage === 'screen') {
-                console.log('[APPLICATIONS-CONSUMER] 📋 Scenario 2: Candidate with recruiter');
 
                 const nextSteps = 'Your application has been sent to your recruiter for review. They will enhance and submit it to the company.';
 
                 if (candidateEmail) {
-                    console.log('[APPLICATIONS-CONSUMER] 📧 Sending email to candidate:', candidateEmail);
                     await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
                         candidateName: candidate.full_name,
                         jobTitle: job.title,
@@ -462,7 +443,6 @@ export class ApplicationsEventConsumer {
                         applicationId: application_id,
                         userId: candidateUserId || undefined,
                     });
-                    console.log('[APPLICATIONS-CONSUMER] ✅ Candidate email sent successfully');
                 }
 
                 const recruiterContact = await this.contactLookup.getRecruiterContact(recruiter_id);
@@ -471,7 +451,6 @@ export class ApplicationsEventConsumer {
                     return;
                 }
 
-                console.log('[APPLICATIONS-CONSUMER] 📧 Sending email to recruiter:', recruiterContact.email);
                 await this.emailService.sendRecruiterApplicationPending(recruiterContact.email, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
@@ -479,14 +458,12 @@ export class ApplicationsEventConsumer {
                     applicationId: application_id,
                     userId: recruiterContact.user_id || undefined,
                 });
-                console.log('[APPLICATIONS-CONSUMER] ✅ Recruiter email sent successfully');
 
                 return;
             }
 
             // Scenario 3: Candidate submits directly to company (no recruiter)
             if (!has_recruiter && stage === 'submitted') {
-                console.log('[APPLICATIONS-CONSUMER] 📋 Scenario 3: Direct to company (no recruiter)');
 
                 const nextSteps = 'Your application has been submitted directly to the company. They will review and contact you if interested.';
 
@@ -521,7 +498,6 @@ export class ApplicationsEventConsumer {
 
             // Scenario 4: Recruiter proposes job to candidate
             if (has_recruiter && stage === 'recruiter_proposed') {
-                console.log('[APPLICATIONS-CONSUMER] 📋 Scenario 4: Recruiter proposing job to candidate');
 
                 if (candidateEmail) {
                     const recruiterContact = await this.contactLookup.getRecruiterContact(recruiter_id);
@@ -542,7 +518,6 @@ export class ApplicationsEventConsumer {
 
             // Scenario 5: Application submitted for AI review
             if (stage === 'ai_review') {
-                console.log('[APPLICATIONS-CONSUMER] 📋 Scenario 5: Application submitted for AI review');
 
                 const nextSteps = has_recruiter
                     ? 'Your application is being reviewed by our AI system. Once complete, your recruiter will review and submit it to the company.'
@@ -576,7 +551,6 @@ export class ApplicationsEventConsumer {
                 return;
             }
 
-            console.log('[APPLICATIONS-CONSUMER] ⚠️ No scenario matched - event details:', { has_recruiter, stage });
         } catch (error) {
             this.logger.error(
                 { error, event_payload: event.payload },
@@ -590,7 +564,6 @@ export class ApplicationsEventConsumer {
         try {
             const { application_id, job_id, candidate_id, candidate_user_id, recruiter_id, company_id } = event.payload;
 
-            console.log('[NOTIFICATION-SERVICE] 🎯 Handling recruiter submission to company:', { application_id });
             this.logger.info({ application_id }, 'Handling recruiter submission to company');
 
             const job = await this.dataLookup.getJob(job_id);
@@ -650,7 +623,6 @@ export class ApplicationsEventConsumer {
         try {
             const { application_id, job_id, candidate_id, recruiter_id, reason, candidate_user_id } = event.payload;
 
-            console.log('[APPLICATIONS-CONSUMER] 🎯 Handling application.withdrawn event:', { application_id });
             this.logger.info({ application_id }, 'Handling application withdrawal by candidate');
 
             const job = await this.dataLookup.getJob(job_id);
@@ -726,7 +698,7 @@ export class ApplicationsEventConsumer {
             }
 
             const requestingUserContact = await this.contactLookup.getContactByUserId(requested_by_user_id);
-            
+
             if (!requestingUserContact) {
                 this.logger.warn({ requested_by_user_id }, 'Cannot send confirmation - requesting user contact not found');
                 return;
@@ -805,7 +777,7 @@ export class ApplicationsEventConsumer {
             const aiReview = await this.dataLookup.getAIReview(application_id);
 
             const candidateContact = await this.contactLookup.getCandidateContact(application.candidate_id);
-            
+
             if (candidateContact) {
                 await this.emailService.sendAIReviewCompletedToCandidate(candidateContact.email, {
                     candidateName: candidate.full_name,
@@ -826,7 +798,7 @@ export class ApplicationsEventConsumer {
 
             if (application.recruiter_id) {
                 const recruiterContact = await this.contactLookup.getRecruiterContact(application.recruiter_id);
-                
+
                 if (recruiterContact) {
                     await this.emailService.sendAIReviewCompletedToRecruiter(recruiterContact.email, {
                         recruiterName: recruiterContact.name,

@@ -30,7 +30,6 @@ export default async function CompanySettingsPage() {
     const organizationId = Array.isArray(profile.organization_ids) ? profile.organization_ids[0] : null;
 
     if (!hasCompanyRole || !organizationId) {
-        console.log('[Company Settings] No company membership found, redirecting to dashboard');
         redirect('/portal/dashboard');
     }
 
@@ -38,15 +37,11 @@ export default async function CompanySettingsPage() {
     let company = null;
     if (organizationId) {
         try {
-            console.log('[Company Settings] Fetching companies for org:', organizationId);
             const companiesResponse: any = await apiClient.get('/companies');
-            console.log('[Company Settings] Companies response:', JSON.stringify(companiesResponse, null, 2));
             const companies = companiesResponse?.data || [];
-            console.log('[Company Settings] Found companies:', companies.length);
             company = companies.find((c: any) => c.identity_organization_id === organizationId);
-            console.log('[Company Settings] Matched company:', company ? company.name : 'NOT FOUND');
         } catch (error) {
-            console.error('[Company Settings] Failed to fetch company:', error);
+            console.error('[Company Settings] Failed to fetch company');
         }
     } else {
         console.log('[Company Settings] No organization ID on membership');

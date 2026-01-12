@@ -105,8 +105,6 @@ export default function SignUpPage() {
                             email: user.email,
                             name: `${user.firstName || firstName} ${user.lastName || lastName}`.trim(),
                         });
-
-                        console.log('User created successfully in database');
                     }
                 } catch (userCreationError) {
                     // Log error but don't block the flow - webhook will catch this later

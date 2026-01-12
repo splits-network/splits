@@ -99,7 +99,6 @@ export class RecruiterCandidateRepository {
 
         const { data, error, count } = await query;
 
-        console.log('findRecruiterCandidates error:', error);
         if (error) throw error;
         return {
             data: data || [],

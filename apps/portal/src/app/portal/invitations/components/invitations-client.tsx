@@ -261,8 +261,6 @@ export default function InvitationsPageClient() {
         );
     }
 
-    console.log('InvitationsPageClient render', { invitations, filteredInvitations, statusFilter });
-
     return (
         <div className="space-y-6">
             {/* Header */}

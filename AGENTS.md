@@ -41,7 +41,7 @@ The /docs/migrations/V2-ARCHITECTURE-IMPLEMENTATION_GUIDE.md outlines the high-l
 
 ### Network Service V2 Proposals
 
-- PostgREST cannot join across schemas, so `services/network-service/src/v2/proposals/repository.ts` now fetches jobs/candidates via follow-up queries in the `ats` schema and filters company users by precomputing accessible job IDs. Any new V2 repository must avoid `*` joins inside a `schema('network')` select to prevent `PGRST100` errors.
+- PostgREST cannot join across schemas, so `services/network-service/src/v2/proposals/repository.ts` now fetches jobs/candidates via follow-up queries in the `ats` schema and filters company users by precomputing accessible job IDs. Any new V2 repository must avoid `*` joins inside a `schema('public')` select to prevent `PGRST100` errors.
 - The canonical proposals table lives at `candidate_role_assignments`. Remember to query that table (not a nonexistent `proposals`) whenever adding new V2 proposal endpoints or migrations.
 
 ### Notification APIs

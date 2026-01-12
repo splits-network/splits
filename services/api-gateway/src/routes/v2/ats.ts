@@ -62,14 +62,14 @@ const ATS_RESOURCES: ResourceDefinition[] = [
 
 export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistry) {
     // Register standard CRUD routes for most resources (excluding jobs and candidates)
-    ATS_RESOURCES.filter(r => r.name !== 'candidates' && r.name !== 'jobs').forEach(resource => 
+    ATS_RESOURCES.filter(r => r.name !== 'candidates' && r.name !== 'jobs').forEach(resource =>
         registerResourceRoutes(app, services, resource)
     );
-    
+
     // Register custom routes with special handling
     registerJobRoutes(app, services);
     registerCandidateRoutes(app, services);
-    
+
     registerStatsRoutes(app, services);
     registerAiReviewRoutes(app, services);
 }
@@ -84,15 +84,12 @@ function registerJobRoutes(app: FastifyInstance, services: ServiceRegistry) {
         apiBase,
         // No preHandler - public endpoint handled by global auth middleware
         async (request: FastifyRequest, reply: FastifyReply) => {
-            console.log(`[Gateway V2] ${apiBase} - Public jobs request received`);
-            console.log(`[Gateway V2] Query:`, request.query);
-            
+
             const correlationId = getCorrelationId(request);
-            
+
             // Build auth headers if user is authenticated, empty if not
             const authHeaders = buildAuthHeaders(request);
-            console.log(`[Gateway V2] Auth headers:`, authHeaders);
-            
+
             const data = await atsService().get(
                 serviceBase,
                 request.query as Record<string, any>,
@@ -109,15 +106,14 @@ function registerJobRoutes(app: FastifyInstance, services: ServiceRegistry) {
         // No preHandler - public endpoint handled by global auth middleware
         async (request: FastifyRequest, reply: FastifyReply) => {
             const { id } = request.params as { id: string };
-            console.log(`[Gateway V2] ${apiBase}/${id} - Public job details request received`);
-            
+
             const correlationId = getCorrelationId(request);
             const queryString = buildQueryString(request.query as Record<string, any>);
             const path = queryString ? `${serviceBase}/${id}?${queryString}` : `${serviceBase}/${id}`;
-            
+
             // Build auth headers if user is authenticated, empty if not
             const authHeaders = buildAuthHeaders(request);
-            
+
             const data = await atsService().get(
                 path,
                 undefined,
@@ -193,7 +189,7 @@ function registerCandidateRoutes(app: FastifyInstance, services: ServiceRegistry
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
             const authHeaders = buildAuthHeaders(request);
-            
+
             try {
                 const data = await atsService().get(
                     serviceBase,
@@ -201,7 +197,7 @@ function registerCandidateRoutes(app: FastifyInstance, services: ServiceRegistry
                     correlationId,
                     authHeaders
                 );
-                
+
                 return reply.send(data);
             } catch (error) {
                 console.error(`[DEBUG CANDIDATES] ServiceClient error:`, error);
@@ -236,11 +232,11 @@ function registerCandidateRoutes(app: FastifyInstance, services: ServiceRegistry
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
             const authHeaders = buildAuthHeaders(request);
-            
+
             if (!request.auth?.clerkUserId) {
                 return reply.code(401).send({ error: 'Authentication required' });
             }
-            
+
             const clerkUserId = request.auth.clerkUserId;
 
             try {
@@ -253,7 +249,7 @@ function registerCandidateRoutes(app: FastifyInstance, services: ServiceRegistry
                 ) as { data?: any };
 
                 const candidate = candidateResponse.data || candidateResponse;
-                
+
                 // Step 2: Get the recruiter's internal ID from network service
                 let recruiterId = null;
                 try {
@@ -284,18 +280,18 @@ function registerCandidateRoutes(app: FastifyInstance, services: ServiceRegistry
                             correlationId,
                             authHeaders
                         );
-                        request.log.info({ 
-                            candidateId: candidate.id, 
+                        request.log.info({
+                            candidateId: candidate.id,
                             recruiterId,
-                            clerkUserId 
+                            clerkUserId
                         }, 'Created recruiter-candidate relationship');
                     } catch (relationshipError: any) {
                         // Log but don't fail the candidate creation
-                        request.log.error({ 
-                            error: relationshipError, 
-                            candidateId: candidate.id, 
+                        request.log.error({
+                            error: relationshipError,
+                            candidateId: candidate.id,
                             recruiterId,
-                            clerkUserId 
+                            clerkUserId
                         }, 'Failed to create recruiter-candidate relationship');
                     }
                 }

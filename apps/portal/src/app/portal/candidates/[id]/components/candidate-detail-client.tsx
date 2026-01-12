@@ -165,7 +165,6 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                     }
                 } catch (err) {
                     // No relationship info available (might be admin or self-managed candidate)
-                    console.log('No relationship info:', err);
                 }
             } catch (err: any) {
                 console.error('Failed to load relationship:', err);

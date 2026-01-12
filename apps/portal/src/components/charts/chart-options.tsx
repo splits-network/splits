@@ -21,7 +21,7 @@ function getColorCache() {
     if (typeof document === 'undefined' || Object.keys(colorCache).length === 0) {
         // SSR or initial load - set defaults
         if (typeof document === 'undefined') {
-            console.log('SSR detected - using default color values for charts');
+
             return {
                 primaryHex: '#0000ff',
                 secondaryHex: '#ff00ff',

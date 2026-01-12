@@ -111,7 +111,6 @@ export default function RecruiterDashboard() {
                 statsResponse ||
                 null;
 
-            console.log('Recruiter Stats Response:', statsResponse);
             setStats(
                 recruiterStats || {
                     active_roles: 0,
@@ -132,7 +131,7 @@ export default function RecruiterDashboard() {
                     sort_order: 'desc',
                 },
             });
-            console.log('Activity Response:', activityResponse);
+
             const applications = activityResponse?.data || activityResponse || [];
             setRecentActivity(
                 Array.isArray(applications)
@@ -147,7 +146,7 @@ export default function RecruiterDashboard() {
                     limit: 5,
                 }
             });
-            console.log('Top Roles Response:', rolesResponse);
+
             setTopRoles(rolesResponse.data || rolesResponse || []);
         } catch (error) {
             console.error('Failed to load dashboard data:', error);

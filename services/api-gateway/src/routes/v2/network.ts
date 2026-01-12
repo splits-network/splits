@@ -46,12 +46,12 @@ export function registerNetworkRoutes(app: FastifyInstance, services: ServiceReg
     registerRecruiterCandidateInvitationRoutes(app, services);
     registerTeamRoutes(app, services);
     registerPublicRecruitersListRoute(app, services);
-    
+
     // Register generic CRUD routes LAST (skip recruiters as we have custom routes)
-    NETWORK_RESOURCES.filter(r => r.name !== 'recruiters').forEach(resource => 
+    NETWORK_RESOURCES.filter(r => r.name !== 'recruiters').forEach(resource =>
         registerResourceRoutes(app, services, resource)
     );
-    
+
     // Register authenticated recruiter routes (POST, PATCH, DELETE, GET by ID)
     registerAuthenticatedRecruiterRoutes(app, services);
 }
@@ -321,11 +321,8 @@ function registerPublicRecruitersListRoute(
             preHandler: optionalAuth(),
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
-            console.log(`[Gateway V2] /api/v2/recruiters - Request received`);
-            console.log(`[Gateway V2] Query:`, request.query);
-            console.log(`[Gateway V2] Auth:`, request.auth);
             const correlationId = getCorrelationId(request);
-            
+
             try {
                 const data = await networkService().get(
                     '/api/v2/recruiters',
@@ -352,7 +349,7 @@ function registerPublicRecruitersListRoute(
         async (request: FastifyRequest, reply: FastifyReply) => {
             const { id } = request.params as { id: string };
             const correlationId = getCorrelationId(request);
-            
+
             try {
                 const data = await networkService().get(
                     `/api/v2/recruiters/${id}`,
@@ -388,7 +385,7 @@ function registerAuthenticatedRecruiterRoutes(
         routeOptions('Create recruiter'),
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
-            
+
             try {
                 const data = await networkService().post(
                     '/api/v2/recruiters',
@@ -412,7 +409,7 @@ function registerAuthenticatedRecruiterRoutes(
         async (request: FastifyRequest, reply: FastifyReply) => {
             const { id } = request.params as { id: string };
             const correlationId = getCorrelationId(request);
-            
+
             try {
                 const data = await networkService().patch(
                     `/api/v2/recruiters/${id}`,
@@ -436,7 +433,7 @@ function registerAuthenticatedRecruiterRoutes(
         async (request: FastifyRequest, reply: FastifyReply) => {
             const { id } = request.params as { id: string };
             const correlationId = getCorrelationId(request);
-            
+
             try {
                 const data = await networkService().delete(
                     `/api/v2/recruiters/${id}`,

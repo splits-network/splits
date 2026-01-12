@@ -130,7 +130,7 @@ export default function ProfilePage() {
             });
             const dataArray = result.data || result;
             const data = Array.isArray(dataArray) ? dataArray[0] : dataArray;
-            console.log(result);
+
             if (!data) {
                 setError('Candidate profile not found.');
                 setLoading(false);

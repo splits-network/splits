@@ -47,13 +47,10 @@ export class ApplicationRepository {
 
 
         if (accessContext.candidateId) {
-            console.log('Filtering applications for candidate:', accessContext.candidateId);
             query = query.eq('candidate_id', accessContext.candidateId);
         } else if (accessContext.recruiterId) {
-            console.log('Filtering applications for recruiter:', accessContext.recruiterId);
             query = query.eq('recruiter_id', accessContext.recruiterId);
         } else if (!accessContext.isPlatformAdmin) {
-            console.log('Filtering applications for organizations:', accessContext.organizationIds);
             if (accessContext.organizationIds.length > 0) {
                 query = query.in('job.company.identity_organization_id', accessContext.organizationIds);
                 // Company admins and hiring managers only see applications in company-relevant stages
@@ -116,8 +113,6 @@ export class ApplicationRepository {
     async findApplication(id: string, clerkUserId?: string, include?: string): Promise<any | null> {
         // Build select clause with optional includes
         const selectClause = this.buildSelectClause(include);
-        console.log('findApplication - id:', id, 'include:', include);
-        console.log('SELECT clause:', selectClause);
 
         const { data, error } = await this.supabase
             .from('applications')
@@ -165,8 +160,6 @@ export class ApplicationRepository {
 
     async createApplication(application: any, clerkUserId?: string): Promise<any> {
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-        console.log('Creating application with access context:', accessContext);
-        console.log('Application data:', application);
 
         // If candidate is submitting (not recruiter), lookup their active recruiter
         let recruiterId = accessContext.recruiterId || null;
@@ -183,15 +176,12 @@ export class ApplicationRepository {
                 recruiterId = recruiterRelationship.recruiter_id;
             }
         }
-        console.log('Resolved recruiter ID for application:', recruiterId);
         const { data, error } = await this.supabase
 
             .from('applications')
             .insert({ ...application, recruiter_id: recruiterId })
             .select()
             .single();
-
-        console.log('Create application result:', { data, error });
 
         if (error) throw error;
         return data;
@@ -364,7 +354,7 @@ export class ApplicationRepository {
             name = `${data.first_name || ''} ${data.last_name || ''}`.trim();
         }
         const nameParts = name.split(' ').filter(Boolean);
-        console.log('data', data);
+
         return {
             ...data,
             user: userInfo,
@@ -491,7 +481,7 @@ export class ApplicationRepository {
             .select('id')
             .eq('clerk_user_id', clerkUserId)
             .maybeSingle();
-        console.log('findCandidateByClerkUserId - identityUser:', identityUser, 'error:', identityError);
+
         if (identityError) throw identityError;
         if (!identityUser) {
             return null;
@@ -503,7 +493,7 @@ export class ApplicationRepository {
             .select('*')
             .eq('user_id', identityUser.id)
             .maybeSingle();
-        console.log('findCandidateByClerkUserId - candidate:', data, 'error:', error);
+
         if (error) throw error;
         return data ?? null;
     }

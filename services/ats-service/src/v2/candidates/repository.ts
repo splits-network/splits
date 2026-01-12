@@ -253,7 +253,7 @@ export class CandidateRepository {
     }
 
     async updateCandidate(id: string, updates: CandidateUpdate): Promise<any> {
-        console.log('CandidateRepository.updateCandidate - updates:', JSON.stringify(updates));
+
         const { data, error } = await this.supabase
             .from('candidates')
             .update({ ...updates, updated_at: new Date().toISOString() })

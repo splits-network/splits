@@ -431,12 +431,12 @@ export class ApplicationServiceV2 {
             return null;
         }
         const candidate = await this.repository.findCandidateByClerkUserId(clerkUserId);
-        console.log('Found candidate for Clerk User ID:', clerkUserId, candidate);
+
         if (!candidate) {
             return null;
         }
         const identityUser = await this.repository.findUserByClerkUserId(clerkUserId);
-        console.log('Found identity user for Clerk User ID:', clerkUserId, identityUser);
+
         if (!identityUser) {
             return null;
         }

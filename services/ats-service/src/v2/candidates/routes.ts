@@ -55,8 +55,7 @@ export function registerCandidateRoutes(
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as any;
-            console.log('PATCH /api/v2/candidates/:id - body:', JSON.stringify(request.body));
-            console.log('PATCH /api/v2/candidates/:id - id:', id, 'clerkUserId:', clerkUserId);
+
             const candidate = await config.candidateService.updateCandidate(
                 id,
                 request.body as CandidateUpdate,

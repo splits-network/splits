@@ -103,7 +103,7 @@ export default async function ApplicationDetailPage({
     }
 
     const company = job.company || {};
-    console.log('application:', application);
+
     return (
         <div className="container mx-auto px-4 py-8">
             {/* Breadcrumbs */}

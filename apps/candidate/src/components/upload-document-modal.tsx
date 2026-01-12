@@ -62,14 +62,11 @@ export default function UploadDocumentModal({
         setUploading(true);
 
         try {
-            console.log('Starting upload...', { file: file.name, entityType, entityId, selectedDocType });
 
             const token = await getToken();
             if (!token) {
                 throw new Error('No auth token available');
             }
-
-            console.log('Got auth token, creating FormData...');
 
             const formData = new FormData();
             formData.append('file', file);
@@ -77,13 +74,11 @@ export default function UploadDocumentModal({
             formData.append('entity_id', entityId);
             formData.append('document_type', selectedDocType);
 
-            console.log('Calling uploadDocument...');
             const client = createAuthenticatedClient(token);
             await client.post('/documents', formData);
-            console.log('Upload successful!');
             onSuccess();
         } catch (err: any) {
-            console.error('Upload error:', err);
+            console.error('Upload error');
             setError(err.message || 'Upload failed');
         } finally {
             setUploading(false);

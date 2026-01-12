@@ -103,7 +103,7 @@ export class JobRepository {
                 }
             } else if (accessContext.organizationIds.length > 0) {
                 // Company users (company_admin, hiring_manager) see only their organization's jobs
-                console.log('[JobRepository] User is company user with org IDs:', accessContext.organizationIds);
+
                 query = query.in('company.identity_organization_id', accessContext.organizationIds);
 
                 if (filters.job_owner_filter === 'assigned' && accessContext.identityUserId) {
