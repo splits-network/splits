@@ -7,6 +7,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { randomBytes } from 'crypto';
 import { RecruiterCandidateFilters, RecruiterCandidateUpdate, RepositoryListResponse } from './types';
 import { resolveAccessContext } from '../shared/access';
+import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 
 export class RecruiterCandidateRepository {
     private supabase: SupabaseClient;
@@ -23,7 +24,7 @@ export class RecruiterCandidateRepository {
      */
     private buildSelectClause(include?: string): string {
         // Base fields - always include relationship data
-        const baseFields = '*';
+        const baseFields = '*,candidate:candidates!candidate_id!inner(id, user_id, email, full_name, phone, location, linkedin_url, user:users!candidates_user_id_fkey(name, email))';
 
         if (!include) {
             return baseFields;
@@ -38,10 +39,6 @@ export class RecruiterCandidateRepository {
                     // Join with recruiters table and identity users for contact info
                     selectClause += ',recruiter:recruiters!recruiter_id(id, user_id, bio, status, user:users(name, email))';
                     break;
-                case 'candidate':
-                    // Join with candidates table and identity users for contact info
-                    selectClause += ',candidate:candidates!candidate_id(id, user_id, full_name, phone, location, linkedin_url, user:users!candidates_user_id_fkey(name, email))';
-                    break;
             }
         }
 
@@ -50,30 +47,37 @@ export class RecruiterCandidateRepository {
 
     async findRecruiterCandidates(
         clerkUserId: string,
-        filters: RecruiterCandidateFilters = {}
-    ): Promise<RepositoryListResponse<any>> {
-        const page = filters.page || 1;
-        const limit = filters.limit || 25;
+        params: StandardListParams = {}
+    ): Promise<StandardListResponse<any>> {
+        const page = params.page || 1;
+        const limit = params.limit || 25;
         const offset = (page - 1) * limit;
+        const search = params.search;
+        const filters = params.filters || {};
+
+        console.log('=== REPOSITORY DEBUG ===');
+        console.log('All params:', JSON.stringify(params, null, 2));
+        console.log('Search value:', search);
+        console.log('params', params);
 
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-        const scopedFilters: RecruiterCandidateFilters = { ...filters };
+        const scopedFilters: RecruiterCandidateFilters = { ...params };
         if (!accessContext.isPlatformAdmin) {
             if (accessContext.recruiterId) {
                 scopedFilters.recruiter_id = accessContext.recruiterId;
             } else if (accessContext.candidateId) {
                 scopedFilters.candidate_id = accessContext.candidateId;
             } else {
-                return { data: [], total: 0 };
+                const total_pages = 0;
+                return { data: [], pagination: { total: 0, page, limit, total_pages } };
             }
         }
 
         // Build select clause with includes
-        const selectClause = this.buildSelectClause(filters.include);
+        const selectClause = this.buildSelectClause(params.include);
 
         // Build query with enriched data
         let query = this.supabase
-
             .from('recruiter_candidates')
             .select(selectClause, { count: 'exact' });
 
@@ -85,8 +89,16 @@ export class RecruiterCandidateRepository {
         }
 
         // Apply filters
-        if (scopedFilters.status) {
-            query = query.eq('status', scopedFilters.status);
+        if (filters.status && filters.status !== '' && filters.status !== 'all') {
+            query = query.eq('status', filters.status);
+        }
+
+        // Apply search on denormalized candidate fields (scales efficiently)
+        if (search) {
+            console.log('Applying search on denormalized fields:', search);
+            // Search directly on recruiter_candidates table (no joins needed)
+            // Uses trigram indexes for fast ILIKE performance
+            query = query.or(`candidate_name.ilike.%${search}%,candidate_email.ilike.%${search}%`);
         }
 
         // Apply sorting
@@ -96,13 +108,17 @@ export class RecruiterCandidateRepository {
 
         // Apply pagination
         query = query.range(offset, offset + limit - 1);
-
         const { data, error, count } = await query;
 
         if (error) throw error;
         return {
             data: data || [],
-            total: count || 0,
+            pagination: {
+                total: count || 0,
+                page,
+                limit,
+                total_pages: Math.ceil((count || 0) / limit),
+            }
         };
     }
 

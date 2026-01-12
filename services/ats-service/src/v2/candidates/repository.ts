@@ -113,6 +113,7 @@ export class CandidateRepository {
         const limit = params.limit || 25;
         const offset = (page - 1) * limit;
         let filters: Record<string, any> = {};
+        const search = params.search || '';
 
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
 
@@ -181,6 +182,13 @@ export class CandidateRepository {
 
             // Filter query to only these candidates BEFORE pagination
             query = query.in('id', candidateIds);
+        }
+
+        // Apply search across name and email fields
+        if (search) {
+            query = query.or(
+                `full_name.ilike.%${search}%,email.ilike.%${search}%`
+            );
         }
 
         // Apply sorting

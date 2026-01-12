@@ -32,6 +32,7 @@ export function registerRecruiterCandidateRoutes(
 
             const filters = {
                 ...pagination,
+                search: query.search, // Extract search parameter
                 recruiter_id: query.recruiter_id,
                 candidate_id: query.candidate_id,
                 status: query.status,

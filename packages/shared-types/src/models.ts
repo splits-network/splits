@@ -405,7 +405,17 @@ export interface CandidateSourcer {
     created_at: Date;
 }
 // Recruiter-Candidate Relationship (12-month renewable relationship)
-export type RecruiterCandidateStatus = 'active' | 'expired' | 'terminated';
+export type RecruiterCandidateStatus = 'active' | 'expired' | 'terminated' | 'pending' | 'accepted' | 'declined' | 'cancelled';
+export const RecruiterCandidateStatusFilter = {
+    all: 'All',
+    active: 'Active',
+    pending: 'Pending',
+    accepted: 'Accepted',
+    declined: 'Declined',
+    expired: 'Expired',
+    terminated: 'Terminated',
+    cancelled: 'Cancelled',
+} as const;
 
 export interface RecruiterCandidate {
     id: string;
@@ -427,6 +437,26 @@ export interface RecruiterCandidate {
     created_at: Date;
     updated_at: Date;
 }
+
+// Enriched version with joined candidate data (for API responses)
+export interface RecruiterCandidateWithCandidate extends RecruiterCandidate {
+    candidate?: {
+        id: string;
+        full_name: string;
+        email: string;
+        phone?: string;
+        profile_picture?: string;
+        current_job_title?: string;
+        current_company?: string;
+        location?: string;
+        verification_status?: string;
+    };
+    recruiter_name?: string;
+    recruiter_email?: string;
+    recruiter_bio?: string;
+    recruiter_status?: string;
+}
+
 // Candidate-Role Assignment State Machine
 export type CandidateRoleAssignmentState =
     | 'proposed'

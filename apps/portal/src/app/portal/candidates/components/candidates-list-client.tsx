@@ -158,7 +158,7 @@ export default function CandidatesListClient() {
                 {loading && candidates.length > 0 && <LoadingState />}
 
                 {/* Grid View */}
-                {viewMode === 'grid' && candidates.length > 0 && (
+                {!loading && viewMode === 'grid' && candidates.length > 0 && (
                     <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
                         {candidates.map((candidate) => (
                             <CandidateCard candidate={candidate} key={candidate.id} />
@@ -167,7 +167,7 @@ export default function CandidatesListClient() {
                 )}
 
                 {/* Table View */}
-                {viewMode === 'table' && candidates.length > 0 && (
+                {!loading && viewMode === 'table' && candidates.length > 0 && (
                     <DataTable
                         columns={candidateColumns}
                         sortBy={sortBy}
