@@ -110,7 +110,7 @@ export function JobTableRow({ job }: JobTableRowProps) {
             </td>
             <td>
                 {job.location && (
-                    <div className="flex items-center gap-1 text-sm">
+                    <div className="flex items-center gap-1 text-sm whitespace-nowrap">
                         <i className="fa-duotone fa-regular fa-location-dot"></i>
                         {job.location}
                     </div>
@@ -137,7 +137,7 @@ export function JobTableRow({ job }: JobTableRowProps) {
             </td>
             <td onClick={(e) => e.stopPropagation()}>
                 <button
-                    className="btn btn-sm btn-primary"
+                    className="btn btn-sm btn-primary whitespace-nowrap"
                     onClick={(e) => {
                         e.stopPropagation();
                         viewJob();
@@ -157,7 +157,7 @@ export function JobTableRow({ job }: JobTableRowProps) {
             {(job.candidate_description || job.description) && (
                 <ExpandedDetailSection title="Description">
                     <p className="text-sm text-base-content/70">
-                        {job.candidate_description || job.description}
+                        <i className='fa-duotone fa-regular fa-quote-left mr-2' />{job.candidate_description || job.description}
                     </p>
                 </ExpandedDetailSection>
             )}
@@ -241,7 +241,7 @@ export function JobTableRow({ job }: JobTableRowProps) {
             {/* Action Buttons */}
             <div className="flex gap-2 pt-2 border-t border-base-300">
                 <button
-                    className="btn btn-primary gap-2"
+                    className="btn btn-primary btn-sm gap-2"
                     onClick={(e) => {
                         e.stopPropagation();
                         viewJob();
