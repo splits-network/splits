@@ -93,12 +93,17 @@ export class RecruiterCandidateRepository {
             query = query.eq('status', filters.status);
         }
 
-        // Apply search on denormalized candidate fields (scales efficiently)
+        // Apply full-text search across all indexed fields
+        // Searches: name, email, location, status with intelligent ranking
+        // Example: "brandon active engineer" matches any Brandon who is active or has engineering keywords
         if (search) {
-            console.log('Applying search on denormalized fields:', search);
-            // Search directly on recruiter_candidates table (no joins needed)
-            // Uses trigram indexes for fast ILIKE performance
-            query = query.or(`candidate_name.ilike.%${search}%,candidate_email.ilike.%${search}%`);
+            // Use PostgreSQL full-text search with tsquery
+            // Converts "brandon active engineer" to "brandon & active & engineer"
+            const tsquery = search.split(/\s+/).filter(t => t.trim()).join(' & ');
+            query = query.textSearch('search_vector', tsquery, {
+                type: 'websearch',
+                config: 'english'
+            });
         }
 
         // Apply sorting
