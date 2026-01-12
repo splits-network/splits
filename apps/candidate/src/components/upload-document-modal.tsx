@@ -78,8 +78,14 @@ export default function UploadDocumentModal({
             await client.post('/documents', formData);
             onSuccess();
         } catch (err: any) {
-            console.error('Upload error');
-            setError(err.message || 'Upload failed');
+            console.error('Upload error:', err);
+            console.error('Error details:', {
+                message: err.message,
+                response: err.response,
+                status: err.status,
+                stack: err.stack
+            });
+            setError(err.response?.data?.error?.message || err.message || 'Upload failed');
         } finally {
             setUploading(false);
         }
@@ -98,8 +104,8 @@ export default function UploadDocumentModal({
                 )}
 
                 <form onSubmit={handleUpload} className="space-y-4">
-                    <div className="fieldset">
-                        <label className="label">Document Type</label>
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">Document Type</legend>
                         <select
                             className="select w-full"
                             value={selectedDocType}
@@ -110,19 +116,19 @@ export default function UploadDocumentModal({
                             <option value="cover_letter">Cover Letter</option>
                             <option value="other">Other</option>
                         </select>
-                    </div>
+                    </fieldset>
 
-                    <div className="fieldset">
-                        <label className="label">
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">
                             File *
-                            <span className="label-text-alt text-base-content/60">
+                            <span className="text-base-content/60 font-normal text-sm ml-2">
                                 PDF, DOC, DOCX, TXT, or RTF - Max 10MB
                             </span>
-                        </label>
+                        </legend>
                         <input
                             type="file"
                             ref={fileInputRef}
-                            className="file-input file-input-bordered w-full"
+                            className="file-input w-full"
                             accept=".pdf,.doc,.docx,.txt,.rtf"
                             onChange={handleFileChange}
                             required
@@ -148,7 +154,7 @@ export default function UploadDocumentModal({
                                 </button>
                             </div>
                         )}
-                    </div>
+                    </fieldset>
 
                     <div className="modal-action">
                         <button

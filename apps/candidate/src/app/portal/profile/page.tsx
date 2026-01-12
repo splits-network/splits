@@ -129,12 +129,25 @@ export default function ProfilePage() {
                 }
             });
             const dataArray = result.data || result;
-            const data = Array.isArray(dataArray) ? dataArray[0] : dataArray;
+            let data = Array.isArray(dataArray) ? dataArray[0] : dataArray;
 
+            // If candidate doesn't exist (self-signup without recruiter invitation), create one
             if (!data) {
-                setError('Candidate profile not found.');
-                setLoading(false);
-                return;
+                console.log('No candidate profile found, creating one for self-signup user...');
+                try {
+                    // Create candidate record using Clerk user data
+                    const createResult = await client.post('/candidates', {
+                        full_name: clerkUser?.fullName || clerkUser?.firstName || 'New Candidate',
+                        email: clerkUser?.primaryEmailAddress?.emailAddress || '',
+                    });
+                    data = createResult.data || createResult;
+                    console.log('Candidate profile created successfully:', data.id);
+                } catch (createErr: any) {
+                    console.error('Failed to create candidate profile:', createErr);
+                    setError('Failed to create candidate profile. Please try again or contact support.');
+                    setLoading(false);
+                    return;
+                }
             }
 
             setCandidateId(data.id);

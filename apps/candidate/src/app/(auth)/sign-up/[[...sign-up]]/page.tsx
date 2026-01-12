@@ -93,24 +93,34 @@ export default function SignUpPage() {
                         });
 
                         // Check ATS service for existing candidates with this email
-                        const candidate = await apiClient.get(`/candidates`, {
+                        // Note: Don't manually encode - the HTTP client handles that
+                        const candidateResponse = await apiClient.get(`/candidates`, {
                             params: {
-                                email: encodeURIComponent(email)
+                                limit: 1,
+                                filters: { email: email }
                             }
                         });
 
-                        if (candidate.data && candidate.data.length > 0) {
-                            await apiClient.patch(`/candidates/${candidate.id}`, {
+                        // candidateResponse.data is an array of candidates
+                        const existingCandidates = candidateResponse.data || candidateResponse;
+                        const candidatesArray = Array.isArray(existingCandidates) ? existingCandidates : [];
+
+                        if (candidatesArray.length > 0 && candidatesArray[0]?.id) {
+                            // Link existing candidate to new user
+                            const existingCandidate = candidatesArray[0];
+                            console.log('Linking existing candidate:', existingCandidate.id);
+                            await apiClient.patch(`/candidates/${existingCandidate.id}`, {
                                 user_id: newUser.data.id,
                             });
                         } else {
-                            await apiClient.post('/candidates', {
+                            // Create new candidate record for self-signup user
+                            console.log('Creating new candidate for self-signup user, user_id:', newUser.data.id);
+                            const newCandidate = await apiClient.post('/candidates', {
                                 user_id: newUser.data.id,
                                 email: user.email,
                                 full_name: `${user.firstName || firstName} ${user.lastName || lastName}`.trim(),
-                                created_by_user_id: newUser.data.id,
                             });
-
+                            console.log('Candidate created:', newCandidate.data?.id || newCandidate.id);
                         }
 
                     }

@@ -89,7 +89,8 @@ export class ApiError extends Error {
     constructor(
         message: string,
         public status: number,
-        public code?: string
+        public code?: string,
+        public response?: any
     ) {
         super(message);
         this.name = 'ApiError';
@@ -204,9 +205,10 @@ export class SplitsApiClient {
     private async handleError(response: Response): Promise<never> {
         let errorMessage = 'An error occurred';
         let errorCode: string | undefined;
+        let errorData: any;
 
         try {
-            const errorData: any = await response.json();
+            errorData = await response.json();
             if (errorData?.error && typeof errorData.error === 'object') {
                 errorMessage = errorData.error.message || errorData.error.code || errorMessage;
                 errorCode = errorData.error.code;
@@ -218,7 +220,7 @@ export class SplitsApiClient {
             errorMessage = response.statusText || errorMessage;
         }
 
-        throw new ApiError(errorMessage, response.status, errorCode);
+        throw new ApiError(errorMessage, response.status, errorCode, errorData);
     }
 
     /**
