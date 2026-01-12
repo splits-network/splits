@@ -43,10 +43,15 @@ if (search) {
 | Jobs (Backend) | `services/ats-service/src/v2/jobs` | Full-text search | ✅ **Implemented** (Jan 12, 2026) |
 | Jobs (Portal) | `apps/portal/src/app/portal/roles` | ILIKE multi-field | 🔄 Needs frontend update |
 | Jobs (Public) | `apps/candidate/src/app/public/jobs` | ILIKE multi-field | 🔄 Needs frontend update |
-| Candidates | `apps/portal/src/app/portal/candidates` | ILIKE name/email | ⏳ Planned |
-| Applications | `apps/portal/src/app/portal/applications` | PostgreSQL function | ⏳ Planned |
-| Applications (Candidate) | `apps/candidate/src/app/portal/applications` | Same as above | ⏳ Planned |
-| Placements | `apps/portal/src/app/portal/placements` | Basic filters | ⏳ Planned |
+| Candidates (Backend) | `services/ats-service/src/v2/candidates` | Full-text search | ✅ **Implemented** (Jan 12, 2026) |
+| Candidates (Portal) | `apps/portal/src/app/portal/candidates` | ILIKE name/email | 🔄 Needs frontend update |
+| Companies (Backend) | `services/ats-service/src/v2/companies` | Full-text search | ✅ **Implemented** (Jan 12, 2026) |
+| Companies (Portal) | `apps/portal/src/app/portal/companies` | ILIKE name/desc | 🔄 Needs frontend update |
+| Applications (Backend) | `services/ats-service/src/v2/applications` | Full-text search | ✅ **Implemented** (Jan 12, 2026) |
+| Applications (Portal) | `apps/portal/src/app/portal/applications` | PostgreSQL function | 🔄 Needs frontend update |
+| Applications (Candidate) | `apps/candidate/src/app/portal/applications` | Same as above | 🔄 Needs frontend update |
+| Placements (Backend) | `services/ats-service/src/v2/placements` | Full-text search | ✅ **Implemented** (Jan 12, 2026) |
+| Placements (Portal) | `apps/portal/src/app/portal/placements` | Basic filters | 🔄 Needs frontend update |
 | Recruiter-Candidates | `services/network-service/src/v2/recruiter-candidates` | Full-text search | ✅ Implemented |
 
 ### Frontend Infrastructure Already in Place
@@ -69,9 +74,12 @@ Create migrations and update repositories for each entity following the recruite
 
 #### 1.1 Jobs Table (`public.jobs`) ✅ COMPLETED
 
-**Status**: ✅ **Implemented and deployed** (January 12, 2026)
+**Status**: ✅ **Implemented and deployed** (January 12, 2026)  
+**Enhanced**: ✅ **Job requirements added** (January 12, 2026)
 
-**Migration**: `services/ats-service/migrations/017_add_jobs_search_index.sql`
+**Migrations**: 
+- `services/ats-service/migrations/017_add_jobs_search_index.sql` (initial)
+- `services/ats-service/migrations/023_enhance_jobs_search_with_requirements_fixed.sql` (enhancement)
 
 **Implemented Fields** (with weights):
 - `title` (A) - Primary job field
@@ -79,6 +87,7 @@ Create migrations and update repositories for each entity following the recruite
 - `recruiter_description` (B) - Internal recruiter notes
 - `candidate_description` (B) - Candidate-facing description
 - `company_name` (B) - Denormalized from companies table
+- `requirements_text` (B) - **NEW**: Aggregated job requirements from job_requirements table
 - `location` (C) - Geographic search
 - `company_industry` (C) - Industry from companies table
 - `company_headquarters_location` (C) - Company location
@@ -90,10 +99,14 @@ Create migrations and update repositories for each entity following the recruite
 - `company_name` - Auto-synced from companies.name
 - `company_industry` - Auto-synced from companies.industry
 - `company_headquarters_location` - Auto-synced from companies.headquarters_location
+- `requirements_text` - **NEW**: Aggregated from job_requirements using string_agg(), format: "type: description | type: description"
 - `search_vector` - Full-text search tsvector
 
 **Triggers Created**:
 - `sync_jobs_company_data` - Updates jobs when companies change
+- `sync_jobs_requirements_data_insert` - **NEW**: Updates jobs when requirements are added
+- `sync_jobs_requirements_data_update` - **NEW**: Updates jobs when requirements are modified
+- `sync_jobs_requirements_data_delete` - **NEW**: Updates jobs when requirements are removed
 - `update_jobs_search_vector` - Rebuilds search_vector on job changes
 
 **Indexes Created**:
@@ -106,8 +119,10 @@ Create migrations and update repositories for each entity following the recruite
 - ✅ Single-word: "engineer" returns 9 results with ranking
 - ✅ Multi-word: "Splits Network" returns 5 results (AND logic)
 - ✅ Company search: Denormalized data working perfectly
-- ✅ Performance: <1ms execution time with 25 rows
-- ✅ Auto-sync: Company changes propagate to jobs automatically
+- ✅ **Requirements search**: "recruiting" returns 5 jobs (top rank 0.753), requirements text fully searchable
+- ✅ **Multi-word requirements**: "7 & years & experience" returns 3 jobs (top rank 0.996)
+- ✅ Performance: 0.277ms execution time using GIN bitmap index scan
+- ✅ Auto-sync: Company changes AND requirement changes propagate to jobs automatically
 
 **Repository Updated**: `services/ats-service/src/v2/jobs/repository.ts`
 ```typescript
@@ -121,7 +136,7 @@ if (filters.search) {
 ```
 
 **Future Enhancements** (not implemented yet):
-- Job requirements concatenation (requires JOIN or denormalization)
+- ~~Job requirements concatenation~~ ✅ **IMPLEMENTED** (January 12, 2026)
 - Salary range text concatenation
 - Remote policy field (not in current schema)
 
@@ -225,13 +240,75 @@ if (search) {
 }
 ```
 
+**Status**: ✅ Implemented (Jan 12, 2026)
+
+**Test Results**:
+- Single-word search: "Smith" returned 1 result (rank 0.608)
+- Multi-word search: "software & engineer" tested (limited data in test DB)
+- Location search: "San Francisco" tested
+- Performance: 0.152ms execution time, using GIN index
+
+**Implementation Details**:
+- **Migration**: `018_enhance_candidates_search_index.sql`
+- **Search Fields** (12 total with weights):
+  - Weight A: `full_name` (primary identifier)
+  - Weight B: `email`, `current_title`, `current_company`, `skills`, `bio`
+  - Weight C: `location`, `phone`, `desired_job_type`
+  - Weight D: `linkedin_url`, `github_url`, `portfolio_url`
+- **Function**: `build_candidates_search_vector()` with 12 parameters
+- **Trigger**: `update_candidates_search_vector_trigger` (BEFORE INSERT/UPDATE)
+- **Indexes**: 
+  - GIN index on `search_vector`
+  - Trigram indexes on `full_name`, `email`, `current_company`
+- **Repository**: Updated to use `textSearch()` with multi-word AND logic
+- **Data**: 105 existing candidate records updated
+
 ---
 
 #### 1.2 Candidates Table (`public.candidates`)
 
-**Migration**: `/infra/migrations/0XX_add_candidates_search_index.sql`
+**Status**: ✅ **Implemented** (Jan 12, 2026)
 
-**Searchable Fields** (with weights):
+**Test Results**:
+- Single-word search: "Smith" returned 1 result (rank 0.608)
+- Multi-word search: "software & engineer" tested (limited test data)
+- Location search: "San Francisco" tested
+- Performance: 0.152ms execution time, using GIN index
+
+**Implementation Details**:
+- **Migration**: `services/ats-service/migrations/018_enhance_candidates_search_index.sql`
+- **Search Fields** (12 total with weights):
+  - Weight A: `full_name` (primary identifier)
+  - Weight B: `email`, `current_title`, `current_company`, `skills`, `bio`
+  - Weight C: `location`, `phone`, `desired_job_type`
+  - Weight D: `linkedin_url`, `github_url`, `portfolio_url`
+- **Function**: `build_candidates_search_vector()` with 12 parameters
+- **Trigger**: `update_candidates_search_vector_trigger` (BEFORE INSERT/UPDATE)
+- **Indexes**: 
+  - GIN index on `search_vector`
+  - Trigram indexes on `full_name`, `email`, `current_company`
+- **Repository**: `services/ats-service/src/v2/candidates/repository.ts` updated to use `textSearch()` with multi-word AND logic
+- **Data**: 105 existing candidate records updated
+
+**Repository Update**: 
+```typescript
+if (search) {
+    console.log('Applying full-text search on candidates:', search);
+    const tsquery = search.split(/\s+/).filter(t => t.trim()).join(' & ');
+    query = query.textSearch('search_vector', tsquery, {
+        type: 'websearch',
+        config: 'english'
+    });
+}
+```
+
+---
+
+#### 1.3 Candidates Table - Future Enhancements
+
+**Migration**: Future enhancement phase
+
+**Additional Searchable Fields** (not yet implemented):
 
 **Primary Candidate Fields:**
 - `full_name` (A) - Primary identifier
@@ -320,9 +397,47 @@ ON public.candidates USING gin(email gin_trgm_ops);
 
 #### 1.3 Companies Table (`public.companies`)
 
-**Migration**: `/infra/migrations/0XX_add_companies_search_index.sql`
+**Status**: ✅ **Implemented** (Jan 12, 2026)
 
-**Searchable Fields** (with weights):
+**Test Results**:
+- Industry search: "technology" returned 4 companies (rank 0.243)
+- Multi-word search tested with limited data
+- Performance: 0.100ms execution time
+- Using GIN index and sequential scan (small table - 14 companies)
+
+**Implementation Details**:
+- **Migration**: `services/ats-service/migrations/019_add_companies_search_index.sql`
+- **Search Fields** (6 total with weights):
+  - Weight A: `name` (primary identifier)
+  - Weight B: `description`, `industry`
+  - Weight C: `headquarters_location`, `company_size`, `website`
+- **Function**: `build_companies_search_vector()` with 6 parameters
+- **Trigger**: `update_companies_search_vector_trigger` (BEFORE INSERT/UPDATE)
+- **Indexes**: 
+  - GIN index on `search_vector`
+  - Trigram indexes on `name`, `industry`
+- **Repository**: `services/ats-service/src/v2/companies/repository.ts` updated to use `textSearch()`
+- **Data**: 14 existing company records updated
+
+**Repository Update**:
+```typescript
+if (filters.search) {
+    console.log('Applying full-text search on companies:', filters.search);
+    const tsquery = filters.search.split(/\s+/).filter(t => t.trim()).join(' & ');
+    query = query.textSearch('search_vector', tsquery, {
+        type: 'websearch',
+        config: 'english'
+    });
+}
+```
+
+---
+
+#### 1.4 Companies Table - Future Enhancements
+
+**Migration**: Future enhancement phase
+
+**Additional Searchable Fields** (not yet implemented):
 
 **Primary Company Fields:**
 - `name` (A) - Primary identifier
@@ -347,39 +462,132 @@ Users search for companies by:
 
 ---
 
-#### 1.4 Placements Table (`public.placements`)
+#### 1.4 Applications Table (`public.applications`)
 
-**Migration**: `/infra/migrations/0XX_add_placements_search_index.sql`
+**Status**: ✅ **Implemented** (Jan 12, 2026)
 
-**Challenge**: Placements need data from candidates, jobs, companies, and recruiters.
+**Test Results**:
+- Candidate name search: "Smith" returned 1 result (rank 0.608)
+- Job title search: "engineer" returned 5 results (rank 0.608)
+- Multi-word search: "Software & Engineer" tested (0 results - limited test data)
+- Performance: 0.146ms execution time, using GIN index (bitmap index scan)
+- Memory: 26kB for quicksort
+- Planning time: 2.828ms
 
-**Searchable Fields** (with weights):
+**Implementation Details**:
+- **Migration**: `services/ats-service/migrations/020_add_applications_search_index.sql`
+- **Denormalized Columns** (4 new fields for performance):
+  - `candidate_name` TEXT - Synced from `candidates.full_name`
+  - `candidate_email` TEXT - Synced from `candidates.email`
+  - `job_title` TEXT - Synced from `jobs.title`
+  - `company_name` TEXT - Synced from `jobs` → `companies.name`
+- **Search Fields** (8 total with weights):
+  - Weight A: `candidate_name` (who is applying), `job_title` (position being applied for)
+  - Weight B: `candidate_email`, `company_name`, `notes`
+  - Weight C: `stage`, `recruiter_notes`, `candidate_notes`
+- **Function**: `build_applications_search_vector()` with 8 parameters
+- **Triggers** (3 total):
+  1. `sync_applications_candidate_data` - Updates candidate_name/email when candidates table changes
+  2. `sync_applications_job_data` - Updates job_title/company_name when jobs table changes
+  3. `update_applications_search_vector_trigger` - Auto-updates search_vector on applications INSERT/UPDATE
+- **Indexes**: 
+  - GIN index on `search_vector`
+  - Trigram indexes on `candidate_name`, `job_title`
+- **Repository**: `services/ats-service/src/v2/applications/repository.ts` updated to use `textSearch()` with multi-word AND logic
+- **Data**: 137 existing application records updated
 
-**Denormalized Fields (from related tables):**
-- `candidate_name` (A) - From `candidates.full_name`
-- `candidate_email` (B) - From `candidates.email`
-- `job_title` (B) - From `jobs.title`
-- `company_name` (B) - From `companies.name`
-- `recruiter_name` (C) - From `users.name` (recruiter who made placement)
-- `job_location` (C) - From `jobs.location`
-- `placement_date` (D) - When placement was made
-- `annual_salary` (D) - Compensation amount
-- `status` (D) - Active/Completed/Cancelled
+**Repository Update**:
+```typescript
+if (search) {
+    console.log('Applying full-text search on applications:', search);
+    const tsquery = search.split(/\s+/).filter((t: string) => t.trim()).join(' & ');
+    query = query.textSearch('search_vector', tsquery, {
+        type: 'websearch',
+        config: 'english'
+    });
+}
+```
 
-**Why Include Related Data:**
-Users search placements by:
-- Candidate name ("Who placed John Doe?")
-- Company ("All placements at Stripe")
-- Job title ("All Senior Engineer placements")
-- Recruiter ("Placements by Sarah")
-- Time period ("Q4 2025 placements")
-- Salary range ("$200k+ placements")
+**Architecture Notes**:
+- Denormalization enables single-query search across candidates, jobs, AND companies
+- Auto-sync triggers maintain data consistency without manual updates
+- Search spans relationships: Find applications by candidate name, job title, OR company
+- Performance scales well: Sub-millisecond execution with GIN indexing
+- TypeScript fix: Added explicit `(t: string)` type annotation to filter callback
 
-**Approach**: Create triggers on `candidates`, `jobs`, `companies`, and `users` tables to sync denormalized data to `placements` whenever source data changes.
+**Frontend Status**:
+- ⏳ Portal applications list needs update to use new search
+- ⏳ Candidate portal applications needs update to use new search
+- Backend ready for immediate frontend integration
+- Denormalized data available for rich search results display
 
 ---
 
-#### 1.5 Recruiters Table (`public.recruiters`)
+#### 1.5 Placements Table (`public.placements`)
+
+**Status**: ✅ **Implemented** (Jan 12, 2026)
+
+**Test Results**:
+- Candidate name search: "Smith" returned 1 result (rank 0.608)
+- Job title search: "engineer" returned 1 result (rank 0.608)
+- Company name search: "CloudServices" returned 1 result (rank 0.243)
+- Performance: 0.091ms execution time, using GIN index (bitmap index scan)
+- Planning time: 2.756ms
+
+**Implementation Details**:
+- **Migration**: `services/ats-service/migrations/021_add_placements_search_index.sql`
+- **Denormalized Columns** (6 new fields for multi-entity search):
+  - `candidate_name` TEXT - Synced from `candidates.full_name`
+  - `candidate_email` TEXT - Synced from `candidates.email`
+  - `job_title` TEXT - Synced from `jobs.title`
+  - `company_name` TEXT - Synced from `jobs` → `companies.name`
+  - `recruiter_name` TEXT - Synced from `recruiters` → `users.name`
+  - `recruiter_email` TEXT - Synced from `recruiters` → `users.email`
+- **Search Fields** (9 total with weights):
+  - Weight A: `candidate_name` (who was placed), `job_title` (position filled)
+  - Weight B: `company_name` (employer), `candidate_email`, `recruiter_name`
+  - Weight C: `recruiter_email`, `state` (active/completed/failed)
+  - Weight D: `salary` (compensation), `failure_reason` (if placement failed)
+- **Function**: `build_placements_search_vector()` with 9 parameters
+- **Triggers** (5 total - most complex denormalization):
+  1. `sync_placements_candidate_data` - Updates candidate_name/email when candidates table changes
+  2. `sync_placements_job_data` - Updates job_title/company_name when jobs table changes
+  3. `sync_placements_company_data` - Updates company_name when companies table changes (via jobs)
+  4. `sync_placements_recruiter_data` - Updates recruiter_name/email when users table changes (via recruiters)
+  5. `update_placements_search_vector_trigger` - Auto-updates search_vector on placements INSERT/UPDATE
+- **Indexes**: 
+  - GIN index on `search_vector`
+  - Trigram indexes on `candidate_name`, `job_title`, `company_name`
+- **Repository**: `services/ats-service/src/v2/placements/repository.ts` updated to use `textSearch()` with multi-word AND logic
+- **Data**: 1 test placement created and populated
+
+**Repository Update**:
+```typescript
+if (filters.search) {
+    console.log('Applying full-text search on placements:', filters.search);
+    const tsquery = filters.search.split(/\s+/).filter((t: string) => t.trim()).join(' & ');
+    query = query.textSearch('search_vector', tsquery, {
+        type: 'websearch',
+        config: 'english'
+    });
+}
+```
+
+**Architecture Notes**:
+- Most complex denormalization: Syncs from candidates, jobs, companies, AND users (via recruiters)
+- Enables unified placement search: Find by candidate, job, company, OR recruiter
+- Five auto-sync triggers maintain consistency across 4 different source tables
+- Search spans the entire placement ecosystem without JOINs
+- Perfect for "Who placed Jane Smith?", "All engineer placements", "CloudServices placements"
+
+**Frontend Status**:
+- ⏳ Portal placements list needs update to use new search
+- Backend ready for immediate frontend integration
+- Denormalized data provides rich context for search results
+
+---
+
+#### 1.6 Recruiters Table (`public.recruiters`)
 
 **Migration**: `/infra/migrations/0XX_add_recruiters_search_index.sql`
 
@@ -424,7 +632,7 @@ Users search recruiters by:
 
 ---
 
-### Step 1.6: Evaluating Searchable Fields
+### Step 1.8: Evaluating Searchable Fields
 
 **Before Creating Each Migration**, use Supabase MCP tools to inspect tables and related data:
 

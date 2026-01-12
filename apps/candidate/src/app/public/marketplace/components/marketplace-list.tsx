@@ -78,6 +78,7 @@ export default function MarketplaceList() {
         viewModeKey: 'marketplaceViewMode',
         autoFetch: true,
         include: 'user',
+        requireAuth: false,
     });
 
     return (
@@ -112,8 +113,8 @@ export default function MarketplaceList() {
                 )}
 
                 {/* Grid View */}
-                {viewMode === 'grid' && recruiters.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                {!loading && viewMode === 'grid' && recruiters.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
                         {recruiters.map((recruiter) => (
                             <RecruiterCard key={recruiter.id} recruiter={recruiter} />
                         ))}
@@ -121,7 +122,7 @@ export default function MarketplaceList() {
                 )}
 
                 {/* Table View */}
-                {viewMode === 'table' && recruiters.length > 0 && (
+                {!loading && viewMode === 'table' && recruiters.length > 0 && (
                     <DataTable
                         columns={recruiterColumns}
                         sortBy={sortBy}

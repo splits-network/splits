@@ -56,9 +56,15 @@ export class CompanyRepository {
             query = query.eq('identity_organization_id', requestedOrgId);
         }
 
-        // Apply filters
+        // Apply full-text search across all company fields
         if (filters.search) {
-            query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+            console.log('Applying full-text search on companies:', filters.search);
+            // Multi-word search: split and join with ' & ' for AND logic
+            const tsquery = filters.search.split(/\s+/).filter(t => t.trim()).join(' & ');
+            query = query.textSearch('search_vector', tsquery, {
+                type: 'websearch',
+                config: 'english'
+            });
         }
         if (filters.status) {
             query = query.eq('status', filters.status);

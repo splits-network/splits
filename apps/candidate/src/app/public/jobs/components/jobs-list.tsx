@@ -128,24 +128,28 @@ export default function JobsList() {
                             value={stats ? stats.totalJobs.toLocaleString() : '—'}
                             loading={loading && !jobs.length}
                             icon="fa-briefcase"
+                            color='accent'
                         />
                         <StatCard
                             title="Remote Friendly"
                             value={stats ? stats.remoteFriendly.toLocaleString() : '—'}
                             loading={loading && !jobs.length}
                             icon="fa-house-laptop"
+                            color='secondary'
                         />
                         <StatCard
                             title="New This Week"
                             value={stats ? stats.newThisWeek.toLocaleString() : '—'}
                             loading={loading && !jobs.length}
                             icon="fa-calendar-plus"
+                            color='info'
                         />
                         <StatCard
                             title="Avg. Salary"
                             value={stats && stats.avgSalary ? `$${stats.avgSalary.toLocaleString()}` : '—'}
                             loading={loading && !jobs.length}
                             icon="fa-dollar-sign"
+                            color='success'
                         />
                     </StatCardGrid>
 
@@ -180,7 +184,7 @@ export default function JobsList() {
                 )}
 
                 {/* Grid View */}
-                {viewMode === 'grid' && jobs.length > 0 && (
+                {!loading && viewMode === 'grid' && jobs.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
                         {jobs.map((job) => (
                             <JobCard key={job.id} job={job} />
@@ -189,7 +193,7 @@ export default function JobsList() {
                 )}
 
                 {/* Table View */}
-                {viewMode === 'table' && jobs.length > 0 && (
+                {!loading && viewMode === 'table' && jobs.length > 0 && (
                     <DataTable
                         columns={jobColumns}
                         sortBy={sortBy}

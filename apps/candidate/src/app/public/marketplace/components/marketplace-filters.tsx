@@ -24,15 +24,15 @@ export default function MarketplaceFilters({
                     Filters & View
                     <span className="text-base-content/30">•••</span>
                 </h3>
-                <div className="flex-1">
+                <div className="flex flex-wrap gap-4 items-center">
                     <SearchInput
                         value={searchInput}
                         onChange={onSearchChange}
                         onClear={onSearchClear}
                         placeholder="Search by skills, location, experience (e.g., 'tech california 10 years')..."
                     />
+                    <ViewModeToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
                 </div>
-                <ViewModeToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
             </div>
         </div>
     );

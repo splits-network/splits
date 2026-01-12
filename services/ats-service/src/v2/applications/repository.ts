@@ -68,9 +68,15 @@ export class ApplicationRepository {
             }
         }
 
-        // Apply filters
+        // Apply full-text search across all application fields
         if (filters.search) {
-            query = query.or(`notes.ilike.%${filters.search}%`);
+            console.log('Applying full-text search on applications:', filters.search);
+            // Multi-word search: split and join with ' & ' for AND logic
+            const tsquery = filters.search.split(/\s+/).filter((t: string) => t.trim()).join(' & ');
+            query = query.textSearch('search_vector', tsquery, {
+                type: 'websearch',
+                config: 'english'
+            });
         }
         if (filters.stage) {
             query = query.eq('stage', filters.stage);

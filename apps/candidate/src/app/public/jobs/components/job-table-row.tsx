@@ -78,7 +78,7 @@ export function JobTableRow({ job }: JobTableRowProps) {
                 <div className="flex items-center gap-3">
                     {/* Company Avatar */}
                     <div className="avatar avatar-placeholder shrink-0">
-                        <div className="bg-secondary text-secondary-content rounded-full w-10 h-10">
+                        <div className="bg-base-100 text-base-content rounded-full w-10 h-10">
                             {job.company?.logo_url ? (
                                 <img src={job.company.logo_url} alt={job.company.name} className='object-contain w-full h-full' />
                             ) : (

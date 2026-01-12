@@ -63,7 +63,12 @@ export class PlacementRepository {
 
         // Apply filters
         if (filters.search) {
-            query = query.or(`notes.ilike.%${filters.search}%`);
+            console.log('Applying full-text search on placements:', filters.search);
+            const tsquery = filters.search.split(/\s+/).filter((t: string) => t.trim()).join(' & ');
+            query = query.textSearch('search_vector', tsquery, {
+                type: 'websearch',
+                config: 'english'
+            });
         }
         if (filters.status) {
             query = query.eq('status', filters.status);
