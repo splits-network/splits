@@ -368,10 +368,7 @@ export default function ApplicationsClient() {
                         {applications.map((application) => (
                             <ApplicationCard
                                 key={application.id}
-                                application={{
-                                    ...application,
-                                    company: application.job?.company
-                                }}
+                                application={application}
                                 canAccept={isCompanyUser && !application.accepted_by_company}
                                 isAccepting={acceptingId === application.id}
                                 onAccept={() => handleAcceptApplication(application.id)}

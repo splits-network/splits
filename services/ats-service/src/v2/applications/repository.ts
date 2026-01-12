@@ -52,6 +52,7 @@ export class ApplicationRepository {
             query = query.eq('recruiter_id', accessContext.recruiterId);
         } else if (!accessContext.isPlatformAdmin) {
             if (accessContext.organizationIds.length > 0) {
+                console.log('Applying organization access filter for organizations:', accessContext.organizationIds);
                 query = query.in('job.company.identity_organization_id', accessContext.organizationIds);
                 // Company admins and hiring managers only see applications in company-relevant stages
                 query = query.in('stage', ['submitted', 'interview', 'offer', 'hired', 'rejected']);
