@@ -4,7 +4,7 @@ import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import { useStandardList } from '@/hooks/use-standard-list';
+import { LoadingState, useStandardList } from '@/hooks/use-standard-list';
 import { useToast } from '@/lib/toast-context';
 import ConfirmDialog from '@/components/confirm-dialog';
 import { formatDate } from '@/lib/utils';
@@ -64,21 +64,21 @@ export default function InvitationsPageClient() {
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
     // Memoize fetchInvitations to prevent infinite re-renders in useStandardList
-    const fetchInvitations = useCallback(async (params: Record<string, any>) => {
-        const token = await getToken();
-        if (!token) throw new Error('Not authenticated');
+    // const fetchInvitations = useCallback(async (params: Record<string, any>) => {
+    //     const token = await getToken();
+    //     if (!token) throw new Error('Not authenticated');
 
-        const client = createAuthenticatedClient(token);
+    //     const client = createAuthenticatedClient(token);
 
-        params.include = 'candidate';
-        // V2 endpoint with enriched candidate data in single query
-        const response = await client.get('/recruiter-candidates', { params });
+    //     params.include = 'candidate';
+    //     // V2 endpoint with enriched candidate data in single query
+    //     const response = await client.get('/recruiter-candidates', { params });
 
-        return {
-            data: response.data || [],
-            pagination: response.pagination || { total: 0, page: 1, limit: 25, total_pages: 0 }
-        };
-    }, [getToken]);
+    //     return {
+    //         data: response.data || [],
+    //         pagination: response.pagination || { total: 0, page: 1, limit: 25, total_pages: 0 }
+    //     };
+    // }, [getToken]);
 
     // Memoize defaultFilters to prevent unnecessary re-renders
     const defaultFilters = useMemo<InvitationFilters>(() => ({
@@ -87,15 +87,29 @@ export default function InvitationsPageClient() {
 
     const {
         data: invitations,
+        pagination,
         loading,
         error,
-        pagination,
-        searchQuery,
+        searchInput,
         setSearchInput,
+        clearSearch,
+        filters,
+        setFilter,
+        sortBy,
+        sortOrder,
+        handleSort,
+        page,
+        limit,
+        totalPages,
+        total,
         goToPage,
-        refetch
+        setLimit,
+        viewMode,
+        setViewMode,
+        refresh,
     } = useStandardList<RecruiterCandidate, InvitationFilters>({
-        fetchFn: fetchInvitations,
+        endpoint: '/recruiter-candidates',
+        //fetchFn: fetchInvitations,
         defaultFilters,
         defaultSortBy: 'invited_at',
         defaultSortOrder: 'desc',
@@ -178,7 +192,7 @@ export default function InvitationsPageClient() {
                 resend_invitation: true
             });
 
-            await refetch();
+            await refresh();
             toast.success('Invitation resent successfully');
         } catch (err: any) {
             console.error('Failed to resend invitation:', err);
@@ -212,7 +226,7 @@ export default function InvitationsPageClient() {
                 cancel_invitation: true
             });
 
-            await refetch();
+            await refresh();
             toast.success('Invitation cancelled');
         } catch (err: any) {
             console.error('Failed to cancel invitation:', err);
@@ -242,7 +256,7 @@ export default function InvitationsPageClient() {
 
             setShowInviteModal(false);
             setCandidateEmail('');
-            await refetch();
+            await refresh();
             toast.success('Invitation sent successfully');
         } catch (err: any) {
             console.error('Failed to send invitation:', err);
@@ -265,12 +279,6 @@ export default function InvitationsPageClient() {
         <div className="space-y-6">
             {/* Header */}
             <div className="flex justify-between items-start">
-                <div>
-                    <h1 className="text-3xl font-bold">Candidate Invitations</h1>
-                    <p className="text-base-content/70 mt-2">
-                        Track the status of invitations you've sent to candidates
-                    </p>
-                </div>
                 <button
                     type="button"
                     className="btn btn-primary gap-2"
@@ -286,44 +294,138 @@ export default function InvitationsPageClient() {
                 <div className="alert alert-error">
                     <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                     <span>{error}</span>
-                    <button className="btn btn-sm btn-ghost" onClick={refetch}>
+                    <button className="btn btn-sm btn-ghost" onClick={refresh}>
                         <i className="fa-duotone fa-regular fa-rotate"></i>
                         Retry
                     </button>
                 </div>
             )}
 
-            {/* Stats Cards */}
-            <StatCardGrid>
-                <StatCard
-                    title="Total Invitations"
-                    value={stats.total}
-                    icon="fa-duotone fa-regular fa-envelopes"
-                    description="Total candidate invitations"
-                />
-                <StatCard
-                    title="Pending"
-                    value={stats.pending}
-                    icon="fa-duotone fa-regular fa-hourglass-half"
-                    color="info"
-                    description="Awaiting response"
-                />
-                <StatCard
-                    title="Accepted"
-                    value={stats.accepted}
-                    icon="fa-duotone fa-regular fa-check"
-                    color="success"
-                    description="Candidates joined"
-                />
-                <StatCard
-                    title="Declined"
-                    value={stats.declined}
-                    icon="fa-duotone fa-regular fa-xmark"
-                    color="error"
-                    description="Not interested"
-                />
-            </StatCardGrid>
+            <div className='card bg-base-200'>
+                {/* Stats Cards */}
+                <StatCardGrid className='m-2 shadow-lg'>
+                    <StatCard
+                        title="Total Invitations"
+                        value={stats.total}
+                        icon="fa-duotone fa-regular fa-envelopes"
+                        description="Total candidate invitations"
+                    />
+                    <StatCard
+                        title="Pending"
+                        value={stats.pending}
+                        icon="fa-duotone fa-regular fa-hourglass-half"
+                        color="info"
+                        description="Awaiting response"
+                    />
+                    <StatCard
+                        title="Accepted"
+                        value={stats.accepted}
+                        icon="fa-duotone fa-regular fa-check"
+                        color="success"
+                        description="Candidates joined"
+                    />
+                    <StatCard
+                        title="Declined"
+                        value={stats.declined}
+                        icon="fa-duotone fa-regular fa-xmark"
+                        color="error"
+                        description="Not interested"
+                    />
+                </StatCardGrid>
+                <div className='p-4 pt-0'></div>
+            </div>
+            {/* Loading State */}
+            {loading && invitations.length === 0 && <LoadingState />}
 
+            {/* Grid View */}
+            {!loading && viewMode === 'grid' && invitations.length > 0 && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
+                    {invitations.map((invitation) => (
+                        <div key={invitation.id} className="card bg-base-100 shadow">
+                            <div className="card-body">
+                                <h3 className="card-title">
+                                    {invitation.candidate?.full_name || 'Unknown'}
+                                </h3>
+                                <p className="text-sm text-base-content/70 mb-2">
+                                    {invitation.candidate?.email || 'N/A'}
+                                </p>
+                                <div className="mb-2">
+                                    <strong>Invited:</strong>{' '}
+                                    {invitation.invited_at ? formatDate(invitation.invited_at) : 'N/A'}
+                                </div>
+                                <div className="mb-2">
+                                    <strong>Expires:</strong>{' '}
+                                    {invitation.invitation_expires_at ? (
+                                        <span
+                                            className={
+                                                new Date(invitation.invitation_expires_at) < new Date()
+                                                    ? 'text-warning'
+                                                    : ''
+                                            }
+                                        >
+                                            {formatDate(invitation.invitation_expires_at)}
+                                        </span>
+                                    ) : (
+                                        'N/A'
+                                    )}
+                                </div>
+                                <div className="mb-4">{getStatusBadge(invitation)}</div>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-ghost"
+                                        onClick={() => router.push(`/portal/candidates/${invitation.candidate_id}`)}
+                                        title="View candidate"
+                                    >
+                                        <i className="fa-duotone fa-regular fa-eye"></i>
+                                    </button>
+                                    {canResendInvitation(invitation) && (
+                                        <>
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-primary"
+                                                onClick={() => handleResendInvitation(invitation.id)}
+                                                disabled={resendingId === invitation.id || cancellingId === invitation.id}
+                                                title="Resend invitation"
+                                            >
+                                                {resendingId === invitation.id ? (
+                                                    <span className="loading loading-spinner loading-xs"></span>
+                                                ) : (
+                                                    <i className="fa-duotone fa-regular fa-paper-plane"></i>
+                                                )}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="btn btn-sm btn-error btn-outline"
+                                                onClick={() => handleCancelInvitation(invitation)}
+                                                disabled={resendingId === invitation.id || cancellingId === invitation.id}
+                                                title="Cancel invitation"
+                                            >
+                                                {cancellingId === invitation.id ? (
+                                                    <span className="loading loading-spinner loading-xs"></span>
+                                                ) : (
+                                                    <i className="fa-duotone fa-regular fa-trash"></i>
+                                                )}
+                                            </button>
+                                        </>
+                                    )}
+                                    {invitation.declined_reason && (
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-ghost"
+                                            onClick={() => toast.info(invitation.declined_reason || 'No reason provided')}
+                                            title="View decline reason"
+                                        >
+                                            <i className="fa-duotone fa-regular fa-comment"></i>
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+            )}
             {/* Search and Filter Tabs */}
             <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
                 <div className="tabs tabs-box">
@@ -362,7 +464,7 @@ export default function InvitationsPageClient() {
                             type="text"
                             placeholder="Search by candidate name or email..."
                             className="input w-full lg:w-80"
-                            value={searchQuery}
+                            value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
                         />
                     </div>

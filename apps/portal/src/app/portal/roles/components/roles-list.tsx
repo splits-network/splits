@@ -170,7 +170,7 @@ export default function RolesList() {
                 {loading && jobs.length === 0 && <LoadingState />}
 
                 {/* Grid View */}
-                {viewMode === 'grid' && jobs.length > 0 && (
+                {!loading && viewMode === 'grid' && jobs.length > 0 && (
                     <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
                         {jobs.map((job) => (
                             <RoleCard
@@ -185,7 +185,7 @@ export default function RolesList() {
                 )}
 
                 {/* Table View */}
-                {viewMode === 'table' && jobs.length > 0 && (
+                {!loading && viewMode === 'table' && jobs.length > 0 && (
                     <DataTable
                         columns={roleColumns}
                         sortBy={sortBy}
