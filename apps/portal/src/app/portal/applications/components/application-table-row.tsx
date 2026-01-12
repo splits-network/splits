@@ -1,168 +1,342 @@
+'use client';
+
 import Link from 'next/link';
+import { formatRelativeTime } from '@/lib/utils';
+import { getApplicationStageBadge } from '@/lib/utils/badge-styles';
+import {
+    ExpandableTableRow,
+    ExpandedDetailGrid,
+    ExpandedDetailItem,
+    ExpandedDetailSection,
+} from '@/components/ui/tables';
+import type { Application } from './application-card';
+
+// ===== TYPES =====
+
+interface Badge {
+    class: string;
+    icon: string;
+    text?: string;
+    tooltip?: string;
+    animated?: boolean;
+}
 
 interface ApplicationTableRowProps {
-    application: {
-        id: string;
-        stage: string;
-        accepted_by_company: boolean;
-        created_at: string;
-        ai_reviewed?: boolean;
-        candidate: {
-            full_name: string;
-            email: string;
-            _masked?: boolean;
-        };
-        job?: {
-            title: string;
-        };
-        company?: {
-            name: string;
-        };
-        recruiter?: {
-            name: string;
-        };
-        ai_review?: {
-            fit_score: number;
-            recommendation: 'strong_fit' | 'good_fit' | 'fair_fit' | 'poor_fit';
-        };
-    };
-    canAccept: boolean;
-    isAccepting: boolean;
-    onAccept: () => void;
-    getStageColor: (stage: string) => string;
-    formatDate: (date: string) => string;
+    application: Application;
+    canAccept?: boolean;
+    isAccepting?: boolean;
+    onAccept?: () => void;
+    getStageColor?: (stage: string) => string;
+    formatDate: (date: string | Date) => string;
     isSelected?: boolean;
     onToggleSelect?: () => void;
     isRecruiter?: boolean;
     isCompanyUser?: boolean;
 }
 
+// Get AI recommendation badge
+function getAIRecommendationBadge(recommendation: string): string {
+    switch (recommendation) {
+        case 'strong_fit':
+            return 'badge-success';
+        case 'good_fit':
+            return 'badge-info';
+        case 'fair_fit':
+            return 'badge-warning';
+        case 'poor_fit':
+            return 'badge-error';
+        default:
+            return 'badge-ghost';
+    }
+}
+
+// ===== COMPONENT =====
+
 export function ApplicationTableRow({
     application,
-    canAccept,
-    isAccepting,
+    canAccept = false,
+    isAccepting = false,
     onAccept,
-    getStageColor,
+    getStageColor = getApplicationStageBadge,
     formatDate,
     isSelected = false,
     onToggleSelect,
     isRecruiter = false,
     isCompanyUser = false,
 }: ApplicationTableRowProps) {
-    const candidate = application.candidate;
-    const isMasked = candidate._masked;
+    const companyName = application.company_name || application.job?.company?.name || 'Unknown Company';
+    const hasAIReview = application.ai_reviewed && application.ai_review;
+    const isMasked = application.candidate._masked;
 
-    return (
-        <tr className="hover">
-            {isRecruiter && (
-                <td className="w-12">
-                    <input
-                        type="checkbox"
-                        className="checkbox checkbox-sm"
-                        checked={isSelected}
-                        onChange={onToggleSelect}
-                        onClick={(e) => e.stopPropagation()}
-                        aria-label={`Select application for ${candidate.full_name}`}
-                    />
-                </td>
-            )}
-            <td>
+    // Calculate badges
+    const badges: Badge[] = [];
+
+    if (application.accepted_by_company) {
+        badges.push({
+            class: 'badge-success',
+            icon: 'fa-check-circle',
+            text: 'Accepted',
+            tooltip: 'Accepted by company',
+        });
+    }
+
+    if (hasAIReview) {
+        badges.push({
+            class: getAIRecommendationBadge(application.ai_review!.recommendation),
+            icon: 'fa-robot',
+            text: `AI: ${application.ai_review!.fit_score}%`,
+            tooltip: `AI Fit Score: ${application.ai_review!.recommendation.replace('_', ' ')}`,
+        });
+    }
+
+    if (application.stage === 'screen') {
+        badges.push({
+            class: 'badge-warning',
+            icon: 'fa-clock',
+            text: 'Awaiting Review',
+            tooltip: 'Pending company review',
+            animated: true,
+        });
+    }
+
+    if (isMasked) {
+        badges.push({
+            class: 'badge-warning',
+            icon: 'fa-eye-slash',
+            text: 'Anonymous',
+            tooltip: 'Anonymous candidate',
+        });
+    }
+
+    // Main row cells
+    const cells = (
+        <>
+            <td className="py-4">
                 <div className="flex items-center gap-3">
-                    <div className="avatar avatar-placeholder">
-                        <div className="bg-primary/10 text-primary rounded-full w-10">
-                            <span className="text-sm">
-                                {isMasked ? <i className="fa-duotone fa-regular fa-user-secret"></i> : candidate.full_name[0]}
-                            </span>
+                    {/* Candidate Avatar */}
+                    <div className="avatar avatar-placeholder shrink-0">
+                        <div className="bg-primary/10 text-base-content/70 w-10 rounded-full flex items-center justify-center text-sm font-semibold">
+                            {isMasked ? (
+                                <i className="fa-duotone fa-regular fa-user-secret"></i>
+                            ) : (
+                                application.candidate.full_name[0].toUpperCase()
+                            )}
                         </div>
                     </div>
-                    <div>
-                        <div className="font-bold flex items-center gap-2">
+                    <div className="text-sm min-w-0">
+                        <span className="font-semibold whitespace-pre-line flex items-center gap-2" title={application.candidate.full_name}>
+                            {application.candidate.full_name}
                             {isMasked && (
                                 <i className="fa-duotone fa-regular fa-eye-slash text-warning" title="Anonymous"></i>
                             )}
-                            {candidate.full_name}
-                        </div>
-                        <div className="text-sm text-base-content/70">
-                            {!isMasked && candidate.email}
-                            {isMasked && <span className="italic">{candidate.email}</span>}
+                        </span>
+                        <div className="text-sm text-base-content/60">
+                            {!isMasked && application.candidate.email}
                         </div>
                     </div>
                 </div>
             </td>
             <td>
-                {application.job ? (
-                    <div className="text-sm font-medium">
-                        {application.job.title}
-                    </div>
-                ) : (
-                    <span className="text-base-content/40">—</span>
-                )}
+                <span className="text-sm">{application.job.title}</span>
             </td>
             <td>
-                {application.company ? (
-                    <div className="text-sm">
-                        {application.company.name}
-                    </div>
-                ) : (
-                    <span className="text-base-content/40">—</span>
-                )}
+                <span className="text-sm">{companyName}</span>
             </td>
             <td>
-                {application.ai_review?.fit_score}
-                {application.ai_reviewed && application.ai_review ? (
+                {hasAIReview ? (
                     <div className="flex items-center gap-2">
-                        <span className="font-bold text-lg">{application.ai_review.fit_score}</span>
+                        <span className="font-semibold text-base">{application.ai_review!.fit_score}</span>
                         <span className="text-xs text-base-content/60">/100</span>
                     </div>
                 ) : application.stage === 'ai_review' ? (
                     <span className="loading loading-spinner loading-sm"></span>
                 ) : (
-                    <span className="text-base-content/40 text-sm">—</span>
+                    <span className="text-base-content/30">—</span>
                 )}
             </td>
             <td>
-                <span className={`badge ${getStageColor(application.stage)}`}>
+                <div className={`badge badge-sm ${getStageColor(application.stage)}`}>
                     {application.stage}
-                </span>
+                </div>
             </td>
-            {isRecruiter && (
-                <td>
-                    {application.recruiter ? (
-                        <div className="text-sm">
-                            {application.recruiter.name}
-                        </div>
-                    ) : (
-                        <span className="text-base-content/40">—</span>
-                    )}
-                </td>
-            )
-            }
             <td>
-                <div className="text-sm">{formatDate(application.created_at)}</div>
+                <span className="text-sm text-base-content/60">{formatRelativeTime(application.created_at)}</span>
             </td>
-            <td className="text-right">
-                <div className="flex gap-2 justify-end">
-                    {isCompanyUser && canAccept && (
+            <td onClick={(e) => e.stopPropagation()}>
+                <div className="flex gap-1 justify-end">
+                    {canAccept && isCompanyUser && onAccept && (
                         <button
                             onClick={onAccept}
-                            className="btn btn-success btn-sm"
+                            className="btn btn-ghost btn-sm btn-square"
                             disabled={isAccepting}
+                            title="Accept Application"
                         >
                             {isAccepting ? (
                                 <span className="loading loading-spinner loading-xs"></span>
                             ) : (
-                                <i className="fa-duotone fa-regular fa-check"></i>
+                                <i className="fa-duotone fa-regular fa-check text-xs"></i>
                             )}
                         </button>
                     )}
                     <Link
                         href={`/portal/applications/${application.id}`}
                         className="btn btn-primary btn-sm"
+                        title="View Details"
                     >
-                        <i className="fa-duotone fa-regular fa-arrow-right"></i>
+                        View
                     </Link>
                 </div>
             </td>
-        </tr >
+        </>
+    );
+
+    // Expanded content
+    const expandedContent = (
+        <div className="space-y-4">
+            {/* Badges Row */}
+            {badges.length > 0 && (
+                <ExpandedDetailSection title="Status Indicators">
+                    <div className="flex flex-wrap gap-2">
+                        {badges.map((badge: Badge, idx: number) => (
+                            <span
+                                key={idx}
+                                className={`badge ${badge.class} gap-1.5 ${badge.animated ? 'animate-pulse' : ''}`}
+                                title={badge.tooltip}
+                            >
+                                <i className={`fa-duotone fa-regular ${badge.icon}`}></i>
+                                {badge.text}
+                            </span>
+                        ))}
+                    </div>
+                </ExpandedDetailSection>
+            )}
+
+            {/* Details Grid */}
+            <ExpandedDetailGrid cols={4}>
+                <ExpandedDetailItem
+                    icon="fa-user"
+                    label="Candidate"
+                    value={
+                        <div>
+                            <div>{application.candidate.full_name}</div>
+                            {!isMasked && (
+                                <div className="text-xs text-base-content/50">{application.candidate.email}</div>
+                            )}
+                        </div>
+                    }
+                />
+                <ExpandedDetailItem
+                    icon="fa-building"
+                    label="Company"
+                    value={companyName}
+                />
+                <ExpandedDetailItem
+                    icon="fa-briefcase"
+                    label="Job Title"
+                    value={application.job.title}
+                />
+                {application.recruiter && (
+                    <ExpandedDetailItem
+                        icon="fa-user-tie"
+                        label="Recruiter"
+                        value={
+                            <div>
+                                <div>{application.recruiter.name}</div>
+                                <div className="text-xs text-base-content/50">{application.recruiter.email}</div>
+                            </div>
+                        }
+                    />
+                )}
+            </ExpandedDetailGrid>
+
+            {/* Second Row - Stats */}
+            <ExpandedDetailGrid cols={4}>
+                <ExpandedDetailItem
+                    icon="fa-robot"
+                    label="AI Fit Score"
+                    value={
+                        hasAIReview ? (
+                            <span className="text-success font-semibold">
+                                {application.ai_review!.fit_score}/100
+                            </span>
+                        ) : (
+                            'Not reviewed'
+                        )
+                    }
+                />
+                <ExpandedDetailItem
+                    icon="fa-signal"
+                    label="Stage"
+                    value={
+                        <span className={`badge badge-sm ${getStageColor(application.stage)}`}>
+                            {application.stage}
+                        </span>
+                    }
+                />
+                <ExpandedDetailItem
+                    icon="fa-calendar"
+                    label="Submitted"
+                    value={formatRelativeTime(application.created_at)}
+                />
+                {application.accepted_by_company && application.accepted_at && (
+                    <ExpandedDetailItem
+                        icon="fa-check-circle"
+                        label="Accepted"
+                        value={formatRelativeTime(application.accepted_at)}
+                    />
+                )}
+            </ExpandedDetailGrid>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 pt-2 border-t border-base-300">
+                <Link
+                    href={`/portal/applications/${application.id}`}
+                    className="btn btn-primary btn-sm gap-2"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <i className="fa-duotone fa-regular fa-eye"></i>
+                    View Details
+                </Link>
+                <Link
+                    href={`/portal/applications/${application.id}?tab=timeline`}
+                    className="btn btn-outline btn-sm gap-2"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <i className="fa-duotone fa-regular fa-clock-rotate-left"></i>
+                    View Timeline
+                </Link>
+                {canAccept && isCompanyUser && onAccept && !application.accepted_by_company && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onAccept();
+                        }}
+                        className="btn btn-success btn-sm gap-2"
+                        disabled={isAccepting}
+                    >
+                        {isAccepting ? (
+                            <>
+                                <span className="loading loading-spinner loading-xs"></span>
+                                Accepting...
+                            </>
+                        ) : (
+                            <>
+                                <i className="fa-duotone fa-regular fa-check"></i>
+                                Accept Application
+                            </>
+                        )}
+                    </button>
+                )}
+            </div>
+        </div>
+    );
+
+    return (
+        <ExpandableTableRow
+            rowId={`application-${application.id}`}
+            cells={cells}
+            expandedContent={expandedContent}
+            showToggle={true}
+        />
     );
 }
