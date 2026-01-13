@@ -116,137 +116,76 @@ export default function Header() {
             {/* Center: Desktop mega menus */}
             <div className="navbar-center hidden lg:flex">
                 <ul className="menu menu-horizontal px-1 gap-1" ref={menuRef}>
-                    <li><Link href="/public/how-it-works">How It Works</Link></li>
-
-                    {/* Jobs Mega Dropdown */}
+                    <li><Link href="/public/how-it-works" className='btn btn-ghost'>How It Works</Link></li>
                     <li>
-                        <details>
-                            <summary>Jobs</summary>
-                            <ul className="p-6 bg-base-100 shadow border border-base-300 rounded-box min-w-[600px] z-50">
-                                <div className="grid grid-cols-2 gap-6">
-                                    <div>
-                                        <h3 className="font-bold text-sm mb-3 text-base-content/60">BROWSE BY CATEGORY</h3>
-                                        <ul className="space-y-2">
-                                            {jobCategories.map((cat) => (
-                                                <li key={cat.name}>
-                                                    <Link
-                                                        href={`/public/jobs?category=${encodeURIComponent(cat.name.toLowerCase())}`}
-                                                        className="flex items-center justify-between p-2 hover:bg-base-200 rounded-lg transition-colors group"
-                                                        onClick={closeAllDropdowns}
-                                                    >
-                                                        <div className="flex items-center gap-3">
-                                                            <i className={`fa-duotone fa-regular fa-${cat.icon} text-primary group-hover:scale-110 transition-transform`}></i>
-                                                            <span>{cat.name}</span>
-                                                        </div>
-                                                        <span className="badge badge-ghost badge-sm">{cat.count}</span>
-                                                    </Link>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-sm mb-3 text-base-content/60">POPULAR SEARCHES</h3>
-                                        <ul className="space-y-2">
-                                            <li>
-                                                <Link href="/public/jobs?remote=true" className="flex items-center gap-2 p-2 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
-                                                    <i className="fa-duotone fa-regular fa-house-laptop text-secondary"></i>
-                                                    Remote Jobs
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link href="/public/jobs?level=director" className="flex items-center gap-2 p-2 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
-                                                    <i className="fa-duotone fa-regular fa-user-tie text-accent"></i>
-                                                    Director Roles
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link href="/public/jobs?salary_min=100000" className="flex items-center gap-2 p-2 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
-                                                    <i className="fa-duotone fa-regular fa-dollar-sign text-success"></i>
-                                                    $100K+ Salary
-                                                </Link>
-                                            </li>
-                                            <li>
-                                                <Link href="/public/jobs?type=full_time" className="flex items-center gap-2 p-2 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
-                                                    <i className="fa-duotone fa-regular fa-briefcase text-info"></i>
-                                                    Full-Time Positions
-                                                </Link>
-                                            </li>
-                                        </ul>
-                                        <div className="mt-4 pt-4 border-t border-base-300">
-                                            <Link href="/public/jobs" className="btn btn-primary btn-sm btn-block" onClick={closeAllDropdowns}>
-                                                View All Jobs <i className="fa-duotone fa-regular fa-arrow-right"></i>
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </div>
-                            </ul>
-                        </details>
+                        <Link href='/public/jobs' className='btn btn-primary btn-outline'>
+                            <i className="fa-duotone fa-regular fa-briefcase mr-1"></i>
+                            Find Jobs
+                        </Link>
                     </li>
 
                     {/* Resources Mega Dropdown */}
                     <li>
                         <details>
-                            <summary>Resources</summary>
-                            <ul className="p-6 bg-base-100 shadow border border-base-300 rounded-box min-w-[500px] z-50">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                        <li>
-                                            <Link href="/public/resources/career-guides" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
-                                                <i className="fa-duotone fa-regular fa-book text-primary text-lg mt-1"></i>
-                                                <div>
-                                                    <div className="font-semibold">Career Guides</div>
-                                                    <div className="text-xs text-base-content/60">Expert advice for your journey</div>
-                                                </div>
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/public/resources/salary-insights" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
-                                                <i className="fa-duotone fa-regular fa-chart-line text-success text-lg mt-1"></i>
-                                                <div>
-                                                    <div className="font-semibold">Salary Insights</div>
-                                                    <div className="text-xs text-base-content/60">Know your worth</div>
-                                                </div>
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/public/resources/interview-prep" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
-                                                <i className="fa-duotone fa-regular fa-user-tie text-secondary text-lg mt-1"></i>
-                                                <div>
-                                                    <div className="font-semibold">Interview Prep</div>
-                                                    <div className="text-xs text-base-content/60">Ace your next interview</div>
-                                                </div>
-                                            </Link>
-                                        </li>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <li>
-                                            <Link href="/public/resources/success-stories" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
-                                                <i className="fa-duotone fa-regular fa-star text-warning text-lg mt-1"></i>
-                                                <div>
-                                                    <div className="font-semibold">Success Stories</div>
-                                                    <div className="text-xs text-base-content/60">Real candidate experiences</div>
-                                                </div>
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/public/resources/resume-tips" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
-                                                <i className="fa-duotone fa-regular fa-file-alt text-info text-lg mt-1"></i>
-                                                <div>
-                                                    <div className="font-semibold">Resume Tips</div>
-                                                    <div className="text-xs text-base-content/60">Stand out from the crowd</div>
-                                                </div>
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link href="/public/resources/industry-trends" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
-                                                <i className="fa-duotone fa-regular fa-trending-up text-accent text-lg mt-1"></i>
-                                                <div>
-                                                    <div className="font-semibold">Industry Trends</div>
-                                                    <div className="text-xs text-base-content/60">Stay ahead of the curve</div>
-                                                </div>
-                                            </Link>
-                                        </li>
-                                    </div>
+                            <summary className='btn btn-ghost'>Resources</summary>
+                            <ul className="menu xl:menu-horizontal bg-base-100 rounded-box lg:min-w-max shadow">
+                                <div className="space-y-1">
+                                    <li>
+                                        <Link href="/public/resources/career-guides" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                            <i className="fa-duotone fa-regular fa-book text-primary text-lg mt-1"></i>
+                                            <div>
+                                                <div className="font-semibold">Career Guides</div>
+                                                <div className="text-xs text-base-content/60">Expert advice for your journey</div>
+                                            </div>
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/public/resources/salary-insights" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                            <i className="fa-duotone fa-regular fa-chart-line text-success text-lg mt-1"></i>
+                                            <div>
+                                                <div className="font-semibold">Salary Insights</div>
+                                                <div className="text-xs text-base-content/60">Know your worth</div>
+                                            </div>
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/public/resources/interview-prep" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                            <i className="fa-duotone fa-regular fa-user-tie text-secondary text-lg mt-1"></i>
+                                            <div>
+                                                <div className="font-semibold">Interview Prep</div>
+                                                <div className="text-xs text-base-content/60">Ace your next interview</div>
+                                            </div>
+                                        </Link>
+                                    </li>
+                                </div>
+                                <div className="space-y-1">
+                                    <li>
+                                        <Link href="/public/resources/success-stories" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                            <i className="fa-duotone fa-regular fa-star text-warning text-lg mt-1"></i>
+                                            <div>
+                                                <div className="font-semibold">Success Stories</div>
+                                                <div className="text-xs text-base-content/60">Real candidate experiences</div>
+                                            </div>
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/public/resources/resume-tips" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                            <i className="fa-duotone fa-regular fa-file-alt text-info text-lg mt-1"></i>
+                                            <div>
+                                                <div className="font-semibold">Resume Tips</div>
+                                                <div className="text-xs text-base-content/60">Stand out from the crowd</div>
+                                            </div>
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/public/resources/industry-trends" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
+                                            <i className="fa-duotone fa-regular fa-trending-up text-accent text-lg mt-1"></i>
+                                            <div>
+                                                <div className="font-semibold">Industry Trends</div>
+                                                <div className="text-xs text-base-content/60">Stay ahead of the curve</div>
+                                            </div>
+                                        </Link>
+                                    </li>
                                 </div>
                             </ul>
                         </details>
@@ -254,8 +193,8 @@ export default function Header() {
 
                     {/* Recruiters/Marketplace Link */}
                     <li>
-                        <Link href="/public/marketplace" className="flex items-center gap-2">
-                            <i className="fa-duotone fa-regular fa-users text-primary"></i>
+                        <Link href="/public/marketplace" className="btn btn-secondary btn-outline">
+                            <i className="fa-duotone fa-regular fa-users"></i>
                             Find a Recruiter
                         </Link>
                     </li>
@@ -263,8 +202,8 @@ export default function Header() {
                     {/* Companies Mega Dropdown */}
                     <li>
                         <details>
-                            <summary>Companies</summary>
-                            <ul className="p-6 bg-base-100 shadow border border-base-300 rounded-box min-w-[450px] z-50">
+                            <summary className='btn btn-ghost'>Companies</summary>
+                            <ul className="menu xl:menu-horizontal bg-base-200 rounded-box lg:min-w-max">
                                 <h3 className="font-bold text-sm mb-3 text-base-content/60">EXPLORE COMPANIES</h3>
                                 <div className="space-y-1">
                                     <li>

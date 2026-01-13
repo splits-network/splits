@@ -145,6 +145,7 @@ export class JobRepository {
             query = query.eq('status', filters.status);
         }
         if (filters.location && !filters.search) {
+            console.log('Applying location filter on jobs:', filters.location);
             query = query.ilike('location', `%${filters.location}%`);
         }
         if (filters.employment_type) {
