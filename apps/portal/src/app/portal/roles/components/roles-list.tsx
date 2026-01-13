@@ -233,7 +233,7 @@ export default function RolesList() {
             <div className="w-full md:w-64 lg:w-72 xl:w-80 shrink-0 mt-6 md:mt-0 space-y-6">
 
                 {/* Add Roles Sidebar */}
-                {profile?.is_platform_admin || profile?.roles?.includes('company_admin') || profile?.roles?.includes('hiring_manager') || (profile?.roles?.includes('recruiter') && profile?.organization_ids?.length > 0) &&
+                {profile?.is_platform_admin || (profile?.roles?.includes('company_admin') || profile?.roles?.includes('hiring_manager') || (profile?.roles?.includes('recruiter')) && profile?.organization_ids?.length > 0) &&
                     <div className="card bg-base-200 shadow">
                         <div className="card-body p-4">
                             <h3 className="font-semibold text-lg mb-2">Add New Role</h3>

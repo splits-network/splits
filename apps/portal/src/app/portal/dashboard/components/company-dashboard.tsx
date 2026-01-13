@@ -8,6 +8,7 @@ import { useUserProfile } from '@/contexts';
 import { getActivityIcon, getJobStatusBadge } from '@/lib/utils';
 import { StatCard, StatCardGrid, ContentCard, EmptyState } from '@/components/ui/cards';
 import { TrendBadge } from '@/components/ui';
+import AddRoleWizardModal from '../../roles/components/add-role-wizard-modal';
 
 interface CompanyStats {
     active_roles: number;
@@ -52,6 +53,7 @@ export default function CompanyDashboard() {
     const [roleBreakdown, setRoleBreakdown] = useState<RoleBreakdown[]>([]);
     const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showAddModal, setShowAddModal] = useState(false);
 
     useEffect(() => {
         loadDashboardData();
@@ -175,6 +177,10 @@ export default function CompanyDashboard() {
         );
     }
 
+    function refresh() {
+        loadDashboardData();
+    }
+
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Welcome Section - Enhanced gradient card */}
@@ -194,10 +200,10 @@ export default function CompanyDashboard() {
                             </p>
                         </div>
                         <div className="flex gap-2">
-                            <Link href="/portal/roles/new" className="btn btn-sm bg-white/20 border-0 hover:bg-white/30 text-white">
+                            <button onClick={() => setShowAddModal(true)} className="btn btn-primary">
                                 <i className="fa-duotone fa-regular fa-plus"></i>
                                 Post Role
-                            </Link>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -294,10 +300,10 @@ export default function CompanyDashboard() {
                         title="Active Roles Pipeline"
                         icon="fa-list-check"
                         headerActions={
-                            <Link href="/portal/roles/new" className="btn btn-sm btn-primary">
+                            <button onClick={() => setShowAddModal(true)} className="btn btn-primary">
                                 <i className="fa-duotone fa-regular fa-plus"></i>
                                 Post New Role
-                            </Link>
+                            </button>
                         }
                     >
                         {roleBreakdown.length === 0 ? (
@@ -306,10 +312,10 @@ export default function CompanyDashboard() {
                                 title="No active roles"
                                 description="Create your first role to start receiving candidates"
                                 action={
-                                    <Link href="/portal/roles/new" className="btn btn-primary">
+                                    <button onClick={() => setShowAddModal(true)} className="btn btn-primary">
                                         <i className="fa-duotone fa-regular fa-plus mr-2"></i>
                                         Create Role
-                                    </Link>
+                                    </button>
                                 }
                             />
                         ) : (
@@ -390,10 +396,10 @@ export default function CompanyDashboard() {
                     {/* Quick Actions - Enhanced buttons */}
                     <ContentCard title="Quick Actions" icon="fa-bolt">
                         <div className="flex flex-col gap-2">
-                            <Link href="/portal/roles/new" className="btn btn-primary w-full justify-start gap-3">
+                            <button onClick={() => setShowAddModal(true)} className="btn btn-primary">
                                 <i className="fa-duotone fa-regular fa-plus w-4"></i>
                                 Post New Role
-                            </Link>
+                            </button>
                             <Link href="/portal/roles" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
                                 <i className="fa-duotone fa-regular fa-briefcase w-4"></i>
                                 Manage Roles
@@ -459,6 +465,18 @@ export default function CompanyDashboard() {
                     </ContentCard>
                 </div>
             </div>
+
+            {/* Add Role Modal */}
+            {showAddModal && (
+                <AddRoleWizardModal
+                    isOpen={showAddModal}
+                    onClose={() => setShowAddModal(false)}
+                    onSuccess={() => {
+                        setShowAddModal(false);
+                        refresh(); // Refresh the list
+                    }}
+                />
+            )}
         </div>
     );
 }
