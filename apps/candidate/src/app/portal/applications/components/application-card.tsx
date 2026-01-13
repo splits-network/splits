@@ -205,10 +205,10 @@ export default function ApplicationCard({ application: app }: ApplicationCardPro
                     <span className="text-xs text-base-content/50">
                         Updated {formatDate(app.updated_at)}
                     </span>
-                    <span className="text-primary text-sm font-medium group-hover:underline">
+                    <Link href={`/portal/applications/${app.id}`} className='btn btn-primary btn-sm'>
                         View Details
                         <i className="fa-duotone fa-regular fa-arrow-right ml-1.5"></i>
-                    </span>
+                    </Link>
                 </div>
             </EntityCard.Footer>
 

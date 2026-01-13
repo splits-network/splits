@@ -239,7 +239,7 @@ export function ApplicationCard({
                                     e.stopPropagation();
                                     onAccept();
                                 }}
-                                className="btn btn-ghost btn-xs"
+                                className="btn btn-sm btn-success btn-outline"
                             >
                                 {isAccepting ? (
                                     <>
@@ -255,7 +255,7 @@ export function ApplicationCard({
                             </span>
                         )}
                         <span className="text-primary text-sm font-medium group-hover:underline">
-                            <Link href={`/portal/applications/${application.id}`}>
+                            <Link href={`/portal/applications/${application.id}`} className='btn btn-primary btn-sm'>
                                 View Details →
                             </Link>
                         </span>
