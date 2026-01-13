@@ -14,19 +14,19 @@ export class CandidatesEventConsumer {
         private logger: Logger,
         private dataLookup: DataLookupHelper,
         private contactLookup: ContactLookupHelper
-    ) {}
+    ) { }
 
     async handleCandidateSourced(event: DomainEvent): Promise<void> {
         try {
             const { candidate_id, candidate_email, candidate_name, sourcer_recruiter_id, source_method } = event.payload;
-            
+
             this.logger.info({ candidate_id, sourcer_recruiter_id }, 'Handling candidate sourced notification');
-            
+
             // Fetch candidate contact (or use payload data if available)
             let candidateEmail = candidate_email;
             let candidateName = candidate_name;
             let candidateUserId: string | undefined;
-            
+
             if (!candidateEmail || !candidateName) {
                 const candidateContact = await this.contactLookup.getCandidateContact(candidate_id);
                 if (!candidateContact) {
@@ -36,26 +36,26 @@ export class CandidatesEventConsumer {
                 candidateName = candidateName || candidateContact.name;
                 candidateUserId = candidateContact.user_id || undefined;
             }
-            
+
             if (!candidateEmail) {
                 throw new Error(`Candidate ${candidate_id} has no email address`);
             }
-            
+
             // Fetch recruiter contact
             const recruiterContact = await this.contactLookup.getRecruiterContact(sourcer_recruiter_id);
             if (!recruiterContact) {
                 throw new Error(`Recruiter contact not found: ${sourcer_recruiter_id}`);
             }
-            
+
             // Send email to the CANDIDATE: "You've been added to a recruiter's network"
             await this.emailService.sendCandidateAddedToNetwork(candidateEmail, {
                 candidateName: candidateName,
                 recruiterName: recruiterContact.name,
                 userId: candidateUserId,
             });
-            
+
             this.logger.info({ candidate_id, recipient: candidateEmail }, 'Candidate sourced notification sent to candidate');
-            
+
             // Send confirmation email to the RECRUITER: "You successfully sourced this candidate"
             await this.emailService.sendRecruiterSourcingConfirmation(recruiterContact.email, {
                 candidateName: candidateName,
@@ -63,7 +63,7 @@ export class CandidatesEventConsumer {
                 protectionPeriod: '365 days',
                 userId: recruiterContact.user_id || undefined,
             });
-            
+
             this.logger.info({ candidate_id, sourcer_recruiter_id, recipient: recruiterContact.email }, 'Candidate sourced confirmation sent to recruiter');
         } catch (error) {
             this.logger.error({ error, event_payload: event.payload }, 'Failed to send candidate sourced notification');
@@ -74,41 +74,41 @@ export class CandidatesEventConsumer {
     async handleOwnershipConflict(event: DomainEvent): Promise<void> {
         try {
             const { candidate_id, original_sourcer_id, attempting_recruiter_id } = event.payload;
-            
+
             this.logger.info({ candidate_id, original_sourcer_id }, 'Handling ownership conflict notification');
-            
+
             // Fetch candidate contact
             const candidateContact = await this.contactLookup.getCandidateContact(candidate_id);
             if (!candidateContact) {
                 throw new Error(`Candidate contact not found: ${candidate_id}`);
             }
-            
+
             // Fetch original sourcer contact
             const originalContact = await this.contactLookup.getRecruiterContact(original_sourcer_id);
             if (!originalContact) {
                 throw new Error(`Original recruiter contact not found: ${original_sourcer_id}`);
             }
-            
+
             // Fetch attempting recruiter contact
             const attemptingContact = await this.contactLookup.getRecruiterContact(attempting_recruiter_id);
             if (!attemptingContact) {
                 throw new Error(`Attempting recruiter contact not found: ${attempting_recruiter_id}`);
             }
-            
+
             // Notify original sourcer
             await this.emailService.sendOwnershipConflict(originalContact.email, {
                 candidateName: candidateContact.name,
                 attemptingRecruiterName: attemptingContact.name,
                 userId: originalContact.user_id || undefined,
             });
-            
+
             // Notify attempting recruiter
             await this.emailService.sendOwnershipConflictRejection(attemptingContact.email, {
                 candidateName: candidateContact.name,
                 originalSourcerName: originalContact.name,
                 userId: attemptingContact.user_id || undefined,
             });
-            
+
             this.logger.info({ candidate_id }, 'Ownership conflict notifications sent');
         } catch (error) {
             this.logger.error({ error, event_payload: event.payload }, 'Failed to send ownership conflict notification');
@@ -122,6 +122,12 @@ export class CandidatesEventConsumer {
 
             this.logger.info({ relationship_id, recruiter_id, candidate_id }, 'Handling candidate invited notification');
 
+            // Skip if no recruiter (self-signup scenario)
+            if (!recruiter_id) {
+                this.logger.info({ candidate_id }, 'Skipping candidate invitation email - no recruiter associated (self-signup)');
+                return;
+            }
+
             // Fetch candidate contact
             const candidateContact = await this.contactLookup.getCandidateContact(candidate_id);
             if (!candidateContact) {
@@ -131,13 +137,14 @@ export class CandidatesEventConsumer {
             // Fetch recruiter contact
             const recruiterContact = await this.contactLookup.getRecruiterContact(recruiter_id);
             if (!recruiterContact) {
-                throw new Error(`Recruiter contact not found: ${recruiter_id}`);
+                this.logger.warn({ recruiter_id, candidate_id }, 'Recruiter contact not found - skipping invitation email');
+                return;
             }
 
             // Fetch recruiter bio from data lookup (contact doesn't have bio)
             const recruiter = await this.dataLookup.getRecruiter(recruiter_id);
 
-            this.logger.info({ 
+            this.logger.info({
                 candidate_email: candidateContact.email,
                 recruiter_email: recruiterContact.email,
                 invitation_token
@@ -155,15 +162,15 @@ export class CandidatesEventConsumer {
                 relationship_id: relationship_id,
             });
 
-            this.logger.info({ 
-                candidate_email: candidateContact.email, 
+            this.logger.info({
+                candidate_email: candidateContact.email,
                 recruiter_id,
                 recruiter_email: recruiterContact.email
             }, 'Candidate invitation email sent successfully');
 
         } catch (error) {
-            this.logger.error({ 
-                err: error, 
+            this.logger.error({
+                err: error,
                 event_type: event.event_type,
                 payload: event.payload,
                 error_message: error instanceof Error ? error.message : 'Unknown error',
@@ -198,9 +205,9 @@ export class CandidatesEventConsumer {
                 userId: candidateContact.user_id || undefined,
             });
 
-            this.logger.info({ 
-                candidate_email: candidateContact.email, 
-                recruiter_id 
+            this.logger.info({
+                candidate_email: candidateContact.email,
+                recruiter_id
             }, 'Candidate added to network email sent to candidate');
 
             // Send acceptance notification to RECRUITER
@@ -212,9 +219,9 @@ export class CandidatesEventConsumer {
                 userId: recruiterContact.user_id || undefined,
             });
 
-            this.logger.info({ 
-                recruiter_email: recruiterContact.email, 
-                candidate_id 
+            this.logger.info({
+                recruiter_email: recruiterContact.email,
+                candidate_id
             }, 'Consent given notification sent to recruiter');
 
         } catch (error) {
@@ -251,8 +258,8 @@ export class CandidatesEventConsumer {
                 userId: recruiterContact.user_id || undefined,
             });
 
-            this.logger.info({ 
-                recruiter_email: recruiterContact.email, 
+            this.logger.info({
+                recruiter_email: recruiterContact.email,
                 candidate_id,
                 has_reason: !!declined_reason
             }, 'Consent declined notification sent to recruiter');

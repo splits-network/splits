@@ -16,7 +16,6 @@ interface CandidateSettings {
     linkedin_url?: string;
     github_url?: string;
     portfolio_url?: string;
-    years_experience?: number;
     skills?: string[];
     industries?: string[];
     specialties?: string[];
@@ -160,7 +159,6 @@ export default function ProfilePage() {
                 linkedin_url: data.linkedin_url || '',
                 github_url: data.github_url || '',
                 portfolio_url: data.portfolio_url || '',
-                years_experience: data.years_experience || 0,
                 skills: data.skills || [],
                 industries: data.industries || [],
                 specialties: data.specialties || [],
@@ -442,17 +440,6 @@ export default function ProfilePage() {
                                     placeholder="e.g., San Francisco, CA"
                                     value={settings?.location || ''}
                                     onChange={(e) => updateSettings({ location: e.target.value })}
-                                />
-                            </fieldset>
-
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Years of Experience</legend>
-                                <input
-                                    type="number"
-                                    className="input w-full"
-                                    min="0"
-                                    value={settings?.years_experience || 0}
-                                    onChange={(e) => updateSettings({ years_experience: parseInt(e.target.value) || 0 })}
                                 />
                             </fieldset>
 
