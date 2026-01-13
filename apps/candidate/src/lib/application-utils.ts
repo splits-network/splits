@@ -14,10 +14,13 @@ export const getStatusColor = (stage: string) => {
         case 'interviewing':
             return 'badge-primary';
         case 'offer':
+            return 'badge-success badge-soft';
+        case 'hired':
             return 'badge-success';
         case 'rejected':
-        case 'withdrawn':
             return 'badge-error';
+        case 'withdrawn':
+            return 'badge-error badge-soft';
         default:
             return 'badge-ghost';
     }

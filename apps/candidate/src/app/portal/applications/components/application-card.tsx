@@ -5,7 +5,6 @@ import { useState, useRef, useEffect } from 'react';
 import { formatDate } from '@/lib/utils';
 import { getStatusColor, formatStage } from '@/lib/application-utils';
 import { EntityCard, DataList, DataRow, VerticalDataRow, InteractiveDataRow } from '@/components/ui';
-import AIReviewPanel from '../[id]/components/ai-review-panel';
 
 interface ApplicationCardProps {
     application: {
