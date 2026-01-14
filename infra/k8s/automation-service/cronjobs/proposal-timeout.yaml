@@ -1,0 +1,122 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: proposal-timeout-checker
+  namespace: splits-network
+  labels:
+    app: automation-service
+    component: cron
+    feature: proposals
+    managed-by: splits-network
+spec:
+  # Run every 6 hours at minute 0
+  # This checks 4 times per day to catch proposals shortly after they expire
+  schedule: "0 */6 * * *"
+  
+  # Keep history of successful/failed jobs for debugging
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  
+  # Prevent overlapping runs - if previous job is still running, skip this execution
+  concurrencyPolicy: Forbid
+  
+  # Suspend can be set to true to temporarily disable the cron job
+  suspend: false
+  
+  jobTemplate:
+    metadata:
+      labels:
+        app: automation-service
+        component: cron-job
+        feature: proposals
+    spec:
+      # Retry failed jobs up to 2 times with exponential backoff
+      backoffLimit: 2
+      
+      # Job must complete within 10 minutes or it will be terminated
+      activeDeadlineSeconds: 600
+      
+      template:
+        metadata:
+          labels:
+            app: automation-service
+            component: cron-job
+            feature: proposals
+          annotations:
+            prometheus.io/scrape: "true"
+            prometheus.io/port: "9090"
+            prometheus.io/path: "/metrics"
+        spec:
+          restartPolicy: OnFailure
+          
+          # Service account with permissions to access secrets
+          serviceAccountName: automation-service
+          
+          containers:
+          - name: timeout-checker
+            image: splits-network/automation-service:latest
+            imagePullPolicy: Always
+            
+            # Execute the timeout checker job
+            command: ["node"]
+            args: ["dist/jobs/proposal-timeout.js"]
+            
+            # Resource allocation
+            resources:
+              requests:
+                cpu: "50m"
+                memory: "128Mi"
+              limits:
+                cpu: "200m"
+                memory: "256Mi"
+            
+            # Environment variables
+            env:
+              # Node environment
+              - name: NODE_ENV
+                value: "production"
+              
+              # Supabase configuration
+              - name: SUPABASE_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: supabase-credentials
+                    key: url
+              
+              - name: SUPABASE_SERVICE_ROLE_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: supabase-credentials
+                    key: service-role-key
+              
+              # RabbitMQ configuration
+              - name: RABBITMQ_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: rabbitmq-credentials
+                    key: url
+              
+              # Service metadata
+              - name: SERVICE_NAME
+                value: "automation-service"
+              
+              - name: SERVICE_VERSION
+                value: "1.0.0"
+            
+            # Health checks (not applicable for batch jobs, but keeping structure)
+            # livenessProbe and readinessProbe are not typically used for CronJobs
+            
+            # Security context
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 1000
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop:
+                  - ALL
+          
+          # Image pull secrets if using private registry
+          # imagePullSecrets:
+          #   - name: splits-network-registry
