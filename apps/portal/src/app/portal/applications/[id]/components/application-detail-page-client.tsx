@@ -7,9 +7,7 @@ import { createAuthenticatedClient } from '@/lib/api-client';
 import { useUserProfile } from '@/contexts/user-profile-context';
 import ApplicationDetailClient from './application-detail-client';
 
-export default function ApplicationDetailPageClient() {
-    const params = useParams();
-    const applicationId = params.id as string;
+export default function ApplicationDetailPageClient({ applicationId }: { applicationId: string }) {
     const { getToken } = useAuth();
     const { profile, isLoading: profileLoading, isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
 
