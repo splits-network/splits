@@ -1,0 +1,82 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: billing-service-escrow-releases
+  namespace: splits-network
+  labels:
+    app: billing-service
+    component: cron
+    job-type: escrow-releases
+spec:
+  # Run daily at 3am UTC (cron format: minute hour day month weekday)
+  schedule: "0 3 * * *"
+  
+  # Keep last 3 successful and 3 failed jobs for debugging
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  
+  # Job template
+  jobTemplate:
+    metadata:
+      labels:
+        app: billing-service
+        component: cron
+        job-type: escrow-releases
+    spec:
+      # Give the job 10 minutes to complete
+      activeDeadlineSeconds: 600
+      
+      # Don't retry failed jobs automatically
+      backoffLimit: 0
+      
+      template:
+        metadata:
+          labels:
+            app: billing-service
+            component: cron
+            job-type: escrow-releases
+        spec:
+          restartPolicy: Never
+          
+          containers:
+          - name: escrow-releases-processor
+            image: ghcr.io/splits-network/billing-service:latest
+            imagePullPolicy: Always
+            
+            # Run the job script
+            command: ["node"]
+            args: ["dist/jobs/process-escrow-releases.js"]
+            
+            env:
+            # Supabase configuration
+            - name: SUPABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-config
+                  key: url
+            - name: SUPABASE_SERVICE_ROLE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: supabase-config
+                  key: service-role-key
+            
+            # RabbitMQ configuration
+            - name: RABBITMQ_URL
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-config
+                  key: url
+            
+            # Job configuration
+            - name: NODE_ENV
+              value: "production"
+            - name: LOG_LEVEL
+              value: "info"
+            
+            resources:
+              requests:
+                memory: "256Mi"
+                cpu: "250m"
+              limits:
+                memory: "512Mi"
+                cpu: "500m"

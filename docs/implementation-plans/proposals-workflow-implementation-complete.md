@@ -353,13 +353,13 @@ pnpm test
 - [ ] Create runbook for timeout job failures
 - [ ] Add integration tests for timeout automation
 
-### Medium Priority
+### Medium Priority (mandatory for full feature) TODO: get back to these
 - [ ] Company user acceptance workflow UI (currently uses unified proposals page)
 - [ ] Proposal detail page with full history
 - [ ] Bulk proposal actions (withdraw multiple)
 - [ ] Email notification preferences
 
-### Low Priority
+### Low Priority (mandatory for full feature) TODO: get back to these
 - [ ] Proposal templates for common notes
 - [ ] AI-suggested matches for proposals
 - [ ] Analytics dashboard for proposal conversion rates
