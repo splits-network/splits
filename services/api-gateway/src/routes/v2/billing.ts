@@ -21,6 +21,18 @@ const BILLING_RESOURCES: ResourceDefinition[] = [
         basePath: '/payouts',
         tag: 'billing',
     },
+    {
+        name: 'payout-schedules',
+        service: 'billing',
+        basePath: '/payout-schedules',
+        tag: 'billing',
+    },
+    {
+        name: 'escrow-holds',
+        service: 'billing',
+        basePath: '/escrow-holds',
+        tag: 'billing',
+    },
 ];
 
 export function registerBillingRoutes(app: FastifyInstance, services: ServiceRegistry) {

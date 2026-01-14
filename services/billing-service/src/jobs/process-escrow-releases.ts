@@ -14,7 +14,7 @@ import { createClient } from '@supabase/supabase-js';
 import { EventPublisher } from '../v2/shared/events';
 import { EscrowHoldServiceV2 } from '../v2/escrow-holds/service';
 import { PayoutAuditRepository } from '../v2/audit/repository';
-import { Logger } from 'pino';
+import { createLogger, Logger } from '@splits-network/shared-logging';
 
 // Load and validate environment variables
 const SUPABASE_URL = process.env.SUPABASE_URL;
