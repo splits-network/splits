@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import ApplicationHeader from './components/application-header';
-import ApplicationTabs from './components/application-tabs';
+import ApplicationDetailPageClient from './components/application-detail-page-client';
 
 export default function ApplicationDetailPage() {
     const params = useParams();
@@ -20,7 +20,7 @@ export default function ApplicationDetailPage() {
             <div className="flex flex-col md:flex-row md:items-start md:justify-between">
                 <div className="w-full md:flex-1 md:mr-4 space-y-6">
                     <ApplicationHeader applicationId={id} />
-                    <ApplicationTabs applicationId={id} />
+                    <ApplicationDetailPageClient applicationId={id} />
                 </div>
                 <div className="w-full md:w-64 lg:w-72 xl:w-80 shrink-0 mt-6 md:mt-0">
                     {/* Sidebar content can go here */}
