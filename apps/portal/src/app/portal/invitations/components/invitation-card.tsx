@@ -98,9 +98,15 @@ export function InvitationCard({
         );
     };
 
-    const canResend = !invitation.consent_given && !invitation.declined_at;
     const isExpired = invitation.invitation_expires_at &&
         new Date(invitation.invitation_expires_at) < new Date();
+    if (isExpired) invitation.status = 'expired';
+
+
+    function canResendInvitation(): boolean {
+        const resendState = invitation.status === 'terminated' || invitation.status === 'cancelled' || invitation.status === 'declined' || invitation.status === 'accepted';
+        return !invitation.consent_given && !invitation.declined_at && !resendState;
+    }
 
     return (
         <MetricCard className="group hover:shadow-lg transition-all duration-200">
@@ -178,7 +184,7 @@ export function InvitationCard({
                         View Profile
                     </button>
                     <div className="flex items-center gap-2">
-                        {canResend && (
+                        {canResendInvitation() && (
                             <>
                                 <button
                                     type="button"
