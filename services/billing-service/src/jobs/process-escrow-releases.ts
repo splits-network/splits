@@ -13,6 +13,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { EventPublisher } from '../v2/shared/events';
 import { EscrowHoldServiceV2 } from '../v2/escrow-holds/service';
+import { PayoutAuditRepository } from '../v2/audit/repository';
 import { Logger } from 'pino';
 
 // Load and validate environment variables
@@ -50,8 +51,11 @@ async function main() {
         const eventPublisher = new EventPublisher(rabbitMqUrl, logger);
         await eventPublisher.connect();
 
+        // Initialize audit repository
+        const auditRepository = new PayoutAuditRepository(supabase);
+
         // Initialize service
-        const service = new EscrowHoldServiceV2(supabase, eventPublisher);
+        const service = new EscrowHoldServiceV2(supabase, eventPublisher, auditRepository);
 
         // Process due releases
         console.log('Processing due escrow releases...\n');

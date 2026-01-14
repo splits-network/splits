@@ -9,6 +9,7 @@ import { PayoutRepository } from './payouts/repository';
 import { PayoutServiceV2 } from './payouts/service';
 import { PayoutScheduleServiceV2 } from './payout-schedules/service';
 import { EscrowHoldServiceV2 } from './escrow-holds/service';
+import { PayoutAuditRepository } from './audit/repository';
 import { registerPlanRoutes } from './plans/routes';
 import { registerSubscriptionRoutes } from './subscriptions/routes';
 import { registerPayoutRoutes } from './payouts/routes';
@@ -45,8 +46,12 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
     if (!eventPublisher) {
         throw new Error('EventPublisher is required for V2 routes');
     }
-    const payoutScheduleService = new PayoutScheduleServiceV2(accessClient, eventPublisher);
-    const escrowHoldService = new EscrowHoldServiceV2(accessClient, eventPublisher);
+
+    // Create audit repository for payout automation logging
+    const auditRepository = new PayoutAuditRepository(accessClient);
+
+    const payoutScheduleService = new PayoutScheduleServiceV2(accessClient, eventPublisher, auditRepository);
+    const escrowHoldService = new EscrowHoldServiceV2(accessClient, eventPublisher, auditRepository);
 
     registerPlanRoutes(app, { planService });
     registerSubscriptionRoutes(app, { subscriptionService });

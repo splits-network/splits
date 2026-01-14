@@ -4,6 +4,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 import { EventPublisher } from '../shared/events';
 import { PayoutScheduleRepository } from './repository';
+import { PayoutAuditRepository } from '../audit/repository';
 import {
     PayoutSchedule,
     PayoutScheduleCreate,
@@ -16,10 +17,16 @@ const MAX_RETRY_ATTEMPTS = 3;
 export class PayoutScheduleServiceV2 {
     private repository: PayoutScheduleRepository;
     private eventPublisher: EventPublisher;
+    private auditRepository: PayoutAuditRepository;
 
-    constructor(supabase: SupabaseClient, eventPublisher: EventPublisher) {
+    constructor(
+        supabase: SupabaseClient,
+        eventPublisher: EventPublisher,
+        auditRepository: PayoutAuditRepository
+    ) {
         this.repository = new PayoutScheduleRepository(supabase);
         this.eventPublisher = eventPublisher;
+        this.auditRepository = auditRepository;
     }
 
     /**
@@ -51,6 +58,18 @@ export class PayoutScheduleServiceV2 {
 
         // Create schedule
         const schedule = await this.repository.create(clerkUserId, scheduleData);
+
+        // Log schedule creation (not payout creation - that happens during processing)
+        if (schedule.payout_id) {
+            await this.auditRepository.logAction(
+                schedule.payout_id,
+                'create_schedule',
+                'Created payout schedule',
+                { trigger_event: schedule.trigger_event, scheduled_date: schedule.scheduled_date, placement_id: schedule.placement_id },
+                clerkUserId,
+                'platform_admin'
+            );
+        }
 
         // Publish event
         await this.eventPublisher.publish('payout_schedule.created', {
@@ -88,6 +107,18 @@ export class PayoutScheduleServiceV2 {
 
         // Update schedule
         const schedule = await this.repository.update(id, clerkUserId, updates);
+
+        // Log update to audit log if payout exists
+        if (schedule.payout_id) {
+            await this.auditRepository.logAction(
+                schedule.payout_id,
+                'update_schedule',
+                `Updated payout schedule`,
+                updates,
+                clerkUserId,
+                'platform_admin'
+            );
+        }
 
         // Publish event
         await this.eventPublisher.publish('payout_schedule.updated', {
@@ -127,6 +158,24 @@ export class PayoutScheduleServiceV2 {
      * Delete a payout schedule (soft delete)
      */
     async delete(id: string, clerkUserId: string): Promise<void> {
+        // Get schedule to get payout_id for audit logging
+        const schedule = await this.repository.getById(id, clerkUserId);
+        if (!schedule) {
+            throw new Error('Payout schedule not found');
+        }
+
+        // Log deletion to audit log if payout exists
+        if (schedule.payout_id) {
+            await this.auditRepository.logAction(
+                schedule.payout_id,
+                'delete_schedule',
+                `Payout schedule deleted by admin`,
+                undefined,
+                clerkUserId,
+                'platform_admin'
+            );
+        }
+
         await this.repository.delete(id, clerkUserId);
 
         // Publish event
@@ -190,6 +239,15 @@ export class PayoutScheduleServiceV2 {
         // Mark as processing
         await this.repository.markProcessing(schedule.id);
 
+        // Log processing start if payout exists
+        if (schedule.payout_id) {
+            await this.auditRepository.logProcessing(
+                schedule.payout_id,
+                undefined,
+                { schedule_id: schedule.id, trigger_event: schedule.trigger_event }
+            );
+        }
+
         // TODO: Integrate with payout creation logic
         // For now, we'll create a placeholder payout
         // In real implementation, this would:
@@ -205,6 +263,14 @@ export class PayoutScheduleServiceV2 {
 
         // Mark as processed
         await this.repository.markProcessed(schedule.id, payoutId);
+
+        // Log successful completion if payout exists
+        if (schedule.payout_id) {
+            await this.auditRepository.logCompletion(
+                schedule.payout_id,
+                { schedule_id: schedule.id, created_payout_id: payoutId }
+            );
+        }
 
         // Publish event
         await this.eventPublisher.publish('payout_schedule.processed', {
@@ -223,10 +289,10 @@ export class PayoutScheduleServiceV2 {
     ): Promise<void> {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-        // Get current schedule to check retry count
+        // Get current schedule to check retry count and payout_id
         const { data: schedule } = await this.repository['supabase']
             .from('payout_schedules')
-            .select('retry_count')
+            .select('retry_count, payout_id')
             .eq('id', scheduleId)
             .single();
 
@@ -234,6 +300,15 @@ export class PayoutScheduleServiceV2 {
 
         // Mark as failed
         await this.repository.markFailed(scheduleId, errorMessage);
+
+        // Log failure to audit log if payout exists
+        if (schedule?.payout_id) {
+            await this.auditRepository.logFailure(
+                schedule.payout_id,
+                errorMessage,
+                { retry_count: retryCount, schedule_id: scheduleId }
+            );
+        }
 
         // If max retries reached, publish failure event
         if (retryCount >= MAX_RETRY_ATTEMPTS) {
@@ -261,6 +336,18 @@ export class PayoutScheduleServiceV2 {
         // Only process schedules in scheduled status
         if (schedule.status !== 'scheduled') {
             throw new Error(`Cannot process schedule in ${schedule.status} status`);
+        }
+
+        // Log manual trigger action if payout exists
+        if (schedule.payout_id) {
+            await this.auditRepository.logAction(
+                schedule.payout_id,
+                'trigger_processing',
+                `Manual processing triggered by admin`,
+                undefined,
+                clerkUserId,
+                'platform_admin'
+            );
         }
 
         // Process the schedule

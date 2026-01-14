@@ -13,6 +13,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { EventPublisher } from '../v2/shared/events';
 import { PayoutScheduleServiceV2 } from '../v2/payout-schedules/service';
+import { PayoutAuditRepository } from '../v2/audit/repository';
 import { Logger } from 'pino';
 
 // Load and validate environment variables
@@ -50,8 +51,11 @@ async function main() {
         const eventPublisher = new EventPublisher(rabbitMqUrl, logger);
         await eventPublisher.connect();
 
+        // Initialize audit repository
+        const auditRepository = new PayoutAuditRepository(supabase);
+
         // Initialize service
-        const service = new PayoutScheduleServiceV2(supabase, eventPublisher);
+        const service = new PayoutScheduleServiceV2(supabase, eventPublisher, auditRepository);
 
         // Process due schedules
         console.log('Processing due payout schedules...\n');

@@ -4,6 +4,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 import { EventPublisher } from '../shared/events';
 import { EscrowHoldRepository } from './repository';
+import { PayoutAuditRepository } from '../audit/repository';
 import {
     EscrowHold,
     EscrowHoldCreate,
@@ -14,10 +15,16 @@ import {
 export class EscrowHoldServiceV2 {
     private repository: EscrowHoldRepository;
     private eventPublisher: EventPublisher;
+    private auditRepository: PayoutAuditRepository;
 
-    constructor(supabase: SupabaseClient, eventPublisher: EventPublisher) {
+    constructor(
+        supabase: SupabaseClient,
+        eventPublisher: EventPublisher,
+        auditRepository: PayoutAuditRepository
+    ) {
         this.repository = new EscrowHoldRepository(supabase);
         this.eventPublisher = eventPublisher;
+        this.auditRepository = auditRepository;
     }
 
     /**
@@ -49,6 +56,16 @@ export class EscrowHoldServiceV2 {
 
         // Create hold
         const hold = await this.repository.create(clerkUserId, holdData);
+
+        // Log creation to audit log if payout exists
+        if (hold.payout_id) {
+            await this.auditRepository.logCreation(
+                hold.payout_id,
+                hold.hold_amount,
+                clerkUserId,
+                { hold_reason: hold.hold_reason, placement_id: hold.placement_id }
+            );
+        }
 
         // Publish event
         await this.eventPublisher.publish('escrow_hold.created', {
@@ -84,6 +101,18 @@ export class EscrowHoldServiceV2 {
         // Update hold
         const hold = await this.repository.update(id, clerkUserId, updates);
 
+        // Log update to audit log if payout exists
+        if (hold.payout_id) {
+            await this.auditRepository.logAction(
+                hold.payout_id,
+                'update_hold',
+                `Updated escrow hold`,
+                updates,
+                clerkUserId,
+                'platform_admin'
+            );
+        }
+
         // Publish event
         await this.eventPublisher.publish('escrow_hold.updated', {
             holdId: hold.id,
@@ -98,6 +127,24 @@ export class EscrowHoldServiceV2 {
      * Delete an escrow hold (soft delete)
      */
     async delete(id: string, clerkUserId: string): Promise<void> {
+        // Get hold to get payout_id for audit logging
+        const hold = await this.repository.getById(id, clerkUserId);
+        if (!hold) {
+            throw new Error('Escrow hold not found');
+        }
+
+        // Log deletion to audit log if payout exists
+        if (hold.payout_id) {
+            await this.auditRepository.logAction(
+                hold.payout_id,
+                'delete_hold',
+                `Escrow hold deleted by admin`,
+                undefined,
+                clerkUserId,
+                'platform_admin'
+            );
+        }
+
         await this.repository.delete(id, clerkUserId);
 
         // Publish event
@@ -126,6 +173,18 @@ export class EscrowHoldServiceV2 {
 
         // Release the hold
         const released = await this.repository.release(id, clerkUserId);
+
+        // Log release to audit log if payout exists
+        if (released.payout_id) {
+            await this.auditRepository.logAction(
+                released.payout_id,
+                'release_hold',
+                `Escrow hold manually released by admin`,
+                { hold_amount: released.hold_amount },
+                clerkUserId,
+                'platform_admin'
+            );
+        }
 
         // Publish event
         await this.eventPublisher.publish('escrow_hold.released', {
@@ -158,6 +217,18 @@ export class EscrowHoldServiceV2 {
 
         // Cancel the hold
         const cancelled = await this.repository.cancel(id);
+
+        // Log cancellation to audit log if payout exists
+        if (cancelled.payout_id) {
+            await this.auditRepository.logAction(
+                cancelled.payout_id,
+                'cancel_hold',
+                `Escrow hold cancelled by admin`,
+                undefined,
+                clerkUserId,
+                'platform_admin'
+            );
+        }
 
         // Publish event
         await this.eventPublisher.publish('escrow_hold.cancelled', {
@@ -221,6 +292,18 @@ export class EscrowHoldServiceV2 {
 
         // Release the hold (system user)
         const released = await this.repository.release(hold.id, 'system');
+
+        // Log automated release to audit log if payout exists
+        if (released.payout_id) {
+            await this.auditRepository.logAction(
+                released.payout_id,
+                'auto_release_hold',
+                `Escrow hold automatically released on scheduled date`,
+                { hold_amount: released.hold_amount },
+                'system',
+                'automated'
+            );
+        }
 
         // Publish event
         await this.eventPublisher.publish('escrow_hold.auto_released', {
