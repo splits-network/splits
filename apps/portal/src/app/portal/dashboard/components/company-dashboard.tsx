@@ -222,7 +222,7 @@ export default function CompanyDashboard() {
                     </div>
                 </div>
 
-                <div className="relative p-6 md:p-8">
+                <div className="relative p-4 md:p-4">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
                             <h2 className="text-2xl md:text-3xl font-bold">Hiring Dashboard</h2>
@@ -334,7 +334,8 @@ export default function CompanyDashboard() {
                             height={150}
                             trendPeriod={trendPeriod}
                             onTrendPeriodChange={setTrendPeriod}
-                            type="recruiter-activity"
+                            type="application-trends"
+                            title={'Application Trends'}
                             chartComponent="bar"
                             showLegend={true}
                             legendPosition="bottom"
@@ -356,8 +357,7 @@ export default function CompanyDashboard() {
                             height={150}
                             trendPeriod={trendPeriod}
                             onTrendPeriodChange={setTrendPeriod}
-                            type="application-trends"
-                            title={'Application Trends'}
+                            type="recruiter-activity"
                             chartComponent="bar"
                             showLegend={true}
                             legendPosition="bottom"
@@ -378,6 +378,7 @@ export default function CompanyDashboard() {
                                 Post New Role
                             </button>
                         }
+                        className='bg-base-200'
                     >
                         {roleBreakdown.length === 0 ? (
                             <EmptyState
@@ -467,7 +468,7 @@ export default function CompanyDashboard() {
                 {/* Right Sidebar */}
                 <div className="space-y-6">
                     {/* Quick Actions - Enhanced buttons */}
-                    <ContentCard title="Quick Actions" icon="fa-bolt">
+                    <ContentCard title="Quick Actions" icon="fa-bolt" className='bg-base-200'>
                         <div className="flex flex-col gap-2">
                             <button onClick={() => setShowAddModal(true)} className="btn btn-primary">
                                 <i className="fa-duotone fa-regular fa-plus w-4"></i>
@@ -500,6 +501,7 @@ export default function CompanyDashboard() {
                                 </Link>
                             )
                         }
+                        className='bg-base-200'
                     >
                         {recentActivity.length === 0 ? (
                             <EmptyState

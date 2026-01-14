@@ -107,6 +107,7 @@ export function InvitationTableRow({
     cancellingId,
 }: InvitationTableRowProps) {
     const router = useRouter();
+    const resendState = invitation.status === 'expired' || invitation.status === 'terminated' || invitation.status === 'cancelled' || invitation.status === 'declined' || invitation.status === 'accepted';
 
     // Main row cells
     const cells = (
@@ -161,7 +162,7 @@ export function InvitationTableRow({
                     >
                         <i className="fa-duotone fa-regular fa-eye fa-fw"></i>
                     </button>
-                    {canResendInvitation(invitation) && (
+                    {canResendInvitation(invitation) && !resendState && (
                         <>
                             <button
                                 type="button"
@@ -286,7 +287,7 @@ export function InvitationTableRow({
                     View Candidate
                 </button>
                 <div className="flex items-center gap-2">
-                    {canResendInvitation(invitation) && (
+                    {canResendInvitation(invitation) && !resendState && (
                         <>
                             <button
                                 type="button"
