@@ -7,6 +7,7 @@ import { createAuthenticatedClient } from '@/lib/api-client';
 import { useToast } from '@/lib/toast-context';
 import { useUserProfile } from '@/contexts';
 import SubmitCandidateWizard from './submit-candidate-wizard';
+import AddRoleWizardModal from '../../components/add-role-wizard-modal';
 import { getJobStatusBadge } from '@/lib/utils/badge-styles';
 import { getRoleBadges } from '@/lib/utils/role-badges';
 
@@ -53,6 +54,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
     const [showSubmitModal, setShowSubmitModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
 
     // Check if user is company admin or platform admin
     const canManageRole = isAdmin || profile?.roles?.includes('company_admin');
@@ -213,13 +215,13 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
 
                             {canManageRole && (
                                 <>
-                                    <Link
-                                        href={`/portal/roles/${roleId}/edit`}
+                                    <button
+                                        onClick={() => setShowEditModal(true)}
                                         className="btn btn-ghost gap-2"
                                     >
                                         <i className="fa-duotone fa-regular fa-pen"></i>
                                         Edit Role
-                                    </Link>
+                                    </button>
 
                                     {/* Status Management Dropdown */}
                                     <div className="dropdown dropdown-end">
@@ -283,6 +285,19 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                     roleTitle={job.title}
                     companyName={job.company_id}
                     onClose={() => setShowSubmitModal(false)}
+                />
+            )}
+
+            {showEditModal && (
+                <AddRoleWizardModal
+                    isOpen={showEditModal}
+                    jobId={roleId}
+                    mode="edit"
+                    onClose={() => setShowEditModal(false)}
+                    onSuccess={() => {
+                        setShowEditModal(false);
+                        fetchJob(); // Refresh job data
+                    }}
                 />
             )}
         </>

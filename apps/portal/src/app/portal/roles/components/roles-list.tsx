@@ -101,12 +101,23 @@ export default function RolesList() {
 
     // Modal state for adding new role
     const [showAddModal, setShowAddModal] = useState(false);
+    const [editingJobId, setEditingJobId] = useState<string | null>(null);
 
     // Calculate stat trends based on selected time period
     const statTrends = useMemo(() =>
         calculateStatTrends(jobs, trendPeriod),
         [jobs, trendPeriod]
     );
+
+    // Handler for opening edit modal
+    const handleEditRole = (jobId: string) => {
+        setEditingJobId(jobId);
+    };
+
+    // Handler for closing edit modal
+    const handleCloseEditModal = () => {
+        setEditingJobId(null);
+    };
 
     // Wait for profile to load
     if (profileLoading) {
@@ -179,6 +190,7 @@ export default function RolesList() {
                                 allJobs={jobs}
                                 userRole={userRole}
                                 canManageRole={canManageRole}
+                                onEditRole={handleEditRole}
                             />
                         ))}
                     </div>
@@ -201,6 +213,7 @@ export default function RolesList() {
                                 job={job}
                                 allJobs={jobs}
                                 canManageRole={canManageRole}
+                                onEditRole={handleEditRole}
                             />
                         ))}
                     </DataTable>
@@ -316,6 +329,20 @@ export default function RolesList() {
                     onClose={() => setShowAddModal(false)}
                     onSuccess={() => {
                         setShowAddModal(false);
+                        refresh(); // Refresh the list
+                    }}
+                />
+            )}
+
+            {/* Edit Role Modal */}
+            {editingJobId && (
+                <AddRoleWizardModal
+                    isOpen={true}
+                    jobId={editingJobId}
+                    mode="edit"
+                    onClose={handleCloseEditModal}
+                    onSuccess={() => {
+                        handleCloseEditModal();
                         refresh(); // Refresh the list
                     }}
                 />

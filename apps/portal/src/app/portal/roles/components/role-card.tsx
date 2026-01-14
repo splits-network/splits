@@ -42,9 +42,10 @@ interface RoleCardProps {
     allJobs: Job[];
     userRole: string | null;
     canManageRole: boolean | undefined;
+    onEditRole?: (jobId: string) => void;
 }
 
-export function RoleCard({ job, allJobs, userRole, canManageRole }: RoleCardProps) {
+export function RoleCard({ job, allJobs, userRole, canManageRole, onEditRole }: RoleCardProps) {
     const badges = getRoleBadges(job, allJobs);
     const maxPayout = job.salary_max ? Math.round(job.fee_percentage * job.salary_max / 100) : null;
     const isRecruiterView = userRole === 'recruiter' || userRole === 'platform_admin';
@@ -177,17 +178,18 @@ export function RoleCard({ job, allJobs, userRole, canManageRole }: RoleCardProp
                         Posted {formatRelativeTime(job.created_at)}
                     </span>
                     <div className="flex items-center gap-2">
-                        {canManageRole && (
-                            <span
+                        {canManageRole && onEditRole && (
+                            <button
                                 onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    window.location.href = `/portal/roles/${job.id}/edit`;
+                                    onEditRole(job.id);
                                 }}
                                 className="btn btn-ghost btn-xs"
+                                title="Edit Role"
                             >
                                 <i className="fa-duotone fa-regular fa-pen"></i>
-                            </span>
+                            </button>
                         )}
                         <span className="text-primary text-sm font-medium group-hover:underline">
                             <Link href={`/portal/roles/${job.id}`}>

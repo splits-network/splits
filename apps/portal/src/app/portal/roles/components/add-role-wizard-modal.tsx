@@ -16,9 +16,11 @@ interface AddRoleWizardModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess?: () => void;
+    jobId?: string; // For edit mode
+    mode?: 'create' | 'edit';
 }
 
-export default function AddRoleWizardModal({ isOpen, onClose, onSuccess }: AddRoleWizardModalProps) {
+export default function AddRoleWizardModal({ isOpen, onClose, onSuccess, jobId, mode = 'create' }: AddRoleWizardModalProps) {
     const { getToken } = useAuth();
     const toast = useToast();
     const { profile, isAdmin, isLoading: profileLoading } = useUserProfile();
@@ -66,6 +68,58 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess }: AddRo
         { number: 4, title: 'Requirements', description: 'Qualifications needed' },
         { number: 5, title: 'Pre-Screen', description: 'Screening questions' },
     ];
+
+    // Load existing job data when in edit mode
+    useEffect(() => {
+        if (!isOpen || !jobId || mode !== 'edit') return;
+
+        async function loadJobData() {
+            setLoading(true);
+            try {
+                const token = await getToken();
+                if (!token) throw new Error('Authentication required');
+
+                const client = createAuthenticatedClient(token);
+                const response = await client.get<{ data: any }>(`/jobs/${jobId}`, {
+                    params: { include: 'requirements,pre_screen_questions' }
+                });
+                const job = response.data;
+                console.log('Loaded job for editing:', job);
+                // Populate form with existing data
+                setFormData({
+                    title: job.title || '',
+                    company_id: job.company_id || '',
+                    location: job.location || '',
+                    department: job.department || '',
+                    status: job.status || 'active',
+                    salary_min: job.salary_min?.toString() || '',
+                    salary_max: job.salary_max?.toString() || '',
+                    show_salary_range: job.show_salary_range ?? true,
+                    fee_percentage: job.fee_percentage || 20,
+                    splits_fee_percentage: job.splits_fee_percentage || 50,
+                    employment_type: job.employment_type || 'full_time',
+                    open_to_relocation: job.open_to_relocation || false,
+                    recruiter_description: job.recruiter_description || '',
+                    candidate_description: job.candidate_description || '',
+                    mandatory_requirements: job.requirements?.filter((r: any) => r.requirement_type === 'mandatory').map((r: any) => r.description) || [],
+                    preferred_requirements: job.requirements?.filter((r: any) => r.requirement_type === 'preferred').map((r: any) => r.description) || [],
+                    pre_screen_questions: job.pre_screen_questions?.map((q: any) => ({
+                        question: q.question,
+                        question_type: q.question_type,
+                        is_required: q.is_required,
+                        options: q.options
+                    })) || [],
+                });
+            } catch (err: any) {
+                console.error('Failed to load job:', err);
+                setError('Failed to load job data. Please try again.');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        loadJobData();
+    }, [isOpen, jobId, mode, getToken]);
 
     // Load companies when modal opens
     useEffect(() => {
@@ -192,18 +246,6 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess }: AddRo
 
             const client = createAuthenticatedClient(token);
 
-            // Build requirements array
-            const requirements = [
-                ...formData.mandatory_requirements.filter(r => r.trim()).map(description => ({
-                    type: 'mandatory' as const,
-                    description
-                })),
-                ...formData.preferred_requirements.filter(r => r.trim()).map(description => ({
-                    type: 'preferred' as const,
-                    description
-                }))
-            ];
-
             // Build payload
             const payload: any = {
                 title: formData.title,
@@ -223,41 +265,67 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess }: AddRo
             if (formData.salary_min) payload.salary_min = parseInt(formData.salary_min);
             if (formData.salary_max) payload.salary_max = parseInt(formData.salary_max);
 
-            // Create the job
-            const response = await client.post<{ data: { id: string } }>('/jobs', payload);
-            const jobId = response.data.id;
+            let targetJobId: string;
 
-            // Add requirements if any
-            if (requirements.length > 0) {
-                await Promise.all(
-                    requirements.map(req =>
-                        client.post('/job-requirements', {
-                            job_id: jobId,
-                            requirement_type: req.type,
-                            description: req.description,
-                        })
-                    )
-                );
+            if (mode === 'edit' && jobId) {
+                // Update existing job
+                await client.patch(`/jobs/${jobId}`, payload);
+                targetJobId = jobId;
+                toast.success('Role updated successfully!');
+            } else {
+                // Create new job
+                const response = await client.post<{ data: { id: string } }>('/jobs', payload);
+                targetJobId = response.data.id;
+                toast.success('Role created successfully!');
             }
 
-            // Add pre-screen questions if any
-            if (formData.pre_screen_questions.length > 0) {
-                await Promise.all(
-                    formData.pre_screen_questions
-                        .filter(q => q.question.trim())
-                        .map(q =>
-                            client.post('/job-pre-screen-questions', {
-                                job_id: jobId,
-                                question: q.question,
-                                question_type: q.question_type,
-                                is_required: q.is_required,
-                                options: q.options || null,
+            // Note: Requirements and pre-screen questions management for edit mode
+            // would require additional logic to handle updates/deletes
+            // For now, only handle creation mode for these
+            if (mode === 'create') {
+                // Build requirements array
+                const requirements = [
+                    ...formData.mandatory_requirements.filter(r => r.trim()).map(description => ({
+                        type: 'mandatory' as const,
+                        description
+                    })),
+                    ...formData.preferred_requirements.filter(r => r.trim()).map(description => ({
+                        type: 'preferred' as const,
+                        description
+                    }))
+                ];
+
+                // Add requirements if any
+                if (requirements.length > 0) {
+                    await Promise.all(
+                        requirements.map(req =>
+                            client.post('/job-requirements', {
+                                job_id: targetJobId,
+                                requirement_type: req.type,
+                                description: req.description,
                             })
                         )
-                );
+                    );
+                }
+
+                // Add pre-screen questions if any
+                if (formData.pre_screen_questions.length > 0) {
+                    await Promise.all(
+                        formData.pre_screen_questions
+                            .filter(q => q.question.trim())
+                            .map(q =>
+                                client.post('/job-pre-screen-questions', {
+                                    job_id: targetJobId,
+                                    question: q.question,
+                                    question_type: q.question_type,
+                                    is_required: q.is_required,
+                                    options: q.options || null,
+                                })
+                            )
+                    );
+                }
             }
 
-            toast.success('Role created successfully!');
             onClose();
             if (onSuccess) onSuccess();
         } catch (err: any) {
@@ -276,7 +344,7 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess }: AddRo
                 {/* Header */}
                 <div className="flex justify-between items-start mb-6">
                     <div>
-                        <h3 className="font-bold text-2xl">Create New Role</h3>
+                        <h3 className="font-bold text-2xl">{mode === 'edit' ? 'Edit Role' : 'Create New Role'}</h3>
                         <p className="text-base-content/70 mt-1">
                             {steps[currentStep - 1].description}
                         </p>
@@ -389,12 +457,12 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess }: AddRo
                             {submitting ? (
                                 <>
                                     <span className="loading loading-spinner loading-sm"></span>
-                                    Creating...
+                                    {mode === 'edit' ? 'Updating...' : 'Creating...'}
                                 </>
                             ) : (
                                 <>
                                     <i className="fa-duotone fa-regular fa-check mr-2"></i>
-                                    Create Role
+                                    {mode === 'edit' ? 'Update Role' : 'Create Role'}
                                 </>
                             )}
                         </button>

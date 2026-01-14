@@ -26,11 +26,12 @@ interface RoleTableRowProps {
     job: Job;
     allJobs: Job[];
     canManageRole: boolean | undefined;
+    onEditRole?: (jobId: string) => void;
 }
 
 // ===== COMPONENT =====
 
-export function RoleTableRow({ job, allJobs, canManageRole }: RoleTableRowProps) {
+export function RoleTableRow({ job, allJobs, canManageRole, onEditRole }: RoleTableRowProps) {
     const badges = getRoleBadges(job, allJobs);
     const maxPayout = job.salary_max ? Math.round(job.fee_percentage * job.salary_max / 100) : null;
     const minPayout = job.salary_min ? Math.round(job.fee_percentage * job.salary_min / 100) : null;
@@ -108,14 +109,14 @@ export function RoleTableRow({ job, allJobs, canManageRole }: RoleTableRowProps)
             </td>
             <td onClick={(e) => e.stopPropagation()}>
                 <div className="flex gap-1 justify-end">
-                    {canManageRole && (
-                        <Link
-                            href={`/portal/roles/${job.id}/edit`}
+                    {canManageRole && onEditRole && (
+                        <button
+                            onClick={() => onEditRole(job.id)}
                             className="btn btn-ghost btn-sm btn-square"
                             title="Edit Role"
                         >
                             <i className="fa-duotone fa-regular fa-pen text-xs"></i>
-                        </Link>
+                        </button>
                     )}
                     <Link
                         href={`/portal/roles/${job.id}`}
@@ -236,14 +237,16 @@ export function RoleTableRow({ job, allJobs, canManageRole }: RoleTableRowProps)
                     Submit Candidate
                 </Link>
                 {canManageRole && (
-                    <Link
-                        href={`/portal/roles/${job.id}/edit`}
+                    <button
                         className="btn btn-ghost btn-sm gap-2"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onEditRole && onEditRole(job.id);
+                        }}
                     >
                         <i className="fa-duotone fa-regular fa-pen"></i>
                         Edit Role
-                    </Link>
+                    </button>
                 )}
             </div>
         </div>
