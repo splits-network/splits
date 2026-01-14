@@ -50,6 +50,8 @@ spec:
               value: "http://document-processing-service.splits-network.svc.cluster.local:3008"
             - name: AI_SERVICE_URL
               value: "http://ai-service.splits-network.svc.cluster.local:3009"
+            - name: ANALYTICS_SERVICE_URL
+              value: "http://analytics-service.splits-network.svc.cluster.local:3010"
             - name: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
               valueFrom:
                 secretKeyRef:
