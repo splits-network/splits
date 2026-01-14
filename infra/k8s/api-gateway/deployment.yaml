@@ -80,6 +80,8 @@ spec:
               value: "http://document-processing-service:3008"
             - name: AI_SERVICE_URL
               value: "http://ai-service:3009"
+            - name: ANALYTICS_SERVICE_URL
+              value: "http://analytics-service:3010"
           resources:
             requests:
               cpu: 200m
