@@ -77,7 +77,7 @@ export default function AdminDashboard() {
             // Load platform stats from V2 analytics endpoint
             const statsResponse: any = await api.get('/stats', {
                 params: {
-                    scope: 'admin',
+                    scope: 'platform',
                 }
             });
             // Extract metrics from the nested response structure

@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'Building Your Professional Network',
+    description: 'Learn strategies to grow and maintain meaningful professional connections.',
+};
 
 export default function NetworkingGuidePage() {
     const strategies = [

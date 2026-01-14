@@ -52,27 +52,28 @@ spec:
             - name: SUPABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: supabase-config
-                  key: url
+                  name: supabase-secrets
+                  key: supabase-url
             - name: SUPABASE_SERVICE_ROLE_KEY
               valueFrom:
                 secretKeyRef:
-                  name: supabase-config
-                  key: service-role-key
+                  name: supabase-secrets
+                  key: supabase-service-role-key
             
             # RabbitMQ configuration
             - name: RABBITMQ_URL
-              valueFrom:
-                secretKeyRef:
-                  name: rabbitmq-config
-                  key: url
+              value: "amqp://splits:splits_production@rabbitmq:5672"
             
             # Stripe configuration
             - name: STRIPE_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: stripe-config
-                  key: secret-key
+                  name: stripe-secrets
+                  key: stripe-secret-key
+            
+            # Monitoring
+            - name: SENTRY_DSN
+              value: "https://6b530a49b41da476e4665d4ee35fbf71@o4510570789732352.ingest.us.sentry.io/4510570905403393"
             
             # Job configuration
             - name: NODE_ENV

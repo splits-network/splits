@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'Remote Work Best Practices',
+    description: 'Tips for staying productive and maintaining work-life balance while remote.',
+};
 
 export default function RemoteWorkGuidePage() {
     const bestPractices = [

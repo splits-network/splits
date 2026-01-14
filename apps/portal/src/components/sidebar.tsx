@@ -25,6 +25,7 @@ const navItems: NavItem[] = [
 
     // Management section (recruiter/company focused)
     { href: '/portal/invitations', label: 'Invitations', icon: 'fa-envelope', roles: ['recruiter'], section: 'management', mobileDock: false },
+    { href: '/portal/proposals', label: 'Proposals', icon: 'fa-handshake', roles: ['recruiter', 'company_admin', 'hiring_manager'], section: 'management', mobileDock: true },
     { href: '/portal/candidates', label: 'Candidates', icon: 'fa-users', roles: ['recruiter', 'platform_admin'], section: 'management', mobileDock: true },
     { href: '/portal/applications', label: 'Applications', icon: 'fa-file-lines', roles: ['company_admin', 'hiring_manager', 'recruiter'], section: 'management', mobileDock: true },
     { href: '/portal/placements', label: 'Placements', icon: 'fa-trophy', roles: ['recruiter', 'platform_admin'], section: 'management', mobileDock: false },
@@ -261,7 +262,7 @@ export function Sidebar() {
                                 <summary className="btn btn-ghost btn-sm px-2">
                                     <i className="fa-duotone fa-regular fa-ellipsis-vertical text-base-content/60"></i>
                                 </summary>
-                                <ul className="dropdown-content menu bg-base-100 rounded-box shadow p-2 w-56 z-[1]">
+                                <ul className="dropdown-content menu bg-base-100 rounded-box shadow p-2 w-56 z-1">
                                     <li>
                                         <Link href="/portal/profile" className="justify-between">
                                             <span className="flex items-center gap-2">
@@ -323,7 +324,7 @@ export function Sidebar() {
                                 <summary className="btn btn-ghost btn-circle dock-item" title="More options">
                                     <i className="fa-duotone fa-regular fa-ellipsis text-lg"></i>
                                 </summary>
-                                <ul className="dropdown-content menu bg-base-100 rounded-box shadow p-2 w-52 z-[1]">
+                                <ul className="dropdown-content menu bg-base-100 rounded-box shadow p-2 w-52 z-1">
                                     {allMoreItems.map((item) => (
                                         <li key={item.href}>
                                             <button

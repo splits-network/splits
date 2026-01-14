@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
@@ -34,6 +34,11 @@ interface PayoutFilters {
 export default function PayoutsAdminPage() {
     const { getToken } = useAuth();
     const [processingId, setProcessingId] = useState<string | null>(null);
+    const [badgeCounts, setBadgeCounts] = useState({
+        pending_schedules: 0,
+        active_holds: 0,
+        loading: true,
+    });
 
     // Memoize defaultFilters to prevent infinite re-renders in useStandardList
     const defaultFilters = useMemo<PayoutFilters>(() => ({ status: 'pending' }), []);
@@ -69,6 +74,35 @@ export default function PayoutsAdminPage() {
         defaultFilters,
         syncToUrl: true,
     });
+
+    // Load badge counts for navigation cards
+    useEffect(() => {
+        async function loadBadgeCounts() {
+            try {
+                const token = await getToken();
+                if (!token) return;
+                const apiClient = createAuthenticatedClient(token);
+
+                // Load pending schedules count
+                const schedulesResponse = await apiClient.get('/payout-schedules?status=pending&limit=1');
+                const pendingSchedules = schedulesResponse.pagination?.total || 0;
+
+                // Load active holds count
+                const holdsResponse = await apiClient.get('/escrow-holds?status=active&limit=1');
+                const activeHolds = holdsResponse.pagination?.total || 0;
+
+                setBadgeCounts({
+                    pending_schedules: pendingSchedules,
+                    active_holds: activeHolds,
+                    loading: false,
+                });
+            } catch (error) {
+                console.error('Failed to load badge counts:', error);
+                setBadgeCounts({ pending_schedules: 0, active_holds: 0, loading: false });
+            }
+        }
+        loadBadgeCounts();
+    }, [getToken]);
 
     async function processPayout(payoutId: string) {
         if (!confirm('Process this payout? This will initiate a Stripe transfer.')) return;
@@ -139,6 +173,68 @@ export default function PayoutsAdminPage() {
                 <p className="text-base-content/70 mt-1">
                     Process and track recruiter payouts
                 </p>
+            </div>
+
+            {/* Automation Dashboard Links */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Link href="/portal/admin/payouts/schedules" className="card bg-base-200 hover:bg-base-300 transition-colors">
+                    <div className="card-body">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-calendar text-primary text-xl"></i>
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                    <h3 className="font-semibold">Payout Schedules</h3>
+                                    {!badgeCounts.loading && badgeCounts.pending_schedules > 0 && (
+                                        <span className="badge badge-warning badge-sm">
+                                            {badgeCounts.pending_schedules}
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-sm text-base-content/60">Automated payout scheduling</p>
+                            </div>
+                            <i className="fa-duotone fa-regular fa-chevron-right text-base-content/40"></i>
+                        </div>
+                    </div>
+                </Link>
+
+                <Link href="/portal/admin/payouts/escrow" className="card bg-base-200 hover:bg-base-300 transition-colors">
+                    <div className="card-body">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-lg bg-warning/10 flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-lock text-warning text-xl"></i>
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                    <h3 className="font-semibold">Escrow Holds</h3>
+                                    {!badgeCounts.loading && badgeCounts.active_holds > 0 && (
+                                        <span className="badge badge-warning badge-sm">
+                                            {badgeCounts.active_holds}
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-sm text-base-content/60">Guarantee period fund holds</p>
+                            </div>
+                            <i className="fa-duotone fa-regular fa-chevron-right text-base-content/40"></i>
+                        </div>
+                    </div>
+                </Link>
+
+                <Link href="/portal/admin/payouts/audit" className="card bg-base-200 hover:bg-base-300 transition-colors">
+                    <div className="card-body">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-lg bg-info/10 flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-clock-rotate-left text-info text-xl"></i>
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="font-semibold">Audit Log</h3>
+                                <p className="text-sm text-base-content/60">Track all payout actions</p>
+                            </div>
+                            <i className="fa-duotone fa-regular fa-chevron-right text-base-content/40"></i>
+                        </div>
+                    </div>
+                </Link>
             </div>
 
             {/* Summary Stats */}

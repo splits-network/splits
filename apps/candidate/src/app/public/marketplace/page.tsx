@@ -1,5 +1,11 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import MarketplaceList from './components/marketplace-list';
+
+export const metadata: Metadata = {
+    title: 'Recruiter Marketplace',
+    description: 'Discover expert recruiters by industry, specialty, and location.',
+};
 
 export default function MarketplacePage() {
     return (

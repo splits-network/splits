@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'Personal Branding Essentials',
+    description: 'Build and promote your professional brand across multiple platforms.',
+};
 
 export default function PersonalBrandingGuidePage() {
     const pillars = [

@@ -1,3 +1,10 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'Salary Insights',
+    description: 'Explore salary benchmarks, compensation trends, and market insights.',
+};
+
 export default function SalaryInsightsPage() {
     const insights = [
         {

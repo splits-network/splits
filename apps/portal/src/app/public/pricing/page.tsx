@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'Pricing',
+    description: 'Choose the plan that fits your recruiting business on Splits Network.',
+};
 
 export default function PricingPage() {
     return (

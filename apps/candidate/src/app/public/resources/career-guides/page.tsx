@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'Career Guides',
+    description: 'Actionable career guides to help you grow, switch roles, and negotiate offers.',
+};
 
 export default function CareerGuidesPage() {
     const guides = [

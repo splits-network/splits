@@ -7,8 +7,12 @@ import { ToastProvider } from "@/lib/toast-context";
 import "./globals.css";
 
 export const metadata: Metadata = {
-    title: "Applicant Network - Find Your Next Career Opportunity",
-    description: "Browse thousands of job opportunities and manage your job search on Applicant  Track applications, verify credentials, and connect with recruiters.",
+    metadataBase: new URL('https://applicant.network'),
+    title: {
+        default: 'Applicant Network - Find Your Next Career Opportunity',
+        template: '%s | Applicant Network',
+    },
+    description: "Browse thousands of job opportunities and manage your job search on Applicant. Track applications, verify credentials, and connect with recruiters.",
     openGraph: {
         title: 'Applicant Network - Find Your Next Career Opportunity',
         description: 'Browse thousands of job opportunities and manage your job search on Applicant  Track applications, verify credentials, and connect with recruiters.',

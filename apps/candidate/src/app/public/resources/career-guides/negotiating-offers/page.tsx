@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'Negotiating Your Job Offer',
+    description: 'Master the art of salary and benefits negotiation with confidence.',
+};
 
 export default function NegotiatingOffersGuidePage() {
     const negotiationSteps = [

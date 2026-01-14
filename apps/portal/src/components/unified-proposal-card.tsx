@@ -7,6 +7,7 @@ interface UnifiedProposalCardProps {
     proposal: UnifiedProposal;
     onAccept?: (proposalId: string, notes: string) => Promise<void>;
     onDecline?: (proposalId: string, notes: string) => Promise<void>;
+    onWithdraw?: (proposalId: string) => Promise<void>;
     onClick?: (proposalId: string) => void;
 }
 
@@ -22,11 +23,13 @@ export default function UnifiedProposalCard({
     proposal,
     onAccept,
     onDecline,
+    onWithdraw,
     onClick
 }: UnifiedProposalCardProps) {
     const [showResponseForm, setShowResponseForm] = useState(false);
     const [responseNotes, setResponseNotes] = useState('');
     const [responding, setResponding] = useState(false);
+    const [withdrawing, setWithdrawing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const formatDate = (date: string | Date) => {
@@ -93,6 +96,21 @@ export default function UnifiedProposalCard({
         }
     };
 
+    const handleWithdraw = async () => {
+        if (!onWithdraw) return;
+
+        setWithdrawing(true);
+        setError(null);
+
+        try {
+            await onWithdraw(proposal.id);
+        } catch (err: any) {
+            setError(err.message || 'Failed to withdraw proposal');
+        } finally {
+            setWithdrawing(false);
+        }
+    };
+
     const handleCardClick = () => {
         if (onClick && !showResponseForm) {
             onClick(proposal.id);
@@ -115,7 +133,7 @@ export default function UnifiedProposalCard({
                             {proposal.subtitle}
                         </p>
                     </div>
-                    <div className="flex gap-2 items-start flex-shrink-0">
+                    <div className="flex gap-2 items-start shrink-0">
                         {getUrgencyBadge()}
                         <span className={`badge gap-1 badge-${proposal.status_badge.color}`}>
                             <i className={`fa-duotone fa-regular fa-${proposal.status_badge.icon}`}></i>
@@ -179,6 +197,32 @@ export default function UnifiedProposalCard({
                             <i className="fa-duotone fa-regular fa-user-check"></i>
                             Screen Proposal
                         </a>
+                    </div>
+                )}
+
+                {/* Withdraw Button */}
+                {onWithdraw && !showResponseForm && (
+                    <div className="card-actions justify-end mt-2">
+                        <button
+                            className="btn btn-sm btn-ghost btn-error"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleWithdraw();
+                            }}
+                            disabled={withdrawing}
+                        >
+                            {withdrawing ? (
+                                <>
+                                    <span className="loading loading-spinner loading-xs"></span>
+                                    Withdrawing...
+                                </>
+                            ) : (
+                                <>
+                                    <i className="fa-duotone fa-regular fa-xmark"></i>
+                                    Withdraw
+                                </>
+                            )}
+                        </button>
                     </div>
                 )}
 

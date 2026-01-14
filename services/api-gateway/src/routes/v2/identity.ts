@@ -28,7 +28,7 @@ const IDENTITY_RESOURCES: ResourceDefinition[] = [
         service: 'identity',
         basePath: '/invitations',
         tag: 'invitations',
-    },
+    }
 ];
 
 export function registerIdentityRoutes(app: FastifyInstance, services: ServiceRegistry) {

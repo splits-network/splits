@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'Press',
+    description: 'Press kit, brand assets, and company updates from Splits Network.',
+};
 
 export default function PressKitPage() {
     return (

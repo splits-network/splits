@@ -160,7 +160,7 @@ export default function RecruiterDashboard() {
         return (
             <div className="space-y-6 animate-fade-in">
                 {/* Welcome skeleton */}
-                <div className="h-28 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 skeleton"></div>
+                <div className="h-28 rounded-2xl bg-linear-to-br from-primary/20 to-secondary/20 skeleton"></div>
                 {/* Stats skeleton */}
                 <StatCardGrid>
                     {[1, 2, 3, 4].map((i) => (
@@ -174,7 +174,7 @@ export default function RecruiterDashboard() {
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Welcome Section - Enhanced gradient card */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-secondary text-primary-content shadow-elevation-3">
+            <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-primary via-primary/90 to-secondary text-primary-content shadow-elevation-3">
                 {/* Decorative pattern */}
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/20 -translate-y-1/2 translate-x-1/4"></div>

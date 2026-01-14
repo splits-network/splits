@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'Integration Partners',
+    description: 'Discover integrations and partners powering Splits Network workflows.',
+};
 
 export default function IntegrationsPage() {
     return (

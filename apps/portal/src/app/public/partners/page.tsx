@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'Partners',
+    description: 'Partner with Splits Network to expand your recruiting reach.',
+};
 
 export default function PartnersPage() {
     return (

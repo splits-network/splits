@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'How to Switch Careers Successfully',
+    description: 'A step-by-step guide to transitioning into a new career path with confidence.',
+};
 
 export default function SwitchCareersGuidePage() {
     const steps = [

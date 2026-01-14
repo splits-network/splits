@@ -1,7 +1,9 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { apiClient, createAuthenticatedClient } from '@/lib/api-client';
 import JobDetailClient from './components/job-detail-client';
+import { cache } from 'react';
 
 interface JobRequirement {
     id: string;
@@ -38,23 +40,42 @@ interface PageProps {
     params: Promise<{ id: string }>;
 }
 
-export default async function JobDetailPage({ params }: PageProps) {
-    const { id } = await params;
-    const { userId, getToken } = await auth();
-
-    let job: Job | null = null;
-    let hasActiveRecruiter = false;
-    let existingApplication: any = null;
-
+const fetchJob = cache(async (id: string): Promise<Job | null> => {
     try {
         const response = await apiClient.get<{ data: Job }>(`/jobs/${id}`, {
             params: { include: 'company,requirements' },
         });
-        job = response.data;
+        return response.data;
     } catch (error) {
         console.error('Failed to fetch job:', error);
-        notFound();
+        return null;
     }
+});
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+    const { id } = await params;
+    const job = await fetchJob(id);
+
+    if (!job) {
+        return {
+            title: 'Job Details',
+            description: 'Explore job details and requirements on Applicant Network.',
+        };
+    }
+
+    return {
+        title: job.title ? `${job.title} at ${job.company?.name ?? 'Applicant Network'}` : 'Job Details',
+        description: job.candidate_description || job.description || 'View job responsibilities, requirements, and application details.',
+    };
+}
+
+export default async function JobDetailPage({ params }: PageProps) {
+    const { id } = await params;
+    const { userId, getToken } = await auth();
+
+    const job = await fetchJob(id);
+    let hasActiveRecruiter = false;
+    let existingApplication: any = null;
 
     if (!job) {
         notFound();

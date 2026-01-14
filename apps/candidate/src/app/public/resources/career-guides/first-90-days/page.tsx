@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'First 90 Days in a New Role',
+    description: 'Set yourself up for success in your new position from day one.',
+};
 
 export default function First90DaysGuidePage() {
     const phases = [

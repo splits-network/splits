@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'Product Updates',
+    description: 'Latest releases and improvements across the Splits Network platform.',
+};
 
 export default function UpdatesPage() {
     return (

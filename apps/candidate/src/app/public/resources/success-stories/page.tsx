@@ -1,3 +1,10 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'Success Stories',
+    description: 'Read real stories from candidates who landed roles through Applicant Network.',
+};
+
 export default function SuccessStoriesPage() {
     const stories = [
         {

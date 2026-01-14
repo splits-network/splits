@@ -154,6 +154,27 @@ export default function ProposalsPage() {
         await Promise.all([refetch(), fetchSummary()]);
     };
 
+    // Handle withdraw proposal
+    const handleWithdraw = async (proposalId: string) => {
+        if (!confirm('Are you sure you want to withdraw this proposal?')) {
+            return;
+        }
+
+        try {
+            const token = await getToken();
+            if (!token) throw new Error('Not authenticated');
+
+            const client = new ApiClient(token);
+            await client.delete(`/proposals/${proposalId}`);
+
+            // Refresh proposals and summary
+            await Promise.all([refetch(), fetchSummary()]);
+        } catch (err: any) {
+            console.error('Failed to withdraw proposal:', err);
+            alert('Failed to withdraw proposal: ' + (err.message || 'Unknown error'));
+        }
+    };
+
     // Handle proposal click
     const handleProposalClick = (proposalId: string) => {
         router.push(`/portal/applications/${proposalId}`);
@@ -280,6 +301,7 @@ export default function ProposalsPage() {
                                 proposal={proposal}
                                 onAccept={activeTab === 'action' ? handleAccept : undefined}
                                 onDecline={activeTab === 'action' ? handleDecline : undefined}
+                                onWithdraw={activeTab === 'waiting' ? handleWithdraw : undefined}
                                 onClick={handleProposalClick}
                             />
                         ))}

@@ -21,14 +21,9 @@ export default async function AdminLayout({
         }
 
         const apiClient = createAuthenticatedClient(token);
-        const profileResponse: any = await apiClient.get('/users', { params: { limit: 1 } });
-        const profile = profileResponse?.data || profileResponse || {};
-        const roles: string[] = Array.isArray(profile.roles) ? profile.roles : [];
-
-        // Check if user has platform_admin role
-        const isAdmin = Boolean(profile.is_platform_admin || roles.includes('platform_admin'));
-
-        if (!isAdmin) {
+        const profileResponse: any = await apiClient.get('/users/me');
+        console.log('User profile response:', profileResponse);
+        if (!profileResponse.data.is_platform_admin) {
             // Not an admin, redirect to dashboard
             redirect('/portal/dashboard');
         }

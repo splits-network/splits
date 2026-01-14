@@ -1,6 +1,12 @@
 import { Footer } from '@/components/footer';
 import { Header } from '@/components/header';
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'Recruiting Marketplace for Split Placements',
+    description: 'Collaborate with recruiters, share roles, and split fees on Splits Network.',
+};
 
 export default async function HomePage() {
 

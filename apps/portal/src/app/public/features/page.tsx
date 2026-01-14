@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'Features',
+    description: 'Explore the tools and workflows that power split placements on Splits Network.',
+};
 
 export default function FeaturesPage() {
     return (

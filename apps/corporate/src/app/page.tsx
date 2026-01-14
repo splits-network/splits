@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'Modern Recruiting & Candidate Experience',
+    description: 'Employment Networks powers Splits and Applicant for collaborative recruiting and candidate success.',
+};
 
 export default function HomePage() {
     return (

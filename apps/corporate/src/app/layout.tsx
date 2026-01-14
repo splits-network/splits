@@ -4,7 +4,11 @@ import './globals.css';
 import { ServiceStatusBanner } from '@/components/ServiceStatusBanner';
 
 export const metadata: Metadata = {
-    title: 'Employment Networks - Modern Recruiting & Candidate Experience',
+    metadataBase: new URL('https://employment-networks.com'),
+    title: {
+        default: 'Employment Networks - Modern Recruiting & Candidate Experience',
+        template: '%s | Employment Networks',
+    },
     description: 'Powering the future of recruiting with Splits (collaborative recruiting platform) and Applicant (modern candidate portal). Transform your hiring process with our innovative platforms.',
     openGraph: {
         title: 'Employment Networks - Modern Recruiting & Candidate Experience',

@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'Blog',
+    description: 'Recruiting insights, product updates, and split placement strategies.',
+};
 
 export default function BlogPage() {
     return (

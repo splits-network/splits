@@ -6,7 +6,11 @@ import { ThemeInitializer } from './theme-initializer';
 import './globals.css';
 
 export const metadata: Metadata = {
-    title: 'Splits Network - Recruiting Marketplace',
+    metadataBase: new URL('https://splits.network'),
+    title: {
+        default: 'Splits Network - Recruiting Marketplace',
+        template: '%s | Splits Network',
+    },
     description: 'Split-fee recruiting marketplace platform. Collaborate with recruiters, share roles, and split fees while growing your recruiting business.',
     openGraph: {
         title: 'Splits Network - Recruiting Marketplace',

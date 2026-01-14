@@ -32,7 +32,7 @@ export default function AdminDashboardClient() {
                 }
 
                 const client = new ApiClient(token);
-                const response = await client.get('/admin/stats');
+                const response = await client.get('/stats?scope=platform&range=all');
 
                 setStats(response.data);
             } catch (err) {

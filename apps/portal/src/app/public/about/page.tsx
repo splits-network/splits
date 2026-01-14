@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'About Splits Network',
+    description: 'Learn how Splits Network powers collaborative recruiting and split placements.',
+};
 
 export default function AboutPage() {
     return (

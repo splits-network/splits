@@ -1,4 +1,10 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+    title: 'Find Your Next Career Opportunity',
+    description: 'Browse thousands of roles and connect with expert recruiters on Applicant Network.',
+};
 
 export default async function CandidateHomePage() {
     return (
