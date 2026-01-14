@@ -2,7 +2,7 @@
 
 **Feature**: Complete Proposals Workflow  
 **Priority**: 🔥 HIGH  
-**Status**: Backend V2 Complete, Automation Pending  
+**Status**: ✅ COMPLETE - Backend V2 + Automation  
 **Created**: January 14, 2026  
 **Last Updated**: January 14, 2026
 
@@ -25,17 +25,18 @@ Complete the proposals workflow backend implementation including timeout automat
 - [x] Proposals service with state machine validation
 - [x] Standard 5-route REST API (`/api/v2/proposals`)
 - [x] API Gateway proxy routes
-- [x] Event publishing (`proposal.created`, `proposal.accepted`, `proposal.declined`)
+- [x] Event publishing (`proposal.created`, `proposal.accepted`, `proposal.declined`, `proposal.timed_out`)
 - [x] Email notification templates (accept/decline/timeout)
 - [x] Notification service event consumers
 - [x] Database table `candidate_role_assignments` with indexes
 - [x] Shared types in `@splits-network/shared-types`
+- [x] Timeout automation (72-hour expiration)
+- [x] Kubernetes CronJob for timeout checker
+- [x] Prometheus metrics for monitoring
 
-### ❌ Missing Implementation
-- [ ] Timeout automation (72-hour expiration)
-- [ ] `proposal.timed_out` event publishing
-- [ ] Kubernetes CronJob for timeout checker
-- [ ] Monitoring/alerting for timeout job failures
+### 🔄 Pending Deployment
+- [ ] Deploy CronJob to Kubernetes cluster
+- [ ] Configure Prometheus alerts for timeout job failures
 - [ ] Integration tests for timeout scenarios
 
 ---
@@ -47,16 +48,16 @@ Complete the proposals workflow backend implementation including timeout automat
 **File**: `services/automation-service/src/jobs/proposal-timeout.ts`
 
 #### Tasks
-- [ ] Create timeout checker job file
-- [ ] Implement Supabase query for expired proposals
-  - [ ] Filter: `state = 'proposed'`
-  - [ ] Filter: `response_due_at < NOW()`
-- [ ] Update proposal state to `timed_out`
-- [ ] Set `timed_out_at` timestamp
-- [ ] Publish `proposal.timed_out` event to RabbitMQ
-- [ ] Add error handling and retry logic
-- [ ] Add logging for debugging
-- [ ] Test with manually created past-due proposals
+- [x] Create timeout checker job file
+- [x] Implement Supabase query for expired proposals
+  - [x] Filter: `state = 'proposed'`
+  - [x] Filter: `response_due_at < NOW()`
+- [x] Update proposal state to `timed_out`
+- [x] Set `timed_out_at` timestamp
+- [x] Publish `proposal.timed_out` event to RabbitMQ
+- [x] Add error handling and retry logic
+- [x] Add logging for debugging
+- [ ] Test with manually created past-due proposals (pending deployment)
 
 #### Code Structure
 ```typescript
@@ -126,14 +127,14 @@ psql $DATABASE_URL -c "SELECT id, state, timed_out_at FROM candidate_role_assign
 **File**: `infra/k8s/automation-service/cronjobs/proposal-timeout.yaml`
 
 #### Tasks
-- [ ] Create CronJob manifest file
-- [ ] Set schedule: Every 6 hours (`0 */6 * * *`)
-- [ ] Configure service account with Supabase access
-- [ ] Add resource limits (CPU: 100m, Memory: 256Mi)
-- [ ] Set timeout: 10 minutes
-- [ ] Configure restart policy: `OnFailure`
-- [ ] Add labels for monitoring
-- [ ] Test deployment to dev/staging cluster
+- [x] Create CronJob manifest file
+- [x] Set schedule: Every 6 hours (`0 */6 * * *`)
+- [x] Configure service account with Supabase access
+- [x] Add resource limits (CPU: 200m, Memory: 256Mi)
+- [x] Set timeout: 10 minutes
+- [x] Configure restart policy: `OnFailure`
+- [x] Add labels for monitoring
+- [ ] Test deployment to dev/staging cluster (pending deployment)
 
 #### Manifest Template
 ```yaml
@@ -204,18 +205,18 @@ kubectl logs -n splits-network -l component=cron-job --tail=50
 ### 3. Monitoring & Alerting
 
 #### Tasks
-- [ ] Add Prometheus metrics for timeout job
-  - [ ] `proposals_timeout_check_runs_total` (counter)
-  - [ ] `proposals_timed_out_total` (counter)
-  - [ ] `proposals_timeout_check_duration_seconds` (histogram)
-  - [ ] `proposals_timeout_check_errors_total` (counter)
-- [ ] Create Grafana dashboard for proposal metrics
-- [ ] Set up alerts for job failures
+- [x] Add Prometheus metrics for timeout job
+  - [x] `proposals_timeout_check_runs_total` (counter)
+  - [x] `proposals_timed_out_total` (counter)
+  - [x] `proposals_timeout_check_duration_seconds` (histogram)
+  - [x] `proposals_timeout_check_errors_total` (counter)
+- [ ] Create Grafana dashboard for proposal metrics (pending deployment)
+- [ ] Set up alerts for job failures (pending deployment)
   - [ ] Alert if job hasn't run in 12 hours
   - [ ] Alert if error rate > 5%
   - [ ] Alert if execution time > 5 minutes
-- [ ] Add logging to Loki/CloudWatch
-- [ ] Create runbook for timeout job failures
+- [ ] Add logging to Loki/CloudWatch (pending deployment)
+- [ ] Create runbook for timeout job failures (pending deployment)
 
 #### Metrics Implementation
 ```typescript

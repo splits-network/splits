@@ -11,7 +11,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { formatDistanceToNow } from 'date-fns';
+import { formatRelativeTime } from '@/lib/utils/date-formatting';
 
 interface Proposal {
     id: string;
@@ -176,7 +176,7 @@ export default function ProposalsTable({ proposals, onRefresh, onWithdraw }: Pro
                                     </td>
                                     <td>
                                         <span className="text-sm">
-                                            {createdAt ? formatDistanceToNow(new Date(createdAt), { addSuffix: true }) : '—'}
+                                            {createdAt ? formatRelativeTime(new Date(createdAt)) : '—'}
                                         </span>
                                     </td>
                                     <td>
