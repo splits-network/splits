@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { ServiceRegistry } from '../../clients';
+import { registerAnalyticsRoutes } from './analytics';
 import { registerAtsRoutes } from './ats';
 import { registerNetworkRoutes } from './network';
 import { registerIdentityRoutes } from './identity';
@@ -15,6 +16,7 @@ export function registerV2GatewayRoutes(
     services: ServiceRegistry,
     options?: { eventPublisher?: EventPublisher | null }
 ) {
+    registerAnalyticsRoutes(app, services);
     registerAtsRoutes(app, services);
     registerAutomationRoutes(app, services);
     registerBillingRoutes(app, services);

@@ -5,7 +5,7 @@ export class ServiceClient {
         private serviceName: string,
         private baseUrl: string,
         private logger: Logger
-    ) {}
+    ) { }
 
     private async request<T>(
         method: string,
@@ -16,7 +16,7 @@ export class ServiceClient {
         customHeaders?: Record<string, string>
     ): Promise<T> {
         const url = new URL(path, this.baseUrl);
-        
+
         if (params) {
             Object.entries(params).forEach(([key, value]) => {
                 url.searchParams.append(key, String(value));
@@ -62,7 +62,7 @@ export class ServiceClient {
 
             if (!response.ok) {
                 const errorBody = await response.text().catch(() => 'Unable to read error body');
-                
+
                 // For client errors (4xx), log and attach error info to the error object
                 // Gateway will handle passing these through to the client
                 if (response.status >= 400 && response.status < 500) {
@@ -87,7 +87,7 @@ export class ServiceClient {
                     }
                     throw error;
                 }
-                
+
                 // For server errors (5xx), log and throw
                 this.logger.error(
                     {
@@ -109,10 +109,18 @@ export class ServiceClient {
             // Check if response has content before parsing JSON
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
-                return await response.json() as T;
+                // Log raw response text first
+                const responseText = await response.text();
+                console.log('[ServiceClient] Raw text from', this.serviceName + ':', responseText);
+
+                // Parse the text as JSON
+                const jsonData = JSON.parse(responseText) as T;
+                console.log('[ServiceClient] Parsed JSON from', this.serviceName + ':', JSON.stringify(jsonData, null, 2));
+                return jsonData;
             }
 
             // For non-JSON responses, return empty object
+            console.log('[ServiceClient] Non-JSON response from', this.serviceName, '- returning empty object');
             return {} as T;
         } catch (error: any) {
             this.logger.error(

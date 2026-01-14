@@ -13,7 +13,7 @@ import AddCandidateModal from './add-candidate-modal';
 import { useToast } from '@/lib/toast-context';
 import { StatCardGrid, StatCard } from '@/components/ui';
 import { DataTable, type TableColumn } from '@/components/ui/tables';
-import { CandidatesTrendsChart, TIME_PERIODS, calculateCandidateStatTrends } from '@/components/charts/candidates-trends-chart';
+import { CandidatesTrendsChart, calculateCandidateStatTrends } from '@/components/charts/candidates-trends-chart';
 
 
 interface CandidateFilters {
@@ -107,7 +107,12 @@ export default function CandidatesListClient() {
     if (error) {
         return <ErrorState message={error} onRetry={refetch} />;
     }
-
+    const TIME_PERIODS = [
+        { label: '1 Month', value: 1 },
+        { label: '3 Months', value: 3 },
+        { label: '6 Months', value: 6 },
+        { label: '12 Months', value: 12 },
+    ];
     return (
         <div className="flex flex-col md:flex-row md:items-start md:justify-between">
             <div className='w-full md:flex-1 md:mr-4 space-y-6'>

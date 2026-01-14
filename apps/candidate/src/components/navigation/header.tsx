@@ -128,7 +128,7 @@ export default function Header() {
                     <li>
                         <details>
                             <summary className='btn btn-ghost'>Resources</summary>
-                            <ul className="menu xl:menu-horizontal bg-base-100 rounded-box lg:min-w-max shadow">
+                            <ul className="menu xl:menu-horizontal bg-base-100 rounded-box lg:min-w-max shadow p-6">
                                 <div className="space-y-1">
                                     <li>
                                         <Link href="/public/resources/career-guides" className="flex items-start gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
@@ -203,9 +203,9 @@ export default function Header() {
                     <li>
                         <details>
                             <summary className='btn btn-ghost'>Companies</summary>
-                            <ul className="menu xl:menu-horizontal bg-base-200 rounded-box lg:min-w-max">
-                                <h3 className="font-bold text-sm mb-3 text-base-content/60">EXPLORE COMPANIES</h3>
+                            <ul className="menu xl:menu-horizontal bg-base-100 rounded-box lg:min-w-max shadow p-6">
                                 <div className="space-y-1">
+                                    <h3 className="font-bold text-sm mb-3 text-base-content/60">EXPLORE COMPANIES</h3>
                                     <li>
                                         <Link href="/public/companies" className="flex items-center gap-3 p-3 hover:bg-base-200 rounded-lg" onClick={closeAllDropdowns}>
                                             <i className="fa-duotone fa-regular fa-building text-primary text-lg"></i>
@@ -235,8 +235,8 @@ export default function Header() {
                                     </li>
                                 </div>
                                 <div className="divider my-4"></div>
-                                <h3 className="font-bold text-sm mb-3 text-base-content/60">FOR EMPLOYERS</h3>
                                 <li>
+                                    <h3 className="font-bold text-sm mb-3 text-base-content/60">FOR EMPLOYERS</h3>
                                     <Link href="/public/for-recruiters" className="flex items-center gap-3 p-3 hover:bg-base-200 rounded-lg bg-primary/5 border border-primary/20" onClick={closeAllDropdowns}>
                                         <i className="fa-duotone fa-regular fa-user-tie text-primary text-lg"></i>
                                         <div>

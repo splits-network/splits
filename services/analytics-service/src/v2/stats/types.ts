@@ -1,3 +1,5 @@
+// Stats domain types for analytics service
+
 export type StatsScope = 'recruiter' | 'candidate' | 'company' | 'platform';
 
 export interface StatsRange {
@@ -41,6 +43,16 @@ export interface CompanyStatsMetrics {
     active_recruiters: number;
 }
 
+export interface PlatformStatsMetrics {
+    total_users: number;
+    active_recruiters: number;
+    active_companies: number;
+    active_jobs: number;
+    total_applications: number;
+    total_placements: number;
+    total_revenue: number;
+}
+
 export interface RecruiterStatsResponse {
     scope: 'recruiter';
     range: {
@@ -71,4 +83,18 @@ export interface CompanyStatsResponse {
     metrics: CompanyStatsMetrics;
 }
 
-export type StatsResponse = RecruiterStatsResponse | CandidateStatsResponse | CompanyStatsResponse;
+export interface PlatformStatsResponse {
+    scope: 'platform';
+    range: {
+        label: string;
+        from: string;
+        to: string;
+    };
+    metrics: PlatformStatsMetrics;
+}
+
+export type StatsResponse =
+    | RecruiterStatsResponse
+    | CandidateStatsResponse
+    | CompanyStatsResponse
+    | PlatformStatsResponse;

@@ -13,6 +13,7 @@ import {
 } from 'chart.js';
 import { dataset, registerChart } from '../charts/chart-options';
 import { Line } from 'react-chartjs-2';
+import { TrendPeriodSelector } from './trend-period-selector';
 
 // Register Chart.js components
 ChartJS.register(
@@ -40,14 +41,6 @@ interface CandidatesTrendsChartProps {
     trendPeriod: number;
     onTrendPeriodChange: (period: number) => void;
 }
-
-// Time period options - exported for use by parent
-export const TIME_PERIODS = [
-    { value: 3, label: '3M' },
-    { value: 6, label: '6M' },
-    { value: 12, label: '1Y' },
-    { value: 24, label: '2Y' },
-] as const;
 
 // Generate last N months labels
 function getLastNMonths(n: number): string[] {
@@ -308,29 +301,11 @@ export function CandidatesTrendsChart({ candidates, loading, trendPeriod, onTren
                     <h3 className="text-sm font-medium text-base-content/80">Trends</h3>
                     <span className="text-base-content/30">•••</span>
                 </div>
-                {/* Time period dropdown */}
-                <div className="dropdown dropdown-end">
-                    <div
-                        tabIndex={0}
-                        role="button"
-                        className="text-xs text-base-content/50 hover:text-base-content cursor-pointer flex items-center gap-1 transition-colors"
-                    >
-                        {TIME_PERIODS.find(p => p.value === trendPeriod)?.label || '6M'}
-                        <i className="fa-duotone fa-regular fa-chevron-down text-[10px]"></i>
-                    </div>
-                    <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-10 w-20 p-1 shadow-lg border border-base-300 mt-1">
-                        {TIME_PERIODS.map((period) => (
-                            <li key={period.value}>
-                                <button
-                                    className={`text-xs justify-center ${trendPeriod === period.value ? 'active' : ''}`}
-                                    onClick={() => onTrendPeriodChange(period.value)}
-                                >
-                                    {period.label}
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                {/* Time period selector */}
+                <TrendPeriodSelector
+                    trendPeriod={trendPeriod}
+                    onTrendPeriodChange={onTrendPeriodChange}
+                />
             </div>
 
             {/* Custom Legend with percentage changes */}

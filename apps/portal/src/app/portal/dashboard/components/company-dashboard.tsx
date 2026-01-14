@@ -7,6 +7,7 @@ import { createAuthenticatedClient } from '@/lib/api-client';
 import { useUserProfile } from '@/contexts';
 import { getActivityIcon, getJobStatusBadge } from '@/lib/utils';
 import { StatCard, StatCardGrid, ContentCard, EmptyState } from '@/components/ui/cards';
+import { AnalyticsChart } from '@/components/charts/analytics-chart';
 import { TrendBadge } from '@/components/ui';
 import AddRoleWizardModal from '../../roles/components/add-role-wizard-modal';
 
@@ -54,6 +55,10 @@ export default function CompanyDashboard() {
     const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [allApplications, setAllApplications] = useState<any[]>([]);
+    const [allJobs, setAllJobs] = useState<any[]>([]);
+    const [placements, setPlacements] = useState<any[]>([]);
+    const [trendPeriod, setTrendPeriod] = useState(6); // Shared trend period for all charts
 
     useEffect(() => {
         loadDashboardData();
@@ -63,22 +68,21 @@ export default function CompanyDashboard() {
         setLoading(true);
         try {
             const token = await getToken();
-            if (!token) return;
+            if (!token) {
+                console.error('[Dashboard] No token available - aborting');
+                return;
+            }
 
             const api = createAuthenticatedClient(token);
 
-            // Load company stats using V2 endpoint
             const statsResponse: any = await api.get('/stats', {
                 params: {
                     scope: 'company',
                 }
             });
-            // Extract metrics from the nested response structure
-            const companyStats =
-                statsResponse?.data?.metrics ||
-                statsResponse?.data ||
-                statsResponse ||
-                null;
+
+            // V2 API response format: { data: { scope, range, metrics: {...} } }
+            const companyStats = statsResponse?.data?.metrics || null;
             setStats(companyStats);
 
             // Load role breakdown using V2 API
@@ -153,10 +157,34 @@ export default function CompanyDashboard() {
 
             setRoleBreakdown(breakdown);
 
+            // Load all applications for trends chart
+            const allAppsResponse: any = await api.get('/applications', {
+                params: {
+                    limit: 1000, // Get enough data for trends
+                    sort_by: 'created_at',
+                    sort_order: 'desc',
+                }
+            });
+            setAllApplications(allAppsResponse.data || []);
+
+            // Store all jobs for trends chart
+            setAllJobs(rolesData);
+
+            // Load placements with application data for time-to-hire chart
+            const placementsResponse: any = await api.get('/placements', {
+                params: {
+                    limit: 1000,
+                    include: 'application',
+                    sort_by: 'created_at',
+                    sort_order: 'desc',
+                }
+            });
+            setPlacements(placementsResponse.data || []);
+
             // TODO: Load recent activity - will need a V2 endpoint
             setRecentActivity([]);
         } catch (error) {
-            console.error('Failed to load dashboard data:', error);
+            console.error('[Dashboard] ===== ERROR IN LOAD DASHBOARD DATA =====');
         } finally {
             setLoading(false);
         }
@@ -166,7 +194,7 @@ export default function CompanyDashboard() {
         return (
             <div className="space-y-6 animate-fade-in">
                 {/* Welcome skeleton */}
-                <div className="h-28 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 skeleton"></div>
+                <div className="h-28 rounded-2xl bg-linear-to-br from-primary/20 to-secondary/20 skeleton"></div>
                 {/* Stats skeleton */}
                 <StatCardGrid>
                     {[1, 2, 3, 4].map((i) => (
@@ -184,11 +212,14 @@ export default function CompanyDashboard() {
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Welcome Section - Enhanced gradient card */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-secondary text-primary-content shadow-elevation-3">
+            <div className="">
                 {/* Decorative pattern */}
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/20 -translate-y-1/2 translate-x-1/4"></div>
                     <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-white/10 translate-y-1/2 -translate-x-1/4"></div>
+                    <div className="absolute top-1/2 right-0 -translate-x-1/2 -translate-y-1/2">
+                        <i className='fa-duotone fa-regular fa-building fa-8x text-primary' />
+                    </div>
                 </div>
 
                 <div className="relative p-6 md:p-8">
@@ -210,88 +241,130 @@ export default function CompanyDashboard() {
             </div>
 
             {/* Key Stats Grid - Using new StatCard component */}
-            <StatCardGrid>
-                <StatCard
-                    title="Active Roles"
-                    value={stats?.active_roles || 0}
-                    description="Open positions"
-                    icon="fa-briefcase"
-                    color="primary"
-                    trend={stats?.trends?.active_roles}
-                    href="/portal/roles"
-                />
-                <StatCard
-                    title="Total Candidates"
-                    value={stats?.total_applications || 0}
-                    description="In pipeline"
-                    icon="fa-users"
-                    color="secondary"
-                    trend={stats?.trends?.total_applications}
-                    href="/portal/application"
-                />
-                <StatCard
-                    title="Interviews"
-                    value={stats?.interviews_scheduled || 0}
-                    description="Scheduled"
-                    icon="fa-calendar-check"
-                    color="accent"
-                    href="/portal/application?stage=interview"
-                />
-                <StatCard
-                    title="Hires YTD"
-                    value={stats?.placements_this_year || 0}
-                    description="Successful placements"
-                    icon="fa-trophy"
-                    color="success"
-                    href="/portal/placements"
-                />
-            </StatCardGrid>
+            <div className='card bg-base-200'>
+                <StatCardGrid className='m-2 shadow-lg'>
+                    <StatCard
+                        title="Active Roles"
+                        value={stats?.active_roles || 0}
+                        description="Open positions"
+                        icon="fa-briefcase"
+                        color="primary"
+                        trend={stats?.trends?.active_roles}
+                        href="/portal/roles"
+                    />
+                    <StatCard
+                        title="Total Candidates"
+                        value={stats?.total_applications || 0}
+                        description="In pipeline"
+                        icon="fa-users"
+                        color="secondary"
+                        trend={stats?.trends?.total_applications}
+                        href="/portal/application"
+                    />
+                    <StatCard
+                        title="Interviews"
+                        value={stats?.interviews_scheduled || 0}
+                        description="Scheduled"
+                        icon="fa-calendar-check"
+                        color="accent"
+                        href="/portal/application?stage=interview"
+                    />
+                    <StatCard
+                        title="Hires YTD"
+                        value={stats?.placements_this_year || 0}
+                        description="Successful placements"
+                        icon="fa-trophy"
+                        color="success"
+                        href="/portal/placements"
+                    />
+                </StatCardGrid>
+                <div className='p-4 pt-0'>
+                    <AnalyticsChart
+                        type="placement-trends"
+                        title="Placement Trends"
+                        chartComponent="line"
+                        showLegend={true}
+                        legendPosition="bottom"
+                        scope="company"
+                        height={200}
+                        trendPeriod={trendPeriod}
+                        onTrendPeriodChange={setTrendPeriod}
+                    />
+                </div>
+            </div>
 
             {/* Performance Metrics - Enhanced cards */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <ContentCard title="Avg Time to Hire" icon="fa-clock">
-                    <div className="flex items-baseline gap-3 mt-2">
-                        <div className="text-4xl font-bold text-info">
-                            {stats?.avg_time_to_hire_days || 0}
-                        </div>
-                        <span className="text-base-content/60">days</span>
+                <div className='card bg-base-200'>
+                    <div className='m-2 shadow-lg rounded-xl bg-base-100'>
+                        <StatCard
+                            title="Time to Hire"
+                            icon="fa-clock"
+                            color="info"
+                            description="Average days to hire"
+                            value={stats?.avg_time_to_hire_days || 0} />
                     </div>
-                    <div className="flex items-center gap-2 mt-3 text-sm text-base-content/60">
-                        <i className="fa-duotone fa-regular fa-chart-bar text-xs"></i>
-                        <span>Industry average: 42 days</span>
+                    <div className='p-4 pt-0'>
+                        <AnalyticsChart
+                            scope='company'
+                            height={150}
+                            trendPeriod={trendPeriod}
+                            onTrendPeriodChange={setTrendPeriod}
+                            type="time-to-hire-trends"
+                            title={'Time to Hire Trends'}
+                            chartComponent="line"
+                            showLegend={true}
+                            legendPosition="bottom"
+                        />
                     </div>
-                </ContentCard>
+                </div>
 
-                <ContentCard title="Active Network" icon="fa-network-wired">
-                    <div className="flex items-baseline gap-3 mt-2">
-                        <div className="text-4xl font-bold text-primary">
-                            {stats?.active_recruiters || 0}
-                        </div>
-                        <span className="text-base-content/60">recruiters</span>
+                <div className='card bg-base-200'>
+                    <div className='m-2 shadow-lg rounded-xl bg-base-100'>
+                        <StatCard
+                            title="Recruiter Activity"
+                            icon="fa-network-wired"
+                            color="warning"
+                            description="Active recruiters"
+                            value={stats?.active_recruiters || 0} />
                     </div>
-                    <div className="flex items-center gap-2 mt-3 text-sm text-base-content/60">
-                        <i className="fa-duotone fa-regular fa-briefcase text-xs"></i>
-                        <span>Working on your roles</span>
+                    <div className='p-4 pt-0'>
+                        <AnalyticsChart
+                            scope='company'
+                            height={150}
+                            trendPeriod={trendPeriod}
+                            onTrendPeriodChange={setTrendPeriod}
+                            type="recruiter-activity"
+                            chartComponent="bar"
+                            showLegend={true}
+                            legendPosition="bottom"
+                        />
                     </div>
-                </ContentCard>
-
-                <ContentCard title="This Month" icon="fa-chart-line">
-                    <div className="flex items-baseline gap-3 mt-2">
-                        <div className="text-4xl font-bold text-success">
-                            {stats?.placements_this_month || 0}
-                        </div>
-                        <span className="text-base-content/60">hires</span>
-                        {stats?.trends?.placements_this_month && (
-                            <TrendBadge value={stats.trends.placements_this_month} />
-                        )}
+                </div>
+                <div className='card bg-base-200'>
+                    <div className='m-2 shadow-lg rounded-xl bg-base-100'>
+                        <StatCard
+                            title="Offers Extended This Month"
+                            icon="fa-chart-line"
+                            color="success"
+                            description={(stats?.offers_extended || 0) + ' offers extended'}
+                            value={stats?.trends?.placements_this_month || 0} />
                     </div>
-                    <div className="flex items-center gap-2 mt-3 text-sm text-base-content/60">
-                        <i className="fa-duotone fa-regular fa-file-contract text-xs"></i>
-                        <span>{stats?.offers_extended || 0} offers extended</span>
+                    <div className='p-4 pt-0'>
+                        <AnalyticsChart
+                            scope='company'
+                            height={150}
+                            trendPeriod={trendPeriod}
+                            onTrendPeriodChange={setTrendPeriod}
+                            type="application-trends"
+                            title={'Application Trends'}
+                            chartComponent="bar"
+                            showLegend={true}
+                            legendPosition="bottom"
+                        />
                     </div>
-                </ContentCard>
+                </div>
             </div>
-
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Role Breakdown - Larger section */}
@@ -467,16 +540,18 @@ export default function CompanyDashboard() {
             </div>
 
             {/* Add Role Modal */}
-            {showAddModal && (
-                <AddRoleWizardModal
-                    isOpen={showAddModal}
-                    onClose={() => setShowAddModal(false)}
-                    onSuccess={() => {
-                        setShowAddModal(false);
-                        refresh(); // Refresh the list
-                    }}
-                />
-            )}
-        </div>
+            {
+                showAddModal && (
+                    <AddRoleWizardModal
+                        isOpen={showAddModal}
+                        onClose={() => setShowAddModal(false)}
+                        onSuccess={() => {
+                            setShowAddModal(false);
+                            refresh(); // Refresh the list
+                        }}
+                    />
+                )
+            }
+        </div >
     );
 }

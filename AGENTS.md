@@ -72,3 +72,12 @@ The /docs/migrations/V2-ARCHITECTURE-IMPLEMENTATION_GUIDE.md outlines the high-l
 ### Pending Applications Dashboard Widget
 
 - `ApiClient.getPendingApplications` now queries `/api/v2/applications?stage=screen` instead of the legacy recruiter-specific endpoint, and both the recruiter dashboard widget plus `applications/pending` page rely on that V2 data (which already includes candidate/job joins). When building new recruiter-review flows, prefer this V2 filterable endpoint instead of `/recruiters/:id/pending-applications`.
+
+## Supabase Table Usage Audit (2025-03-08)
+
+- Compared Supabase public tables to runtime usage in apps/services.
+- Tables with no runtime usage in apps/services (only migrations/docs): `candidate_sourcers`, `marketplace_events`.
+  - `candidate_sourcers`: tracks first sourcer + protection window; shared types/clients expect sourcing endpoints, but no ATS/API Gateway routes exist yet.
+  - `marketplace_events`: event log for marketplace actions/analytics; no service writes/consumers found.
+- Auth schema tables are Supabase-managed internals; avoid treating them as app-owned resources.
+- If implementing new resources, follow V2 guardrails: top-level `/api/v2/<resource>` routes with access-context scoping (no child endpoints).

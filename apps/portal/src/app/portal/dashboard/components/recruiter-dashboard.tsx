@@ -99,6 +99,7 @@ export default function RecruiterDashboard() {
 
             const api = createAuthenticatedClient(token);
 
+            // Load recruiter stats using V2 analytics endpoint
             const statsResponse: any = await api.get('/stats', {
                 params: {
                     scope: 'recruiter',

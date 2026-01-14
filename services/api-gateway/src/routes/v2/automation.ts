@@ -24,13 +24,6 @@ const AUTOMATION_RESOURCES: ResourceDefinition[] = [
         serviceBasePath: '/v2/fraud-signals',
         tag: 'automation',
     },
-    {
-        name: 'marketplace-metrics',
-        service: 'automation',
-        basePath: '/marketplace-metrics',
-        serviceBasePath: '/v2/marketplace-metrics',
-        tag: 'automation',
-    },
 ];
 
 export function registerAutomationRoutes(app: FastifyInstance, services: ServiceRegistry) {

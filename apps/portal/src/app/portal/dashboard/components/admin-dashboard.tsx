@@ -74,13 +74,40 @@ export default function AdminDashboard() {
 
             const api = createAuthenticatedClient(token);
 
-            // Load platform stats
-            const statsResponse = await api.get<{ data: PlatformStats }>('/admin/portal/dashboard/stats');
-            setStats(statsResponse.data);
+            // Load platform stats from V2 analytics endpoint
+            const statsResponse: any = await api.get('/stats', {
+                params: {
+                    scope: 'admin',
+                }
+            });
+            // Extract metrics from the nested response structure
+            const platformStats =
+                statsResponse?.data?.metrics ||
+                statsResponse?.data ||
+                statsResponse ||
+                null;
+            setStats(platformStats);
 
-            // Load marketplace health
-            const healthResponse = await api.get<{ data: MarketplaceHealth }>('/admin/portal/dashboard/health');
-            setHealth(healthResponse.data);
+            // Load marketplace health from V2 analytics endpoint
+            const healthResponse: any = await api.get('/marketplace-metrics', {
+                params: {
+                    limit: 1,
+                    sort_by: 'date',
+                    sort_order: 'desc'
+                }
+            });
+            // Extract latest health metrics
+            const healthData = healthResponse?.data?.data?.[0] || healthResponse?.data?.[0] || null;
+            if (healthData) {
+                // Map analytics metrics to dashboard health format
+                setHealth({
+                    recruiter_satisfaction: 0, // TODO: Add to analytics
+                    company_satisfaction: 0, // TODO: Add to analytics
+                    avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
+                    avg_time_to_placement_days: healthData.avg_time_to_hire_days || 0,
+                    fill_rate_percentage: healthData.hire_rate * 100 || 0,
+                });
+            }
 
             // Load recent activity
             const activityResponse = await api.get<{ data: RecentActivity[] }>('/admin/portal/dashboard/activity');
@@ -100,7 +127,7 @@ export default function AdminDashboard() {
         return (
             <div className="space-y-6 animate-fade-in">
                 {/* Welcome skeleton */}
-                <div className="h-28 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 skeleton"></div>
+                <div className="h-28 rounded-2xl bg-linear-to-br from-primary/20 to-secondary/20 skeleton"></div>
                 {/* Stats skeleton */}
                 <StatCardGrid>
                     {[1, 2, 3, 4].map((i) => (
@@ -114,7 +141,7 @@ export default function AdminDashboard() {
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Welcome Section - Enhanced gradient card */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-secondary text-primary-content shadow-elevation-3">
+            <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-primary via-primary/90 to-secondary text-primary-content shadow-elevation-3">
                 {/* Decorative pattern */}
                 <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/20 -translate-y-1/2 translate-x-1/4"></div>

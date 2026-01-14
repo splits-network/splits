@@ -2,7 +2,7 @@
 -- Rule-based automations with human approval guardrails
 
 -- Automation rules (configurable workflows)
-CREATE TABLE IF NOT EXISTS platform.automation_rules (
+CREATE TABLE IF NOT EXISTS automation_rules (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
     description TEXT,
@@ -31,9 +31,9 @@ CREATE TABLE IF NOT EXISTS platform.automation_rules (
 );
 
 -- Automation executions (audit trail of what was done)
-CREATE TABLE IF NOT EXISTS platform.automation_executions (
+CREATE TABLE IF NOT EXISTS automation_executions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    rule_id UUID NOT NULL REFERENCES platform.automation_rules(id),
+    rule_id UUID NOT NULL REFERENCES automation_rules(id),
     
     -- Context
     entity_type TEXT NOT NULL, -- application, placement, recruiter, etc.
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS platform.automation_executions (
 );
 
 -- Decision audit logs (AI + human decisions)
-CREATE TABLE IF NOT EXISTS platform.decision_audit_log (
+CREATE TABLE IF NOT EXISTS decision_audit_log (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     decision_type TEXT NOT NULL, -- ai_suggestion_accepted, automation_triggered, fraud_flag_raised, etc.
     entity_type TEXT NOT NULL, -- placement, application, recruiter, etc.
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS platform.decision_audit_log (
 );
 
 -- AI candidate-role match suggestions
-CREATE TABLE IF NOT EXISTS platform.candidate_role_matches (
+CREATE TABLE IF NOT EXISTS candidate_role_matches (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     candidate_id UUID NOT NULL,
     job_id UUID NOT NULL,
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS platform.candidate_role_matches (
 );
 
 -- Fraud detection signals
-CREATE TABLE IF NOT EXISTS platform.fraud_signals (
+CREATE TABLE IF NOT EXISTS fraud_signals (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     signal_type TEXT NOT NULL, -- duplicate_submission, suspicious_pattern, velocity_anomaly, etc.
     severity TEXT NOT NULL, -- low, medium, high, critical
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS platform.fraud_signals (
 );
 
 -- Marketplace health metrics (aggregated views)
-CREATE TABLE IF NOT EXISTS platform.marketplace_metrics_daily (
+CREATE TABLE IF NOT EXISTS marketplace_metrics_daily (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     metric_date DATE NOT NULL,
     
@@ -169,25 +169,25 @@ CREATE TABLE IF NOT EXISTS platform.marketplace_metrics_daily (
 );
 
 -- Indexes
-CREATE INDEX IF NOT EXISTS idx_automation_rules_status ON platform.automation_rules(status) WHERE status = 'active';
-CREATE INDEX IF NOT EXISTS idx_automation_rules_type ON platform.automation_rules(rule_type);
+CREATE INDEX IF NOT EXISTS idx_automation_rules_status ON automation_rules(status) WHERE status = 'active';
+CREATE INDEX IF NOT EXISTS idx_automation_rules_type ON automation_rules(rule_type);
 
-CREATE INDEX IF NOT EXISTS idx_automation_executions_rule ON platform.automation_executions(rule_id);
-CREATE INDEX IF NOT EXISTS idx_automation_executions_status ON platform.automation_executions(status);
-CREATE INDEX IF NOT EXISTS idx_automation_executions_entity ON platform.automation_executions(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_automation_executions_rule ON automation_executions(rule_id);
+CREATE INDEX IF NOT EXISTS idx_automation_executions_status ON automation_executions(status);
+CREATE INDEX IF NOT EXISTS idx_automation_executions_entity ON automation_executions(entity_type, entity_id);
 
-CREATE INDEX IF NOT EXISTS idx_decision_audit_entity ON platform.decision_audit_log(entity_type, entity_id);
-CREATE INDEX IF NOT EXISTS idx_decision_audit_type ON platform.decision_audit_log(decision_type);
-CREATE INDEX IF NOT EXISTS idx_decision_audit_created_at ON platform.decision_audit_log(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_decision_audit_entity ON decision_audit_log(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_decision_audit_type ON decision_audit_log(decision_type);
+CREATE INDEX IF NOT EXISTS idx_decision_audit_created_at ON decision_audit_log(created_at DESC);
 
-CREATE INDEX IF NOT EXISTS idx_candidate_matches_candidate ON platform.candidate_role_matches(candidate_id);
-CREATE INDEX IF NOT EXISTS idx_candidate_matches_job ON platform.candidate_role_matches(job_id);
-CREATE INDEX IF NOT EXISTS idx_candidate_matches_score ON platform.candidate_role_matches(match_score DESC);
-CREATE INDEX IF NOT EXISTS idx_candidate_matches_reviewed ON platform.candidate_role_matches(reviewed_at) WHERE reviewed_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_candidate_matches_candidate ON candidate_role_matches(candidate_id);
+CREATE INDEX IF NOT EXISTS idx_candidate_matches_job ON candidate_role_matches(job_id);
+CREATE INDEX IF NOT EXISTS idx_candidate_matches_score ON candidate_role_matches(match_score DESC);
+CREATE INDEX IF NOT EXISTS idx_candidate_matches_reviewed ON candidate_role_matches(reviewed_at) WHERE reviewed_at IS NULL;
 
-CREATE INDEX IF NOT EXISTS idx_fraud_signals_status ON platform.fraud_signals(status) WHERE status = 'active';
-CREATE INDEX IF NOT EXISTS idx_fraud_signals_severity ON platform.fraud_signals(severity);
-CREATE INDEX IF NOT EXISTS idx_fraud_signals_recruiter ON platform.fraud_signals(recruiter_id);
-CREATE INDEX IF NOT EXISTS idx_fraud_signals_created_at ON platform.fraud_signals(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_fraud_signals_status ON fraud_signals(status) WHERE status = 'active';
+CREATE INDEX IF NOT EXISTS idx_fraud_signals_severity ON fraud_signals(severity);
+CREATE INDEX IF NOT EXISTS idx_fraud_signals_recruiter ON fraud_signals(recruiter_id);
+CREATE INDEX IF NOT EXISTS idx_fraud_signals_created_at ON fraud_signals(created_at DESC);
 
-CREATE INDEX IF NOT EXISTS idx_marketplace_metrics_date ON platform.marketplace_metrics_daily(metric_date DESC);
+CREATE INDEX IF NOT EXISTS idx_marketplace_metrics_date ON marketplace_metrics_daily(metric_date DESC);

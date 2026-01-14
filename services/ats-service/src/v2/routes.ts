@@ -15,10 +15,6 @@ import { registerCompanyRoutes } from './companies/routes';
 import { registerCandidateRoutes } from './candidates/routes';
 import { registerApplicationRoutes } from './applications/routes';
 import { registerPlacementRoutes } from './placements/routes';
-// import { registerAIReviewRoutes } from './ai-review/routes'; // TODO: Fix and re-enable
-import { StatsRepository } from './stats/repository';
-import { StatsServiceV2 } from './stats/service';
-import { registerStatsRoutes } from './stats/routes';
 import { JobPreScreenQuestionRepository } from './job-pre-screen-questions/repository';
 import { JobPreScreenQuestionService } from './job-pre-screen-questions/service';
 import { registerJobPreScreenQuestionRoutes } from './job-pre-screen-questions/routes';
@@ -51,8 +47,6 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     const placementRepository = new PlacementRepository(config.supabaseUrl, config.supabaseKey);
     const placementService = new PlacementServiceV2(placementRepository.getSupabase(), placementRepository, config.eventPublisher);
 
-    const statsRepository = new StatsRepository(config.supabaseUrl, config.supabaseKey);
-    const statsService = new StatsServiceV2(statsRepository);
 
     const preScreenQuestionRepository = new JobPreScreenQuestionRepository(config.supabaseUrl, config.supabaseKey);
     const preScreenQuestionService = new JobPreScreenQuestionService(preScreenQuestionRepository);
@@ -66,8 +60,6 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     registerCandidateRoutes(app, { candidateService });
     registerApplicationRoutes(app, { applicationService });
     registerPlacementRoutes(app, { placementService });
-    // TODO: Re-implement AI review routes using V2 patterns
-    registerStatsRoutes(app, { statsService });
     registerJobPreScreenQuestionRoutes(app, { service: preScreenQuestionService });
     registerJobPreScreenAnswerRoutes(app, { service: preScreenAnswerService });
     registerJobRequirementRoutes(app, { service: jobRequirementService });

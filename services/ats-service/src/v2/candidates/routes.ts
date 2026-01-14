@@ -79,18 +79,6 @@ export function registerCandidateRoutes(
         }
     });
 
-    app.get('/api/v2/candidate-dashboard/stats', async (request: FastifyRequest, reply: FastifyReply) => {
-        try {
-            const { clerkUserId } = requireUserContext(request);
-            const stats = await config.candidateService.getCandidateDashboardStats(clerkUserId);
-            return reply.send({ data: stats });
-        } catch (error: any) {
-            return reply
-                .code(400)
-                .send({ error: { message: error.message || 'Failed to load dashboard stats' } });
-        }
-    });
-
     app.get(
         '/v2/candidate-dashboard/recent-applications',
         async (request: FastifyRequest, reply: FastifyReply) => {

@@ -1,0 +1,49 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.turbo": true
+  },
+  "search.exclude": {
+    "**/.git": true,
+    "**/.github": false,
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.turbo": true,
+    "**/pnpm-lock.yaml": true
+  },
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+  "typescript.validate.enable": true,
+  "javascript.validate.enable": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  // Exclude .github folder from TypeScript checking
+  "typescript.tsserver.watchOptions": {
+    "excludeDirectories": [
+      "**/node_modules",
+      "**/.git",
+      "**/.github"
+    ]
+  }
+}

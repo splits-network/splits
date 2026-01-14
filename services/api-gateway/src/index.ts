@@ -330,6 +330,7 @@ async function main() {
     services.register('automation', process.env.AUTOMATION_SERVICE_URL || 'http://localhost:3007');
     services.register('document-processing', process.env.DOCUMENT_PROCESSING_SERVICE_URL || 'http://localhost:3008');
     services.register('ai', process.env.AI_SERVICE_URL || 'http://localhost:3009');
+    services.register('analytics', process.env.ANALYTICS_SERVICE_URL || 'http://localhost:3010');
 
     // Register V2 proxy routes only
     registerV2GatewayRoutes(app, services, { eventPublisher });

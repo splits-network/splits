@@ -70,7 +70,6 @@ export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistr
     registerJobRoutes(app, services);
     registerCandidateRoutes(app, services);
 
-    registerStatsRoutes(app, services);
     registerAiReviewRoutes(app, services);
 }
 
@@ -340,32 +339,33 @@ function registerCandidateRoutes(app: FastifyInstance, services: ServiceRegistry
     );
 }
 
-function registerStatsRoutes(app: FastifyInstance, services: ServiceRegistry) {
-    const atsService = () => services.get('ats');
+// Stats routes have been moved to analytics service
+// function registerStatsRoutes(app: FastifyInstance, services: ServiceRegistry) {
+//     const atsService = () => services.get('ats');
 
-    app.get(
-        '/api/v2/stats',
-        {
-            preHandler: requireAuth(),
-            // No schema needed for Fastify 5.x
-        },
-        async (request: FastifyRequest, reply: FastifyReply) => {
-            const correlationId = getCorrelationId(request);
-            const authHeaders = buildAuthHeaders(request);
-            const queryString = buildQueryString(request.query as Record<string, any>);
-            const path = queryString ? `/api/v2/stats?${queryString}` : '/api/v2/stats';
-            try {
-                const data = await atsService().get(path, undefined, correlationId, authHeaders);
-                return reply.send(data);
-            } catch (error: any) {
-                request.log.error({ error, correlationId }, 'Failed to fetch stats');
-                return reply
-                    .status(error.statusCode || 500)
-                    .send(error.jsonBody || { error: 'Failed to load stats' });
-            }
-        }
-    );
-}
+//     app.get(
+//         '/api/v2/stats',
+//         {
+//             preHandler: requireAuth(),
+//             // No schema needed for Fastify 5.x
+//         },
+//         async (request: FastifyRequest, reply: FastifyReply) => {
+//             const correlationId = getCorrelationId(request);
+//             const authHeaders = buildAuthHeaders(request);
+//             const queryString = buildQueryString(request.query as Record<string, any>);
+//             const path = queryString ? `/api/v2/stats?${queryString}` : '/api/v2/stats';
+//             try {
+//                 const data = await atsService().get(path, undefined, correlationId, authHeaders);
+//                 return reply.send(data);
+//             } catch (error: any) {
+//                 request.log.error({ error, correlationId }, 'Failed to fetch stats');
+//                 return reply
+//                     .status(error.statusCode || 500)
+//                     .send(error.jsonBody || { error: 'Failed to load stats' });
+//             }
+//         }
+//     );
+// }
 
 function registerAiReviewRoutes(app: FastifyInstance, services: ServiceRegistry) {
     const aiService = () => services.get('ai');

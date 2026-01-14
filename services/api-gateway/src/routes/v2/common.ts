@@ -4,6 +4,7 @@ import { requireAuth } from '../../middleware/auth';
 import { buildAuthHeaders } from '../../helpers/auth-headers';
 
 export type ServiceName =
+    | 'analytics'
     | 'ats'
     | 'network'
     | 'billing'
