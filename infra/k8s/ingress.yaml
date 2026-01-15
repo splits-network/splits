@@ -71,3 +71,87 @@ spec:
                 name: corporate
                 port:
                   number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: splits-network-www-redirect
+  namespace: splits-network
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/permanent-redirect: https://splits.network$request_uri
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - www.splits.network
+      secretName: splits-network-www-tls
+  rules:
+    - host: www.splits.network
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: portal
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: applicant-network-www-redirect
+  namespace: splits-network
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/permanent-redirect: https://applicant.network$request_uri
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - www.applicant.network
+      secretName: applicant-network-www-tls
+  rules:
+    - host: www.applicant.network
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: candidate
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: employment-networks-www-redirect
+  namespace: splits-network
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/permanent-redirect: https://employment-networks.com$request_uri
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - www.employment-networks.com
+      secretName: employment-networks-www-tls
+  rules:
+    - host: www.employment-networks.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: corporate
+                port:
+                  number: 80
