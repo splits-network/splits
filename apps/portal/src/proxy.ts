@@ -17,19 +17,25 @@ const isPublicRoute = createRouteMatcher([
     '/press',
     '/partners',
     '/careers',
-    '/blog'
+    '/blog',
+    '/contact',
+    '/terms-of-service',
+    '/privacy-policy',
+    '/security',
+    '/docs(.*)',
+    '/sitemap.xml',
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
     const path = request.nextUrl.pathname;
-    
+
     // Skip auth for static files (including video files)
     const isStaticFile = /\.(ico|png|jpg|jpeg|svg|gif|webp|mp4|webm|ogg|mp3|wav|pdf)$/i.test(path);
-    
+
     if (isStaticFile || isPublicRoute(request)) {
         return;
     }
-    
+
     await auth.protect();
 });
 
