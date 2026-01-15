@@ -18,7 +18,6 @@ spec:
         - api.splits.network
         - applicant.network
         - employment-networks.com
-        - www.employment-networks.com
       secretName: splits-network-tls
   rules:
     - host: splits.network
@@ -52,16 +51,6 @@ spec:
                 port:
                   number: 80
     - host: employment-networks.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: corporate
-                port:
-                  number: 80
-    - host: www.employment-networks.com
       http:
         paths:
           - path: /
