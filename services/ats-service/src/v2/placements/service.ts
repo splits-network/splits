@@ -9,6 +9,7 @@ import { EventPublisher } from '../shared/events';
 import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { CandidateRoleAssignmentServiceV2 } from '../candidate-role-assignments/service';
 
 export class PlacementServiceV2 {
     private accessResolver: AccessContextResolver;
@@ -16,7 +17,8 @@ export class PlacementServiceV2 {
     constructor(
         supabase: SupabaseClient,
         private repository: PlacementRepository,
-        private eventPublisher?: EventPublisher
+        private eventPublisher?: EventPublisher,
+        private assignmentService?: CandidateRoleAssignmentServiceV2
     ) {
         this.accessResolver = new AccessContextResolver(supabase);
     }
@@ -74,6 +76,55 @@ export class PlacementServiceV2 {
         // Validate fee percentage
         if (data.fee_percentage < 0 || data.fee_percentage > 100) {
             throw new Error('Fee percentage must be between 0 and 100');
+        }
+
+        // If recruiter_id provided, validate and close the assignment
+        if (data.recruiter_id && this.assignmentService) {
+            try {
+                // Find the assignment
+                const assignments = await this.assignmentService.list(clerkUserId || '', {
+                    job_id: data.job_id,
+                    candidate_id: data.candidate_id,
+                    recruiter_id: data.recruiter_id,
+                });
+
+                if (assignments.data.length === 0) {
+                    throw new Error(
+                        'No assignment found for this candidate-job-recruiter combination. ' +
+                        'An assignment must exist before creating a placement.'
+                    );
+                }
+
+                const assignment = assignments.data[0];
+
+                // Validate assignment is in a state that can be closed
+                if (assignment.state === 'closed') {
+                    throw new Error('Assignment is already closed');
+                }
+                if (assignment.state === 'declined' || assignment.state === 'timed_out') {
+                    throw new Error(
+                        'Cannot create placement for declined or timed out assignment'
+                    );
+                }
+
+                // Close the assignment
+                if (!clerkUserId) {
+                    throw new Error('User ID required to close assignment');
+                }
+                if (!assignment.job_id || !assignment.candidate_id) {
+                    throw new Error('Assignment missing required job_id or candidate_id');
+                }
+                await this.assignmentService.closeAssignment(
+                    clerkUserId,
+                    assignment.job_id,
+                    assignment.candidate_id
+                );
+            } catch (error) {
+                console.error('Assignment validation/closure failed:', error);
+                throw new Error(
+                    `Failed to validate/close assignment: ${error instanceof Error ? error.message : 'Unknown error'}`
+                );
+            }
         }
 
         const userContext = await this.accessResolver.resolve(clerkUserId);

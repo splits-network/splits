@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { UnifiedProposal } from '@splits-network/shared-types';
+// TODO: Define proper type for UnifiedProposal
+type UnifiedProposal = any; // TODO: Define proper type
 
 interface UnifiedProposalCardProps {
     proposal: UnifiedProposal;

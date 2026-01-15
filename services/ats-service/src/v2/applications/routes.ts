@@ -74,4 +74,38 @@ export function registerApplicationRoutes(
         }
     });
 
+    // AI Review Loop Routes
+    app.post('/api/v2/applications/:id/trigger-ai-review', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as any;
+            await config.applicationService.triggerAIReview(id, clerkUserId);
+            return reply.send({ data: { message: 'AI review triggered successfully' } });
+        } catch (error: any) {
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
+    app.post('/api/v2/applications/:id/return-to-draft', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as any;
+            const application = await config.applicationService.returnToDraft(id, clerkUserId);
+            return reply.send({ data: application });
+        } catch (error: any) {
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
+    app.post('/api/v2/applications/:id/submit', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as any;
+            const result = await config.applicationService.submitApplication(id, clerkUserId);
+            return reply.send({ data: result });
+        } catch (error: any) {
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
 }

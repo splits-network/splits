@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
@@ -11,6 +11,7 @@ import { InvitationCard, type RecruiterCandidate } from './invitation-card';
 import { InvitationTableRow } from './invitation-table-row';
 import { DataTable, type TableColumn } from '@/components/ui';
 import { InvitationsFiltersPanel } from './invitations-filters-panel';
+import InvitationsStats from './invitations-stats';
 
 interface InvitationFilters {
     status: string;
@@ -26,6 +27,15 @@ const invitationColumns: TableColumn[] = [
     { key: 'actions', label: 'Actions', align: 'right' },
 ];
 
+function StatsLoading() {
+    return (
+        <div className='card bg-base-200'>
+            <div className='p-8 flex items-center justify-center'>
+                <span className="loading loading-spinner loading-lg"></span>
+            </div>
+        </div>
+    );
+}
 
 // ===== COMPONENT =====
 
@@ -209,8 +219,22 @@ export default function InvitationsPageClient() {
     }
 
     return (
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between">
-            <div className="w-full md:flex-1 md:mr-4 space-y-6">
+        <div className="grid grid-cols-2 md:grid-cols-8 lg:grid-cols-12 gap-6">
+            <div className='col-span-2 md:col-span-4 lg:col-span-8'>
+                <InvitationsStats />
+            </div>
+            <div className='col-span-2 md:col-span-4'>
+                <InvitationsFiltersPanel
+                    statusFilter={filters.status || ''}
+                    onStatusFilterChange={handleStatusFilterChange}
+                    searchInput={searchInput}
+                    onSearchInputChange={handleSearchInputChange}
+                    onClearSearch={handleClearSearch}
+                    viewMode={viewMode}
+                    onViewModeChange={handleViewModeChange}
+                />
+            </div>
+            <div className="md:col-span-12 space-y-6">
 
                 {/* Error */}
                 {error && (
@@ -290,15 +314,6 @@ export default function InvitationsPageClient() {
             </div>
             {/* Search and Filter Tabs */}
             <div className="w-full md:w-64 lg:w-72 xl:w-80 shrink-0 mt-6 md:mt-0 space-y-6">
-                <InvitationsFiltersPanel
-                    statusFilter={filters.status || ''}
-                    onStatusFilterChange={handleStatusFilterChange}
-                    searchInput={searchInput}
-                    onSearchInputChange={handleSearchInputChange}
-                    onClearSearch={handleClearSearch}
-                    viewMode={viewMode}
-                    onViewModeChange={handleViewModeChange}
-                />
             </div>
 
             {/* Confirm Dialog */}

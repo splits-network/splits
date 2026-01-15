@@ -12,7 +12,8 @@ interface AIReviewPanelProps {
     compact?: boolean;
 }
 
-const getRecommendationColor = (recommendation: string) => {
+const getRecommendationColor = (recommendation: string | null) => {
+    if (!recommendation) return 'badge-ghost';
     switch (recommendation) {
         case 'strong_fit':
             return 'badge-success';
@@ -27,7 +28,8 @@ const getRecommendationColor = (recommendation: string) => {
     }
 };
 
-const getRecommendationLabel = (recommendation: string) => {
+const getRecommendationLabel = (recommendation: string | null) => {
+    if (!recommendation) return 'N/A';
     switch (recommendation) {
         case 'strong_fit':
             return 'Strong Match';
@@ -42,14 +44,16 @@ const getRecommendationLabel = (recommendation: string) => {
     }
 };
 
-const getFitScoreColor = (score: number) => {
+const getFitScoreColor = (score: number | null) => {
+    if (!score) return 'text-base-content';
     if (score >= 90) return 'text-success';
     if (score >= 70) return 'text-info';
     if (score >= 50) return 'text-warning';
     return 'text-error';
 };
 
-const getLocationLabel = (compatibility: string) => {
+const getLocationLabel = (compatibility: string | null) => {
+    if (!compatibility) return 'Unknown';
     switch (compatibility) {
         case 'perfect':
             return 'Perfect Match';
@@ -263,16 +267,18 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                     </div>
 
                     <div className="space-y-3">
-                        <div>
-                            <div className="text-sm font-medium mb-1">Skills Match: {aiReview.fit_score}%</div>
-                            <progress
-                                className="progress progress-success w-full"
-                                value={aiReview.fit_score}
-                                max="100"
-                            ></progress>
-                        </div>
+                        {aiReview.fit_score !== null && (
+                            <div>
+                                <div className="text-sm font-medium mb-1">Skills Match: {aiReview.fit_score}%</div>
+                                <progress
+                                    className="progress progress-success w-full"
+                                    value={aiReview.fit_score ?? 0}
+                                    max="100"
+                                ></progress>
+                            </div>
+                        )}
 
-                        {aiReview.strengths.length > 0 && (
+                        {aiReview.strengths && aiReview.strengths.length > 0 && (
                             <div>
                                 <div className="text-sm font-medium mb-1">
                                     <i className="fa-duotone fa-regular fa-circle-check text-success mr-1"></i>
@@ -286,7 +292,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                             </div>
                         )}
 
-                        {aiReview.concerns.length > 0 && (
+                        {aiReview.concerns && aiReview.concerns.length > 0 && (
                             <div>
                                 <div className="text-sm font-medium mb-1">
                                     <i className="fa-duotone fa-regular fa-triangle-exclamation text-warning mr-1"></i>
@@ -340,7 +346,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                     <div className="stat">
                         <div className="stat-title">Match Score</div>
                         <div className={`stat-value ${getFitScoreColor(aiReview.fit_score)}`}>
-                            {aiReview.fit_score}/100
+                            {aiReview.fit_score ?? 'N/A'}/100
                         </div>
                         <div className="stat-desc">
                             <span className={`badge ${getRecommendationColor(aiReview.recommendation)}`}>
@@ -350,19 +356,21 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                     </div>
                     <div className="stat">
                         <div className="stat-title">Confidence</div>
-                        <div className="stat-value text-primary">{aiReview.confidence_level}%</div>
+                        <div className="stat-value text-primary">{aiReview.confidence_level ?? 'N/A'}%</div>
                         <div className="stat-desc">AI confidence level</div>
                     </div>
                 </div>
 
                 {/* Overall Summary */}
-                <div className="mb-4">
-                    <h4 className="font-semibold text-base mb-2">Summary</h4>
-                    <p className="text-sm text-base-content/80">{aiReview.overall_summary}</p>
-                </div>
+                {aiReview.overall_summary && (
+                    <div className="mb-4">
+                        <h4 className="font-semibold text-base mb-2">Summary</h4>
+                        <p className="text-sm text-base-content/80">{aiReview.overall_summary}</p>
+                    </div>
+                )}
 
                 {/* Strengths */}
-                {aiReview.strengths.length > 0 && (
+                {aiReview.strengths && aiReview.strengths.length > 0 && (
                     <div className="mb-4">
                         <h4 className="font-semibold text-base mb-2 flex items-center gap-2">
                             <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
@@ -377,7 +385,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                 )}
 
                 {/* Concerns */}
-                {aiReview.concerns.length > 0 && (
+                {aiReview.concerns && aiReview.concerns.length > 0 && (
                     <div className="mb-4">
                         <h4 className="font-semibold text-base mb-2 flex items-center gap-2">
                             <i className="fa-duotone fa-regular fa-triangle-exclamation text-warning"></i>
@@ -391,41 +399,39 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
                     </div>
                 )}
 
-                {/* Skills Match */}
-                {aiReview.skills_match && (
+                {/* Skills Match - Using flat structure */}
+                {aiReview.skills_match_percentage !== null && (
                     <div className="mb-4">
                         <h4 className="font-semibold text-base mb-2">Skills Analysis</h4>
 
-                        {aiReview.skills_match.match_percentage !== null && aiReview.skills_match.match_percentage !== undefined && (
-                            <div className="flex items-center gap-2 mb-3">
-                                <span className="text-sm">Match Rate:</span>
-                                <div className="flex-1">
-                                    <progress
-                                        className="progress progress-success w-full"
-                                        value={aiReview.skills_match.match_percentage}
-                                        max="100"
-                                    ></progress>
-                                </div>
-                                <span className="text-sm font-semibold">{aiReview.skills_match.match_percentage}%</span>
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="text-sm">Match Rate:</span>
+                            <div className="flex-1">
+                                <progress
+                                    className="progress progress-success w-full"
+                                    value={aiReview.skills_match_percentage ?? 0}
+                                    max="100"
+                                ></progress>
                             </div>
-                        )}
+                            <span className="text-sm font-semibold">{aiReview.skills_match_percentage}%</span>
+                        </div>
 
-                        {aiReview.skills_match.matched_skills && aiReview.skills_match.matched_skills.length > 0 && (
+                        {aiReview.matched_skills && aiReview.matched_skills.length > 0 && (
                             <div className="mb-2">
                                 <span className="text-sm font-medium">Matched Skills:</span>
                                 <div className="flex flex-wrap gap-1 mt-1">
-                                    {aiReview.skills_match.matched_skills.map((skill, index) => (
+                                    {aiReview.matched_skills.map((skill, index) => (
                                         <span key={index} className="badge badge-success badge-sm">{skill}</span>
                                     ))}
                                 </div>
                             </div>
                         )}
 
-                        {aiReview.skills_match.missing_skills && aiReview.skills_match.missing_skills.length > 0 && (
+                        {aiReview.missing_skills && aiReview.missing_skills.length > 0 && (
                             <div>
                                 <span className="text-sm font-medium">Missing Skills:</span>
                                 <div className="flex flex-wrap gap-1 mt-1">
-                                    {aiReview.skills_match.missing_skills.map((skill, index) => (
+                                    {aiReview.missing_skills.map((skill, index) => (
                                         <span key={index} className="badge badge-warning badge-sm">{skill}</span>
                                     ))}
                                 </div>
@@ -436,17 +442,17 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
 
                 {/* Experience & Location */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
-                    {aiReview.experience_analysis && aiReview.experience_analysis.candidate_years !== undefined && aiReview.experience_analysis.required_years !== undefined && (
+                    {aiReview.candidate_years !== null && aiReview.required_years !== null && (
                         <div>
                             <h4 className="font-medium text-sm mb-1">Experience</h4>
                             <div className="flex items-center gap-2">
-                                {aiReview.experience_analysis.meets_requirement ? (
+                                {aiReview.meets_experience_requirement ? (
                                     <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
                                 ) : (
                                     <i className="fa-duotone fa-regular fa-circle-xmark text-warning"></i>
                                 )}
                                 <span className="text-sm">
-                                    {aiReview.experience_analysis.candidate_years} yrs (Req: {aiReview.experience_analysis.required_years})
+                                    {aiReview.candidate_years} yrs (Req: {aiReview.required_years})
                                 </span>
                             </div>
                         </div>
@@ -460,7 +466,7 @@ export default function AIReviewPanel({ applicationId, compact = false }: AIRevi
 
                 {/* Analysis Metadata */}
                 <div className="text-xs text-base-content/60 border-t pt-2">
-                    <p>Analyzed by {aiReview.model_version} on {new Date(aiReview.analyzed_at).toLocaleString()}</p>
+                    <p>Analyzed by {aiReview.model_version ?? 'AI'} on {aiReview.analyzed_at ? new Date(aiReview.analyzed_at).toLocaleString() : 'N/A'}</p>
                 </div>
             </div>
         </div>

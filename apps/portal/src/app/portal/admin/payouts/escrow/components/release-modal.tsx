@@ -5,7 +5,7 @@ import { useState } from 'react';
 interface EscrowHold {
     id: string;
     payout_id?: string;
-    placement_id?: string;
+    placement_id: string;
     hold_amount: number;
     holdback_percentage?: number;
     hold_reason: 'guarantee_period' | 'dispute' | 'verification' | 'other';

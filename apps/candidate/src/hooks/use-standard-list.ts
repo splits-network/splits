@@ -61,6 +61,10 @@ export interface UseStandardListOptions<T, F extends Record<string, any> = Recor
     autoFetch?: boolean;
     /** Require authentication (default: true). Set to false for public routes */
     requireAuth?: boolean;
+    /** Seeded data for SSR to avoid client-only loading states */
+    initialData?: T[];
+    /** Seeded pagination for SSR to avoid client-only loading states */
+    initialPagination?: PaginationResponse;
 }
 
 export interface UseStandardListReturn<T, F extends Record<string, any> = Record<string, any>> {
@@ -148,6 +152,8 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         storageKey, // Deprecated alias for viewModeKey
         autoFetch = true,
         requireAuth = true,
+        initialData,
+        initialPagination,
     } = options;
 
     // Support deprecated storageKey as fallback
@@ -201,14 +207,17 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     }, [syncToUrl, searchParams, defaultFilters, defaultSortBy, defaultSortOrder, defaultLimit]);
 
     // Core state
-    const [data, setData] = useState<T[]>([]);
-    const [pagination, setPagination] = useState<PaginationResponse>({
-        total: 0,
-        page: DEFAULT_PAGE,
-        limit: defaultLimit,
-        total_pages: 0,
-    });
-    const [loading, setLoading] = useState(false);
+    const hasInitialData = initialData !== undefined;
+    const [data, setData] = useState<T[]>(initialData ?? []);
+    const [pagination, setPagination] = useState<PaginationResponse>(
+        initialPagination ?? {
+            total: 0,
+            page: DEFAULT_PAGE,
+            limit: defaultLimit,
+            total_pages: 0,
+        }
+    );
+    const [loading, setLoading] = useState(autoFetch && !hasInitialData);
     const [error, setError] = useState<string | null>(null);
 
     // Search state (separate input for controlled component)
@@ -244,6 +253,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     // Refs for debouncing
     const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
     const isInitialMount = useRef(true);
+    const skipInitialFetch = useRef(hasInitialData);
 
     // Create stable keys for callback dependencies
     const filtersKey = useMemo(() => JSON.stringify(filters), [filters]);
@@ -471,6 +481,10 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     // Fetch data when dependencies change
     useEffect(() => {
         if (autoFetch) {
+            if (skipInitialFetch.current) {
+                skipInitialFetch.current = false;
+                return;
+            }
             fetchData();
         }
     }, [fetchData, autoFetch]);

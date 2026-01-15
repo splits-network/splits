@@ -81,3 +81,8 @@ The /docs/migrations/V2-ARCHITECTURE-IMPLEMENTATION_GUIDE.md outlines the high-l
   - `marketplace_events`: event log for marketplace actions/analytics; no service writes/consumers found.
 - Auth schema tables are Supabase-managed internals; avoid treating them as app-owned resources.
 - If implementing new resources, follow V2 guardrails: top-level `/api/v2/<resource>` routes with access-context scoping (no child endpoints).
+
+## Public Pages SEO/SSR Notes (2026-01-14)
+
+- Public list pages now seed SSR data from the API before hydrating client lists (candidate jobs + recruiter marketplace). Avoid reintroducing client-only fetch-only shells on public routes.
+- Status pages are split into server wrappers + client components and accept `initialStatuses` in `useServiceHealth`. Keep the server wrapper fetching `/api-health/*` so crawlers see real status content.

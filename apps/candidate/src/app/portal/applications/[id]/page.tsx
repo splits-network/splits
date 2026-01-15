@@ -19,6 +19,8 @@ const getStatusColor = (stage: string) => {
             return 'badge-info';
         case 'ai_review':
             return 'badge-warning';
+        case 'ai_reviewed':
+            return 'badge-success';
         case 'screen':
         case 'submitted':
             return 'badge-info';
@@ -44,6 +46,8 @@ const formatStage = (stage: string) => {
             return 'Recruiter Request';
         case 'ai_review':
             return 'AI Review';
+        case 'ai_reviewed':
+            return 'AI Reviewed';
         case 'screen':
             return 'Recruiter Review';
         case 'submitted':
@@ -397,6 +401,17 @@ export default async function ApplicationDetailPage({
                             </h2>
 
                             <div className="space-y-2">
+                                {/* Review AI Feedback - for ai_reviewed stage */}
+                                {application.stage === 'ai_reviewed' && (
+                                    <Link
+                                        href={`/portal/applications/${application.id}/ai-review`}
+                                        className="btn btn-primary btn-block"
+                                    >
+                                        <i className="fa-duotone fa-regular fa-sparkles"></i>
+                                        Review AI Feedback
+                                    </Link>
+                                )}
+
                                 {/* Edit & Submit - for draft applications */}
                                 {application.stage === 'draft' && (
                                     <EditDraftButton

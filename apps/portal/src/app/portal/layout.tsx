@@ -22,7 +22,7 @@ export default async function AuthenticatedLayout({
                 <Sidebar />
                 <div className="drawer-content flex flex-col bg-base-300">
                     <ServiceStatusBanner />
-                    <main className="flex-1 p-6 container mx-auto">
+                    <main className="p-6">
                         {children}
                     </main>
                 </div>

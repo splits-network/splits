@@ -6,6 +6,8 @@ import swaggerUi from '@fastify/swagger-ui';
 import { EventPublisher as V2EventPublisher } from './v2/shared/events';
 import { DomainEventConsumer } from './v2/shared/domain-consumer';
 import { ApplicationRepository } from './v2/applications/repository';
+import { CandidateRepository } from './v2/candidates/repository';
+import { CandidateSourcerRepository } from './v2/candidate-sourcers/repository';
 import { registerV2Routes } from './v2/routes';
 import * as Sentry from '@sentry/node';
 
@@ -95,9 +97,22 @@ async function main() {
         dbConfig.supabaseUrl,
         dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
     );
+
+    const candidateRepository = new CandidateRepository(
+        dbConfig.supabaseUrl,
+        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+    );
+
+    const candidateSourcerRepository = new CandidateSourcerRepository(
+        candidateRepository.getSupabase()
+    );
+
     const domainConsumer = new DomainEventConsumer(
         rabbitConfig.url,
         applicationRepository,
+        candidateRepository,
+        candidateSourcerRepository,
+        v2EventPublisher,
         logger
     );
     await domainConsumer.connect();
@@ -114,13 +129,13 @@ async function main() {
         try {
             // Check database connectivity using V2 repository
             const healthRepo = new ApplicationRepository(
-                dbConfig.supabaseUrl, 
+                dbConfig.supabaseUrl,
                 dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
             );
-            
+
             // Test database connectivity by doing a simple query
             await healthRepo.findApplications('internal-service', { limit: 1 });
-            
+
             // Check RabbitMQ connectivity
             const rabbitHealthy = v2EventPublisher.isConnected();
             if (!rabbitHealthy) {

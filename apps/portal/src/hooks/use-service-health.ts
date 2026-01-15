@@ -61,14 +61,27 @@ const checkServiceHealth = async (service: typeof services[0]): Promise<ServiceH
     }
 };
 
-export function useServiceHealth(options?: { autoRefresh?: boolean; refreshInterval?: number }) {
-    const { autoRefresh = true, refreshInterval = 30000 } = options || {};
-    
+export function useServiceHealth(options?: {
+    autoRefresh?: boolean;
+    refreshInterval?: number;
+    initialStatuses?: ServiceHealth[];
+    initialCheckedAt?: string | Date;
+}) {
+    const {
+        autoRefresh = true,
+        refreshInterval = 30000,
+        initialStatuses,
+        initialCheckedAt,
+    } = options || {};
+
+    const hasInitialStatuses = initialStatuses !== undefined;
     const [serviceStatuses, setServiceStatuses] = useState<ServiceHealth[]>(
-        services.map(s => ({ ...s, status: 'checking' as const }))
+        initialStatuses ?? services.map(s => ({ ...s, status: 'checking' as const }))
     );
-    const [lastChecked, setLastChecked] = useState<Date>(new Date());
-    const [isLoading, setIsLoading] = useState(true);
+    const [lastChecked, setLastChecked] = useState<Date>(
+        initialCheckedAt ? new Date(initialCheckedAt) : new Date()
+    );
+    const [isLoading, setIsLoading] = useState(!hasInitialStatuses);
 
     const checkAllServices = async () => {
         // Don't set loading on subsequent checks to avoid layout shifts
@@ -79,8 +92,10 @@ export function useServiceHealth(options?: { autoRefresh?: boolean; refreshInter
     };
 
     useEffect(() => {
-        checkAllServices();
-        
+        if (!hasInitialStatuses) {
+            checkAllServices();
+        }
+
         if (autoRefresh) {
             const interval = setInterval(checkAllServices, refreshInterval);
             return () => clearInterval(interval);

@@ -155,18 +155,45 @@ export interface MaskedCandidate {
 }
 
 export type ApplicationStage =
-    | 'withdrawn'  // Candidate withdrew
-    | 'recruiter_proposed'  // Recruiter sent job opportunity, awaiting candidate decision
-    | 'recruiter_request' // Recruiter requsts candidate to update or change something in the application
-    | 'draft'       // Application not yet complete
-    | 'ai_review'   // AI evaluating candidate-job fit
-    | 'screen'      // Initial phone screen (recruiter only, for represented)
-    | 'submitted'   // Submitted to company, awaiting company review
-    | 'interview'   // Formal interviews with company
-    | 'offer'       // Offer extended
-    | 'hired'       // Candidate accepted offer
-    | 'rejected'    // Rejected by recruiter or company
+    | 'draft'              // Application not yet complete
+    | 'ai_review'          // AI evaluating candidate-job fit
+    | 'ai_reviewed'        // AI review completed, candidate reviewing feedback before submission
+    | 'recruiter_request'  // Recruiter requested changes, awaiting candidate response
+    | 'recruiter_proposed' // Recruiter sent job opportunity, awaiting candidate decision
+    | 'screen'             // Initial phone screen (candidate or company recruiter only)
+    | 'submitted'          // Submitted to company, awaiting company review
+    | 'interview'          // Formal interviews with company
+    | 'offer'              // Offer extended
+    | 'hired'              // Candidate accepted offer
+    | 'rejected'           // Rejected by recruiter or company
+    | 'withdrawn'          // Candidate withdrew
     ;
+
+export type ApplicationFeedbackType =
+    | 'info_request'       // Someone requested more info
+    | 'info_response'      // Response to info request
+    | 'note'               // General comment/guidance
+    | 'improvement_request'; // Specific change requested
+
+export type ApplicationFeedbackCreatorType =
+    | 'candidate'
+    | 'candidate_recruiter'
+    | 'platform_admin';
+
+export interface ApplicationFeedback {
+    id: string;
+    application_id: string;
+    created_by_user_id: string;
+    created_by_type: ApplicationFeedbackCreatorType;
+    feedback_type: ApplicationFeedbackType;
+    message_text: string;
+    in_response_to_id?: string;
+    created_at: Date;
+    updated_at: Date;
+    // Enriched data from service layer
+    created_by?: { id: string; name: string; email: string };
+    in_response_to?: ApplicationFeedback;
+}
 // Audit log for tracking application actions
 export interface ApplicationAuditLog {
     id: string;
@@ -457,34 +484,8 @@ export interface RecruiterCandidateWithCandidate extends RecruiterCandidate {
     recruiter_status?: string;
 }
 
-// Candidate-Role Assignment State Machine
-export type CandidateRoleAssignmentState =
-    | 'proposed'
-    | 'accepted'
-    | 'declined'
-    | 'timed_out'
-    | 'submitted'
-    | 'closed';
-
-export interface CandidateRoleAssignment {
-    id: string;
-    job_id: string;
-    candidate_id: string;
-    recruiter_id: string;
-    state: CandidateRoleAssignmentState;
-    proposed_at: Date;
-    response_due_at: Date;
-    accepted_at?: Date;
-    declined_at?: Date;
-    timed_out_at?: Date;
-    submitted_at?: Date;
-    closed_at?: Date;
-    proposed_by?: string;
-    proposal_notes?: string;
-    response_notes?: string;
-    created_at: Date;
-    updated_at: Date;
-}
+// NOTE: CandidateRoleAssignment types are now defined in candidate-role-assignments.ts
+// Import from there instead of duplicating here
 
 // Multi-Recruiter Placements
 export type CollaboratorRole = 'sourcer' | 'submitter' | 'closer' | 'support';

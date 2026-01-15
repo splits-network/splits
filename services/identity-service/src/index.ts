@@ -1,4 +1,4 @@
-import { loadBaseConfig, loadDatabaseConfig } from '@splits-network/shared-config';
+import { loadBaseConfig, loadDatabaseConfig, loadRabbitMQConfig } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler } from '@splits-network/shared-fastify';
 import swagger from '@fastify/swagger';
@@ -10,6 +10,7 @@ import * as Sentry from '@sentry/node';
 async function main() {
     const baseConfig = loadBaseConfig('identity-service');
     const dbConfig = loadDatabaseConfig();
+    const rabbitConfig = loadRabbitMQConfig();
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
@@ -80,8 +81,7 @@ async function main() {
     });
 
     // Initialize V2 event publisher
-    const rabbitMqUrl = process.env.RABBITMQ_URL || 'amqp://localhost:5672';
-    const eventPublisher = new EventPublisherV2(rabbitMqUrl, logger);
+    const eventPublisher = new EventPublisherV2(rabbitConfig.url, logger);
     try {
         await eventPublisher.connect();
         logger.info('Successfully connected to RabbitMQ for event publishing');
@@ -129,8 +129,17 @@ async function main() {
             Sentry.captureException(err as Error);
             await Sentry.flush(2000);
         }
+        await eventPublisher.close();
         process.exit(1);
     }
+
+    // Graceful shutdown
+    process.on('SIGTERM', async () => {
+        logger.info('SIGTERM received, shutting down gracefully');
+        await eventPublisher.close();
+        await app.close();
+        process.exit(0);
+    });
 }
 
 main();

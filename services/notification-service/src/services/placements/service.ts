@@ -96,11 +96,11 @@ export class PlacementsEmailService {
         try {
             await this.repository.createNotificationLog({
                 event_type: options.eventType,
-                recipient_user_id: options.userId,
+                recipient_user_id: options.userId ?? null,
                 recipient_email: '',
                 subject: options.subject,
                 template: 'in_app',
-                payload: options.payload,
+                payload: options.payload ?? null,
                 status: 'sent',
                 channel: 'in_app',
                 read: false,

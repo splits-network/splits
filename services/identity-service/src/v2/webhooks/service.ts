@@ -38,11 +38,11 @@ export class WebhooksServiceV2 {
                 case 'user.updated':
                     await this.handleUserCreatedOrUpdated(event.data);
                     break;
-                
+
                 case 'user.deleted':
                     await this.handleUserDeleted(event.data);
                     break;
-                
+
                 default:
                     this.logger.warn({ type: event.type }, 'Unknown webhook event type');
             }
@@ -82,7 +82,7 @@ export class WebhooksServiceV2 {
 
                 if (hasChanges) {
                     await this.repository.updateUser(existingUser.id, updates);
-                    
+
                     // Publish user updated event
                     await this.events.publish('user.updated', {
                         userId: existingUser.id,
@@ -106,7 +106,7 @@ export class WebhooksServiceV2 {
                     status: 'active' as const,
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
-                };
+                } as any; // Type assertion needed for webhook-created users
 
                 const newUser = await this.repository.createUser(userData);
 
@@ -138,7 +138,7 @@ export class WebhooksServiceV2 {
      */
     private async handleUserCreatedOrUpdated(userData: ClerkWebhookEvent['data']): Promise<void> {
         const email = userData.email_addresses?.[0]?.email_address;
-        const name = userData.first_name && userData.last_name 
+        const name = userData.first_name && userData.last_name
             ? `${userData.first_name} ${userData.last_name}`.trim()
             : userData.first_name || null;
 

@@ -9,7 +9,8 @@ interface AIReviewPanelProps {
     applicationId: string;
 }
 
-const getRecommendationColor = (recommendation: string) => {
+const getRecommendationColor = (recommendation: string | null) => {
+    if (!recommendation) return 'badge-ghost';
     switch (recommendation) {
         case 'strong_fit':
             return 'badge-success';
@@ -24,7 +25,8 @@ const getRecommendationColor = (recommendation: string) => {
     }
 };
 
-const getRecommendationLabel = (recommendation: string) => {
+const getRecommendationLabel = (recommendation: string | null) => {
+    if (!recommendation) return 'Not Yet Analyzed';
     switch (recommendation) {
         case 'strong_fit':
             return 'Strong Match';
@@ -39,28 +41,32 @@ const getRecommendationLabel = (recommendation: string) => {
     }
 };
 
-const getFitScoreColor = (score: number) => {
+const getFitScoreColor = (score: number | null) => {
+    if (!score) return 'text-base-content';
     if (score >= 90) return 'text-success';
     if (score >= 70) return 'text-info';
     if (score >= 50) return 'text-warning';
     return 'text-error';
 };
 
-const getFitScoreIcon = (score: number) => {
+const getFitScoreIcon = (score: number | null) => {
+    if (!score) return 'fa-duotone fa-regular fa-question';
     if (score >= 90) return 'fa-duotone fa-regular fa-trophy';
     if (score >= 70) return 'fa-duotone fa-regular fa-chart-line';
     if (score >= 50) return 'fa-duotone fa-regular fa-chart-simple';
     return 'fa-duotone fa-regular fa-triangle-exclamation';
 };
 
-const getConfidenceIcon = (confidence: number) => {
+const getConfidenceIcon = (confidence: number | null) => {
+    if (!confidence) return 'fa-duotone fa-regular fa-question';
     if (confidence >= 90) return 'fa-duotone fa-regular fa-shield-check';
     if (confidence >= 70) return 'fa-duotone fa-regular fa-shield-halved';
     if (confidence >= 50) return 'fa-duotone fa-regular fa-shield';
     return 'fa-duotone fa-regular fa-shield-exclamation';
 };
 
-const getConfidenceColor = (confidence: number) => {
+const getConfidenceColor = (confidence: number | null) => {
+    if (!confidence) return 'text-base-content';
     if (confidence >= 90) return 'text-success';
     if (confidence >= 70) return 'text-info';
     if (confidence >= 50) return 'text-warning';
@@ -297,29 +303,29 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                 )}
 
                 {/* Skills Match */}
-                {aiReview.skills_match && (
+                {(aiReview.skills_match_percentage !== null || aiReview.matched_skills || aiReview.missing_skills) && (
                     <div className="mt-4">
                         <h3 className="font-semibold text-lg mb-2">Skills Analysis</h3>
 
-                        {aiReview.skills_match.match_percentage !== null && aiReview.skills_match.match_percentage !== undefined && (
+                        {aiReview.skills_match_percentage !== null && (
                             <div className="flex items-center gap-2 mb-2">
                                 <span className="text-sm">Skills Match:</span>
                                 <div className="flex-1">
                                     <progress
                                         className="progress progress-success w-full"
-                                        value={aiReview.skills_match.match_percentage}
+                                        value={aiReview.skills_match_percentage}
                                         max="100"
                                     ></progress>
                                 </div>
-                                <span className="text-sm font-semibold">{aiReview.skills_match.match_percentage}%</span>
+                                <span className="text-sm font-semibold">{aiReview.skills_match_percentage}%</span>
                             </div>
                         )}
 
                         <div className="mb-2">
                             <span className="text-sm font-medium">Matched Skills:</span>
                             <div className="flex flex-wrap gap-1 mt-1">
-                                {aiReview.skills_match.matched_skills && aiReview.skills_match.matched_skills.length > 0 ? (
-                                    aiReview.skills_match.matched_skills.map((skill, index) => (
+                                {aiReview.matched_skills && aiReview.matched_skills.length > 0 ? (
+                                    aiReview.matched_skills.map((skill, index) => (
                                         <span key={index} className="badge badge-success badge-sm">{skill}</span>
                                     ))
                                 ) : (
@@ -331,8 +337,8 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                         <div>
                             <span className="text-sm font-medium">Skills to Develop:</span>
                             <div className="flex flex-wrap gap-1 mt-1">
-                                {aiReview.skills_match.missing_skills && aiReview.skills_match.missing_skills.length > 0 ? (
-                                    aiReview.skills_match.missing_skills.map((skill, index) => (
+                                {aiReview.missing_skills && aiReview.missing_skills.length > 0 ? (
+                                    aiReview.missing_skills.map((skill, index) => (
                                         <span key={index} className="badge badge-warning badge-sm">{skill}</span>
                                     ))
                                 ) : (
@@ -345,17 +351,17 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
 
                 {/* Experience & Location */}
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {aiReview.experience_analysis && aiReview.experience_analysis.candidate_years !== null && aiReview.experience_analysis.candidate_years !== undefined && aiReview.experience_analysis.required_years !== null && aiReview.experience_analysis.required_years !== undefined && (
+                    {aiReview.candidate_years !== null && aiReview.required_years !== null && (
                         <div>
                             <h4 className="font-medium text-sm mb-1">Experience</h4>
                             <div className="flex items-center gap-2">
-                                {aiReview.experience_analysis.meets_requirement ? (
+                                {aiReview.meets_experience_requirement ? (
                                     <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
                                 ) : (
                                     <i className="fa-duotone fa-regular fa-circle-xmark text-warning"></i>
                                 )}
                                 <span className="text-sm">
-                                    {aiReview.experience_analysis.candidate_years} years (Required: {aiReview.experience_analysis.required_years})
+                                    {aiReview.candidate_years} years (Required: {aiReview.required_years})
                                 </span>
                             </div>
                         </div>
@@ -371,7 +377,7 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
 
                 {/* Analysis Info */}
                 <div className="mt-4 text-xs text-base-content/60">
-                    <p>Analyzed by {aiReview.model_version} on {new Date(aiReview.analyzed_at).toLocaleString()}</p>
+                    <p>Analyzed by {aiReview.model_version ?? 'AI'} on {aiReview.analyzed_at ? new Date(aiReview.analyzed_at).toLocaleString() : 'N/A'}</p>
                 </div>
             </div>
         </div >

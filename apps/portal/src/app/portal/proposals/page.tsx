@@ -3,11 +3,14 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-import { UnifiedProposal, ProposalsResponse } from '@splits-network/shared-types';
+// TODO: Define proper types for UnifiedProposal and ProposalsResponse
 import UnifiedProposalCard from '@/components/unified-proposal-card';
 import { useStandardList, PaginationControls, SearchInput, EmptyState, LoadingState, ErrorState } from '@/hooks/use-standard-list';
 import { ApiClient } from '@/lib/api-client';
 import { StatCard, StatCardGrid } from '@/components/ui/cards';
+
+type UnifiedProposal = any; // TODO: Define proper type
+type ProposalsResponse = any; // TODO: Define proper type
 
 type TabType = 'action' | 'waiting' | 'completed';
 

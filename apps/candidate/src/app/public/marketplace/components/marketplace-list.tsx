@@ -1,6 +1,7 @@
 'use client';
 
 import { useStandardList } from '@/hooks/use-standard-list';
+import type { PaginationResponse } from '@splits-network/shared-types';
 import { PaginationControls, LoadingState, ErrorState, EmptyState } from '@/components/standard-lists';
 import { DataTable, type TableColumn } from '@/components/ui/tables';
 import RecruiterCard from './recruiter-card';
@@ -45,7 +46,12 @@ const recruiterColumns: TableColumn[] = [
     { key: 'actions', label: 'Actions', align: 'right' },
 ];
 
-export default function MarketplaceList() {
+interface MarketplaceListProps {
+    initialData?: Recruiter[];
+    initialPagination?: PaginationResponse;
+}
+
+export default function MarketplaceList({ initialData, initialPagination }: MarketplaceListProps) {
     const {
         data: recruiters,
         pagination,
@@ -79,6 +85,8 @@ export default function MarketplaceList() {
         autoFetch: true,
         include: 'user',
         requireAuth: false,
+        initialData,
+        initialPagination,
     });
 
     return (

@@ -9,13 +9,15 @@ import { EventPublisher } from '../shared/events';
 import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { CandidateRoleAssignmentServiceV2 } from '../candidate-role-assignments/service';
 
 export class ApplicationServiceV2 {
     private accessResolver: AccessContextResolver;
     constructor(
         private repository: ApplicationRepository,
         supabase: SupabaseClient,
-        private eventPublisher?: EventPublisher
+        private eventPublisher?: EventPublisher,
+        private assignmentService?: CandidateRoleAssignmentServiceV2
     ) {
         this.accessResolver = new AccessContextResolver(supabase);
     }
@@ -200,6 +202,22 @@ export class ApplicationServiceV2 {
             });
         }
 
+        // Create or update candidate role assignment if recruiter is involved
+        if (recruiterId && this.assignmentService) {
+            try {
+                await this.assignmentService.createOrUpdateForApplication(
+                    clerkUserId || 'system',
+                    application.job_id,
+                    candidateId,
+                    recruiterId,
+                    application.stage
+                );
+            } catch (assignmentError) {
+                // Log but don't fail application creation if assignment fails
+                console.error('Failed to create/update assignment:', assignmentError);
+            }
+        }
+
         return application;
     }
 
@@ -335,6 +353,23 @@ export class ApplicationServiceV2 {
             });
         }
 
+        // Update candidate role assignment if stage changed and recruiter is involved
+        if (updates.stage && currentApplication.stage !== updates.stage &&
+            updatedApplication.recruiter_id && this.assignmentService) {
+            try {
+                await this.assignmentService.createOrUpdateForApplication(
+                    clerkUserId || 'system',
+                    updatedApplication.job_id,
+                    updatedApplication.candidate_id,
+                    updatedApplication.recruiter_id,
+                    updates.stage as 'draft' | 'screen' | 'interview' | 'offer' | 'hired' | 'rejected' | 'submitted'
+                );
+            } catch (assignmentError) {
+                // Log but don't fail application update if assignment fails
+                console.error('Failed to update assignment:', assignmentError);
+            }
+        }
+
         return updatedApplication;
     }
 
@@ -409,7 +444,8 @@ export class ApplicationServiceV2 {
             draft: ['ai_review', 'screen', 'rejected'], // Draft can move to review or screening
             recruiter_proposed: ['ai_review', 'draft', 'rejected'], // Recruiter proposal can be reviewed or sent back
             recruiter_request: ['draft', 'ai_review', 'rejected'], // Candidate responds to request, or recruiter rejects
-            ai_review: ['screen', 'rejected'], // After AI review, move to screening or reject
+            ai_review: ['ai_reviewed', 'rejected'], // After AI review completes, move to ai_reviewed state
+            ai_reviewed: ['draft', 'screen', 'submitted', 'rejected'], // Candidate can edit draft, screen, or submit
             screen: ['submitted', 'rejected'], // After screening, submit to company or reject
             submitted: ['interview', 'rejected'], // Company reviews application
             interview: ['offer', 'rejected'], // Interview stage
@@ -441,5 +477,165 @@ export class ApplicationServiceV2 {
             return null;
         }
         return { candidate, identityUser };
+    }
+
+    /**
+     * Handle AI review completion event
+     * Transitions application from 'ai_review' to 'ai_reviewed'
+     * Candidate must review feedback before submission
+     */
+    async handleAIReviewCompleted(data: {
+        application_id: string;
+        review_id: string;
+        recommendation: 'strong_fit' | 'good_fit' | 'fair_fit' | 'poor_fit';
+        concerns: string[];
+    }): Promise<void> {
+        // Update application to ai_reviewed (NOT submitted!)
+        await this.repository.updateApplication(data.application_id, {
+            stage: 'ai_reviewed',
+            ai_reviewed: true,
+        });
+
+        // Publish event for notification
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish('application.ai_reviewed', {
+                application_id: data.application_id,
+                review_id: data.review_id,
+                recommendation: data.recommendation,
+                has_concerns: data.concerns.length > 0,
+            });
+
+            // If poor fit or fair fit with concerns, suggest edits
+            if (data.recommendation === 'poor_fit' ||
+                (data.recommendation === 'fair_fit' && data.concerns.length > 0)) {
+                await this.eventPublisher.publish('application.needs_improvement', {
+                    application_id: data.application_id,
+                    concerns: data.concerns,
+                });
+            }
+        }
+    }
+
+    /**
+     * Return application to draft stage
+     * Candidate wants to edit application after AI review
+     */
+    async returnToDraft(applicationId: string, clerkUserId: string): Promise<any> {
+        const application = await this.repository.findApplication(applicationId, clerkUserId);
+
+        if (!application) {
+            throw new Error('Application not found');
+        }
+
+        // Only allow return to draft from ai_reviewed, recruiter_request, or screen
+        if (!['ai_reviewed', 'recruiter_request', 'screen'].includes(application.stage)) {
+            throw new Error(`Cannot return to draft from stage: ${application.stage}`);
+        }
+
+        // Update to draft
+        const updated = await this.repository.updateApplication(applicationId, {
+            stage: 'draft',
+            ai_reviewed: false, // Reset AI review flag
+        });
+
+        // Publish event
+        if (this.eventPublisher) {
+            const userContext = await this.accessResolver.resolve(clerkUserId);
+            await this.eventPublisher.publish('application.returned_to_draft', {
+                applicationId,
+                from_stage: application.stage,
+                updatedBy: userContext.identityUserId,
+            });
+        }
+
+        return updated;
+    }
+
+    /**
+     * Trigger AI review for application
+     * Candidate clicks "Review My Application"
+     */
+    async triggerAIReview(applicationId: string, clerkUserId: string): Promise<void> {
+        const application = await this.repository.findApplication(applicationId, clerkUserId);
+
+        if (!application) {
+            throw new Error('Application not found');
+        }
+
+        // Only allow AI review from draft or after returning from ai_reviewed
+        if (!['draft'].includes(application.stage)) {
+            throw new Error(`Cannot trigger AI review from stage: ${application.stage}`);
+        }
+
+        // Update to ai_review stage
+        await this.repository.updateApplication(applicationId, {
+            stage: 'ai_review',
+        });
+
+        // Publish event for AI service to process
+        if (this.eventPublisher) {
+            const userContext = await this.accessResolver.resolve(clerkUserId);
+            await this.eventPublisher.publish('application.ai_review.triggered', {
+                application_id: applicationId,
+                candidate_id: application.candidate_id,
+                job_id: application.job_id,
+                triggeredBy: userContext.identityUserId,
+            });
+        }
+    }
+
+    /**
+     * Submit application after AI review
+     * Candidate is satisfied with AI feedback and ready to submit
+     */
+    async submitApplication(applicationId: string, clerkUserId: string, data?: any): Promise<{
+        application: any;
+        assignment?: any;
+    }> {
+        const application = await this.repository.findApplication(applicationId, clerkUserId);
+
+        if (!application) {
+            throw new Error('Application not found');
+        }
+
+        // Only allow submission from ai_reviewed or screen
+        if (!['ai_reviewed', 'screen'].includes(application.stage)) {
+            throw new Error(`Cannot submit from stage: ${application.stage}. Application must be in ai_reviewed or screen stage.`);
+        }
+
+        // Update to submitted
+        const updated = await this.repository.updateApplication(applicationId, {
+            stage: 'submitted',
+        });
+
+        // Create CandidateRoleAssignment if assignment service is available
+        let assignment = null;
+        if (this.assignmentService && this.assignmentService.create) {
+            try {
+                assignment = await this.assignmentService.create(clerkUserId, {
+                    candidate_id: updated.candidate_id,
+                    job_id: updated.job_id,
+                    recruiter_id: updated.recruiter_id,
+                    state: 'proposed'
+                });
+            } catch (error) {
+                console.error('Failed to create CandidateRoleAssignment:', error);
+                // Don't fail the submission if CRA creation fails
+            }
+        }
+
+        // Publish event
+        if (this.eventPublisher) {
+            const userContext = await this.accessResolver.resolve(clerkUserId);
+            await this.eventPublisher.publish('application.submitted', {
+                applicationId,
+                candidate_id: application.candidate_id,
+                job_id: application.job_id,
+                submittedBy: userContext.identityUserId,
+                has_assignment: !!assignment,
+            });
+        }
+
+        return { application: updated, assignment };
     }
 }

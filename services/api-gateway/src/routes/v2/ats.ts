@@ -41,6 +41,12 @@ const ATS_RESOURCES: ResourceDefinition[] = [
         tag: 'placements',
     },
     {
+        name: 'candidate-role-assignments',
+        service: 'ats',
+        basePath: '/candidate-role-assignments',
+        tag: 'candidate-role-assignments',
+    },
+    {
         name: 'job-pre-screen-questions',
         service: 'ats',
         basePath: '/job-pre-screen-questions',
@@ -71,6 +77,7 @@ export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistr
     registerCandidateRoutes(app, services);
 
     registerAiReviewRoutes(app, services);
+    registerApplicationFeedbackRoutes(app, services);
 }
 
 function registerJobRoutes(app: FastifyInstance, services: ServiceRegistry) {
@@ -445,6 +452,146 @@ function registerAiReviewRoutes(app: FastifyInstance, services: ServiceRegistry)
                 return reply
                     .status(error.statusCode || 500)
                     .send(error.jsonBody || { error: 'Failed to trigger AI review' });
+            }
+        }
+    );
+}
+
+function registerApplicationFeedbackRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const atsService = () => services.get('ats');
+
+    // LIST feedback for an application
+    app.get(
+        '/api/v2/applications/:application_id/feedback',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { application_id } = request.params as { application_id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const queryString = buildQueryString(request.query as Record<string, any>);
+            const path = queryString
+                ? `/api/v2/applications/${application_id}/feedback?${queryString}`
+                : `/api/v2/applications/${application_id}/feedback`;
+
+            try {
+                const data = await atsService().get(path, undefined, correlationId, authHeaders);
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, application_id, correlationId }, 'Failed to fetch application feedback');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to fetch application feedback' });
+            }
+        }
+    );
+
+    // GET single feedback by ID
+    app.get(
+        '/api/v2/application-feedback/:id',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await atsService().get(
+                    `/api/v2/application-feedback/${id}`,
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to fetch feedback');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to fetch feedback' });
+            }
+        }
+    );
+
+    // CREATE feedback
+    app.post(
+        '/api/v2/applications/:application_id/feedback',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { application_id } = request.params as { application_id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await atsService().post(
+                    `/api/v2/applications/${application_id}/feedback`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, application_id, correlationId }, 'Failed to create feedback');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to create feedback' });
+            }
+        }
+    );
+
+    // UPDATE feedback
+    app.patch(
+        '/api/v2/application-feedback/:id',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await atsService().patch(
+                    `/api/v2/application-feedback/${id}`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to update feedback');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to update feedback' });
+            }
+        }
+    );
+
+    // DELETE feedback
+    app.delete(
+        '/api/v2/application-feedback/:id',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await atsService().delete(
+                    `/api/v2/application-feedback/${id}`
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to delete feedback');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to delete feedback' });
             }
         }
     );

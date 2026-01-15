@@ -96,7 +96,7 @@ export function PaginationControls(props: PaginationControlsProps) {
                         >
                             <i className="fa-duotone fa-regular fa-angle-left"></i>
                         </button>
-                        <button className="join-item btn btn-sm pointer-events-none min-w-[5rem] sm:min-w-[7rem]">
+                        <button className="join-item btn btn-sm pointer-events-none min-w-20 sm:min-w-28">
                             <span className="hidden sm:inline">Page </span>{page}<span className="hidden sm:inline"> of </span><span className="sm:hidden">/</span>{totalPages}
                         </button>
                         <button

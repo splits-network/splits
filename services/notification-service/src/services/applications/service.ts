@@ -38,16 +38,21 @@ export class ApplicationsEmailService {
     ): Promise<void> {
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
-            recipient_user_id: options.userId,
+            recipient_user_id: options.userId ?? null,
             recipient_email: to,
             subject,
             template: 'custom',
-            payload: options.payload,
+            payload: options.payload ?? null,
             channel: 'email',
             status: 'pending',
             read: false,
             dismissed: false,
             priority: 'normal',
+            action_url: null,
+            action_label: null,
+            category: null,
+            error_message: null,
+            sent_at: null,
         });
 
         try {
@@ -100,19 +105,21 @@ export class ApplicationsEmailService {
         try {
             await this.repository.createNotificationLog({
                 event_type: options.eventType,
-                recipient_user_id: options.userId,
+                recipient_user_id: options.userId ?? null,
                 recipient_email: options.email,
                 subject: options.subject,
                 template: 'in_app',
-                payload: options.payload,
+                payload: options.payload ?? null,
                 channel: 'in_app',
                 status: 'sent',
                 read: false,
                 dismissed: false,
-                action_url: options.actionUrl,
-                action_label: options.actionLabel,
+                action_url: options.actionUrl ?? null,
+                action_label: options.actionLabel ?? null,
                 priority: options.priority || 'normal',
                 category: options.category || 'application',
+                error_message: null,
+                sent_at: null,
             });
 
             this.logger.info(

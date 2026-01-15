@@ -1,6 +1,7 @@
 'use client';
 
 import { useStandardList } from '@/hooks/use-standard-list';
+import type { PaginationResponse } from '@splits-network/shared-types';
 import {
     PaginationControls,
     LoadingState,
@@ -84,7 +85,12 @@ function buildStats(jobs: Job[], totalJobs: number): JobStats {
     return { totalJobs, remoteFriendly, newThisWeek, avgSalary };
 }
 
-export default function JobsList() {
+interface JobsListProps {
+    initialData?: Job[];
+    initialPagination?: PaginationResponse;
+}
+
+export default function JobsList({ initialData, initialPagination }: JobsListProps) {
     const {
         data: jobs,
         pagination,
@@ -114,6 +120,8 @@ export default function JobsList() {
         viewModeKey: 'jobsViewMode',
         autoFetch: true,
         requireAuth: false,
+        initialData,
+        initialPagination,
     });
 
     const stats = jobs.length > 0 ? buildStats(jobs, pagination?.total || 0) : null;

@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { NotificationLog } from '@splits-network/shared-types';
+import { NotificationLog, NotificationLogInsert } from '@splits-network/shared-types';
 
 export class NotificationRepository {
     private supabase: SupabaseClient;
@@ -19,23 +19,18 @@ export class NotificationRepository {
     async healthCheck(): Promise<void> {
         // Simple query to verify database connectivity
         const { error } = await this.supabase
-            
+
             .from('notification_log')
             .select('id')
             .limit(1);
-        
+
         if (error) {
             throw new Error(`Database health check failed: ${error.message}`);
         }
     }
 
     async createNotificationLog(
-        log: Omit<NotificationLog, 'id' | 'sent_at' | 'created_at'> & {
-            // Override to make these fields optional (they have defaults in DB)
-            read?: boolean;
-            dismissed?: boolean;
-            priority?: 'low' | 'normal' | 'high' | 'urgent';
-        }
+        log: NotificationLogInsert
     ): Promise<NotificationLog> {
         const { data, error } = await this.supabase
             .from('notification_log')
@@ -64,7 +59,7 @@ export class NotificationRepository {
 
     // Get in-app notifications for a user (unread first, then by date)
     async findInAppNotificationsByUserId(
-        userId: string, 
+        userId: string,
         options?: {
             unreadOnly?: boolean;
             limit?: number;
@@ -72,9 +67,9 @@ export class NotificationRepository {
         }
     ): Promise<NotificationLog[]> {
         const { unreadOnly = false, limit = 50, offset = 0 } = options || {};
-        
+
         let query = this.supabase
-            
+
             .from('notification_log')
             .select('*')
             .eq('recipient_user_id', userId)
@@ -99,7 +94,7 @@ export class NotificationRepository {
     // Get unread count for badge
     async getUnreadCount(userId: string): Promise<number> {
         const { count, error } = await this.supabase
-            
+
             .from('notification_log')
             .select('*', { count: 'exact', head: true })
             .eq('recipient_user_id', userId)
@@ -114,11 +109,11 @@ export class NotificationRepository {
     // Mark notification as read
     async markAsRead(notificationId: string, userId: string): Promise<NotificationLog> {
         const { data, error } = await this.supabase
-            
+
             .from('notification_log')
-            .update({ 
-                read: true, 
-                read_at: new Date().toISOString() 
+            .update({
+                read: true,
+                read_at: new Date().toISOString()
             })
             .eq('id', notificationId)
             .eq('recipient_user_id', userId)
@@ -132,11 +127,11 @@ export class NotificationRepository {
     // Mark all notifications as read
     async markAllAsRead(userId: string): Promise<void> {
         const { error } = await this.supabase
-            
+
             .from('notification_log')
-            .update({ 
-                read: true, 
-                read_at: new Date().toISOString() 
+            .update({
+                read: true,
+                read_at: new Date().toISOString()
             })
             .eq('recipient_user_id', userId)
             .in('channel', ['in_app', 'both'])
@@ -148,7 +143,7 @@ export class NotificationRepository {
     // Dismiss notification
     async dismissNotification(notificationId: string, userId: string): Promise<NotificationLog> {
         const { data, error } = await this.supabase
-            
+
             .from('notification_log')
             .update({ dismissed: true })
             .eq('id', notificationId)

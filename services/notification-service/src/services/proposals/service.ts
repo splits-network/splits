@@ -30,11 +30,11 @@ export class ProposalsEmailService {
     ): Promise<void> {
         const log = await this.repository.createNotificationLog({
             event_type: options.eventType,
-            recipient_user_id: options.userId,
+            recipient_user_id: options.userId ?? null,
             recipient_email: to,
             subject,
             template: 'custom',
-            payload: options.payload,
+            payload: options.payload ?? null,
             channel: 'email',
             status: 'pending',
             read: false,

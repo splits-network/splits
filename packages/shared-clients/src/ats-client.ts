@@ -5,9 +5,23 @@ import {
     Application,
     Placement,
     CandidateSourcer,
-    PlacementCollaborator,
-    CandidateOutreach,
-} from '@splits-network/shared-types';
+    PlacementSplit,
+} from '@splits-network/shared-types/';
+
+// Type aliases for Phase 2 features
+type PlacementCollaborator = PlacementSplit;
+
+// Placeholder type for future CandidateOutreach feature (no table exists yet)
+interface CandidateOutreach {
+    id: string;
+    candidate_id: string;
+    recruiter_user_id: string;
+    job_id?: string;
+    email_subject: string;
+    email_body: string;
+    sent_at?: string;
+    created_at: string;
+}
 
 /**
  * Client for ATS Service (Phase 1 + Phase 2)
