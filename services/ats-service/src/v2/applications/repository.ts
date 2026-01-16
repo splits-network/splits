@@ -177,7 +177,6 @@ export class ApplicationRepository {
             .single();
 
         if (error) {
-            console.error('findApplication error:', error);
             if (error.code === 'PGRST116') return null;
             if (error.code === 'PGRST116') return null;
             throw error;
@@ -328,7 +327,7 @@ export class ApplicationRepository {
         // Base fields - always include related candidate and job with company
         const baseFields = `*,
             candidate:candidates(id, full_name, email, phone, location),
-            job:jobs(*, company:companies(id, name, website, industry, identity_organization_id), job_requirements:job_requirements(*))`;
+            job:jobs(*, company:companies(id, name, website, industry, company_size, headquarters_location, description, logo_url, identity_organization_id), job_requirements:job_requirements(*))`;
 
         if (!include) {
             return baseFields;
@@ -365,9 +364,8 @@ export class ApplicationRepository {
                     break;
                 case 'ai_review':
                 case 'ai-review':
-                    // AI reviews use one-to-one relationship but must be queried separately
-                    // Cannot use Supabase join syntax - must query in service layer
-                    // Skip in SELECT clause
+                    // AI reviews use one-to-many relationship - get only the latest
+                    //selectClause += `,ai_review:ai_reviews!application_id(id, application_id, fit_score, confidence_level, created_at)`;
                     break;
             }
         }
@@ -504,6 +502,8 @@ export class ApplicationRepository {
             .from('ai_reviews')
             .select('*')
             .eq('application_id', applicationId)
+            .order('created_at', { ascending: false })
+            .limit(1)
             .maybeSingle();
 
         if (error) throw error;

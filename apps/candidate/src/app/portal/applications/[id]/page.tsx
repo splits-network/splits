@@ -6,8 +6,17 @@ import WithdrawButton from '@/components/withdraw-button';
 import BackToDraftButton from '@/components/back-to-draft-button';
 import AIReviewPanel from './components/ai-review-panel';
 import { ApplicationDetailClient } from './components/application-detail-client';
+import { AIReviewedActions } from './components/ai-reviewed-actions';
 import EditDraftButton from './components/edit-draft-button';
 import { createAuthenticatedClient } from '@/lib/api-client';
+
+const getFitScoreColor = (score: number | null) => {
+    if (!score) return 'bg-base-300/30 text-base-300 border-base-300/10';
+    if (score >= 90) return 'bg-success/30 text-success border-success/10';
+    if (score >= 70) return 'bg-info/30 text-info border-info/10';
+    if (score >= 50) return 'bg-warning/30 text-warning border-warning/10';
+    return 'bg-error/30 text-error border-error/10';
+};
 
 const getStatusColor = (stage: string) => {
     switch (stage) {
@@ -88,9 +97,10 @@ export default async function ApplicationDetailPage({
     let application: any = null;
     let job: any = {};
     let recruiter: any = null;
+    let company: any = null;
 
     try {
-        const includes = ['job', 'recruiter', 'documents', 'job_requirements', 'pre_screen_answers'];
+        const includes = ['job', 'recruiter', 'documents', 'job_requirements', 'pre_screen_answers', 'ai_review'];
         const client = createAuthenticatedClient(token);
         const response = await client.get(`/applications/${id}`, {
             params: { include: includes.join(',') }
@@ -100,16 +110,16 @@ export default async function ApplicationDetailPage({
         const responseData = (response as any).data;
         application = responseData || response;
         job = application?.job || {};
+        company = job?.company || {};
         recruiter = application?.recruiter || null;
     } catch (error) {
         console.error('Error fetching application data:', error);
         return notFound();
     }
 
-    const company = job.company || {};
-
+    console.log('Application Detail:', { application, job, company, recruiter });
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 space-y-4">
             {/* Breadcrumbs */}
             <div className="text-sm breadcrumbs mb-6">
                 <ul>
@@ -119,16 +129,102 @@ export default async function ApplicationDetailPage({
                 </ul>
             </div>
 
-            {/* Header */}
-            <div className="mb-8">
-                <div className="flex items-start justify-between">
-                    <div>
-                        <h1 className="text-4xl font-bold mb-2">{job.title || 'Position'}</h1>
-                        <p className="text-xl text-base-content/70">{company.name || 'Company'}</p>
+            <div className='card bg-base-200'>
+                <div className='card bg-base-100 m-2 shadow-lg'>
+                    <div className='card-body'>
+                        <div className="flex flex-col md:flex-row items-start justify-between">
+                            <div>
+                                <h1 className="text-4xl font-bold mb-2">{job.title || 'Position'}</h1>
+                                <p className="text-xl text-base-content/70"><i className='fa-duotone fa-regular fa-buildings text-primary mr-2' />{company.name || 'Company'}</p>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                {job.location && (
+                                    <div>
+                                        <div className="text-sm text-base-content/60 mb-1">Location</div>
+                                        <div className="flex items-center gap-2 font-medium">
+                                            <i className="fa-duotone fa-regular fa-location-dot text-primary"></i>
+                                            {job.location}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {job.employment_type && (
+                                    <div>
+                                        <div className="text-sm text-base-content/60 mb-1">Employment Type</div>
+                                        <div className="flex items-center gap-2 font-medium">
+                                            <i className="fa-duotone fa-regular fa-clock text-primary"></i>
+                                            {job.employment_type === 'full_time' ? 'Full Time' :
+                                                job.employment_type === 'contract' ? 'Contract' :
+                                                    job.employment_type === 'temporary' ? 'Temporary' :
+                                                        job.employment_type}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {(job.salary_min || job.salary_max) && (
+                                    <div>
+                                        <div className="text-sm text-base-content/60 mb-1">Salary Range</div>
+                                        <div className="flex items-center gap-2 font-medium">
+                                            <i className="fa-duotone fa-regular fa-dollar-sign text-primary"></i>
+                                            {job.salary_min && job.salary_max ? (
+                                                `$${job.salary_min.toLocaleString()} - $${job.salary_max.toLocaleString()}`
+                                            ) : job.salary_min ? (
+                                                `From $${job.salary_min.toLocaleString()}`
+                                            ) : (
+                                                `Up to $${job.salary_max?.toLocaleString()}`
+                                            )}
+                                            {job.salary_currency && job.salary_currency !== 'USD' && ` ${job.salary_currency}`}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {job.department && (
+                                    <div>
+                                        <div className="text-sm text-base-content/60 mb-1">Department</div>
+                                        <div className="flex items-center gap-2 font-medium">
+                                            <i className="fa-duotone fa-regular fa-building text-primary"></i>
+                                            {job.department}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {typeof job.open_to_relocation !== 'undefined' && (
+                                    <div>
+                                        <div className="text-sm text-base-content/60 mb-1">Relocation</div>
+                                        <div className="flex items-center gap-2 font-medium">
+                                            <i className={`fa-duotone fa-regular ${job.open_to_relocation ? 'fa-check-circle text-success' : 'fa-times-circle text-base-content/40'}`}></i>
+                                            {job.open_to_relocation ? 'Open to Relocation' : 'No Relocation'}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
-                    <span className={`badge badge-lg ${getStatusColor(application.stage)}`}>
-                        {formatStage(application.stage)}
-                    </span>
+                </div>
+                <div className='p-4 pt-0'>
+                    {/* AI Review Panel - Show if ai_review stage or later */}
+                    {(application.stage === 'ai_review' ||
+                        application.stage === 'ai_reviewed' ||
+                        application.stage === 'recruiter_request' ||
+                        application.stage === 'screen' ||
+                        application.stage === 'submitted' ||
+                        application.stage === 'interviewing' ||
+                        application.stage === 'offer' ||
+                        application.ai_reviewed) && (
+                            <AIReviewPanel
+                                aiReviewId={application.ai_review.id}
+                            />
+                        )}
+                    {/** This should be a  */}
+                    <div className='alert alert-info alert-outline mb-0'>
+                        <i className="fa-duotone fa-regular fa-circle-info fa-xl text-info"></i>
+                        <span>
+                            This is a preview of your application as seen by the recruiter and hiring team.
+                            {recruiter && (
+                                <> Your application is being managed by <strong>{recruiter.name}</strong>.</>
+                            )}
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -138,7 +234,7 @@ export default async function ApplicationDetailPage({
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">{/* Main Content */}
                 <div className="lg:col-span-2 space-y-6">
                     {/* Job Details */}
-                    <div className="card bg-base-100 shadow">
+                    <div className="card bg-base-200 shadow">
                         <div className="card-body">
                             <h2 className="card-title mb-4">
                                 <i className="fa-duotone fa-regular fa-briefcase"></i>
@@ -146,68 +242,6 @@ export default async function ApplicationDetailPage({
                             </h2>
 
                             <div className="space-y-6">
-                                {/* Quick Facts Grid */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-base-200 rounded-lg">
-                                    {job.location && (
-                                        <div>
-                                            <div className="text-sm text-base-content/60 mb-1">Location</div>
-                                            <div className="flex items-center gap-2 font-medium">
-                                                <i className="fa-duotone fa-regular fa-location-dot text-primary"></i>
-                                                {job.location}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {job.employment_type && (
-                                        <div>
-                                            <div className="text-sm text-base-content/60 mb-1">Employment Type</div>
-                                            <div className="flex items-center gap-2 font-medium">
-                                                <i className="fa-duotone fa-regular fa-clock text-primary"></i>
-                                                {job.employment_type === 'full_time' ? 'Full Time' :
-                                                    job.employment_type === 'contract' ? 'Contract' :
-                                                        job.employment_type === 'temporary' ? 'Temporary' :
-                                                            job.employment_type}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {(job.salary_min || job.salary_max) && (
-                                        <div>
-                                            <div className="text-sm text-base-content/60 mb-1">Salary Range</div>
-                                            <div className="flex items-center gap-2 font-medium">
-                                                <i className="fa-duotone fa-regular fa-dollar-sign text-primary"></i>
-                                                {job.salary_min && job.salary_max ? (
-                                                    `$${job.salary_min.toLocaleString()} - $${job.salary_max.toLocaleString()}`
-                                                ) : job.salary_min ? (
-                                                    `From $${job.salary_min.toLocaleString()}`
-                                                ) : (
-                                                    `Up to $${job.salary_max?.toLocaleString()}`
-                                                )}
-                                                {job.salary_currency && job.salary_currency !== 'USD' && ` ${job.salary_currency}`}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {job.department && (
-                                        <div>
-                                            <div className="text-sm text-base-content/60 mb-1">Department</div>
-                                            <div className="flex items-center gap-2 font-medium">
-                                                <i className="fa-duotone fa-regular fa-building text-primary"></i>
-                                                {job.department}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {typeof job.open_to_relocation !== 'undefined' && (
-                                        <div>
-                                            <div className="text-sm text-base-content/60 mb-1">Relocation</div>
-                                            <div className="flex items-center gap-2 font-medium">
-                                                <i className={`fa-duotone fa-regular ${job.open_to_relocation ? 'fa-check-circle text-success' : 'fa-times-circle text-base-content/40'}`}></i>
-                                                {job.open_to_relocation ? 'Open to Relocation' : 'No Relocation'}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
 
                                 {/* Description */}
                                 {(job.candidate_description || job.recruiter_description || job.description) && (
@@ -296,14 +330,113 @@ export default async function ApplicationDetailPage({
                             </div>
                         </div>
                     )}
+                    {/* Application Info */}
+                    <div className="card bg-base-200 shadow">
+                        <div className="card-body">
+                            <h2 className="card-title mb-4">
+                                <i className="fa-duotone fa-regular fa-info-circle"></i>
+                                Application Info
+                            </h2>
+
+                            <div className="flex flex-col md:flex-row justify-between space-y-3">
+                                <div>
+                                    <div className="text-sm text-base-content/60">Application Date</div>
+                                    <div>{formatDate(application.created_at)}</div>
+                                </div>
+
+                                {application.updated_at !== application.created_at && (
+                                    <div>
+                                        <div className="text-sm text-base-content/60">Last Updated</div>
+                                        <div>{formatDate(application.updated_at)}</div>
+                                    </div>
+                                )}
+
+                                <div>
+                                    <div className="text-sm text-base-content/60">Status</div>
+                                    <div className="mt-1">
+                                        <span className={`badge ${getStatusColor(application.stage)}`}>
+                                            {formatStage(application.stage)}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Sidebar */}
                 <div className="space-y-6">
 
+
+                    {/* Actions */}
+                    <div className="card bg-base-200 shadow">
+                        <div className="card-body">
+                            <h2 className="card-title mb-4 justify-between">
+                                <div>
+                                    <i className="fa-duotone fa-regular fa-ellipsis"></i>
+                                    Actions
+                                </div>
+                                <div className="mt-1">
+                                    <span className={`badge ${getStatusColor(application.stage)}`}>
+                                        {formatStage(application.stage)}
+                                    </span>
+                                </div>
+                            </h2>
+
+                            <div className="space-y-2 grid grid-cols-1 xl:grid-cols-2 gap-2">
+                                {/* Edit Application and Submit - for ai_reviewed stage after reviewing AI feedback */}
+                                {application.stage === 'ai_reviewed' && (
+                                    <AIReviewedActions
+                                        applicationId={application.id}
+                                        jobTitle={job.title || 'this position'}
+                                    />
+                                )}
+
+                                {/* Review AI Feedback - for ai_reviewed stage */}
+                                {application.stage === 'ai_reviewed' && (
+                                    <Link
+                                        href="#"
+                                        // href={`/portal/applications/${application.id}/ai-review`}
+                                        className="btn btn-primary"
+                                    >
+                                        <div className='indicator'>
+                                            <span className="indicator-item badge badge-warning badge-xs">Coming Soon</span>
+                                            <i className="fa-duotone fa-regular fa-sparkles mr-2"></i>
+                                            Review AI Feedback
+                                        </div>
+                                    </Link>
+                                )}
+                                {/* Edit & Submit - for draft applications */}
+                                {application.stage === 'draft' && (
+                                    <EditDraftButton
+                                        application={application}
+                                        job={job}
+                                    />
+                                )}
+
+                                {/* Back to Draft - for stages where candidate can edit */}
+                                {['ai_review', 'screen', 'recruiter_request', 'rejected'].includes(application.stage) && (
+                                    <BackToDraftButton
+                                        applicationId={application.id}
+                                        jobTitle={job.title || 'this position'}
+                                    />
+                                )}
+
+                                {/* Withdraw - for any non-terminal stage */}
+                                {application.stage !== 'withdrawn' && application.stage !== 'rejected' && (
+                                    <WithdrawButton
+                                        applicationId={application.id}
+                                        jobTitle={job.title || 'this position'}
+                                        isJobClosed={['closed', 'filled', 'cancelled'].includes(job.status)}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Company Information */}
-                    {company && (company.description || company.industry || company.company_size || company.headquarters_location || company.website) && (
-                        <div className='card bg-base-100 shadow'>
+                    {company.id && (
+                        <div className='card bg-base-200 shadow'>
                             <div className="card-body">
 
                                 <h2 className="card-title mb-4">
@@ -359,92 +492,10 @@ export default async function ApplicationDetailPage({
                             </div>
                         </div>
                     )}
-                    {/* Application Info */}
-                    <div className="card bg-base-100 shadow">
-                        <div className="card-body">
-                            <h2 className="card-title mb-4">
-                                <i className="fa-duotone fa-regular fa-info-circle"></i>
-                                Application Info
-                            </h2>
-
-                            <div className="space-y-3">
-                                <div>
-                                    <div className="text-sm text-base-content/60">Application Date</div>
-                                    <div>{formatDate(application.created_at)}</div>
-                                </div>
-
-                                {application.updated_at !== application.created_at && (
-                                    <div>
-                                        <div className="text-sm text-base-content/60">Last Updated</div>
-                                        <div>{formatDate(application.updated_at)}</div>
-                                    </div>
-                                )}
-
-                                <div>
-                                    <div className="text-sm text-base-content/60">Status</div>
-                                    <div className="mt-1">
-                                        <span className={`badge ${getStatusColor(application.stage)}`}>
-                                            {formatStage(application.stage)}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="card bg-base-100 shadow">
-                        <div className="card-body">
-                            <h2 className="card-title mb-4">
-                                <i className="fa-duotone fa-regular fa-ellipsis"></i>
-                                Actions
-                            </h2>
-
-                            <div className="space-y-2">
-                                {/* Review AI Feedback - for ai_reviewed stage */}
-                                {application.stage === 'ai_reviewed' && (
-                                    <Link
-                                        href="#"
-                                        // href={`/portal/applications/${application.id}/ai-review`}
-                                        className="btn btn-primary btn-block"
-                                    >
-                                        <i className="fa-duotone fa-regular fa-sparkles"></i>
-                                        Review AI Feedback
-                                        <span className="ml-2 badge badge-sm badge-warning">Coming soon</span>
-                                    </Link>
-                                )}
-
-                                {/* Edit & Submit - for draft applications */}
-                                {application.stage === 'draft' && (
-                                    <EditDraftButton
-                                        application={application}
-                                        job={job}
-                                    />
-                                )}
-
-                                {/* Back to Draft - for stages where candidate can edit */}
-                                {['ai_review', 'screen', 'recruiter_request', 'rejected'].includes(application.stage) && (
-                                    <BackToDraftButton
-                                        applicationId={application.id}
-                                        jobTitle={job.title || 'this position'}
-                                    />
-                                )}
-
-                                {/* Withdraw - for any non-terminal stage */}
-                                {application.stage !== 'withdrawn' && application.stage !== 'rejected' && (
-                                    <WithdrawButton
-                                        applicationId={application.id}
-                                        jobTitle={job.title || 'this position'}
-                                        isJobClosed={['closed', 'filled', 'cancelled'].includes(job.status)}
-                                    />
-                                )}
-                            </div>
-                        </div>
-                    </div>
 
                     {/* Documents */}
                     {application.documents && application.documents.length > 0 && (
-                        <div className="card bg-base-100 shadow">
+                        <div className="card bg-base-200 shadow">
                             <div className="card-body">
                                 <h2 className="card-title mb-4">
                                     <i className="fa-duotone fa-regular fa-file"></i>
@@ -453,7 +504,7 @@ export default async function ApplicationDetailPage({
 
                                 <div className="space-y-2">
                                     {application.documents.map((doc: any) => (
-                                        <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg bg-base-200 hover:bg-base-300 transition-colors">
+                                        <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg bg-base-300 hover:bg-base-300 transition-colors">
                                             <div className="flex items-center gap-3 flex-1 min-w-0">
                                                 <i className={`fa-duotone fa-regular ${doc.document_type === 'resume' ? 'fa-file-text' :
                                                     doc.document_type === 'cover_letter' ? 'fa-file-lines' :
@@ -508,21 +559,6 @@ export default async function ApplicationDetailPage({
                             </div>
                         </div>
                     )}
-
-                    {/* AI Review Panel - Show if ai_review stage or later */}
-                    {(application.stage === 'ai_review' ||
-                        application.stage === 'ai_reviewed' ||
-                        application.stage === 'recruiter_request' ||
-                        application.stage === 'screen' ||
-                        application.stage === 'submitted' ||
-                        application.stage === 'interviewing' ||
-                        application.stage === 'offer' ||
-                        application.ai_reviewed) && (
-                            <AIReviewPanel
-                                applicationId={application.id}
-                                applicationStage={application.stage}
-                            />
-                        )}
 
                     {/* Recruiter Info */}
                     {recruiter && (

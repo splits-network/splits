@@ -6,8 +6,7 @@ import { createAuthenticatedClient } from '@/lib/api-client';
 import type { AIReview } from '@splits-network/shared-types';
 
 interface AIReviewPanelProps {
-    applicationId: string;
-    applicationStage?: string; // Optional - will fetch if not provided
+    aiReviewId: string;
 }
 
 const getRecommendationColor = (recommendation: string | null) => {
@@ -89,14 +88,12 @@ const getLocationLabel = (compatibility: string) => {
     }
 };
 
-export default function AIReviewPanel({ applicationId, applicationStage }: AIReviewPanelProps) {
+export default function AIReviewPanel({ aiReviewId }: AIReviewPanelProps) {
     const { getToken } = useAuth();
     const [loading, setLoading] = useState(true);
     const [aiReview, setAIReview] = useState<AIReview | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [requesting, setRequesting] = useState(false);
-    const [stage, setStage] = useState<string | undefined>(applicationStage);
-    const [actionLoading, setActionLoading] = useState<'draft' | 'submit' | null>(null);
 
     useEffect(() => {
         async function fetchData() {
@@ -109,23 +106,11 @@ export default function AIReviewPanel({ applicationId, applicationStage }: AIRev
                 }
                 const client = createAuthenticatedClient(token);
 
-                // Fetch application stage if not provided
-                if (!applicationStage) {
-                    const appResponse = await client.get<{ data: any }>(`/applications/${applicationId}`);
-                    setStage(appResponse.data.stage);
-                }
-
                 // Fetch AI review
-                const response = await client.get<{ data: AIReview[] }>('/ai-reviews', { params: { application_id: applicationId } });
-                // V2 API returns { data: [...] } envelope, get first review
-                const reviews = response.data;
-                if (reviews && reviews.length > 0) {
-                    setAIReview(reviews[0]);
-                    setError(null);
-                } else {
-                    setAIReview(null);
-                    setError(null);
-                }
+                const response = await client.get<{ data: AIReview }>(`/ai-reviews/${aiReviewId}`);
+                console.log('Fetched AI review:', response.data);
+                setAIReview(response.data);
+                setError(null);
             } catch (err) {
                 // Network errors or other API errors
                 console.error('Error fetching data:', err);
@@ -145,7 +130,7 @@ export default function AIReviewPanel({ applicationId, applicationStage }: AIRev
         }
 
         fetchData();
-    }, [applicationId, applicationStage]);
+    }, [aiReviewId]);
 
     const handleRequestNewReview = async () => {
         setRequesting(true);
@@ -157,7 +142,7 @@ export default function AIReviewPanel({ applicationId, applicationStage }: AIRev
                 return;
             }
             const client = createAuthenticatedClient(token);
-            const response = await client.post<{ data: AIReview }>('/ai-reviews', { application_id: applicationId });
+            const response = await client.post<{ data: AIReview }>('/ai-reviews', { application_id: aiReview?.application_id });
             // V2 API returns { data: {...} } envelope
             setAIReview(response.data);
         } catch (err) {
@@ -165,52 +150,6 @@ export default function AIReviewPanel({ applicationId, applicationStage }: AIRev
             setError(err instanceof Error ? err.message : 'Failed to request new review');
         } finally {
             setRequesting(false);
-        }
-    };
-
-    const handleReturnToDraft = async () => {
-        setActionLoading('draft');
-        setError(null);
-        try {
-            const token = await getToken();
-            if (!token) {
-                setError('Authentication required');
-                return;
-            }
-            const client = createAuthenticatedClient(token);
-            await client.post(`/applications/${applicationId}/return-to-draft`, {});
-            // Update local stage state
-            setStage('draft');
-            // Optionally refresh page or show success message
-            window.location.reload();
-        } catch (err) {
-            console.error('Error returning to draft:', err);
-            setError(err instanceof Error ? err.message : 'Failed to return to draft');
-        } finally {
-            setActionLoading(null);
-        }
-    };
-
-    const handleSubmitApplication = async () => {
-        setActionLoading('submit');
-        setError(null);
-        try {
-            const token = await getToken();
-            if (!token) {
-                setError('Authentication required');
-                return;
-            }
-            const client = createAuthenticatedClient(token);
-            await client.post(`/applications/${applicationId}/submit`, {});
-            // Update local stage state
-            setStage('submitted');
-            // Optionally refresh page or show success message
-            window.location.reload();
-        } catch (err) {
-            console.error('Error submitting application:', err);
-            setError(err instanceof Error ? err.message : 'Failed to submit application');
-        } finally {
-            setActionLoading(null);
         }
     };
 
@@ -232,38 +171,36 @@ export default function AIReviewPanel({ applicationId, applicationStage }: AIRev
 
     if (error) {
         return (
-            <div className="card bg-base-100 shadow">
-                <div className="card-body">
-                    <h2 className="card-title">
-                        <i className="fa-duotone fa-regular fa-robot"></i>
-                        AI Analysis
-                    </h2>
-                    <div className="alert alert-warning">
-                        <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
-                        <div>
-                            <div className="font-semibold">Unable to Load AI Review</div>
-                            <div className="text-sm mt-1">{error}</div>
-                            <div className="text-sm mt-2">Please try refreshing the page or check back later.</div>
-                        </div>
+            <div className="card-body">
+                <h2 className="card-title">
+                    <i className="fa-duotone fa-regular fa-robot"></i>
+                    AI Analysis
+                </h2>
+                <div className="alert alert-warning">
+                    <i className="fa-duotone fa-regular fa-triangle-exclamation"></i>
+                    <div>
+                        <div className="font-semibold">Unable to Load AI Review</div>
+                        <div className="text-sm mt-1">{error}</div>
+                        <div className="text-sm mt-2">Please try refreshing the page or check back later.</div>
                     </div>
-                    <button
-                        onClick={handleRequestNewReview}
-                        disabled={requesting}
-                        className="btn btn-primary btn-sm"
-                    >
-                        {requesting ? (
-                            <>
-                                <span className="loading loading-spinner loading-xs"></span>
-                                Requesting Review...
-                            </>
-                        ) : (
-                            <>
-                                <i className="fa-duotone fa-regular fa-rotate"></i>
-                                Request New Review
-                            </>
-                        )}
-                    </button>
                 </div>
+                <button
+                    onClick={handleRequestNewReview}
+                    disabled={requesting}
+                    className="btn btn-primary btn-sm"
+                >
+                    {requesting ? (
+                        <>
+                            <span className="loading loading-spinner loading-xs"></span>
+                            Requesting Review...
+                        </>
+                    ) : (
+                        <>
+                            <i className="fa-duotone fa-regular fa-rotate"></i>
+                            Request New Review
+                        </>
+                    )}
+                </button>
             </div>
         );
     }
@@ -286,16 +223,16 @@ export default function AIReviewPanel({ applicationId, applicationStage }: AIRev
     }
 
     return (
-        <div className="card bg-base-100 shadow">
-            <div className="card-body">
-                <h2 className="card-title mb-4">
-                    <i className="fa-duotone fa-regular fa-robot"></i>
-                    AI Analysis
-                </h2>
+        <div className="p-4 pt-0">
+            <h2 className="mb-4">
+                <i className="fa-duotone fa-regular fa-robot mr-2"></i>
+                AI Analysis
+            </h2>
 
+            <div className='grid grid-cols-4 gap-4'>
                 {/* Fit Score */}
                 <div className='flex flex-col gap-4'>
-                    <div className="stats shadow bg-base-200">
+                    <div className="stats shadow bg-base-100">
                         <div className="stat overflow-clip">
                             <div className="stat-figure">
                                 <i className={`${getFitScoreIcon(aiReview.fit_score)} fa-2x ${getFitScoreColor(aiReview.fit_score)}`}></i>
@@ -311,7 +248,7 @@ export default function AIReviewPanel({ applicationId, applicationStage }: AIRev
                             </div>
                         </div>
                     </div>
-                    <div className="stats shadow bg-base-200">
+                    <div className="stats shadow bg-base-100">
                         <div className="stat">
                             <div className="stat-figure">
                                 <i className={`${getConfidenceIcon(aiReview.confidence_level)} fa-2x ${getConfidenceColor(aiReview.confidence_level)}`}></i>
@@ -360,8 +297,8 @@ export default function AIReviewPanel({ applicationId, applicationStage }: AIRev
                 )}
 
                 {/* Skills Match */}
-                {(aiReview.skills_match_percentage !== null || aiReview.matched_skills || aiReview.missing_skills) && (
-                    <div className="mt-4">
+                {(aiReview.skills_match_percentage !== null) && (
+                    <div className="">
                         <h3 className="font-semibold text-lg mb-2">Skills Analysis</h3>
 
                         {aiReview.skills_match_percentage !== null && (
@@ -370,55 +307,59 @@ export default function AIReviewPanel({ applicationId, applicationStage }: AIRev
                                 <div className="flex-1">
                                     <progress
                                         className="progress progress-success w-full"
-                                        value={aiReview.skills_match_percentage}
+                                        value={aiReview.skills_match.match_percentage}
                                         max="100"
                                     ></progress>
                                 </div>
                                 <span className="text-sm font-semibold">{aiReview.skills_match_percentage}%</span>
                             </div>
                         )}
-
-                        <div className="mb-2">
-                            <span className="text-sm font-medium">Matched Skills:</span>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                                {aiReview.matched_skills && aiReview.matched_skills.length > 0 ? (
-                                    aiReview.matched_skills.map((skill, index) => (
-                                        <span key={index} className="badge badge-success badge-sm">{skill}</span>
-                                    ))
-                                ) : (
-                                    <span className="text-sm text-base-content/60 italic">No matched skills identified</span>
-                                )}
-                            </div>
-                        </div>
-
-                        <div>
-                            <span className="text-sm font-medium">Skills to Develop:</span>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                                {aiReview.missing_skills && aiReview.missing_skills.length > 0 ? (
-                                    aiReview.missing_skills.map((skill, index) => (
-                                        <span key={index} className="badge badge-warning badge-sm">{skill}</span>
-                                    ))
-                                ) : (
-                                    <span className="text-sm text-base-content/60 italic">You have all required skills!</span>
-                                )}
-                            </div>
-                        </div>
                     </div>
                 )}
 
+                <div className="mb-2">
+                    <span className="text-sm font-medium">Matched Skills:</span>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                        {aiReview.skills_match.matched_skills && aiReview.skills_match.matched_skills.length > 0 ? (
+                            <ul className="list-disc list-inside">
+                                {aiReview.skills_match.matched_skills.map((skill, index) => (
+                                    <span key={index} className="badge badge-success badge-sm">{skill}</span>
+                                ))}
+                            </ul>
+                        ) : (
+                            <span className="text-sm text-base-content/60 italic">No matched skills identified</span>
+                        )}
+                    </div>
+                </div>
+
+                <div>
+                    <span className="text-sm font-medium">Skills to Develop:</span>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                        {aiReview.skills_match.missing_skills && aiReview.skills_match.missing_skills.length > 0 ? (
+                            <ul className="list-disc list-inside">
+                                {aiReview.skills_match.missing_skills.map((skill, index) => (
+                                    <li key={index} className="text-sm">{skill}</li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <span className="text-sm text-base-content/60 italic">You have all required skills!</span>
+                        )}
+                    </div>
+                </div>
+
                 {/* Experience & Location */}
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {aiReview.candidate_years !== null && aiReview.required_years !== null && (
+                <div className="flex flex-col gap-4">
+                    {aiReview.experience_analysis.candidate_years !== null && aiReview.experience_analysis.required_years !== null && (
                         <div>
                             <h4 className="font-medium text-sm mb-1">Experience</h4>
                             <div className="flex items-center gap-2">
-                                {aiReview.meets_experience_requirement ? (
+                                {aiReview.experience_analysis.meets_requirement ? (
                                     <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
                                 ) : (
                                     <i className="fa-duotone fa-regular fa-circle-xmark text-warning"></i>
                                 )}
                                 <span className="text-sm">
-                                    {aiReview.candidate_years} years (Required: {aiReview.required_years})
+                                    {aiReview.experience_analysis.candidate_years} years (Required: {aiReview.experience_analysis.required_years})
                                 </span>
                             </div>
                         </div>
@@ -433,56 +374,10 @@ export default function AIReviewPanel({ applicationId, applicationStage }: AIRev
                 </div>
 
                 {/* Analysis Info */}
-                <div className="mt-4 text-xs text-base-content/60">
+                <div className="mt-4 text-xs text-base-content/60 text-right col-span-4">
                     <p>Analyzed by {aiReview.model_version ?? 'AI'} on {aiReview.analyzed_at ? new Date(aiReview.analyzed_at).toLocaleString() : 'N/A'}</p>
                 </div>
-
-                {/* Action Buttons - Phase 1: AI Review Loop */}
-                {stage === 'ai_reviewed' && (
-                    <div className="mt-6 flex flex-col gap-3">
-                        <div className="alert alert-info">
-                            <i className="fa-duotone fa-regular fa-circle-info"></i>
-                            <span>Review the AI feedback above. You can edit your application or submit it for review.</span>
-                        </div>
-                        <div className="flex gap-2 justify-end">
-                            <button
-                                onClick={handleReturnToDraft}
-                                disabled={actionLoading !== null}
-                                className="btn btn-outline"
-                            >
-                                {actionLoading === 'draft' ? (
-                                    <>
-                                        <span className="loading loading-spinner loading-sm"></span>
-                                        Returning to Draft...
-                                    </>
-                                ) : (
-                                    <>
-                                        <i className="fa-duotone fa-regular fa-pen-to-square"></i>
-                                        Edit Application
-                                    </>
-                                )}
-                            </button>
-                            <button
-                                onClick={handleSubmitApplication}
-                                disabled={actionLoading !== null}
-                                className="btn btn-primary"
-                            >
-                                {actionLoading === 'submit' ? (
-                                    <>
-                                        <span className="loading loading-spinner loading-sm"></span>
-                                        Submitting...
-                                    </>
-                                ) : (
-                                    <>
-                                        <i className="fa-duotone fa-regular fa-paper-plane"></i>
-                                        Submit Application
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                )}
             </div>
-        </div >
+        </div>
     );
 }
