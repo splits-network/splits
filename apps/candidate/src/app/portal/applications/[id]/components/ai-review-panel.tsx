@@ -7,6 +7,7 @@ import type { AIReview } from '@splits-network/shared-types';
 
 interface AIReviewPanelProps {
     applicationId: string;
+    applicationStage?: string; // Optional - will fetch if not provided
 }
 
 const getRecommendationColor = (recommendation: string | null) => {
@@ -88,15 +89,17 @@ const getLocationLabel = (compatibility: string) => {
     }
 };
 
-export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
+export default function AIReviewPanel({ applicationId, applicationStage }: AIReviewPanelProps) {
     const { getToken } = useAuth();
     const [loading, setLoading] = useState(true);
     const [aiReview, setAIReview] = useState<AIReview | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [requesting, setRequesting] = useState(false);
+    const [stage, setStage] = useState<string | undefined>(applicationStage);
+    const [actionLoading, setActionLoading] = useState<'draft' | 'submit' | null>(null);
 
     useEffect(() => {
-        async function fetchAIReview() {
+        async function fetchData() {
             try {
                 const token = await getToken();
                 if (!token) {
@@ -105,6 +108,14 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                     return;
                 }
                 const client = createAuthenticatedClient(token);
+
+                // Fetch application stage if not provided
+                if (!applicationStage) {
+                    const appResponse = await client.get<{ data: any }>(`/applications/${applicationId}`);
+                    setStage(appResponse.data.stage);
+                }
+
+                // Fetch AI review
                 const response = await client.get<{ data: AIReview[] }>('/ai-reviews', { params: { application_id: applicationId } });
                 // V2 API returns { data: [...] } envelope, get first review
                 const reviews = response.data;
@@ -117,8 +128,8 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                 }
             } catch (err) {
                 // Network errors or other API errors
-                console.error('Error fetching AI review:', err);
-                const errorMsg = err instanceof Error ? err.message : 'Unable to load AI review';
+                console.error('Error fetching data:', err);
+                const errorMsg = err instanceof Error ? err.message : 'Unable to load data';
                 // Check if it's a service unavailability error
                 if (errorMsg.includes('500') || errorMsg.includes('fetch failed') || errorMsg.includes('Service call failed')) {
                     // Service unavailable - silently set to null to hide the panel
@@ -133,8 +144,8 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
             }
         }
 
-        fetchAIReview();
-    }, [applicationId]);
+        fetchData();
+    }, [applicationId, applicationStage]);
 
     const handleRequestNewReview = async () => {
         setRequesting(true);
@@ -154,6 +165,52 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
             setError(err instanceof Error ? err.message : 'Failed to request new review');
         } finally {
             setRequesting(false);
+        }
+    };
+
+    const handleReturnToDraft = async () => {
+        setActionLoading('draft');
+        setError(null);
+        try {
+            const token = await getToken();
+            if (!token) {
+                setError('Authentication required');
+                return;
+            }
+            const client = createAuthenticatedClient(token);
+            await client.post(`/applications/${applicationId}/return-to-draft`, {});
+            // Update local stage state
+            setStage('draft');
+            // Optionally refresh page or show success message
+            window.location.reload();
+        } catch (err) {
+            console.error('Error returning to draft:', err);
+            setError(err instanceof Error ? err.message : 'Failed to return to draft');
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleSubmitApplication = async () => {
+        setActionLoading('submit');
+        setError(null);
+        try {
+            const token = await getToken();
+            if (!token) {
+                setError('Authentication required');
+                return;
+            }
+            const client = createAuthenticatedClient(token);
+            await client.post(`/applications/${applicationId}/submit`, {});
+            // Update local stage state
+            setStage('submitted');
+            // Optionally refresh page or show success message
+            window.location.reload();
+        } catch (err) {
+            console.error('Error submitting application:', err);
+            setError(err instanceof Error ? err.message : 'Failed to submit application');
+        } finally {
+            setActionLoading(null);
         }
     };
 
@@ -379,6 +436,52 @@ export default function AIReviewPanel({ applicationId }: AIReviewPanelProps) {
                 <div className="mt-4 text-xs text-base-content/60">
                     <p>Analyzed by {aiReview.model_version ?? 'AI'} on {aiReview.analyzed_at ? new Date(aiReview.analyzed_at).toLocaleString() : 'N/A'}</p>
                 </div>
+
+                {/* Action Buttons - Phase 1: AI Review Loop */}
+                {stage === 'ai_reviewed' && (
+                    <div className="mt-6 flex flex-col gap-3">
+                        <div className="alert alert-info">
+                            <i className="fa-duotone fa-regular fa-circle-info"></i>
+                            <span>Review the AI feedback above. You can edit your application or submit it for review.</span>
+                        </div>
+                        <div className="flex gap-2 justify-end">
+                            <button
+                                onClick={handleReturnToDraft}
+                                disabled={actionLoading !== null}
+                                className="btn btn-outline"
+                            >
+                                {actionLoading === 'draft' ? (
+                                    <>
+                                        <span className="loading loading-spinner loading-sm"></span>
+                                        Returning to Draft...
+                                    </>
+                                ) : (
+                                    <>
+                                        <i className="fa-duotone fa-regular fa-pen-to-square"></i>
+                                        Edit Application
+                                    </>
+                                )}
+                            </button>
+                            <button
+                                onClick={handleSubmitApplication}
+                                disabled={actionLoading !== null}
+                                className="btn btn-primary"
+                            >
+                                {actionLoading === 'submit' ? (
+                                    <>
+                                        <span className="loading loading-spinner loading-sm"></span>
+                                        Submitting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <i className="fa-duotone fa-regular fa-paper-plane"></i>
+                                        Submit Application
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div >
     );

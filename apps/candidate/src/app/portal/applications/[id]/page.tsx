@@ -404,11 +404,13 @@ export default async function ApplicationDetailPage({
                                 {/* Review AI Feedback - for ai_reviewed stage */}
                                 {application.stage === 'ai_reviewed' && (
                                     <Link
-                                        href={`/portal/applications/${application.id}/ai-review`}
+                                        href="#"
+                                        // href={`/portal/applications/${application.id}/ai-review`}
                                         className="btn btn-primary btn-block"
                                     >
                                         <i className="fa-duotone fa-regular fa-sparkles"></i>
                                         Review AI Feedback
+                                        <span className="ml-2 badge badge-sm badge-warning">Coming soon</span>
                                     </Link>
                                 )}
 
@@ -509,6 +511,7 @@ export default async function ApplicationDetailPage({
 
                     {/* AI Review Panel - Show if ai_review stage or later */}
                     {(application.stage === 'ai_review' ||
+                        application.stage === 'ai_reviewed' ||
                         application.stage === 'recruiter_request' ||
                         application.stage === 'screen' ||
                         application.stage === 'submitted' ||
@@ -517,6 +520,7 @@ export default async function ApplicationDetailPage({
                         application.ai_reviewed) && (
                             <AIReviewPanel
                                 applicationId={application.id}
+                                applicationStage={application.stage}
                             />
                         )}
 

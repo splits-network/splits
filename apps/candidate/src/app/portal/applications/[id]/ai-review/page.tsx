@@ -1,5 +1,23 @@
 'use client';
 
+/*
+ * TODO: This page is commented out pending Phase 2+ implementation
+ * 
+ * REASON: Violates V2 architecture - uses incorrect child endpoint pattern
+ * - Line 60: Uses `/applications/${id}/feedback` (should be `/application-feedback?application_id=${id}`)
+ * - Line 123: Uses `/applications/${id}/feedback` POST (should be `/application-feedback` with body)
+ * 
+ * REQUIREMENTS BEFORE UNCOMMENTING:
+ * 1. Implement V2 application-feedback service in ATS (repository, service, routes)
+ * 2. Add API Gateway proxy for `/api/v2/application-feedback`
+ * 3. Update this page to use correct V2 pattern:
+ *    - GET /application-feedback?application_id=${id}
+ *    - POST /application-feedback with { application_id, message_text, feedback_type }
+ * 4. Ensure Phase 2+ gate review infrastructure is in place
+ * 
+ * RELATED DOCS: docs/flows/plan-applicationProposalFlowImplementationAlignment.prompt.md (Section 6.1)
+ */
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -12,6 +30,7 @@ interface AIReviewPageProps {
 }
 
 export default function AIReviewPage({ params }: AIReviewPageProps) {
+    return null; // Placeholder while commented out
     const router = useRouter();
     const { getToken } = useAuth();
     const [applicationId, setApplicationId] = useState<string>('');

@@ -595,4 +595,90 @@ function registerApplicationFeedbackRoutes(app: FastifyInstance, services: Servi
             }
         }
     );
+
+    // AI Review Loop - Application Action Routes
+
+    // Trigger AI Review
+    app.post(
+        '/api/v2/applications/:id/trigger-ai-review',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await atsService().post(
+                    `/api/v2/applications/${id}/trigger-ai-review`,
+                    {},
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to trigger AI review');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to trigger AI review' });
+            }
+        }
+    );
+
+    // Return to Draft
+    app.post(
+        '/api/v2/applications/:id/return-to-draft',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await atsService().post(
+                    `/api/v2/applications/${id}/return-to-draft`,
+                    {},
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to return application to draft');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to return application to draft' });
+            }
+        }
+    );
+
+    // Submit Application
+    app.post(
+        '/api/v2/applications/:id/submit',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await atsService().post(
+                    `/api/v2/applications/${id}/submit`,
+                    request.body || {},
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to submit application');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to submit application' });
+            }
+        }
+    );
 }
