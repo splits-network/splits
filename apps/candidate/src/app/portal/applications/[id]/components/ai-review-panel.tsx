@@ -321,9 +321,9 @@ export default function AIReviewPanel({ aiReviewId }: AIReviewPanelProps) {
                     <span className="text-sm font-medium">Matched Skills:</span>
                     <div className="flex flex-wrap gap-1 mt-1">
                         {aiReview.skills_match.matched_skills && aiReview.skills_match.matched_skills.length > 0 ? (
-                            <ul className="list-disc list-inside">
+                            <ul className="list-disc list-inside marker:text-success marker:text-xl">
                                 {aiReview.skills_match.matched_skills.map((skill, index) => (
-                                    <span key={index} className="badge badge-success badge-sm">{skill}</span>
+                                    <li key={index} className="text-sm">{skill}</li>
                                 ))}
                             </ul>
                         ) : (
@@ -336,7 +336,7 @@ export default function AIReviewPanel({ aiReviewId }: AIReviewPanelProps) {
                     <span className="text-sm font-medium">Skills to Develop:</span>
                     <div className="flex flex-wrap gap-1 mt-1">
                         {aiReview.skills_match.missing_skills && aiReview.skills_match.missing_skills.length > 0 ? (
-                            <ul className="list-disc list-inside">
+                            <ul className="list-disc list-inside marker:text-warning marker:text-xl">
                                 {aiReview.skills_match.missing_skills.map((skill, index) => (
                                     <li key={index} className="text-sm">{skill}</li>
                                 ))}
