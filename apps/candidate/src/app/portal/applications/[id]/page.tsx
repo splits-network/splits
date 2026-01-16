@@ -210,7 +210,7 @@ export default async function ApplicationDetailPage({
                         application.stage === 'submitted' ||
                         application.stage === 'interviewing' ||
                         application.stage === 'offer' ||
-                        application.ai_reviewed) && (
+                        application.ai_reviewed) && application.ai_review?.id && (
                             <AIReviewPanel
                                 aiReviewId={application.ai_review.id}
                             />
