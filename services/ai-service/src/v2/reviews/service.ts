@@ -400,7 +400,7 @@ Analyze this candidate's fit for the role and provide your assessment in the fol
 **Scoring Guidelines:**
 - fit_score: 90-100 = strong_fit, 70-89 = good_fit, 50-69 = fair_fit, 0-49 = poor_fit
 - List 3-5 strengths (specific matching qualifications)
-- List 0-3 concerns (specific gaps or mismatches)
+- List 0-5 concerns (specific gaps or mismatches)
 - matched_skills: Skills from required/preferred list that candidate has
 - missing_skills: Skills from required/preferred list that candidate lacks
 - location_compatibility: perfect (same location/remote), good (nearby/willing to relocate), challenging (different location but possible), mismatch (incompatible)

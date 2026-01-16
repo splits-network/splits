@@ -118,7 +118,7 @@ export default function Header() {
                 <ul className="menu menu-horizontal px-1 gap-1" ref={menuRef}>
                     <li><Link href="/public/how-it-works" className='btn btn-ghost'>How It Works</Link></li>
                     <li>
-                        <Link href='/public/jobs' className='btn btn-primary btn-outline'>
+                        <Link href='/public/jobs' className='btn btn-ghost'>
                             <i className="fa-duotone fa-regular fa-briefcase mr-1"></i>
                             Find Jobs
                         </Link>
@@ -193,7 +193,7 @@ export default function Header() {
 
                     {/* Recruiters/Marketplace Link */}
                     <li>
-                        <Link href="/public/marketplace" className="btn btn-secondary btn-outline">
+                        <Link href="/public/marketplace" className="btn btn-ghost">
                             <i className="fa-duotone fa-regular fa-users"></i>
                             Find a Recruiter
                         </Link>

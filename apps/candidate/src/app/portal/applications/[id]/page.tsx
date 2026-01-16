@@ -132,7 +132,7 @@ export default async function ApplicationDetailPage({
             <div className='card bg-base-200'>
                 <div className='card bg-base-100 m-2 shadow-lg'>
                     <div className='card-body'>
-                        <div className="flex flex-col md:flex-row items-start justify-between">
+                        <div className="flex flex-col md:flex-row items-center justify-between">
                             <div>
                                 <h1 className="text-4xl font-bold mb-2">{job.title || 'Position'}</h1>
                                 <p className="text-xl text-base-content/70"><i className='fa-duotone fa-regular fa-buildings text-primary mr-2' />{company.name || 'Company'}</p>
@@ -366,14 +366,12 @@ export default async function ApplicationDetailPage({
 
                 {/* Sidebar */}
                 <div className="space-y-6">
-
-
                     {/* Actions */}
                     <div className="card bg-base-200 shadow">
                         <div className="card-body">
                             <h2 className="card-title mb-4 justify-between">
                                 <div>
-                                    <i className="fa-duotone fa-regular fa-ellipsis"></i>
+                                    <i className="fa-duotone fa-regular fa-ellipsis mr-2"></i>
                                     Actions
                                 </div>
                                 <div className="mt-1">

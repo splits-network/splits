@@ -91,7 +91,7 @@ const getLocationLabel = (compatibility: string) => {
 export default function AIReviewPanel({ aiReviewId }: AIReviewPanelProps) {
     const { getToken } = useAuth();
     const [loading, setLoading] = useState(true);
-    const [aiReview, setAIReview] = useState<AIReview | null>(null);
+    const [aiReview, setAIReview] = useState<any | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [requesting, setRequesting] = useState(false);
 
@@ -107,7 +107,7 @@ export default function AIReviewPanel({ aiReviewId }: AIReviewPanelProps) {
                 const client = createAuthenticatedClient(token);
 
                 // Fetch AI review
-                const response = await client.get<{ data: AIReview }>(`/ai-reviews/${aiReviewId}`);
+                const response = await client.get<{ data: any }>(`/ai-reviews/${aiReviewId}`);
                 console.log('Fetched AI review:', response.data);
                 setAIReview(response.data);
                 setError(null);
@@ -297,11 +297,11 @@ export default function AIReviewPanel({ aiReviewId }: AIReviewPanelProps) {
                 )}
 
                 {/* Skills Match */}
-                {(aiReview.skills_match_percentage !== null) && (
+                {(aiReview.skills_match.match_percentage !== null) && (
                     <div className="">
                         <h3 className="font-semibold text-lg mb-2">Skills Analysis</h3>
 
-                        {aiReview.skills_match_percentage !== null && (
+                        {aiReview.skills_match.match_percentage !== null && (
                             <div className="flex items-center gap-2 mb-2">
                                 <span className="text-sm">Skills Match:</span>
                                 <div className="flex-1">
@@ -311,7 +311,7 @@ export default function AIReviewPanel({ aiReviewId }: AIReviewPanelProps) {
                                         max="100"
                                     ></progress>
                                 </div>
-                                <span className="text-sm font-semibold">{aiReview.skills_match_percentage}%</span>
+                                <span className="text-sm font-semibold">{aiReview.skills_match.match_percentage}%</span>
                             </div>
                         )}
                     </div>
