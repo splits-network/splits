@@ -108,7 +108,6 @@ export default function AIReviewPanel({ aiReviewId }: AIReviewPanelProps) {
 
                 // Fetch AI review
                 const response = await client.get<{ data: any }>(`/ai-reviews/${aiReviewId}`);
-                console.log('Fetched AI review:', response.data);
                 setAIReview(response.data);
                 setError(null);
             } catch (err) {

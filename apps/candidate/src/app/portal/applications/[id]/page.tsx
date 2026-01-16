@@ -117,7 +117,6 @@ export default async function ApplicationDetailPage({
         return notFound();
     }
 
-    console.log('Application Detail:', { application, job, company, recruiter });
     return (
         <div className="container mx-auto px-4 space-y-4">
             {/* Breadcrumbs */}
