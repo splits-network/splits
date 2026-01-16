@@ -213,14 +213,6 @@ export default function CompanyDashboard() {
         <div className="space-y-6 animate-fade-in">
             {/* Welcome Section - Enhanced gradient card */}
             <div className="">
-                {/* Decorative pattern */}
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/20 -translate-y-1/2 translate-x-1/4"></div>
-                    <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-white/10 translate-y-1/2 -translate-x-1/4"></div>
-                    <div className="absolute top-1/2 right-0 -translate-x-1/2 -translate-y-1/2">
-                        <i className='fa-duotone fa-regular fa-building fa-8x text-primary' />
-                    </div>
-                </div>
 
                 <div className="relative p-4 md:p-4">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
