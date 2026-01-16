@@ -274,7 +274,7 @@ export default function AIReviewPanel({ aiReviewId }: AIReviewPanelProps) {
                             Your Strengths
                         </h3>
                         <ul className="list-disc list-inside space-y-1">
-                            {aiReview.strengths.map((strength, index) => (
+                            {aiReview.strengths.map((strength: any, index: any) => (
                                 <li key={index} className="text-base-content/80">{strength}</li>
                             ))}
                         </ul>
@@ -289,7 +289,7 @@ export default function AIReviewPanel({ aiReviewId }: AIReviewPanelProps) {
                             Areas to Address
                         </h3>
                         <ul className="list-disc list-inside space-y-1">
-                            {aiReview.concerns.map((concern, index) => (
+                            {aiReview.concerns.map((concern: string, index: number) => (
                                 <li key={index} className="text-base-content/80">{concern}</li>
                             ))}
                         </ul>
@@ -322,7 +322,7 @@ export default function AIReviewPanel({ aiReviewId }: AIReviewPanelProps) {
                     <div className="flex flex-wrap gap-1 mt-1">
                         {aiReview.skills_match.matched_skills && aiReview.skills_match.matched_skills.length > 0 ? (
                             <ul className="list-disc list-inside marker:text-success marker:text-xl">
-                                {aiReview.skills_match.matched_skills.map((skill, index) => (
+                                {aiReview.skills_match.matched_skills.map((skill: string, index: number) => (
                                     <li key={index} className="text-sm">{skill}</li>
                                 ))}
                             </ul>
@@ -337,7 +337,7 @@ export default function AIReviewPanel({ aiReviewId }: AIReviewPanelProps) {
                     <div className="flex flex-wrap gap-1 mt-1">
                         {aiReview.skills_match.missing_skills && aiReview.skills_match.missing_skills.length > 0 ? (
                             <ul className="list-disc list-inside marker:text-warning marker:text-xl">
-                                {aiReview.skills_match.missing_skills.map((skill, index) => (
+                                {aiReview.skills_match.missing_skills.map((skill: string, index: number) => (
                                     <li key={index} className="text-sm">{skill}</li>
                                 ))}
                             </ul>

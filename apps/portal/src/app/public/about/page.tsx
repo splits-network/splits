@@ -10,7 +10,7 @@ export default function AboutPage() {
     return (
         <>
             {/* Hero Section */}
-            <section className="hero bg-gradient-to-r from-primary to-accent text-primary-content py-20">
+            <section className="hero bg-linear-to-r from-primary to-accent text-primary-content py-20">
                 <div className="hero-content text-center max-w-5xl">
                     <div>
                         <h1 className="text-5xl font-bold mb-6">
