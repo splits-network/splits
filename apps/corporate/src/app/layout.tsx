@@ -47,7 +47,7 @@ export default function RootLayout({
     return (
         <html lang="en" data-theme="splits-light">
             <head>
-                <link rel="stylesheet" href="https://kit.fontawesome.com/240c9f263d.css" crossOrigin="anonymous" />
+                <link rel="stylesheet" href="https://kit.fontawesome.com/728c8ddec8.css" crossOrigin="anonymous" />
             </head>
             <body className="antialiased">
                 <ServiceStatusBanner />
