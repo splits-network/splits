@@ -86,3 +86,383 @@ The /docs/migrations/V2-ARCHITECTURE-IMPLEMENTATION_GUIDE.md outlines the high-l
 
 - Public list pages now seed SSR data from the API before hydrating client lists (candidate jobs + recruiter marketplace). Avoid reintroducing client-only fetch-only shells on public routes.
 - Status pages are split into server wrappers + client components and accept `initialStatuses` in `useServiceHealth`. Keep the server wrapper fetching `/api-health/*` so crawlers see real status content.
+
+## CRA Schema Specifications (2026-01-15)
+
+**Date:** January 16, 2026  
+**Status:** 📋 AUTHORITATIVE SPECIFICATION  
+**Purpose:** Define the correct CRA schema for fiscal tracking and deal management
+
+**Authoritative Reference**: See `docs/guidance/cra-schema-specifications.md` for complete specification.
+
+### Core Schema Principles
+
+- **CRA is the "deal record"** tracking candidate-job pairings through gate stages, NOT the attribution ledger (that's placement_snapshot).
+- **Separated recruiter roles**: `candidate_recruiter_id` (Closer - represents candidate) and `company_recruiter_id` (Client/Hiring Facilitator - represents company) are distinct marketplace roles.
+- **Sourcer attribution**: **NOT stored on CRA**. Authority lives in dedicated `candidate_sourcers` and `company_sourcers` tables with permanent attribution (first recruiter wins, account-based).
+- **Job owner**: `job_owner_recruiter_id` on jobs table (NOT CRA). Only recruiters receive job owner commission (company employees excluded).
+- **Required fields**: `candidate_id`, `job_id`, `proposed_by` must be NOT NULL (CRA without these is meaningless).
+- **Uniqueness**: Only one active CRA per (candidate_id, job_id) pair. Enforced via partial unique constraint excluding terminal states.
+
+### Schema Quick Reference
+
+```sql
+CREATE TABLE candidate_role_assignments (
+    -- Core (REQUIRED)
+    id UUID PRIMARY KEY,
+    candidate_id UUID NOT NULL,          -- FK to candidates
+    job_id UUID NOT NULL,                -- FK to jobs
+    proposed_by UUID NOT NULL,           -- FK to users (tracks initiator)
+    
+    -- Recruiter roles (OPTIONAL)
+    candidate_recruiter_id UUID,         -- Closer role
+    company_recruiter_id UUID,           -- Client/Hiring Facilitator role
+    
+    -- NOTE: Sourcer attribution NOT stored on CRA
+    -- Query via JOINs to candidate_sourcers and company_sourcers tables
+    
+    -- State & gates
+    state TEXT NOT NULL,
+    current_gate TEXT,
+    gate_sequence JSONB,
+    gate_history JSONB,
+    
+    -- Unique constraint (one active deal per candidate+job)
+    UNIQUE (candidate_id, job_id) WHERE state NOT IN ('rejected', 'declined', 'withdrawn', 'timed_out', 'closed')
+);
+```
+
+### Critical Anti-Patterns to Avoid
+
+1. **DO NOT store money rates on CRA** - Split percentages belong on `placement_snapshot` (immutable money ledger).
+2. **DO NOT store sourcer attribution on CRA** - Use dedicated `candidate_sourcers` and `company_sourcers` tables with timestamps (permanent attribution).
+3. **DO NOT store job_owner on CRA** - Store as `job_owner_recruiter_id` on jobs table (references recruiters, not users).
+4. **DO NOT pay job owner commission to company employees** - Only recruiters who create job postings get job owner payout.
+5. **DO NOT create child endpoints** - Use top-level `/api/v2/candidate-role-assignments` with filters, not `/applications/:id/cra`.
+6. **DO NOT conflate recruiter types** - `candidate_recruiter_id` and `company_recruiter_id` are distinct roles with different permissions and revenue shares.
+
+### Migration Path
+
+When implementing CRA schema updates:
+1. Rename `recruiter_id` → `candidate_recruiter_id`
+2. Add `company_recruiter_id` column
+3. **Create sourcer tables** (`candidate_sourcers`, `company_sourcers`) with UNIQUE constraints
+4. Add `job_owner_recruiter_id` to jobs table (references recruiters)
+5. Enforce NOT NULL on `candidate_id`, `job_id`, `proposed_by`
+6. Add partial unique constraint on (candidate_id, job_id)
+7. Create indexes on all new columns and tables
+8. Backfill sourcer data from existing candidates/companies if columns exist
+9. Create `placement_snapshot` table for money attribution
+
+See migration scripts:
+- `services/ats-service/migrations/029_split_cra_recruiter_columns.sql`
+- `services/ats-service/migrations/030_create_sourcer_tables.sql`
+- `services/ats-service/migrations/031_add_job_owner_recruiter.sql`
+- `services/billing-service/migrations/020_create_placement_snapshot.sql`
+
+### TypeScript Interface
+
+```typescript
+export interface CandidateRoleAssignment {
+    id: string;
+    candidate_id: string;                    // REQUIRED
+    job_id: string;                          // REQUIRED
+    proposed_by: string;                     // REQUIRED
+    candidate_recruiter_id: string | null;   // Optional
+    company_recruiter_id: string | null;     // Optional
+    // NOTE: Sourcer attribution NOT on CRA - query via candidate_sourcers/company_sourcers tables
+    state: CRAState;
+    current_gate: string | null;
+    // ... other fields
+}
+```
+
+### Query Patterns
+
+```sql
+-- Find CRAs where recruiter represents candidate
+SELECT * FROM candidate_role_assignments WHERE candidate_recruiter_id = $1;
+
+-- Find CRAs where recruiter represents company
+SELECT * FROM candidate_role_assignments WHERE company_recruiter_id = $1;
+
+-- Check for existing deal (respects unique constraint)
+SELECT * FROM candidate_role_assignments 
+WHERE candidate_id = $1 AND job_id = $2 
+AND state NOT IN ('rejected', 'declined', 'withdrawn', 'timed_out', 'closed');
+
+-- Gate routing (both recruiter types)
+SELECT 
+    cra.*,
+    cr.name as candidate_recruiter_name,
+    cmr.name as company_recruiter_name
+FROM candidate_role_assignments cra
+LEFT JOIN recruiters cr ON cr.id = cra.candidate_recruiter_id
+LEFT JOIN recruiters cmr ON cmr.id = cra.company_recruiter_id
+WHERE cra.id = $1;
+```
+
+### Documentation Index
+
+- **Authoritative Spec**: `docs/guidance/cra-schema-specifications.md` (complete reference)
+- **Quick Reference**: `docs/guidance/cra-schema-quick-reference.md` (developer lookup)
+- **Implementation Plan**: `docs/flows/plan-applicationProposalFlowImplementationAlignment.prompt.md` (section 6.3)
+- **Phase 2 Gates**: `docs/flows/PHASE-2-GATE-REVIEW-IMPLEMENTATION-PLAN.md` (schema + routing)
+- **Tracking Doc**: `CRA-SCHEMA-GUIDANCE-UPDATE.md` (implementation checklist)
+---
+
+## Sourcer Permanent Attribution Tables (2026-01-16)
+
+**Sourcer Definition:** The recruiter who first brings a candidate or company to the platform.
+
+### Sourcer Tables Schema
+
+```sql
+-- Candidate sourcing attribution (permanent record)
+CREATE TABLE candidate_sourcers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    candidate_id UUID NOT NULL REFERENCES candidates(id) ON DELETE CASCADE,
+    sourcer_recruiter_id UUID NOT NULL REFERENCES recruiters(id),
+    sourced_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    
+    -- Only one sourcer per candidate (first recruiter wins)
+    UNIQUE(candidate_id)
+);
+
+-- Company sourcing attribution (permanent record)
+CREATE TABLE company_sourcers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+    sourcer_recruiter_id UUID NOT NULL REFERENCES recruiters(id),
+    sourced_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    
+    -- Only one sourcer per company (first recruiter wins)
+    UNIQUE(company_id)
+);
+
+CREATE INDEX idx_candidate_sourcers_recruiter ON candidate_sourcers(sourcer_recruiter_id);
+CREATE INDEX idx_company_sourcers_recruiter ON company_sourcers(sourcer_recruiter_id);
+```
+
+### Critical Business Rules
+
+1. **Permanence**: Sourcer attribution is **permanent** while the recruiter maintains an active account
+2. **One Sourcer**: Only **one sourcer** per candidate and one sourcer per company (first recruiter wins)
+3. **Inactive Handling**: If sourcer's account becomes inactive, sourcer fee is **NOT paid out** (platform consumes remainder)
+4. **Commission Structure**: Sourcer gets base 6% commission + bonus (0-4%) based on subscription tier
+5. **No Time Limit**: Permanence is account-based, not time-based (no expiration)
+6. **No Transfer**: If sourcer leaves, attribution remains but no payout (platform consumes fee, no transfer to another recruiter)
+
+### Why Separate Tables?
+
+- Tracks historical timestamp (when sourcing occurred)
+- Enables future capabilities (e.g., handling candidate reactivation)
+- Cleaner than denormalized columns on multiple tables
+- Authority is explicit and cannot be accidentally overwritten
+- UNIQUE constraints enforce one sourcer rule
+
+### Query Patterns
+
+```sql
+-- Get candidate's sourcer (if exists)
+SELECT 
+    cs.sourcer_recruiter_id,
+    r.name as sourcer_name,
+    cs.sourced_at,
+    r.status as sourcer_account_status
+FROM candidate_sourcers cs
+JOIN recruiters r ON r.id = cs.sourcer_recruiter_id
+WHERE cs.candidate_id = $1;
+
+-- Get company's sourcer (if exists)
+SELECT 
+    cos.sourcer_recruiter_id,
+    r.name as sourcer_name,
+    cos.sourced_at,
+    r.status as sourcer_account_status
+FROM company_sourcers cos
+JOIN recruiters r ON r.id = cos.sourcer_recruiter_id
+WHERE cos.company_id = $1;
+
+-- Check if sourcer account is active before payout
+SELECT 
+    cs.sourcer_recruiter_id,
+    r.status
+FROM candidate_sourcers cs
+JOIN recruiters r ON r.id = cs.sourcer_recruiter_id
+WHERE cs.candidate_id = $1
+  AND r.status = 'active';  -- Only pay if active
+```
+
+---
+
+## Five-Role Commission Structure (2026-01-16)
+
+Every placement has up to **5 commission-earning roles** (all nullable):
+
+1. **Candidate Recruiter** ("Closer") - Represents the candidate
+2. **Job Owner** ("Specs Owner") - Created the job posting (recruiter only)
+3. **Company Recruiter** ("Client/Hiring Facilitator") - Represents the company
+4. **Company Sourcer** ("BD") - First brought company to platform
+5. **Candidate Sourcer** ("Discovery") - First brought candidate to platform
+
+### Subscription Tier Rates
+
+| Role | Premium ($249/mo) | Paid ($99/mo) | Free ($0/mo) |
+|------|-------------------|---------------|-------------|
+| Candidate Recruiter | 40% | 30% | 20% |
+| Job Owner | 20% | 15% | 10% |
+| Company Recruiter | 20% | 15% | 10% |
+| Company Sourcer | 6% + 4% = **10%** | 6% + 2% = **8%** | **6%** |
+| Candidate Sourcer | 6% + 4% = **10%** | 6% + 2% = **8%** | **6%** |
+| **Platform Remainder** | **0%** | **24%** | **48%** |
+
+### Sourcer Commission Breakdown
+
+- **Base rate**: 6% (all tiers)
+- **Premium bonus**: +4% = 10% total
+- **Paid bonus**: +2% = 8% total
+- **Free bonus**: +0% = 6% total
+- **Only paid while sourcer account is active**
+
+### Nullable Roles & Platform Remainder
+
+**All roles are nullable:**
+- Direct candidates (no candidate recruiter)
+- Direct companies (no company recruiter)
+- Companies not sourced (no company sourcer)
+- Candidates not sourced (no candidate sourcer)
+- Jobs created by company employees (no job owner payout)
+
+**When role is NULL:** That commission percentage goes to platform as remainder.
+
+**Example (Paid Plan, Direct Candidate):**
+- Candidate Recruiter: NULL → 30% to platform
+- Job Owner: 15%
+- Company Recruiter: 15%
+- Company Sourcer: 8%
+- Candidate Sourcer: 8%
+- **Platform Total:** 30% + 24% = 54%
+
+### Job Owner Rules
+
+- **Location**: `jobs.job_owner_recruiter_id` (NOT on CRA, NOT on users)
+- **Type**: References `recruiters(id)` (enforces recruiter-only)
+- **Nullable**: YES (company employees can create jobs without commission)
+- **Business Rule**: Only recruiters who post jobs on behalf of companies get this payout
+- **Company employees**: hiring_manager and company_admin do NOT receive job owner commission
+
+### Money Snapshot at Hire (Immutable)
+
+All commission rates and role assignments must be snapshotted in `placement_snapshot` table at hire time:
+
+```sql
+CREATE TABLE placement_snapshot (
+    placement_id UUID PRIMARY KEY REFERENCES placements(id),
+    
+    -- Role assignments (snapshotted at hire)
+    candidate_recruiter_id UUID,
+    company_recruiter_id UUID,
+    job_owner_recruiter_id UUID,
+    candidate_sourcer_recruiter_id UUID,
+    company_sourcer_recruiter_id UUID,
+    
+    -- Commission rates (snapshotted at hire)
+    candidate_recruiter_rate DECIMAL(5,2),
+    company_recruiter_rate DECIMAL(5,2),
+    job_owner_rate DECIMAL(5,2),
+    candidate_sourcer_rate DECIMAL(5,2),
+    company_sourcer_rate DECIMAL(5,2),
+    
+    -- Total fee and subscription tier at hire
+    total_placement_fee DECIMAL(10,2),
+    subscription_tier TEXT,
+    
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+**Critical Rules:**
+- CRA tracks deal state and role assignments (mutable during deal)
+- placement_snapshot tracks money attribution (immutable after hire)
+- Commission calculations ALWAYS use placement_snapshot (never live CRA data)
+- If sourcer account becomes inactive after hire, payout still uses snapshotted rate
+
+### Attribution Chain
+
+```
+Permanent Sourcer Attribution (Never Changes):
+    candidate_sourcers.sourcer_recruiter_id (first recruiter wins)
+    company_sourcers.sourcer_recruiter_id (first recruiter wins)
+    candidate_sourcers.sourced_at (timestamp proof)
+    company_sourcers.sourced_at (timestamp proof)
+
+Deal Attribution (Live During Deal):
+    candidate_role_assignments.candidate_recruiter_id (Closer role)
+    candidate_role_assignments.company_recruiter_id (Client role)
+    jobs.job_owner_recruiter_id (Specs Owner role)
+    
+Money Attribution (Immutable Snapshot at Hire):
+    placement_snapshot.candidate_recruiter_id
+    placement_snapshot.candidate_recruiter_rate
+    placement_snapshot.company_recruiter_id
+    placement_snapshot.company_recruiter_rate
+    placement_snapshot.job_owner_recruiter_id
+    placement_snapshot.job_owner_rate
+    placement_snapshot.candidate_sourcer_recruiter_id
+    placement_snapshot.candidate_sourcer_rate
+    placement_snapshot.company_sourcer_recruiter_id
+    placement_snapshot.company_sourcer_rate
+    placement_snapshot.total_placement_fee
+    placement_snapshot.subscription_tier
+```
+
+### Commission Calculation Examples
+
+**Scenario 1: Paid Plan, All 5 Roles Filled**
+```
+Placement Fee: $20,000
+Subscription: Paid ($99/month)
+
+Candidate Recruiter: 30% = $6,000
+Job Owner: 15% = $3,000
+Company Recruiter: 15% = $3,000
+Company Sourcer: 8% = $1,600
+Candidate Sourcer: 8% = $1,600
+Platform: 24% = $4,800
+
+Total: 100% = $20,000 ✅
+```
+
+**Scenario 2: Premium Plan, Direct Candidate (No Candidate Recruiter)**
+```
+Placement Fee: $20,000
+Subscription: Premium ($249/month)
+
+Candidate Recruiter: NULL → 40% to platform
+Job Owner: 20% = $4,000
+Company Recruiter: 20% = $4,000
+Company Sourcer: 10% = $2,000
+Candidate Sourcer: 10% = $2,000
+Platform: 40% (from NULL) + 0% (base) = $8,000
+
+Total: 100% = $20,000 ✅
+```
+
+**Scenario 3: Free Plan, Inactive Company Sourcer**
+```
+Placement Fee: $20,000
+Subscription: Free ($0/month)
+Company Sourcer: INACTIVE (no payout)
+
+Candidate Recruiter: 20% = $4,000
+Job Owner: 10% = $2,000
+Company Recruiter: 10% = $2,000
+Company Sourcer: NULL (inactive) → 6% to platform
+Candidate Sourcer: 6% = $1,200
+Platform: 48% + 6% (from inactive) = $10,800
+
+Total: 100% = $20,000 ✅
+```

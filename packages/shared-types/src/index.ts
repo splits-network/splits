@@ -10,6 +10,9 @@ export * from './events';
 export * from './list-params';
 export * from './list-response';
 
+// Commission structure (five-role model, tier rates, breakdown calculations)
+export * from './commission';
+
 // Candidate role assignment business logic types (re-uses database type)
 export * from './candidate-role-assignments';
 

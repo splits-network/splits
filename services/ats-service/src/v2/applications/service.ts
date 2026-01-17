@@ -609,14 +609,16 @@ export class ApplicationServiceV2 {
         });
 
         // Create CandidateRoleAssignment if assignment service is available
+        // Note: For direct candidate applications (no recruiter), CRA is optional
         let assignment = null;
         if (this.assignmentService && this.assignmentService.create) {
             try {
                 assignment = await this.assignmentService.create(clerkUserId, {
                     candidate_id: updated.candidate_id,
                     job_id: updated.job_id,
-                    recruiter_id: updated.recruiter_id,
-                    state: 'proposed'
+                    proposed_by: clerkUserId,
+                    state: 'proposed',
+                    // candidate_recruiter_id and company_recruiter_id will be null for direct applications
                 });
             } catch (error) {
                 console.error('Failed to create CandidateRoleAssignment:', error);

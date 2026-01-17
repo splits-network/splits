@@ -68,7 +68,9 @@ export interface Job {
     show_salary_range: boolean;
     splits_fee_percentage: number; // Default 50%
     job_owner_id?: string; // Splits Network or recruiting partner GUID
-    recruiter_id?: string;
+    recruiter_id?: string; // Legacy: company recruiter (Client/Hiring Facilitator role) - use company_recruiter_id
+    company_recruiter_id?: string; // Company recruiter (Client/Hiring Facilitator role) - represents company
+    job_owner_recruiter_id?: string; // Job owner (Specs Owner role) - recruiter who posted job (recruiter-only, external postings only)
     status: JobStatus;
     created_at: Date;
     updated_at: Date;

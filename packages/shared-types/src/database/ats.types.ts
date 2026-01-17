@@ -112,6 +112,28 @@ export type CandidateSourcerInsert = DbTableInsert<'candidate_sourcers'>;
 export type CandidateSourcerUpdate = DbTableUpdate<'candidate_sourcers'>;
 
 // ============================================================================
+// COMPANY SOURCERS (PERMANENT ATTRIBUTION)
+// ============================================================================
+
+/**
+ * Company Sourcer - Permanent attribution of company sourcing
+ * 
+ * Tracks the first recruiter who brought a company to the platform.
+ * This is permanent attribution (first recruiter wins) and only one
+ * sourcer per company is allowed.
+ * 
+ * Key Rules:
+ * - Only ONE sourcer per company (UNIQUE constraint on company_id)
+ * - First recruiter wins - no changes allowed
+ * - Sourcer gets 6% base + bonus (0-4%) based on subscription tier
+ * - Commission paid only while sourcer account is active
+ * - If sourcer becomes inactive, platform consumes their fee (no transfer)
+ */
+export type CompanySourcer = DbTable<'company_sourcers'>;
+export type CompanySourcerInsert = DbTableInsert<'company_sourcers'>;
+export type CompanySourcerUpdate = DbTableUpdate<'company_sourcers'>;
+
+// ============================================================================
 // CANDIDATE ROLE ASSIGNMENTS (PROPOSALS)
 // ============================================================================
 

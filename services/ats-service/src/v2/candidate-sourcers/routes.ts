@@ -107,7 +107,7 @@ export async function candidateSourcerRoutes(app: FastifyInstance, service: Cand
 
         const sourcer = await service.create(clerkUserId, {
             candidate_id: body.candidate_id,
-            sourcer_user_id: body.sourcer_user_id,
+            sourcer_recruiter_id: body.sourcer_recruiter_id,
             sourcer_type: body.sourcer_type,
             sourced_at: body.sourced_at ? new Date(body.sourced_at) : undefined,
             protection_window_days: body.protection_window_days,

@@ -142,7 +142,7 @@ export class CandidateSourcerRepository {
             .from('candidate_sourcers')
             .insert({
                 candidate_id: sourcerData.candidate_id,
-                sourcer_user_id: sourcerData.sourcer_user_id,
+                sourcer_recruiter_id: sourcerData.sourcer_recruiter_id,
                 sourcer_type: sourcerData.sourcer_type,
                 sourced_at: sourcerData.sourced_at || new Date().toISOString(),
                 protection_window_days: sourcerData.protection_window_days || 365,
@@ -214,7 +214,7 @@ export class CandidateSourcerRepository {
 
     async checkProtectionStatus(candidate_id: string): Promise<{
         has_protection: boolean;
-        sourcer_user_id?: string;
+        sourcer_recruiter_id?: string;
         protection_expires_at?: Date;
     }> {
         const sourcer = await this.findByCandidate(candidate_id);
@@ -229,8 +229,34 @@ export class CandidateSourcerRepository {
 
         return {
             has_protection: hasActiveProtection,
-            sourcer_user_id: sourcer.sourcer_user_id ?? undefined,
+            sourcer_recruiter_id: sourcer.sourcer_recruiter_id ?? undefined,
             protection_expires_at: expiresAt,
         };
+    }
+
+    /**
+     * Get sourcer by candidate ID (alias for findByCandidate for clarity)
+     */
+    async getByCandidateId(candidate_id: string): Promise<CandidateSourcer | null> {
+        return this.findByCandidate(candidate_id);
+    }
+
+    /**
+     * Check if candidate has an active sourcer (sourcer exists and recruiter account is active)
+     */
+    async isSourcerActive(candidate_id: string): Promise<boolean> {
+        const sourcer = await this.findByCandidate(candidate_id);
+        if (!sourcer) return false;
+
+        // Check if sourcer's recruiter account is active
+        const { data: recruiter, error } = await this.supabase
+            .from('recruiters')
+            .select('status')
+            .eq('id', sourcer.sourcer_recruiter_id)
+            .single();
+
+        if (error || !recruiter) return false;
+
+        return recruiter.status === 'active';
     }
 }

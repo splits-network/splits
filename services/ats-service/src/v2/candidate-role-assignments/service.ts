@@ -71,7 +71,8 @@ export class CandidateRoleAssignmentServiceV2 {
             assignment_id: assignment.id,
             job_id: assignment.job_id,
             candidate_id: assignment.candidate_id,
-            recruiter_id: assignment.recruiter_id,
+            candidate_recruiter_id: assignment.candidate_recruiter_id,
+            company_recruiter_id: assignment.company_recruiter_id,
             state: assignment.state,
         });
 
@@ -105,7 +106,8 @@ export class CandidateRoleAssignmentServiceV2 {
             assignment_id: id,
             job_id: updated.job_id,
             candidate_id: updated.candidate_id,
-            recruiter_id: updated.recruiter_id,
+            candidate_recruiter_id: updated.candidate_recruiter_id,
+            company_recruiter_id: updated.company_recruiter_id,
             old_state: existing.state,
             new_state: updated.state,
         });
@@ -125,7 +127,8 @@ export class CandidateRoleAssignmentServiceV2 {
             assignment_id: id,
             job_id: assignment.job_id,
             candidate_id: assignment.candidate_id,
-            recruiter_id: assignment.recruiter_id,
+            candidate_recruiter_id: assignment.candidate_recruiter_id,
+            company_recruiter_id: assignment.company_recruiter_id,
         });
     }
 
@@ -140,14 +143,20 @@ export class CandidateRoleAssignmentServiceV2 {
         recruiterId: string,
         applicationState: 'draft' | 'screen' | 'submitted' | 'interview' | 'offer' | 'hired' | 'rejected'
     ): Promise<CandidateRoleAssignment> {
-        // Check if assignment exists
-        const existing = await this.repository.findByJobCandidateRecruiter(
-            jobId,
-            candidateId,
-            recruiterId
+        // Check if assignment exists for this job and candidate
+        const { data: existingAssignments } = await this.repository.list(clerkUserId, {
+            job_id: jobId,
+            candidate_id: candidateId,
+            limit: 10
+        });
+
+        // Filter to assignments involving this recruiter in either role
+        const recruiterAssignment = existingAssignments.find(a =>
+            a.candidate_recruiter_id === recruiterId ||
+            a.company_recruiter_id === recruiterId
         );
 
-        if (existing) {
+        if (recruiterAssignment) {
             // Update existing assignment based on application state
             const assignmentState = this.mapApplicationStateToAssignmentState(applicationState);
             const now = new Date();
@@ -157,13 +166,13 @@ export class CandidateRoleAssignmentServiceV2 {
             };
 
             // Set timestamps based on state
-            if (assignmentState === 'submitted' && !existing.submitted_at) {
+            if (assignmentState === 'submitted_to_company' && !recruiterAssignment.submitted_at) {
                 updates.submitted_at = now;
-            } else if (assignmentState === 'closed' && !existing.closed_at) {
+            } else if ((assignmentState === 'hired' || assignmentState === 'rejected') && !recruiterAssignment.closed_at) {
                 updates.closed_at = now;
             }
 
-            return this.update(existing.id, clerkUserId, updates);
+            return this.update(recruiterAssignment.id, clerkUserId, updates);
         } else {
             // Create new assignment (auto-accepted)
             const now = new Date();
@@ -172,7 +181,7 @@ export class CandidateRoleAssignmentServiceV2 {
             return this.create(clerkUserId, {
                 job_id: jobId,
                 candidate_id: candidateId,
-                recruiter_id: recruiterId,
+                candidate_recruiter_id: recruiterId,
                 state: assignmentState,
                 proposed_by: clerkUserId,
             });
@@ -206,15 +215,21 @@ export class CandidateRoleAssignmentServiceV2 {
         // Create proposal with 72-hour response window
         const responseDue = new Date(Date.now() + 72 * 60 * 60 * 1000);
 
-        const assignment = await this.create(clerkUserId, {
+        // Determine which recruiter field to use based on context
+        // TODO: In Phase 2, determine if recruiter represents candidate or company
+        // For now, default to candidate_recruiter_id
+        const createInput: CandidateRoleAssignmentCreateInput = {
             job_id: input.job_id,
             candidate_id: input.candidate_id,
-            recruiter_id: context.recruiterId!,
+            candidate_recruiter_id: context.recruiterId || undefined,  // Default to candidate representation
+            company_recruiter_id: undefined,  // Set when recruiter represents company
             state: 'proposed',
-            proposed_by: context.identityUserId || undefined,
+            proposed_by: context.identityUserId!,
             proposal_notes: input.proposal_notes,
             response_due_at: responseDue,
-        });
+        };
+
+        const assignment = await this.create(clerkUserId, createInput);
 
         // Publish proposal event for notifications
         await this.eventPublisher?.publish('candidate_role_assignment.proposed', {
@@ -244,7 +259,7 @@ export class CandidateRoleAssignmentServiceV2 {
 
         const now = new Date();
         const updated = await this.update(assignmentId, clerkUserId, {
-            state: 'accepted',
+            state: 'in_process',
             accepted_at: now,
             response_notes: responseNotes,
         });
@@ -253,7 +268,8 @@ export class CandidateRoleAssignmentServiceV2 {
             assignment_id: assignmentId,
             job_id: assignment.job_id,
             candidate_id: assignment.candidate_id,
-            recruiter_id: assignment.recruiter_id,
+            candidate_recruiter_id: assignment.candidate_recruiter_id,
+            company_recruiter_id: assignment.company_recruiter_id,
         });
 
         return updated;
@@ -284,7 +300,8 @@ export class CandidateRoleAssignmentServiceV2 {
             assignment_id: assignmentId,
             job_id: assignment.job_id,
             candidate_id: assignment.candidate_id,
-            recruiter_id: assignment.recruiter_id,
+            candidate_recruiter_id: assignment.candidate_recruiter_id,
+            company_recruiter_id: assignment.company_recruiter_id,
         });
 
         return updated;
@@ -305,12 +322,12 @@ export class CandidateRoleAssignmentServiceV2 {
             return null;
         }
 
-        if (assignment.state === 'submitted' || assignment.state === 'closed') {
+        if (assignment.state === 'submitted_to_company' || assignment.state === 'hired' || assignment.state === 'withdrawn') {
             return assignment; // Already in final state
         }
 
         return this.update(assignment.id, clerkUserId, {
-            state: 'submitted',
+            state: 'submitted_to_company',
             submitted_at: new Date(),
         });
     }
@@ -330,12 +347,12 @@ export class CandidateRoleAssignmentServiceV2 {
             return null;
         }
 
-        if (assignment.state === 'closed') {
-            return assignment; // Already closed
+        if (assignment.state === 'hired' || assignment.state === 'withdrawn' || assignment.state === 'rejected') {
+            return assignment; // Already in terminal state
         }
 
         return this.update(assignment.id, clerkUserId, {
-            state: 'closed',
+            state: 'hired',
             closed_at: new Date(),
         });
     }
@@ -345,7 +362,12 @@ export class CandidateRoleAssignmentServiceV2 {
     private validateCreateInput(input: CandidateRoleAssignmentCreateInput): void {
         if (!input.job_id) throw new Error('job_id is required');
         if (!input.candidate_id) throw new Error('candidate_id is required');
-        if (!input.recruiter_id) throw new Error('recruiter_id is required');
+        if (!input.proposed_by) throw new Error('proposed_by is required');
+
+        // At least one recruiter required (candidate OR company)
+        if (!input.candidate_recruiter_id && !input.company_recruiter_id) {
+            throw new Error('At least one recruiter (candidate_recruiter_id or company_recruiter_id) is required');
+        }
     }
 
     private validateStateTransition(
@@ -353,12 +375,21 @@ export class CandidateRoleAssignmentServiceV2 {
         newState: CandidateRoleAssignmentState
     ): void {
         const validTransitions: Record<CandidateRoleAssignmentState, CandidateRoleAssignmentState[]> = {
-            proposed: ['accepted', 'declined', 'timed_out'],
-            accepted: ['submitted', 'closed'],
+            proposed: ['awaiting_candidate_recruiter', 'awaiting_company_recruiter', 'awaiting_company', 'submitted_to_company', 'declined', 'timed_out'],
+            awaiting_candidate_recruiter: ['awaiting_company_recruiter', 'awaiting_company', 'submitted_to_company', 'rejected'],
+            awaiting_company_recruiter: ['awaiting_company', 'submitted_to_company', 'rejected'],
+            awaiting_company: ['submitted_to_company', 'rejected'],
+            under_review: ['info_requested', 'submitted_to_company', 'rejected'],
+            info_requested: ['under_review', 'submitted_to_company', 'rejected'],
+            submitted_to_company: ['screen', 'in_process', 'rejected'],
+            screen: ['in_process', 'rejected'],
+            in_process: ['offer', 'rejected'],
+            offer: ['hired', 'declined', 'withdrawn'],
+            hired: [],
+            rejected: [],
             declined: [],
+            withdrawn: [],
             timed_out: [],
-            submitted: ['closed'],
-            closed: [],
         };
 
         const allowed = validTransitions[currentState] || [];
@@ -372,17 +403,21 @@ export class CandidateRoleAssignmentServiceV2 {
     ): CandidateRoleAssignmentState {
         switch (applicationState) {
             case 'draft':
+                return 'proposed';
             case 'screen':
-                return 'accepted';
+                return 'screen';
             case 'submitted':
+                return 'submitted_to_company';
             case 'interview':
+                return 'in_process';
             case 'offer':
-                return 'submitted';
+                return 'offer';
             case 'hired':
+                return 'hired';
             case 'rejected':
-                return 'closed';
+                return 'rejected';
             default:
-                return 'accepted';
+                return 'proposed';
         }
     }
 }

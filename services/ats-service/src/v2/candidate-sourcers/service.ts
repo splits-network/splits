@@ -31,8 +31,8 @@ export class CandidateSourcerServiceV2 {
         const context = await resolveAccessContext(this.supabase, clerkUserId);
 
         // Validate inputs
-        if (!data.candidate_id || !data.sourcer_user_id) {
-            throw new Error('candidate_id and sourcer_user_id are required');
+        if (!data.candidate_id || !data.sourcer_recruiter_id) {
+            throw new Error('candidate_id and sourcer_recruiter_id are required');
         }
 
         // Check if sourcer already exists
@@ -49,7 +49,7 @@ export class CandidateSourcerServiceV2 {
         }
 
         // Recruiters can only assign themselves
-        if (isRecruiter && data.sourcer_user_id !== context.identityUserId) {
+        if (isRecruiter && data.sourcer_recruiter_id !== context.recruiterId) {
             throw new Error('Recruiters can only assign sourcer credit to themselves');
         }
 
@@ -59,7 +59,7 @@ export class CandidateSourcerServiceV2 {
         // Publish event
         await this.eventPublisher.publish('candidate.sourced', {
             candidate_id: sourcer.candidate_id,
-            sourcer_user_id: sourcer.sourcer_user_id,
+            sourcer_recruiter_id: sourcer.sourcer_recruiter_id,
             sourcer_type: sourcer.sourcer_type,
             sourced_at: sourcer.sourced_at,
             protection_expires_at: sourcer.protection_expires_at,
@@ -113,14 +113,14 @@ export class CandidateSourcerServiceV2 {
         await this.eventPublisher.publish('candidate.sourcer_removed', {
             sourcer_id: id,
             candidate_id: sourcer.candidate_id,
-            sourcer_user_id: sourcer.sourcer_user_id,
+            sourcer_recruiter_id: sourcer.sourcer_recruiter_id,
             deleted_by: context.identityUserId,
         });
     }
 
     async checkProtection(candidate_id: string): Promise<{
         has_protection: boolean;
-        sourcer_user_id?: string;
+        sourcer_recruiter_id?: string;
         protection_expires_at?: Date;
     }> {
         return this.repository.checkProtectionStatus(candidate_id);

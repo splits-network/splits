@@ -40,7 +40,8 @@ export class CandidateRoleAssignmentRepository {
             sort_order = 'desc',
             job_id,
             candidate_id,
-            recruiter_id,
+            candidate_recruiter_id,
+            company_recruiter_id,
             state,
         } = params;
 
@@ -53,8 +54,8 @@ export class CandidateRoleAssignmentRepository {
 
         // Apply role-based filtering
         if (context.roles.includes('recruiter')) {
-            // Recruiters see only their own assignments
-            query = query.eq('recruiter_id', context.recruiterId);
+            // Recruiters see assignments where they represent either the candidate or company
+            query = query.or(`candidate_recruiter_id.eq.${context.recruiterId},company_recruiter_id.eq.${context.recruiterId}`);
         } else if (context.organizationIds.length > 0 && !context.isPlatformAdmin) {
             // Company users see assignments for their jobs
             const { data: companyJobs } = await this.supabase
@@ -87,8 +88,11 @@ export class CandidateRoleAssignmentRepository {
         if (candidate_id) {
             query = query.eq('candidate_id', candidate_id);
         }
-        if (recruiter_id) {
-            query = query.eq('recruiter_id', recruiter_id);
+        if (candidate_recruiter_id) {
+            query = query.eq('candidate_recruiter_id', candidate_recruiter_id);
+        }
+        if (company_recruiter_id) {
+            query = query.eq('company_recruiter_id', company_recruiter_id);
         }
         if (state) {
             if (Array.isArray(state)) {
@@ -135,7 +139,7 @@ export class CandidateRoleAssignmentRepository {
 
         // Apply role-based filtering
         if (context.roles.includes('recruiter')) {
-            query = query.eq('recruiter_id', context.recruiterId);
+            query = query.or(`candidate_recruiter_id.eq.${context.recruiterId},company_recruiter_id.eq.${context.recruiterId}`);
         } else if (context.organizationIds.length > 0 && !context.isPlatformAdmin) {
             // Verify job belongs to accessible company
             const assignment = await this.supabase
@@ -190,30 +194,6 @@ export class CandidateRoleAssignmentRepository {
     }
 
     /**
-     * Find assignment by job, candidate, and recruiter
-     */
-    async findByJobCandidateRecruiter(
-        jobId: string,
-        candidateId: string,
-        recruiterId: string
-    ): Promise<CandidateRoleAssignment | null> {
-        const { data, error } = await this.supabase
-            .from('candidate_role_assignments')
-            .select('*')
-            .eq('job_id', jobId)
-            .eq('candidate_id', candidateId)
-            .eq('recruiter_id', recruiterId)
-            .maybeSingle();
-
-        if (error) {
-            this.logger.error({ error, jobId, candidateId, recruiterId }, 'Failed to find assignment');
-            throw error;
-        }
-
-        return data;
-    }
-
-    /**
      * Create new assignment
      */
     async create(
@@ -234,8 +214,9 @@ export class CandidateRoleAssignmentRepository {
             .insert({
                 job_id: input.job_id,
                 candidate_id: input.candidate_id,
-                recruiter_id: input.recruiter_id,
-                state: input.state || 'accepted',
+                candidate_recruiter_id: input.candidate_recruiter_id,
+                company_recruiter_id: input.company_recruiter_id,
+                state: input.state || 'proposed',
                 proposed_at: now,
                 accepted_at: input.state === 'proposed' ? null : now,
                 response_due_at: input.response_due_at,
@@ -300,26 +281,26 @@ export class CandidateRoleAssignmentRepository {
     }
 
     /**
-     * Delete assignment (soft delete by setting state to closed)
+     * Delete assignment (soft delete by setting state to withdrawn)
      */
     async delete(id: string, clerkUserId: string): Promise<void> {
         await this.update(id, clerkUserId, {
-            state: 'closed',
+            state: 'withdrawn',
             closed_at: new Date(),
         });
     }
 
     /**
-     * Get assignments by recruiter
+     * Get assignments where recruiter represents the candidate (Closer role)
      */
-    async findByRecruiter(
+    async findByCandidateRecruiterId(
         recruiterId: string,
         filters?: Partial<CandidateRoleAssignmentFilters>
     ): Promise<CandidateRoleAssignment[]> {
         let query = this.supabase
             .from('candidate_role_assignments')
             .select('*')
-            .eq('recruiter_id', recruiterId);
+            .eq('candidate_recruiter_id', recruiterId);
 
         if (filters?.state) {
             if (Array.isArray(filters.state)) {
@@ -334,11 +315,88 @@ export class CandidateRoleAssignmentRepository {
         const { data, error } = await query;
 
         if (error) {
-            this.logger.error({ error, recruiterId }, 'Failed to find recruiter assignments');
+            this.logger.error({ error, recruiterId }, 'Failed to find candidate recruiter assignments');
             throw error;
         }
 
         return data || [];
+    }
+
+    /**
+     * Get assignments where recruiter represents the company (Client/Hiring Facilitator role)
+     */
+    async findByCompanyRecruiterId(
+        recruiterId: string,
+        filters?: Partial<CandidateRoleAssignmentFilters>
+    ): Promise<CandidateRoleAssignment[]> {
+        let query = this.supabase
+            .from('candidate_role_assignments')
+            .select('*')
+            .eq('company_recruiter_id', recruiterId);
+
+        if (filters?.state) {
+            if (Array.isArray(filters.state)) {
+                query = query.in('state', filters.state);
+            } else {
+                query = query.eq('state', filters.state);
+            }
+        }
+
+        query = query.order('created_at', { ascending: false });
+
+        const { data, error } = await query;
+
+        if (error) {
+            this.logger.error({ error, recruiterId }, 'Failed to find company recruiter assignments');
+            throw error;
+        }
+
+        return data || [];
+    }
+
+    /**
+     * Get assignments where recruiter is in either role (Candidate or Company recruiter)
+     * Useful for backward compatibility and general recruiter assignment queries
+     */
+    async findByEitherRecruiterId(
+        recruiterId: string,
+        filters?: Partial<CandidateRoleAssignmentFilters>
+    ): Promise<CandidateRoleAssignment[]> {
+        let query = this.supabase
+            .from('candidate_role_assignments')
+            .select('*')
+            .or(`candidate_recruiter_id.eq.${recruiterId},company_recruiter_id.eq.${recruiterId}`);
+
+        if (filters?.state) {
+            if (Array.isArray(filters.state)) {
+                query = query.in('state', filters.state);
+            } else {
+                query = query.eq('state', filters.state);
+            }
+        }
+
+        query = query.order('created_at', { ascending: false });
+
+        const { data, error } = await query;
+
+        if (error) {
+            this.logger.error({ error, recruiterId }, 'Failed to find recruiter assignments (either role)');
+            throw error;
+        }
+
+        return data || [];
+    }
+
+    /**
+     * @deprecated Use findByCandidateRecruiterId() or findByCompanyRecruiterId() instead
+     * Get assignments by recruiter (legacy method for backward compatibility)
+     */
+    async findByRecruiter(
+        recruiterId: string,
+        filters?: Partial<CandidateRoleAssignmentFilters>
+    ): Promise<CandidateRoleAssignment[]> {
+        // Delegate to findByEitherRecruiterId for backward compatibility
+        return this.findByEitherRecruiterId(recruiterId, filters);
     }
 
     /**

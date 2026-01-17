@@ -582,12 +582,154 @@ ALTER TABLE candidate_role_assignments ADD COLUMN IF NOT EXISTS gate_history JSO
 -- Routing flags (cached for query performance)
 ALTER TABLE candidate_role_assignments ADD COLUMN IF NOT EXISTS has_candidate_recruiter BOOLEAN DEFAULT FALSE;
 ALTER TABLE candidate_role_assignments ADD COLUMN IF NOT EXISTS has_company_recruiter BOOLEAN DEFAULT FALSE;
+
+-- **CRITICAL: Recruiter Role Separation (See docs/guidance/cra-schema-specifications.md)**
+-- Split ambiguous recruiter_id into two distinct roles:
+ALTER TABLE candidate_role_assignments RENAME COLUMN recruiter_id TO candidate_recruiter_id;
+ALTER TABLE candidate_role_assignments ADD COLUMN IF NOT EXISTS company_recruiter_id UUID REFERENCES recruiters(id);
+
+-- Enforce required fields
+ALTER TABLE candidate_role_assignments ALTER COLUMN candidate_id SET NOT NULL;
+ALTER TABLE candidate_role_assignments ALTER COLUMN job_id SET NOT NULL;
+ALTER TABLE candidate_role_assignments ALTER COLUMN proposed_by SET NOT NULL;
+
+-- Add uniqueness constraint (one active deal per candidate-job pair)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_cra_unique_active_deal 
+ON candidate_role_assignments(candidate_id, job_id) 
+WHERE state NOT IN ('rejected', 'declined', 'withdrawn', 'timed_out', 'closed');
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_cra_candidate_recruiter ON candidate_role_assignments(candidate_recruiter_id);
+CREATE INDEX IF NOT EXISTS idx_cra_company_recruiter ON candidate_role_assignments(company_recruiter_id);
 ```
+
+**CRA Schema Specifications:**
+- `candidate_recruiter_id` - Represents the candidate ("Closer" role)
+- `company_recruiter_id` - Represents the company ("Client/Hiring Facilitator" role)
+- `proposed_by` - User who initiated this CRA (NOT the same as recruiter IDs)
+- **NO sourcer columns on CRA** - Sourcer attribution tracked in separate tables (see below)
+- **NO job_owner on CRA** - Job owner tracked on jobs table (see below)
+- Money rates and snapshots belong in placements/payouts tables, NOT on CRA
+- See [CRA Schema Specifications](../guidance/cra-schema-specifications.md) for full details
+
+### 6.4 Sourcer Attribution Tables (Permanent Attribution)
+
+**Create dedicated tables for permanent sourcer tracking:**
+
+```sql
+-- Candidate sourcing attribution (permanent record)
+CREATE TABLE IF NOT EXISTS candidate_sourcers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    candidate_id UUID NOT NULL REFERENCES candidates(id) ON DELETE CASCADE,
+    sourcer_recruiter_id UUID NOT NULL REFERENCES recruiters(id),
+    sourced_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    
+    -- Only one sourcer per candidate (first recruiter wins)
+    UNIQUE(candidate_id)
+);
+
+-- Company sourcing attribution (permanent record)
+CREATE TABLE IF NOT EXISTS company_sourcers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    company_id UUID NOT NULL REFERENCES companies(id) ON DELETE CASCADE,
+    sourcer_recruiter_id UUID NOT NULL REFERENCES recruiters(id),
+    sourced_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    
+    -- Only one sourcer per company (first recruiter wins)
+    UNIQUE(company_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_candidate_sourcers_recruiter ON candidate_sourcers(sourcer_recruiter_id);
+CREATE INDEX IF NOT EXISTS idx_company_sourcers_recruiter ON company_sourcers(sourcer_recruiter_id);
+```
+
+**Sourcer Permanence Rules:**
+- **Permanent while active:** Sourcer attribution lasts while recruiter has active account
+- **First wins:** Only one sourcer per candidate/company (first recruiter to bring them)
+- **No payout if inactive:** If sourcer account becomes inactive, platform consumes that commission percentage
+- **Attribution remains:** Record stays in table for potential future reactivation
+- **Commission structure:** Base 6% + bonus (0-4%) based on subscription tier
+
+### 6.5 Job Owner Tracking (Recruiter-Only Payout)
+
+**Add job owner to jobs table (NOT on CRA):**
+
+```sql
+-- Job owner is the recruiter who created the job posting
+-- Only recruiters get this payout (NOT company employees)
+ALTER TABLE jobs ADD COLUMN IF NOT EXISTS job_owner_recruiter_id UUID REFERENCES recruiters(id);
+CREATE INDEX IF NOT EXISTS idx_jobs_owner_recruiter ON jobs(job_owner_recruiter_id);
+```
+
+**Job Owner Rules:**
+- **Recruiter only:** References `recruiters` table (not `users`) to enforce recruiter-only payout
+- **Nullable:** Company employees can create jobs but don't get commission
+- **Specs Owner role:** Gets 10-20% commission based on subscription tier
+- **Snapshot at hire:** Copy to `placement_snapshot.job_owner_recruiter_id` when placement created
+
+### 6.6 Commission Structure (5 Roles)
+
+**Every placement has up to 5 commission-earning roles (all nullable):**
+
+| Role | Description | Premium ($249) | Paid ($99) | Free ($0) |
+|------|-------------|----------------|------------|----------|
+| Candidate Recruiter | "Closer" - Represents candidate | 40% | 30% | 20% |
+| Job Owner | "Specs Owner" - Created job (recruiter only) | 20% | 15% | 10% |
+| Company Recruiter | "Client" - Represents company | 20% | 15% | 10% |
+| Company Sourcer | "BD" - First brought company | 10% (6%+4%) | 8% (6%+2%) | 6% |
+| Candidate Sourcer | "Discovery" - First brought candidate | 10% (6%+4%) | 8% (6%+2%) | 6% |
+| **SPLITS PLATFORM** | **Remainder** | **0%** | **24%** | **48%** |
+
+**Key Principles:**
+- All roles are **nullable** (direct candidates/companies possible)
+- When role is NULL, that percentage goes to platform
+- Sourcer rates are permanent while recruiter has active account
+- If sourcer account inactive, platform consumes that percentage
+- Money snapshots in `placement_snapshot` table (immutable after hire)
+
+### 6.7 Placement Snapshot Table (Money Attribution)
+
+**Create immutable money snapshot at hire time:**
+
+```sql
+CREATE TABLE IF NOT EXISTS placement_snapshot (
+    placement_id UUID PRIMARY KEY REFERENCES placements(id),
+    
+    -- Role assignments (snapshotted at hire)
+    candidate_recruiter_id UUID,
+    company_recruiter_id UUID,
+    job_owner_recruiter_id UUID,
+    candidate_sourcer_recruiter_id UUID,
+    company_sourcer_recruiter_id UUID,
+    
+    -- Commission rates (snapshotted at hire)
+    candidate_recruiter_rate DECIMAL(5,2),
+    company_recruiter_rate DECIMAL(5,2),
+    job_owner_rate DECIMAL(5,2),
+    candidate_sourcer_rate DECIMAL(5,2),
+    company_sourcer_rate DECIMAL(5,2),
+    
+    -- Total fee and subscription tier at hire
+    total_placement_fee DECIMAL(10,2),
+    subscription_tier TEXT, -- 'premium' | 'paid' | 'free'
+    
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_placement_snapshot_candidate_rec ON placement_snapshot(candidate_recruiter_id);
+CREATE INDEX IF NOT EXISTS idx_placement_snapshot_company_rec ON placement_snapshot(company_recruiter_id);
+CREATE INDEX IF NOT EXISTS idx_placement_snapshot_job_owner ON placement_snapshot(job_owner_recruiter_id);
+CREATE INDEX IF NOT EXISTS idx_placement_snapshot_cand_sourcer ON placement_snapshot(candidate_sourcer_recruiter_id);
+CREATE INDEX IF NOT EXISTS idx_placement_snapshot_comp_sourcer ON placement_snapshot(company_sourcer_recruiter_id);
 
 **Notes:**
 - Info request communication handled in `cra_gate_feedback` table (sequential records)
 - Gate decisions logged in `gate_history` JSONB for quick access
 - Detailed gate communication tracked in separate feedback table
+- Sourcer attribution tracked in separate `candidate_sourcers` and `company_sourcers` tables (query via JOIN)
+- Commission calculation uses `placement_snapshot` table (immutable money attribution)
 
 **Add new enum values:**
 ```sql

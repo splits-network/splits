@@ -10,16 +10,22 @@ import { PaginationResponse, buildPaginationResponse, validatePaginationParams }
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { CandidateRoleAssignmentServiceV2 } from '../candidate-role-assignments/service';
+import { CompanySourcerRepository } from '../company-sourcers/repository';
+import { CandidateSourcerRepository } from '../candidate-sourcers/repository';
 
 export class PlacementServiceV2 {
     private accessResolver: AccessContextResolver;
+    private supabase: SupabaseClient;
 
     constructor(
         supabase: SupabaseClient,
         private repository: PlacementRepository,
+        private companySourcerRepo: CompanySourcerRepository,
+        private candidateSourcerRepo: CandidateSourcerRepository,
         private eventPublisher?: EventPublisher,
         private assignmentService?: CandidateRoleAssignmentServiceV2
     ) {
+        this.supabase = supabase;
         this.accessResolver = new AccessContextResolver(supabase);
     }
 
@@ -52,6 +58,82 @@ export class PlacementServiceV2 {
         return placement;
     }
 
+    /**
+     * Gather all 5 attribution role IDs for commission calculation:
+     * 1. Candidate Recruiter (from CRA)
+     * 2. Company Recruiter (from CRA)
+     * 3. Job Owner (from Job)
+     * 4. Candidate Sourcer (if active)
+     * 5. Company Sourcer (if active)
+     */
+    private async gatherAttribution(
+        candidateId: string,
+        jobId: string,
+        craId?: string
+    ): Promise<{
+        candidate_recruiter_id: string | null;
+        company_recruiter_id: string | null;
+        job_owner_recruiter_id: string | null;
+        candidate_sourcer_recruiter_id: string | null;
+        company_sourcer_recruiter_id: string | null;
+    }> {
+        // 1 & 2: Get CRA for candidate_recruiter_id and company_recruiter_id
+        let candidateRecruiterId: string | null = null;
+        let companyRecruiterId: string | null = null;
+
+        if (craId) {
+            const { data: cra } = await this.supabase
+                .schema('ats')
+                .from('candidate_role_assignments')
+                .select('candidate_recruiter_id, company_recruiter_id')
+                .eq('id', craId)
+                .single();
+
+            if (cra) {
+                candidateRecruiterId = cra.candidate_recruiter_id;
+                companyRecruiterId = cra.company_recruiter_id;
+            }
+        }
+
+        // 3: Get job for job_owner_recruiter_id and company_id
+        const { data: job } = await this.supabase
+            .schema('ats')
+            .from('jobs')
+            .select('job_owner_recruiter_id, company_id')
+            .eq('id', jobId)
+            .single();
+
+        if (!job) {
+            throw new Error(`Job ${jobId} not found for attribution gathering`);
+        }
+
+        const jobOwnerRecruiterId = job.job_owner_recruiter_id || null;
+
+        // 4: Get candidate sourcer (check if active)
+        const candidateSourcer = await this.candidateSourcerRepo.getByCandidateId(candidateId);
+        const candidateSourcerActive = candidateSourcer
+            ? await this.candidateSourcerRepo.isSourcerActive(candidateId)
+            : false;
+
+        // 5: Get company sourcer (check if active)
+        const companySourcer = await this.companySourcerRepo.getByCompanyId(job.company_id);
+        const companySourcerActive = companySourcer
+            ? await this.companySourcerRepo.isSourcerActive(job.company_id)
+            : false;
+
+        return {
+            candidate_recruiter_id: candidateRecruiterId,
+            company_recruiter_id: companyRecruiterId,
+            job_owner_recruiter_id: jobOwnerRecruiterId,
+            candidate_sourcer_recruiter_id:
+                candidateSourcerActive && candidateSourcer
+                    ? candidateSourcer.sourcer_recruiter_id
+                    : null,
+            company_sourcer_recruiter_id:
+                companySourcerActive && companySourcer ? companySourcer.sourcer_recruiter_id : null,
+        };
+    }
+
     async createPlacement(data: any, clerkUserId?: string): Promise<any> {
         // Validation
         if (!data.job_id) {
@@ -78,15 +160,26 @@ export class PlacementServiceV2 {
             throw new Error('Fee percentage must be between 0 and 100');
         }
 
-        // If recruiter_id provided, validate and close the assignment
-        if (data.recruiter_id && this.assignmentService) {
+        // If candidate_recruiter_id or company_recruiter_id provided, validate and close the assignment
+        const candidateRecruiterId = data.candidate_recruiter_id;
+        const companyRecruiterId = data.company_recruiter_id;
+
+        if ((candidateRecruiterId || companyRecruiterId) && this.assignmentService) {
             try {
-                // Find the assignment
-                const assignments = await this.assignmentService.list(clerkUserId || '', {
+                // Find the assignment - try both recruiter types
+                const filters: any = {
                     job_id: data.job_id,
                     candidate_id: data.candidate_id,
-                    recruiter_id: data.recruiter_id,
-                });
+                };
+
+                // Try to find by candidate recruiter first, then company recruiter
+                if (candidateRecruiterId) {
+                    filters.candidate_recruiter_id = candidateRecruiterId;
+                } else if (companyRecruiterId) {
+                    filters.company_recruiter_id = companyRecruiterId;
+                }
+
+                const assignments = await this.assignmentService.list(clerkUserId || '', filters);
 
                 if (assignments.data.length === 0) {
                     throw new Error(
@@ -135,18 +228,27 @@ export class PlacementServiceV2 {
             updated_at: new Date().toISOString(),
         });
 
-        // Emit event
+        // Gather all 5 role attributions for commission calculation
+        const attribution = await this.gatherAttribution(
+            data.candidate_id,
+            data.job_id,
+            data.candidate_role_assignment_id
+        );
+
+        // Emit event with all attribution data
         if (this.eventPublisher) {
             await this.eventPublisher.publish('placement.created', {
                 placement_id: placement.id,
                 job_id: placement.job_id,
                 candidate_id: placement.candidate_id,
                 application_id: placement.application_id,
-                recruiter_id: placement.recruiter_id,
+                recruiter_id: placement.recruiter_id, // Legacy field
                 salary: placement.salary,
                 fee_percentage: placement.fee_percentage,
                 recruiter_share: placement.recruiter_share,
                 created_by: userContext.identityUserId,
+                // Add all 5 role IDs for commission calculation
+                ...attribution,
             });
         }
 

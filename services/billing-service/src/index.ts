@@ -8,6 +8,10 @@ import { BillingService } from './service'; // V1 - Keep for webhook compatibili
 import { BillingRepository } from './repository'; // V1 - Keep for webhook compatibility until V2 migration
 import { registerV2Routes } from './v2/routes';
 import { EventPublisher as V2EventPublisher } from './v2/shared/events';
+import { PlacementEventConsumer } from './events/placement-consumer';
+import { PlacementSnapshotRepository } from './v2/placement-snapshot/repository';
+import { PlacementSnapshotService } from './v2/placement-snapshot/service';
+import { createClient } from '@supabase/supabase-js';
 import * as Sentry from '@sentry/node';
 
 async function main() {
@@ -116,12 +120,40 @@ async function main() {
         logger.warn({ err: error }, 'Failed to connect Billing V2 event publisher - continuing without events');
     }
 
+    // Initialize placement snapshot domain and event consumer
+    const supabase = createClient(
+        dbConfig.supabaseUrl,
+        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+    );
+    const snapshotRepository = new PlacementSnapshotRepository(supabase);
+    const snapshotService = new PlacementSnapshotService(snapshotRepository);
+
     // Register V2 routes (plans, subscriptions, payouts)
-    await registerV2Routes(app, {
+    // This also initializes PayoutServiceV2
+    const v2Services = await registerV2Routes(app, {
         supabaseUrl: dbConfig.supabaseUrl,
         supabaseKey: dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey,
         eventPublisher: v2EventPublisher,
     });
+
+    // Phase 6: Initialize placement event consumer with payout service
+    // System user ID for automated operations (use a service account or system admin)
+    const systemUserId = process.env.SYSTEM_USER_ID || 'system'; // TODO: Create proper system user
+    const placementConsumer = new PlacementEventConsumer(
+        rabbitConfig.url,
+        snapshotService,
+        v2Services.payoutService,
+        systemUserId,
+        supabase,
+        logger
+    );
+
+    try {
+        await placementConsumer.connect();
+        logger.info('Placement event consumer connected and listening');
+    } catch (error) {
+        logger.warn({ err: error }, 'Failed to connect placement event consumer - continuing without events');
+    }
 
     // Register webhook routes (V1 - TODO: migrate to V2)
     registerWebhookRoutes(app, service, stripeConfig.webhookSecret);
@@ -149,6 +181,7 @@ async function main() {
 
     process.on('SIGTERM', async () => {
         logger.info('SIGTERM received, shutting down billing service');
+        await placementConsumer.close();
         await v2EventPublisher.close();
         await app.close();
         process.exit(0);

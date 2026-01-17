@@ -155,7 +155,7 @@ export function Sidebar() {
         <>
             <div className="drawer-side z-40 overflow-visible hidden md:block">
                 <label htmlFor="sidebar-drawer" className="drawer-overlay"></label>
-                <aside className="bg-base-300 w-64 min-h-screen flex flex-col border-r border-base-200">
+                <aside className=" w-64 min-h-screen flex flex-col border-r border-base-200">
 
                     {/* Logo / Brand */}
                     <div className="px-4 py-5 border-b border-base-200/50">

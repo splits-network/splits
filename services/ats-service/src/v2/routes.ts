@@ -11,6 +11,7 @@ import { PlacementRepository } from './placements/repository';
 import { PlacementServiceV2 } from './placements/service';
 import { CandidateSourcerRepository } from './candidate-sourcers/repository';
 import { CandidateSourcerServiceV2 } from './candidate-sourcers/service';
+import { CompanySourcerRepository } from './company-sourcers/repository';
 import { CandidateRoleAssignmentRepository } from './candidate-role-assignments/repository';
 import { CandidateRoleAssignmentServiceV2 } from './candidate-role-assignments/service';
 import { EventPublisher } from './shared/events';
@@ -71,14 +72,19 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     );
 
     const placementRepository = new PlacementRepository(config.supabaseUrl, config.supabaseKey);
+
+    const candidateSourcerRepository = new CandidateSourcerRepository(candidateRepository.getSupabase());
+    const companySourcerRepository = new CompanySourcerRepository(candidateRepository.getSupabase());
+
     const placementService = new PlacementServiceV2(
         placementRepository.getSupabase(),
         placementRepository,
+        companySourcerRepository,  // Add company sourcer repo for attribution
+        candidateSourcerRepository,  // Add candidate sourcer repo for attribution
         config.eventPublisher,
         assignmentService // Pass assignment service to placement service for validation
     );
 
-    const candidateSourcerRepository = new CandidateSourcerRepository(candidateRepository.getSupabase());
     const candidateSourcerService = new CandidateSourcerServiceV2(
         candidateSourcerRepository,
         config.eventPublisher!,

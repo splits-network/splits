@@ -10,6 +10,9 @@ import { PayoutServiceV2 } from './payouts/service';
 import { PayoutScheduleServiceV2 } from './payout-schedules/service';
 import { EscrowHoldServiceV2 } from './escrow-holds/service';
 import { PayoutAuditRepository } from './audit/repository';
+import { PlacementSnapshotRepository } from './placement-snapshot/repository';
+import { PlacementSplitRepository } from './payouts/placement-split-repository';
+import { PlacementPayoutTransactionRepository } from './payouts/placement-payout-transaction-repository';
 import { registerPlanRoutes } from './plans/routes';
 import { registerSubscriptionRoutes } from './subscriptions/routes';
 import { registerPayoutRoutes } from './payouts/routes';
@@ -30,6 +33,13 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
     const accessClient = createClient(config.supabaseUrl, config.supabaseKey);
     const accessResolver = (clerkUserId: string) => resolveAccessContext(accessClient, clerkUserId);
 
+    // Phase 6: Initialize PlacementSnapshotRepository for commission calculator
+    const snapshotRepository = new PlacementSnapshotRepository(accessClient);
+
+    // Phase 6: Initialize new repositories for canonical payout architecture
+    const splitRepository = new PlacementSplitRepository(accessClient);
+    const transactionRepository = new PlacementPayoutTransactionRepository(accessClient);
+
     // Use provided event publisher (already initialized in main server)
     const eventPublisher = config.eventPublisher;
 
@@ -40,7 +50,14 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
         accessResolver,
         config.eventPublisher
     );
-    const payoutService = new PayoutServiceV2(payoutRepository, accessResolver, config.eventPublisher);
+    const payoutService = new PayoutServiceV2(
+        payoutRepository,
+        snapshotRepository,  // Phase 6: Wire in PlacementSnapshotRepository
+        splitRepository,     // Phase 6: Wire in PlacementSplitRepository
+        transactionRepository, // Phase 6: Wire in PlacementPayoutTransactionRepository
+        accessResolver,
+        config.eventPublisher
+    );
 
     // Create new automation services
     if (!eventPublisher) {
@@ -60,4 +77,13 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
     // Register automation routes
     await payoutScheduleRoutes(app, payoutScheduleService);
     await escrowHoldRoutes(app, escrowHoldService);
+
+    // Phase 6: Return services for use by event consumers
+    return {
+        planService,
+        subscriptionService,
+        payoutService,
+        payoutScheduleService,
+        escrowHoldService,
+    };
 }

@@ -393,7 +393,7 @@ export class DomainEventConsumer {
                 this.logger.warn(
                     {
                         candidate_id,
-                        existing_sourcer_id: existing.sourcer_user_id,
+                        existing_sourcer_id: existing.sourcer_recruiter_id,
                         requested_sourcer_id: recruiter_id,
                         event_id: event.event_id,
                     },
@@ -403,8 +403,8 @@ export class DomainEventConsumer {
                 // Publish ownership.conflict_detected event for admin review
                 await this.eventPublisher.publish('ownership.conflict_detected', {
                     candidate_id,
-                    existing_sourcer_user_id: existing.sourcer_user_id,
-                    requested_sourcer_user_id: recruiter_id,
+                    existing_sourcer_recruiter_id: existing.sourcer_recruiter_id,
+                    requested_sourcer_recruiter_id: recruiter_id,
                     source_method,
                     existing_sourced_at: existing.sourced_at,
                     existing_protection_expires_at: existing.protection_expires_at,
@@ -422,7 +422,7 @@ export class DomainEventConsumer {
             // Create sourcer record
             const sourcer = await this.candidateSourcerRepository.create({
                 candidate_id,
-                sourcer_user_id: recruiter_id,
+                sourcer_recruiter_id: recruiter_id,
                 sourcer_type: 'recruiter',
                 sourced_at: new Date(),
                 protection_window_days: protectionDays,

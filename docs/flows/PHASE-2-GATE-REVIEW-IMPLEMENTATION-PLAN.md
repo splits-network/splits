@@ -133,7 +133,7 @@ ON cra_gate_feedback(in_response_to_id);
 COMMENT ON TABLE cra_gate_feedback IS 'Communication between gate reviewers and candidates during gate review process';
 ```
 
-### Step 3: Add New CRA States
+### Step 3: Add New CRA States & Schema Updates
 
 **Migration:** `services/ats-service/migrations/XXX_add_cra_gate_states.sql`
 
@@ -146,6 +146,32 @@ ALTER TYPE candidate_role_assignment_state ADD VALUE IF NOT EXISTS 'under_review
 ALTER TYPE candidate_role_assignment_state ADD VALUE IF NOT EXISTS 'info_requested';
 ALTER TYPE candidate_role_assignment_state ADD VALUE IF NOT EXISTS 'submitted_to_company';
 
+-- **CRITICAL: Recruiter Role Separation**
+-- See docs/guidance/cra-schema-specifications.md for complete specification
+-- Split ambiguous recruiter_id into candidate_recruiter_id and company_recruiter_id
+ALTER TABLE candidate_role_assignments RENAME COLUMN recruiter_id TO candidate_recruiter_id;
+ALTER TABLE candidate_role_assignments ADD COLUMN IF NOT EXISTS company_recruiter_id UUID REFERENCES recruiters(id);
+
+-- Optional: Add sourcer fields as denormalized convenience
+ALTER TABLE candidate_role_assignments ADD COLUMN IF NOT EXISTS candidate_sourcer_id UUID REFERENCES recruiters(id);
+ALTER TABLE candidate_role_assignments ADD COLUMN IF NOT EXISTS company_sourcer_id UUID REFERENCES recruiters(id);
+
+-- Enforce required fields
+ALTER TABLE candidate_role_assignments ALTER COLUMN candidate_id SET NOT NULL;
+ALTER TABLE candidate_role_assignments ALTER COLUMN job_id SET NOT NULL;
+ALTER TABLE candidate_role_assignments ALTER COLUMN proposed_by SET NOT NULL;
+
+-- Add uniqueness constraint (one active deal per candidate-job pair)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_cra_unique_active_deal 
+ON candidate_role_assignments(candidate_id, job_id) 
+WHERE state NOT IN ('rejected', 'declined', 'withdrawn', 'timed_out', 'closed');
+
+-- Update indexes
+CREATE INDEX IF NOT EXISTS idx_cra_candidate_recruiter ON candidate_role_assignments(candidate_recruiter_id);
+CREATE INDEX IF NOT EXISTS idx_cra_company_recruiter ON candidate_role_assignments(company_recruiter_id);
+CREATE INDEX IF NOT EXISTS idx_cra_candidate_sourcer ON candidate_role_assignments(candidate_sourcer_id);
+CREATE INDEX IF NOT EXISTS idx_cra_company_sourcer ON candidate_role_assignments(company_sourcer_id);
+
 -- Update existing 'proposed' assignments to proper gate state
 -- This is a data migration for historical records
 UPDATE candidate_role_assignments
@@ -156,8 +182,21 @@ WHERE state = 'proposed'
 AND NOT has_candidate_recruiter 
 AND NOT has_company_recruiter;
 
+COMMENT ON COLUMN candidate_role_assignments.candidate_recruiter_id IS 'Represents the candidate (Closer role)';
+COMMENT ON COLUMN candidate_role_assignments.company_recruiter_id IS 'Represents the company (Client/Hiring Facilitator role)';
+COMMENT ON COLUMN candidate_role_assignments.candidate_sourcer_id IS 'Denormalized convenience - authority is candidates.candidate_sourcer_id';
+COMMENT ON COLUMN candidate_role_assignments.company_sourcer_id IS 'Denormalized convenience - authority is companies.company_sourcer_id';
+COMMENT ON COLUMN candidate_role_assignments.proposed_by IS 'User who initiated this CRA (NOT the same as recruiter IDs)';
 COMMENT ON TYPE candidate_role_assignment_state IS 'Lifecycle states for CRA including gate review workflow';
 ```
+
+**Important Notes:**
+- `candidate_recruiter_id` vs `company_recruiter_id` are distinct roles, not redundant fields
+- Both can be null (direct candidate application or direct company hire)
+- `proposed_by` tracks who initiated the deal (could be candidate, recruiter, or admin)
+- Money rates and snapshots belong in placements table, NOT on CRA
+- Sourcers are denormalized convenience - placement_snapshot is authority for payouts
+- See [CRA Schema Specifications](../guidance/cra-schema-specifications.md) for complete details
 
 ---
 
@@ -207,7 +246,7 @@ export class GateRoutingService {
         // Check for company recruiter assignment on job
         const { data: job } = await this.supabase
             .from('jobs')
-            .select('recruiter_id, company_id')
+            .select('recruiter_id, company_id')  // This becomes company_recruiter_id in CRA
             .eq('id', jobId)
             .single();
 
@@ -243,6 +282,8 @@ export class GateRoutingService {
                 hasCompanyRecruiter,
                 gateSequence,
                 firstGate,
+                candidateRecruiterId: candidateRecruiter?.recruiter_id,
+                companyRecruiterId: job.recruiter_id,
             },
             'Determined gate routing'
         );
@@ -252,8 +293,8 @@ export class GateRoutingService {
             gateSequence,
             hasCandidateRecruiter,
             hasCompanyRecruiter,
-            candidateRecruiterId: candidateRecruiter?.recruiter_id,
-            companyRecruiterId: job.recruiter_id,
+            candidateRecruiterId: candidateRecruiter?.recruiter_id,  // Stored in CRA.candidate_recruiter_id
+            companyRecruiterId: job.recruiter_id,                    // Stored in CRA.company_recruiter_id
         };
     }
 
@@ -270,15 +311,24 @@ export class GateRoutingService {
 
     /**
      * Check if user has permission to review at this gate
+     * 
+     * CRITICAL: Uses candidate_recruiter_id and company_recruiter_id from CRA
+     * See docs/guidance/cra-schema-specifications.md for complete schema
      */
     async validateGatePermission(
         clerkUserId: string,
         assignmentId: string,
         gateName: string
     ): Promise<boolean> {
+        // Fetch CRA with separated recruiter IDs
         const { data: assignment } = await this.supabase
             .from('candidate_role_assignments')
-            .select('*, jobs(recruiter_id, company_id)')
+            .select(`
+                *,
+                candidate_recruiter:recruiters!candidate_recruiter_id(id, user_id),
+                company_recruiter:recruiters!company_recruiter_id(id, user_id),
+                jobs(recruiter_id, company_id)
+            `)
             .eq('id', assignmentId)
             .single();
 

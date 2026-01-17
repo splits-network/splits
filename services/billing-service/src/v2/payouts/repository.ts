@@ -21,18 +21,24 @@ export class PayoutRepository {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            
+
             .from('payouts')
             .select('*', { count: 'exact' });
 
         if (filters.recruiter_id) {
             query = query.eq('recruiter_id', filters.recruiter_id);
         }
+        if (filters.placement_id) {
+            query = query.eq('placement_id', filters.placement_id);
+        }
+        if (filters.role) {
+            query = query.eq('role', filters.role);
+        }
         if (filters.status) {
             query = query.eq('status', filters.status);
         }
 
-        const sortBy = filters.sort_by || 'period_end';
+        const sortBy = filters.sort_by || 'created_at';
         const ascending = (filters.sort_order || 'desc').toLowerCase() === 'asc';
         query = query.order(sortBy, { ascending });
 
@@ -49,7 +55,7 @@ export class PayoutRepository {
 
     async findPayout(id: string): Promise<Payout | null> {
         const { data, error } = await this.supabase
-            
+
             .from('payouts')
             .select('*')
             .eq('id', id)
@@ -64,7 +70,7 @@ export class PayoutRepository {
 
     async createPayout(payload: PayoutCreateInput): Promise<Payout> {
         const { data, error } = await this.supabase
-            
+
             .from('payouts')
             .insert(payload)
             .select('*')
@@ -76,7 +82,7 @@ export class PayoutRepository {
 
     async updatePayout(id: string, updates: PayoutUpdateInput): Promise<Payout> {
         const { data, error } = await this.supabase
-            
+
             .from('payouts')
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id)

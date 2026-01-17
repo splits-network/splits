@@ -20,12 +20,13 @@ export default async function AuthenticatedLayout({
             <div className="drawer lg:drawer-open">
                 <input id="sidebar-drawer" type="checkbox" className="drawer-toggle" />
                 <Sidebar />
-                <div className="drawer-content flex flex-col bg-base-300">
+                <div className="drawer-content flex flex-col">
                     <ServiceStatusBanner />
                     <main className="p-6">
                         {children}
                     </main>
                 </div>
+                {/* <div className='absolute top-0 left-0 inset-0 bg-linear-to-r from-primary/20 from-20% to-base-300 -z-100'></div> */}
             </div>
         </AuthenticatedLayoutClient>
     );

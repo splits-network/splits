@@ -68,3 +68,24 @@ export type EscrowHoldUpdate = DbTableUpdate<'escrow_holds'>;
 export type PayoutAuditLog = DbTable<'payout_audit_log'>;
 export type PayoutAuditLogInsert = DbTableInsert<'payout_audit_log'>;
 export type PayoutAuditLogUpdate = DbTableUpdate<'payout_audit_log'>;
+
+// ============================================================================
+// PLACEMENT SNAPSHOT (IMMUTABLE MONEY ATTRIBUTION)
+// ============================================================================
+
+/**
+ * Placement Snapshot - Immutable money attribution record
+ * 
+ * Captures all role assignments and commission rates at the moment of hire.
+ * This snapshot is immutable and used for all payout calculations, ensuring
+ * that changes to roles or subscription tiers after hire do not affect payouts.
+ * 
+ * Key Rules:
+ * - Created when placement state changes to 'hired'
+ * - Never modified after creation (immutable)
+ * - Commission calculations ALWAYS use snapshot data (never live CRA data)
+ * - If sourcer account becomes inactive after hire, payout still uses snapshotted rate
+ */
+export type PlacementSnapshot = DbTable<'placement_snapshot'>;
+export type PlacementSnapshotInsert = DbTableInsert<'placement_snapshot'>;
+export type PlacementSnapshotUpdate = DbTableUpdate<'placement_snapshot'>;
