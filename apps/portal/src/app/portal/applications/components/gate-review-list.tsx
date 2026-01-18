@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { formatRelativeTime } from '@/lib/utils';
-import { apiClient } from '@/lib/api-client';
+import { useAuth } from '@clerk/nextjs';
+import { createAuthenticatedClient } from '@/lib/api-client';
 import ApproveGateModal from './approve-gate-modal';
 import DenyGateModal from './deny-gate-modal';
 import RequestInfoModal from './request-info-modal';
@@ -49,6 +50,7 @@ type ModalState = {
 };
 
 export default function GateReviewList({ gateType, userId, className = '' }: GateReviewListProps) {
+    const { getToken } = useAuth();
     const [applications, setApplications] = useState<CandidateRoleAssignment[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -79,8 +81,12 @@ export default function GateReviewList({ gateType, userId, className = '' }: Gat
                 params[filterKey] = userId;
             }
 
-            const response = await apiClient.get<{ data: CandidateRoleAssignment[] }>(
-                '/api/v2/candidate-role-assignments',
+            const token = await getToken();
+            if (!token) throw new Error('Not authenticated');
+
+            const client = createAuthenticatedClient(token);
+            const response = await client.get<{ data: CandidateRoleAssignment[] }>(
+                '/candidate-role-assignments',
                 { params }
             );
 
@@ -121,8 +127,13 @@ export default function GateReviewList({ gateType, userId, className = '' }: Gat
         if (!modalState.craId) return;
 
         setActionLoading(true);
+
+        const token = await getToken();
+        if (!token) throw new Error('Not authenticated');
+
+        const client = createAuthenticatedClient(token);
         try {
-            await apiClient.post(`/api/v2/candidate-role-assignments/${modalState.craId}/approve-gate`, {
+            await client.post(`/candidate-role-assignments/${modalState.craId}/approve-gate`, {
                 notes
             });
 
@@ -144,8 +155,12 @@ export default function GateReviewList({ gateType, userId, className = '' }: Gat
         if (!modalState.craId) return;
 
         setActionLoading(true);
+        const token = await getToken();
+        if (!token) throw new Error('Not authenticated');
+
+        const client = createAuthenticatedClient(token);
         try {
-            await apiClient.post(`/api/v2/candidate-role-assignments/${modalState.craId}/deny-gate`, {
+            await client.post(`/candidate-role-assignments/${modalState.craId}/deny-gate`, {
                 reason
             });
 
@@ -165,8 +180,12 @@ export default function GateReviewList({ gateType, userId, className = '' }: Gat
         if (!modalState.craId) return;
 
         setActionLoading(true);
+        const token = await getToken();
+        if (!token) throw new Error('Not authenticated');
+
+        const client = createAuthenticatedClient(token);
         try {
-            await apiClient.post(`/api/v2/candidate-role-assignments/${modalState.craId}/request-info`, {
+            await client.post(`/candidate-role-assignments/${modalState.craId}/request-info`, {
                 questions
             });
 
@@ -186,8 +205,12 @@ export default function GateReviewList({ gateType, userId, className = '' }: Gat
         if (!modalState.craId) return;
 
         setActionLoading(true);
+        const token = await getToken();
+        if (!token) throw new Error('Not authenticated');
+
+        const client = createAuthenticatedClient(token);
         try {
-            await apiClient.post(`/api/v2/candidate-role-assignments/${modalState.craId}/provide-info`, {
+            await client.post(`/candidate-role-assignments/${modalState.craId}/provide-info`, {
                 answers
             });
 

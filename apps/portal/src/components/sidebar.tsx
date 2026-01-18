@@ -26,6 +26,7 @@ const navItems: NavItem[] = [
     // Management section (recruiter/company focused)
     { href: '/portal/invitations', label: 'Invitations', icon: 'fa-envelope', roles: ['recruiter'], section: 'management', mobileDock: false },
     { href: '/portal/proposals', label: 'Proposals', icon: 'fa-handshake', roles: ['recruiter', 'company_admin', 'hiring_manager'], section: 'management', mobileDock: true },
+    { href: '/portal/gate-reviews', label: 'Gate Reviews', icon: 'fa-clipboard-check', roles: ['recruiter', 'company_admin', 'hiring_manager'], section: 'management', mobileDock: false },
     { href: '/portal/candidates', label: 'Candidates', icon: 'fa-users', roles: ['recruiter', 'platform_admin'], section: 'management', mobileDock: true },
     { href: '/portal/applications', label: 'Applications', icon: 'fa-file-lines', roles: ['company_admin', 'hiring_manager', 'recruiter'], section: 'management', mobileDock: true },
     { href: '/portal/placements', label: 'Placements', icon: 'fa-trophy', roles: ['recruiter', 'platform_admin'], section: 'management', mobileDock: false },

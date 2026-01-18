@@ -145,7 +145,7 @@ export default function TeamsPage() {
         const token = await getToken();
         if (!token) throw new Error('Not authenticated');
 
-        const client = new ApiClient(token);
+        const client = createAuthenticatedClient(token);
         const queryParams = new URLSearchParams();
 
         if (params.page) queryParams.set('page', params.page.toString());

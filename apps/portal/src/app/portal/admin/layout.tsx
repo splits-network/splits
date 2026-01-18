@@ -22,8 +22,8 @@ export default async function AdminLayout({
 
         const apiClient = createAuthenticatedClient(token);
         const profileResponse: any = await apiClient.get('/users/me');
-        console.log('User profile response:', profileResponse);
-        if (!profileResponse.data.is_platform_admin) {
+
+        if (!profileResponse.data?.is_platform_admin) {
             // Not an admin, redirect to dashboard
             redirect('/portal/dashboard');
         }
