@@ -605,9 +605,14 @@ export class ApplicationServiceV2 {
             throw new Error(`Cannot submit from stage: ${application.stage}. Application must be in ai_reviewed or screen stage.`);
         }
 
-        // Update to submitted
+        // Determine next stage based on recruiter presence
+        // Represented candidates (with recruiter) → screen (recruiter reviews first)
+        // Direct candidates (no recruiter) → submitted (goes straight to company)
+        const nextStage = application.recruiter_id ? 'screen' : 'submitted';
+
+        // Update to appropriate stage
         const updated = await this.repository.updateApplication(applicationId, {
-            stage: 'submitted',
+            stage: nextStage,
         });
 
         // Phase 2.2 & 2.3: Determine gate routing and create CRA with routing
