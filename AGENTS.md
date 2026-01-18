@@ -466,3 +466,83 @@ Platform: 48% + 6% (from inactive) = $10,800
 
 Total: 100% = $20,000 ✅
 ```
+
+---
+
+## Phase 6: Canonical Payout Architecture (2026-01-17)
+
+**Status**: ✅ COMPLETE - Implementation Finished | ⏳ Testing Pending
+
+**Documentation**: [PHASE-6-CANONICAL-ARCHITECTURE-COMPLETE.md](PHASE-6-CANONICAL-ARCHITECTURE-COMPLETE.md)
+
+### Implementation Summary
+
+Completed the canonical 4-layer payout architecture as defined in guidance documents:
+
+**Layer 3: placement_splits** (Computed Allocations) ✅
+- Added explicit `role` column (TEXT NOT NULL, CHECK constraint)
+- 5 valid roles: candidate_recruiter, company_recruiter, job_owner, candidate_sourcer, company_sourcer
+- Updated UNIQUE constraint: (placement_id, recruiter_id, role) - allows same recruiter in multiple roles
+- New indexes: idx_placement_splits_role, idx_placement_splits_placement_role
+
+**Layer 4: placement_payout_transactions** (Execution Tracking) ✅
+- New table with 1-to-1 relationship to placement_splits (UNIQUE on placement_split_id)
+- Stripe integration: stripe_transfer_id, stripe_payout_id, stripe_connect_account_id
+- Status workflow: pending → processing → completed/failed
+- Amount tracking: amount, stripe_fee, net_amount
+
+### Database Migrations ✅
+
+- **Migration 002/028**: Add role to placement_splits
+  - File: `services/billing-service/migrations/002_add_role_to_placement_splits.sql`
+  - Applied: Manually via Supabase (MCP had tracking table conflict)
+  - Verified: Schema correct, constraints active, indexes created
+
+- **Migration 003/029**: Create placement_payout_transactions
+  - File: `services/billing-service/migrations/003_create_placement_payout_transactions.sql`
+  - Applied: Via Supabase MCP (successful)
+  - Verified: Table exists with all columns and constraints
+
+### Code Implementation ✅
+
+**New Files**:
+- `PlacementSplitRepository` (72 lines) - CRUD for splits with role filtering
+- `PlacementPayoutTransactionRepository` (115 lines) - Transaction tracking with Stripe integration
+
+**Updated Files**:
+- `PayoutServiceV2` - Added `createSplitsAndTransactionsForPlacement()` method
+- `placement-consumer.ts` - Updated event handler to create splits + transactions
+- `routes.ts` - Wired new repositories
+
+**Event Flow**:
+```
+placement.created → placement-consumer.ts
+  → createSplitsAndTransactionsForPlacement()
+    → For each role with assigned recruiter:
+      - Create placement_split (with explicit role)
+      - Create placement_payout_transaction (1-to-1)
+  → Publish 'placement.splits_created' event
+```
+
+### Build Verification ✅
+
+- TypeScript types regenerated (database.types.ts)
+- Build command: `pnpm build` in billing-service
+- Result: ✅ 0 errors
+- All imports resolve correctly
+- All repositories compile successfully
+
+### Next Steps
+
+**Immediate Priority** ⏳:
+1. Integration testing (placement.created → splits + transactions)
+2. Idempotency testing (duplicate events)
+3. Edge case testing (NULL roles, partial roles)
+4. 1-to-1 relationship verification
+
+**Optional Cleanup** 🟢:
+1. Remove `placements.recruiter_id` column (deprecated with new architecture)
+2. Update documentation in plan-implementSourcerTablesCommissionStructure.prompt.md
+3. Add architecture diagrams
+
+---

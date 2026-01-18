@@ -12,6 +12,7 @@ import { CollaborationEventConsumer } from './consumers/collaboration/consumer';
 import { InvitationsConsumer } from './consumers/invitations/consumer';
 import { RecruiterSubmissionEventConsumer } from './consumers/recruiter-submission/consumer';
 import { SupportEventConsumer } from './consumers/support/consumer';
+import { GateEventsConsumer } from './consumers/gate-events/consumer';
 import { ContactLookupHelper } from './helpers/contact-lookup';
 import { DataLookupHelper } from './helpers/data-lookup';
 
@@ -29,6 +30,7 @@ export class DomainEventConsumer {
     private invitationsConsumer: InvitationsConsumer;
     private recruiterSubmissionConsumer: RecruiterSubmissionEventConsumer;
     private supportConsumer: SupportEventConsumer;
+    private gateEventsConsumer: GateEventsConsumer;
 
     constructor(
         private rabbitMqUrl: string,
@@ -38,13 +40,13 @@ export class DomainEventConsumer {
         private logger: Logger
     ) {
         const portalUrl = process.env.PORTAL_URL || 'http://localhost:3001';
-        
+
         // Create data lookup helper for direct database queries (avoiding inter-service HTTP calls)
         const dataLookup = new DataLookupHelper(repository.supabaseClient, logger);
-        
+
         // Create contact lookup helper for unified contact resolution
         const contactLookup = new ContactLookupHelper(repository.supabaseClient, logger);
-        
+
         this.applicationsConsumer = new ApplicationsEventConsumer(
             notificationService.applications,
             services,
@@ -98,6 +100,12 @@ export class DomainEventConsumer {
             contactLookup
         );
         this.supportConsumer = new SupportEventConsumer(notificationService.support, logger);
+        this.gateEventsConsumer = new GateEventsConsumer(
+            notificationService.gateEvents,
+            logger,
+            dataLookup,
+            contactLookup
+        );
     }
 
     async connect(): Promise<void> {
@@ -119,13 +127,13 @@ export class DomainEventConsumer {
             await this.channel.bindQueue(this.queue, this.exchange, 'application.withdrawn');
             await this.channel.bindQueue(this.queue, this.exchange, 'application.prescreen_requested');
             await this.channel.bindQueue(this.queue, this.exchange, 'placement.created');
-            
+
             // Phase 1.5 events - AI Review
             await this.channel.bindQueue(this.queue, this.exchange, 'ai_review.started');
             await this.channel.bindQueue(this.queue, this.exchange, 'ai_review.completed');
             await this.channel.bindQueue(this.queue, this.exchange, 'ai_review.failed');
             await this.channel.bindQueue(this.queue, this.exchange, 'application.draft_completed');
-            
+
             // Phase 2 events - Ownership & Sourcing
             await this.channel.bindQueue(this.queue, this.exchange, 'candidate.sourced');
             await this.channel.bindQueue(this.queue, this.exchange, 'candidate.outreach_recorded');
@@ -133,36 +141,43 @@ export class DomainEventConsumer {
             await this.channel.bindQueue(this.queue, this.exchange, 'candidate.invited');
             await this.channel.bindQueue(this.queue, this.exchange, 'candidate.consent_given');
             await this.channel.bindQueue(this.queue, this.exchange, 'candidate.consent_declined');
-            
+
             // Phase 2 events - Proposals
             await this.channel.bindQueue(this.queue, this.exchange, 'proposal.created');
             await this.channel.bindQueue(this.queue, this.exchange, 'proposal.accepted');
             await this.channel.bindQueue(this.queue, this.exchange, 'proposal.declined');
             await this.channel.bindQueue(this.queue, this.exchange, 'proposal.timeout');
-            
+
             // Phase 2 events - Recruiter Submission (new opportunity proposals)
             await this.channel.bindQueue(this.queue, this.exchange, 'application.recruiter_proposed');
             await this.channel.bindQueue(this.queue, this.exchange, 'application.recruiter_approved');
             await this.channel.bindQueue(this.queue, this.exchange, 'application.recruiter_declined');
             await this.channel.bindQueue(this.queue, this.exchange, 'application.recruiter_opportunity_expired');
-            
+
             // Phase 2 events - Placements
             await this.channel.bindQueue(this.queue, this.exchange, 'placement.activated');
             await this.channel.bindQueue(this.queue, this.exchange, 'placement.completed');
             await this.channel.bindQueue(this.queue, this.exchange, 'placement.failed');
             await this.channel.bindQueue(this.queue, this.exchange, 'replacement.requested');
             await this.channel.bindQueue(this.queue, this.exchange, 'guarantee.expiring');
-            
+
             // Phase 2 events - Collaboration
             await this.channel.bindQueue(this.queue, this.exchange, 'collaborator.added');
             await this.channel.bindQueue(this.queue, this.exchange, 'reputation.updated');
-            
+
             // Invitation events
             await this.channel.bindQueue(this.queue, this.exchange, 'invitation.created');
             await this.channel.bindQueue(this.queue, this.exchange, 'invitation.revoked');
 
             // Status page contact submissions
             await this.channel.bindQueue(this.queue, this.exchange, 'status.contact_submitted');
+
+            // Phase 3 events - Gate Review System
+            await this.channel.bindQueue(this.queue, this.exchange, 'gate.approved');
+            await this.channel.bindQueue(this.queue, this.exchange, 'gate.denied');
+            await this.channel.bindQueue(this.queue, this.exchange, 'gate.info_requested');
+            await this.channel.bindQueue(this.queue, this.exchange, 'gate.info_provided');
+            await this.channel.bindQueue(this.queue, this.exchange, 'gate.entered');
 
             this.logger.info('Connected to RabbitMQ and bound to events');
 
@@ -193,7 +208,7 @@ export class DomainEventConsumer {
                     this.logger.info({ event_type: event.event_type }, 'Processing event');
 
                     await this.handleEvent(event);
-                    
+
                     console.log('[NOTIFICATION-SERVICE] ✅ Event processed and acknowledged');
                     this.channel!.ack(msg);
                 } catch (error) {
@@ -319,6 +334,23 @@ export class DomainEventConsumer {
                 break;
             case 'status.contact_submitted':
                 await this.supportConsumer.handleStatusContact(event);
+                break;
+
+            // Phase 3 - Gate Review System
+            case 'gate.approved':
+                await this.gateEventsConsumer.handleGateApproved(event);
+                break;
+            case 'gate.denied':
+                await this.gateEventsConsumer.handleGateDenied(event);
+                break;
+            case 'gate.info_requested':
+                await this.gateEventsConsumer.handleGateInfoRequested(event);
+                break;
+            case 'gate.info_provided':
+                await this.gateEventsConsumer.handleGateInfoProvided(event);
+                break;
+            case 'gate.entered':
+                await this.gateEventsConsumer.handleGateEntered(event);
                 break;
 
             default:

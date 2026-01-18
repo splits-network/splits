@@ -18,6 +18,7 @@ import type {
     CandidateRoleAssignmentFilters,
     CandidateRoleAssignmentState,
     ProposeAssignmentInput,
+    GateType,
     StandardListParams,
     StandardListResponse,
 } from '@splits-network/shared-types';
@@ -419,5 +420,383 @@ export class CandidateRoleAssignmentServiceV2 {
             default:
                 return 'proposed';
         }
+    }
+
+    /**
+     * Approve gate (Phase 3)
+     * Move to next gate in sequence or to submitted_to_company if last gate
+     */
+    async approveGate(
+        clerkUserId: string,
+        assignmentId: string,
+        notes?: string
+    ): Promise<CandidateRoleAssignment> {
+        const assignment = await this.get(clerkUserId, assignmentId);
+        const context = await resolveAccessContext(this.supabase, clerkUserId);
+
+        // Validate current gate state
+        if (!assignment.current_gate) {
+            throw new Error('Assignment has no current gate');
+        }
+
+        // Validate user has permission for this gate
+        await this.validateGatePermission(context, assignment, assignment.current_gate);
+
+        // Determine next gate or final state
+        const gateSequence = (assignment.gate_sequence as string[]) || [];
+        const currentIndex = gateSequence.indexOf(assignment.current_gate);
+
+        if (currentIndex === -1) {
+            throw new Error('Current gate not found in gate sequence');
+        }
+
+        const isLastGate = currentIndex === gateSequence.length - 1;
+        const nextGate = isLastGate ? null : gateSequence[currentIndex + 1];
+        const now = new Date();
+
+        // Add approval to gate_history
+        const gateHistory = (assignment.gate_history as any[]) || [];
+        gateHistory.push({
+            gate: assignment.current_gate,
+            action: 'approved',
+            timestamp: now.toISOString(),
+            reviewer_user_id: context.identityUserId,
+            notes: notes || 'Gate approved',
+        });
+
+        // Update assignment
+        const updates: CandidateRoleAssignmentUpdateInput = {
+            gate_history: gateHistory,
+        };
+
+        if (nextGate) {
+            // Move to next gate
+            updates.current_gate = nextGate as GateType;
+            updates.state = this.mapGateToState(nextGate);
+        } else {
+            // All gates passed - move to submitted_to_company
+            updates.current_gate = null;
+            updates.state = 'submitted_to_company';
+            updates.submitted_at = now;
+        }
+
+        const updated = await this.update(assignmentId, clerkUserId, updates);
+
+        // Publish events
+        await this.eventPublisher?.publish('application.gate_approved', {
+            applicationId: assignment.id,
+            craId: assignmentId,
+            gate: assignment.current_gate,
+            nextGate,
+            reviewerUserId: context.identityUserId,
+            notes,
+            timestamp: now.toISOString(),
+        });
+
+        if (nextGate) {
+            await this.eventPublisher?.publish('application.gate_entered', {
+                applicationId: assignment.id,
+                craId: assignmentId,
+                gate: nextGate,
+                previousGate: assignment.current_gate,
+                gateSequence,
+                remainingGates: gateSequence.slice(currentIndex + 2),
+                timestamp: now.toISOString(),
+            });
+        } else {
+            await this.eventPublisher?.publish('application.all_gates_passed', {
+                applicationId: assignment.id,
+                craId: assignmentId,
+                timestamp: now.toISOString(),
+            });
+        }
+
+        return updated;
+    }
+
+    /**
+     * Deny gate (Phase 3)
+     * Reject application at current gate
+     */
+    async denyGate(
+        clerkUserId: string,
+        assignmentId: string,
+        reason: string
+    ): Promise<CandidateRoleAssignment> {
+        const assignment = await this.get(clerkUserId, assignmentId);
+        const context = await resolveAccessContext(this.supabase, clerkUserId);
+
+        // Validate current gate state
+        if (!assignment.current_gate) {
+            throw new Error('Assignment has no current gate');
+        }
+
+        // Validate user has permission for this gate
+        await this.validateGatePermission(context, assignment, assignment.current_gate);
+
+        const now = new Date();
+
+        // Add denial to gate_history
+        const gateHistory = (assignment.gate_history as any[]) || [];
+        gateHistory.push({
+            gate: assignment.current_gate,
+            action: 'denied',
+            timestamp: now.toISOString(),
+            reviewer_user_id: context.identityUserId,
+            notes: reason,
+        });
+
+        // Update assignment to rejected
+        const updated = await this.update(assignmentId, clerkUserId, {
+            state: 'rejected',
+            current_gate: null,
+            gate_history: gateHistory,
+        });
+
+        // Publish event
+        await this.eventPublisher?.publish('application.gate_denied', {
+            applicationId: assignment.id,
+            craId: assignmentId,
+            gate: assignment.current_gate,
+            reviewerUserId: context.identityUserId,
+            reason,
+            timestamp: now.toISOString(),
+        });
+
+        return updated;
+    }
+
+    /**
+     * Request additional information (Phase 3)
+     * Set application to info_requested state with specific questions
+     */
+    async requestInfo(
+        clerkUserId: string,
+        assignmentId: string,
+        questions: string
+    ): Promise<CandidateRoleAssignment> {
+        const assignment = await this.get(clerkUserId, assignmentId);
+        const context = await resolveAccessContext(this.supabase, clerkUserId);
+
+        // Validate current gate state
+        if (!assignment.current_gate) {
+            throw new Error('Assignment has no current gate');
+        }
+
+        // Validate user has permission for this gate
+        await this.validateGatePermission(context, assignment, assignment.current_gate);
+
+        const now = new Date();
+
+        // Add info request to gate_history
+        const gateHistory = (assignment.gate_history as any[]) || [];
+        gateHistory.push({
+            gate: assignment.current_gate,
+            action: 'info_requested',
+            timestamp: now.toISOString(),
+            reviewer_user_id: context.identityUserId,
+            notes: questions,
+        });
+
+        // Update assignment to info_requested
+        const updated = await this.update(assignmentId, clerkUserId, {
+            state: 'info_requested',
+            gate_history: gateHistory,
+        });
+
+        // Publish event
+        await this.eventPublisher?.publish('application.info_requested', {
+            applicationId: assignment.id,
+            craId: assignmentId,
+            gate: assignment.current_gate,
+            reviewerUserId: context.identityUserId,
+            questions,
+            timestamp: now.toISOString(),
+        });
+
+        return updated;
+    }
+
+    /**
+     * Provide requested information (Phase 3)
+     * Return application to under_review state with answers
+     */
+    async provideInfo(
+        clerkUserId: string,
+        assignmentId: string,
+        answers: string
+    ): Promise<CandidateRoleAssignment> {
+        const assignment = await this.get(clerkUserId, assignmentId);
+        const context = await resolveAccessContext(this.supabase, clerkUserId);
+
+        // Validate current state
+        if (assignment.state !== 'info_requested') {
+            throw new Error('Can only provide info for assignments in info_requested state');
+        }
+
+        const now = new Date();
+
+        // Add info provision to gate_history
+        const gateHistory = (assignment.gate_history as any[]) || [];
+        gateHistory.push({
+            gate: assignment.current_gate,
+            action: 'info_provided',
+            timestamp: now.toISOString(),
+            responder_user_id: context.identityUserId,
+            notes: answers,
+        });
+
+        // Update assignment back to under_review (stays at same gate)
+        const updated = await this.update(assignmentId, clerkUserId, {
+            state: 'under_review',
+            gate_history: gateHistory,
+        });
+
+        // Publish event
+        await this.eventPublisher?.publish('application.info_provided', {
+            applicationId: assignment.id,
+            craId: assignmentId,
+            gate: assignment.current_gate,
+            responderUserId: context.identityUserId,
+            answers,
+            timestamp: now.toISOString(),
+        });
+
+        return updated;
+    }
+
+    /**
+     * Validate user has permission to act on current gate
+     */
+    private async validateGatePermission(
+        context: any,
+        assignment: CandidateRoleAssignment,
+        gate: string
+    ): Promise<void> {
+        // Platform admins can act on any gate
+        if (context.roles.includes('platform_admin')) {
+            return;
+        }
+
+        switch (gate) {
+            case 'candidate_recruiter':
+                // Must be the assigned candidate recruiter
+                if (context.recruiterId !== assignment.candidate_recruiter_id) {
+                    throw new Error('Only the assigned candidate recruiter can act on this gate');
+                }
+                break;
+
+            case 'company_recruiter':
+                // Must be the assigned company recruiter
+                if (context.recruiterId !== assignment.company_recruiter_id) {
+                    throw new Error('Only the assigned company recruiter can act on this gate');
+                }
+                break;
+
+            case 'company':
+                // Must be company admin or hiring manager for the job's company
+                const { data: jobData } = await this.supabase
+                    .from('jobs')
+                    .select('company_id')
+                    .eq('id', assignment.job_id)
+                    .single();
+
+                if (!jobData) {
+                    throw new Error('Job not found');
+                }
+
+                const isCompanyUser = context.accessibleCompanyIds?.includes(jobData.company_id);
+                if (!isCompanyUser) {
+                    throw new Error('Only company users can act on the company gate');
+                }
+                break;
+
+            default:
+                throw new Error(`Unknown gate: ${gate}`);
+        }
+    }
+
+    /**
+     * Map gate name to CRA state
+     */
+    private mapGateToState(gate: string): CandidateRoleAssignmentState {
+        switch (gate) {
+            case 'candidate_recruiter':
+                return 'awaiting_candidate_recruiter';
+            case 'company_recruiter':
+                return 'awaiting_company_recruiter';
+            case 'company':
+                return 'awaiting_company';
+            default:
+                return 'under_review';
+        }
+    }
+
+    /**
+     * Determine gate routing based on recruiter assignments
+     * Phase 2.2: Gate Review Infrastructure
+     * 
+     * 4 Routing Scenarios:
+     * 1. No recruiters → Direct to company gate
+     * 2. Candidate recruiter only → Candidate recruiter gate → Company gate
+     * 3. Company recruiter only → Company recruiter gate → Company gate
+     * 4. Both recruiters → Candidate recruiter → Company recruiter → Company gate
+     */
+    public async determineGateRouting(context: {
+        jobId: string;
+        candidateId: string;
+    }): Promise<{
+        firstGate: string;
+        gateSequence: string[];
+        hasCandidateRecruiter: boolean;
+        hasCompanyRecruiter: boolean;
+        candidateRecruiterId: string | null;
+        companyRecruiterId: string | null;
+    }> {
+        // Check for active candidate recruiter relationship
+        const { data: candidateRecruiterData } = await this.supabase
+            .from('recruiter_candidates')
+            .select('recruiter_id')
+            .eq('candidate_id', context.candidateId)
+            .eq('status', 'active')
+            .maybeSingle();
+
+        // Check for company recruiter assignment on job
+        const { data: jobData } = await this.supabase
+            .from('jobs')
+            .select('recruiter_id')
+            .eq('id', context.jobId)
+            .single();
+
+        const candidateRecruiterId = candidateRecruiterData?.recruiter_id || null;
+        const companyRecruiterId = jobData?.recruiter_id || null;
+
+        const hasCandidateRecruiter = !!candidateRecruiterId;
+        const hasCompanyRecruiter = !!companyRecruiterId;
+
+        // Build gate sequence based on 4 scenarios
+        const gateSequence: string[] = [];
+
+        if (hasCandidateRecruiter) {
+            gateSequence.push('candidate_recruiter');
+        }
+
+        if (hasCompanyRecruiter) {
+            gateSequence.push('company_recruiter');
+        }
+
+        // Company gate is always the final gate
+        gateSequence.push('company');
+
+        const firstGate = gateSequence[0];
+
+        return {
+            firstGate,
+            gateSequence,
+            hasCandidateRecruiter,
+            hasCompanyRecruiter,
+            candidateRecruiterId,
+            companyRecruiterId,
+        };
     }
 }

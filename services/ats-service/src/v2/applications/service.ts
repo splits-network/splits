@@ -587,6 +587,8 @@ export class ApplicationServiceV2 {
     /**
      * Submit application after AI review
      * Candidate is satisfied with AI feedback and ready to submit
+     * 
+     * Phase 2: Creates CandidateRoleAssignment with gate routing
      */
     async submitApplication(applicationId: string, clerkUserId: string, data?: any): Promise<{
         application: any;
@@ -608,25 +610,62 @@ export class ApplicationServiceV2 {
             stage: 'submitted',
         });
 
-        // Create CandidateRoleAssignment if assignment service is available
-        // Note: For direct candidate applications (no recruiter), CRA is optional
+        // Phase 2.2 & 2.3: Determine gate routing and create CRA with routing
         let assignment = null;
-        if (this.assignmentService && this.assignmentService.create) {
+        if (this.assignmentService) {
             try {
-                assignment = await this.assignmentService.create(clerkUserId, {
+                // Determine gate routing
+                const gateRouting = await this.assignmentService.determineGateRouting({
+                    jobId: updated.job_id,
+                    candidateId: updated.candidate_id,
+                });
+
+                // Create CRA with gate routing metadata
+                const now = new Date();
+                const createInput: any = {
                     candidate_id: updated.candidate_id,
                     job_id: updated.job_id,
                     proposed_by: clerkUserId,
-                    state: 'proposed',
-                    // candidate_recruiter_id and company_recruiter_id will be null for direct applications
-                });
+                    state: gateRouting.firstGate === 'company' ? 'awaiting_company' :
+                        gateRouting.firstGate === 'candidate_recruiter' ? 'awaiting_candidate_recruiter' :
+                            'awaiting_company_recruiter',
+                    // Gate routing fields
+                    current_gate: gateRouting.firstGate,
+                    gate_sequence: gateRouting.gateSequence,
+                    gate_history: [{
+                        gate: gateRouting.firstGate,
+                        action: 'entered',
+                        timestamp: now.toISOString(),
+                        notes: 'Application submitted',
+                    }],
+                    has_candidate_recruiter: gateRouting.hasCandidateRecruiter,
+                    has_company_recruiter: gateRouting.hasCompanyRecruiter,
+                    // Recruiter assignments
+                    candidate_recruiter_id: gateRouting.candidateRecruiterId,
+                    company_recruiter_id: gateRouting.companyRecruiterId,
+                };
+
+                assignment = await this.assignmentService.create(clerkUserId, createInput);
+
+                // Phase 2.5: Publish gate entered event
+                if (this.eventPublisher) {
+                    await this.eventPublisher.publish('application.gate_entered', {
+                        applicationId,
+                        craId: assignment.id,
+                        gate: gateRouting.firstGate,
+                        previousGate: null,
+                        gateSequence: gateRouting.gateSequence,
+                        remainingGates: gateRouting.gateSequence.slice(1),
+                        timestamp: now.toISOString(),
+                    });
+                }
             } catch (error) {
-                console.error('Failed to create CandidateRoleAssignment:', error);
+                console.error('Failed to create CandidateRoleAssignment with gate routing:', error);
                 // Don't fail the submission if CRA creation fails
             }
         }
 
-        // Publish event
+        // Publish submission event
         if (this.eventPublisher) {
             const userContext = await this.accessResolver.resolve(clerkUserId);
             await this.eventPublisher.publish('application.submitted', {

@@ -127,7 +127,9 @@ export interface CandidateRoleAssignmentUpdateInput {
     state?: CandidateRoleAssignmentState;
     candidate_recruiter_id?: string;
     company_recruiter_id?: string;
-    current_gate?: GateType;
+    current_gate?: GateType | null;  // Allow null to clear gate
+    gate_sequence?: string[];         // Allow updating gate sequence
+    gate_history?: any[];             // Allow updating gate history (JSONB)
     response_notes?: string;
     accepted_at?: Date;
     declined_at?: Date;

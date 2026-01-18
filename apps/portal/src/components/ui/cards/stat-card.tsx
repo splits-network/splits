@@ -232,13 +232,15 @@ export function StatCard({
 
     const statContent = (
         <>
-            {icon && (
-                <div className={`stat-figure ${iconColorClasses[color]}`}>
-                    <i className={`fa-duotone fa-regular ${icon} text-3xl`}></i>
-                </div>
-            )}
             <div className="stat-title">{title}</div>
-            <div className={`stat-value ${statColorClasses[color]}`}>{displayValue}</div>
+            <div className="grid grid-cols-2 items-center">
+                <div className={`stat-value ${statColorClasses[color]}`}>{displayValue}</div>
+                {icon && (
+                    <div className={`stat-figure ${iconColorClasses[color]}`}>
+                        <i className={`fa-duotone fa-regular ${icon} text-3xl`}></i>
+                    </div>
+                )}
+            </div>
             {(description || trend !== undefined) && (
                 <div className="stat-desc">
                     {trend !== undefined && (
@@ -263,7 +265,7 @@ export function StatCard({
     // If href is provided, wrap in a Link
     if (href) {
         return (
-            <Link href={href} className="block">
+            <Link href={href} className="">
                 <div
                     ref={ref}
                     className={`stat ${interactiveClasses} ${className}`}

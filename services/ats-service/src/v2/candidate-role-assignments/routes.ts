@@ -217,4 +217,130 @@ export function registerCandidateRoleAssignmentRoutes(
             return reply.code(400).send({ error: { message: error.message } });
         }
     });
+
+    /**
+     * APPROVE GATE (Phase 3)
+     * POST /api/v2/candidate-role-assignments/:id/approve-gate
+     * 
+     * Body: { notes?: string }
+     */
+    app.post('/api/v2/candidate-role-assignments/:id/approve-gate', async (
+        request: FastifyRequest<{ Params: { id: string } }>,
+        reply: FastifyReply
+    ) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params;
+            const { notes } = request.body as any;
+
+            const assignment = await config.assignmentService.approveGate(
+                clerkUserId,
+                id,
+                notes
+            );
+            return reply.send({ data: assignment });
+        } catch (error: any) {
+            request.log.error({ error: error.message, id: request.params.id }, 'Failed to approve gate');
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
+    /**
+     * DENY GATE (Phase 3)
+     * POST /api/v2/candidate-role-assignments/:id/deny-gate
+     * 
+     * Body: { reason: string }
+     */
+    app.post('/api/v2/candidate-role-assignments/:id/deny-gate', async (
+        request: FastifyRequest<{ Params: { id: string } }>,
+        reply: FastifyReply
+    ) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params;
+            const { reason } = request.body as any;
+
+            if (!reason) {
+                return reply.code(400).send({
+                    error: { message: 'Denial reason is required' }
+                });
+            }
+
+            const assignment = await config.assignmentService.denyGate(
+                clerkUserId,
+                id,
+                reason
+            );
+            return reply.send({ data: assignment });
+        } catch (error: any) {
+            request.log.error({ error: error.message, id: request.params.id }, 'Failed to deny gate');
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
+    /**
+     * REQUEST INFO (Phase 3)
+     * POST /api/v2/candidate-role-assignments/:id/request-info
+     * 
+     * Body: { questions: string }
+     */
+    app.post('/api/v2/candidate-role-assignments/:id/request-info', async (
+        request: FastifyRequest<{ Params: { id: string } }>,
+        reply: FastifyReply
+    ) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params;
+            const { questions } = request.body as any;
+
+            if (!questions) {
+                return reply.code(400).send({
+                    error: { message: 'Questions are required' }
+                });
+            }
+
+            const assignment = await config.assignmentService.requestInfo(
+                clerkUserId,
+                id,
+                questions
+            );
+            return reply.send({ data: assignment });
+        } catch (error: any) {
+            request.log.error({ error: error.message, id: request.params.id }, 'Failed to request info');
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
+    /**
+     * PROVIDE INFO (Phase 3)
+     * POST /api/v2/candidate-role-assignments/:id/provide-info
+     * 
+     * Body: { answers: string }
+     */
+    app.post('/api/v2/candidate-role-assignments/:id/provide-info', async (
+        request: FastifyRequest<{ Params: { id: string } }>,
+        reply: FastifyReply
+    ) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params;
+            const { answers } = request.body as any;
+
+            if (!answers) {
+                return reply.code(400).send({
+                    error: { message: 'Answers are required' }
+                });
+            }
+
+            const assignment = await config.assignmentService.provideInfo(
+                clerkUserId,
+                id,
+                answers
+            );
+            return reply.send({ data: assignment });
+        } catch (error: any) {
+            request.log.error({ error: error.message, id: request.params.id }, 'Failed to provide info');
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
 }
