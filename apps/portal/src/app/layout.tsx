@@ -70,7 +70,7 @@ export default async function RootLayout({
                     />
                     <link rel="stylesheet" href="https://kit.fontawesome.com/728c8ddec8.css" crossOrigin="anonymous" />
                 </head>
-                <body className="flex flex-col min-h-screen">
+                <body className="flex flex-col min-h-screen bg-base-300">
                     <ThemeInitializer />
                     <ToastProvider>
                         <main className="grow">

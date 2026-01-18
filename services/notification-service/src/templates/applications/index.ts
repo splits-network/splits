@@ -750,3 +750,191 @@ ${paragraph(
         source: data.source || 'portal',
     });
 }
+
+// ============================================================================
+// Phase 4: Recruiter Proposal Templates
+// ============================================================================
+
+export interface RecruiterProposedData {
+    candidateName: string;
+    recruiterName: string;
+    jobTitle: string;
+    companyName: string;
+    pitch?: string;
+    proposalUrl: string;
+    source?: EmailSource;
+}
+
+export function recruiterProposedEmail(data: RecruiterProposedData): string {
+    const content = `
+${heading({ level: 1, text: `${data.recruiterName} Has Proposed a Job for You!` })}
+
+${alert({
+        type: 'info',
+        title: 'New Job Opportunity',
+        message: `A recruiter thinks you'd be a great fit for the ${data.jobTitle} position at ${data.companyName}.`,
+    })}
+
+${data.pitch ? `
+${heading({ level: 3, text: 'Personal Message from the Recruiter' })}
+${paragraph(data.pitch)}
+
+${divider()}
+` : ''}
+
+${infoCard({
+        title: 'Position Details',
+        items: [
+            { label: 'Position', value: data.jobTitle },
+            { label: 'Company', value: data.companyName },
+            { label: 'Proposed by', value: data.recruiterName },
+        ],
+    })}
+
+${paragraph(
+        'Review the full job details and decide if you\'d like to proceed with your application.'
+    )}
+
+${button({
+        href: data.proposalUrl,
+        text: 'Review Proposal →',
+        variant: 'primary',
+    })}
+
+${divider()}
+
+${paragraph(
+        '<strong>Next Steps:</strong> If you\'re interested, accept the proposal and complete your application. If not, you can decline with a brief reason.'
+    )}
+
+${paragraph(
+        'Questions? Reply to this email or visit our <a href="https://splits.network/public/help" style="color: #233876; text-decoration: underline;">Help Center</a>.'
+    )}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `${data.recruiterName} has proposed the ${data.jobTitle} position at ${data.companyName} for you`,
+        content,
+        source: data.source || 'candidate',
+    });
+}
+
+export interface ApplicationProposalAcceptedData {
+    recruiterName: string;
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    applicationUrl: string;
+    source?: EmailSource;
+}
+
+export function proposalAcceptedByApplicationEmail(data: ApplicationProposalAcceptedData): string {
+    const content = `
+${heading({ level: 1, text: 'Your Job Proposal Was Accepted!' })}
+
+${alert({
+        type: 'success',
+        title: 'Great News!',
+        message: `${data.candidateName} has accepted your job proposal and is working on their application.`,
+    })}
+
+${infoCard({
+        title: 'Application Details',
+        items: [
+            { label: 'Candidate', value: data.candidateName },
+            { label: 'Position', value: data.jobTitle },
+            { label: 'Company', value: data.companyName },
+        ],
+    })}
+
+${paragraph(
+        'The candidate is now completing their application. You\'ll be notified when it\'s ready for your review.'
+    )}
+
+${button({
+        href: data.applicationUrl,
+        text: 'View Application Status →',
+        variant: 'primary',
+    })}
+
+${divider()}
+
+${paragraph(
+        '<strong>Next Steps:</strong> Wait for the candidate to submit their application, then review and provide feedback.'
+    )}
+
+${paragraph(
+        'Track all your proposals in your <a href="https://splits.network/portal/dashboard" style="color: #233876; text-decoration: underline;">dashboard</a>.'
+    )}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `${data.candidateName} accepted your proposal for ${data.jobTitle}`,
+        content,
+        source: data.source || 'portal',
+    });
+}
+
+export interface ApplicationProposalDeclinedData {
+    recruiterName: string;
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    reason?: string;
+    candidateProfileUrl: string;
+    source?: EmailSource;
+}
+
+export function proposalDeclinedByApplicationEmail(data: ApplicationProposalDeclinedData): string {
+    const content = `
+${heading({ level: 1, text: 'Proposal Update' })}
+
+${alert({
+        type: 'warning',
+        title: 'Proposal Declined',
+        message: `${data.candidateName} has declined your proposal for the ${data.jobTitle} position.`,
+    })}
+
+${data.reason ? `
+${heading({ level: 3, text: 'Candidate\'s Reason' })}
+${paragraph(data.reason)}
+
+${divider()}
+` : ''}
+
+${infoCard({
+        title: 'Proposal Details',
+        items: [
+            { label: 'Candidate', value: data.candidateName },
+            { label: 'Position', value: data.jobTitle },
+            { label: 'Company', value: data.companyName },
+        ],
+    })}
+
+${paragraph(
+        'Don\'t worry! You can continue exploring other opportunities with this candidate or find other great matches.'
+    )}
+
+${button({
+        href: data.candidateProfileUrl,
+        text: 'View Candidate Profile →',
+        variant: 'secondary',
+    })}
+
+${divider()}
+
+${paragraph(
+        '<strong>Next Steps:</strong> Consider proposing other positions that might be a better fit, or continue your search for the perfect candidate.'
+    )}
+
+${paragraph(
+        'Need tips on crafting better proposals? Visit our <a href="https://splits.network/public/help/proposals" style="color: #233876; text-decoration: underline;">Proposal Guide</a>.'
+    )}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `${data.candidateName} declined your proposal for ${data.jobTitle}`,
+        content,
+        source: data.source || 'portal',
+    });
+}

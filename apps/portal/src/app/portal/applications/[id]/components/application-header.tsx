@@ -223,10 +223,6 @@ export default function ApplicationHeader({ applicationId }: ApplicationHeaderPr
                                     Accept Application
                                 </button>
                             )}
-                            <Link href="/portal/applications" className="btn btn-ghost gap-2">
-                                <i className="fa-duotone fa-regular fa-arrow-left"></i>
-                                Back
-                            </Link>
                         </div>
                     </div>
                 </div>

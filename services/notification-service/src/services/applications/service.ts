@@ -13,6 +13,8 @@ import {
     preScreenRequestConfirmationEmail,
     aiReviewCompletedCandidateEmail,
     aiReviewCompletedRecruiterEmail,
+    proposalAcceptedByApplicationEmail,
+    proposalDeclinedByApplicationEmail,
 } from '../../templates/applications';
 
 export class ApplicationsEmailService {
@@ -734,6 +736,82 @@ export class ApplicationsEmailService {
             actionLabel: 'View Job Details',
             priority: 'high',
             category: 'application',
+        });
+    }
+
+    // ========================================================================
+    // Phase 4: Recruiter Proposal Methods
+    // ========================================================================
+
+    async sendApplicationProposalAccepted(
+        recipientEmail: string,
+        data: {
+            recruiterName: string;
+            candidateName: string;
+            jobTitle: string;
+            companyName: string;
+            applicationId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `${data.candidateName} Accepted Your Proposal: ${data.jobTitle}`;
+        const portalUrl = process.env.PORTAL_URL || 'https://splits.network';
+        const applicationUrl = `${portalUrl}/portal/applications/${data.applicationId}`;
+
+        const html = proposalAcceptedByApplicationEmail({
+            recruiterName: data.recruiterName,
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            applicationUrl,
+            source: 'portal',
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'application.proposal_accepted',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/portal/applications/${data.applicationId}`,
+            actionLabel: 'View Application',
+            priority: 'high',
+            category: 'proposal',
+        });
+    }
+
+    async sendApplicationProposalDeclined(
+        recipientEmail: string,
+        data: {
+            recruiterName: string;
+            candidateName: string;
+            jobTitle: string;
+            companyName: string;
+            reason?: string;
+            candidateId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `Proposal Update: ${data.candidateName} - ${data.jobTitle}`;
+        const portalUrl = process.env.PORTAL_URL || 'https://splits.network';
+        const candidateProfileUrl = `${portalUrl}/portal/candidates/${data.candidateId}`;
+
+        const html = proposalDeclinedByApplicationEmail({
+            recruiterName: data.recruiterName,
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            reason: data.reason,
+            candidateProfileUrl,
+            source: 'portal',
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'application.proposal_declined',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/portal/candidates/${data.candidateId}`,
+            actionLabel: 'View Candidate',
+            priority: 'normal',
+            category: 'proposal',
         });
     }
 }

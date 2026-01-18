@@ -130,8 +130,8 @@ export default function RolesList() {
     }
 
     return (
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between">
-            <div className="w-full md:flex-1 md:mr-4 space-y-6">
+        <div className="grid grid-cols-12 gap-6">
+            <div className="col-span-12 md:col-span-8 xl:col-span-10">
                 <div className='card bg-base-200'>
                     <StatCardGrid className='m-2 shadow-lg'>
                         <StatCard
@@ -176,7 +176,81 @@ export default function RolesList() {
                         />
                     </div>
                 </div>
+            </div>
 
+            <div className="col-span-12 md:col-span-4 xl:col-span-2 space-y-6">
+
+
+                {/* Filters and View Toggle */}
+                <div className="card bg-base-200 shadow">
+                    <div className="card-body p-4 space-y-4">
+                        <h3 className='card-title'>
+                            <i className='fa-duotone fa-regular fa-filter mr-2' />
+                            Options
+                        </h3>
+                        {profile?.is_platform_admin || (profile?.roles?.includes('company_admin') || profile?.roles?.includes('hiring_manager') || (profile?.roles?.includes('recruiter')) && profile?.organization_ids?.length > 0) &&
+                            <>
+                                <button
+                                    className="btn btn-primary w-full"
+                                    onClick={() => setShowAddModal(true)}
+                                >
+                                    <i className="fa-duotone fa-regular fa-plus"></i>
+                                    Add Role
+                                </button>
+                            </>
+                        }
+                        <div className="flex flex-wrap gap-4 items-center">
+                            {/* Status Filter */}
+                            <div className="fieldset w-full">
+                                <select
+                                    name="status-selector"
+                                    className="select w-full"
+                                    value={filters.status || 'all'}
+                                    onChange={(e) => setFilter('status', e.target.value === 'all' ? undefined : e.target.value)}
+                                >
+                                    <option value="all">All Statuses</option>
+                                    <option value="active">Active</option>
+                                    <option value="paused">Paused</option>
+                                    <option value="filled">Filled</option>
+                                    <option value="closed">Closed</option>
+                                </select>
+                            </div>
+
+                            {/* Ownership Filter (for recruiters and company users) */}
+                            {(userRole === 'recruiter' || userRole === 'company_admin' || userRole === 'hiring_manager') && (
+                                <div className="fieldset w-full">
+                                    <select
+                                        name="job-owner-filter"
+                                        className="select w-full"
+                                        value={filters.job_owner_filter || 'all'}
+                                        onChange={(e) => setFilter('job_owner_filter', e.target.value as 'all' | 'assigned')}
+                                    >
+                                        <option value="all">
+                                            {userRole === 'recruiter' ? 'All Jobs' : 'All Organization Jobs'}
+                                        </option>
+                                        <option value="assigned">My Assigned Jobs</option>
+                                    </select>
+                                </div>
+                            )}
+
+                            {/* Search */}
+                            <SearchInput
+                                value={searchInput}
+                                onChange={setSearchInput}
+                                onClear={clearSearch}
+                                placeholder="Search roles..."
+                                loading={loading}
+                                className="flex-1 min-w-[200px]"
+                            />
+
+                            {/* View Toggle */}
+                            <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="col-span-12 gap-4">
                 {/* Loading State */}
                 {loading && jobs.length === 0 && <LoadingState />}
 
@@ -243,110 +317,36 @@ export default function RolesList() {
                     loading={loading}
                 />
             </div>
-            <div className="w-full md:w-64 lg:w-72 xl:w-80 shrink-0 mt-6 md:mt-0 space-y-6">
-
-                {/* Add Roles Sidebar */}
-                {profile?.is_platform_admin || (profile?.roles?.includes('company_admin') || profile?.roles?.includes('hiring_manager') || (profile?.roles?.includes('recruiter')) && profile?.organization_ids?.length > 0) &&
-                    <div className="card bg-base-200 shadow">
-                        <div className="card-body p-4">
-                            <h3 className="font-semibold text-lg mb-2">Add New Role</h3>
-                            <p className="text-base-content/70 mb-4">
-                                Quickly add a new role to your database.
-                            </p>
-                            <button
-                                className="btn btn-primary w-full"
-                                onClick={() => setShowAddModal(true)}
-                            >
-                                <i className="fa-duotone fa-regular fa-plus"></i>
-                                Add Role
-                            </button>
-                        </div>
-                    </div>
-                }
-
-                {/* Filters and View Toggle */}
-                <div className="card bg-base-200 shadow">
-                    <div className="card-body p-4">
-                        <h3 className='card-title'>
-                            Filters & View
-                            <span className="text-base-content/30">•••</span>
-                        </h3>
-                        <div className="flex flex-wrap gap-4 items-center">
-                            {/* Status Filter */}
-                            <div className="fieldset w-full">
-                                <select
-                                    name="status-selector"
-                                    className="select w-full"
-                                    value={filters.status || 'all'}
-                                    onChange={(e) => setFilter('status', e.target.value === 'all' ? undefined : e.target.value)}
-                                >
-                                    <option value="all">All Statuses</option>
-                                    <option value="active">Active</option>
-                                    <option value="paused">Paused</option>
-                                    <option value="filled">Filled</option>
-                                    <option value="closed">Closed</option>
-                                </select>
-                            </div>
-
-                            {/* Ownership Filter (for recruiters and company users) */}
-                            {(userRole === 'recruiter' || userRole === 'company_admin' || userRole === 'hiring_manager') && (
-                                <div className="fieldset w-full">
-                                    <select
-                                        name="job-owner-filter"
-                                        className="select w-full"
-                                        value={filters.job_owner_filter || 'all'}
-                                        onChange={(e) => setFilter('job_owner_filter', e.target.value as 'all' | 'assigned')}
-                                    >
-                                        <option value="all">
-                                            {userRole === 'recruiter' ? 'All Jobs' : 'All Organization Jobs'}
-                                        </option>
-                                        <option value="assigned">My Assigned Jobs</option>
-                                    </select>
-                                </div>
-                            )}
-
-                            {/* Search */}
-                            <SearchInput
-                                value={searchInput}
-                                onChange={setSearchInput}
-                                onClear={clearSearch}
-                                placeholder="Search roles..."
-                                loading={loading}
-                                className="flex-1 min-w-[200px]"
-                            />
-
-                            {/* View Toggle */}
-                            <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} />
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             {/* Add Role Modal */}
-            {showAddModal && (
-                <AddRoleWizardModal
-                    isOpen={showAddModal}
-                    onClose={() => setShowAddModal(false)}
-                    onSuccess={() => {
-                        setShowAddModal(false);
-                        refresh(); // Refresh the list
-                    }}
-                />
-            )}
+            {
+                showAddModal && (
+                    <AddRoleWizardModal
+                        isOpen={showAddModal}
+                        onClose={() => setShowAddModal(false)}
+                        onSuccess={() => {
+                            setShowAddModal(false);
+                            refresh(); // Refresh the list
+                        }}
+                    />
+                )
+            }
 
             {/* Edit Role Modal */}
-            {editingJobId && (
-                <AddRoleWizardModal
-                    isOpen={true}
-                    jobId={editingJobId}
-                    mode="edit"
-                    onClose={handleCloseEditModal}
-                    onSuccess={() => {
-                        handleCloseEditModal();
-                        refresh(); // Refresh the list
-                    }}
-                />
-            )}
-        </div>
+            {
+                editingJobId && (
+                    <AddRoleWizardModal
+                        isOpen={true}
+                        jobId={editingJobId}
+                        mode="edit"
+                        onClose={handleCloseEditModal}
+                        onSuccess={() => {
+                            handleCloseEditModal();
+                            refresh(); // Refresh the list
+                        }}
+                    />
+                )
+            }
+        </div >
     );
 }

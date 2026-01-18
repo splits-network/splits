@@ -64,7 +64,6 @@ interface Application {
         recommendation: 'strong_fit' | 'good_fit' | 'fair_fit' | 'poor_fit';
     };
 }
-
 interface ApplicationFiltersType {
     stage?: string;
     ai_score_filter?: string;
@@ -167,6 +166,7 @@ export default function ApplicationsList() {
         refresh,
     } = useStandardList<Application, ApplicationFiltersType>({
         endpoint: '/applications',
+        include: 'candidate,job,company,ai_review',
         defaultFilters,
         defaultSortBy: 'created_at',
         defaultSortOrder: 'desc',
@@ -294,7 +294,7 @@ export default function ApplicationsList() {
 
     return (
         <div className="grid grid-cols-12 gap-6">
-            <div className="col-span-8">
+            <div className="col-span-12 md:col-span-8 xl:col-span-10">
                 {/* Stats and Trends Card */}
                 <div className="card bg-base-200">
                     <ApplicationsStats
@@ -317,13 +317,13 @@ export default function ApplicationsList() {
 
 
             {/* Sidebar */}
-            <div className="col-span-4">
+            <div className="col-span-12 md:col-span-4 xl:col-span-2">
                 {/* Filters and View Toggle */}
                 <div className="card bg-base-200 shadow">
-                    <div className="card-body p-4">
-                        <h3 className="card-title">
-                            Filters & View
-                            <span className="text-base-content/30">•••</span>
+                    <div className="card-body p-4 space-y-4">
+                        <h3 className='card-title'>
+                            <i className='fa-duotone fa-regular fa-filter mr-2' />
+                            Options
                         </h3>
                         <div className="flex flex-wrap gap-4 items-center">
                             {/* Filters */}
@@ -394,7 +394,7 @@ export default function ApplicationsList() {
 
                 {/* Grid View */}
                 {!loading && viewMode === 'grid' && applications.length > 0 && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {applications.map((application) => (
                             <ApplicationCard
                                 key={application.id}

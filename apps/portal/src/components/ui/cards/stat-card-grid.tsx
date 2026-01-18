@@ -34,7 +34,7 @@ export function StatCardGrid({
 
     return (
         // <div className={`stats items-stretch shadow bg-base-100 ${directionClasses[direction]} ${className}`}>
-        <div className={`grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 space-y rounded-xl shadow bg-base-100 ${className}`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 space-y rounded-xl shadow bg-base-100 ${className}`}>
             {children}
         </div>
     );

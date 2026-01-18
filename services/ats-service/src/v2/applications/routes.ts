@@ -108,4 +108,70 @@ export function registerApplicationRoutes(
         }
     });
 
+    // Phase 4: Recruiter Proposal Routes
+
+    /**
+     * POST /api/v2/applications/propose
+     * Recruiter proposes a job to one of their candidates
+     */
+    app.post('/api/v2/applications/propose', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const body = request.body as {
+                recruiter_id: string;
+                candidate_id: string;
+                job_id: string;
+                pitch?: string;
+                notes?: string;
+            };
+
+            request.log.info({ body, clerkUserId }, 'Proposing job to candidate');
+
+            const application = await config.applicationService.proposeJobToCandidate(body, clerkUserId);
+            return reply.code(201).send({ data: application });
+        } catch (error: any) {
+            request.log.error({ error: error.message, stack: error.stack }, 'Failed to propose job to candidate');
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
+    /**
+     * POST /api/v2/applications/:id/accept-proposal
+     * Candidate accepts a job proposal from recruiter
+     */
+    app.post('/api/v2/applications/:id/accept-proposal', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as any;
+
+            request.log.info({ applicationId: id, clerkUserId }, 'Accepting job proposal');
+
+            const application = await config.applicationService.acceptProposal(id, clerkUserId);
+            return reply.send({ data: application });
+        } catch (error: any) {
+            request.log.error({ error: error.message, applicationId: request.params }, 'Failed to accept proposal');
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
+    /**
+     * POST /api/v2/applications/:id/decline-proposal
+     * Candidate declines a job proposal from recruiter
+     */
+    app.post('/api/v2/applications/:id/decline-proposal', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as any;
+            const body = request.body as { reason?: string } | undefined;
+
+            request.log.info({ applicationId: id, clerkUserId, hasReason: !!body?.reason }, 'Declining job proposal');
+
+            const application = await config.applicationService.declineProposal(id, clerkUserId, body?.reason);
+            return reply.send({ data: application });
+        } catch (error: any) {
+            request.log.error({ error: error.message, applicationId: request.params }, 'Failed to decline proposal');
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
 }

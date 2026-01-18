@@ -74,7 +74,7 @@ export default function CandidatesListClient() {
         handleSort,
         setViewMode,
         setLimit,
-        refetch
+        refresh
     } = useStandardList<Candidate, CandidateFilters>({
         fetchFn: fetchCandidates,
         defaultFilters,
@@ -90,7 +90,7 @@ export default function CandidatesListClient() {
     );
 
     const handleAddCandidateSuccess = (newCandidate: Candidate) => {
-        refetch();
+        refresh();
         toast.success('Invitation sent to candidate successfully!');
     };
 
@@ -105,7 +105,7 @@ export default function CandidatesListClient() {
     }
 
     if (error) {
-        return <ErrorState message={error} onRetry={refetch} />;
+        return <ErrorState message={error} onRetry={refresh} />;
     }
     const TIME_PERIODS = [
         { label: '1 Month', value: 1 },
@@ -114,13 +114,14 @@ export default function CandidatesListClient() {
         { label: '12 Months', value: 12 },
     ];
     return (
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between">
-            <div className='w-full md:flex-1 md:mr-4 space-y-6'>
+        <div className="grid grid-cols-12 gap-6">
+            <div className="col-span-12 md:col-span-8 xl:col-span-10">
                 <div className='card bg-base-200'>
                     <StatCardGrid className='m-2 shadow-lg'>
                         <StatCard
                             title='Total Candidates'
                             icon="fa-users"
+                            color='primary'
                             value={pagination.total}
                             trend={statTrends.total}
                             trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
@@ -128,6 +129,7 @@ export default function CandidatesListClient() {
                         <StatCard
                             title='New Candidates'
                             icon="fa-user-plus"
+                            color='info'
                             value={candidates.filter(c => c.is_new).length}
                             trend={statTrends.total}
                             trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
@@ -136,6 +138,7 @@ export default function CandidatesListClient() {
                             <StatCard
                                 title='Sourced by You'
                                 icon="fa-user-astronaut"
+                                color='success'
                                 value={candidates.filter(c => c.is_sourcer).length}
                             />
                         )}
@@ -143,6 +146,7 @@ export default function CandidatesListClient() {
                             <StatCard
                                 title='With Active Relationships'
                                 icon="fa-handshake"
+                                color='warning'
                                 value={candidates.filter(c => c.has_active_relationship).length}
                                 trend={statTrends.withRelationships}
                                 trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
@@ -158,7 +162,56 @@ export default function CandidatesListClient() {
                         />
                     </div>
                 </div>
+            </div>
 
+            <div className="col-span-12 md:col-span-4 xl:col-span-2 space-y-6">
+                {/* Add Candidate Sidebar */}
+                <div className="card bg-base-200 shadow">
+                    <div className="card-body p-4 space-y-4">
+                        <h3 className='card-title'>
+                            <i className='fa-duotone fa-regular fa-filter mr-2' />
+                            Options
+                        </h3>
+                        <button
+                            className="btn btn-primary w-full"
+                            onClick={() => setShowAddModal(true)}
+                        >
+                            <i className="fa-duotone fa-regular fa-plus"></i>
+                            Add Candidate
+                        </button>
+                        <div className="flex flex-wrap gap-4 items-center">
+                            {/* Scope Filter - Only show for recruiters */}
+                            {isRecruiter && (
+                                <div className="fieldset w-full">
+                                    <select
+                                        name="scope-filter"
+                                        className="select w-full"
+                                        value={filters.scope}
+                                        onChange={(e) => setFilters({ scope: e.target.value as 'mine' | 'all' })}
+                                    >
+                                        <option value="mine">My Candidates</option>
+                                        <option value="all">All Candidates</option>
+                                    </select>
+                                </div>
+                            )}
+
+                            {/* Search */}
+                            <SearchInput
+                                value={searchInput}
+                                onChange={setSearchInput}
+                                onClear={clearSearch}
+                                placeholder="Search candidates..."
+                                loading={loading}
+                                className="flex-1 min-w-[200px]"
+                            />
+
+                            {/* View Toggle */}
+                            <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className="col-span-12 gap-4">
                 {/* Loading overlay for subsequent fetches */}
                 {loading && candidates.length > 0 && <LoadingState />}
 
@@ -217,60 +270,6 @@ export default function CandidatesListClient() {
                 />
             </div>
             <div className="w-full md:w-64 lg:w-72 xl:w-80 shrink-0 mt-6 md:mt-0 space-y-6">
-                {/* Add Candidate Sidebar */}
-                <div className="card bg-base-200 shadow">
-                    <div className="card-body p-4">
-                        <h3 className="font-semibold text-lg mb-2">Add New Candidate</h3>
-                        <p className="text-base-content/70 mb-4">
-                            Quickly add a new candidate to your database.
-                        </p>
-                        <button
-                            className="btn btn-primary w-full"
-                            onClick={() => setShowAddModal(true)}
-                        >
-                            <i className="fa-duotone fa-regular fa-plus"></i>
-                            Add Candidate
-                        </button>
-                    </div>
-                </div>
-                {/* Filters and View Toggle */}
-                <div className="card bg-base-200 shadow">
-                    <div className="card-body p-4">
-                        <h3 className='card-title'>
-                            Filters & View
-                            <span className="text-base-content/30">•••</span>
-                        </h3>
-                        <div className="flex flex-wrap gap-4 items-center">
-                            {/* Scope Filter - Only show for recruiters */}
-                            {isRecruiter && (
-                                <div className="fieldset w-full">
-                                    <select
-                                        name="scope-filter"
-                                        className="select w-full"
-                                        value={filters.scope}
-                                        onChange={(e) => setFilters({ scope: e.target.value as 'mine' | 'all' })}
-                                    >
-                                        <option value="mine">My Candidates</option>
-                                        <option value="all">All Candidates</option>
-                                    </select>
-                                </div>
-                            )}
-
-                            {/* Search */}
-                            <SearchInput
-                                value={searchInput}
-                                onChange={setSearchInput}
-                                onClear={clearSearch}
-                                placeholder="Search candidates..."
-                                loading={loading}
-                                className="flex-1 min-w-[200px]"
-                            />
-
-                            {/* View Toggle */}
-                            <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} />
-                        </div>
-                    </div>
-                </div>
             </div>
 
             {/* Add Candidate Modal */}

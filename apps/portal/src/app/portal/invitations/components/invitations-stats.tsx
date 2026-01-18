@@ -84,8 +84,6 @@ export default function InvitationsStats() {
                         color="info"
                         description="Awaiting response"
                     />
-                </StatCardGrid>
-                <StatCardGrid>
                     <StatCard
                         title="Accepted"
                         value={stats.accepted}

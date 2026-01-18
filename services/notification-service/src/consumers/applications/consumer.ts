@@ -858,4 +858,105 @@ export class ApplicationsEventConsumer {
             throw error;
         }
     }
+
+    async handleApplicationProposalAccepted(event: DomainEvent): Promise<void> {
+        try {
+            const { application_id, candidate_id, job_id, recruiter_id, accepted_by } = event.payload;
+
+            this.logger.info({ application_id, recruiter_id, candidate_id }, 'Processing proposal accepted notification');
+
+            // Fetch recruiter contact (REQUIRED)
+            const recruiterContact = await this.contactLookup.getRecruiterContact(recruiter_id);
+            if (!recruiterContact) {
+                this.logger.error({ application_id, recruiter_id }, 'Recruiter contact not found');
+                throw new Error(`Recruiter contact not found: ${recruiter_id}`);
+            }
+
+            // Fetch candidate contact (REQUIRED)
+            const candidateContact = await this.contactLookup.getCandidateContact(candidate_id);
+            if (!candidateContact) {
+                this.logger.error({ application_id, candidate_id }, 'Candidate contact not found');
+                throw new Error(`Candidate contact not found: ${candidate_id}`);
+            }
+
+            // Fetch job details (REQUIRED)
+            const job = await this.dataLookup.getJob(job_id);
+            if (!job) {
+                this.logger.error({ application_id, job_id }, 'Job not found');
+                throw new Error(`Job not found: ${job_id}`);
+            }
+
+            // Send notification
+            await this.emailService.sendApplicationProposalAccepted(recruiterContact.email, {
+                recruiterName: recruiterContact.name,
+                candidateName: candidateContact.name,
+                jobTitle: job.title,
+                companyName: job.company?.name || 'Unknown Company',
+                applicationId: application_id,
+                userId: recruiterContact.user_id || undefined,
+            });
+
+            this.logger.info(
+                { application_id, recipient: recruiterContact.email },
+                'Proposal accepted notification sent to recruiter'
+            );
+        } catch (error) {
+            this.logger.error(
+                { error, event_payload: event.payload },
+                'Failed to send proposal accepted notification'
+            );
+            throw error;
+        }
+    }
+
+    async handleApplicationProposalDeclined(event: DomainEvent): Promise<void> {
+        try {
+            const { application_id, candidate_id, job_id, recruiter_id, declined_by, reason } = event.payload;
+
+            this.logger.info({ application_id, recruiter_id, candidate_id }, 'Processing proposal declined notification');
+
+            // Fetch recruiter contact (REQUIRED)
+            const recruiterContact = await this.contactLookup.getRecruiterContact(recruiter_id);
+            if (!recruiterContact) {
+                this.logger.error({ application_id, recruiter_id }, 'Recruiter contact not found');
+                throw new Error(`Recruiter contact not found: ${recruiter_id}`);
+            }
+
+            // Fetch candidate contact (REQUIRED)
+            const candidateContact = await this.contactLookup.getCandidateContact(candidate_id);
+            if (!candidateContact) {
+                this.logger.error({ application_id, candidate_id }, 'Candidate contact not found');
+                throw new Error(`Candidate contact not found: ${candidate_id}`);
+            }
+
+            // Fetch job details (REQUIRED)
+            const job = await this.dataLookup.getJob(job_id);
+            if (!job) {
+                this.logger.error({ application_id, job_id }, 'Job not found');
+                throw new Error(`Job not found: ${job_id}`);
+            }
+
+            // Send notification
+            await this.emailService.sendApplicationProposalDeclined(recruiterContact.email, {
+                recruiterName: recruiterContact.name,
+                candidateName: candidateContact.name,
+                jobTitle: job.title,
+                companyName: job.company?.name || 'Unknown Company',
+                reason: reason || undefined,
+                candidateId: candidate_id,
+                userId: recruiterContact.user_id || undefined,
+            });
+
+            this.logger.info(
+                { application_id, recipient: recruiterContact.email },
+                'Proposal declined notification sent to recruiter'
+            );
+        } catch (error) {
+            this.logger.error(
+                { error, event_payload: event.payload },
+                'Failed to send proposal declined notification'
+            );
+            throw error;
+        }
+    }
 }

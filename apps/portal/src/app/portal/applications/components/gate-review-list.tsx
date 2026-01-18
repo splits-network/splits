@@ -6,6 +6,7 @@ import { apiClient } from '@/lib/api-client';
 import ApproveGateModal from './approve-gate-modal';
 import DenyGateModal from './deny-gate-modal';
 import RequestInfoModal from './request-info-modal';
+import ProvideInfoModal from './provide-info-modal';
 import GateHistoryTimeline from '@/components/gate-history-timeline';
 
 interface CandidateRoleAssignment {
@@ -38,12 +39,13 @@ interface GateReviewListProps {
 }
 
 type ModalState = {
-    type: 'approve' | 'deny' | 'request-info' | 'history' | null;
+    type: 'approve' | 'deny' | 'request-info' | 'provide-info' | 'history' | null;
     craId: string | null;
     candidateName?: string;
     jobTitle?: string;
     gateName?: string;
     gateHistory?: any[];
+    questions?: string;
 };
 
 export default function GateReviewList({ gateType, userId, className = '' }: GateReviewListProps) {
@@ -96,8 +98,9 @@ export default function GateReviewList({ gateType, userId, className = '' }: Gat
     }, [gateType, userId]);
 
     const openModal = (
-        type: 'approve' | 'deny' | 'request-info' | 'history',
-        application: CandidateRoleAssignment
+        type: 'approve' | 'deny' | 'request-info' | 'provide-info' | 'history',
+        application: CandidateRoleAssignment,
+        questions?: string
     ) => {
         setModalState({
             type,
@@ -105,7 +108,8 @@ export default function GateReviewList({ gateType, userId, className = '' }: Gat
             candidateName: application.candidate?.name || 'Unknown',
             jobTitle: application.job?.title || 'Unknown',
             gateName: getGateLabel(gateType),
-            gateHistory: application.gate_history
+            gateHistory: application.gate_history,
+            questions
         });
     };
 
@@ -172,6 +176,27 @@ export default function GateReviewList({ gateType, userId, className = '' }: Gat
             console.log('Information requested');
         } catch (err) {
             console.error('Failed to request information:', err);
+            throw err;
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleProvideInfo = async (answers: string) => {
+        if (!modalState.craId) return;
+
+        setActionLoading(true);
+        try {
+            await apiClient.post(`/api/v2/candidate-role-assignments/${modalState.craId}/provide-info`, {
+                answers
+            });
+
+            await fetchApplications();
+            closeModal();
+
+            console.log('Information provided');
+        } catch (err) {
+            console.error('Failed to provide information:', err);
             throw err;
         } finally {
             setActionLoading(false);
@@ -271,27 +296,48 @@ export default function GateReviewList({ gateType, userId, className = '' }: Gat
                                     </td>
                                     <td>
                                         <div className="flex gap-2">
-                                            <button
-                                                onClick={() => openModal('approve', app)}
-                                                className="btn btn-success btn-sm"
-                                                title="Approve"
-                                            >
-                                                <i className="fa-duotone fa-regular fa-circle-check"></i>
-                                            </button>
-                                            <button
-                                                onClick={() => openModal('deny', app)}
-                                                className="btn btn-error btn-sm"
-                                                title="Deny"
-                                            >
-                                                <i className="fa-duotone fa-regular fa-circle-xmark"></i>
-                                            </button>
-                                            <button
-                                                onClick={() => openModal('request-info', app)}
-                                                className="btn btn-warning btn-sm"
-                                                title="Request Info"
-                                            >
-                                                <i className="fa-duotone fa-regular fa-circle-question"></i>
-                                            </button>
+                                            {/* Show provide-info if info was requested */}
+                                            {app.state === 'info_requested' && app.gate_history?.some(
+                                                (h: any) => h.action === 'info_requested' && !h.answered
+                                            ) ? (
+                                                <button
+                                                    onClick={() => {
+                                                        const lastInfoRequest = app.gate_history
+                                                            ?.filter((h: any) => h.action === 'info_requested')
+                                                            ?.pop();
+                                                        openModal('provide-info', app, lastInfoRequest?.questions);
+                                                    }}
+                                                    className="btn btn-info btn-sm"
+                                                    title="Provide Requested Info"
+                                                >
+                                                    <i className="fa-duotone fa-regular fa-reply"></i>
+                                                    Respond
+                                                </button>
+                                            ) : (
+                                                <>
+                                                    <button
+                                                        onClick={() => openModal('approve', app)}
+                                                        className="btn btn-success btn-sm"
+                                                        title="Approve"
+                                                    >
+                                                        <i className="fa-duotone fa-regular fa-circle-check"></i>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => openModal('deny', app)}
+                                                        className="btn btn-error btn-sm"
+                                                        title="Deny"
+                                                    >
+                                                        <i className="fa-duotone fa-regular fa-circle-xmark"></i>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => openModal('request-info', app)}
+                                                        className="btn btn-warning btn-sm"
+                                                        title="Request Info"
+                                                    >
+                                                        <i className="fa-duotone fa-regular fa-circle-question"></i>
+                                                    </button>
+                                                </>
+                                            )}
                                             <button
                                                 onClick={() => openModal('history', app)}
                                                 className="btn btn-ghost btn-sm"
@@ -336,6 +382,16 @@ export default function GateReviewList({ gateType, userId, className = '' }: Gat
                 gateName={modalState.gateName || ''}
             />
 
+            <ProvideInfoModal
+                isOpen={modalState.type === 'provide-info'}
+                onClose={closeModal}
+                onProvideInfo={handleProvideInfo}
+                candidateName={modalState.candidateName || ''}
+                jobTitle={modalState.jobTitle || ''}
+                gateName={modalState.gateName || ''}
+                questions={modalState.questions || ''}
+            />
+
             {/* History Modal */}
             {modalState.type === 'history' && (
                 <dialog className="modal modal-open">
@@ -365,7 +421,8 @@ export default function GateReviewList({ gateType, userId, className = '' }: Gat
                     </div>
                     <div className="modal-backdrop" onClick={closeModal}></div>
                 </dialog>
-            )}
+            )
+            }
         </>
     );
 }

@@ -239,7 +239,7 @@ export function Sidebar() {
                         <NotificationBell position="right" />
                     </div>
                     {/* User Footer */}
-                    <div className="border-t border-base-200/50 p-3">
+                    <div className="bg-base-200 border-t border-base-200/50 p-3">
                         <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-base-200/50 transition-colors">
                             <div className="avatar avatar-placeholder">
                                 <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-medium">

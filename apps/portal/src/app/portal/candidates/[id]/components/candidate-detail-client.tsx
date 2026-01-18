@@ -383,9 +383,16 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                         <div className="flex gap-2">
                             {canEdit && (
                                 <>
+                                    <Link
+                                        href={`/portal/candidates/${candidateId}/propose`}
+                                        className="btn btn-success gap-2"
+                                    >
+                                        <i className="fa-duotone fa-regular fa-paper-plane"></i>
+                                        Propose Job
+                                    </Link>
                                     <button
                                         onClick={() => setShowSubmitWizard(true)}
-                                        className="btn btn-success gap-2"
+                                        className="btn btn-outline btn-success gap-2"
                                     >
                                         <i className="fa-duotone fa-regular fa-paper-plane"></i>
                                         Send Job Opportunity

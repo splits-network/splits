@@ -154,6 +154,10 @@ export class DomainEventConsumer {
             await this.channel.bindQueue(this.queue, this.exchange, 'application.recruiter_declined');
             await this.channel.bindQueue(this.queue, this.exchange, 'application.recruiter_opportunity_expired');
 
+            // Phase 4 events - Application Proposals (recruiter proposes job to candidate)
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.proposal_accepted');
+            await this.channel.bindQueue(this.queue, this.exchange, 'application.proposal_declined');
+
             // Phase 2 events - Placements
             await this.channel.bindQueue(this.queue, this.exchange, 'placement.activated');
             await this.channel.bindQueue(this.queue, this.exchange, 'placement.completed');
@@ -301,6 +305,14 @@ export class DomainEventConsumer {
                 break;
             case 'application.recruiter_opportunity_expired':
                 await this.recruiterSubmissionConsumer.handleOpportunityExpired(event);
+                break;
+
+            // Phase 4 - Application Proposals (candidate accepts/declines recruiter proposal)
+            case 'application.proposal_accepted':
+                await this.applicationsConsumer.handleApplicationProposalAccepted(event);
+                break;
+            case 'application.proposal_declined':
+                await this.applicationsConsumer.handleApplicationProposalDeclined(event);
                 break;
 
             // Candidates domain

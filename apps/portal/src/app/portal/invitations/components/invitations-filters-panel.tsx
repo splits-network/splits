@@ -20,6 +20,8 @@ interface InvitationFiltersPanelProps {
     onClearSearch: () => void;
     viewMode: 'grid' | 'table';
     onViewModeChange: (mode: 'grid' | 'table') => void;
+    isRecruiter?: boolean;
+    onAddCandidate?: () => void;
 }
 
 export const InvitationsFiltersPanel = React.memo(function InvitationsFiltersPanel({
@@ -30,13 +32,27 @@ export const InvitationsFiltersPanel = React.memo(function InvitationsFiltersPan
     onClearSearch,
     viewMode,
     onViewModeChange,
+    isRecruiter,
+    onAddCandidate,
 }: InvitationFiltersPanelProps) {
     return (
         <div className='card bg-base-200 shadow'>
-            <div className='card-body p-4'>
-                <h3 className="font-semibold text-lg mb-4">
-                    Filters & View
+            <div className='card-body p-4 space-y-4'>
+                <h3 className='card-title'>
+                    <i className='fa-duotone fa-regular fa-filter mr-2' />
+                    Options
                 </h3>
+
+                {isRecruiter && onAddCandidate && (
+                    <button
+                        className="btn btn-primary w-full"
+                        onClick={onAddCandidate}
+                    >
+                        <i className="fa-duotone fa-regular fa-plus"></i>
+                        Add Candidate
+                    </button>
+                )}
+
                 <div className='flex flex-wrap gap-4 items-center'>
                     <fieldset className='fieldset w-full'>
                         <select

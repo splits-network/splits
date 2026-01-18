@@ -679,4 +679,229 @@ export class ApplicationServiceV2 {
 
         return { application: updated, assignment };
     }
+
+    /**
+     * Phase 4: Propose job to candidate (Recruiter-initiated application)
+     * Recruiter proposes a job opportunity to one of their candidates
+     * Creates application with stage: 'recruiter_proposed'
+     */
+    async proposeJobToCandidate(data: {
+        recruiter_id: string;
+        candidate_id: string;
+        job_id: string;
+        pitch?: string;
+        notes?: string;
+    }, clerkUserId: string): Promise<any> {
+        // Validate required fields
+        if (!data.recruiter_id || !data.candidate_id || !data.job_id) {
+            throw new Error('Recruiter ID, Candidate ID, and Job ID are required');
+        }
+
+        // Verify recruiter exists and is active (query recruiters table)
+        const recruiter = await this.repository.getSupabase()
+            .from('recruiters')
+            .select('id, status')
+            .eq('id', data.recruiter_id)
+            .single();
+
+        if (!recruiter.data || recruiter.data.status !== 'active') {
+            throw new Error('Invalid or inactive recruiter');
+        }
+
+        // Verify candidate exists (query candidates table)
+        const candidate = await this.repository.getSupabase()
+            .from('candidates')
+            .select('id, user_id')
+            .eq('id', data.candidate_id)
+            .single();
+
+        if (!candidate.data) {
+            throw new Error('Candidate not found');
+        }
+
+        // Verify job exists and is active (query jobs table)
+        const job = await this.repository.getSupabase()
+            .from('jobs')
+            .select('id, status')
+            .eq('id', data.job_id)
+            .single();
+
+        if (!job.data || job.data.status !== 'active') {
+            throw new Error('Invalid or inactive job');
+        }
+
+        // Check if there's already an active application for this candidate-job pair
+        const existingApplications = await this.repository.getSupabase()
+            .from('applications')
+            .select('id, stage')
+            .eq('candidate_id', data.candidate_id)
+            .eq('job_id', data.job_id)
+            .not('stage', 'in', ['rejected', 'withdrawn', 'hired'])
+            .limit(1);
+
+        if (existingApplications.data && existingApplications.data.length > 0) {
+            throw new Error('Candidate already has an active application for this job');
+        }
+
+        // Create application with recruiter_proposed stage
+        const application = await this.repository.createApplication({
+            candidate_id: data.candidate_id,
+            job_id: data.job_id,
+            recruiter_id: data.recruiter_id,
+            stage: 'recruiter_proposed',
+            pitch: data.pitch || null,
+            notes: data.notes || null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        }, clerkUserId);
+
+        const userContext = await this.accessResolver.resolve(clerkUserId);
+
+        // Create audit log entry
+        await this.repository.createAuditLog({
+            application_id: application.id,
+            action: 'recruiter_proposed',
+            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_role: 'recruiter',
+            new_value: {
+                stage: 'recruiter_proposed',
+                recruiter_id: data.recruiter_id,
+                has_pitch: !!data.pitch,
+            },
+            metadata: {
+                pitch_length: data.pitch?.length || 0,
+                has_notes: !!data.notes,
+            },
+        });
+
+        // Publish event for notification system
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish('application.recruiter_proposed', {
+                application_id: application.id,
+                recruiter_id: data.recruiter_id,
+                candidate_id: data.candidate_id,
+                job_id: data.job_id,
+                pitch: data.pitch,
+                proposed_by: userContext.identityUserId,
+            });
+        }
+
+        return application;
+    }
+
+    /**
+     * Phase 4: Accept job proposal
+     * Candidate accepts a recruiter's job proposal
+     * Converts application from 'recruiter_proposed' → 'draft'
+     */
+    async acceptProposal(applicationId: string, clerkUserId: string): Promise<any> {
+        const application = await this.repository.findApplication(applicationId, clerkUserId);
+
+        if (!application) {
+            throw new Error('Application not found');
+        }
+
+        // Only allow acceptance from recruiter_proposed stage
+        if (application.stage !== 'recruiter_proposed') {
+            throw new Error(`Cannot accept proposal from stage: ${application.stage}. Application must be in recruiter_proposed stage.`);
+        }
+
+        // Verify candidate owns this application (permission check)
+        const userContext = await this.accessResolver.resolve(clerkUserId);
+        if (!userContext.candidateId || userContext.candidateId !== application.candidate_id) {
+            throw new Error('Only the candidate can accept this proposal');
+        }
+
+        // Update application to draft stage (candidate can now fill it out)
+        const updated = await this.repository.updateApplication(applicationId, {
+            stage: 'draft',
+        });
+
+        // Create audit log entry
+        await this.repository.createAuditLog({
+            application_id: applicationId,
+            action: 'proposal_accepted',
+            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_role: 'candidate',
+            old_value: { stage: 'recruiter_proposed' },
+            new_value: { stage: 'draft' },
+            metadata: {
+                recruiter_id: application.recruiter_id,
+            },
+        });
+
+        // Publish event for notification system
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish('application.proposal_accepted', {
+                application_id: applicationId,
+                candidate_id: application.candidate_id,
+                job_id: application.job_id,
+                recruiter_id: application.recruiter_id,
+                accepted_by: userContext.identityUserId,
+            });
+        }
+
+        return updated;
+    }
+
+    /**
+     * Phase 4: Decline job proposal
+     * Candidate declines a recruiter's job proposal
+     * Updates application from 'recruiter_proposed' → 'rejected'
+     */
+    async declineProposal(applicationId: string, clerkUserId: string, reason?: string): Promise<any> {
+        const application = await this.repository.findApplication(applicationId, clerkUserId);
+
+        if (!application) {
+            throw new Error('Application not found');
+        }
+
+        // Only allow decline from recruiter_proposed stage
+        if (application.stage !== 'recruiter_proposed') {
+            throw new Error(`Cannot decline proposal from stage: ${application.stage}. Application must be in recruiter_proposed stage.`);
+        }
+
+        // Verify candidate owns this application (permission check)
+        const userContext = await this.accessResolver.resolve(clerkUserId);
+        if (!userContext.candidateId || userContext.candidateId !== application.candidate_id) {
+            throw new Error('Only the candidate can decline this proposal');
+        }
+
+        // Update application to rejected stage
+        const updated = await this.repository.updateApplication(applicationId, {
+            stage: 'rejected',
+            decline_reason: reason || undefined,
+        });
+
+        // Create audit log entry
+        await this.repository.createAuditLog({
+            application_id: applicationId,
+            action: 'proposal_declined',
+            performed_by_user_id: userContext.identityUserId || 'system',
+            performed_by_role: 'candidate',
+            old_value: { stage: 'recruiter_proposed' },
+            new_value: {
+                stage: 'rejected',
+                decline_reason: reason || null,
+            },
+            metadata: {
+                recruiter_id: application.recruiter_id,
+                has_reason: !!reason,
+            },
+        });
+
+        // Publish event for notification system
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish('application.proposal_declined', {
+                application_id: applicationId,
+                candidate_id: application.candidate_id,
+                job_id: application.job_id,
+                recruiter_id: application.recruiter_id,
+                declined_by: userContext.identityUserId,
+                reason: reason || null,
+            });
+        }
+
+        return updated;
+    }
 }

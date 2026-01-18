@@ -11,11 +11,12 @@ export default function ApplicationDetailPage() {
 
     return (
         <>
-            <div className="flex">
-                <Link href="/portal/applications" className="btn btn-ghost btn-sm gap-2">
-                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
-                    Back to Applications
-                </Link>
+            <div className='text-sm breadcrumbs mb-6'>
+                <ul>
+                    <li><Link href='/portal/dashboard'>Dashboard</Link></li>
+                    <li><Link href='/portal/applications'>Applications</Link></li>
+                    <li>Application Details</li>
+                </ul>
             </div>
             <div className="flex flex-col md:flex-row md:items-start md:justify-between">
                 <div className="w-full md:flex-1 md:mr-4 space-y-6">

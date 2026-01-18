@@ -78,6 +78,7 @@ export function registerAtsRoutes(app: FastifyInstance, services: ServiceRegistr
 
     registerAiReviewRoutes(app, services);
     registerApplicationFeedbackRoutes(app, services);
+    registerApplicationProposalRoutes(app, services);
 }
 
 function registerJobRoutes(app: FastifyInstance, services: ServiceRegistry) {
@@ -790,6 +791,92 @@ function registerApplicationFeedbackRoutes(app: FastifyInstance, services: Servi
                 return reply
                     .status(error.statusCode || 500)
                     .send(error.jsonBody || { error: 'Failed to provide info' });
+            }
+        }
+    );
+}
+
+/**
+ * Register Phase 4 application proposal routes
+ * - Recruiter proposes job to candidate
+ * - Candidate accepts/declines proposal
+ */
+function registerApplicationProposalRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const atsService = () => services.get('ats');
+
+    // POST /api/v2/applications/propose - Recruiter proposes job to candidate
+    app.post(
+        '/api/v2/applications/propose',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await atsService().post(
+                    '/api/v2/applications/propose',
+                    request.body || {},
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to propose job to candidate');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to propose job to candidate' });
+            }
+        }
+    );
+
+    // POST /api/v2/applications/:id/accept-proposal - Candidate accepts proposal
+    app.post(
+        '/api/v2/applications/:id/accept-proposal',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await atsService().post(
+                    `/api/v2/applications/${id}/accept-proposal`,
+                    request.body || {},
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to accept proposal');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to accept proposal' });
+            }
+        }
+    );
+
+    // POST /api/v2/applications/:id/decline-proposal - Candidate declines proposal
+    app.post(
+        '/api/v2/applications/:id/decline-proposal',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await atsService().post(
+                    `/api/v2/applications/${id}/decline-proposal`,
+                    request.body || {},
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, id, correlationId }, 'Failed to decline proposal');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: 'Failed to decline proposal' });
             }
         }
     );

@@ -227,7 +227,7 @@ export function ApplicationCard({
                 )}
             </MetricCard.Body>
             <MetricCard.Footer>
-                <div className="flex items-center justify-between w-full">
+                <div className="flex flex-wrap space-y-2 items-center justify-between w-full">
                     <span className="text-xs text-base-content/50">
                         Submitted {formatRelativeTime(application.created_at)}
                     </span>

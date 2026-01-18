@@ -12,6 +12,16 @@ The /docs/migrations/V2-ARCHITECTURE-IMPLEMENTATION_GUIDE.md outlines the high-l
 - **Shared access context lives in `@splits-network/shared-access-context`.** Every service imports `resolveAccessContext` from that package; do not reach into `services/shared/access-context.ts`.
 - **RBAC checks rely on the above.** For example, the gateway checks the `candidate` role by calling `/v2/candidates?limit=1`—changing that contract will break role detection.
 
+## Project Phase Status (January 2026)
+
+- ✅ **Phase 1**: AI Review Loop - COMPLETE
+- ✅ **Phase 2/3**: Gate Review System - COMPLETE (originally planned as Phase 2, implemented as Phase 3)
+- ✅ **Phase 4**: Portal UI for Recruiters - COMPLETE
+- ✅ **Phase 5**: 5-Role Commission Structure - COMPLETE
+- ✅ **Phase 6**: Canonical Payout Architecture - COMPLETE (testing pending)
+
+**Note**: The file `PHASE-2-READY-TO-START.md` is outdated documentation. Phase 2 (gate review) was fully implemented as Phase 3. See `PHASE-3-COMPLETE-GATE-REVIEW-SYSTEM.md` for actual implementation.
+
 ## Recruiter-Candidate Responses
 
 - The network service V2 repository enriches recruiter-candidate rows with recruiter metadata:

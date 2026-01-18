@@ -381,7 +381,7 @@ export default function ApplicationsTrendsChart({
             </div>
 
             {/* Stats row with changes */}
-            <div className="flex items-center justify-center gap-6 pt-2 border-t border-base-300">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-2 border-t border-base-300">
                 <div className="flex items-center gap-2 text-xs">
                     <span className="w-1.5 h-3 rounded-sm" style={{ backgroundColor: dataset.primaryBorderColor }}></span>
                     <span className="text-base-content/70">Total</span>

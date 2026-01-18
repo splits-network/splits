@@ -212,7 +212,7 @@ export function StatCard({
                     <div className="stat-figure text-base-300">
                         <div className="w-8 h-8 bg-base-300 rounded-full"></div>
                     </div>
-                    <div className="stat-title">
+                    <div className="stat-title white">
                         <div className="h-4 bg-base-300 rounded w-20"></div>
                     </div>
                     <div className="stat-value">
@@ -232,7 +232,7 @@ export function StatCard({
 
     const statContent = (
         <>
-            <div className="stat-title">{title}</div>
+            <div className="stat-title whitespace-normal">{title}</div>
             <div className="grid grid-cols-2 items-center">
                 <div className={`stat-value ${statColorClasses[color]}`}>{displayValue}</div>
                 {icon && (

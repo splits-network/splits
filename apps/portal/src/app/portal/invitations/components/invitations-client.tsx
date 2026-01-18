@@ -12,6 +12,8 @@ import { InvitationTableRow } from './invitation-table-row';
 import { DataTable, type TableColumn } from '@/components/ui';
 import { InvitationsFiltersPanel } from './invitations-filters-panel';
 import InvitationsStats from './invitations-stats';
+import AddCandidateModal from '../../candidates/components/add-candidate-modal';
+import { Candidate } from '@splits-network/shared-types';
 
 interface InvitationFilters {
     status: string;
@@ -64,7 +66,7 @@ export default function InvitationsPageClient() {
     }>({ isOpen: false, title: '', message: '', onConfirm: () => { } });
 
     // Send new invitation state
-    const [showInviteModal, setShowInviteModal] = useState(false);
+    const [showAddModal, setShowAddModal] = useState(false);
     const [candidateEmail, setCandidateEmail] = useState('');
     const [sendingInvitation, setSendingInvitation] = useState(false);
 
@@ -123,6 +125,11 @@ export default function InvitationsPageClient() {
         setViewMode(mode);
     }, [setViewMode]);
 
+    const handleAddCandidateSuccess = (newCandidate: Candidate) => {
+        refresh();
+        toast.success('Invitation sent to candidate successfully!');
+    };
+
     const handleResendInvitation = async (invitationId: string) => {
         try {
             setResendingId(invitationId);
@@ -179,36 +186,6 @@ export default function InvitationsPageClient() {
         }
     };
 
-    const handleSendNewInvitation = async () => {
-        if (!candidateEmail.trim()) {
-            toast.error('Please enter a valid email address');
-            return;
-        }
-
-        try {
-            setSendingInvitation(true);
-
-            const token = await getToken();
-            if (!token) throw new Error('Not authenticated');
-
-            const client = createAuthenticatedClient(token);
-            await client.post('/recruiter-candidates', {
-                candidate_email: candidateEmail.trim(),
-                send_invitation: true
-            });
-
-            setShowInviteModal(false);
-            setCandidateEmail('');
-            await refresh();
-            toast.success('Invitation sent successfully');
-        } catch (err: any) {
-            console.error('Failed to send invitation:', err);
-            toast.error(err.response?.data?.error || err.message || 'Failed to send invitation');
-        } finally {
-            setSendingInvitation(false);
-        }
-    };
-
     // Loading state
     if (loading && invitations.length === 0) {
         return (
@@ -219,11 +196,11 @@ export default function InvitationsPageClient() {
     }
 
     return (
-        <div className="grid grid-cols-2 md:grid-cols-8 lg:grid-cols-12 gap-6">
-            <div className='col-span-2 md:col-span-4 lg:col-span-8'>
+        <div className="grid grid-cols-12 gap-6">
+            <div className="col-span-12 md:col-span-8 xl:col-span-10">
                 <InvitationsStats />
             </div>
-            <div className='col-span-2 md:col-span-4'>
+            <div className="col-span-12 md:col-span-4 xl:col-span-2">
                 <InvitationsFiltersPanel
                     statusFilter={filters.status || ''}
                     onStatusFilterChange={handleStatusFilterChange}
@@ -232,6 +209,8 @@ export default function InvitationsPageClient() {
                     onClearSearch={handleClearSearch}
                     viewMode={viewMode}
                     onViewModeChange={handleViewModeChange}
+                    isRecruiter={true}
+                    onAddCandidate={() => setShowAddModal(true)}
                 />
             </div>
             <div className="md:col-span-12 space-y-6">
@@ -329,88 +308,13 @@ export default function InvitationsPageClient() {
                 loading={cancellingId !== null}
             />
 
-            {/* Send Invitation Modal */}
-            {showInviteModal && (
-                <div className="modal modal-open">
-                    <div className="modal-box">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-bold text-lg">Send Invitation to Candidate</h3>
-                            <button
-                                type="button"
-                                className="btn btn-sm btn-circle btn-ghost"
-                                onClick={() => {
-                                    setShowInviteModal(false);
-                                    setCandidateEmail('');
-                                }}
-                            >
-                                <i className="fa-duotone fa-regular fa-times"></i>
-                            </button>
-                        </div>
 
-                        <fieldset className="fieldset mb-4">
-                            <legend className="fieldset-legend">Candidate Email *</legend>
-                            <input
-                                type="email"
-                                className="input w-full"
-                                value={candidateEmail}
-                                onChange={(e) => setCandidateEmail(e.target.value)}
-                                placeholder="candidate@example.com"
-                                disabled={sendingInvitation}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        handleSendNewInvitation();
-                                    }
-                                }}
-                            />
-                            <p className="fieldset-label">
-                                Enter the email address of the candidate you want to invite
-                            </p>
-                        </fieldset>
-
-                        <div className="modal-action">
-                            <button
-                                type="button"
-                                className="btn"
-                                onClick={() => {
-                                    setShowInviteModal(false);
-                                    setCandidateEmail('');
-                                }}
-                                disabled={sendingInvitation}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="button"
-                                className="btn btn-primary"
-                                onClick={handleSendNewInvitation}
-                                disabled={sendingInvitation || !candidateEmail.trim()}
-                            >
-                                {sendingInvitation ? (
-                                    <>
-                                        <span className="loading loading-spinner loading-sm"></span>
-                                        Sending...
-                                    </>
-                                ) : (
-                                    <>
-                                        <i className="fa-duotone fa-regular fa-paper-plane"></i>
-                                        Send Invitation
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                    <div
-                        className="modal-backdrop"
-                        onClick={() => {
-                            if (!sendingInvitation) {
-                                setShowInviteModal(false);
-                                setCandidateEmail('');
-                            }
-                        }}
-                    ></div>
-                </div>
-            )}
+            {/* Add Candidate Modal */}
+            <AddCandidateModal
+                isOpen={showAddModal}
+                onClose={() => setShowAddModal(false)}
+                onSuccess={handleAddCandidateSuccess}
+            />
         </div>
     );
 }
