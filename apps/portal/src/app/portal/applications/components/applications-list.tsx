@@ -294,6 +294,14 @@ export default function ApplicationsList() {
 
     return (
         <div className="grid grid-cols-12 gap-6">
+            <div className='col-span-12'>
+                <div className='text-sm breadcrumbs'>
+                    <ul>
+                        <li><a href="/portal/dashboard">Dashboard</a></li>
+                        <li>Applications</li>
+                    </ul>
+                </div>
+            </div>
             <div className="col-span-12 md:col-span-8 xl:col-span-10">
                 {/* Stats and Trends Card */}
                 <div className="card bg-base-200">
