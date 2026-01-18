@@ -232,7 +232,7 @@ function registerCandidateRoutes(app: FastifyInstance, services: ServiceRegistry
         }
     );
 
-    // CREATE candidate (with orchestration)
+    // CREATE candidate
     app.post(
         apiBase,
         { preHandler: requireAuth() },
@@ -244,64 +244,15 @@ function registerCandidateRoutes(app: FastifyInstance, services: ServiceRegistry
                 return reply.code(401).send({ error: 'Authentication required' });
             }
 
-            const clerkUserId = request.auth.clerkUserId;
-
             try {
-                // Step 1: Create candidate in ATS service
+                // Create candidate in ATS service
+                // Note: Recruiter-candidate relationships are created ONLY through explicit recruiter invitations
                 const candidateResponse = await atsService().post(
                     serviceBase,
                     request.body,
                     correlationId,
                     authHeaders
-                ) as { data?: any };
-
-                const candidate = candidateResponse.data || candidateResponse;
-
-                // Step 2: Get the recruiter's internal ID from network service
-                let recruiterId = null;
-                try {
-                    const recruiterResponse = await networkService().get(
-                        `/api/v2/recruiters?limit=1`,
-                        {},
-                        correlationId,
-                        authHeaders
-                    ) as { data?: any[] };
-                    const recruiters = (recruiterResponse.data || []);
-                    if (recruiters.length > 0) {
-                        recruiterId = recruiters[0].id; // Use the recruiters.id
-                    }
-                } catch (recruiterError) {
-                    // User might not be a recruiter, that's okay
-                    request.log.info({ clerkUserId }, 'User is not a recruiter, skipping recruiter-candidate relationship');
-                }
-
-                // Step 3: Create recruiter-candidate relationship if user is a recruiter
-                if (recruiterId && candidate.id) {
-                    try {
-                        await networkService().post(
-                            `/api/v2/recruiter-candidates`,
-                            {
-                                recruiter_id: recruiterId,
-                                candidate_id: candidate.id
-                            },
-                            correlationId,
-                            authHeaders
-                        );
-                        request.log.info({
-                            candidateId: candidate.id,
-                            recruiterId,
-                            clerkUserId
-                        }, 'Created recruiter-candidate relationship');
-                    } catch (relationshipError: any) {
-                        // Log but don't fail the candidate creation
-                        request.log.error({
-                            error: relationshipError,
-                            candidateId: candidate.id,
-                            recruiterId,
-                            clerkUserId
-                        }, 'Failed to create recruiter-candidate relationship');
-                    }
-                }
+                );
 
                 return reply.code(201).send(candidateResponse);
             } catch (error: any) {
