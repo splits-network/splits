@@ -77,7 +77,6 @@ export async function checkProposalTimeouts() {
     
     // Find expired proposals
     const { data: expiredProposals, error } = await supabase
-        .schema('public')
         .from('candidate_role_assignments')
         .select('id, job_id, candidate_id, recruiter_id')
         .eq('state', 'proposed')
@@ -88,7 +87,6 @@ export async function checkProposalTimeouts() {
     for (const proposal of expiredProposals || []) {
         // Update state
         await supabase
-            .schema('public')
             .from('candidate_role_assignments')
             .update({
                 state: 'timed_out',

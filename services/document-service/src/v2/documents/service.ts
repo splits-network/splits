@@ -141,7 +141,7 @@ export class DocumentServiceV2 {
             metadata: payload.metadata,
             processing_status: 'pending',
         });
-
+console.log("document state: ", document);
         if (this.eventPublisher) {
             await this.eventPublisher.publish('document.uploaded', {
                 document_id: document.id,

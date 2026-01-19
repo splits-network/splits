@@ -15,7 +15,6 @@ export class CompanySourcerRepository {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            .schema('ats')
             .from('company_sourcers')
             .select('*', { count: 'exact' });
 
@@ -75,7 +74,6 @@ export class CompanySourcerRepository {
         const context = await resolveAccessContext(this.supabase, clerkUserId);
 
         let query = this.supabase
-            .schema('ats')
             .from('company_sourcers')
             .select('*')
             .eq('id', id)
@@ -103,7 +101,6 @@ export class CompanySourcerRepository {
 
     async findByCompany(company_id: string): Promise<CompanySourcer | null> {
         const { data, error } = await this.supabase
-            .schema('ats')
             .from('company_sourcers')
             .select('*')
             .eq('company_id', company_id)
@@ -119,7 +116,6 @@ export class CompanySourcerRepository {
 
     async create(sourcerData: CompanySourcerCreate): Promise<CompanySourcer> {
         const { data, error } = await this.supabase
-            .schema('ats')
             .from('company_sourcers')
             .insert({
                 company_id: sourcerData.company_id,
@@ -145,7 +141,6 @@ export class CompanySourcerRepository {
 
         // Build update query with role-based filtering
         let query = this.supabase
-            .schema('ats')
             .from('company_sourcers')
             .update({
                 notes: updates.notes,
@@ -183,7 +178,6 @@ export class CompanySourcerRepository {
         }
 
         const { error } = await this.supabase
-            .schema('ats')
             .from('company_sourcers')
             .delete()
             .eq('id', id);

@@ -106,7 +106,6 @@ export class PlacementEventConsumer {
             // For Phase 5, we'll default to STANDARD tier
             // TODO: Query from placements table or determine from recruiter subscription
             const { data: placement } = await this.supabase
-                .schema('ats')
                 .from('placements')
                 .select('subscription_tier')
                 .eq('id', event.placement_id)

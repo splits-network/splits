@@ -333,10 +333,17 @@ export class DomainEventConsumer {
         );
 
         try {
+
+            const { data: user, error: identityError } = await this.candidateRepository.getSupabase()
+                .from('users')
+                .select('*')
+                .eq('clerk_user_id', user_id)
+                .single();
+
             // Update candidate with user_id using direct Supabase call
             const { error } = await this.candidateRepository.getSupabase()
                 .from('candidates')
-                .update({ user_id })
+                .update({ user_id: user.id })
                 .eq('id', candidate_id);
 
             if (error) {

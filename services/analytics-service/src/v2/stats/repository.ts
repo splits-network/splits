@@ -121,7 +121,6 @@ export class StatsRepository {
         try {
             // Get candidate's user_id from ats schema
             const { data: candidate } = await this.supabase
-                .schema('ats')
                 .from('candidates')
                 .select('user_id')
                 .eq('id', candidateId)

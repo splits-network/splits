@@ -15,7 +15,6 @@ export class CandidateSourcerRepository {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            .schema('ats')
             .from('candidate_sourcers')
             .select('*', { count: 'exact' });
 
@@ -27,7 +26,6 @@ export class CandidateSourcerRepository {
             // Company users see sourcers for their organization's candidates
             // Need to join with candidates to filter by company
             const { data: companyCandidates } = await this.supabase
-                .schema('ats')
                 .from('candidates')
                 .select('id')
                 .in('company_id', context.organizationIds);
@@ -87,7 +85,6 @@ export class CandidateSourcerRepository {
         const context = await resolveAccessContext(this.supabase, clerkUserId);
 
         let query = this.supabase
-            .schema('ats')
             .from('candidate_sourcers')
             .select('*')
             .eq('id', id)
@@ -106,7 +103,6 @@ export class CandidateSourcerRepository {
         } else if (context.organizationIds.length > 0 && !context.isPlatformAdmin) {
             // Check if candidate belongs to accessible company
             const { data: candidate } = await this.supabase
-                .schema('ats')
                 .from('candidates')
                 .select('company_id')
                 .eq('id', data.candidate_id)
@@ -122,7 +118,6 @@ export class CandidateSourcerRepository {
 
     async findByCandidate(candidate_id: string): Promise<CandidateSourcer | null> {
         const { data, error } = await this.supabase
-            .schema('ats')
             .from('candidate_sourcers')
             .select('*')
             .eq('candidate_id', candidate_id)
@@ -138,7 +133,6 @@ export class CandidateSourcerRepository {
 
     async create(sourcerData: CandidateSourcerCreate): Promise<CandidateSourcer> {
         const { data, error } = await this.supabase
-            .schema('ats')
             .from('candidate_sourcers')
             .insert({
                 candidate_id: sourcerData.candidate_id,
@@ -164,7 +158,6 @@ export class CandidateSourcerRepository {
 
         // Build update query with role-based filtering
         let query = this.supabase
-            .schema('ats')
             .from('candidate_sourcers')
             .update({
                 notes: updates.notes,
@@ -202,7 +195,6 @@ export class CandidateSourcerRepository {
         }
 
         const { error } = await this.supabase
-            .schema('ats')
             .from('candidate_sourcers')
             .delete()
             .eq('id', id);

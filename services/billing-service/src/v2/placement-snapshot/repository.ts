@@ -15,7 +15,6 @@ export class PlacementSnapshotRepository {
         company_sourcer_rate: number | null;
     }): Promise<PlacementSnapshot> {
         const { data: snapshot, error } = await this.supabase
-            .schema('billing')
             .from('placement_snapshot')
             .insert(data)
             .select()
@@ -33,7 +32,6 @@ export class PlacementSnapshotRepository {
      */
     async getByPlacementId(placementId: string): Promise<PlacementSnapshot | null> {
         const { data, error } = await this.supabase
-            .schema('billing')
             .from('placement_snapshot')
             .select('*')
             .eq('placement_id', placementId)
@@ -52,7 +50,6 @@ export class PlacementSnapshotRepository {
      */
     async list(filters: PlacementSnapshotFilters = {}): Promise<PlacementSnapshot[]> {
         let query = this.supabase
-            .schema('billing')
             .from('placement_snapshot')
             .select('*');
 

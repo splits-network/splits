@@ -83,7 +83,6 @@ export class PlacementServiceV2 {
 
         if (craId) {
             const { data: cra } = await this.supabase
-                .schema('ats')
                 .from('candidate_role_assignments')
                 .select('candidate_recruiter_id, company_recruiter_id')
                 .eq('id', craId)
@@ -97,7 +96,6 @@ export class PlacementServiceV2 {
 
         // 3: Get job for job_owner_recruiter_id and company_id
         const { data: job } = await this.supabase
-            .schema('ats')
             .from('jobs')
             .select('job_owner_recruiter_id, company_id')
             .eq('id', jobId)
