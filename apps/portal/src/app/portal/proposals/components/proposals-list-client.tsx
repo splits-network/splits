@@ -174,7 +174,7 @@ export default function ProposalsListClient() {
             </div>
         );
     }
-
+    console.log('Rendering ProposalsListClient with proposals:', proposals);
     return (
         <div className="space-y-6">
             {showSuccess && (
