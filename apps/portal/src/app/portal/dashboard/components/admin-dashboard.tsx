@@ -157,7 +157,7 @@ export default function AdminDashboard() {
                             </p>
                         </div>
                         <div className="flex gap-2">
-                            <Link href="/admin/metrics" className="btn btn-sm bg-white/20 border-0 hover:bg-white/30 text-white">
+                            <Link href="/portal/admin/metrics" className="btn btn-sm bg-white/20 border-0 hover:bg-white/30 text-white">
                                 <i className="fa-duotone fa-regular fa-chart-bar"></i>
                                 View Metrics
                             </Link>
@@ -202,7 +202,7 @@ export default function AdminDashboard() {
                     icon="fa-briefcase"
                     color="primary"
                     trend={stats?.trends?.roles}
-                    href="/admin/roles"
+                    href="/portal/admin/roles"
                 />
                 <StatCard
                     title="Active Recruiters"
@@ -211,7 +211,7 @@ export default function AdminDashboard() {
                     icon="fa-network-wired"
                     color="secondary"
                     trend={stats?.trends?.recruiters}
-                    href="/admin/users?role=recruiter"
+                    href="/portal/admin/users?role=recruiter"
                 />
                 <StatCard
                     title="Applications"
@@ -219,7 +219,7 @@ export default function AdminDashboard() {
                     description="In pipeline"
                     icon="fa-users"
                     color="accent"
-                    href="/admin/applications"
+                    href="/portal/admin/applications"
                 />
                 <StatCard
                     title="Placements YTD"
@@ -228,7 +228,7 @@ export default function AdminDashboard() {
                     icon="fa-trophy"
                     color="success"
                     trend={stats?.trends?.placements}
-                    href="/admin/placements"
+                    href="/portal/admin/placements"
                 />
             </StatCardGrid>
 
@@ -238,7 +238,7 @@ export default function AdminDashboard() {
                     title="Platform Revenue YTD"
                     icon="fa-chart-line"
                     headerActions={
-                        <Link href="/admin/revenue" className="btn btn-sm btn-ghost text-success">
+                        <Link href="/portal/admin/revenue" className="btn btn-sm btn-ghost text-success">
                             View Report
                             <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                         </Link>
@@ -421,19 +421,19 @@ export default function AdminDashboard() {
                     {/* Core Admin Tools - Enhanced styling */}
                     <ContentCard title="Platform Management" icon="fa-cog">
                         <div className="flex flex-col gap-2">
-                            <Link href="/admin/users" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
+                            <Link href="/portal/admin/users" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
                                 <i className="fa-duotone fa-regular fa-users w-4"></i>
                                 Users
                             </Link>
-                            <Link href="/admin/companies" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
+                            <Link href="/portal/admin/companies" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
                                 <i className="fa-duotone fa-regular fa-building w-4"></i>
                                 Companies
                             </Link>
-                            <Link href="/admin/roles" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
+                            <Link href="/portal/admin/roles" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
                                 <i className="fa-duotone fa-regular fa-briefcase w-4"></i>
                                 All Roles
                             </Link>
-                            <Link href="/admin/metrics" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
+                            <Link href="/portal/admin/metrics" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
                                 <i className="fa-duotone fa-regular fa-chart-bar w-4"></i>
                                 Metrics
                             </Link>

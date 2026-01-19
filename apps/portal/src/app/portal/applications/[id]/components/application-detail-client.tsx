@@ -604,7 +604,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
                             </button>
                             {application.stage === 'screen' && (
                                 <Link
-                                    href={`/applications/${application.id}/review`}
+                                    href={`/portal/applications/${application.id}/review`}
                                     className="btn btn-accent btn-sm btn-block gap-2"
                                 >
                                     <i className="fa-duotone fa-regular fa-clipboard-check"></i>

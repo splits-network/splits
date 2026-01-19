@@ -59,28 +59,28 @@ export default function NotFound() {
                         {/* Quick links grid */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full">
                             <Link
-                                href="/jobs"
+                                href="/portal/jobs"
                                 className="btn btn-ghost btn-sm flex-col h-auto py-4 gap-2"
                             >
                                 <i className="fa-duotone fa-regular fa-briefcase text-2xl text-primary"></i>
                                 <span className="text-xs">All Jobs</span>
                             </Link>
                             <Link
-                                href="/profile"
+                                href="/portal/profile"
                                 className="btn btn-ghost btn-sm flex-col h-auto py-4 gap-2"
                             >
                                 <i className="fa-duotone fa-regular fa-user text-2xl text-secondary"></i>
                                 <span className="text-xs">My Profile</span>
                             </Link>
                             <Link
-                                href="/applications"
+                                href="/portal/applications"
                                 className="btn btn-ghost btn-sm flex-col h-auto py-4 gap-2"
                             >
                                 <i className="fa-duotone fa-regular fa-file-lines text-2xl text-accent"></i>
                                 <span className="text-xs">Applications</span>
                             </Link>
                             <Link
-                                href="/recruiters"
+                                href="/portal/recruiters"
                                 className="btn btn-ghost btn-sm flex-col h-auto py-4 gap-2"
                             >
                                 <i className="fa-duotone fa-regular fa-users text-2xl text-info"></i>
