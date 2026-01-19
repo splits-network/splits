@@ -115,7 +115,7 @@ export default function CandidatesListClient() {
     ];
     return (
         <div className="grid grid-cols-12 gap-6">
-            <div className="col-span-12 md:col-span-8 xl:col-span-10">
+            <div className="col-span-12 md:col-span-8 xl:col-span-9 2xl:col-span-10">
                 <div className='card bg-base-200'>
                     <StatCardGrid className='m-2 shadow-lg'>
                         <StatCard
@@ -164,7 +164,7 @@ export default function CandidatesListClient() {
                 </div>
             </div>
 
-            <div className="col-span-12 md:col-span-4 xl:col-span-2 space-y-6">
+            <div className="col-span-12 md:col-span-4 xl:col-span-3 2xl:col-span-2 space-y-6">
                 {/* Add Candidate Sidebar */}
                 <div className="card bg-base-200 shadow">
                     <div className="card-body p-4 space-y-4">

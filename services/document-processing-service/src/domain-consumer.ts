@@ -94,11 +94,14 @@ export class DomainConsumer {
       const content = JSON.parse(message.content.toString());
       const routingKey = message.fields.routingKey;
 
-      logger.debug(`Received message: ${routingKey} (messageId: ${content.id})`);
+      logger.debug(`Received message: ${routingKey} (messageId: ${content.event_id})`);
+
+      // Extract payload from DomainEvent wrapper
+      const payload = content.payload || content;
 
       switch (routingKey) {
         case 'document.uploaded':
-          await this.handleDocumentUploaded(content);
+          await this.handleDocumentUploaded(payload);
           break;
         
         default:
