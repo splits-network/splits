@@ -42,7 +42,7 @@ export default async function ProposalScreenPage({
                             <span>{error || 'Proposal not found'}</span>
                         </div>
                         <div className="card-actions justify-start mt-4">
-                            <Link href="/proposals" className="btn">
+                            <Link href="/portal/proposals" className="btn">
                                 <i className="fa-duotone fa-regular fa-arrow-left"></i>
                                 Back to Proposals
                             </Link>

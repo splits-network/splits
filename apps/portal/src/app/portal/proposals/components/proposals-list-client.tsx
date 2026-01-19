@@ -56,8 +56,8 @@ export default function ProposalsListClient() {
         if (pagination.page > 1) params.set('page', pagination.page.toString());
 
         const newUrl = params.toString()
-            ? `/proposals?${params.toString()}`
-            : '/proposals';
+            ? `/portal/proposals?${params.toString()}`
+            : '/portal/proposals';
         router.replace(newUrl, { scroll: false });
     }, [stateFilter, pagination.page, router]);
 

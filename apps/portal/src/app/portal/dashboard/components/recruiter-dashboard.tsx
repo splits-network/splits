@@ -306,7 +306,7 @@ export default function RecruiterDashboard() {
                         title="Action Required"
                         icon="fa-inbox"
                         headerActions={
-                            <Link href="/proposals" className="btn btn-sm btn-ghost">
+                            <Link href="/portal/proposals" className="btn btn-sm btn-ghost">
                                 View all
                                 <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                             </Link>
@@ -380,7 +380,7 @@ export default function RecruiterDashboard() {
                                 <i className="fa-duotone fa-regular fa-users w-4"></i>
                                 My Candidates
                             </Link>
-                            <Link href="/proposals" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
+                            <Link href="/portal/proposals" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
                                 <i className="fa-duotone fa-regular fa-inbox w-4"></i>
                                 Proposals
                             </Link>

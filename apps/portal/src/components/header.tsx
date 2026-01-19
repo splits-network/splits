@@ -37,11 +37,11 @@ export function Header() {
     // Authenticated app pages
     const isAuthenticatedPage = pathname?.startsWith('/portal/dashboard') || pathname?.startsWith('/portal/roles') ||
         pathname?.startsWith('/portal/candidates') || pathname?.startsWith('/portal/placements') ||
-        pathname?.startsWith('/admin') || pathname?.startsWith('/portal/profile') || pathname?.startsWith('/portal/billing') ||
-        pathname?.startsWith('/notifications') || pathname?.startsWith('/portal/applications') ||
-        pathname?.startsWith('/proposals') || pathname?.startsWith('/teams') ||
+        pathname?.startsWith('/portal/admin') || pathname?.startsWith('/portal/profile') || pathname?.startsWith('/portal/billing') ||
+        pathname?.startsWith('/portal/notifications') || pathname?.startsWith('/portal/applications') ||
+        pathname?.startsWith('/portal/proposals') || pathname?.startsWith('/teams') ||
         pathname?.startsWith('/portal/company') || pathname?.startsWith('/integrations') ||
-        pathname?.startsWith('/invitations');
+        pathname?.startsWith('/portal/invitations');
 
     return (
         <header className="navbar bg-base-100 shadow sticky top-0 z-50">
@@ -57,7 +57,7 @@ export function Header() {
                                 <li><Link href="/portal/dashboard">Dashboard</Link></li>
                                 <li><Link href="/portal/roles">Roles</Link></li>
                                 <li><Link href="/portal/candidates">Candidates</Link></li>
-                                <li><Link href="/invitations">Invitations</Link></li>
+                                <li><Link href="/portal/invitations">Invitations</Link></li>
                                 <li><Link href="/portal/placements">Placements</Link></li>
                                 <li><Link href="/portal/application">Applications</Link></li>
                                 <li className="menu-title mt-2">Account</li>
@@ -66,9 +66,9 @@ export function Header() {
                             </>
                         ) : (
                             <>
-                                <li><a href="/how-it-works">How It Works</a></li>
-                                <li><a href="/features">Features</a></li>
-                                <li><a href="/pricing">Pricing</a></li>
+                                <li><a href="/public/how-it-works">How It Works</a></li>
+                                <li><a href="/public/features">Features</a></li>
+                                <li><a href="/public/pricing">Pricing</a></li>
                             </>
                         )}
                     </ul>
@@ -81,9 +81,9 @@ export function Header() {
             {/* Center: Desktop marketing links */}
             <div className="navbar-center hidden lg:flex">
                 <ul className="menu menu-horizontal px-1">
-                    <li><a href="/how-it-works">How It Works</a></li>
-                    <li><a href="/features">Features</a></li>
-                    <li><a href="/pricing">Pricing</a></li>
+                    <li><a href="/public/how-it-works">How It Works</a></li>
+                    <li><a href="/public/features">Features</a></li>
+                    <li><a href="/public/pricing">Pricing</a></li>
                 </ul>
             </div>
 

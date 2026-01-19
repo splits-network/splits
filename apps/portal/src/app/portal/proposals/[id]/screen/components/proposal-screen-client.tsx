@@ -143,7 +143,7 @@ export default function ProposalScreenClient({
                             <span>{error}</span>
                         </div>
                         <div className="card-actions justify-start mt-4">
-                            <Link href="/proposals" className="btn">
+                            <Link href="/portal/proposals" className="btn">
                                 <i className="fa-duotone fa-regular fa-arrow-left"></i>
                                 Back to Proposals
                             </Link>
@@ -169,7 +169,7 @@ export default function ProposalScreenClient({
         <div className="space-y-6">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-base-content/60">
-                <Link href="/proposals" className="hover:text-primary">
+                <Link href="/portal/proposals" className="hover:text-primary">
                     <i className="fa-duotone fa-regular fa-arrow-left mr-2"></i>
                     Proposals
                 </Link>

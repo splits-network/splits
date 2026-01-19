@@ -102,7 +102,7 @@ export default function ScreenForm({
             });
 
             // Success - redirect to proposals list with success message
-            router.push('/proposals?success=accepted');
+            router.push('/portal/proposals?success=accepted');
         } catch (err: any) {
             setError(err.message || 'Failed to accept proposal');
             setSubmitting(false);
@@ -130,7 +130,7 @@ export default function ScreenForm({
             });
 
             // Success - redirect to proposals list with success message
-            router.push('/proposals?success=declined');
+            router.push('/portal/proposals?success=declined');
         } catch (err: any) {
             setError(err.message || 'Failed to decline proposal');
             setSubmitting(false);
