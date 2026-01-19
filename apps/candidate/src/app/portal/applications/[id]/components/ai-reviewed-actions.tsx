@@ -69,7 +69,7 @@ export function AIReviewedActions({ applicationId, jobTitle }: AIReviewedActions
             <button
                 onClick={handleReturnToDraft}
                 disabled={actionLoading !== null}
-                className="btn btn-accent btn-outline"
+                className="btn btn-accent btn-outline btn-block"
             >
                 {actionLoading === 'draft' ? (
                     <>
@@ -86,7 +86,7 @@ export function AIReviewedActions({ applicationId, jobTitle }: AIReviewedActions
             <button
                 onClick={handleSubmitApplication}
                 disabled={actionLoading !== null}
-                className="btn btn-success"
+                className="btn btn-success btn-block"
             >
                 {actionLoading === 'submit' ? (
                     <>

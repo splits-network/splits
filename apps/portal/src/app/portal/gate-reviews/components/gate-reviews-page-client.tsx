@@ -90,10 +90,11 @@ export default function GateReviewsPageClient() {
 
             const client = createAuthenticatedClient(token);
             try {
+                console.log('Fetching pending count for gate type:', gateType);
                 const response = await client.get('/candidate-role-assignments', {
                     params: {
                         current_gate: gateType,
-                        state: 'awaiting_gate_review',
+                        state: 'submitted',
                         limit: 1
                     }
                 });

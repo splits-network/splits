@@ -416,7 +416,7 @@ export default async function ApplicationDetailPage({
                                 </div>
                             </h2>
 
-                            <div className="space-y-2 grid grid-cols-1 xl:grid-cols-2 gap-2">
+                            <div className="space-y-2 gap-2">
                                 {/* Edit Application and Submit - for ai_reviewed stage after reviewing AI feedback */}
                                 {application.stage === 'ai_reviewed' && (
                                     <AIReviewedActions
@@ -430,7 +430,7 @@ export default async function ApplicationDetailPage({
                                     <Link
                                         href="#"
                                         // href={`/portal/applications/${application.id}/ai-review`}
-                                        className="btn btn-primary"
+                                        className="btn btn-primary btn-block"
                                     >
                                         <div className='indicator'>
                                             <span className="indicator-item badge badge-warning badge-xs">Coming Soon</span>

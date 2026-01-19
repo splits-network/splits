@@ -172,7 +172,27 @@ export class CandidateRoleAssignmentRepository {
     }
 
     /**
-     * Find assignment by job and candidate
+     * Find assignment by application ID (1-to-1 relationship)
+     */
+    async findByApplicationId(
+        applicationId: string
+    ): Promise<CandidateRoleAssignment | null> {
+        const { data, error } = await this.supabase
+            .from('candidate_role_assignments')
+            .select('*')
+            .eq('application_id', applicationId)
+            .maybeSingle();
+
+        if (error) {
+            this.logger.error({ error, applicationId }, 'Failed to find assignment by application');
+            throw error;
+        }
+
+        return data;
+    }
+
+    /**
+     * Find assignment by job and candidate (legacy - may return multiple if reapplications exist)
      */
     async findByJobAndCandidate(
         jobId: string,
@@ -202,24 +222,31 @@ export class CandidateRoleAssignmentRepository {
     ): Promise<CandidateRoleAssignment> {
         const context = await resolveAccessContext(this.supabase, clerkUserId);
 
-        // Check for existing assignment
-        const existing = await this.findByJobAndCandidate(input.job_id, input.candidate_id);
-        if (existing) {
-            throw new Error('Assignment already exists for this candidate-job pair');
+        // Check for existing assignment by application_id (1-to-1 relationship)
+        const existingByApp = await this.findByApplicationId(input.application_id);
+        if (existingByApp) {
+            throw new Error('Assignment already exists for this application');
         }
 
         const now = new Date();
         const { data, error } = await this.supabase
             .from('candidate_role_assignments')
             .insert({
+                application_id: input.application_id,
                 job_id: input.job_id,
                 candidate_id: input.candidate_id,
                 candidate_recruiter_id: input.candidate_recruiter_id,
                 company_recruiter_id: input.company_recruiter_id,
                 state: input.state || 'proposed',
+                current_gate: input.current_gate || null,
+                gate_sequence: input.gate_sequence || [],
+                gate_history: input.gate_history || [],
+                has_candidate_recruiter: input.has_candidate_recruiter ?? false,
+                has_company_recruiter: input.has_company_recruiter ?? false,
                 proposed_at: now,
-                accepted_at: input.state === 'proposed' ? null : now,
-                response_due_at: input.response_due_at,
+                submitted_at: input.submitted_at || null,
+                accepted_at: input.accepted_at || null, // Only set when candidate accepts offer (state='accepted')
+                response_due_at: input.response_due_at || null,
                 proposed_by: input.proposed_by || context.identityUserId,
                 proposal_notes: input.proposal_notes,
                 created_at: now,
@@ -234,7 +261,7 @@ export class CandidateRoleAssignmentRepository {
         }
 
         this.logger.info(
-            { assignment_id: data.id, job_id: input.job_id, candidate_id: input.candidate_id },
+            { assignment_id: data.id, application_id: input.application_id, job_id: input.job_id, candidate_id: input.candidate_id },
             'Created candidate role assignment'
         );
 

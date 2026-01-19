@@ -65,7 +65,7 @@ export default function GateReviewList({ gateType, userId, className = '' }: Gat
             // Build query params based on gate type
             const params: Record<string, any> = {
                 current_gate: gateType,
-                state: 'awaiting_gate_review', // Or appropriate state
+                state: 'submitted', // CRAs at gate awaiting review
                 include: 'candidate,job',
                 sort_by: 'created_at',
                 sort_order: 'desc'

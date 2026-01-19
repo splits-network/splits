@@ -179,7 +179,22 @@ export class CandidateRoleAssignmentServiceV2 {
             const now = new Date();
             const assignmentState = this.mapApplicationStateToAssignmentState(applicationState);
 
+            // Get application_id for this candidate-job pair
+            const { data: application } = await this.supabase
+                .from('applications')
+                .select('id')
+                .eq('candidate_id', candidateId)
+                .eq('job_id', jobId)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+
+            if (!application) {
+                throw new Error('Application not found for this candidate-job pair');
+            }
+
             return this.create(clerkUserId, {
+                application_id: application.id,
                 job_id: jobId,
                 candidate_id: candidateId,
                 candidate_recruiter_id: recruiterId,
@@ -216,10 +231,25 @@ export class CandidateRoleAssignmentServiceV2 {
         // Create proposal with 72-hour response window
         const responseDue = new Date(Date.now() + 72 * 60 * 60 * 1000);
 
+        // Get application_id - application must exist before proposal
+        const { data: application } = await this.supabase
+            .from('applications')
+            .select('id')
+            .eq('candidate_id', input.candidate_id)
+            .eq('job_id', input.job_id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (!application) {
+            throw new Error('Application not found. Create application first before proposing assignment.');
+        }
+
         // Determine which recruiter field to use based on context
         // TODO: In Phase 2, determine if recruiter represents candidate or company
         // For now, default to candidate_recruiter_id
         const createInput: CandidateRoleAssignmentCreateInput = {
+            application_id: application.id,
             job_id: input.job_id,
             candidate_id: input.candidate_id,
             candidate_recruiter_id: context.recruiterId || undefined,  // Default to candidate representation
@@ -365,10 +395,9 @@ export class CandidateRoleAssignmentServiceV2 {
         if (!input.candidate_id) throw new Error('candidate_id is required');
         if (!input.proposed_by) throw new Error('proposed_by is required');
 
-        // At least one recruiter required (candidate OR company)
-        if (!input.candidate_recruiter_id && !input.company_recruiter_id) {
-            throw new Error('At least one recruiter (candidate_recruiter_id or company_recruiter_id) is required');
-        }
+        // NOTE: Recruiters are OPTIONAL for direct applications
+        // Direct applications (no recruiters) go straight to company gate
+        // This aligns with Gate Routing Scenario A: No recruiters → Company gate only
     }
 
     private validateStateTransition(

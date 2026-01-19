@@ -110,6 +110,7 @@ export interface EnrichedCandidateRoleAssignment extends CandidateRoleAssignment
  * Input for creating new assignment
  */
 export interface CandidateRoleAssignmentCreateInput {
+    application_id: string;           // Required - 1-to-1 relationship with application
     job_id: string;
     candidate_id: string;
     candidate_recruiter_id?: string;  // Optional - Closer role
@@ -118,12 +119,24 @@ export interface CandidateRoleAssignmentCreateInput {
     proposed_by: string;              // Required - who initiated this CRA
     proposal_notes?: string;
     response_due_at?: Date;
+
+    // Gate routing fields (Phase 3)
+    current_gate?: GateType | null;
+    gate_sequence?: string[];
+    gate_history?: any[];
+    has_candidate_recruiter?: boolean;
+    has_company_recruiter?: boolean;
+
+    // Timestamp fields
+    submitted_at?: Date | string;
+    accepted_at?: Date | string;
 }
 
 /**
  * Input for updating assignment
  */
 export interface CandidateRoleAssignmentUpdateInput {
+    application_id?: string;          // Generally should not change, but allow for edge cases
     state?: CandidateRoleAssignmentState;
     candidate_recruiter_id?: string;
     company_recruiter_id?: string;

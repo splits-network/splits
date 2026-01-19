@@ -615,6 +615,9 @@ export class ApplicationServiceV2 {
             stage: nextStage,
         });
 
+        // Resolve user context early (needed for proposed_by UUID)
+        const userContext = await this.accessResolver.resolve(clerkUserId);
+
         // Phase 2.2 & 2.3: Determine gate routing and create CRA with routing
         let assignment = null;
         if (this.assignmentService) {
@@ -628,12 +631,12 @@ export class ApplicationServiceV2 {
                 // Create CRA with gate routing metadata
                 const now = new Date();
                 const createInput: any = {
+                    application_id: updated.id, // 1-to-1 relationship with application
                     candidate_id: updated.candidate_id,
                     job_id: updated.job_id,
-                    proposed_by: clerkUserId,
-                    state: gateRouting.firstGate === 'company' ? 'awaiting_company' :
-                        gateRouting.firstGate === 'candidate_recruiter' ? 'awaiting_candidate_recruiter' :
-                            'awaiting_company_recruiter',
+                    proposed_by: userContext.identityUserId,
+                    state: 'submitted', // CRA lifecycle state (submitted to gate system)
+                    submitted_at: now.toISOString(), // Timestamp when submitted to gate system
                     // Gate routing fields
                     current_gate: gateRouting.firstGate,
                     gate_sequence: gateRouting.gateSequence,
@@ -672,7 +675,6 @@ export class ApplicationServiceV2 {
 
         // Publish submission event
         if (this.eventPublisher) {
-            const userContext = await this.accessResolver.resolve(clerkUserId);
             await this.eventPublisher.publish('application.submitted', {
                 applicationId,
                 candidate_id: application.candidate_id,

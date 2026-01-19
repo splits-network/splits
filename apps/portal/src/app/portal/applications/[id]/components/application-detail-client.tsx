@@ -573,7 +573,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
                             {isPlatformAdmin && (
                                 <button
                                     onClick={() => setShowStageModal(true)}
-                                    className="btn btn-primary btn-sm btn-block gap-2"
+                                    className="btn btn-primary btn-sm gap-2"
                                     disabled={actionLoading}
                                 >
                                     <i className="fa-duotone fa-regular fa-arrow-right-arrow-left"></i>
@@ -582,7 +582,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
                             )}
                             <button
                                 onClick={() => setShowNoteModal(true)}
-                                className="btn btn-outline btn-sm btn-block gap-2"
+                                className="btn btn-outline btn-sm gap-2"
                                 disabled={actionLoading}
                             >
                                 <i className="fa-duotone fa-regular fa-note-sticky"></i>
@@ -590,14 +590,14 @@ export default function ApplicationDetailClient({ applicationId }: { application
                             </button>
                             <button
                                 onClick={handleOpenCandidateModal}
-                                className="btn btn-outline btn-sm btn-block gap-2"
+                                className="btn btn-outline btn-sm gap-2"
                             >
                                 <i className="fa-duotone fa-regular fa-user"></i>
                                 View Candidate
                             </button>
                             <button
                                 onClick={() => setShowJobModal(true)}
-                                className="btn btn-outline btn-sm btn-block gap-2"
+                                className="btn btn-outline btn-sm gap-2"
                             >
                                 <i className="fa-duotone fa-regular fa-briefcase"></i>
                                 View Job
@@ -605,7 +605,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
                             {application.stage === 'screen' && (
                                 <Link
                                     href={`/portal/applications/${application.id}/review`}
-                                    className="btn btn-accent btn-sm btn-block gap-2"
+                                    className="btn btn-accent btn-sm gap-2"
                                 >
                                     <i className="fa-duotone fa-regular fa-clipboard-check"></i>
                                     Review & Submit
@@ -616,7 +616,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
                             {application.stage === 'submitted' && (
                                 <button
                                     onClick={() => handleStageUpdate('interview')}
-                                    className="btn btn-success btn-sm btn-block gap-2"
+                                    className="btn btn-success btn-sm gap-2"
                                     disabled={loading}
                                 >
                                     <i className="fa-duotone fa-regular fa-calendar"></i>
@@ -626,7 +626,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
                             {application.stage === 'interview' && (
                                 <button
                                     onClick={() => handleStageUpdate('offer')}
-                                    className="btn btn-success btn-sm btn-block gap-2"
+                                    className="btn btn-success btn-sm gap-2"
                                     disabled={loading}
                                 >
                                     <i className="fa-duotone fa-regular fa-handshake"></i>
@@ -636,7 +636,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
                             {application.stage === 'offer' && (
                                 <button
                                     onClick={() => handleStageUpdate('hired')}
-                                    className="btn btn-success btn-sm btn-block gap-2"
+                                    className="btn btn-success btn-sm gap-2"
                                     disabled={loading}
                                 >
                                     <i className="fa-duotone fa-regular fa-check-circle"></i>
@@ -646,7 +646,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
                             {!['rejected', 'hired'].includes(application.stage) && (
                                 <button
                                     onClick={() => handleStageUpdate('rejected')}
-                                    className="btn btn-error btn-sm btn-block gap-2"
+                                    className="btn btn-error btn-sm gap-2"
                                     disabled={actionLoading}
                                 >
                                     <i className="fa-duotone fa-regular fa-xmark"></i>

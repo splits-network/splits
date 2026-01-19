@@ -22,7 +22,7 @@ export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = 
     if (isJobClosed) {
         return (
             <button
-                className="btn btn-error btn-outline w-full"
+                className="btn btn-error btn-outline btn-block"
                 disabled
                 title="Cannot withdraw - position is no longer available"
             >
@@ -70,7 +70,7 @@ export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = 
 
             {!showConfirm ? (
                 <button
-                    className="btn btn-error btn-outline"
+                    className="btn btn-error btn-outline btn-block"
                     onClick={() => setShowConfirm(true)}
                     disabled={isWithdrawing}
                 >

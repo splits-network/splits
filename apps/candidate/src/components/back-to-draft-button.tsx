@@ -53,7 +53,7 @@ export default function BackToDraftButton({ applicationId, jobTitle }: BackToDra
 
             {!showConfirm ? (
                 <button
-                    className="btn btn-outline w-full"
+                    className="btn btn-outline btn-block"
                     onClick={() => setShowConfirm(true)}
                     disabled={isMoving}
                 >
