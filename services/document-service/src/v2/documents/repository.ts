@@ -207,7 +207,6 @@ export class DocumentRepositoryV2 {
 
     async createDocument(clerkUserId: string, input: CreateDocumentRecord): Promise<Document> {
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-console.log('[DOCUMENT_UPLOAD] Resolving access context for user:', clerkUserId, accessContext);
         if (!accessContext.identityUserId) {
             throw new Error('Unable to resolve identity user for document upload');
         }
@@ -215,20 +214,7 @@ console.log('[DOCUMENT_UPLOAD] Resolving access context for user:', clerkUserId,
         if (!this.canModifyEntity(input.entity_type, input.entity_id, accessContext)) {
             throw new Error('Not authorized to upload document for this entity');
         }
-console.log('[DOCUMENT_UPLOAD] Authorized upload by user:', accessContext.identityUserId);
-console.log('[DOCUMENT_UPLOAD] Upload details:', {
-                entity_type: input.entity_type,
-                entity_id: input.entity_id,
-                document_type: input.document_type,
-                filename: input.file_name,
-                storage_path: input.file_path,
-                bucket_name: input.storage_bucket,
-                content_type: input.mime_type,
-                file_size: input.file_size,
-                uploaded_by_user_id: accessContext.identityUserId,
-                metadata: input.metadata || {},
-                processing_status: input.processing_status || 'pending',
-});
+
         const { data, error } = await this.supabase
 
             .from('documents')

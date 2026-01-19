@@ -104,24 +104,16 @@ export class StatsServiceV2 {
             }
 
             case 'company': {
-                console.log('[StatsService] Getting company stats for clerkUserId:', clerkUserId);
                 const accessContext = await this.repository.getAccessContext(clerkUserId);
-                console.log('[StatsService] Access context:', {
-                    organizationIds: accessContext.organizationIds,
-                    isPlatformAdmin: accessContext.isPlatformAdmin,
-                    identityUserId: accessContext.identityUserId
-                });
                 
                 if (accessContext.organizationIds.length === 0) {
                     throw new Error('Company membership required to view company stats');
                 }
                 
-                console.log('[StatsService] Calling getCompanyStats with organizationIds:', accessContext.organizationIds);
                 const metrics = await this.repository.getCompanyStats(
                     accessContext.organizationIds,
                     range
                 );
-                console.log('[StatsService] Got metrics from repository:', metrics);
                 
                 return {
                     scope: 'company',

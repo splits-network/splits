@@ -69,11 +69,8 @@ export function registerStatsRoutes(app: FastifyInstance, config: RegisterStatsR
         ) => {
             try {
                 const { clerkUserId } = requireUserContext(request);
-                console.log('[Stats Route] About to call service.getStats');
                 const stats = await config.statsService.getStats(clerkUserId, request.query || {});
-                console.log('[Stats Route] Got stats from service:', JSON.stringify(stats, null, 2));
                 const response = { data: stats };
-                console.log('[Stats Route] Sending response:', JSON.stringify(response, null, 2));
                 return reply.send(response);
             } catch (error: any) {
                 console.error('[Stats Error]', error?.message || error);

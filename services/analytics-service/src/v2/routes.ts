@@ -10,6 +10,9 @@ import { registerMarketplaceMetricsRoutes } from './marketplace-metrics/routes';
 import { ChartRepository } from './charts/repository';
 import { ChartServiceV2 } from './charts/service';
 import { registerChartRoutes } from './charts/routes';
+import { ProposalStatsRepository } from './proposal-stats/repository';
+import { ProposalStatsService } from './proposal-stats/service';
+import { registerProposalStatsRoutes } from './proposal-stats/routes';
 
 // Domain route imports (will be created)
 // import { marketplaceHealthRoutes } from './marketplace-health/routes';
@@ -27,7 +30,7 @@ export async function registerV2Routes(
     app: FastifyInstance,
     options: RouteOptions
 ) {
-    const { supabase, cache, config } = options;
+    const { supabase, cache, redis, config } = options;
 
     // Root V2 endpoint
     app.get('/', async (request, reply) => {
@@ -58,10 +61,14 @@ export async function registerV2Routes(
     const chartRepository = new ChartRepository(supabase);
     const chartService = new ChartServiceV2(chartRepository, supabase);
 
+    const proposalStatsRepository = new ProposalStatsRepository(supabase);
+    const proposalStatsService = new ProposalStatsService(proposalStatsRepository, cache, supabase);
+
     // Register domain routes
     registerStatsRoutes(app, { statsService });
     registerMarketplaceMetricsRoutes(app, { marketplaceMetricsService });
     registerChartRoutes(app, { chartService });
+    registerProposalStatsRoutes(app, proposalStatsService);
 
     // TODO: Register marketplace health routes when implemented
     // await app.register(marketplaceHealthRoutes, { prefix: '/marketplace-health', supabase, cache });

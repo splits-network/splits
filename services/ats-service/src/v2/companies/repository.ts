@@ -58,7 +58,6 @@ export class CompanyRepository {
 
         // Apply full-text search across all company fields
         if (filters.search) {
-            console.log('Applying full-text search on companies:', filters.search);
             // Multi-word search: split and join with ' & ' for AND logic
             const tsquery = filters.search.split(/\s+/).filter(t => t.trim()).join(' & ');
             query = query.textSearch('search_vector', tsquery, {

@@ -128,12 +128,6 @@ export async function registerChartRoutes(
                     const end = new Date(query.end_date);
                     const daysDiff = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
                     months = Math.round(daysDiff / 30); // Convert days to approximate months
-                    console.log('[ChartRoutes] Calculated months from date range:', {
-                        start_date: query.start_date,
-                        end_date: query.end_date,
-                        daysDiff,
-                        months
-                    });
                 } else if (query.months) {
                     months = parseInt(query.months, 10);
                 }

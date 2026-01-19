@@ -186,7 +186,6 @@ export class StatsRepository {
             // Skip pre-aggregated query and go straight to real-time calculation
             
             // Fallback: Calculate real-time stats from public schema tables
-            console.log('[CompanyStats] Using real-time stats calculation for organizationIds:', organizationIds);
             return await this.calculateCompanyStatsRealtime(organizationIds, range);
         } catch (error) {
             console.error('Error fetching company stats:', error);
@@ -205,9 +204,6 @@ export class StatsRepository {
         try {
             const stats = { ...DEFAULT_COMPANY_STATS };
             
-            console.log('[CompanyStats] Starting real-time calculation for organizationIds:', organizationIds);
-            console.log('[CompanyStats] Date range:', { from: range.from.toISOString(), to: range.to.toISOString() });
-
             // First, get company IDs from organization IDs
             const { data: companies, error: companiesError } = await this.supabase
                 .from('companies')
@@ -220,7 +216,6 @@ export class StatsRepository {
             }
             
             const companyIds = companies?.map(c => c.id) || [];
-            console.log('[CompanyStats] Found company IDs:', companyIds);
             
             if (companyIds.length === 0) {
                 console.log('[CompanyStats] No companies found for organizations');
@@ -234,7 +229,6 @@ export class StatsRepository {
                 .in('company_id', companyIds)
                 .eq('status', 'active');
             stats.active_roles = activeRolesCount || 0;
-            console.log('[CompanyStats] Active roles:', stats.active_roles);
 
             // Total applications (in visible stages)
             const { data: applications } = await this.supabase
@@ -245,7 +239,6 @@ export class StatsRepository {
                 .lte('created_at', range.to.toISOString());
 
             if (applications && applications.length > 0) {
-                console.log('[CompanyStats] Found applications:', applications.length);
                 
                 // Filter to company jobs
                 const { data: companyJobs } = await this.supabase
@@ -254,10 +247,8 @@ export class StatsRepository {
                     .in('company_id', companyIds);
                 
                 const companyJobIds = new Set(companyJobs?.map(j => j.id) || []);
-                console.log('[CompanyStats] Company job IDs:', Array.from(companyJobIds));
                 
                 const companyApplications = applications.filter(app => companyJobIds.has(app.job_id));
-                console.log('[CompanyStats] Filtered company applications:', companyApplications.length);
 
                 stats.total_applications = companyApplications.length;
                 stats.interviews_scheduled = companyApplications.filter(a => a.stage === 'interview').length;
@@ -272,7 +263,6 @@ export class StatsRepository {
                 .lte('created_at', range.to.toISOString());
 
             if (placements && placements.length > 0) {
-                console.log('[CompanyStats] Found placements:', placements.length);
                 
                 // Filter to company placements
                 const { data: companyJobs } = await this.supabase
@@ -301,7 +291,6 @@ export class StatsRepository {
                     p => new Date(p.created_at) >= monthStart
                 ).length;
                 
-                console.log('[CompanyStats] Placements this year/month:', stats.placements_this_year, stats.placements_this_month);
             }
 
             // Active recruiters (unique recruiters with assignments)
@@ -322,13 +311,11 @@ export class StatsRepository {
                         .map(a => a.recruiter_id)
                 );
                 stats.active_recruiters = activeRecruiterIds.size;
-                console.log('[CompanyStats] Active recruiters:', stats.active_recruiters);
             }
 
             // Average time to hire - skip for now (requires complex calculation)
             stats.avg_time_to_hire_days = 0;
 
-            console.log('[CompanyStats] Real-time calculation complete:', stats);
             return stats;
         } catch (error) {
             console.error('Error calculating real-time company stats:', error);

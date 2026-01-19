@@ -139,7 +139,7 @@ export function ApplicationCard({
             tooltip: 'Anonymous candidate',
         });
     }
-    console.log('Rendering ApplicationCard for:', application);
+
     return (
         <MetricCard className="group hover:shadow-lg transition-all duration-200">
             <MetricCard.Header>

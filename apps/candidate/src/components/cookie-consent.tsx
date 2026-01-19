@@ -52,7 +52,6 @@ export default function CookieConsent() {
                 if (response.ok) {
                     // Mark as synced to avoid re-syncing
                     localStorage.setItem('cookie-consent-synced', 'true');
-                    console.log('Consent synced to database');
                 } else {
                     console.error('Failed to sync consent to database:', response.status);
                 }

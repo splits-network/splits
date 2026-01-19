@@ -52,8 +52,6 @@ export class ApplicationRepository {
             query = query.eq('recruiter_id', accessContext.recruiterId);
         } else if (!accessContext.isPlatformAdmin) {
             if (accessContext.organizationIds.length > 0) {
-                console.log('Applying organization access filter for organizations:', accessContext.organizationIds);
-
                 // First, get all companies that belong to the user's organizations
                 const { data: companies, error: companyError } = await this.supabase
                     .from('companies')
@@ -120,7 +118,6 @@ export class ApplicationRepository {
 
         // Apply full-text search across all application fields
         if (filters.search) {
-            console.log('Applying full-text search on applications:', filters.search);
             // Multi-word search: split and join with ' & ' for AND logic
             const tsquery = filters.search.split(/\s+/).filter((t: string) => t.trim()).join(' & ');
             query = query.textSearch('search_vector', tsquery, {

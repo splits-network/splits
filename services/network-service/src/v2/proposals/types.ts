@@ -7,7 +7,8 @@ import { PaginationParams, SortParams } from '../shared/pagination';
 export interface ProposalFilters extends PaginationParams, SortParams {
     search?: string;
     state?: string;
-    recruiter_id?: string;
+    candidate_recruiter_id?: string;
+    company_recruiter_id?: string;
     job_id?: string;
     candidate_id?: string;
 }

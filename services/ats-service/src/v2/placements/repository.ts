@@ -63,7 +63,6 @@ export class PlacementRepository {
 
         // Apply filters
         if (filters.search) {
-            console.log('Applying full-text search on placements:', filters.search);
             const tsquery = filters.search.split(/\s+/).filter((t: string) => t.trim()).join(' & ');
             query = query.textSearch('search_vector', tsquery, {
                 type: 'websearch',

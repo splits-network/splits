@@ -88,13 +88,6 @@ export class ChartServiceV2 {
     ): ChartData {
         const metricTypes = CHART_METRIC_MAPPING[chartType];
 
-        console.log('[ChartService] formatChartData called:', {
-            chartType,
-            metricTypes,
-            rowsCount: rows.length,
-            sampleRows: rows.slice(0, 3)
-        });
-
         // Generate all month labels
         const labels = this.generateMonthLabels(months);
 
@@ -125,21 +118,7 @@ export class ChartServiceV2 {
                 fill: false,
             };
 
-            console.log('[ChartService] Dataset created:', {
-                metricType,
-                label: dataset.label,
-                dataPoints: dataset.data.length,
-                sampleData: dataset.data.slice(0, 3),
-                totalSum: dataset.data.reduce((a, b) => a + b, 0)
-            });
-
             return dataset;
-        });
-
-        console.log('[ChartService] Final chart data:', {
-            labelsCount: labels.length,
-            datasetsCount: datasets.length,
-            labels: labels.slice(0, 3)
         });
 
         return { labels, datasets };

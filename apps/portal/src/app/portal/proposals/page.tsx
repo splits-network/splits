@@ -6,8 +6,9 @@ import { useAuth } from '@clerk/nextjs';
 // TODO: Define proper types for UnifiedProposal and ProposalsResponse
 import UnifiedProposalCard from '@/components/unified-proposal-card';
 import { useStandardList, PaginationControls, SearchInput, EmptyState, LoadingState, ErrorState } from '@/hooks/use-standard-list';
-import { ApiClient } from '@/lib/api-client';
+import { createAuthenticatedClient } from '@/lib/api-client';
 import { StatCard, StatCardGrid } from '@/components/ui/cards';
+import { enhanceProposals } from '@/lib/proposal-helpers';
 
 type UnifiedProposal = any; // TODO: Define proper type
 type ProposalsResponse = any; // TODO: Define proper type
@@ -57,7 +58,7 @@ export default function ProposalsPage() {
         const token = await getToken();
         if (!token) throw new Error('Not authenticated');
 
-        const client = new ApiClient(token);
+        const client = createAuthenticatedClient(token);
         const queryParams = new URLSearchParams();
 
         if (params.page) queryParams.set('page', params.page.toString());
@@ -65,11 +66,14 @@ export default function ProposalsPage() {
         if (params.search) queryParams.set('search', params.search);
         if (params.state) queryParams.set('state', params.state);
 
-        const result: { data: ProposalsResponse } = await client.get(`/proposals?${queryParams.toString()}`);
+        const result: ProposalsResponse = await client.get(`/proposals?${queryParams.toString()}`);
+
+        // Enhance proposals with computed display fields
+        const enhancedData = enhanceProposals(result.data);
 
         return {
-            data: result.data.data,
-            pagination: result.data.pagination
+            data: enhancedData,
+            pagination: result.pagination
         };
     }, [getToken]);
 
@@ -101,8 +105,8 @@ export default function ProposalsPage() {
             const token = await getToken();
             if (!token) return;
 
-            const client = new ApiClient(token);
-            const result: { data: ProposalSummary } = await client.get('/proposals/summary');
+            const client = createAuthenticatedClient(token);
+            const result: { data: ProposalSummary } = await client.get('/proposal-stats/summary');
             setSummary(result.data);
         } catch (err) {
             console.error('Failed to fetch summary:', err);
@@ -138,7 +142,7 @@ export default function ProposalsPage() {
         const token = await getToken();
         if (!token) throw new Error('Not authenticated');
 
-        const client = new ApiClient(token);
+        const client = createAuthenticatedClient(token);
         await client.post(`/proposals/${proposalId}/accept`, { notes });
 
         // Refresh proposals and summary
@@ -150,7 +154,7 @@ export default function ProposalsPage() {
         const token = await getToken();
         if (!token) throw new Error('Not authenticated');
 
-        const client = new ApiClient(token);
+        const client = createAuthenticatedClient(token);
         await client.post(`/proposals/${proposalId}/decline`, { notes });
 
         // Refresh proposals and summary
@@ -167,7 +171,7 @@ export default function ProposalsPage() {
             const token = await getToken();
             if (!token) throw new Error('Not authenticated');
 
-            const client = new ApiClient(token);
+            const client = createAuthenticatedClient(token);
             await client.delete(`/proposals/${proposalId}`);
 
             // Refresh proposals and summary

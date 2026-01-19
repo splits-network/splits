@@ -46,7 +46,6 @@ export default function DocumentViewerModal({ document, isOpen, onClose }: Docum
 
                 const client = createAuthenticatedClient(token);
                 const response: any = await client.get(`/documents/${document.id}`);
-                console.log('Signed URL response:', response);
                 const url = response.data?.download_url;
 
                 if (!url) {

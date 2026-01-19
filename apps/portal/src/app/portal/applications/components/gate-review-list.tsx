@@ -142,7 +142,6 @@ export default function GateReviewList({ gateType, userId, className = '' }: Gat
             closeModal();
 
             // Optional: Show success toast
-            console.log('Application approved successfully');
         } catch (err) {
             console.error('Failed to approve application:', err);
             throw err; // Let modal handle error display
@@ -167,7 +166,6 @@ export default function GateReviewList({ gateType, userId, className = '' }: Gat
             await fetchApplications();
             closeModal();
 
-            console.log('Application denied');
         } catch (err) {
             console.error('Failed to deny application:', err);
             throw err;
@@ -192,7 +190,6 @@ export default function GateReviewList({ gateType, userId, className = '' }: Gat
             await fetchApplications();
             closeModal();
 
-            console.log('Information requested');
         } catch (err) {
             console.error('Failed to request information:', err);
             throw err;
@@ -217,7 +214,6 @@ export default function GateReviewList({ gateType, userId, className = '' }: Gat
             await fetchApplications();
             closeModal();
 
-            console.log('Information provided');
         } catch (err) {
             console.error('Failed to provide information:', err);
             throw err;

@@ -143,4 +143,38 @@ export function registerAnalyticsRoutes(
             }
         }
     );
+
+    // Proposal statistics endpoint - GET /api/v2/proposal-stats/summary
+    app.get(
+        '/api/v2/proposal-stats/summary',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const queryString = buildQueryString(request.query as Record<string, any>);
+            const path = queryString ? `/api/v2/proposal-stats/summary?${queryString}` : '/api/v2/proposal-stats/summary';
+
+            try {
+                const response = await analyticsClient().get<any>(
+                    path,
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(response);
+            } catch (error: any) {
+                request.log.error({
+                    correlationId,
+                    error: error.message,
+                    stack: error.stack,
+                }, 'Error fetching proposal summary statistics');
+
+                return reply.status(error.statusCode || 500).send({
+                    error: {
+                        message: error.message || 'Internal server error',
+                        code: error.code || 'INTERNAL_ERROR',
+                    },
+                });
+            }
+        }
+    );
 }

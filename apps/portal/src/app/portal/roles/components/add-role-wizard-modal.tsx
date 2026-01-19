@@ -84,7 +84,6 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess, jobId, 
                     params: { include: 'requirements,pre_screen_questions' }
                 });
                 const job = response.data;
-                console.log('Loaded job for editing:', job);
                 // Populate form with existing data
                 setFormData({
                     title: job.title || '',

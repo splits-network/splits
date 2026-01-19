@@ -29,12 +29,12 @@ export function registerProposalRoutes(
                     console.error('Failed to parse filters:', e);
                 }
             }
-
             const filters = {
                 ...pagination,
                 search: query.search,
                 state: query.state,
-                recruiter_id: query.recruiter_id,
+                candidate_recruiter_id: query.candidate_recruiter_id,
+                company_recruiter_id: query.company_recruiter_id,
                 job_id: query.job_id,
                 candidate_id: query.candidate_id,
                 sort_by: query.sort_by,
@@ -43,6 +43,7 @@ export function registerProposalRoutes(
             };
 
             const result = await config.proposalService.getProposals(clerkUserId, filters);
+
             return reply.send(result);
         } catch (error: any) {
             return reply

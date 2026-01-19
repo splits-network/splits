@@ -54,12 +54,10 @@ export class JobRepository {
 
             if (accessContext.isPlatformAdmin) {
                 // Platform admins see all jobs
-                console.log('[JobRepository] User is platform admin - showing all jobs');
             } else if (accessContext.recruiterId && accessContext.roles.includes('recruiter')) {
                 // Recruiters see all active jobs (marketplace model)
                 // OR only jobs where they have active involvement if job_owner_filter is 'assigned'
                 // NOTE: Check recruiter FIRST before company roles, even if they have both
-                console.log('[JobRepository] User is recruiter - applying recruiter filters');
                 query = query.eq('status', 'active');
                 // Recruiters see all active jobs (marketplace model)
                 // OR only jobs where they have active involvement if job_owner_filter is 'assigned'
@@ -97,7 +95,6 @@ export class JobRepository {
                         query = query.in('id', involvedJobIds);
                     } else {
                         // No involved jobs - return empty
-                        console.log('[JobRepository] No involved jobs found, returning empty');
                         return { data: [], total: 0 };
                     }
                 }
@@ -125,8 +122,6 @@ export class JobRepository {
         // Apply full-text search
         let useRelevanceSort = false;
         if (filters.search) {
-            console.log('Applying full-text search on jobs:', filters.search);
-
             // Convert search query to tsquery format (AND logic for multiple words)
             const tsquery = filters.search.split(/\s+/).filter(t => t.trim()).join(' & ');
 
@@ -145,7 +140,6 @@ export class JobRepository {
             query = query.eq('status', filters.status);
         }
         if (filters.location && !filters.search) {
-            console.log('Applying location filter on jobs:', filters.location);
             query = query.ilike('location', `%${filters.location}%`);
         }
         if (filters.employment_type) {

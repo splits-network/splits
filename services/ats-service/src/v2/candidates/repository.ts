@@ -186,7 +186,6 @@ export class CandidateRepository {
 
         // Apply full-text search across all candidate fields
         if (search) {
-            console.log('Applying full-text search on candidates:', search);
             // Multi-word search: split and join with ' & ' for AND logic
             const tsquery = search.split(/\s+/).filter(t => t.trim()).join(' & ');
             query = query.textSearch('search_vector', tsquery, {

@@ -11,7 +11,7 @@ export class ProposalServiceV2 {
     constructor(
         private repository: ProposalRepository,
         private eventPublisher: EventPublisherV2
-    ) {}
+    ) { }
 
     async getProposals(
         clerkUserId: string,
@@ -37,7 +37,8 @@ export class ProposalServiceV2 {
 
     async createProposal(
         data: {
-            recruiter_id: string;
+            candidate_recruiter_id?: string;
+            company_recruiter_id?: string;
             job_id: string;
             candidate_id: string;
             notes?: string;
@@ -46,10 +47,17 @@ export class ProposalServiceV2 {
         clerkUserId: string
     ): Promise<any> {
         // Validation
-        if (!data.recruiter_id || !data.job_id || !data.candidate_id) {
+        if (!data.job_id || !data.candidate_id) {
             throw {
                 statusCode: 400,
-                message: 'recruiter_id, job_id, and candidate_id are required',
+                message: 'job_id and candidate_id are required',
+            };
+        }
+
+        if (!data.candidate_recruiter_id && !data.company_recruiter_id) {
+            throw {
+                statusCode: 400,
+                message: 'At least one of candidate_recruiter_id or company_recruiter_id is required',
             };
         }
 
@@ -63,7 +71,8 @@ export class ProposalServiceV2 {
         // Publish event
         await this.eventPublisher.publish('proposal.created', {
             proposal_id: proposal.id,
-            recruiter_id: proposal.recruiter_id,
+            candidate_recruiter_id: proposal.candidate_recruiter_id || null,
+            company_recruiter_id: proposal.company_recruiter_id || null,
             job_id: proposal.job_id,
             candidate_id: proposal.candidate_id,
         });
@@ -102,8 +111,8 @@ export class ProposalServiceV2 {
 
         // Publish event
         await this.eventPublisher.publish('proposal.deleted', {
-                proposal_id: id,
-            });
+            proposal_id: id,
+        });
     }
 
     // Private helpers

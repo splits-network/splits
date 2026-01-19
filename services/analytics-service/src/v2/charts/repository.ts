@@ -47,14 +47,6 @@ export class ChartRepository {
                 p_company_id: filters.company_id || null
             });
 
-        console.log('[ChartRepository] RPC Response:', {
-            chartType,
-            metricTypes,
-            dataLength: data?.length || 0,
-            sampleData: data?.slice(0, 3),
-            error
-        });
-
         if (error) {
             throw new Error(`Failed to query chart data: ${error.message}`);
         }

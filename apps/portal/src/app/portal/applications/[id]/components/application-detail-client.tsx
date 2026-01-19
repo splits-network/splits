@@ -268,7 +268,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
     const handleOpenCandidateModal = () => {
         setShowCandidateModal(true);
     };
-    console.log('application detail render:', { application, candidate, job });
+
     const relationshipWarning = relationship && relationship.status !== 'active';
     return (
         <div className="grid grid-cols-12 gap-6">

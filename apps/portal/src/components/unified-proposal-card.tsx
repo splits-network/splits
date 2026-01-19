@@ -147,11 +147,11 @@ export default function UnifiedProposalCard({
                 <div className="flex items-center gap-2 text-sm mb-2">
                     <div className="avatar avatar-placeholder">
                         <div className="bg-neutral text-neutral-content rounded-full w-8">
-                            <span className="text-xs">{proposal.candidate.name.charAt(0)}</span>
+                            <span className="text-xs">{proposal.candidate.full_name.charAt(0) ?? ''}</span>
                         </div>
                     </div>
                     <div>
-                        <div className="font-medium">{proposal.candidate.name}</div>
+                        <div className="font-medium">{proposal.candidate.full_name ?? ''}</div>
                         {proposal.candidate.email && (
                             <div className="text-xs text-base-content/60">{proposal.candidate.email}</div>
                         )}

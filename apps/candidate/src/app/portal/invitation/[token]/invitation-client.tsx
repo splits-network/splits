@@ -87,10 +87,8 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             // Fetch invitation details (includes enriched recruiter info)
             // Use the non-authenticated endpoint for invitations
             const response = await client.get(`/recruiter-candidates/invitations/${token}`);
-            console.log('response: ', response);
             const invitationData = response.data;
             setInvitation(invitationData);
-            console.log('invitation data: ', invitationData);
 
             // Set recruiter from invitation data
             if (invitationData.recruiter_name || invitationData.recruiter_email) {
@@ -106,7 +104,6 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             // Fetch candidate details
             const candidateResponse = await client.get(`/candidates/${invitationData.candidate_id}`);
             setCandidate(candidateResponse.data);
-            console.log('candidate data: ', candidateResponse.data);
 
         } catch (err) {
             if (err instanceof Response) {
@@ -199,7 +196,7 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
             </div>
         );
     }
-    console.log("stuff: ", error, invitation, recruiter, candidate);
+
     if (error || !invitation || !recruiter || !candidate) {
         return (
             <div className="min-h-screen flex items-center justify-center p-4">

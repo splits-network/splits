@@ -30,12 +30,15 @@ export class ProposalRepository {
 
         // Build base query (cross-schema relations resolved after initial fetch)
         let query = this.supabase
-            
+
             .from(ProposalRepository.TABLE)
-            .select('*', { count: 'exact' });
+            .select(`*
+                candidate:candidates(id, phone, user:users!user_id(id, name, email)),
+                `, { count: 'exact' });
 
         if (accessContext.recruiterId) {
-            query = query.eq('recruiter_id', accessContext.recruiterId);
+            // Recruiter sees proposals where they are either candidate or company recruiter
+            query = query.or(`candidate_recruiter_id.eq.${accessContext.recruiterId},company_recruiter_id.eq.${accessContext.recruiterId}`);
         } else if (!accessContext.isPlatformAdmin) {
             if (organizationIds.length === 0) {
                 return { data: [], total: 0 };
@@ -55,8 +58,11 @@ export class ProposalRepository {
         if (filters.state) {
             query = query.eq('state', filters.state);
         }
-        if (filters.recruiter_id) {
-            query = query.eq('recruiter_id', filters.recruiter_id);
+        if (filters.candidate_recruiter_id) {
+            query = query.eq('candidate_recruiter_id', filters.candidate_recruiter_id);
+        }
+        if (filters.company_recruiter_id) {
+            query = query.eq('company_recruiter_id', filters.company_recruiter_id);
         }
         if (filters.job_id) {
             query = query.eq('job_id', filters.job_id);
@@ -87,7 +93,7 @@ export class ProposalRepository {
 
     async findProposal(id: string): Promise<any | null> {
         const { data, error } = await this.supabase
-            
+
             .from(ProposalRepository.TABLE)
             .select('*')
             .eq('id', id)
@@ -104,7 +110,7 @@ export class ProposalRepository {
 
     async createProposal(proposal: any): Promise<any> {
         const { data, error } = await this.supabase
-            
+
             .from(ProposalRepository.TABLE)
             .insert(proposal)
             .select()
@@ -116,7 +122,7 @@ export class ProposalRepository {
 
     async updateProposal(id: string, updates: ProposalUpdate): Promise<any> {
         const { data, error } = await this.supabase
-            
+
             .from(ProposalRepository.TABLE)
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id)
@@ -130,7 +136,7 @@ export class ProposalRepository {
     async deleteProposal(id: string): Promise<void> {
         // Soft delete
         const { error } = await this.supabase
-            
+
             .from(ProposalRepository.TABLE)
             .update({ state: 'cancelled', updated_at: new Date().toISOString() })
             .eq('id', id);
@@ -140,7 +146,7 @@ export class ProposalRepository {
 
     private async findJobIdsForOrganizations(organizationIds: string[]): Promise<string[]> {
         const { data: companies, error: companiesError } = await this.supabase
-            
+
             .from('companies')
             .select('id, identity_organization_id')
             .in('identity_organization_id', organizationIds);
@@ -153,7 +159,7 @@ export class ProposalRepository {
         }
 
         const { data: jobs, error: jobsError } = await this.supabase
-            
+
             .from('jobs')
             .select('id, company_id')
             .in('company_id', companyIds);
@@ -172,21 +178,27 @@ export class ProposalRepository {
         const candidateIds = Array.from(
             new Set(proposals.map((proposal) => proposal.candidate_id).filter(Boolean))
         );
-        const recruiterIds = Array.from(
-            new Set(proposals.map((proposal) => proposal.recruiter_id).filter(Boolean))
+        // Collect both candidate and company recruiter IDs
+        const candidateRecruiterIds = Array.from(
+            new Set(proposals.map((proposal) => proposal.candidate_recruiter_id).filter(Boolean))
         );
+        const companyRecruiterIds = Array.from(
+            new Set(proposals.map((proposal) => proposal.company_recruiter_id).filter(Boolean))
+        );
+        const allRecruiterIds = Array.from(new Set([...candidateRecruiterIds, ...companyRecruiterIds]));
 
         const [jobs, candidates, recruiters] = await Promise.all([
             this.fetchJobs(jobIds),
             this.fetchCandidates(candidateIds),
-            this.fetchRecruiters(recruiterIds),
+            this.fetchRecruiters(allRecruiterIds),
         ]);
 
         return proposals.map((proposal) => ({
             ...proposal,
             job: proposal.job_id ? jobs.get(proposal.job_id) || null : null,
             candidate: proposal.candidate_id ? candidates.get(proposal.candidate_id) || null : null,
-            recruiter: proposal.recruiter_id ? recruiters.get(proposal.recruiter_id) || null : null,
+            candidate_recruiter: proposal.candidate_recruiter_id ? recruiters.get(proposal.candidate_recruiter_id) || null : null,
+            company_recruiter: proposal.company_recruiter_id ? recruiters.get(proposal.company_recruiter_id) || null : null,
         }));
     }
 
@@ -196,7 +208,7 @@ export class ProposalRepository {
         }
 
         const { data, error } = await this.supabase
-            
+
             .from('jobs')
             .select(
                 `
@@ -224,7 +236,7 @@ export class ProposalRepository {
         }
 
         const { data, error } = await this.supabase
-            
+
             .from('candidates')
             .select('id, full_name, email, phone')
             .in('id', candidateIds);
@@ -240,7 +252,7 @@ export class ProposalRepository {
         }
 
         const { data, error } = await this.supabase
-            
+
             .from('recruiters')
             .select('*')
             .in('id', recruiterIds);
@@ -271,7 +283,7 @@ export class ProposalRepository {
         }
 
         const { data, error } = await this.supabase
-            
+
             .from('users')
             .select('id, name, email')
             .in('id', userIds);
