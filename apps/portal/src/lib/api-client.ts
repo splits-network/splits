@@ -39,7 +39,7 @@ export class ApiClient {
 
     // ===== DIRECT HTTP METHODS =====
     // Use these for simple CRUD operations
-    
+
     async get<T = any>(endpoint: string, options?: { params?: Record<string, any> }): Promise<T> {
         const response = await this.client.get(endpoint, options?.params);
         return response as T;
@@ -62,30 +62,21 @@ export class ApiClient {
 
     // ===== COMPLEX BUSINESS LOGIC OPERATIONS ONLY =====
     // Keep only methods that add real value beyond simple HTTP calls
-    
 
-    async getUserRoles(): Promise<{
-        isRecruiter: boolean;
-        isCompanyAdmin: boolean;
-        isHiringManager: boolean;
-        isPlatformAdmin: boolean;
-    }> {
-        const response: any = await this.get('/users', { params: { limit: 1 } });
-        const payload = response?.data ?? response;
-        const user = Array.isArray(payload) ? payload[0] : payload;
-        const memberships: Array<{ role?: string }> = user?.memberships ?? [];
-        const roles = memberships.map((m) => m.role).filter(Boolean);
+    /**
+     * Get current user's recruiter profile
+     * Uses /me endpoint for security (prevents seeing other users' data)
+     */
+    async getCurrentRecruiter(): Promise<{ data: any }> {
+        return await this.get('/recruiters/me');
+    }
 
-        const isRecruiter =
-            Boolean(user?.recruiter_id) ||
-            roles.includes('recruiter');
-
-        return {
-            isRecruiter,
-            isCompanyAdmin: roles.includes('company_admin'),
-            isHiringManager: roles.includes('hiring_manager'),
-            isPlatformAdmin: roles.includes('platform_admin'),
-        };
+    /**
+     * Get current user's active subscription
+     * Uses /me endpoint for security
+     */
+    async getCurrentSubscription(): Promise<{ data: any }> {
+        return await this.get('/subscriptions/me');
     }
 }
 

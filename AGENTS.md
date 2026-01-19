@@ -7,10 +7,12 @@ The /docs/migrations/V2-ARCHITECTURE-IMPLEMENTATION_GUIDE.md outlines the high-l
 
 ## V2 Architecture Guardrails
 
-- **No `/me` endpoints.** All V2 services expose the canonical REST resources (`/v2/candidates`, `/v2/recruiter-candidates`, etc.). Per-user access control lives in the repository/service layer via `resolveAccessContext`, so never add `/v2/.../me` or similar shortcuts.
-- **Gateway/frontends never special-case “current user.”** Consumers fetch `/api/v2/<resource>` (often with `limit=1` or other filters) and let the backend filter based on the resolved access context.
+- **Use `/me` endpoints for user-specific singletons.** When a resource represents the current user's profile (candidate, recruiter, subscription), expose a `/me` alias that resolves to their actual record via `resolveAccessContext`. This prevents accidental data leakage from filtered queries and is more performant than `?limit=1`.
+  - Examples: `/v2/users/me`, `/v2/candidates/me`, `/v2/recruiters/me`, `/v2/subscriptions/me`
+  - `/me` endpoints MUST be registered BEFORE generic CRUD routes to avoid route conflicts
+- **Gateway/frontends use `/me` for current user lookups.** Instead of filtering with `?limit=1`, use the `/me` endpoint which is both more secure and performant.
 - **Shared access context lives in `@splits-network/shared-access-context`.** Every service imports `resolveAccessContext` from that package; do not reach into `services/shared/access-context.ts`.
-- **RBAC checks rely on the above.** For example, the gateway checks the `candidate` role by calling `/v2/candidates?limit=1`—changing that contract will break role detection.
+- **RBAC checks rely on the above.** For example, the gateway checks the `candidate` role by calling `/v2/candidates/me`—this endpoint must exist and be properly secured.
 
 ## Project Phase Status (January 2026)
 

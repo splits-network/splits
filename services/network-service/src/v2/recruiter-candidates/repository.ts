@@ -36,6 +36,7 @@ export class RecruiterCandidateRepository {
         for (const inc of includes) {
             switch (inc) {
                 case 'recruiter':
+                    console.log('including recruiter');
                     // Join with recruiters table and identity users for contact info
                     selectClause += ',recruiter:recruiters!recruiter_id(id, user_id, bio, status, user:users(name, email))';
                     break;
@@ -213,6 +214,7 @@ export class RecruiterCandidateRepository {
             .eq('invitation_token', token)
             .maybeSingle();
 
+        console.log("data: ", data);
         if (error) throw error;
         return data;
     }

@@ -21,7 +21,6 @@ The ATS Service manages core recruiting data with a **V2-only architecture**. Al
 - No legacy route handlers outside `src/v2/`
 - No V1 repository or service classes
 - No HTTP calls to other services (use database queries)
-- No `/me` endpoints or user shortcuts
 - No Phase 1/2/3 legacy patterns
 
 ## Current Domains
@@ -40,6 +39,12 @@ The ATS Service manages core recruiting data with a **V2-only architecture**. Al
 - **Repository**: `CandidateRepository` - Role-scoped access (candidates see own, recruiters see assigned)
 - **Service**: `CandidateServiceV2` - Profile management, document integration
 - **Routes**: Full candidate lifecycle with document attachments
+  - ✅ **`GET /v2/candidates/me`** - Get current user's candidate profile (direct lookup)
+  - `GET /v2/candidates` - List candidates (role-filtered)
+  - `GET /v2/candidates/:id` - Get candidate by ID
+  - `POST /v2/candidates` - Create candidate
+  - `PATCH /v2/candidates/:id` - Update candidate
+  - `DELETE /v2/candidates/:id` - Delete candidate
 
 ### Applications (`src/v2/applications/`)
 - **Repository**: `ApplicationRepository` - Complex joins for enriched data

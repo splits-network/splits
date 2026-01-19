@@ -15,7 +15,7 @@ export class SubscriptionServiceV2 {
         private planRepository: PlanRepository,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
         private eventPublisher?: EventPublisher
-    ) {}
+    ) { }
 
     async getSubscriptions(
         filters: SubscriptionListFilters = {},
@@ -57,6 +57,20 @@ export class SubscriptionServiceV2 {
             if (!access.identityUserId || subscription.user_id !== access.identityUserId) {
                 throw new Error('Not authorized to view this subscription');
             }
+        }
+
+        return subscription;
+    }
+
+    async getSubscriptionByClerkId(clerkUserId: string): Promise<any> {
+        const access = await this.resolveAccessContext(clerkUserId);
+        if (!access.identityUserId) {
+            throw new Error('Unable to resolve user for subscription');
+        }
+
+        const subscription = await this.repository.findByUserId(access.identityUserId);
+        if (!subscription) {
+            throw new Error('No active subscription found');
         }
 
         return subscription;

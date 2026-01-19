@@ -35,6 +35,12 @@ The Billing Service manages subscription billing and Stripe integration with **m
 - **Repository**: `SubscriptionRepository` - Role-scoped subscription management
 - **Service**: `SubscriptionServiceV2` - Subscription lifecycle, Stripe integration
 - **Routes**: Complete subscription CRUD with Stripe integration
+  - ✅ **`GET /v2/subscriptions/me`** - Get current user's active subscription (direct lookup)
+  - `GET /v2/subscriptions` - List subscriptions (role-filtered)
+  - `GET /v2/subscriptions/:id` - Get subscription by ID
+  - `POST /v2/subscriptions` - Create subscription
+  - `PATCH /v2/subscriptions/:id` - Update subscription
+  - `DELETE /v2/subscriptions/:id` - Cancel subscription
 
 #### Payouts (`src/v2/payouts/`)
 - **Repository**: `PayoutRepository` - Recruiter payment tracking

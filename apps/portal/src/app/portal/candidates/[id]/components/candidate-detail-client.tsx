@@ -65,14 +65,13 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                 // Fetch candidate details and user context
                 const [candidateResponse, userContextResponse] = await Promise.all([
                     client.get(`/candidates/${candidateId}`),
-                    client.get('/users?limit=1')
+                    client.get('/users/me')
                 ]);
 
                 setCandidate(candidateResponse.data);
 
                 // Check if user can edit (upload documents for) this candidate
-                // V2 users endpoint returns array, get first (current) user
-                const userContext = userContextResponse.data?.[0];
+                const userContext = userContextResponse.data;
                 if (!userContext) {
                     throw new Error('User context not found');
                 }

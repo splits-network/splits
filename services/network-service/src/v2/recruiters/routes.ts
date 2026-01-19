@@ -11,6 +11,19 @@ export function registerRecruiterRoutes(
     app: FastifyInstance,
     config: RegisterRecruiterRoutesConfig
 ) {
+    // GET /me endpoint - must be BEFORE generic /recruiters routes
+    app.get('/api/v2/recruiters/me', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const recruiter = await config.recruiterService.getRecruiterByClerkId(clerkUserId);
+            return reply.send({ data: recruiter });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 404)
+                .send({ error: { message: error.message || 'Recruiter profile not found' } });
+        }
+    });
+
     app.get('/api/v2/recruiters', async (request, reply) => {
         try {
             // Allow both authenticated and unauthenticated access for marketplace browsing

@@ -162,8 +162,8 @@ export class RecruiterCandidateServiceV2 {
             invited_at: relationship.invited_at,
             expires_at: relationship.invitation_expires_at,
             status: 'pending',
-            recruiter_name: relationship.recruiter.name,
-            recruiter_email: relationship.recruiter.email,
+            recruiter_name: relationship.recruiter.user.name,
+            recruiter_email: relationship.recruiter.user.email,
             recruiter_bio: relationship.recruiter.bio,
         };
     }
@@ -196,7 +196,7 @@ export class RecruiterCandidateServiceV2 {
             consent_user_agent: metadata.user_agent || null,
             relationship_start_date: new Date().toISOString(),
             relationship_end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(), // 1 year from now
-            relationship_status: 'active',
+            status: 'active',
         });
 
         // V2: Use events for cross-service communication
@@ -254,7 +254,7 @@ export class RecruiterCandidateServiceV2 {
             declined_reason: metadata.reason || null,
             consent_ip_address: metadata.ip_address || null,
             consent_user_agent: metadata.user_agent || null,
-            relationship_status: 'declined',
+            status: 'declined',
             relationship_start_date: null,
             relationship_end_date: null,
         });

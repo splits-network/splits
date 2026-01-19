@@ -253,6 +253,38 @@ export class CandidateRepository {
         return data;
     }
 
+    async findCandidateByClerkId(clerkUserId: string): Promise<any | null> {
+        const { data: userData, error: userError } = await this.supabase
+            .from('users')
+            .select('id')
+            .eq('clerk_user_id', clerkUserId)
+            .single();
+        if (userError) {
+            console.error('Error fetching user by Clerk ID:', userError);
+            throw userError;
+        }
+        if (!userData) {
+            return null;
+        }
+        const { data, error } = await this.supabase
+            .from('candidates')
+            .select(`*,
+                user:users!user_id(
+                    id,
+                    email,
+                    name,
+                    clerk_user_id
+                )
+                `)
+            .eq('user_id', userData.id)
+            .single();
+        if (error) {
+            if (error.code === 'PGRST116') return null;
+            throw error;
+        }
+        return data;
+    }
+
     async createCandidate(candidate: any): Promise<any> {
         const { data, error } = await this.supabase
             .from('candidates')

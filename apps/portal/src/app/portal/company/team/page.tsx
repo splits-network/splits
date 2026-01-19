@@ -17,13 +17,8 @@ export default async function CompanyTeamPage() {
 
     // Fetch user profile
     const apiClient = new ApiClient(token);
-    const profileResponse: any = await apiClient.get('/users?limit=1');
-    const profileArray = Array.isArray(profileResponse?.data)
-        ? profileResponse.data
-        : Array.isArray(profileResponse)
-            ? profileResponse
-            : [];
-    const profile = profileArray[0] || {};
+    const profileResponse: any = await apiClient.get('/users/me');
+    const profile = profileResponse.data || {};
     const roles: string[] = Array.isArray(profile.roles) ? profile.roles : [];
 
     if (!roles.includes('company_admin')) {

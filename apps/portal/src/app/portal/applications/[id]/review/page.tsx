@@ -30,9 +30,8 @@ export default async function ApplicationReviewPage({
 
     try {
         // Get recruiter profile first
-        const recruiterResponse: any = await client.get('/recruiters?limit=1');
-        const recruiters = recruiterResponse.data || [];
-        recruiter = recruiters[0] || null;
+        const recruiterResponse: any = await client.getCurrentRecruiter();
+        recruiter = recruiterResponse.data || null;
 
         // Get application full details with includes
         const appResponse: any = await client.get(`/applications/${applicationId}?include=candidate,job,documents,pre_screen_answers,job_requirements`);

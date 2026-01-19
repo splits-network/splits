@@ -41,6 +41,16 @@ export function registerCandidateRoutes(
         }
     });
 
+    app.get('/api/v2/candidates/me', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const candidate = await config.candidateService.getCandidateByClerkId(clerkUserId);
+            return reply.send({ data: candidate });
+        } catch (error: any) {
+            return reply.code(404).send({ error: { message: error.message } });
+        }
+    });
+
     app.post('/api/v2/candidates', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);

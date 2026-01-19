@@ -72,7 +72,7 @@ The repo is organized by **responsibility**, not by technology.
    - Use standardized 5-route pattern (LIST, GET, CREATE, UPDATE, DELETE)
    - Implement domain-based folder structure under `v2/`
    - Use shared access context from `@splits-network/shared-access-context`
-   - No `/me` endpoints - use filtered queries with access context
+   - **Provide `/me` endpoints for user-specific singletons** - more secure and performant than filtered queries
    - Single update methods with smart validation
    - Direct Supabase queries with role-based scoping
 4. **ALWAYS use server-side filtering, searching, pagination, and sorting for list views.**

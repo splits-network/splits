@@ -172,6 +172,24 @@ export class RecruiterRepository {
         return data;
     }
 
+    async findByClerkUserId(clerkUserId: string): Promise<any | null> {
+        const context = await resolveAccessContext(this.supabase, clerkUserId);
+
+        const { data, error } = await this.supabase
+
+            .from('recruiters')
+            .select('*')
+            .eq('user_id', context.identityUserId)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') return null;
+            throw error;
+        }
+
+        return data;
+    }
+
     async createRecruiter(recruiter: any): Promise<any> {
         const { data, error } = await this.supabase
 

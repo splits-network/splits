@@ -35,6 +35,14 @@ export class RecruiterServiceV2 {
         return recruiter;
     }
 
+    async getRecruiterByClerkId(clerkUserId: string): Promise<any> {
+        const recruiter = await this.repository.findByClerkUserId(clerkUserId);
+        if (!recruiter) {
+            throw { statusCode: 404, message: 'Recruiter profile not found' };
+        }
+        return recruiter;
+    }
+
     async createRecruiter(
         data: {
             user_id: string;

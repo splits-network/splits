@@ -111,16 +111,12 @@ export class ServiceClient {
             if (contentType && contentType.includes('application/json')) {
                 // Log raw response text first
                 const responseText = await response.text();
-                console.log('[ServiceClient] Raw text from', this.serviceName + ':', responseText);
 
                 // Parse the text as JSON
                 const jsonData = JSON.parse(responseText) as T;
-                console.log('[ServiceClient] Parsed JSON from', this.serviceName + ':', JSON.stringify(jsonData, null, 2));
                 return jsonData;
             }
 
-            // For non-JSON responses, return empty object
-            console.log('[ServiceClient] Non-JSON response from', this.serviceName, '- returning empty object');
             return {} as T;
         } catch (error: any) {
             this.logger.error(

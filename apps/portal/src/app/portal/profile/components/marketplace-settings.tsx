@@ -88,11 +88,10 @@ export function MarketplaceSettings() {
             }
 
             const client = createAuthenticatedClient(token);
-            const result = await client.get('/recruiters?limit=1');
+            const result = await client.getCurrentRecruiter();
 
-            // Handle array response from V2 API
-            const dataArray = result.data || result;
-            const data = Array.isArray(dataArray) ? dataArray[0] : dataArray;
+            // getCurrentRecruiter() returns { data: recruiter }
+            const data = result.data;
 
             setRecruiterId(data.id);
             setSettings({

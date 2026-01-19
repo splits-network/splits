@@ -41,7 +41,40 @@ const NETWORK_RESOURCES: ResourceDefinition[] = [
     },
 ];
 
+function registerRecruiterMeRoute(app: FastifyInstance, services: ServiceRegistry) {
+    const networkService = () => services.get('network');
+
+    app.get(
+        '/api/v2/recruiters/me',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await networkService().get(
+                    '/api/v2/recruiters/me',
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch current recruiter');
+                return reply
+                    .status(error.statusCode || 404)
+                    .send(error.jsonBody || { error: { message: 'Recruiter profile not found' } });
+            }
+        }
+    );
+}
+
 export function registerNetworkRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    // Register /me routes FIRST (must be before generic CRUD routes)
+    registerRecruiterMeRoute(app, services);
+
     // Register custom routes FIRST before generic CRUD routes
     registerRecruiterCandidateInvitationRoutes(app, services);
     registerTeamRoutes(app, services);

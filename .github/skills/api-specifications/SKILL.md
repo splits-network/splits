@@ -502,16 +502,6 @@ app.get('/v2/candidates/:id', async (request, reply) => {
 - **No New Endpoint**: Just an alias within existing GET by ID route
 - **Still Secure**: Access context validates user can access resolved ID
 
-**Anti-pattern** (avoid):
-```typescript
-// ❌ WRONG - Separate /me endpoint
-app.get('/v2/candidates/me', async () => {...});
-
-// ❌ WRONG - Using list endpoint for singleton
-GET /api/v2/candidates?limit=1
-// Less efficient, wrong response shape, unintuitive
-```
-
 ### Single Update Method
 
 One update method handles ALL updates with smart validation:

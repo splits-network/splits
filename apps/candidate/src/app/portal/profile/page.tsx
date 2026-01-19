@@ -121,15 +121,14 @@ export default function ProfilePage() {
             }
 
             const client = createAuthenticatedClient(token);
-            const result = await client.get('/candidates', {
+            const result = await client.get('/candidates/me', {
                 params: {
                     include: 'user',
-                    limit: 1,
                 }
             });
             const dataArray = result.data || result;
             let data = Array.isArray(dataArray) ? dataArray[0] : dataArray;
-
+            console.log(data);
             // If candidate doesn't exist (self-signup without recruiter invitation), create one
             if (!data) {
                 console.log('No candidate profile found, creating one for self-signup user...');

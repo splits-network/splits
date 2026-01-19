@@ -56,6 +56,16 @@ export class ApiClient {
         const response = await this.client.delete(endpoint);
         return response as T;
     }
+
+    // ===== CONVENIENCE METHODS FOR /ME ENDPOINTS =====
+
+    /**
+     * Get current user's candidate profile
+     * Uses /me endpoint for security (prevents seeing other users' data)
+     */
+    async getCurrentCandidate(): Promise<{ data: any }> {
+        return await this.get('/candidates/me');
+    }
 }
 
 // ===== EXPORTS =====

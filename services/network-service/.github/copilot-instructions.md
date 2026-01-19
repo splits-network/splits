@@ -21,7 +21,6 @@ The Network Service manages recruiter marketplace data with a **V2-only architec
 - No legacy route handlers outside `src/v2/`
 - No V1 repository or service classes
 - No HTTP calls to other services (use database queries)
-- No `/me` endpoints or user shortcuts
 - No Phase 1/2/3 legacy patterns
 
 ## Current Domains
@@ -30,6 +29,12 @@ The Network Service manages recruiter marketplace data with a **V2-only architec
 - **Repository**: `RecruiterRepository` - Direct Supabase queries with access context
 - **Service**: `RecruiterServiceV2` - Business logic, validation, event publishing
 - **Routes**: Standard 5-route pattern with role-based filtering
+  - ✅ **`GET /v2/recruiters/me`** - Get current user's recruiter profile (direct lookup)
+  - `GET /v2/recruiters` - List recruiters (role-filtered)
+  - `GET /v2/recruiters/:id` - Get recruiter by ID
+  - `POST /v2/recruiters` - Create recruiter
+  - `PATCH /v2/recruiters/:id` - Update recruiter
+  - `DELETE /v2/recruiters/:id` - Delete recruiter
 
 ### Assignments (`src/v2/assignments/`)
 - **Repository**: `AssignmentRepository` - Role assignments to jobs

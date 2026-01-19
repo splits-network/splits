@@ -10,6 +10,19 @@ export function registerSubscriptionRoutes(
     app: FastifyInstance,
     config: RegisterSubscriptionRoutesConfig
 ) {
+    // GET /me endpoint - must be BEFORE generic /subscriptions routes
+    app.get('/v2/subscriptions/me', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const subscription = await config.subscriptionService.getSubscriptionByClerkId(clerkUserId);
+            return reply.send({ data: subscription });
+        } catch (error: any) {
+            return reply
+                .code(error.statusCode || 404)
+                .send({ error: { message: error.message || 'No active subscription found' } });
+        }
+    });
+
     app.get('/v2/subscriptions', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);

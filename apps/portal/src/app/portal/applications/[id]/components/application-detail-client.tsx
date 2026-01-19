@@ -119,9 +119,8 @@ export default function ApplicationDetailClient({ applicationId }: { application
             if (isRecruiter) {
                 // For recruiters: get recruiter profile and check permissions
                 try {
-                    const recruiterResponse: any = await client.get('/recruiters?limit=1');
-                    const recruiters = recruiterResponse.data || [];
-                    const recruiterProfile = recruiters[0] || null;
+                    const recruiterResponse: any = await client.getCurrentRecruiter();
+                    const recruiterProfile = recruiterResponse.data || null;
                     setRecruiter(recruiterProfile);
 
                     // Check recruiter-candidate relationship status

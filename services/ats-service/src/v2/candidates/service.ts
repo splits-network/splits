@@ -50,6 +50,14 @@ export class CandidateServiceV2 {
         return candidate;
     }
 
+    async getCandidateByClerkId(clerkUserId: string): Promise<any> {
+        const candidate = await this.repository.findCandidateByClerkId(clerkUserId);
+        if (!candidate) {
+            throw new Error(`Candidate for Clerk User ID ${clerkUserId} not found`);
+        }
+        return candidate;
+    }
+
     async createCandidate(data: any, clerkUserId?: string): Promise<any> {
         // Validation
         if (!data.full_name) {
