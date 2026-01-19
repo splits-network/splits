@@ -59,7 +59,7 @@ export default function NotFound() {
                         {/* Quick links grid */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full">
                             <Link
-                                href="/portal/jobs"
+                                href="/public/jobs"
                                 className="btn btn-ghost btn-sm flex-col h-auto py-4 gap-2"
                             >
                                 <i className="fa-duotone fa-regular fa-briefcase text-2xl text-primary"></i>
@@ -80,7 +80,7 @@ export default function NotFound() {
                                 <span className="text-xs">Applications</span>
                             </Link>
                             <Link
-                                href="/portal/recruiters"
+                                href="/public/recruiters"
                                 className="btn btn-ghost btn-sm flex-col h-auto py-4 gap-2"
                             >
                                 <i className="fa-duotone fa-regular fa-users text-2xl text-info"></i>
