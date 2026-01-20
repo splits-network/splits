@@ -58,16 +58,38 @@ export class CandidateRoleAssignmentRepository {
             query = query.or(`candidate_recruiter_id.eq.${context.recruiterId},company_recruiter_id.eq.${context.recruiterId}`);
         } else if (context.organizationIds.length > 0 && !context.isPlatformAdmin) {
             // Company users see assignments for their jobs
-            const { data: companyJobs } = await this.supabase
-                .from('jobs')
+            // First, get companies that belong to the user's organizations
+            const { data: companies } = await this.supabase
+                .from('companies')
                 .select('id')
-                .in('company_id', context.organizationIds || []);
+                .in('identity_organization_id', context.organizationIds || []);
 
-            const jobIds = companyJobs?.map((j) => j.id) || [];
-            if (jobIds.length > 0) {
-                query = query.in('job_id', jobIds);
+            const companyIds = companies?.map((c) => c.id) || [];
+
+            if (companyIds.length > 0) {
+                // Then get jobs for those companies
+                const { data: companyJobs } = await this.supabase
+                    .from('jobs')
+                    .select('id')
+                    .in('company_id', companyIds);
+
+                const jobIds = companyJobs?.map((j) => j.id) || [];
+                if (jobIds.length > 0) {
+                    query = query.in('job_id', jobIds);
+                } else {
+                    // No jobs for these companies, return empty
+                    return {
+                        data: [],
+                        pagination: {
+                            total: 0,
+                            page,
+                            limit,
+                            total_pages: 0,
+                        },
+                    };
+                }
             } else {
-                // No jobs accessible, return empty
+                // No companies accessible, return empty
                 return {
                     data: [],
                     pagination: {
@@ -142,6 +164,7 @@ export class CandidateRoleAssignmentRepository {
             query = query.or(`candidate_recruiter_id.eq.${context.recruiterId},company_recruiter_id.eq.${context.recruiterId}`);
         } else if (context.organizationIds.length > 0 && !context.isPlatformAdmin) {
             // Verify job belongs to accessible company
+            // First get the assignment with job info
             const assignment = await this.supabase
                 .from('candidate_role_assignments')
                 .select('*, jobs!inner(company_id)')
@@ -153,7 +176,15 @@ export class CandidateRoleAssignmentRepository {
             }
 
             const job = assignment.data.jobs as any;
-            if (!context.organizationIds?.includes(job.company_id)) {
+
+            // Then verify the company belongs to one of the user's organizations
+            const { data: company } = await this.supabase
+                .from('companies')
+                .select('identity_organization_id')
+                .eq('id', job.company_id)
+                .single();
+
+            if (!company || !context.organizationIds?.includes(company.identity_organization_id)) {
                 return null;
             }
 

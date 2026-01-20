@@ -68,6 +68,43 @@ export default async function RootLayout({
                             `,
                         }}
                     />
+                    <script
+                        type="application/ld+json"
+                        dangerouslySetInnerHTML={{
+                            __html: JSON.stringify({
+                                '@context': 'https://schema.org',
+                                '@type': 'WebApplication',
+                                'name': 'Splits Network',
+                                'url': 'https://splits.network',
+                                'applicationCategory': 'BusinessApplication',
+                                'description': 'Split-fee recruiting marketplace platform. Collaborate with recruiters, share roles, and split fees while growing your recruiting business.',
+                                'operatingSystem': 'Web',
+                                'offers': {
+                                    '@type': 'Offer',
+                                    'price': '0',
+                                    'priceCurrency': 'USD',
+                                },
+                                'provider': {
+                                    '@type': 'Organization',
+                                    'name': 'Employment Networks',
+                                    'url': 'https://employment-networks.com',
+                                    'logo': 'https://splits.network/logo.png',
+                                    'sameAs': [
+                                        'https://employment-networks.com',
+                                    ],
+                                },
+                                'featureList': [
+                                    'Split-fee recruiting',
+                                    'Collaborative hiring',
+                                    'Job marketplace',
+                                    'Candidate management',
+                                    'Recruiter network',
+                                    'Commission tracking',
+                                    'Placement management',
+                                ],
+                            }),
+                        }}
+                    />
                     <link rel="stylesheet" href="https://kit.fontawesome.com/728c8ddec8.css" crossOrigin="anonymous" />
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-300">

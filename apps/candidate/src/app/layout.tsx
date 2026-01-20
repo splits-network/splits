@@ -68,6 +68,58 @@ export default function RootLayout({
                             `,
                         }}
                     />
+                    <script
+                        type="application/ld+json"
+                        dangerouslySetInnerHTML={{
+                            __html: JSON.stringify({
+                                '@context': 'https://schema.org',
+                                '@type': 'WebApplication',
+                                'name': 'Applicant Network',
+                                'url': 'https://applicant.network',
+                                'applicationCategory': 'BusinessApplication',
+                                'description': 'Browse thousands of job opportunities and manage your job search. Track applications, verify credentials, and connect with recruiters.',
+                                'operatingSystem': 'Web',
+                                'offers': {
+                                    '@type': 'Offer',
+                                    'price': '0',
+                                    'priceCurrency': 'USD',
+                                },
+                                'provider': {
+                                    '@type': 'Organization',
+                                    'name': 'Employment Networks',
+                                    'url': 'https://employment-networks.com',
+                                    'logo': 'https://applicant.network/logo.png',
+                                },
+                                'featureList': [
+                                    'Job search',
+                                    'Application tracking',
+                                    'Resume management',
+                                    'Recruiter connections',
+                                    'Career opportunities',
+                                    'Profile management',
+                                ],
+                            }),
+                        }}
+                    />
+                    <script
+                        type="application/ld+json"
+                        dangerouslySetInnerHTML={{
+                            __html: JSON.stringify({
+                                '@context': 'https://schema.org',
+                                '@type': 'WebSite',
+                                'name': 'Applicant Network',
+                                'url': 'https://applicant.network',
+                                'potentialAction': {
+                                    '@type': 'SearchAction',
+                                    'target': {
+                                        '@type': 'EntryPoint',
+                                        'urlTemplate': 'https://applicant.network/jobs?search={search_term_string}',
+                                    },
+                                    'query-input': 'required name=search_term_string',
+                                },
+                            }),
+                        }}
+                    />
                     <link rel="stylesheet" href="https://kit.fontawesome.com/728c8ddec8.css" crossOrigin="anonymous" />
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-300">

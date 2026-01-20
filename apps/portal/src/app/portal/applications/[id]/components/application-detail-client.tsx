@@ -14,6 +14,7 @@ import AIReviewDisplay from './ai-review-display';
 import JobDetailModal from './job-detail-modal';
 import CandidateDetailModal from './candidate-detail-modal';
 import DocumentViewerModal from './document-viewer-modal';
+import GateActions from './gate-actions';
 import { getApplicationStageBadge, getApplicationStageLabel } from '@/lib/utils/badge-styles';
 import type { ApplicationStage } from '@splits-network/shared-types';
 
@@ -33,6 +34,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
     const [recruiter, setRecruiter] = useState<any>(null);
     const [relationship, setRelationship] = useState<any>(null);
     const [auditLogs, setAuditLogs] = useState<any[]>([]);
+    const [cra, setCra] = useState<any>(null);
 
     // UI states
     const [showStageModal, setShowStageModal] = useState(false);
@@ -76,9 +78,9 @@ export default function ApplicationDetailClient({ applicationId }: { application
             const client = createAuthenticatedClient(token);
 
             // Get application full details with includes
-            const appResponse: any = await client.get(`/applications/${applicationId}?include=job,documents,pre_screen_answers,job_requirements`);
+            const appResponse: any = await client.get(`/applications/${applicationId}?include=job,documents,pre_screen_answers,job_requirements,current_gate`);
             const appData = appResponse.data || appResponse;
-
+            console.log(appResponse);
             if (!appData) {
                 setError('Application not found');
                 return;
@@ -113,6 +115,16 @@ export default function ApplicationDetailClient({ applicationId }: { application
                 setAuditLogs(auditLogResponse.data?.audit_log || []);
             } catch (err) {
                 console.warn('Could not fetch audit log:', err);
+            }
+
+            // Get CRA (Candidate Role Assignment) for gate actions
+            try {
+                const craResponse: any = await client.get(`/candidate-role-assignments?candidate_id=${appData.candidate_id}&job_id=${appData.job_id}&limit=1&include=current_gate`);
+                const craData = craResponse.data?.[0] || null;
+                console.log('first cra gate', craData);
+                setCra(craData);
+            } catch (err) {
+                console.warn('Could not fetch CRA:', err);
             }
 
             // Role-specific permission checks and data loading
@@ -265,10 +277,76 @@ export default function ApplicationDetailClient({ applicationId }: { application
         }
     };
 
+    const handleGateApprove = async (notes?: string) => {
+        if (!cra?.id) return;
+
+        setActionLoading(true);
+        try {
+            const token = await getToken();
+            if (!token) throw new Error('Not authenticated');
+
+            const client = createAuthenticatedClient(token);
+            await client.post(`/candidate-role-assignments/${cra.id}/approve-gate`, { notes });
+
+            toast.success('Application approved successfully');
+            await loadApplicationData();
+        } catch (error: any) {
+            console.error('Failed to approve gate:', error);
+            toast.error(error.message || 'Failed to approve application');
+            throw error;
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleGateDeny = async (reason: string) => {
+        if (!cra?.id) return;
+
+        setActionLoading(true);
+        try {
+            const token = await getToken();
+            if (!token) throw new Error('Not authenticated');
+
+            const client = createAuthenticatedClient(token);
+            await client.post(`/candidate-role-assignments/${cra.id}/deny-gate`, { reason });
+
+            toast.success('Application denied');
+            await loadApplicationData();
+        } catch (error: any) {
+            console.error('Failed to deny gate:', error);
+            toast.error(error.message || 'Failed to deny application');
+            throw error;
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleGateRequestInfo = async (questions: string) => {
+        if (!cra?.id) return;
+
+        setActionLoading(true);
+        try {
+            const token = await getToken();
+            if (!token) throw new Error('Not authenticated');
+
+            const client = createAuthenticatedClient(token);
+            await client.post(`/candidate-role-assignments/${cra.id}/request-info`, { questions });
+
+            toast.success('Information request sent');
+            await loadApplicationData();
+        } catch (error: any) {
+            console.error('Failed to request info:', error);
+            toast.error(error.message || 'Failed to request information');
+            throw error;
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
     const handleOpenCandidateModal = () => {
         setShowCandidateModal(true);
     };
-
+    console.log("current gate", cra.current_gate);
     const relationshipWarning = relationship && relationship.status !== 'active';
     return (
         <div className="grid grid-cols-12 gap-6">
@@ -283,7 +361,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
                 </div>
             </div>
 
-            <div className="col-span-12 md:col-span-8 xl:col-span-10 space-y-6">
+            <div className="col-span-12 md:col-span-8 xl:col-span-8 space-y-6">
                 {/* Hero Section with Candidate & Job Info */}
 
                 <div className='card bg-base-200'>
@@ -496,40 +574,36 @@ export default function ApplicationDetailClient({ applicationId }: { application
                             )}
 
                             {/* Mandatory Requirements */}
-                            {job.job_requirements.filter((r: any) => r.requirement_type === 'mandatory').length > 0 && (
-                                <div className="mb-4">
-                                    <div className="text-sm font-medium text-error mb-2">Required</div>
-                                    <ul className="space-y-2">
-                                        {job.job_requirements
-                                            .filter((r: any) => r.requirement_type === 'mandatory')
-                                            .sort((a: any, b: any) => a.sort_order - b.sort_order)
-                                            .map((req: any) => (
-                                                <li key={req.id} className="flex items-start gap-2">
-                                                    <i className="fa-duotone fa-regular fa-circle-check text-error mt-1 shrink-0"></i>
-                                                    <span>{req.description}</span>
-                                                </li>
-                                            ))}
-                                    </ul>
-                                </div>
-                            )}
+                            <div className="mb-4">
+                                <div className="text-sm font-medium text-error mb-2">Required</div>
+                                <ul className="space-y-2">
+                                    {job.job_requirements
+                                        .filter((r: any) => r.requirement_type === 'mandatory')
+                                        .sort((a: any, b: any) => a.sort_order - b.sort_order)
+                                        .map((req: any) => (
+                                            <li key={req.id} className="flex items-start gap-2">
+                                                <i className="fa-duotone fa-regular fa-circle-check text-error mt-1 shrink-0"></i>
+                                                <span>{req.description}</span>
+                                            </li>
+                                        ))}
+                                </ul>
+                            </div>
 
                             {/* Preferred Requirements */}
-                            {job.job_requirements.filter((r: any) => r.requirement_type === 'preferred').length > 0 && (
-                                <div>
-                                    <div className="text-sm font-medium text-info mb-2">Preferred</div>
-                                    <ul className="space-y-2">
-                                        {job.job_requirements
-                                            .filter((r: any) => r.requirement_type === 'preferred')
-                                            .sort((a: any, b: any) => a.sort_order - b.sort_order)
-                                            .map((req: any) => (
-                                                <li key={req.id} className="flex items-start gap-2">
-                                                    <i className="fa-duotone fa-regular fa-circle-plus text-info mt-1 shrink-0"></i>
-                                                    <span>{req.description}</span>
-                                                </li>
-                                            ))}
-                                    </ul>
-                                </div>
-                            )}
+                            <div>
+                                <div className="text-sm font-medium text-info mb-2">Preferred</div>
+                                <ul className="space-y-2">
+                                    {job.job_requirements
+                                        .filter((r: any) => r.requirement_type === 'preferred')
+                                        .sort((a: any, b: any) => a.sort_order - b.sort_order)
+                                        .map((req: any) => (
+                                            <li key={req.id} className="flex items-start gap-2">
+                                                <i className="fa-duotone fa-regular fa-circle-plus text-info mt-1 shrink-0"></i>
+                                                <span>{req.description}</span>
+                                            </li>
+                                        ))}
+                                </ul>
+                            </div>
 
                         </div>
                     </div>
@@ -560,7 +634,20 @@ export default function ApplicationDetailClient({ applicationId }: { application
                     </div>
                 )}
             </div>
-            <div className='col-span-12 md:col-span-4 xl:col-span-2 space-y-6'>
+            <div className='col-span-12 md:col-span-4 xl:col-span-4 space-y-6'>
+
+                {/* Gate Actions - Show if user has review responsibility */}
+                <GateActions
+                    application={application}
+                    craId={cra?.id || null}
+                    isRecruiter={isRecruiter || false}
+                    isCompanyUser={isCompanyUser || false}
+                    currentGate={application?.current_gate || null}
+                    onGateAction={loadApplicationData}
+                    onApprove={handleGateApprove}
+                    onDeny={handleGateDeny}
+                    onRequestInfo={handleGateRequestInfo}
+                />
 
                 <div className="card bg-base-200 shadow">
                     <div className="card-body">
@@ -588,20 +675,6 @@ export default function ApplicationDetailClient({ applicationId }: { application
                                 <i className="fa-duotone fa-regular fa-note-sticky"></i>
                                 Add Note
                             </button>
-                            <button
-                                onClick={handleOpenCandidateModal}
-                                className="btn btn-outline btn-sm gap-2"
-                            >
-                                <i className="fa-duotone fa-regular fa-user"></i>
-                                View Candidate
-                            </button>
-                            <button
-                                onClick={() => setShowJobModal(true)}
-                                className="btn btn-outline btn-sm gap-2"
-                            >
-                                <i className="fa-duotone fa-regular fa-briefcase"></i>
-                                View Job
-                            </button>
                             {application.stage === 'screen' && (
                                 <Link
                                     href={`/portal/applications/${application.id}/review`}
@@ -610,28 +683,6 @@ export default function ApplicationDetailClient({ applicationId }: { application
                                     <i className="fa-duotone fa-regular fa-clipboard-check"></i>
                                     Review & Submit
                                 </Link>
-                            )}
-
-                            {/* Quick Stage Actions */}
-                            {application.stage === 'submitted' && (
-                                <button
-                                    onClick={() => handleStageUpdate('interview')}
-                                    className="btn btn-success btn-sm gap-2"
-                                    disabled={loading}
-                                >
-                                    <i className="fa-duotone fa-regular fa-calendar"></i>
-                                    Move to Interview
-                                </button>
-                            )}
-                            {application.stage === 'interview' && (
-                                <button
-                                    onClick={() => handleStageUpdate('offer')}
-                                    className="btn btn-success btn-sm gap-2"
-                                    disabled={loading}
-                                >
-                                    <i className="fa-duotone fa-regular fa-handshake"></i>
-                                    Make Offer
-                                </button>
                             )}
                             {application.stage === 'offer' && (
                                 <button
@@ -643,16 +694,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
                                     Mark as Hired
                                 </button>
                             )}
-                            {!['rejected', 'hired'].includes(application.stage) && (
-                                <button
-                                    onClick={() => handleStageUpdate('rejected')}
-                                    className="btn btn-error btn-sm gap-2"
-                                    disabled={actionLoading}
-                                >
-                                    <i className="fa-duotone fa-regular fa-xmark"></i>
-                                    Reject
-                                </button>
-                            )}
+
                         </div>
                     </div>
                 </div>

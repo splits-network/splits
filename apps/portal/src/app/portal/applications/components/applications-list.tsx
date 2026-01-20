@@ -67,6 +67,7 @@ interface Application {
 interface ApplicationFiltersType {
     stage?: string;
     ai_score_filter?: string;
+    gate_status?: string;
 }
 
 // ===== TABLE COLUMNS =====
@@ -217,6 +218,10 @@ export default function ApplicationsList() {
         setFilter('ai_score_filter', value || undefined);
     };
 
+    const handleGateStatusFilterChange = (value: string) => {
+        setFilter('gate_status', value || undefined);
+    };
+
     // Accept application handler
     const handleAcceptApplication = async (applicationId: string) => {
         try {
@@ -302,7 +307,7 @@ export default function ApplicationsList() {
                     </ul>
                 </div>
             </div>
-            <div className="col-span-12 md:col-span-8 xl:col-span-10">
+            <div className="col-span-12 md:col-span-8 2xl:col-span-10 space-y-6">
                 {/* Stats and Trends Card */}
                 <div className="card bg-base-200">
                     <ApplicationsStats
@@ -325,7 +330,7 @@ export default function ApplicationsList() {
 
 
             {/* Sidebar */}
-            <div className="col-span-12 md:col-span-4 xl:col-span-2">
+            <div className="col-span-12 md:col-span-4 2xl:col-span-2">
                 {/* Filters and View Toggle */}
                 <div className="card bg-base-200 shadow">
                     <div className="card-body p-4 space-y-4">
@@ -339,10 +344,12 @@ export default function ApplicationsList() {
                                 searchQuery={searchInput}
                                 stageFilter={filters.stage || ''}
                                 aiScoreFilter={filters.ai_score_filter || ''}
+                                gateStatusFilter={filters.gate_status || ''}
                                 viewMode={viewMode}
                                 onSearchChange={setSearchInput}
                                 onStageFilterChange={handleStageFilterChange}
                                 onAIScoreFilterChange={handleAIScoreFilterChange}
+                                onGateStatusFilterChange={handleGateStatusFilterChange}
                                 onViewModeChange={setViewMode}
                             />
 
@@ -402,7 +409,7 @@ export default function ApplicationsList() {
 
                 {/* Grid View */}
                 {!loading && viewMode === 'grid' && applications.length > 0 && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
                         {applications.map((application) => (
                             <ApplicationCard
                                 key={application.id}

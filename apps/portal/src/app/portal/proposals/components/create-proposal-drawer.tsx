@@ -143,7 +143,7 @@ export default function CreateProposalDrawer({
             const client = new ApiClient(token);
 
             // Get current user's recruiter ID
-            const userResponse: any = await client.get('/users', { params: { limit: 1 } });
+            const userResponse: any = await client.get('/users/me');
             const userData = userResponse?.data?.data?.[0] || userResponse?.data?.[0];
             const recruiterId = userData?.recruiter_id;
 

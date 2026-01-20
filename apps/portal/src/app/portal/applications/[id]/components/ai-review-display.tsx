@@ -146,7 +146,7 @@ export default function AIReviewDisplay({ applicationId, isRecruiter, isCompanyU
                     <i className="fa-duotone fa-regular fa-robot mr-2"></i>
                     AI Analysis
                 </h2>
-                <div className="space-y-3">
+                <div className="grid grid-cols-2 space-y-3">
                     <div>
                         <div className="text-sm text-base-content/60 mb-1">Fit Score</div>
                         <div className={`text-3xl font-bold ${getFitScoreColor(aiReview.fit_score)}`}>

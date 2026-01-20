@@ -219,7 +219,7 @@ export default function RecruiterDashboard() {
                     icon="fa-users"
                     color="secondary"
                     trend={stats?.trends?.candidates_in_process}
-                    href="/portal/application"
+                    href="/portal/applications"
                 />
                 <StatCard
                     title="Pending Offers"
@@ -227,7 +227,7 @@ export default function RecruiterDashboard() {
                     description="Awaiting acceptance"
                     icon="fa-file-contract"
                     color="accent"
-                    href="/portal/application?stage=offer"
+                    href="/portal/applications?stage=offer"
                 />
                 <StatCard
                     title="Placements YTD"

@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import GateReviewList from '../../applications/components/gate-review-list';
+import GateReviewList from '../../gate-reviews/components/gate-review-list';
 
 export const metadata = {
     title: 'Company Gate Reviews - Splits Network',

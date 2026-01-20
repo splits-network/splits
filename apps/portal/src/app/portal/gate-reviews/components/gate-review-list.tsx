@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { formatRelativeTime } from '@/lib/utils';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
-import ApproveGateModal from './approve-gate-modal';
-import DenyGateModal from './deny-gate-modal';
-import RequestInfoModal from './request-info-modal';
-import ProvideInfoModal from './provide-info-modal';
+import ApproveGateModal from '../../applications/components/approve-gate-modal';
+import DenyGateModal from '../../applications/components/deny-gate-modal';
+import RequestInfoModal from '../../applications/components/request-info-modal';
+import ProvideInfoModal from '../../applications/components/provide-info-modal';
 import GateHistoryTimeline from '@/components/gate-history-timeline';
 
 interface CandidateRoleAssignment {
@@ -89,7 +89,7 @@ export default function GateReviewList({ gateType, userId, className = '' }: Gat
                 '/candidate-role-assignments',
                 { params }
             );
-
+            console.log('Fetched gate review applications:', response.data, params);
             setApplications(response.data || []);
         } catch (err) {
             console.error('Failed to fetch gate reviews:', err);

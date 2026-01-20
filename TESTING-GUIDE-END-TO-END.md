@@ -148,7 +148,9 @@ If AI suggests improvements:
 
 ## Phase 4: Gate Review System (Multi-Stage Approval)
 
-**Note:** Gate sequence depends on whether recruiters are involved. Test all scenarios:
+**Note:** Gate reviews are now integrated into the Applications page with filtering.
+
+**Gate sequence depends on whether recruiters are involved. Test all scenarios:**
 
 - **Scenario A:** Direct application (no recruiters) → Goes straight to Company gate
 - **Scenario B:** Candidate has recruiter → Candidate Recruiter gate → Company gate
@@ -163,16 +165,30 @@ If AI suggests improvements:
 
 **As Candidate Recruiter:**
 1. Log into main portal at `https://splits.network`
-2. Navigate to **Gate Reviews** or **Pending Reviews**
-3. **Expected Result:** See the application awaiting your review
-4. Click on application to view details
-5. Review candidate information and job fit
-6. Choose action:
-   - **Option A - Approve:** Click **Approve** → Add notes → Submit
-   - **Option B - Deny:** Click **Deny** → Add feedback → Submit
-   - **Option C - Request Info:** Click **Request Info** → Ask questions → Submit
-7. **Expected Result:** Action processed successfully
-8. **Expected Result:** Email notifications sent to candidate and next reviewer
+2. Navigate to **Applications** page
+3. Use **Gate Status filter** → Select **"⚡ Needs My Review"**
+4. **Expected Result:** See only applications at YOUR gate awaiting review
+   - Applications at Candidate Recruiter gate
+   - Filtered list with candidate name, job title, time submitted
+   - AI fit score badges (if available)
+5. Click **View** or click row to open application details
+6. **Expected Result:** Application detail page shows:
+   - Candidate profile with all information
+   - Resume and documents
+   - AI Review with detailed analysis
+   - Pre-screen answers
+   - Job requirements and description
+   - **Gate Actions card** in right sidebar
+7. Review candidate information and assess job fit
+8. In **Gate Actions card**, choose action:
+   - **Option A - Approve:** Click **Approve & Forward to Company** → Add notes → Submit
+   - **Option B - Deny:** Click **Decline to Represent** → Add feedback → Submit  
+   - **Option C - Request Info:** Click **Request More Info** → Ask questions → Submit
+9. **Expected Result:** Action processed successfully
+10. **Expected Result:** Email notifications sent to candidate and next reviewer
+11. **Expected Result:** Application removed from "Needs My Review" filter
+12. Navigate back to Applications page
+13. **Expected Result:** Application no longer in "Needs My Review" list
 
 **If Info Requested:**
 1. **As Candidate:** Check email for info request
@@ -186,29 +202,67 @@ If AI suggests improvements:
 
 Repeat same process as Step 4.1, but as **Company Recruiter** role:
 1. Log into portal as company recruiter
-2. Navigate to pending gate reviews
-3. Review application
-4. Approve/Deny/Request Info
-5. **Expected Result:** Moves to final Company gate or rejection
+2. Navigate to **Applications** page
+3. Use **Gate Status filter** → Select **"⚡ Needs My Review"**
+4. **Expected Result:** See applications at Company Recruiter gate
+5. Click application to see full details
+6. Review application with all information and gate history
+7. Use **Gate Actions card** to Approve/Deny/Request Info
+8. **Expected Result:** Moves to final Company gate or rejection
 
 ### Step 4.3: Company Gate (Always Required)
 
 **As Hiring Manager or Company Admin:**
 1. Log into main portal
-2. Navigate to **Applications** or **Gate Reviews**
-3. **Expected Result:** See application at Company gate
-4. Click to view full application details
-5. Review:
-   - Candidate profile
-   - Resume
-   - AI Review results
-   - Pre-screen answers
-   - Gate history (previous approvals)
-6. Make final decision:
-   - **Approve:** Click **Approve** → Moves to "Accepted" status
-   - **Deny:** Click **Deny** → Provide reason → Moves to "Rejected"
-7. **Expected Result:** Decision recorded in gate history
-8. **Expected Result:** Email notifications sent to all parties
+2. Navigate to **Applications** page
+3. Use **Gate Status filter** → Select **"⚡ Needs My Review"**
+4. **Expected Result:** See filtered list of applications at your gate with:
+   - Candidate name
+   - Job title  
+   - Time submitted
+   - AI fit score badge (if available)
+   - Current stage indicator
+5. Click application to open full details
+6. **Expected Result:** Application detail page opens showing:
+   - Complete candidate profile (name, email, location, skills)
+   - Resume with download/view option
+   - AI Review results (fit score + recommendation + key strengths)
+   - Pre-screen answers (if job had questions)
+   - Documents attached to application
+   - Gate history showing previous approvals
+   - **Gate Actions card** at top of right sidebar
+7. Review all information to make informed decision
+8. In **Gate Actions card**, make final decision:
+   - **Option A - Approve:** Click **Approve & Move to Offer** → Add optional notes → Submit
+   - **Option B - Deny:** Click **Reject Application** → Provide reason (required) → Submit
+   - **Option C - Request Info:** Click **Request More Info** → Enter questions → Submit
+9. **Expected Result:** Success message appears
+10. **Expected Result:** Page refreshes with updated status
+11. **Expected Result:** Decision recorded in gate history
+12. **Expected Result:** Email notifications sent to all parties
+13. Navigate back to Applications → "Needs My Review" filter
+14. **Expected Result:** Application removed from queue
+
+**Additional Gate Filter Testing:**
+1. From Applications page, try each gate filter option:
+   - **All Gate Statuses** - Shows all applications
+   - **⚡ Needs My Review** - Only your pending gates
+   - **Waiting on Candidate Recruiter** - See other gate stages
+   - **Waiting on Company Recruiter** - See other gate stages
+   - **Waiting on Company** - See other gate stages
+   - **Approved / No Gates** - See completed applications
+2. **Expected Result:** Each filter correctly shows appropriate applications
+3. Combine filters: Try **Stage: Interview** + **Gate Status: Needs My Review**
+4. **Expected Result:** Filters work together correctly
+
+**If Info Requested:**
+1. **As Candidate:** Check email for info request
+2. Navigate to application in candidate portal
+3. Click **Provide Information**
+4. Answer questions
+5. Submit responses
+6. **Expected Result:** Returns to company gate for review
+7. **As Company User:** Application reappears in "Needs My Review" filter with candidate's responses
 
 **✅ Checkpoint:** Application passed all gates OR was rejected with proper notifications
 

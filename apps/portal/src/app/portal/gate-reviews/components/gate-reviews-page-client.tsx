@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { useUserProfile } from '@/contexts';
 import { apiClient, createAuthenticatedClient } from '@/lib/api-client';
-import GateReviewList from '../../applications/components/gate-review-list';
+import GateReviewList from './gate-review-list';
 
 type GateType = 'candidate_recruiter' | 'company_recruiter' | 'company';
 
