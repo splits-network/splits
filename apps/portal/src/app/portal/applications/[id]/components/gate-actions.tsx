@@ -49,9 +49,9 @@ export default function GateActions({
     const userHasActions = showCompanyActions || showCandidateRecruiterActions || showCompanyRecruiterActions;
 
     const getGateLabel = () => {
-        if (showCompanyActions) return 'Company Gate';
-        if (showCandidateRecruiterActions) return 'Candidate Recruiter Gate';
-        if (showCompanyRecruiterActions) return 'Company Recruiter Gate';
+        if (currentGate === 'company') return 'Company Gate';
+        if (currentGate === 'candidate_recruiter') return 'Candidate Recruiter Gate';
+        if (currentGate === 'company_recruiter') return 'Company Recruiter Gate';
         return 'Gate';
     };
 
@@ -79,7 +79,7 @@ export default function GateActions({
         }
         return 'Application is being reviewed at this stage.';
     };
-    console.log(currentGate)
+
     return (
         <>
             <div className="card bg-base-200 shadow">
@@ -127,22 +127,22 @@ export default function GateActions({
                                     <button
                                         className="btn btn-success btn-sm btn-block"
                                         onClick={() => {
-                                            setNextStage('offer');
-                                            setModalType('approve');
-                                        }}
-                                    >
-                                        <i className="fa-duotone fa-regular fa-handshake"></i>
-                                        Skip to Offer
-                                    </button>
-                                    <button
-                                        className="btn btn-primary btn-sm btn-block"
-                                        onClick={() => {
                                             setNextStage('interview');
                                             setModalType('approve');
                                         }}
                                     >
                                         <i className="fa-duotone fa-regular fa-calendar"></i>
                                         Move to Interview
+                                    </button>
+                                    <button
+                                        className="btn btn-success btn-outline btn-sm btn-block"
+                                        onClick={() => {
+                                            setNextStage('offer');
+                                            setModalType('approve');
+                                        }}
+                                    >
+                                        <i className="fa-duotone fa-regular fa-handshake"></i>
+                                        Skip to Offer
                                     </button>
                                 </>
                             ) : (

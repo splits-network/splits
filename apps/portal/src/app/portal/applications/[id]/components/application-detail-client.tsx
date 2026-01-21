@@ -52,14 +52,6 @@ export default function ApplicationDetailClient({ applicationId }: { application
     // Use context for platform admin check
     const isPlatformAdmin = isAdmin;
 
-    // Get token on mount
-    useEffect(() => {
-        async function initializeAuth() {
-            const authToken = await getToken();
-            setToken(authToken);
-        }
-        initializeAuth();
-    }, [getToken]);
 
     // Data fetching logic
     const loadApplicationData = useCallback(async () => {
@@ -80,7 +72,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
             // Get application full details with includes
             const appResponse: any = await client.get(`/applications/${applicationId}?include=job,documents,pre_screen_answers,job_requirements,current_gate`);
             const appData = appResponse.data || appResponse;
-            console.log(appResponse);
+
             if (!appData) {
                 setError('Application not found');
                 return;
@@ -121,7 +113,6 @@ export default function ApplicationDetailClient({ applicationId }: { application
             try {
                 const craResponse: any = await client.get(`/candidate-role-assignments?candidate_id=${appData.candidate_id}&job_id=${appData.job_id}&limit=1&include=current_gate`);
                 const craData = craResponse.data?.[0] || null;
-                console.log('first cra gate', craData);
                 setCra(craData);
             } catch (err) {
                 console.warn('Could not fetch CRA:', err);
@@ -322,6 +313,9 @@ export default function ApplicationDetailClient({ applicationId }: { application
     };
 
     const handleGateRequestInfo = async (questions: string) => {
+        toast.info('This feature is coming soon!');
+        return;
+
         if (!cra?.id) return;
 
         setActionLoading(true);
@@ -346,7 +340,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
     const handleOpenCandidateModal = () => {
         setShowCandidateModal(true);
     };
-    console.log("current gate", cra.current_gate);
+
     const relationshipWarning = relationship && relationship.status !== 'active';
     return (
         <div className="grid grid-cols-12 gap-6">
@@ -413,9 +407,8 @@ export default function ApplicationDetailClient({ applicationId }: { application
                                                 href={candidate.linkedin_url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="btn btn-outline btn-sm gap-2"
                                             >
-                                                <i className="fa-brands fa-linkedin"></i>
+                                                <i className="fa-brands fa-linkedin mr-1"></i>
                                                 View LinkedIn Profile
                                             </Link>
                                         </div>
@@ -426,9 +419,8 @@ export default function ApplicationDetailClient({ applicationId }: { application
                                                 href={candidate.portfolio_url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="btn btn-outline btn-sm gap-2"
                                             >
-                                                <i className="fa-duotone fa-regular fa-globe"></i>
+                                                <i className="fa-duotone fa-regular fa-globe mr-1"></i>
                                                 View Portfolio
                                             </Link>
                                         </div>
@@ -439,9 +431,8 @@ export default function ApplicationDetailClient({ applicationId }: { application
                                                 href={candidate.github_url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="btn btn-outline btn-sm gap-2"
                                             >
-                                                <i className="fa-brands fa-github"></i>
+                                                <i className="fa-brands fa-github mr-1"></i>
                                                 View GitHub Profile
                                             </Link>
                                         </div>
