@@ -279,6 +279,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
 
             const client = createAuthenticatedClient(token);
             await client.post(`/candidate-role-assignments/${cra.id}/approve-gate`, { notes });
+            await client.patch(`/applications/${application.id}`, { stage: 'submitted' });
 
             toast.success('Application approved successfully');
             await loadApplicationData();
@@ -666,7 +667,6 @@ export default function ApplicationDetailClient({ applicationId }: { application
 
                             {application.notes && (
                                 <div className="mb-4">
-                                    <h3 className="font-semibold mb-2">Candidate Notes:</h3>
                                     <p className="text-sm text-base-content/70 whitespace-pre-wrap">
                                         {application.notes}
                                     </p>
