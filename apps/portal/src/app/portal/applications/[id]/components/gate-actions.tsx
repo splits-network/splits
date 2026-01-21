@@ -155,6 +155,7 @@ export default function GateActions({
                                 </button>
                             )}
 
+                            {/* we will add this back later, or replace with full chat interface
                             <button
                                 className="btn btn-warning btn-sm btn-block"
                                 onClick={() => setModalType('request-info')}
@@ -162,6 +163,7 @@ export default function GateActions({
                                 <i className="fa-duotone fa-regular fa-circle-question"></i>
                                 Request More Info
                             </button>
+                            */}
                             <button
                                 className="btn btn-error btn-sm btn-block"
                                 onClick={() => setModalType('deny')}

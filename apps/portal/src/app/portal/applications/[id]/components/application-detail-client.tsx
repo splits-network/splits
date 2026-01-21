@@ -19,7 +19,6 @@ import { getApplicationStageBadge, getApplicationStageLabel } from '@/lib/utils/
 import type { ApplicationStage } from '@splits-network/shared-types';
 
 export default function ApplicationDetailClient({ applicationId }: { applicationId: string }) {
-    const router = useRouter();
     const { getToken } = useAuth();
     const toast = useToast();
     const { profile, isLoading: profileLoading, isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
@@ -253,8 +252,10 @@ export default function ApplicationDetailClient({ applicationId }: { application
             }
 
             const client = createAuthenticatedClient(token);
+            const userType = isRecruiter ? 'Recruiter' : isCompanyUser ? 'Company User' : isPlatformAdmin ? 'Platform Admin' : 'Unknown';
+            const newNote = `\n[${formatDate(new Date().toISOString())}] ${userType}: ${note}`;
             await client.patch(`/applications/${application.id}`, {
-                notes: note
+                notes: application.notes + newNote
             });
 
             setShowNoteModal(false);
@@ -362,8 +363,8 @@ export default function ApplicationDetailClient({ applicationId }: { application
                     <div className='card bg-base-100 m-2 shadow-lg'>
                         <div className='card-body'>
                             <div className="flex flex-col md:flex-row items-start justify-between gap-4">
-                                <div className="flex items-center gap-4">
-                                    <i className="fa-duotone fa-regular fa-users fa-2xl text-primary mr-2"></i>
+                                <div className="flex items-start gap-4">
+                                    <i className="fa-duotone fa-regular fa-users fa-2xl text-primary mr-2 pt-6"></i>
                                     <div>
                                         <h2 className="text-4xl font-bold mb-2">
                                             {candidate?.full_name}
@@ -476,8 +477,8 @@ export default function ApplicationDetailClient({ applicationId }: { application
                     <div className='card bg-base-100 m-2 shadow-lg'>
                         <div className="card-body">
                             <div className="flex flex-col md:flex-row items-start justify-between gap-4">
-                                <div className="flex items-center gap-4">
-                                    <i className="fa-duotone fa-regular fa-buildings fa-2xl text-primary mr-2"></i>
+                                <div className="flex items-start gap-4">
+                                    <i className="fa-duotone fa-regular fa-buildings fa-2xl text-primary mr-2 pt-6"></i>
                                     <div>
                                         <h2 className="text-4xl font-bold mb-2">
                                             {job.title}
@@ -624,6 +625,65 @@ export default function ApplicationDetailClient({ applicationId }: { application
                         </div>
                     </div>
                 )}
+
+                {/* Pre-Screen Answers */}
+                {preScreenAnswers && preScreenAnswers.length > 0 && (
+                    <div className="card bg-base-200 shadow">
+                        <div className="card-body">
+                            <h2 className="card-title mb-4">
+                                <i className="fa-duotone fa-regular fa-clipboard-question"></i>
+                                Pre-Screen Responses
+                            </h2>
+                            <div className="space-y-4">
+                                {preScreenAnswers.map((answer: any, index: number) => {
+                                    const questionObj = questions.find((q: any) => q.id === answer.question_id);
+                                    const questionText = questionObj?.question || `Question ${index + 1}`;
+                                    return (
+                                        <div key={index} className="border-l-4 border-primary pl-4">
+                                            <p className="font-semibold mb-1">
+                                                {questionText}
+                                            </p>
+                                            <p className="text-sm text-base-content/70">
+                                                {typeof answer.answer === 'string'
+                                                    ? answer.answer
+                                                    : JSON.stringify(answer.answer)}
+                                            </p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {/* Notes */}
+                {(application.notes || application.recruiter_notes) && (
+                    <div className="card bg-base-200 shadow">
+                        <div className="card-body">
+                            <h2 className="card-title mb-4">
+                                <i className="fa-duotone fa-regular fa-note-sticky"></i>
+                                Notes
+                            </h2>
+
+                            {application.notes && (
+                                <div className="mb-4">
+                                    <h3 className="font-semibold mb-2">Candidate Notes:</h3>
+                                    <p className="text-sm text-base-content/70 whitespace-pre-wrap">
+                                        {application.notes}
+                                    </p>
+                                </div>
+                            )}
+
+                            {application.recruiter_notes && (
+                                <div>
+                                    <h3 className="font-semibold mb-2">Recruiter Notes:</h3>
+                                    <p className="text-sm text-base-content/70 whitespace-pre-wrap">
+                                        {application.recruiter_notes}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
             <div className='col-span-12 md:col-span-4 xl:col-span-4 space-y-6'>
 
@@ -660,7 +720,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
                             )}
                             <button
                                 onClick={() => setShowNoteModal(true)}
-                                className="btn btn-outline btn-sm gap-2"
+                                className="btn btn-outline btn-sm btn-block gap-2"
                                 disabled={actionLoading}
                             >
                                 <i className="fa-duotone fa-regular fa-note-sticky"></i>
@@ -693,7 +753,10 @@ export default function ApplicationDetailClient({ applicationId }: { application
                 {/* Status Card */}
                 <div className="card bg-base-200 shadow">
                     <div className="card-body">
-                        <h2 className="card-title text-lg mb-4">Status</h2>
+                        <h2 className="card-title text-lg mb-4">
+                            <i className="fa-duotone fa-regular fa-info-circle mr-1"></i>
+                            Status
+                        </h2>
                         <div className="space-y-3">
                             <div>
                                 <div className="text-sm text-base-content/60 mb-1">Current Stage</div>
@@ -786,79 +849,22 @@ export default function ApplicationDetailClient({ applicationId }: { application
                         </div>
                     </div>
                 )}
+                {/* Application Timeline */}
+                <div className='card bg-base-200 shadow'>
+                    <div className='card-body'>
+                        <h2 className="card-title text-lg mb-4">
+                            <i className="fa-duotone fa-regular fa-clock-rotate-left mr-1"></i>
+                            Application Timeline
+                        </h2>
+                        <ApplicationTimeline auditLogs={auditLogs} />
+                    </div>
+                </div>
 
             </div>
-
-            {/* Main Content Grid */}
-
-            <div className="col-span-12 md:col-span-8 xl:col-span-10 space-y-6">
-                {/* Pre-Screen Answers */}
-                {preScreenAnswers && preScreenAnswers.length > 0 && (
-                    <div className="card bg-base-200 shadow">
-                        <div className="card-body">
-                            <h2 className="card-title mb-4">
-                                <i className="fa-duotone fa-regular fa-clipboard-question"></i>
-                                Pre-Screen Responses
-                            </h2>
-                            <div className="space-y-4">
-                                {preScreenAnswers.map((answer: any, index: number) => {
-                                    const questionObj = questions.find((q: any) => q.id === answer.question_id);
-                                    const questionText = questionObj?.question || `Question ${index + 1}`;
-                                    return (
-                                        <div key={index} className="border-l-4 border-primary pl-4">
-                                            <p className="font-semibold mb-1">
-                                                {questionText}
-                                            </p>
-                                            <p className="text-sm text-base-content/70">
-                                                {typeof answer.answer === 'string'
-                                                    ? answer.answer
-                                                    : JSON.stringify(answer.answer)}
-                                            </p>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Notes */}
-                {(application.notes || application.recruiter_notes) && (
-                    <div className="card bg-base-200 shadow">
-                        <div className="card-body">
-                            <h2 className="card-title mb-4">
-                                <i className="fa-duotone fa-regular fa-note-sticky"></i>
-                                Notes
-                            </h2>
-
-                            {application.notes && (
-                                <div className="mb-4">
-                                    <h3 className="font-semibold mb-2">Candidate Notes:</h3>
-                                    <p className="text-sm text-base-content/70 whitespace-pre-wrap">
-                                        {application.notes}
-                                    </p>
-                                </div>
-                            )}
-
-                            {application.recruiter_notes && (
-                                <div>
-                                    <h3 className="font-semibold mb-2">Recruiter Notes:</h3>
-                                    <p className="text-sm text-base-content/70 whitespace-pre-wrap">
-                                        {application.recruiter_notes}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
-            </div>
-
             {/* Right Column - Sidebar */}
             <div className="col-span-12 md:col-span-4 xl:col-span-2 space-y-6">
                 {/* Actions */}
 
-                {/* Application Timeline */}
-                <ApplicationTimeline auditLogs={auditLogs} />
             </div>
 
             {/* Stage Update Modal */}

@@ -43,11 +43,12 @@ export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = 
             }
 
             const client = createAuthenticatedClient(token);
-
+            const userType = isRecruiter ? 'Recruiter' : isCompanyUser ? 'Company User' : isPlatformAdmin ? 'Platform Admin' : 'Unknown';
+            const newNote = `\n[${formatDate(new Date().toISOString())}] ${userType}: Candidate withdrew application`;
             // Use standard V2 PATCH endpoint to update application status
             await client.patch(`/applications/${applicationId}`, {
                 stage: 'withdrawn',
-                notes: 'Candidate withdrew application'
+                notes: newNote
             });
 
             // Success - redirect to applications list with success message
