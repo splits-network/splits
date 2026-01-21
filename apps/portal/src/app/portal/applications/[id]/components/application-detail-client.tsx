@@ -703,15 +703,15 @@ export default function ApplicationDetailClient({ applicationId }: { application
                     actionLoading={actionLoading}
                 />
 
-                <div className="card bg-base-200 shadow">
-                    <div className="card-body">
-                        <h2 className="card-title text-lg mb-4">
-                            <i className="fa-duotone fa-regular fa-ellipsis"></i>
-                            Actions
-                        </h2>
+                {isPlatformAdmin && (
+                    <div className="card bg-base-200 shadow">
+                        <div className="card-body">
+                            <h2 className="card-title text-lg mb-4">
+                                <i className="fa-duotone fa-regular fa-ellipsis"></i>
+                                Actions
+                            </h2>
 
-                        <div className="space-y-2">
-                            {isPlatformAdmin && (
+                            <div className="space-y-2">
                                 <button
                                     onClick={() => setShowStageModal(true)}
                                     className="btn btn-primary btn-sm gap-2"
@@ -720,30 +720,10 @@ export default function ApplicationDetailClient({ applicationId }: { application
                                     <i className="fa-duotone fa-regular fa-arrow-right-arrow-left"></i>
                                     Update Stage
                                 </button>
-                            )}
-                            {application.stage === 'screen' && (
-                                <Link
-                                    href={`/portal/applications/${application.id}/review`}
-                                    className="btn btn-accent btn-sm gap-2"
-                                >
-                                    <i className="fa-duotone fa-regular fa-clipboard-check"></i>
-                                    Review & Submit
-                                </Link>
-                            )}
-                            {application.stage === 'offer' && (
-                                <button
-                                    onClick={() => handleStageUpdate('hired')}
-                                    className="btn btn-success btn-sm gap-2"
-                                    disabled={loading}
-                                >
-                                    <i className="fa-duotone fa-regular fa-check-circle"></i>
-                                    Mark as Hired
-                                </button>
-                            )}
-
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 {/* Status Card */}
                 <div className="card bg-base-200 shadow">

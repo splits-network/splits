@@ -726,20 +726,27 @@ export class CandidateRoleAssignmentServiceV2 {
 
             case 'company':
                 // Must be company admin or hiring manager for the job's company
-                const { data: jobData } = await this.supabase
+                const { data: jobData, error } = await this.supabase
                     .from('jobs')
-                    .select('company_id')
+                    .select(`company_id,
+                        company:companies ( id, name, identity_organization_id )`)
                     .eq('id', assignment.job_id)
+                    .in("company.identity_organization_id", context.organization_ids || [])
                     .single();
+
+                if (error) {
+                    console.log('Error fetching job data:', error);
+                    throw new Error('Error fetching job data');
+                }
 
                 if (!jobData) {
                     throw new Error('Job not found');
                 }
 
-                const isCompanyUser = context.accessibleCompanyIds?.includes(jobData.company_id);
-                if (!isCompanyUser) {
-                    throw new Error('Only company users can act on the company gate');
-                }
+                // const isCompanyUser = context.accessibleCompanyIds?.includes(jobData.company_id);
+                // if (!isCompanyUser) {
+                //     throw new Error('Only company users can act on the company gate');
+                // }
                 break;
 
             default:
