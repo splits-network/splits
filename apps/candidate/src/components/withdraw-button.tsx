@@ -32,6 +32,16 @@ export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = 
         );
     }
 
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    };
+
     const handleWithdraw = async () => {
         setIsWithdrawing(true);
         setError(null);
@@ -43,8 +53,7 @@ export default function WithdrawButton({ applicationId, jobTitle, isJobClosed = 
             }
 
             const client = createAuthenticatedClient(token);
-            const userType = isRecruiter ? 'Recruiter' : isCompanyUser ? 'Company User' : isPlatformAdmin ? 'Platform Admin' : 'Unknown';
-            const newNote = `\n[${formatDate(new Date().toISOString())}] ${userType}: Candidate withdrew application`;
+            const newNote = `\n[${formatDate(new Date().toISOString())}] Candidate: Withdrew application`;
             // Use standard V2 PATCH endpoint to update application status
             await client.patch(`/applications/${applicationId}`, {
                 stage: 'withdrawn',
