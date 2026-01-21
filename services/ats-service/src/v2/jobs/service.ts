@@ -120,15 +120,15 @@ export class JobServiceV2 {
             );
         }
 
-        // If closing job, require reason
-        if (updates.status === 'closed' && !updates.closed_reason) {
-            throw new Error('closed_reason is required when closing a job');
-        }
+        // // If closing job, require reason
+        // if (updates.status === 'closed' && !updates.closed_reason) {
+        //     throw new Error('closed_reason is required when closing a job');
+        // }
 
-        // If reopening, clear closed fields
-        if (updates.status === 'active' && currentJob.status === 'closed') {
-            updates.closed_reason = undefined;
-        }
+        // // If reopening, clear closed fields
+        // if (updates.status === 'active' && currentJob.status === 'closed') {
+        //     updates.closed_reason = undefined;
+        // }
 
         // Salary validation
         if (updates.salary_min !== undefined && updates.salary_max !== undefined) {
@@ -202,9 +202,10 @@ export class JobServiceV2 {
         // Define allowed transitions
         const allowedTransitions: Record<string, string[]> = {
             draft: ['active', 'closed'],
-            active: ['paused', 'closed'],
-            paused: ['active', 'closed'],
-            closed: ['active'], // Can reopen
+            active: ['paused', 'closed', 'filled'],
+            paused: ['active', 'closed', 'filled'],
+            closed: ['active', 'filled'], // Can reopen
+            filled: ['active', 'closed'],
         };
 
         if (!allowedTransitions[fromStatus]?.includes(toStatus)) {
