@@ -316,25 +316,25 @@ export default function ApplicationDetailClient({ applicationId }: { application
         toast.info('This feature is coming soon!');
         return;
 
-        if (!cra?.id) return;
+        // if (!cra?.id) return;
 
-        setActionLoading(true);
-        try {
-            const token = await getToken();
-            if (!token) throw new Error('Not authenticated');
+        // setActionLoading(true);
+        // try {
+        //     const token = await getToken();
+        //     if (!token) return;
 
-            const client = createAuthenticatedClient(token);
-            await client.post(`/candidate-role-assignments/${cra.id}/request-info`, { questions });
+        //     const client = createAuthenticatedClient(token);
+        //     await client.post(`/candidate-role-assignments/${cra.id}/request-info`, { questions });
 
-            toast.success('Information request sent');
-            await loadApplicationData();
-        } catch (error: any) {
-            console.error('Failed to request info:', error);
-            toast.error(error.message || 'Failed to request information');
-            throw error;
-        } finally {
-            setActionLoading(false);
-        }
+        //     toast.success('Information request sent');
+        //     await loadApplicationData();
+        // } catch (error: any) {
+        //     console.error('Failed to request info:', error);
+        //     toast.error(error.message || 'Failed to request information');
+        //     throw error;
+        // } finally {
+        //     setActionLoading(false);
+        // }
     };
 
     const handleOpenCandidateModal = () => {
