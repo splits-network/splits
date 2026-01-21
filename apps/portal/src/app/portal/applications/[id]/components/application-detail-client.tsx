@@ -554,7 +554,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
                     </div>
 
                     <div className='px-4 py-0'>
-                        <div className='grid grid-cols-1 md:grid-cols-4 gap-6 py-4'>
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-6 py-4'>
                             {/* Description */}
                             {(job.recruiter_description || job.description) && (
                                 <div className='md:col-span-2'>
@@ -698,6 +698,9 @@ export default function ApplicationDetailClient({ applicationId }: { application
                     onApprove={handleGateApprove}
                     onDeny={handleGateDeny}
                     onRequestInfo={handleGateRequestInfo}
+                    onAddNote={handleAddNote}
+                    showAddNoteModal={setShowNoteModal}
+                    actionLoading={actionLoading}
                 />
 
                 <div className="card bg-base-200 shadow">
@@ -718,14 +721,6 @@ export default function ApplicationDetailClient({ applicationId }: { application
                                     Update Stage
                                 </button>
                             )}
-                            <button
-                                onClick={() => setShowNoteModal(true)}
-                                className="btn btn-outline btn-sm btn-block gap-2"
-                                disabled={actionLoading}
-                            >
-                                <i className="fa-duotone fa-regular fa-note-sticky"></i>
-                                Add Note
-                            </button>
                             {application.stage === 'screen' && (
                                 <Link
                                     href={`/portal/applications/${application.id}/review`}

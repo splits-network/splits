@@ -91,10 +91,12 @@ export class CandidateRoleAssignmentServiceV2 {
         // Get existing assignment
         const existing = await this.get(clerkUserId, id);
 
+
         // Validate state transition
         if (updates.state && existing.state) {
+            const existingState = this.mapApplicationStateToAssignmentState(existing.state);
             this.validateStateTransition(
-                existing.state as CandidateRoleAssignmentState,
+                existingState,
                 updates.state
             );
         }
@@ -411,7 +413,7 @@ export class CandidateRoleAssignmentServiceV2 {
             awaiting_company: ['submitted_to_company', 'rejected'],
             under_review: ['info_requested', 'submitted_to_company', 'rejected'],
             info_requested: ['under_review', 'submitted_to_company', 'rejected'],
-            submitted_to_company: ['screen', 'in_process', 'rejected'],
+            submitted_to_company: ['screen', 'in_process', 'rejected', 'awaiting_company', 'awaiting_company_recruiter'],
             screen: ['in_process', 'rejected'],
             in_process: ['offer', 'rejected'],
             offer: ['hired', 'declined', 'withdrawn'],

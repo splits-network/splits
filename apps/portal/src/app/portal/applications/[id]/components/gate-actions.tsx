@@ -15,6 +15,9 @@ interface GateActionsProps {
     onApprove: (notes?: string) => Promise<void>;
     onDeny: (reason: string) => Promise<void>;
     onRequestInfo: (questions: string) => Promise<void>;
+    onAddNote: (note: string) => Promise<void>;
+    showAddNoteModal: (show: boolean) => void;
+    actionLoading: boolean;
 }
 
 export default function GateActions({
@@ -27,6 +30,9 @@ export default function GateActions({
     onApprove,
     onDeny,
     onRequestInfo,
+    onAddNote,
+    showAddNoteModal,
+    actionLoading = false,
 }: GateActionsProps) {
     const [modalType, setModalType] = useState<'approve' | 'deny' | 'request-info' | null>(null);
     const [nextStage, setNextStage] = useState<'interview' | 'offer'>('interview');
@@ -154,6 +160,15 @@ export default function GateActions({
                                     {getActionButtonText()}
                                 </button>
                             )}
+
+                            <button
+                                onClick={() => showAddNoteModal(true)}
+                                className="btn btn-info btn-outline btn-sm btn-block gap-2"
+                                disabled={actionLoading}
+                            >
+                                <i className="fa-duotone fa-regular fa-note-sticky"></i>
+                                Add Note
+                            </button>
 
                             {/* we will add this back later, or replace with full chat interface
                             <button
