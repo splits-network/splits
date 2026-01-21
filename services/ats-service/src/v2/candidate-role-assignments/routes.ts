@@ -32,7 +32,7 @@ export function registerCandidateRoleAssignmentRoutes(
      * 
      * Query params:
      * - page, limit (pagination)
-     * - job_id, candidate_id, recruiter_id (filters)
+     * - job_id, candidate_id, candidate_recruiter_id, company_recruiter_id (filters)
      * - state (proposed | accepted | declined | timed_out | submitted | closed)
      * - sort_by, sort_order
      */
@@ -78,7 +78,7 @@ export function registerCandidateRoleAssignmentRoutes(
      * CREATE assignment (internal use - called from application service)
      * POST /api/v2/candidate-role-assignments
      * 
-     * Body: { job_id, candidate_id, recruiter_id, state?, proposal_notes? }
+     * Body: { job_id, candidate_id, candidate_recruiter_id?, company_recruiter_id?, state?, proposal_notes? }
      */
     app.post('/api/v2/candidate-role-assignments', async (
         request: FastifyRequest,

@@ -109,7 +109,7 @@ export class ApplicationServiceV2 {
 
         // Auto-resolve candidate_id from clerkUserId if not provided
         let candidateId = data.candidate_id;
-        let recruiterId = data.recruiter_id;
+        let recruiterId = data.candidate_recruiter_id;
         let identityUserId = undefined;
 
         const userContext = await this.accessResolver.resolve(clerkUserId);
@@ -321,7 +321,7 @@ export class ApplicationServiceV2 {
                 metadata: {
                     job_id: updatedApplication.job_id,
                     candidate_id: updatedApplication.candidate_id,
-                    recruiter_id: updatedApplication.recruiter_id,
+                    candidate_recruiter_id: updatedApplication.candidate_recruiter_id,
                     decline_reason: decline_reason || null,
                     decline_details: decline_details || null,
                 },
@@ -336,7 +336,7 @@ export class ApplicationServiceV2 {
                     application_id: id,
                     job_id: updatedApplication.job_id,
                     candidate_id: updatedApplication.candidate_id,
-                    recruiter_id: updatedApplication.recruiter_id,
+                    candidate_recruiter_id: updatedApplication.candidate_recruiter_id,
                     old_stage: currentApplication.stage,
                     new_stage: updates.stage,
                     changed_by: userContext.identityUserId,
@@ -355,13 +355,13 @@ export class ApplicationServiceV2 {
 
         // Update candidate role assignment if stage changed and recruiter is involved
         if (updates.stage && currentApplication.stage !== updates.stage &&
-            updatedApplication.recruiter_id && this.assignmentService) {
+            updatedApplication.candidate_recruiter_id && this.assignmentService) {
             try {
                 await this.assignmentService.createOrUpdateForApplication(
                     clerkUserId || 'system',
                     updatedApplication.job_id,
                     updatedApplication.candidate_id,
-                    updatedApplication.recruiter_id,
+                    updatedApplication.candidate_recruiter_id,
                     updates.stage as 'draft' | 'screen' | 'interview' | 'offer' | 'hired' | 'rejected' | 'submitted'
                 );
             } catch (assignmentError) {
@@ -608,7 +608,7 @@ export class ApplicationServiceV2 {
         // Determine next stage based on recruiter presence
         // Represented candidates (with recruiter) → screen (recruiter reviews first)
         // Direct candidates (no recruiter) → submitted (goes straight to company)
-        const nextStage = application.recruiter_id ? 'screen' : 'submitted';
+        const nextStage = application.candidate_recruiter_id ? 'screen' : 'submitted';
 
         // Update to appropriate stage
         const updated = await this.repository.updateApplication(applicationId, {
@@ -693,22 +693,22 @@ export class ApplicationServiceV2 {
      * Creates application with stage: 'recruiter_proposed'
      */
     async proposeJobToCandidate(data: {
-        recruiter_id: string;
+        candidate_recruiter_id: string;
         candidate_id: string;
         job_id: string;
         pitch?: string;
         notes?: string;
     }, clerkUserId: string): Promise<any> {
         // Validate required fields
-        if (!data.recruiter_id || !data.candidate_id || !data.job_id) {
-            throw new Error('Recruiter ID, Candidate ID, and Job ID are required');
+        if (!data.candidate_recruiter_id || !data.candidate_id || !data.job_id) {
+            throw new Error('Candidate Recruiter ID, Candidate ID, and Job ID are required');
         }
 
         // Verify recruiter exists and is active (query recruiters table)
         const recruiter = await this.repository.getSupabase()
             .from('recruiters')
             .select('id, status')
-            .eq('id', data.recruiter_id)
+            .eq('id', data.candidate_recruiter_id)
             .single();
 
         if (!recruiter.data || recruiter.data.status !== 'active') {
@@ -754,7 +754,7 @@ export class ApplicationServiceV2 {
         const application = await this.repository.createApplication({
             candidate_id: data.candidate_id,
             job_id: data.job_id,
-            recruiter_id: data.recruiter_id,
+            candidate_recruiter_id: data.candidate_recruiter_id,
             stage: 'recruiter_proposed',
             pitch: data.pitch || null,
             notes: data.notes || null,
@@ -772,7 +772,7 @@ export class ApplicationServiceV2 {
             performed_by_role: 'recruiter',
             new_value: {
                 stage: 'recruiter_proposed',
-                recruiter_id: data.recruiter_id,
+                candidate_recruiter_id: data.candidate_recruiter_id,
                 has_pitch: !!data.pitch,
             },
             metadata: {
@@ -785,7 +785,7 @@ export class ApplicationServiceV2 {
         if (this.eventPublisher) {
             await this.eventPublisher.publish('application.recruiter_proposed', {
                 application_id: application.id,
-                recruiter_id: data.recruiter_id,
+                candidate_recruiter_id: data.candidate_recruiter_id,
                 candidate_id: data.candidate_id,
                 job_id: data.job_id,
                 pitch: data.pitch,
@@ -833,7 +833,7 @@ export class ApplicationServiceV2 {
             old_value: { stage: 'recruiter_proposed' },
             new_value: { stage: 'draft' },
             metadata: {
-                recruiter_id: application.recruiter_id,
+                candidate_recruiter_id: application.candidate_recruiter_id,
             },
         });
 
@@ -843,7 +843,7 @@ export class ApplicationServiceV2 {
                 application_id: applicationId,
                 candidate_id: application.candidate_id,
                 job_id: application.job_id,
-                recruiter_id: application.recruiter_id,
+                candidate_recruiter_id: application.candidate_recruiter_id,
                 accepted_by: userContext.identityUserId,
             });
         }
@@ -892,7 +892,7 @@ export class ApplicationServiceV2 {
                 decline_reason: reason || null,
             },
             metadata: {
-                recruiter_id: application.recruiter_id,
+                candidate_recruiter_id: application.candidate_recruiter_id,
                 has_reason: !!reason,
             },
         });
@@ -903,7 +903,7 @@ export class ApplicationServiceV2 {
                 application_id: applicationId,
                 candidate_id: application.candidate_id,
                 job_id: application.job_id,
-                recruiter_id: application.recruiter_id,
+                candidate_recruiter_id: application.candidate_recruiter_id,
                 declined_by: userContext.identityUserId,
                 reason: reason || null,
             });

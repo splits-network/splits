@@ -59,7 +59,7 @@ export class ApplicationFeedbackRepository {
             const { data: applications } = await this.supabase
                 .from('applications')
                 .select('id, candidate_id')
-                .eq('recruiter_id', context.recruiterId!);
+                .eq('candidate_recruiter_id', context.recruiterId!);
 
             const applicationIds = applications?.map(a => a.id) || [];
             if (applicationIds.length === 0) {
@@ -145,11 +145,11 @@ export class ApplicationFeedbackRepository {
         } else if (context.roles.includes('recruiter')) {
             const { data: application } = await this.supabase
                 .from('applications')
-                .select('recruiter_id')
+                .select('candidate_recruiter_id')
                 .eq('id', data.application_id)
                 .single();
 
-            if (!application || application.recruiter_id !== context.recruiterId) {
+            if (!application || application.candidate_recruiter_id !== context.recruiterId) {
                 throw new Error('Access denied to this feedback');
             }
         }
@@ -169,7 +169,7 @@ export class ApplicationFeedbackRepository {
         // Verify user has access to this application
         const { data: application } = await this.supabase
             .from('applications')
-            .select('id, candidate_id, recruiter_id')
+            .select('id, candidate_id, candidate_recruiter_id')
             .eq('id', data.application_id)
             .single();
 

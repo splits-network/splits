@@ -118,7 +118,7 @@ export function registerApplicationRoutes(
         try {
             const { clerkUserId } = requireUserContext(request);
             const body = request.body as {
-                recruiter_id: string;
+                candidate_recruiter_id: string;
                 candidate_id: string;
                 job_id: string;
                 pitch?: string;

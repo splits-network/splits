@@ -269,7 +269,7 @@ export class CandidateRoleAssignmentServiceV2 {
             assignment_id: assignment.id,
             job_id: input.job_id,
             candidate_id: input.candidate_id,
-            recruiter_id: context.recruiterId,
+            candidate_recruiter_id: context.recruiterId,  // Updated field name
             response_due_at: responseDue,
         });
 

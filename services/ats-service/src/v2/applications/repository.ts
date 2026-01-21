@@ -49,7 +49,7 @@ export class ApplicationRepository {
         if (accessContext.candidateId) {
             query = query.eq('candidate_id', accessContext.candidateId);
         } else if (accessContext.recruiterId) {
-            query = query.eq('recruiter_id', accessContext.recruiterId);
+            query = query.eq('candidate_recruiter_id', accessContext.recruiterId);
         } else if (!accessContext.isPlatformAdmin) {
             if (accessContext.organizationIds.length > 0) {
                 // First, get all companies that belong to the user's organizations
@@ -219,7 +219,7 @@ export class ApplicationRepository {
             return data;
         }
 
-        if (accessContext.recruiterId && (data as any).recruiter_id === accessContext.recruiterId) {
+        if (accessContext.recruiterId && (data as any).candidate_recruiter_id === accessContext.recruiterId) {
             return data;
         }
 
@@ -244,19 +244,19 @@ export class ApplicationRepository {
             const { data: recruiterRelationship } = await this.supabase
 
                 .from('recruiter_candidates')
-                .select('recruiter_id')
+                .select('candidate_recruiter_id')
                 .eq('candidate_id', application.candidate_id)
                 .eq('status', 'active')
                 .single();
 
             if (recruiterRelationship) {
-                recruiterId = recruiterRelationship.recruiter_id;
+                recruiterId = recruiterRelationship.candidate_recruiter_id;
             }
         }
         const { data, error } = await this.supabase
 
             .from('applications')
-            .insert({ ...application, recruiter_id: recruiterId })
+            .insert({ ...application, candidate_recruiter_id: recruiterId })
             .select()
             .single();
 

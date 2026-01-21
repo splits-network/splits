@@ -260,7 +260,7 @@ export interface Application {
     id: string;
     job_id: string;
     candidate_id: string;
-    recruiter_id?: string;
+    candidate_recruiter_id?: string;  // Renamed from recruiter_id for clarity - represents candidate (Closer role)
     stage: ApplicationStage;
     notes?: string;
     recruiter_notes?: string;  // NEW: Recruiter's notes/pitch added during review
