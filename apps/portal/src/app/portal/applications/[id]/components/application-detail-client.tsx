@@ -633,16 +633,14 @@ export default function ApplicationDetailClient({ applicationId }: { application
                         <div className="card-body">
                             <h2 className="card-title mb-4">
                                 <i className="fa-duotone fa-regular fa-clipboard-question"></i>
-                                Pre-Screen Responses
+                                Pre-Screen Questions
                             </h2>
                             <div className="space-y-4">
                                 {preScreenAnswers.map((answer: any, index: number) => {
-                                    const questionObj = questions.find((q: any) => q.id === answer.question_id);
-                                    const questionText = questionObj?.question || `Question ${index + 1}`;
                                     return (
                                         <div key={index} className="border-l-4 border-primary pl-4">
                                             <p className="font-semibold mb-1">
-                                                {questionText}
+                                                {answer.question.question}
                                             </p>
                                             <p className="text-sm text-base-content/70">
                                                 {typeof answer.answer === 'string'

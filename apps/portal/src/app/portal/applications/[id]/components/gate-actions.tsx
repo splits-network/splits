@@ -86,8 +86,29 @@ export default function GateActions({
         return 'Application is being reviewed at this stage.';
     };
 
+    const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
     return (
         <>
+            {/* Debug info div */}
+            {isLocalhost && (
+                <div className="fixed bottom-4 right-4 bg-base-300 border border-base-content/20 rounded-lg p-4 text-xs z-50 shadow-lg max-w-xs">
+                    <div className="font-bold mb-2 text-sm">Debug Flags</div>
+                    <div className="space-y-1">
+                        <div>userHasActions: <span className={userHasActions ? 'text-success' : 'text-error'}>{String(userHasActions)}</span></div>
+                        <div>showCompanyActions: <span className={showCompanyActions ? 'text-success' : 'text-error'}>{String(showCompanyActions)}</span></div>
+                        <div>showCandidateRecruiterActions: <span className={showCandidateRecruiterActions ? 'text-success' : 'text-error'}>{String(showCandidateRecruiterActions)}</span></div>
+                        <div>showCompanyRecruiterActions: <span className={showCompanyRecruiterActions ? 'text-success' : 'text-error'}>{String(showCompanyRecruiterActions)}</span></div>
+                        <div className="border-t border-base-content/20 pt-1 mt-1">
+                            <div>isRecruiter: <span className={isRecruiter ? 'text-success' : 'text-error'}>{String(isRecruiter)}</span></div>
+                            <div>isCompanyUser: <span className={isCompanyUser ? 'text-success' : 'text-error'}>{String(isCompanyUser)}</span></div>
+                            <div>currentGate: <span className="text-info">{currentGate || 'null'}</span></div>
+                            <div>craId: <span className="text-info">{craId || 'null'}</span></div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="card bg-base-200 shadow">
                 <div className="card-body">
                     <h2 className="card-title">
