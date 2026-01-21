@@ -407,7 +407,7 @@ export class CandidateRoleAssignmentServiceV2 {
         newState: CandidateRoleAssignmentState
     ): void {
         const validTransitions: Record<CandidateRoleAssignmentState, CandidateRoleAssignmentState[]> = {
-            proposed: ['awaiting_candidate_recruiter', 'awaiting_company_recruiter', 'awaiting_company', 'submitted_to_company', 'declined', 'timed_out'],
+            proposed: ['awaiting_candidate_recruiter', 'awaiting_company_recruiter', 'awaiting_company', 'submitted_to_company', 'declined', 'timed_out', 'rejected'],
             awaiting_candidate_recruiter: ['awaiting_company_recruiter', 'awaiting_company', 'submitted_to_company', 'rejected'],
             awaiting_company_recruiter: ['awaiting_company', 'submitted_to_company', 'rejected'],
             awaiting_company: ['submitted_to_company', 'rejected'],
