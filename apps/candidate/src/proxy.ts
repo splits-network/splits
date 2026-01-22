@@ -1,18 +1,26 @@
 import { clerkMiddleware } from '@clerk/nextjs/server';
 
-// Clerk middleware only runs on protected routes, preventing redirect loops for crawlers
+// Clerk middleware runs on both protected and semi-public routes
 export default clerkMiddleware(async (auth, request) => {
-    // All routes matched by config.matcher require authentication
-    await auth.protect();
+    const path = request.nextUrl.pathname;
+
+    // Protected routes that require authentication
+    const isProtectedRoute = path.startsWith('/portal/') ||
+        path.startsWith('/api/v2/') ||
+        path.startsWith('/api/notifications/') ||
+        path === '/api/healthcheck';
+
+    if (isProtectedRoute) {
+        await auth.protect();
+    }
+    // For other routes (like /jobs/*), auth is available but optional
 });
 
 export const config = {
     matcher: [
         // Protected routes that require authentication
         '/portal/(.*)',     // Main authenticated portal
-        //'/sign-in(.*)',     // Auth routes
-        //'/sign-up(.*)',
-        //'/forgot-password(.*)',
+        '/public/jobs/(.*)',       // Job pages (auth optional for personalization)
         // Protected API routes only
         '/api/v2/(.*)',     // V2 API routes
         '/api/notifications/(.*)', // Notification APIs
