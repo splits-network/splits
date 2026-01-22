@@ -6,6 +6,7 @@ import { createAuthenticatedClient } from '@/lib/api-client';
 import { useDebouncedCallback } from '@/hooks/use-debounce';
 import { MarketplaceProfile } from '@splits-network/shared-types';
 import { calculateProfileCompleteness, TIER_CONFIG } from '@/lib/utils/profile-completeness';
+import { useToast } from '@/lib/toast-context';
 
 interface CandidateSettings {
     id: string;
@@ -17,8 +18,8 @@ interface CandidateSettings {
     github_url?: string;
     portfolio_url?: string;
     skills?: string[];
-    industries?: string[];
-    specialties?: string[];
+    //industries?: string[];
+    //specialties?: string[];
     bio?: string;
     marketplace_profile?: MarketplaceProfile;
     marketplace_visibility?: 'public' | 'limited' | 'hidden';
@@ -69,13 +70,13 @@ const SPECIALTY_OPTIONS = [
 
 export default function ProfilePage() {
     const { getToken } = useAuth();
+    const toast = useToast();
     const { user: clerkUser } = useUser();
     const [settings, setSettings] = useState<CandidateSettings | null>(null);
     const [candidateId, setCandidateId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
-    const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
     // Name edit state
     const [name, setName] = useState('');
@@ -157,8 +158,8 @@ export default function ProfilePage() {
                 github_url: data.github_url || '',
                 portfolio_url: data.portfolio_url || '',
                 skills: data.skills || [],
-                industries: data.industries || [],
-                specialties: data.specialties || [],
+                //industries: data.industries || [],
+                //specialties: data.specialties || [],
                 bio: data.bio || '',
                 marketplace_profile: data.marketplace_profile || {},
                 marketplace_visibility: data.marketplace_visibility || 'public',
@@ -198,10 +199,11 @@ export default function ProfilePage() {
 
             const client = createAuthenticatedClient(token);
             await client.patch(`/candidates/${candidateId}`, updates);
-            setLastSaved(new Date());
+            toast.success('Profile updated!');
             setSaving(false);
         } catch (err: any) {
             console.error('Failed to save settings:', err);
+            toast.error('Failed to save changes');
             setError('Failed to save changes');
             setSaving(false);
         }
@@ -224,19 +226,29 @@ export default function ProfilePage() {
     };
 
     const toggleIndustry = (industry: string) => {
-        const industries = settings?.industries || [];
+        const industries = settings?.marketplace_profile?.industries || [];
         const updated = industries.includes(industry)
             ? industries.filter(i => i !== industry)
             : [...industries, industry];
-        updateSettings({ industries: updated });
+        updateSettings({
+            marketplace_profile: {
+                ...settings?.marketplace_profile,
+                industries: updated,
+            },
+        });
     };
 
     const toggleSpecialty = (specialty: string) => {
-        const specialties = settings?.specialties || [];
+        const specialties = settings?.marketplace_profile?.specialties || [];
         const updated = specialties.includes(specialty)
             ? specialties.filter(s => s !== specialty)
             : [...specialties, specialty];
-        updateSettings({ specialties: updated });
+        updateSettings({
+            marketplace_profile: {
+                ...settings?.marketplace_profile,
+                specialties: updated,
+            },
+        });
     };
 
     const handleNameSubmit = async (e: FormEvent) => {
@@ -350,25 +362,7 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    {/* Save Status */}
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-sm">
-                            {saving && (
-                                <>
-                                    <span className="loading loading-spinner loading-xs"></span>
-                                    <span className="text-base-content/70">Saving...</span>
-                                </>
-                            )}
-                            {!saving && lastSaved && (
-                                <>
-                                    <i className="fa-duotone fa-regular fa-check text-success"></i>
-                                    <span className="text-base-content/70">
-                                        Saved {lastSaved.toLocaleTimeString()}
-                                    </span>
-                                </>
-                            )}
-                        </div>
-                    </div>
+
 
                     {error && (
                         <div className="alert alert-error">
@@ -470,7 +464,7 @@ export default function ProfilePage() {
                                     <button
                                         key={industry}
                                         type="button"
-                                        className={`btn btn-sm ${(settings?.industries || []).includes(industry)
+                                        className={`btn btn-sm ${(settings?.marketplace_profile?.industries || []).includes(industry)
                                             ? 'btn-primary'
                                             : 'btn-outline'
                                             }`}
@@ -496,7 +490,7 @@ export default function ProfilePage() {
                                     <button
                                         key={specialty}
                                         type="button"
-                                        className={`btn btn-sm ${(settings?.specialties || []).includes(specialty)
+                                        className={`btn btn-sm ${(settings?.marketplace_profile?.specialties || []).includes(specialty)
                                             ? 'btn-primary'
                                             : 'btn-outline'
                                             }`}

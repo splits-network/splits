@@ -350,6 +350,10 @@ export type MarketplaceVisibility = 'public' | 'limited' | 'hidden';
  */
 export interface MarketplaceProfile {
     bio_rich?: string;  // Rich text/markdown bio (Phase 1)
+    specialties?: string[]; // Areas of expertise
+    industries?: string[];  // Industries served
+    // Future Phase 1 fields:
+    // education?: { institution: string; degree: string; fieldOfStudy: string; startYear: number; endYear: number }[];
     // Future Phase 2 fields:
     // achievements?: { title: string; description: string; year: number }[];
     // certifications?: { name: string; issuer: string; year: number }[];
