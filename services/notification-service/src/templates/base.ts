@@ -50,7 +50,7 @@ export interface BaseEmailProps {
 function getLogoUrl(source?: EmailSource): string {
     switch (source) {
         case 'candidate':
-            return 'https://applicant.network/logo.png';
+            return 'https://applicant.network/logo-email.png';
         case 'corporate':
             return 'https://employment-networks.com/logo.png';
         case 'portal':
