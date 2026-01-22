@@ -149,6 +149,70 @@ export class ApplicationsEventConsumer {
                     }
                     break;
 
+                case 'recruiter_review':
+
+                    if (candidateEmail) {
+                        const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                        const recruiterName = recruiterContact?.name || 'Your recruiter';
+
+                        await this.emailService.sendCandidateRecruiterReview(candidateEmail, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName: job.company?.name || 'Unknown Company',
+                            recruiterName: recruiterName,
+                            applicationId: application_id,
+                            userId: candidateUserId || undefined,
+                        });
+                    }
+
+                    if (effectiveRecruiterId) {
+                        const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                        if (recruiterContact) {
+                            await this.emailService.sendApplicationStageChanged(recruiterContact.email, {
+                                candidateName: candidate.full_name,
+                                jobTitle: job.title,
+                                companyName: job.company?.name || 'Unknown Company',
+                                oldStage: old_stage || 'Unknown',
+                                newStage: 'recruiter_review',
+                                applicationId: application_id,
+                                userId: recruiterContact.user_id || undefined,
+                            });
+                        }
+                    }
+                    break;
+
+                case 'recruiter_proposed':
+
+                    if (candidateEmail) {
+                        const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                        const recruiterName = recruiterContact?.name || 'Your recruiter';
+
+                        await this.emailService.sendCandidateRecruiterProposed(candidateEmail, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName: job.company?.name || 'Unknown Company',
+                            recruiterName: recruiterName,
+                            applicationId: application_id,
+                            userId: candidateUserId || undefined,
+                        });
+                    }
+
+                    if (effectiveRecruiterId) {
+                        const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                        if (recruiterContact) {
+                            await this.emailService.sendApplicationStageChanged(recruiterContact.email, {
+                                candidateName: candidate.full_name,
+                                jobTitle: job.title,
+                                companyName: job.company?.name || 'Unknown Company',
+                                oldStage: old_stage || 'Unknown',
+                                newStage: 'recruiter_proposed',
+                                applicationId: application_id,
+                                userId: recruiterContact.user_id || undefined,
+                            });
+                        }
+                    }
+                    break;
+
                 case 'submitted':
 
                     if (candidateEmail) {
@@ -197,6 +261,82 @@ export class ApplicationsEventConsumer {
                                 companyName: job.company?.name || 'Unknown Company',
                                 oldStage: old_stage || 'Unknown',
                                 newStage: 'submitted',
+                                applicationId: application_id,
+                                userId: recruiterContact.user_id || undefined,
+                            });
+                        }
+                    }
+                    break;
+
+                case 'company_review':
+
+                    if (candidateEmail) {
+                        let recruiterName = undefined;
+                        if (effectiveRecruiterId) {
+                            const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                            if (recruiterContact) {
+                                recruiterName = recruiterContact.name;
+                            }
+                        }
+
+                        await this.emailService.sendCandidateCompanyReview(candidateEmail, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName: job.company?.name || 'Unknown Company',
+                            hasRecruiter: !!effectiveRecruiterId,
+                            recruiterName: recruiterName,
+                            applicationId: application_id,
+                            userId: candidateUserId || undefined,
+                        });
+                    }
+
+                    if (effectiveRecruiterId) {
+                        const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                        if (recruiterContact) {
+                            await this.emailService.sendApplicationStageChanged(recruiterContact.email, {
+                                candidateName: candidate.full_name,
+                                jobTitle: job.title,
+                                companyName: job.company?.name || 'Unknown Company',
+                                oldStage: old_stage || 'Unknown',
+                                newStage: 'company_review',
+                                applicationId: application_id,
+                                userId: recruiterContact.user_id || undefined,
+                            });
+                        }
+                    }
+                    break;
+
+                case 'company_feedback':
+
+                    if (candidateEmail) {
+                        let recruiterName = undefined;
+                        if (effectiveRecruiterId) {
+                            const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                            if (recruiterContact) {
+                                recruiterName = recruiterContact.name;
+                            }
+                        }
+
+                        await this.emailService.sendCandidateCompanyFeedback(candidateEmail, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName: job.company?.name || 'Unknown Company',
+                            hasRecruiter: !!effectiveRecruiterId,
+                            recruiterName: recruiterName,
+                            applicationId: application_id,
+                            userId: candidateUserId || undefined,
+                        });
+                    }
+
+                    if (effectiveRecruiterId) {
+                        const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                        if (recruiterContact) {
+                            await this.emailService.sendApplicationStageChanged(recruiterContact.email, {
+                                candidateName: candidate.full_name,
+                                jobTitle: job.title,
+                                companyName: job.company?.name || 'Unknown Company',
+                                oldStage: old_stage || 'Unknown',
+                                newStage: 'company_feedback',
                                 applicationId: application_id,
                                 userId: recruiterContact.user_id || undefined,
                             });
@@ -393,6 +533,82 @@ export class ApplicationsEventConsumer {
                                 oldStage: old_stage || 'Unknown',
                                 newStage: 'withdrawn',
                                 applicationId: application_id,
+                            });
+                        }
+                    }
+                    break;
+
+                case 'ai_reviewed':
+
+                    if (candidateEmail) {
+                        let recruiterName = undefined;
+                        if (effectiveRecruiterId) {
+                            const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                            if (recruiterContact) {
+                                recruiterName = recruiterContact.name;
+                            }
+                        }
+
+                        await this.emailService.sendCandidateAIReviewed(candidateEmail, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName: job.company?.name || 'Unknown Company',
+                            hasRecruiter: !!effectiveRecruiterId,
+                            recruiterName: recruiterName,
+                            applicationId: application_id,
+                            userId: candidateUserId || undefined,
+                        });
+                    }
+
+                    if (effectiveRecruiterId) {
+                        const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                        if (recruiterContact) {
+                            await this.emailService.sendApplicationStageChanged(recruiterContact.email, {
+                                candidateName: candidate.full_name,
+                                jobTitle: job.title,
+                                companyName: job.company?.name || 'Unknown Company',
+                                oldStage: old_stage || 'Unknown',
+                                newStage: 'ai_reviewed',
+                                applicationId: application_id,
+                                userId: recruiterContact.user_id || undefined,
+                            });
+                        }
+                    }
+                    break;
+
+                case 'expired':
+
+                    if (candidateEmail) {
+                        let recruiterName = undefined;
+                        if (effectiveRecruiterId) {
+                            const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                            if (recruiterContact) {
+                                recruiterName = recruiterContact.name;
+                            }
+                        }
+
+                        await this.emailService.sendCandidateApplicationExpired(candidateEmail, {
+                            candidateName: candidate.full_name,
+                            jobTitle: job.title,
+                            companyName: job.company?.name || 'Unknown Company',
+                            hasRecruiter: !!effectiveRecruiterId,
+                            recruiterName: recruiterName,
+                            applicationId: application_id,
+                            userId: candidateUserId || undefined,
+                        });
+                    }
+
+                    if (effectiveRecruiterId) {
+                        const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                        if (recruiterContact) {
+                            await this.emailService.sendApplicationStageChanged(recruiterContact.email, {
+                                candidateName: candidate.full_name,
+                                jobTitle: job.title,
+                                companyName: job.company?.name || 'Unknown Company',
+                                oldStage: old_stage || 'Unknown',
+                                newStage: 'expired',
+                                applicationId: application_id,
+                                userId: recruiterContact.user_id || undefined,
                             });
                         }
                     }

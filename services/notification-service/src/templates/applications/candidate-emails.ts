@@ -515,3 +515,367 @@ ${paragraph(`Have questions about your application? Your recruiter <strong>${dat
         theme: defaultTheme,
     });
 }
+
+// When application moves to company review stage
+export interface CandidateCompanyReviewData {
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    hasRecruiter: boolean;
+    recruiterName?: string;
+    applicationUrl: string;
+}
+
+export function candidateCompanyReviewEmail(data: CandidateCompanyReviewData): string {
+    const reviewMessage = data.hasRecruiter
+        ? `Your recruiter has successfully submitted your application for <strong>${data.jobTitle}</strong> to <strong>${data.companyName}</strong>, and it's now under their review.`
+        : `Your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> is now being reviewed by their hiring team.`;
+
+    const nextStepsMessage = data.hasRecruiter
+        ? `The hiring team is reviewing your application. ${data.recruiterName} will keep you updated on their feedback and any next steps.`
+        : 'The hiring team is reviewing your application details and will contact you directly if they would like to move forward.';
+
+    const content = `
+${heading({ level: 1, text: 'Your Application is Under Review!' })}
+
+${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
+
+${paragraph(reviewMessage)}
+
+${alert({
+        type: 'info',
+        title: 'Application Under Review',
+        message: `${data.companyName} is now evaluating your qualifications and fit for the ${data.jobTitle} role.`,
+    })}
+
+${infoCard({
+        title: 'What happens during company review',
+        items: [
+            { label: 'Application Review', value: 'Hiring team evaluates your background and qualifications' },
+            { label: 'Internal Discussion', value: 'Team discusses fit with role requirements and company culture' },
+            { label: 'Decision Timeline', value: 'Most companies complete their review within 1-2 weeks' },
+            { label: 'Next Steps', value: 'Interview invitation or feedback on application status' },
+        ],
+        theme: defaultTheme,
+    })}
+
+${paragraph(`<strong>What to expect next:</strong> ${nextStepsMessage}`)}
+
+${button({
+        href: data.applicationUrl,
+        text: 'Track Application Status →',
+        variant: 'primary',
+        theme: defaultTheme,
+    })}
+
+${data.hasRecruiter
+            ? paragraph(`Your recruiter <strong>${data.recruiterName}</strong> is actively monitoring the process and will update you on any developments.`)
+            : paragraph('We\'ll notify you as soon as there are any updates on your application status.')
+        }
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `${data.companyName} is reviewing your ${data.jobTitle} application`,
+        content,
+        source: 'candidate',
+        theme: defaultTheme,
+    });
+}
+
+// When company provides feedback on application
+export interface CandidateCompanyFeedbackData {
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    hasRecruiter: boolean;
+    recruiterName?: string;
+    applicationUrl: string;
+}
+
+export function candidateCompanyFeedbackEmail(data: CandidateCompanyFeedbackData): string {
+    const feedbackMessage = data.hasRecruiter
+        ? `Great news! <strong>${data.companyName}</strong> has provided feedback on your application for <strong>${data.jobTitle}</strong>. Your recruiter <strong>${data.recruiterName}</strong> will review this feedback and guide you on next steps.`
+        : `<strong>${data.companyName}</strong> has provided feedback on your application for <strong>${data.jobTitle}</strong> and we're processing their response.`;
+
+    const nextStepsMessage = data.hasRecruiter
+        ? `${data.recruiterName} will review the company's feedback and contact you shortly with guidance on how to proceed. This could include next steps for interviews, additional information needed, or other opportunities.`
+        : `We'll review the company's feedback and update you on the next steps within 24 hours. This could include interview scheduling, additional information requests, or status updates.`;
+
+    const content = `
+${heading({ level: 1, text: 'Company Feedback Received!' })}
+
+${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
+
+${paragraph(feedbackMessage)}
+
+${alert({
+        type: 'success',
+        title: 'Progress Update',
+        message: `${data.companyName} has engaged with your application and provided detailed feedback.`,
+    })}
+
+${infoCard({
+        title: 'What company feedback means',
+        items: [
+            { label: 'Active Interest', value: 'Company is actively considering your candidacy' },
+            { label: 'Detailed Review', value: 'They\'ve reviewed your qualifications in detail' },
+            { label: 'Next Steps', value: 'Feedback includes guidance on moving forward' },
+            { label: 'Timeline', value: 'Expect follow-up within 1-2 business days' },
+        ],
+        theme: defaultTheme,
+    })}
+
+${paragraph(`<strong>What happens next:</strong> ${nextStepsMessage}`)}
+
+${button({
+        href: data.applicationUrl,
+        text: 'View Application Status →',
+        variant: 'primary',
+        theme: defaultTheme,
+    })}
+
+${paragraph('This is an encouraging sign - companies that provide feedback are usually seriously considering candidates!')}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `${data.companyName} provided feedback on your ${data.jobTitle} application`,
+        content,
+        source: 'candidate',
+        theme: defaultTheme,
+    });
+}
+
+// When recruiter proposes candidate to a job
+export interface CandidateRecruiterProposedData {
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    recruiterName: string;
+    applicationUrl: string;
+}
+
+export function candidateRecruiterProposedEmail(data: CandidateRecruiterProposedData): string {
+    const content = `
+${heading({ level: 1, text: 'You\'ve Been Proposed for a Role!' })}
+
+${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
+
+${paragraph(`Exciting news! Your recruiter <strong>${data.recruiterName}</strong> has officially proposed you for the <strong>${data.jobTitle}</strong> position at <strong>${data.companyName}</strong>.`)}
+
+${alert({
+        type: 'success',
+        title: 'Recruiter Endorsement',
+        message: `${data.recruiterName} believes you're an excellent fit for this role and is advocating for you.`,
+    })}
+
+${infoCard({
+        title: 'What being proposed means',
+        items: [
+            { label: 'Recruiter Confidence', value: `${data.recruiterName} is endorsing your candidacy to the company` },
+            { label: 'Application Enhancement', value: 'Your application has been professionally optimized and presented' },
+            { label: 'Direct Advocacy', value: 'Your recruiter is actively promoting your qualifications' },
+            { label: 'Next Phase', value: 'Application will move to company review stage' },
+        ],
+        theme: defaultTheme,
+    })}
+
+${paragraph(`Your recruiter will now work to get your application in front of the right decision-makers at ${data.companyName}.`)}
+
+${button({
+        href: data.applicationUrl,
+        text: 'Track Proposal Status →',
+        variant: 'primary',
+        theme: defaultTheme,
+    })}
+
+${paragraph(`Questions about your proposal? Your recruiter <strong>${data.recruiterName}</strong> is your advocate throughout this process.`)}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `${data.recruiterName} proposed you for ${data.jobTitle} at ${data.companyName}`,
+        content,
+        source: 'candidate',
+        theme: defaultTheme,
+    });
+}
+
+// When AI review is complete and candidate action may be needed
+export interface CandidateAIReviewedData {
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    hasRecruiter: boolean;
+    recruiterName?: string;
+    aiScore?: number;
+    applicationUrl: string;
+}
+
+export function candidateAIReviewedEmail(data: CandidateAIReviewedData): string {
+    const scoreText = data.aiScore ? ` with a match score of ${data.aiScore}%` : '';
+    const nextStepsMessage = data.hasRecruiter
+        ? `${data.recruiterName} will review the AI analysis and guide you on any optimizations or next steps before submitting to the company.`
+        : 'Based on the analysis, your application will either be submitted to the company or you may receive suggestions for improvements.';
+
+    const content = `
+${heading({ level: 1, text: 'AI Analysis Complete!' })}
+
+${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
+
+${paragraph(`Our AI has completed analyzing your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong>${scoreText}.`)}
+
+${alert({
+        type: 'info',
+        title: 'Analysis Complete',
+        message: 'Your application has been thoroughly analyzed for skills match, experience alignment, and optimization opportunities.',
+    })}
+
+${infoCard({
+        title: 'What our AI analyzed',
+        items: [
+            { label: 'Skills Alignment', value: 'How your skills match the job requirements' },
+            { label: 'Experience Relevance', value: 'Relevance of your background to the role' },
+            { label: 'Application Optimization', value: 'Suggestions for improving presentation' },
+            { label: 'Success Probability', value: 'Likelihood of positive company response' },
+        ],
+        theme: defaultTheme,
+    })}
+
+${paragraph(`<strong>What happens next:</strong> ${nextStepsMessage}`)}
+
+${button({
+        href: data.applicationUrl,
+        text: 'View AI Analysis Results →',
+        variant: 'primary',
+        theme: defaultTheme,
+    })}
+
+${data.hasRecruiter
+            ? paragraph(`Your recruiter <strong>${data.recruiterName}</strong> will use this analysis to ensure your application is perfectly positioned for success.`)
+            : paragraph('The AI analysis helps ensure your application is optimally presented to maximize your chances of success.')
+        }
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `AI analysis complete for your ${data.jobTitle} application`,
+        content,
+        source: 'candidate',
+        theme: defaultTheme,
+    });
+}
+
+// When recruiter is reviewing application before submission
+export interface CandidateRecruiterReviewData {
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    recruiterName: string;
+    applicationUrl: string;
+}
+
+export function candidateRecruiterReviewEmail(data: CandidateRecruiterReviewData): string {
+    const content = `
+${heading({ level: 1, text: 'Recruiter Review in Progress' })}
+
+${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
+
+${paragraph(`Your recruiter <strong>${data.recruiterName}</strong> is currently reviewing your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> before submission.`)}
+
+${infoCard({
+        title: 'What your recruiter is reviewing',
+        items: [
+            { label: 'Application Polish', value: 'Ensuring your application is professionally presented' },
+            { label: 'Skills Highlighting', value: 'Emphasizing your most relevant qualifications' },
+            { label: 'Company Fit', value: 'Tailoring presentation to company culture and needs' },
+            { label: 'Competitive Edge', value: 'Adding insights that make you stand out' },
+        ],
+        theme: defaultTheme,
+    })}
+
+${alert({
+        type: 'info',
+        title: 'Professional Review',
+        message: `${data.recruiterName} is applying their expertise to maximize your application's impact.`,
+    })}
+
+${paragraph(`This review process ensures your application will make the strongest possible impression when it reaches ${data.companyName}.`)}
+
+${button({
+        href: data.applicationUrl,
+        text: 'Track Review Progress →',
+        variant: 'primary',
+        theme: defaultTheme,
+    })}
+
+${paragraph(`Your recruiter will submit your enhanced application once the review is complete, typically within 24-48 hours.`)}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `${data.recruiterName} is reviewing your ${data.jobTitle} application`,
+        content,
+        source: 'candidate',
+        theme: defaultTheme,
+    });
+}
+
+// When application expires due to inactivity
+export interface CandidateApplicationExpiredData {
+    candidateName: string;
+    jobTitle: string;
+    companyName: string;
+    hasRecruiter: boolean;
+    recruiterName?: string;
+    applicationUrl: string;
+}
+
+export function candidateApplicationExpiredEmail(data: CandidateApplicationExpiredData): string {
+    const expiredMessage = data.hasRecruiter
+        ? `Your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> has expired due to inactivity. Your recruiter <strong>${data.recruiterName}</strong> can help you explore next steps.`
+        : `Your application for <strong>${data.jobTitle}</strong> at <strong>${data.companyName}</strong> has expired due to inactivity.`;
+
+    const nextStepsMessage = data.hasRecruiter
+        ? `Contact ${data.recruiterName} to discuss reactivating your application or exploring similar opportunities.`
+        : 'You can explore similar opportunities or reach out to our team for assistance finding new roles.';
+
+    const content = `
+${heading({ level: 1, text: 'Application Expired' })}
+
+${paragraph(`Hi <strong>${data.candidateName}</strong>,`)}
+
+${paragraph(expiredMessage)}
+
+${alert({
+        type: 'warning',
+        title: 'Application Timeout',
+        message: 'This application has been closed due to extended inactivity from all parties.',
+    })}
+
+${infoCard({
+        title: 'Why applications expire',
+        items: [
+            { label: 'Inactivity Period', value: 'No updates or responses for an extended period' },
+            { label: 'Company Timeline', value: 'Company may have filled the role or changed priorities' },
+            { label: 'Process Efficiency', value: 'Keeps active applications moving forward' },
+            { label: 'New Opportunities', value: 'Frees you up to focus on active prospects' },
+        ],
+        theme: defaultTheme,
+    })}
+
+${paragraph(`<strong>What you can do:</strong> ${nextStepsMessage}`)}
+
+${button({
+        href: data.applicationUrl,
+        text: 'View Application History →',
+        variant: 'secondary',
+        theme: defaultTheme,
+    })}
+
+${paragraph('Don\'t worry - expired applications don\'t reflect negatively on your profile, and new opportunities are always available!')}
+    `.trim();
+
+    return baseEmailTemplate({
+        preheader: `Your ${data.jobTitle} application at ${data.companyName} has expired`,
+        content,
+        source: 'candidate',
+        theme: defaultTheme,
+    });
+}

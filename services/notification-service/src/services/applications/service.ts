@@ -26,6 +26,12 @@ import {
     recruiterJobProposalEmail,
     candidateAIReviewEmail,
     candidateApplicationSubmittedByRecruiterEmail,
+    candidateCompanyReviewEmail,
+    candidateCompanyFeedbackEmail,
+    candidateRecruiterProposedEmail,
+    candidateAIReviewedEmail,
+    candidateRecruiterReviewEmail,
+    candidateApplicationExpiredEmail,
 } from '../../templates/applications/candidate-emails';
 
 export class ApplicationsEmailService {
@@ -1125,6 +1131,214 @@ export class ApplicationsEmailService {
             actionUrl: `/applications/${data.applicationId}`,
             actionLabel: 'View Application',
             priority: 'high',
+            category: 'application',
+        });
+    }
+
+    async sendCandidateCompanyReview(
+        recipientEmail: string,
+        data: {
+            candidateName: string;
+            jobTitle: string;
+            companyName: string;
+            hasRecruiter: boolean;
+            recruiterName?: string;
+            applicationId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `Application Under Review - ${data.jobTitle}`;
+        const applicationUrl = `${process.env.CANDIDATE_URL || 'https://applicant.network'}/applications/${data.applicationId}`;
+
+        const html = candidateCompanyReviewEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            hasRecruiter: data.hasRecruiter,
+            recruiterName: data.recruiterName,
+            applicationUrl,
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'candidate.company_review_started',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/applications/${data.applicationId}`,
+            actionLabel: 'Track Review Status',
+            priority: 'normal',
+            category: 'application',
+        });
+    }
+
+    async sendCandidateCompanyFeedback(
+        recipientEmail: string,
+        data: {
+            candidateName: string;
+            jobTitle: string;
+            companyName: string;
+            hasRecruiter: boolean;
+            recruiterName?: string;
+            applicationId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `Company Feedback Received - ${data.jobTitle}`;
+        const applicationUrl = `${process.env.CANDIDATE_URL || 'https://applicant.network'}/applications/${data.applicationId}`;
+
+        const html = candidateCompanyFeedbackEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            hasRecruiter: data.hasRecruiter,
+            recruiterName: data.recruiterName,
+            applicationUrl,
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'candidate.company_feedback_received',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/applications/${data.applicationId}`,
+            actionLabel: 'View Feedback',
+            priority: 'high',
+            category: 'application',
+        });
+    }
+
+    async sendCandidateRecruiterProposed(
+        recipientEmail: string,
+        data: {
+            candidateName: string;
+            jobTitle: string;
+            companyName: string;
+            recruiterName: string;
+            applicationId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `You've Been Proposed - ${data.jobTitle}`;
+        const applicationUrl = `${process.env.CANDIDATE_URL || 'https://applicant.network'}/applications/${data.applicationId}`;
+
+        const html = candidateRecruiterProposedEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            recruiterName: data.recruiterName,
+            applicationUrl,
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'candidate.recruiter_proposed',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/applications/${data.applicationId}`,
+            actionLabel: 'Track Proposal',
+            priority: 'high',
+            category: 'application',
+        });
+    }
+
+    async sendCandidateAIReviewed(
+        recipientEmail: string,
+        data: {
+            candidateName: string;
+            jobTitle: string;
+            companyName: string;
+            hasRecruiter: boolean;
+            recruiterName?: string;
+            aiScore?: number;
+            applicationId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `AI Analysis Complete - ${data.jobTitle}`;
+        const applicationUrl = `${process.env.CANDIDATE_URL || 'https://applicant.network'}/applications/${data.applicationId}`;
+
+        const html = candidateAIReviewedEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            hasRecruiter: data.hasRecruiter,
+            recruiterName: data.recruiterName,
+            aiScore: data.aiScore,
+            applicationUrl,
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'candidate.ai_reviewed',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/applications/${data.applicationId}`,
+            actionLabel: 'View AI Results',
+            priority: 'normal',
+            category: 'application',
+        });
+    }
+
+    async sendCandidateRecruiterReview(
+        recipientEmail: string,
+        data: {
+            candidateName: string;
+            jobTitle: string;
+            companyName: string;
+            recruiterName: string;
+            applicationId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `Recruiter Review in Progress - ${data.jobTitle}`;
+        const applicationUrl = `${process.env.CANDIDATE_URL || 'https://applicant.network'}/applications/${data.applicationId}`;
+
+        const html = candidateRecruiterReviewEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            recruiterName: data.recruiterName,
+            applicationUrl,
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'candidate.recruiter_review_started',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/applications/${data.applicationId}`,
+            actionLabel: 'Track Review',
+            priority: 'normal',
+            category: 'application',
+        });
+    }
+
+    async sendCandidateApplicationExpired(
+        recipientEmail: string,
+        data: {
+            candidateName: string;
+            jobTitle: string;
+            companyName: string;
+            hasRecruiter: boolean;
+            recruiterName?: string;
+            applicationId: string;
+            userId?: string;
+        }
+    ): Promise<void> {
+        const subject = `Application Expired - ${data.jobTitle}`;
+        const applicationUrl = `${process.env.CANDIDATE_URL || 'https://applicant.network'}/applications/${data.applicationId}`;
+
+        const html = candidateApplicationExpiredEmail({
+            candidateName: data.candidateName,
+            jobTitle: data.jobTitle,
+            companyName: data.companyName,
+            hasRecruiter: data.hasRecruiter,
+            recruiterName: data.recruiterName,
+            applicationUrl,
+        });
+
+        await this.sendDualNotification(recipientEmail, subject, html, {
+            eventType: 'candidate.application_expired',
+            userId: data.userId,
+            payload: data,
+            actionUrl: `/applications/${data.applicationId}`,
+            actionLabel: 'View History',
+            priority: 'low',
             category: 'application',
         });
     }
