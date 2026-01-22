@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { ContentCard } from '@/components/ui';
 
 interface ActionableProposalsWidgetProps {
     compact?: boolean;
@@ -98,91 +99,63 @@ export default function ActionableProposalsWidget({ compact = true }: Actionable
     const visibleApplications = applications.slice(0, compact ? 5 : applications.length);
 
     return (
-        <div className="space-y-3">
-            {visibleApplications.map((application) => {
-                const submittedAt = application.created_at
-                    ? new Date(application.created_at).toLocaleDateString()
-                    : null;
-                const hasDocuments = (application.document_count ?? 0) > 0;
-                const hasQuestions = (application.pre_screen_answer_count ?? 0) > 0;
+        <div className="overflow-x-auto -mx-4 sm:-mx-6">
+            <table className="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Candidate</th>
+                        <th>Role</th>
+                        <th className="text-right">Stage</th>
+                        <th>Submitted</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {visibleApplications.map((application) => {
+                        const submittedAt = application.created_at
+                            ? new Date(application.created_at).toLocaleDateString()
+                            : null;
+                        const hasDocuments = (application.document_count ?? 0) > 0;
+                        const hasQuestions = (application.pre_screen_answer_count ?? 0) > 0;
 
-                return (
-                    <div
-                        key={application.id}
-                        className="block card bg-base-100 shadow hover:shadow transition-all border border-base-300"
-                    >
-                        <div className="card-body p-4">
-                            <div className="flex items-start justify-between gap-4">
-                                <div className="grow">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <i className="fa-duotone fa-regular fa-user text-primary"></i>
-                                        <span className="badge badge-sm badge-info">{application.stage}</span>
-                                    </div>
-
-                                    <h3 className="font-semibold text-base mb-1">
-                                        {application.candidate?.full_name || 'Unknown Candidate'}
-                                    </h3>
-
-                                    <div className="text-sm text-base-content/70">
-                                        <p className="font-medium">
-                                            <i className="fa-duotone fa-regular fa-briefcase mr-2 text-primary"></i>
+                        return (
+                            <tr key={application.id} className="hover:bg-base-200/50 transition-colors">
+                                <td>
+                                    {application.candidate?.full_name || 'Unknown Candidate'}
+                                </td>
+                                <td>
+                                    <div>
+                                        <div className="font-medium">
                                             {application.job?.title || 'Unknown Role'}
-                                        </p>
+                                        </div>
                                         {application.job?.company?.name && (
-                                            <p className="text-xs mt-1 text-base-content/60">
-                                                <i className="fa-duotone fa-regular fa-building mr-1"></i>
+                                            <div className="text-xs text-base-content/60">
                                                 {application.job.company.name}
-                                            </p>
+                                            </div>
                                         )}
                                     </div>
-
-                                    <Link href={`/portal/applications/${application.id}`} className="text-sm text-primary font-medium mt-2">
+                                </td>
+                                <td className="text-right">
+                                    <span className="badge badge-sm badge-info">{application.stage}</span>
+                                </td>
+                                <td>
+                                    {submittedAt || 'N/A'}
+                                </td>
+                                <td>
+                                    <Link
+                                        href={`/portal/applications/${application.id}`}
+                                        className="btn btn-sm btn-ghost"
+                                    >
                                         <i className="fa-duotone fa-regular fa-arrow-right mr-1"></i>
-                                        Review details & submit to company
+                                        Review & Submit
                                     </Link>
+                                </td>
+                            </tr>
 
-                                    <div className="flex flex-wrap gap-3 mt-3 text-xs text-base-content/60">
-                                        {submittedAt && (
-                                            <span>
-                                                <i className="fa-duotone fa-regular fa-calendar mr-1"></i>
-                                                Submitted {submittedAt}
-                                            </span>
-                                        )}
-                                        {hasDocuments && (
-                                            <span>
-                                                <i className="fa-duotone fa-regular fa-file mr-1"></i>
-                                                {application.document_count} document
-                                                {application.document_count !== 1 ? 's' : ''}
-                                            </span>
-                                        )}
-                                        {hasQuestions && (
-                                            <span>
-                                                <i className="fa-duotone fa-regular fa-clipboard-question mr-1"></i>
-                                                {application.pre_screen_answer_count} question
-                                                {application.pre_screen_answer_count !== 1 ? 's' : ''} answered
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="text-right">
-                                    <p className="text-sm text-base-content/60 mb-2">
-                                        <i className="fa-duotone fa-regular fa-clock mr-1"></i>
-                                        Pending submission
-                                    </p>
-                                    <span className="badge badge-outline">Step 2 of 3</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-            })}
-
-            <div className="text-center pt-2">
-                <Link href="/portal/applications" className="text-sm text-primary hover:underline">
-                    View all pending reviews
-                </Link>
-            </div>
+                        );
+                    })}
+                </tbody>
+            </table>
         </div>
     );
 }

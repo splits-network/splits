@@ -176,14 +176,8 @@ export default function RecruiterDashboard() {
     return (
         <div className="space-y-6 animate-fade-in">
             {/* Welcome Section - Enhanced gradient card */}
-            <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-primary via-primary/90 to-secondary text-primary-content shadow-elevation-3">
-                {/* Decorative pattern */}
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/20 -translate-y-1/2 translate-x-1/4"></div>
-                    <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-white/10 translate-y-1/2 -translate-x-1/4"></div>
-                </div>
-
-                <div className="relative p-6 md:p-8">
+            <div className="">
+                <div className="relative p-4">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div>
                             <h2 className="text-2xl md:text-3xl font-bold">
@@ -192,12 +186,6 @@ export default function RecruiterDashboard() {
                             <p className="text-lg opacity-90 mt-1">
                                 Here's an overview of your recruiting activity.
                             </p>
-                        </div>
-                        <div className="flex gap-2">
-                            <Link href="/portal/roles" className="btn btn-sm bg-white/20 border-0 hover:bg-white/30 text-white">
-                                <i className="fa-duotone fa-regular fa-briefcase"></i>
-                                Browse Roles
-                            </Link>
                         </div>
                     </div>
                 </div>
@@ -327,10 +315,11 @@ export default function RecruiterDashboard() {
                     {/* Actionable Proposals */}
                     <ContentCard
                         title="Action Required"
+                        subtitle="Review and submit these applications to the hiring companies."
                         icon="fa-inbox"
                         headerActions={
-                            <Link href="/portal/proposals" className="btn btn-sm btn-ghost">
-                                View all
+                            <Link href="/portal/applications" className="btn btn-sm btn-ghost">
+                                View all applications
                                 <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                             </Link>
                         }
