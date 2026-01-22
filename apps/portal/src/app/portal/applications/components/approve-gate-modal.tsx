@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import { useAuth } from '@clerk/nextjs';
+import { createAuthenticatedClient } from '@/lib/api-client';
+import CompanyDocumentUpload, { StagedDocument } from '@/components/documents/company-document-upload';
 
 interface ApproveGateModalProps {
     isOpen: boolean;
@@ -10,6 +13,8 @@ interface ApproveGateModalProps {
     jobTitle: string;
     gateName: string;
     isHireTransition?: boolean;
+    applicationId?: string;
+    currentStage?: string;
 }
 
 export default function ApproveGateModal({
@@ -20,11 +25,74 @@ export default function ApproveGateModal({
     jobTitle,
     gateName,
     isHireTransition = false,
+    applicationId,
+    currentStage,
 }: ApproveGateModalProps) {
     const [notes, setNotes] = useState('');
     const [salary, setSalary] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showDocumentUpload, setShowDocumentUpload] = useState(false);
+    const [stagedDocuments, setStagedDocuments] = useState<StagedDocument[]>([]);
+    const [uploadingDocuments, setUploadingDocuments] = useState(false);
+
+    const { getToken } = useAuth();
+
+    // Check if this is an offer transition (interview → offer)
+    const isOfferTransition = currentStage === 'interview' && !isHireTransition;
+
+    // Modal title builder based on transition type
+    const getTitleText = () => {
+        switch (currentStage) {
+            case 'screen':
+                return 'Approve & Submit to Company';
+            case 'submitted':
+                return 'Approve & Move to Company Review';
+            case 'company_review':
+                return 'Approve & Move Forward';
+            case 'recruiter_review':
+                // "Recruiter reviewing before submission" → submit to company
+                return 'Approve & Submit to Company';
+            case 'recruiter_proposed':
+                // "Recruiter proposed candidate to job" → company reviews proposal
+                return 'Approve Proposal for Company Review';
+            case 'company_feedback':
+                return 'Approve & Continue';
+            case 'interview':
+                return 'Extend Offer';
+            case 'offer':
+                return 'Mark as Hired';
+            default:
+                return 'Approve';
+        }
+    };
+
+    const uploadStagedDocuments = async (): Promise<void> => {
+        if (stagedDocuments.length === 0) return;
+
+        setUploadingDocuments(true);
+        const token = await getToken();
+        if (!token) {
+            throw new Error('Not authenticated');
+        }
+
+        const client = createAuthenticatedClient(token);
+        const uploadPromises = stagedDocuments.map(async (doc) => {
+            const formData = new FormData();
+            formData.append('file', doc.file);
+            formData.append('entity_type', 'application');
+            formData.append('entity_id', applicationId!);
+            formData.append('document_type', doc.document_type);
+
+            return client.post<{ data: any }>('/documents', formData);
+        });
+
+        try {
+            await Promise.all(uploadPromises);
+        } finally {
+            setUploadingDocuments(false);
+        }
+    };
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -32,6 +100,11 @@ export default function ApproveGateModal({
         setSubmitting(true);
 
         try {
+            // Upload documents first if there are any staged
+            if (isOfferTransition && stagedDocuments.length > 0) {
+                await uploadStagedDocuments();
+            }
+
             // Validate salary for hire transitions
             if (isHireTransition) {
                 const salaryValue = parseFloat(salary);
@@ -44,8 +117,11 @@ export default function ApproveGateModal({
             } else {
                 await onApprove(notes.trim() || undefined);
             }
+
+            // Reset all state
             setNotes('');
             setSalary('');
+            setStagedDocuments([]);
             onClose();
         } catch (err) {
             console.error('Failed to approve gate:', err);
@@ -60,6 +136,8 @@ export default function ApproveGateModal({
             setNotes('');
             setSalary('');
             setError(null);
+            setShowDocumentUpload(false);
+            setStagedDocuments([]);
             onClose();
         }
     };
@@ -71,7 +149,7 @@ export default function ApproveGateModal({
             <div className="modal-box">
                 <h3 className="font-bold text-lg mb-4">
                     <i className="fa-duotone fa-regular fa-circle-check text-success mr-2"></i>
-                    Approve Application
+                    {getTitleText()}
                 </h3>
 
                 <div className="mb-4">
@@ -118,6 +196,54 @@ export default function ApproveGateModal({
                         </fieldset>
                     )}
 
+                    {/* Document Upload Section for Offer Transitions */}
+                    {isOfferTransition && applicationId && (
+                        <div className="mb-4">
+                            <div className="flex items-center gap-2 mb-3">
+                                <i className="fa-duotone fa-regular fa-file-contract text-primary"></i>
+                                <h4 className="font-semibold">Offer Documents (Optional)</h4>
+                                <button
+                                    type="button"
+                                    className="btn btn-ghost btn-xs"
+                                    onClick={() => setShowDocumentUpload(!showDocumentUpload)}
+                                >
+                                    {showDocumentUpload ? (
+                                        <>
+                                            <i className="fa-duotone fa-regular fa-chevron-up"></i>
+                                            Hide
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="fa-duotone fa-regular fa-chevron-down"></i>
+                                            Add Documents
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+
+                            <p className="text-sm text-base-content/70 mb-3">
+                                Upload offer letters, contracts, or other documents to include with your offer.
+                            </p>
+
+                            {showDocumentUpload && (
+                                <div className="bg-base-100 border border-base-300 rounded-lg p-4">
+                                    <CompanyDocumentUpload
+                                        entityType="application"
+                                        entityId={applicationId}
+                                        staged={true}
+                                        onFilesStaged={(files) => setStagedDocuments(files)}
+                                        onError={(error) => {
+                                            console.error('Document staging failed:', error);
+                                            setError(error);
+                                        }}
+                                        compact={true}
+                                        maxSizeKB={5120} // 5MB limit for offer documents
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     <fieldset className="fieldset mb-4">
                         <legend className="fieldset-legend">{isHireTransition ? 'Notes (Optional)' : 'Approval Notes (Optional)'}</legend>
                         <textarea
@@ -144,17 +270,20 @@ export default function ApproveGateModal({
                         <button
                             type="submit"
                             className="btn btn-success"
-                            disabled={submitting}
+                            disabled={submitting || uploadingDocuments}
                         >
                             {submitting ? (
                                 <>
                                     <span className="loading loading-spinner loading-sm"></span>
-                                    {isHireTransition ? 'Creating Placement...' : 'Approving...'}
+                                    {uploadingDocuments ? `Uploading Documents...` : (isHireTransition ? 'Creating Placement...' : 'Approving...')}
                                 </>
                             ) : (
                                 <>
                                     <i className="fa-duotone fa-regular fa-check"></i>
-                                    {isHireTransition ? 'Mark as Hired' : 'Approve Application'}
+                                    {isOfferTransition && stagedDocuments.length > 0
+                                        ? `Extend Offer (${stagedDocuments.length} document${stagedDocuments.length !== 1 ? 's' : ''})`
+                                        : (isHireTransition ? 'Mark as Hired' : 'Approve Application')
+                                    }
                                 </>
                             )}
                         </button>

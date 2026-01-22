@@ -346,6 +346,8 @@ export default function ApplicationActions({
                 jobTitle={application.job?.title || 'Unknown'}
                 gateName={getStageLabel()}
                 isHireTransition={currentStage === 'offer'}
+                applicationId={application.id}
+                currentStage={currentStage}
             />
 
             <DenyGateModal

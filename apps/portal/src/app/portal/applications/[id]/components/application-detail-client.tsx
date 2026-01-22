@@ -15,6 +15,7 @@ import JobDetailModal from './job-detail-modal';
 import CandidateDetailModal from './candidate-detail-modal';
 import DocumentViewerModal from './document-viewer-modal';
 import GateActions from './gate-actions';
+import CompanyDocumentUpload from '@/components/documents/company-document-upload';
 import { getApplicationStageBadge, getApplicationStageLabel } from '@/lib/utils/badge-styles';
 import type { ApplicationStage } from '@splits-network/shared-types';
 import { format } from 'path';
@@ -42,6 +43,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
     const [showJobModal, setShowJobModal] = useState(false);
     const [showCandidateModal, setShowCandidateModal] = useState(false);
     const [showDocumentModal, setShowDocumentModal] = useState(false);
+    const [showCompanyUploadModal, setShowCompanyUploadModal] = useState(false);
     const [selectedDocument, setSelectedDocument] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
@@ -327,6 +329,31 @@ export default function ApplicationDetailClient({ applicationId }: { application
     const handleOpenCandidateModal = () => {
         setShowCandidateModal(true);
     };
+
+    const handleDocumentUploadSuccess = () => {
+        // Refresh documents
+        loadApplicationData();
+        setShowCompanyUploadModal(false);
+    };
+
+    const handleDocumentView = (document: any) => {
+        setSelectedDocument(document);
+        setShowDocumentModal(true);
+    };
+
+    // Helper function to categorize documents
+    const categorizeDocuments = (docs: any[]) => {
+        const candidateTypes = ['resume', 'cover_letter', 'portfolio'];
+        const companyTypes = ['offer_letter', 'employment_contract', 'benefits_summary', 'company_handbook', 'nda', 'company_document'];
+
+        return {
+            candidateDocuments: docs.filter(doc => candidateTypes.includes(doc.document_type) || !companyTypes.includes(doc.document_type)),
+            companyDocuments: docs.filter(doc => companyTypes.includes(doc.document_type))
+        };
+    };
+
+    const { candidateDocuments, companyDocuments } = categorizeDocuments(documents);
+    const canUploadCompanyDocs = isCompanyUser && ['offer', 'hired'].includes(application?.stage);
 
     const relationshipWarning = relationship && relationship.status !== 'active';
     return (
@@ -865,6 +892,36 @@ export default function ApplicationDetailClient({ applicationId }: { application
                     setSelectedDocument(null);
                 }}
             />
+
+            {/* Company Document Upload Modal */}
+            {showCompanyUploadModal && (
+                <div className="modal modal-open">
+                    <div className="modal-box max-w-2xl">
+                        <h3 className="font-bold text-lg mb-4">
+                            <i className="fa-duotone fa-regular fa-upload mr-2"></i>
+                            Upload Company Document
+                        </h3>
+
+                        <CompanyDocumentUpload
+                            entityType="application"
+                            entityId={applicationId}
+                            onUploadSuccess={handleDocumentUploadSuccess}
+                            disabled={actionLoading}
+                        />
+
+                        <div className="modal-action">
+                            <button
+                                onClick={() => setShowCompanyUploadModal(false)}
+                                className="btn"
+                                disabled={actionLoading}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                    <div className="modal-backdrop" onClick={() => setShowCompanyUploadModal(false)}></div>
+                </div>
+            )}
         </div>
     );
 }

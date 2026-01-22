@@ -114,7 +114,7 @@ export class DocumentServiceV2 {
 
     async createDocument(clerkUserId: string, payload: CreateDocumentPayload) {
         const mimeType = await this.validateFile(payload.file, payload.originalFileName);
-        const storageBucket = this.storage.getBucketName(payload.entity_type);
+        const storageBucket = this.storage.getBucketName(payload.entity_type, payload.document_type);
         const storagePath = this.generateStoragePath(
             payload.entity_type,
             payload.entity_id,

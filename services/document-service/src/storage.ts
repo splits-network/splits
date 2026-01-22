@@ -25,13 +25,18 @@ export class StorageClient {
     }
 
     /**
-     * Get the appropriate bucket name for an entity type
+     * Get the appropriate bucket name for an entity type and document type
      */
-    getBucketName(entityType: string): string {
+    getBucketName(entityType: string, documentType?: string): string {
         switch (entityType) {
             case 'candidate':
-            case 'application':
                 return this.buckets.candidates;
+            case 'application':
+                // Company documents go to company bucket, candidate docs go to candidate bucket
+                const companyDocTypes = ['offer_letter', 'employment_contract', 'benefits_summary', 'company_handbook', 'nda', 'company_document'];
+                return companyDocTypes.includes(documentType || '') 
+                    ? this.buckets.companies 
+                    : this.buckets.candidates;
             case 'job':
             case 'company':
                 return this.buckets.companies;
