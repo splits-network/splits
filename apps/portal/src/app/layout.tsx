@@ -117,6 +117,17 @@ export default async function RootLayout({
                             `,
                         }}
                     />
+                    <script async src="https://www.googletagmanager.com/gtag/js?id=G-L49Q34QZQT" />
+                    <script
+                        dangerouslySetInnerHTML={{
+                            __html: `
+                                window.dataLayer = window.dataLayer || [];
+                                function gtag(){dataLayer.push(arguments);}
+                                gtag('js', new Date());
+                                gtag('config', 'G-L49Q34QZQT');
+                            `,
+                        }}
+                    />
                     <link rel="stylesheet" href="https://kit.fontawesome.com/728c8ddec8.css" crossOrigin="anonymous" />
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-300">
