@@ -9,6 +9,7 @@ import ActionableProposalsWidget from './actionable-proposals-widget';
 import { getActivityIcon } from '@/lib/utils';
 import { StatCard, StatCardGrid, ContentCard, EmptyState } from '@/components/ui/cards';
 import { TrendBadge } from '@/components/ui';
+import { AnalyticsChart } from '@/components/charts/analytics-chart';
 
 interface RecruiterStats {
     active_roles: number;
@@ -86,6 +87,7 @@ export default function RecruiterDashboard() {
     const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
     const [topRoles, setTopRoles] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [trendPeriod, setTrendPeriod] = useState(6); // Shared trend period for all charts
 
     useEffect(() => {
         loadDashboardData();
@@ -202,43 +204,64 @@ export default function RecruiterDashboard() {
             </div>
 
             {/* Key Stats Grid - Using new StatCard component */}
-            <StatCardGrid>
-                <StatCard
-                    title="Active Roles"
-                    value={stats?.active_roles || 0}
-                    description="Roles assigned to you"
-                    icon="fa-briefcase"
-                    color="primary"
-                    trend={stats?.trends?.active_roles}
-                    href="/portal/roles"
-                />
-                <StatCard
-                    title="In Process"
-                    value={stats?.candidates_in_process || 0}
-                    description="Active candidates"
-                    icon="fa-users"
-                    color="secondary"
-                    trend={stats?.trends?.candidates_in_process}
-                    href="/portal/applications"
-                />
-                <StatCard
-                    title="Pending Offers"
-                    value={stats?.offers_pending || 0}
-                    description="Awaiting acceptance"
-                    icon="fa-file-contract"
-                    color="accent"
-                    href="/portal/applications?stage=offer"
-                />
-                <StatCard
-                    title="Placements YTD"
-                    value={stats?.placements_this_year || 0}
-                    description="Successful hires"
-                    icon="fa-trophy"
-                    color="success"
-                    trend={stats?.trends?.placements_this_year}
-                    href="/portal/placements"
-                />
-            </StatCardGrid>
+            <div className='card bg-base-200'>
+                <StatCardGrid>
+                    <StatCard
+                        title="Active Roles"
+                        value={stats?.active_roles || 0}
+                        description="Roles assigned to you"
+                        icon="fa-briefcase"
+                        color="primary"
+                        trend={stats?.trends?.active_roles}
+                        href="/portal/roles"
+                    />
+                    <StatCard
+                        title="In Process"
+                        value={stats?.candidates_in_process || 0}
+                        description="Active candidates"
+                        icon="fa-users"
+                        color="secondary"
+                        trend={stats?.trends?.candidates_in_process}
+                        href="/portal/applications"
+                    />
+                    <StatCard
+                        title="Pending Offers"
+                        value={stats?.offers_pending || 0}
+                        description="Awaiting acceptance"
+                        icon="fa-file-contract"
+                        color="accent"
+                        href="/portal/applications?stage=offer"
+                    />
+                    <StatCard
+                        title="Placements YTD"
+                        value={stats?.placements_this_year || 0}
+                        description="Successful hires"
+                        icon="fa-trophy"
+                        color="success"
+                        trend={stats?.trends?.placements_this_year}
+                        href="/portal/placements"
+                    />
+                </StatCardGrid>
+                <div className='p-4 pt-0'>
+                    <AnalyticsChart
+                        type="placement-trends"
+                        title="Placement Trends"
+                        chartComponent="line"
+                        showLegend={true}
+                        legendPosition="bottom"
+                        scope="company"
+                        height={200}
+                        trendPeriod={trendPeriod}
+                        onTrendPeriodChange={setTrendPeriod}
+                    />
+                    <div className='alert alert-info alert-outline'>
+                        <i className="fa-duotone fa-regular fa-info-circle text-base-content/40"></i>
+                        <span className='text-sm text-base-content/70'>
+                            This is an example of integrating an analytics chart into the dashboard.
+                        </span>
+                    </div>
+                </div>
+            </div>
 
             {/* Earnings Overview - Enhanced cards */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

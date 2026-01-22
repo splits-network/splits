@@ -106,9 +106,8 @@ export default function ActionableProposalsWidget({ compact = true }: Actionable
                 const hasQuestions = (application.pre_screen_answer_count ?? 0) > 0;
 
                 return (
-                    <Link
+                    <div
                         key={application.id}
-                        href={`/portal/applications/${application.id}/review`}
                         className="block card bg-base-100 shadow hover:shadow transition-all border border-base-300"
                     >
                         <div className="card-body p-4">
@@ -136,10 +135,10 @@ export default function ActionableProposalsWidget({ compact = true }: Actionable
                                         )}
                                     </div>
 
-                                    <div className="text-sm text-primary font-medium mt-2">
+                                    <Link href={`/portal/applications/${application.id}`} className="text-sm text-primary font-medium mt-2">
                                         <i className="fa-duotone fa-regular fa-arrow-right mr-1"></i>
                                         Review details & submit to company
-                                    </div>
+                                    </Link>
 
                                     <div className="flex flex-wrap gap-3 mt-3 text-xs text-base-content/60">
                                         {submittedAt && (
@@ -174,12 +173,12 @@ export default function ActionableProposalsWidget({ compact = true }: Actionable
                                 </div>
                             </div>
                         </div>
-                    </Link>
+                    </div>
                 );
             })}
 
             <div className="text-center pt-2">
-                <Link href="/portal/applications/pending" className="text-sm text-primary hover:underline">
+                <Link href="/portal/applications" className="text-sm text-primary hover:underline">
                     View all pending reviews
                 </Link>
             </div>
