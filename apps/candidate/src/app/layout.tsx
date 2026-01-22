@@ -132,6 +132,17 @@ export default function RootLayout({
                             `,
                         }}
                     />
+                    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9F24GB9QJQ" />
+                    <script
+                        dangerouslySetInnerHTML={{
+                            __html: `
+                                window.dataLayer = window.dataLayer || [];
+                                function gtag(){dataLayer.push(arguments);}
+                                gtag('js', new Date());
+                                gtag('config', 'G-9F24GB9QJQ');
+                            `,
+                        }}
+                    />
                     <link rel="stylesheet" href="https://kit.fontawesome.com/728c8ddec8.css" crossOrigin="anonymous" />
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-300">
