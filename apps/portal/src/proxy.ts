@@ -10,10 +10,10 @@ export const config = {
     matcher: [
         // Protected routes that require authentication
         '/portal/(.*)',     // Main authenticated portal
-        '/sign-in(.*)',     // Auth routes
-        '/sign-up(.*)',
-        '/forgot-password(.*)',
-        '/sso-callback(.*)', // SSO callback
+        //'/sign-in(.*)',     // Auth routes
+        //'/sign-up(.*)',
+        //'/forgot-password(.*)',
+        //'/sso-callback(.*)', // SSO callback
         '/accept-invitation(.*)', // Invitation acceptance
         // Protected API routes only
         '/api/v2/(.*)',     // V2 API routes

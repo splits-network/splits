@@ -10,9 +10,9 @@ export const config = {
     matcher: [
         // Protected routes that require authentication
         '/portal/(.*)',     // Main authenticated portal
-        '/sign-in(.*)',     // Auth routes
-        '/sign-up(.*)',
-        '/forgot-password(.*)',
+        //'/sign-in(.*)',     // Auth routes
+        //'/sign-up(.*)',
+        //'/forgot-password(.*)',
         // Protected API routes only
         '/api/v2/(.*)',     // V2 API routes
         '/api/notifications/(.*)', // Notification APIs
