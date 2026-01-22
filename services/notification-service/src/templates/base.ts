@@ -55,7 +55,7 @@ function getLogoUrl(source?: EmailSource): string {
             return 'https://employment-networks.com/logo.png';
         case 'portal':
         default:
-            return 'https://splits.network/logo.png';
+            return 'https://splits.network/logo-email.png';
     }
 }
 
