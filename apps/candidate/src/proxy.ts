@@ -1,40 +1,22 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { clerkMiddleware } from '@clerk/nextjs/server';
 
-const isPublicRoute = createRouteMatcher([
-    '/public(.*)',
-    '/jobs(.*)',
-    '/how-it-works(.*)',
-    '/for-recruiters(.*)',
-    '/help(.*)',
-    '/about(.*)',
-    '/contact(.*)',
-    '/privacy(.*)',
-    '/terms(.*)',
-    '/cookies(.*)',
-    '/companies(.*)',
-    '/resources(.*)',
-    '/sign-in(.*)',
-    '/sign-up(.*)',
-    '/forgot-password(.*)',
-    '/marketplace(.*)',
-    '/status(.*)',
-    '/api-health(.*)',
-    '/sitemap.xml',
-    '/robots.txt',
-]);
-
+// Clerk middleware only runs on protected routes, preventing redirect loops for crawlers
 export default clerkMiddleware(async (auth, request) => {
-    if (!isPublicRoute(request)) {
-        await auth.protect();
-    }
+    // All routes matched by config.matcher require authentication
+    await auth.protect();
 });
 
 export const config = {
     matcher: [
-        // Skip Next.js internals and all static files, unless found in search params
-        '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-        // Always run for API routes
-        '/(api|trpc)(.*)',
+        // Protected routes that require authentication
+        '/portal/(.*)',     // Main authenticated portal
+        '/sign-in(.*)',     // Auth routes
+        '/sign-up(.*)',
+        '/forgot-password(.*)',
+        // Protected API routes only
+        '/api/v2/(.*)',     // V2 API routes
+        '/api/notifications/(.*)', // Notification APIs
+        '/api/healthcheck', // Internal health check
     ],
 };
 
