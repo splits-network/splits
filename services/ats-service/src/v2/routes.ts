@@ -12,8 +12,6 @@ import { PlacementServiceV2 } from './placements/service';
 import { CandidateSourcerRepository } from './candidate-sourcers/repository';
 import { CandidateSourcerServiceV2 } from './candidate-sourcers/service';
 import { CompanySourcerRepository } from './company-sourcers/repository';
-import { CandidateRoleAssignmentRepository } from './candidate-role-assignments/repository';
-import { CandidateRoleAssignmentServiceV2 } from './candidate-role-assignments/service';
 import { EventPublisher } from './shared/events';
 import { registerJobRoutes } from './jobs/routes';
 import { registerCompanyRoutes } from './companies/routes';
@@ -21,7 +19,6 @@ import { registerCandidateRoutes } from './candidates/routes';
 import { registerApplicationRoutes } from './applications/routes';
 import { registerPlacementRoutes } from './placements/routes';
 import { candidateSourcerRoutes } from './candidate-sourcers/routes';
-import { registerCandidateRoleAssignmentRoutes } from './candidate-role-assignments/routes';
 import { JobPreScreenQuestionRepository } from './job-pre-screen-questions/repository';
 import { JobPreScreenQuestionService } from './job-pre-screen-questions/service';
 import { registerJobPreScreenQuestionRoutes } from './job-pre-screen-questions/routes';
@@ -51,24 +48,13 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     const candidateRepository = new CandidateRepository(config.supabaseUrl, config.supabaseKey);
     const candidateService = new CandidateServiceV2(candidateRepository, candidateRepository.getSupabase(), config.eventPublisher);
 
-    // Initialize assignment repository and service
-    const assignmentRepository = new CandidateRoleAssignmentRepository(
-        candidateRepository.getSupabase(),
-        app.log as any  // FastifyBaseLogger is compatible with pino.Logger
-    );
-    const assignmentService = new CandidateRoleAssignmentServiceV2(
-        assignmentRepository,
-        config.eventPublisher || null,
-        candidateRepository.getSupabase(),
-        app.log as any  // FastifyBaseLogger is compatible with pino.Logger
-    );
+
 
     const applicationRepository = new ApplicationRepository(config.supabaseUrl, config.supabaseKey);
     const applicationService = new ApplicationServiceV2(
         applicationRepository,
         applicationRepository.getSupabase(),
-        config.eventPublisher,
-        assignmentService // Pass assignment service to application service
+        config.eventPublisher
     );
 
     const placementRepository = new PlacementRepository(config.supabaseUrl, config.supabaseKey);
@@ -81,8 +67,7 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
         placementRepository,
         companySourcerRepository,  // Add company sourcer repo for attribution
         candidateSourcerRepository,  // Add candidate sourcer repo for attribution
-        config.eventPublisher,
-        assignmentService // Pass assignment service to placement service for validation
+        config.eventPublisher
     );
 
     const candidateSourcerService = new CandidateSourcerServiceV2(
@@ -109,7 +94,6 @@ export function registerV2Routes(app: FastifyInstance, config: RegisterConfig) {
     registerCandidateRoutes(app, { candidateService });
     registerApplicationRoutes(app, { applicationService });
     registerPlacementRoutes(app, { placementService });
-    registerCandidateRoleAssignmentRoutes(app, { assignmentService });
     candidateSourcerRoutes(app, candidateSourcerService);
     registerJobPreScreenQuestionRoutes(app, { service: preScreenQuestionService });
     registerJobPreScreenAnswerRoutes(app, { service: preScreenAnswerService });

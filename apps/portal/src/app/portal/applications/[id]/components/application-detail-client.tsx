@@ -69,7 +69,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
             const client = createAuthenticatedClient(token);
 
             // Get application full details with includes
-            const appResponse: any = await client.get(`/applications/${applicationId}?include=job,documents,pre_screen_answers,job_requirements,current_gate`);
+            const appResponse: any = await client.get(`/applications/${applicationId}?include=job,documents,pre_screen_answers,job_requirements`);
             const appData = appResponse.data || appResponse;
 
             if (!appData) {
@@ -108,14 +108,9 @@ export default function ApplicationDetailClient({ applicationId }: { application
                 console.warn('Could not fetch audit log:', err);
             }
 
-            // Get CRA (Candidate Role Assignment) for gate actions
-            try {
-                const craResponse: any = await client.get(`/candidate-role-assignments?candidate_id=${appData.candidate_id}&job_id=${appData.job_id}&limit=1&include=current_gate`);
-                const craData = craResponse.data?.[0] || null;
-                setCra(craData);
-            } catch (err) {
-                console.warn('Could not fetch CRA:', err);
-            }
+            // Note: CRA (Candidate Role Assignment) table was dropped during application flow consolidation
+            // Gate logic is now handled via application.stage field
+            setCra(null); // CRA no longer exists
 
             // Role-specific permission checks and data loading
             if (isRecruiter) {

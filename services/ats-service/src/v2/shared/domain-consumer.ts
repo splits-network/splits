@@ -9,6 +9,7 @@ import { Logger } from '@splits-network/shared-logging';
 import { ApplicationRepository } from '../applications/repository';
 import { CandidateRepository } from '../candidates/repository';
 import { CandidateSourcerRepository } from '../candidate-sourcers/repository';
+import { PlacementServiceV2 } from '../placements/service';
 import { EventPublisher } from './events';
 
 interface DomainEvent {
@@ -29,6 +30,7 @@ export class DomainEventConsumer {
         private applicationRepository: ApplicationRepository,
         private candidateRepository: CandidateRepository,
         private candidateSourcerRepository: CandidateSourcerRepository,
+        private placementService: PlacementServiceV2,
         private eventPublisher: EventPublisher,
         private logger: Logger
     ) { }
@@ -166,6 +168,45 @@ export class DomainEventConsumer {
                     stage: new_stage,
                 }
             );
+
+            // Phase 4: If stage changed to 'hired', create placement automatically
+            if (new_stage === 'hired' && old_stage !== 'hired') {
+                this.logger.info(
+                    {
+                        application_id,
+                        event_id: event.event_id,
+                    },
+                    'Application hired - creating placement automatically'
+                );
+
+                try {
+                    // Use injected placement service to create placement from application
+                    // This will gather all 5 role IDs from referential data
+                    const placement = await this.placementService.createPlacementFromApplication(application_id);
+
+                    this.logger.info(
+                        {
+                            application_id,
+                            placement_id: placement.id,
+                            event_id: event.event_id,
+                        },
+                        'Successfully created placement from hired application'
+                    );
+                } catch (placementError: any) {
+                    this.logger.error(
+                        {
+                            err: placementError,
+                            application_id,
+                            event_id: event.event_id,
+                            error_message: placementError.message,
+                        },
+                        'Failed to create placement for hired application'
+                    );
+
+                    // Don't re-throw - stage change succeeded even if placement creation failed
+                    // Placement can be created manually later if needed
+                }
+            }
 
             this.logger.info(
                 {

@@ -9,15 +9,13 @@ import { EventPublisher } from '../shared/events';
 import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CandidateRoleAssignmentServiceV2 } from '../candidate-role-assignments/service';
 
 export class ApplicationServiceV2 {
     private accessResolver: AccessContextResolver;
     constructor(
         private repository: ApplicationRepository,
         supabase: SupabaseClient,
-        private eventPublisher?: EventPublisher,
-        private assignmentService?: CandidateRoleAssignmentServiceV2
+        private eventPublisher?: EventPublisher
     ) {
         this.accessResolver = new AccessContextResolver(supabase);
     }
@@ -202,21 +200,8 @@ export class ApplicationServiceV2 {
             });
         }
 
-        // Create or update candidate role assignment if recruiter is involved
-        if (recruiterId && this.assignmentService) {
-            try {
-                await this.assignmentService.createOrUpdateForApplication(
-                    clerkUserId || 'system',
-                    application.job_id,
-                    candidateId,
-                    recruiterId,
-                    application.stage
-                );
-            } catch (assignmentError) {
-                // Log but don't fail application creation if assignment fails
-                console.error('Failed to create/update assignment:', assignmentError);
-            }
-        }
+        // Note: Application created with referential recruiter data
+        // No additional assignment tracking needed
 
         return application;
     }
@@ -353,22 +338,8 @@ export class ApplicationServiceV2 {
             });
         }
 
-        // Update candidate role assignment if stage changed and recruiter is involved
-        if (updates.stage && currentApplication.stage !== updates.stage &&
-            updatedApplication.candidate_recruiter_id && this.assignmentService) {
-            try {
-                await this.assignmentService.createOrUpdateForApplication(
-                    clerkUserId || 'system',
-                    updatedApplication.job_id,
-                    updatedApplication.candidate_id,
-                    updatedApplication.candidate_recruiter_id,
-                    updates.stage as 'draft' | 'screen' | 'interview' | 'offer' | 'hired' | 'rejected' | 'submitted'
-                );
-            } catch (assignmentError) {
-                // Log but don't fail application update if assignment fails
-                console.error('Failed to update assignment:', assignmentError);
-            }
-        }
+        // Note: Application updated with referential recruiter data
+        // No additional assignment tracking needed
 
         return updatedApplication;
     }
@@ -419,7 +390,7 @@ export class ApplicationServiceV2 {
         // Draft is allowed from most active stages (candidate back-to-draft, recruiter request changes)
         if (toStage === 'draft') {
             // Cannot go back to draft from terminal stages
-            if (['hired', 'withdrawn'].includes(fromStage)) {
+            if (['hired', 'withdrawn', 'expired'].includes(fromStage)) {
                 throw new Error(
                     `Invalid stage transition: ${fromStage} -> ${toStage}`
                 );
@@ -431,7 +402,7 @@ export class ApplicationServiceV2 {
         // Recruiter can request changes/info from candidate at any active stage
         if (toStage === 'recruiter_request') {
             // Cannot request from terminal stages
-            if (['hired', 'rejected', 'withdrawn'].includes(fromStage)) {
+            if (['hired', 'rejected', 'withdrawn', 'expired'].includes(fromStage)) {
                 throw new Error(
                     `Invalid stage transition: ${fromStage} -> ${toStage}`
                 );
@@ -441,18 +412,29 @@ export class ApplicationServiceV2 {
 
         // Define allowed stage transitions for forward progress
         const allowedTransitions: Record<string, string[]> = {
+            // Candidate self-service stages
             draft: ['ai_review', 'screen', 'rejected'], // Draft can move to review or screening
-            recruiter_proposed: ['ai_review', 'draft', 'rejected'], // Recruiter proposal can be reviewed or sent back
-            recruiter_request: ['draft', 'ai_review', 'rejected'], // Candidate responds to request, or recruiter rejects
             ai_review: ['ai_reviewed', 'rejected'], // After AI review completes, move to ai_reviewed state
             ai_reviewed: ['draft', 'screen', 'submitted', 'rejected'], // Candidate can edit draft, screen, or submit
-            screen: ['submitted', 'rejected'], // After screening, submit to company or reject
-            submitted: ['interview', 'rejected'], // Company reviews application
+
+            // Recruiter involvement stages
+            recruiter_request: ['draft', 'ai_review', 'rejected'], // Candidate responds to request, or recruiter rejects
+            recruiter_proposed: ['ai_review', 'draft', 'recruiter_review', 'screen', 'submitted', 'rejected'], // Recruiter proposal can be reviewed or sent back
+            recruiter_review: ['screen', 'submitted', 'draft', 'rejected'], // Recruiter can submit, screen, or request changes
+
+            // Company review stages (replaces CRA gates)
+            screen: ['submitted', 'company_review', 'rejected'], // After screening, submit to company or reject
+            submitted: ['company_review', 'interview', 'rejected'], // Company reviews application
+            company_review: ['company_feedback', 'interview', 'offer', 'rejected'], // Company reviewing candidate
+            company_feedback: ['interview', 'offer', 'recruiter_request', 'rejected'], // Company provided feedback
             interview: ['offer', 'rejected'], // Interview stage
             offer: ['hired', 'rejected'], // Offer stage
-            hired: [], // Terminal state
-            rejected: [], // Terminal state
-            withdrawn: [], // Terminal state
+
+            // Terminal states
+            hired: [], // Terminal state - cannot transition further
+            rejected: [], // Terminal state - cannot transition further
+            withdrawn: [], // Terminal state - cannot transition further
+            expired: [], // Terminal state - cannot transition further
         };
 
         if (!allowedTransitions[fromStage]?.includes(toStage)) {
@@ -618,60 +600,9 @@ export class ApplicationServiceV2 {
         // Resolve user context early (needed for proposed_by UUID)
         const userContext = await this.accessResolver.resolve(clerkUserId);
 
-        // Phase 2.2 & 2.3: Determine gate routing and create CRA with routing
+        // Note: Gate routing now handled directly in application workflow
+        // No separate assignment service needed - using referential data approach
         let assignment = null;
-        if (this.assignmentService) {
-            try {
-                // Determine gate routing
-                const gateRouting = await this.assignmentService.determineGateRouting({
-                    jobId: updated.job_id,
-                    candidateId: updated.candidate_id,
-                });
-
-                // Create CRA with gate routing metadata
-                const now = new Date();
-                const createInput: any = {
-                    application_id: updated.id, // 1-to-1 relationship with application
-                    candidate_id: updated.candidate_id,
-                    job_id: updated.job_id,
-                    proposed_by: userContext.identityUserId,
-                    state: 'submitted', // CRA lifecycle state (submitted to gate system)
-                    submitted_at: now.toISOString(), // Timestamp when submitted to gate system
-                    // Gate routing fields
-                    current_gate: gateRouting.firstGate,
-                    gate_sequence: gateRouting.gateSequence,
-                    gate_history: [{
-                        gate: gateRouting.firstGate,
-                        action: 'entered',
-                        timestamp: now.toISOString(),
-                        notes: 'Application submitted',
-                    }],
-                    has_candidate_recruiter: gateRouting.hasCandidateRecruiter,
-                    has_company_recruiter: gateRouting.hasCompanyRecruiter,
-                    // Recruiter assignments
-                    candidate_recruiter_id: gateRouting.candidateRecruiterId,
-                    company_recruiter_id: gateRouting.companyRecruiterId,
-                };
-
-                assignment = await this.assignmentService.create(clerkUserId, createInput);
-
-                // Phase 2.5: Publish gate entered event
-                if (this.eventPublisher) {
-                    await this.eventPublisher.publish('application.gate_entered', {
-                        applicationId,
-                        craId: assignment.id,
-                        gate: gateRouting.firstGate,
-                        previousGate: null,
-                        gateSequence: gateRouting.gateSequence,
-                        remainingGates: gateRouting.gateSequence.slice(1),
-                        timestamp: now.toISOString(),
-                    });
-                }
-            } catch (error) {
-                console.error('Failed to create CandidateRoleAssignment with gate routing:', error);
-                // Don't fail the submission if CRA creation fails
-            }
-        }
 
         // Publish submission event
         if (this.eventPublisher) {

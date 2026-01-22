@@ -5,12 +5,10 @@ interface ApplicationFiltersProps {
     searchQuery: string;
     stageFilter: string;
     aiScoreFilter: string;
-    gateStatusFilter: string;
     viewMode: 'grid' | 'table';
     onSearchChange: (value: string) => void;
     onStageFilterChange: (value: string) => void;
     onAIScoreFilterChange: (value: string) => void;
-    onGateStatusFilterChange: (value: string) => void;
     onViewModeChange: (mode: 'grid' | 'table') => void;
 }
 
@@ -23,12 +21,10 @@ export const ApplicationFilters = forwardRef<HTMLInputElement, ApplicationFilter
         searchQuery,
         stageFilter,
         aiScoreFilter,
-        gateStatusFilter,
         viewMode,
         onSearchChange,
         onStageFilterChange,
         onAIScoreFilterChange,
-        onGateStatusFilterChange,
         onViewModeChange,
     }, ref) {
         return (
@@ -66,21 +62,6 @@ export const ApplicationFilters = forwardRef<HTMLInputElement, ApplicationFilter
                             <option value="medium">Medium Fit (60-79)</option>
                             <option value="low">Low Fit (&lt;60)</option>
                             <option value="not_reviewed">Not Reviewed</option>
-                        </select>
-                    </fieldset>
-
-                    <fieldset className="fieldset w-full">
-                        <select
-                            className="select w-full"
-                            value={gateStatusFilter}
-                            onChange={(e) => onGateStatusFilterChange(e.target.value)}
-                        >
-                            <option value="">All Gate Statuses</option>
-                            <option value="needs_my_review">⚡ Needs My Review</option>
-                            <option value="candidate_recruiter">Waiting on Candidate Recruiter</option>
-                            <option value="company_recruiter">Waiting on Company Recruiter</option>
-                            <option value="company">Waiting on Company</option>
-                            <option value="approved">Approved / No Gates</option>
                         </select>
                     </fieldset>
                 </div>

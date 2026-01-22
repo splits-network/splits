@@ -427,8 +427,10 @@ export class DataLookupHelper {
         status: string;
         notes: string | null;
     } | null> {
+        // Note: candidate_role_assignments table was dropped during application flow consolidation
+        // Proposal data is now tracked via applications table
         const { data, error } = await this.supabase
-            .from('candidate_role_assignments')
+            .from('applications')
             .select('*')
             .eq('id', proposalId)
             .single();
@@ -444,10 +446,12 @@ export class DataLookupHelper {
     /**
      * Get candidate role assignment (CRA) by ID
      * Used for gate notification workflows
+     * Note: candidate_role_assignments table was dropped during application flow consolidation
      */
     async getCandidateRoleAssignment(craId: string): Promise<CandidateRoleAssignmentData | null> {
+        // Note: candidate_role_assignments table was dropped - CRA data now tracked via applications
         const { data, error } = await this.supabase
-            .from('candidate_role_assignments')
+            .from('applications')
             .select('*')
             .eq('id', craId)
             .single();

@@ -16,6 +16,15 @@ export interface ApplicationUpdate {
     stage?: string;
     notes?: string;
     candidate_notes?: string;
+    recruiter_notes?: string;
+    internal_notes?: string;
+    cover_letter?: string;
+    salary?: number;
+    submitted_at?: Date | string;
+    hired_at?: Date | string;
+    placement_id?: string;
+    accepted_by_company?: boolean;
+    accepted_at?: Date | string;
     document_ids?: string[];
     primary_resume_id?: string;
     pre_screen_answers?: Array<{ question_id: string; answer: any }>;

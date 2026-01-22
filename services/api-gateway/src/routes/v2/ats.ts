@@ -40,12 +40,7 @@ const ATS_RESOURCES: ResourceDefinition[] = [
         basePath: '/placements',
         tag: 'placements',
     },
-    {
-        name: 'candidate-role-assignments',
-        service: 'ats',
-        basePath: '/candidate-role-assignments',
-        tag: 'candidate-role-assignments',
-    },
+    // Note: candidate-role-assignments removed - table dropped during application flow consolidation
     {
         name: 'job-pre-screen-questions',
         service: 'ats',
@@ -707,117 +702,8 @@ function registerApplicationFeedbackRoutes(app: FastifyInstance, services: Servi
         }
     );
 
-    // Approve Gate (Phase 3)
-    app.post(
-        '/api/v2/candidate-role-assignments/:id/approve-gate',
-        {
-            preHandler: requireAuth(),
-        },
-        async (request: FastifyRequest, reply: FastifyReply) => {
-            const { id } = request.params as { id: string };
-            const correlationId = getCorrelationId(request);
-            const authHeaders = buildAuthHeaders(request);
-
-            try {
-                const data = await atsService().post(
-                    `/api/v2/candidate-role-assignments/${id}/approve-gate`,
-                    request.body || {},
-                    correlationId,
-                    authHeaders
-                );
-                return reply.send(data);
-            } catch (error: any) {
-                request.log.error({ error, id, correlationId }, 'Failed to approve gate');
-                return reply
-                    .status(error.statusCode || 500)
-                    .send(error.jsonBody || { error: 'Failed to approve gate' });
-            }
-        }
-    );
-
-    // Deny Gate (Phase 3)
-    app.post(
-        '/api/v2/candidate-role-assignments/:id/deny-gate',
-        {
-            preHandler: requireAuth(),
-        },
-        async (request: FastifyRequest, reply: FastifyReply) => {
-            const { id } = request.params as { id: string };
-            const correlationId = getCorrelationId(request);
-            const authHeaders = buildAuthHeaders(request);
-
-            try {
-                const data = await atsService().post(
-                    `/api/v2/candidate-role-assignments/${id}/deny-gate`,
-                    request.body || {},
-                    correlationId,
-                    authHeaders
-                );
-                return reply.send(data);
-            } catch (error: any) {
-                request.log.error({ error, id, correlationId }, 'Failed to deny gate');
-                return reply
-                    .status(error.statusCode || 500)
-                    .send(error.jsonBody || { error: 'Failed to deny gate' });
-            }
-        }
-    );
-
-    // Request Info (Phase 3)
-    app.post(
-        '/api/v2/candidate-role-assignments/:id/request-info',
-        {
-            preHandler: requireAuth(),
-        },
-        async (request: FastifyRequest, reply: FastifyReply) => {
-            const { id } = request.params as { id: string };
-            const correlationId = getCorrelationId(request);
-            const authHeaders = buildAuthHeaders(request);
-
-            try {
-                const data = await atsService().post(
-                    `/api/v2/candidate-role-assignments/${id}/request-info`,
-                    request.body || {},
-                    correlationId,
-                    authHeaders
-                );
-                return reply.send(data);
-            } catch (error: any) {
-                request.log.error({ error, id, correlationId }, 'Failed to request info');
-                return reply
-                    .status(error.statusCode || 500)
-                    .send(error.jsonBody || { error: 'Failed to request info' });
-            }
-        }
-    );
-
-    // Provide Info (Phase 3)
-    app.post(
-        '/api/v2/candidate-role-assignments/:id/provide-info',
-        {
-            preHandler: requireAuth(),
-        },
-        async (request: FastifyRequest, reply: FastifyReply) => {
-            const { id } = request.params as { id: string };
-            const correlationId = getCorrelationId(request);
-            const authHeaders = buildAuthHeaders(request);
-
-            try {
-                const data = await atsService().post(
-                    `/api/v2/candidate-role-assignments/${id}/provide-info`,
-                    request.body || {},
-                    correlationId,
-                    authHeaders
-                );
-                return reply.send(data);
-            } catch (error: any) {
-                request.log.error({ error, id, correlationId }, 'Failed to provide info');
-                return reply
-                    .status(error.statusCode || 500)
-                    .send(error.jsonBody || { error: 'Failed to provide info' });
-            }
-        }
-    );
+    // Note: CRA gate endpoints removed - candidate_role_assignments table dropped during application flow consolidation
+    // Gate logic is now handled via application stage transitions
 }
 
 /**

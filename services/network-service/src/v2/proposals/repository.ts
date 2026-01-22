@@ -9,7 +9,8 @@ import { resolveAccessContext } from '../shared/access';
 
 export class ProposalRepository {
     private supabase: SupabaseClient;
-    private static readonly TABLE = 'candidate_role_assignments';
+    // Note: Proposals are now tracked via applications table (candidate_role_assignments dropped)
+    private static readonly TABLE = 'applications';
 
     constructor(supabaseUrl: string, supabaseKey: string) {
         this.supabase = createClient(supabaseUrl, supabaseKey, {

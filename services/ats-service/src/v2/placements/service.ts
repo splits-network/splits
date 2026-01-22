@@ -9,7 +9,6 @@ import { EventPublisher } from '../shared/events';
 import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CandidateRoleAssignmentServiceV2 } from '../candidate-role-assignments/service';
 import { CompanySourcerRepository } from '../company-sourcers/repository';
 import { CandidateSourcerRepository } from '../candidate-sourcers/repository';
 
@@ -22,8 +21,7 @@ export class PlacementServiceV2 {
         private repository: PlacementRepository,
         private companySourcerRepo: CompanySourcerRepository,
         private candidateSourcerRepo: CandidateSourcerRepository,
-        private eventPublisher?: EventPublisher,
-        private assignmentService?: CandidateRoleAssignmentServiceV2
+        private eventPublisher?: EventPublisher
     ) {
         this.supabase = supabase;
         this.accessResolver = new AccessContextResolver(supabase);
@@ -82,16 +80,11 @@ export class PlacementServiceV2 {
         let companyRecruiterId: string | null = null;
 
         if (craId) {
-            const { data: cra } = await this.supabase
-                .from('candidate_role_assignments')
-                .select('candidate_recruiter_id, company_recruiter_id')
-                .eq('id', craId)
-                .single();
-
-            if (cra) {
-                candidateRecruiterId = cra.candidate_recruiter_id;
-                companyRecruiterId = cra.company_recruiter_id;
-            }
+            // Note: candidate_role_assignments table was dropped during application flow consolidation
+            // CRA data is now tracked via applications.candidate_recruiter_id
+            // This code path should not be used anymore
+            console.warn('Legacy CRA ID provided to placement service - candidate_role_assignments table was dropped');
+            // candidateRecruiterId will be obtained from application data instead
         }
 
         // 3: Get job for job_owner_recruiter_id and company_id
@@ -162,61 +155,8 @@ export class PlacementServiceV2 {
         const candidateRecruiterId = data.candidate_recruiter_id;
         const companyRecruiterId = data.company_recruiter_id;
 
-        if ((candidateRecruiterId || companyRecruiterId) && this.assignmentService) {
-            try {
-                // Find the assignment - try both recruiter types
-                const filters: any = {
-                    job_id: data.job_id,
-                    candidate_id: data.candidate_id,
-                };
-
-                // Try to find by candidate recruiter first, then company recruiter
-                if (candidateRecruiterId) {
-                    filters.candidate_recruiter_id = candidateRecruiterId;
-                } else if (companyRecruiterId) {
-                    filters.company_recruiter_id = companyRecruiterId;
-                }
-
-                const assignments = await this.assignmentService.list(clerkUserId || '', filters);
-
-                if (assignments.data.length === 0) {
-                    throw new Error(
-                        'No assignment found for this candidate-job-recruiter combination. ' +
-                        'An assignment must exist before creating a placement.'
-                    );
-                }
-
-                const assignment = assignments.data[0];
-
-                // Validate assignment is in a state that can be closed
-                if (assignment.state === 'closed') {
-                    throw new Error('Assignment is already closed');
-                }
-                if (assignment.state === 'declined' || assignment.state === 'timed_out') {
-                    throw new Error(
-                        'Cannot create placement for declined or timed out assignment'
-                    );
-                }
-
-                // Close the assignment
-                if (!clerkUserId) {
-                    throw new Error('User ID required to close assignment');
-                }
-                if (!assignment.job_id || !assignment.candidate_id) {
-                    throw new Error('Assignment missing required job_id or candidate_id');
-                }
-                await this.assignmentService.closeAssignment(
-                    clerkUserId,
-                    assignment.job_id,
-                    assignment.candidate_id
-                );
-            } catch (error) {
-                console.error('Assignment validation/closure failed:', error);
-                throw new Error(
-                    `Failed to validate/close assignment: ${error instanceof Error ? error.message : 'Unknown error'}`
-                );
-            }
-        }
+        // Note: Assignment validation removed - using referential data approach
+        // Placement creation now uses direct recruiter relationships from application data
 
         const userContext = await this.accessResolver.resolve(clerkUserId);
         const placement = await this.repository.createPlacement({
@@ -355,5 +295,115 @@ export class PlacementServiceV2 {
         if (toStatus === 'completed' && userRole === 'hiring_manager') {
             throw new Error('Only admins can mark placements as completed');
         }
+    }
+
+    /**
+     * Phase 4: Create placement from application using referential data approach
+     * Gathers all 5 role IDs from referential sources instead of duplicating on placement
+     */
+    async createPlacementFromApplication(applicationId: string): Promise<any> {
+        // Get application with related data
+        const { data: application } = await this.supabase
+            .from('applications')
+            .select('*')
+            .eq('id', applicationId)
+            .single();
+
+        if (!application) {
+            throw new Error(`Application ${applicationId} not found`);
+        }
+
+        if (application.stage !== 'hired') {
+            throw new Error(`Application must be in 'hired' stage to create placement. Current stage: ${application.stage}`);
+        }
+
+        // Get job data with company_id and job owner
+        const { data: job } = await this.supabase
+            .from('jobs')
+            .select('id, company_id, company_recruiter_id, job_owner_recruiter_id, fee_percentage')
+            .eq('id', application.job_id)
+            .single();
+
+        if (!job) {
+            throw new Error(`Job ${application.job_id} not found`);
+        }
+
+        // Get all 5 recruiter role IDs from referential data (all nullable)
+        const candidateRecruiterId = application.candidate_recruiter_id;  // From application
+        const companyRecruiterId = job.company_recruiter_id;              // From job  
+        const jobOwnerRecruiterId = job.job_owner_recruiter_id;           // From job
+
+        // Get sourcer IDs from dedicated tables (all nullable)
+        const candidateSourcer = await this.candidateSourcerRepo.getByCandidateId(application.candidate_id);
+        const companySourcer = await this.companySourcerRepo.getByCompanyId(job.company_id);
+
+        // Only include active sourcers for commission
+        const candidateSourcerActive = candidateSourcer ?
+            await this.candidateSourcerRepo.isSourcerActive(application.candidate_id) : false;
+        const companySourcerActive = companySourcer ?
+            await this.companySourcerRepo.isSourcerActive(job.company_id) : false;
+
+        const candidateSourcerRecruiterId = candidateSourcerActive ?
+            candidateSourcer?.sourcer_recruiter_id : null;
+        const companySourcerRecruiterId = companySourcerActive ?
+            companySourcer?.sourcer_recruiter_id : null;
+
+        // Calculate placement fee
+        const salary = application.salary || 0;
+        const feePercentage = job.fee_percentage || 0;
+        const placementFee = Math.round((salary * feePercentage) / 100);
+
+        // Create placement with snapshot of all role IDs
+        const placement = await this.repository.createPlacement({
+            application_id: application.id,
+            candidate_id: application.candidate_id,
+            job_id: application.job_id,
+
+            // Snapshot all 5 role IDs from referential data (all nullable)
+            candidate_recruiter_id: candidateRecruiterId,
+            company_recruiter_id: companyRecruiterId,
+            job_owner_recruiter_id: jobOwnerRecruiterId,
+            candidate_sourcer_recruiter_id: candidateSourcerRecruiterId,
+            company_sourcer_recruiter_id: companySourcerRecruiterId,
+
+            // Money details
+            salary: salary,
+            fee_percentage: feePercentage,
+            placement_fee: placementFee,
+
+            state: 'active',
+            start_date: new Date(), // Default to current date, can be updated later
+            created_at: new Date(),
+            updated_at: new Date(),
+        });
+
+        // Update application with placement link and hired timestamp
+        await this.supabase
+            .from('applications')
+            .update({
+                placement_id: placement.id,
+                hired_at: new Date(),
+                updated_at: new Date(),
+            })
+            .eq('id', applicationId);
+
+        // Publish placement created event
+        if (this.eventPublisher) {
+            await this.eventPublisher.publish('placement.created', {
+                placement_id: placement.id,
+                application_id: application.id,
+                candidate_id: application.candidate_id,
+                job_id: application.job_id,
+                candidate_recruiter_id: candidateRecruiterId,
+                company_recruiter_id: companyRecruiterId,
+                job_owner_recruiter_id: jobOwnerRecruiterId,
+                candidate_sourcer_recruiter_id: candidateSourcerRecruiterId,
+                company_sourcer_recruiter_id: companySourcerRecruiterId,
+                placement_fee: placementFee,
+                created_by: 'system', // Created automatically when application hired
+            });
+        }
+
+        return placement;
     }
 }

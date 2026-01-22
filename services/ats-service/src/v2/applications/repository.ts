@@ -132,30 +132,6 @@ export class ApplicationRepository {
             query = query.eq('stage', filters.stage);
         }
 
-        // Gate status filtering
-        if (filters.gate_status) {
-            const gateApplicationIds = await this.filterByGateStatus(
-                filters.gate_status,
-                accessContext,
-                clerkUserId
-            );
-
-            if (gateApplicationIds.length === 0) {
-                // No applications match gate criteria
-                return {
-                    data: [],
-                    pagination: {
-                        page: 1,
-                        limit,
-                        total: 0,
-                        total_pages: 0
-                    }
-                };
-            }
-
-            query = query.in('id', gateApplicationIds);
-        }
-
         if (filters.job_id) {
             query = query.eq('job_id', filters.job_id);
         }
@@ -384,14 +360,7 @@ export class ApplicationRepository {
                     // Requirements are part of the job - already fetched with job.requirements
                     // This is a separate query via getJobRequirements if needed
                     break;
-                case 'current_gate':
-                    // Join with current gate from candidate role assignments
-                    selectClause += `, ...candidate_role_assignments!application_id(current_gate)`;
-                    break;
-                case 'candidate_role_assignments':
-                    // Join with candidate role assignments (one-to-many relationship via application_id)
-                    selectClause += `,candidate_role_assignments:candidate_role_assignments!application_id(id, candidate_id, state, current_gate, candidate_recruiter_id, company_recruiter_id, created_at, updated_at)`;
-                    break;
+                // Note: current_gate and candidate_role_assignments removed - table was dropped during application flow consolidation
                 case 'ai_review':
                 case 'ai-review':
                     // AI reviews use one-to-many relationship - get only the latest
@@ -401,89 +370,6 @@ export class ApplicationRepository {
         }
 
         return selectClause;
-    }
-
-    /**
-     * Filter applications by gate status
-     * Returns array of application IDs that match the gate criteria
-     */
-    private async filterByGateStatus(
-        gateStatus: string,
-        accessContext: AccessContext,
-        clerkUserId: string
-    ): Promise<string[]> {
-        if (gateStatus === 'approved') {
-            // Applications with no CRA or CRA in terminal approved state
-            const { data: approvedApps, error: appsError } = await this.supabase
-                .from('applications')
-                .select('id')
-                .is('application_id', null)
-                .or('state.eq.approved', {
-                    foreignTable: 'candidate_role_assignments',
-                    referencedTable: 'applications'
-                });
-
-            if (appsError) {
-                // Fallback: get all applications and filter out those with active CRAs
-                const { data: allApps } = await this.supabase
-                    .from('applications')
-                    .select('id');
-
-                const { data: activeCRAs } = await this.supabase
-                    .from('candidate_role_assignments')
-                    .select('application_id')
-                    .not('state', 'in', '(rejected,declined,withdrawn,timed_out,closed)');
-
-                const activeCRAAppIds = new Set((activeCRAs || []).map((c: any) => c.application_id));
-                return (allApps || [])
-                    .filter((app: any) => !activeCRAAppIds.has(app.id))
-                    .map((app: any) => app.id);
-            }
-
-            return (approvedApps || []).map((app: any) => app.id);
-        }
-
-        // For gate-specific filters, query CRAs using application_id
-        let craQuery = this.supabase
-            .from('candidate_role_assignments')
-            .select('application_id, current_gate, candidate_recruiter_id, company_recruiter_id');
-
-        if (gateStatus === 'needs_my_review') {
-            // Applications at gates where current user has authority
-            if (accessContext.recruiterId) {
-                // Recruiter: check if at candidate_recruiter or company_recruiter gate
-                craQuery = craQuery.or(
-                    `and(current_gate.eq.candidate_recruiter,candidate_recruiter_id.eq.${accessContext.recruiterId}),` +
-                    `and(current_gate.eq.company_recruiter,company_recruiter_id.eq.${accessContext.recruiterId})`
-                );
-            } else if (accessContext.organizationIds.length > 0) {
-                // Company user: applications at company gate for their jobs
-                craQuery = craQuery.eq('current_gate', 'company');
-            } else {
-                return [];
-            }
-        } else if (gateStatus === 'candidate_recruiter') {
-            craQuery = craQuery.eq('current_gate', 'candidate_recruiter');
-        } else if (gateStatus === 'company_recruiter') {
-            craQuery = craQuery.eq('current_gate', 'company_recruiter');
-        } else if (gateStatus === 'company') {
-            craQuery = craQuery.eq('current_gate', 'company');
-        } else {
-            return [];
-        }
-
-        // Only get CRAs in active state (not terminal states)
-        craQuery = craQuery.not('state', 'in', '(rejected,declined,withdrawn,timed_out,closed)');
-
-        const { data: cras, error: crasError } = await craQuery;
-
-        if (crasError) throw crasError;
-        if (!cras || cras.length === 0) return [];
-
-        // Extract application IDs directly from CRAs
-        return cras
-            .filter((cra: any) => cra.application_id)
-            .map((cra: any) => cra.application_id);
     }
 
     async getRecruiterById(recruiterId: string): Promise<any | null> {

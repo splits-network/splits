@@ -157,18 +157,29 @@ export interface MaskedCandidate {
 }
 
 export type ApplicationStage =
-    | 'draft'              // Application not yet complete
-    | 'ai_review'          // AI evaluating candidate-job fit
-    | 'ai_reviewed'        // AI review completed, candidate reviewing feedback before submission
-    | 'recruiter_request'  // Recruiter requested changes, awaiting candidate response
-    | 'recruiter_proposed' // Recruiter sent job opportunity, awaiting candidate decision
-    | 'screen'             // Initial phone screen (candidate or company recruiter only)
-    | 'submitted'          // Submitted to company, awaiting company review
-    | 'interview'          // Formal interviews with company
+    // Candidate self-service stages
+    | 'draft'              // Candidate working on application
+    | 'ai_review'          // AI analyzing fit
+    | 'ai_reviewed'        // AI review complete, awaiting candidate action
+
+    // Recruiter involvement stages
+    | 'recruiter_request'  // Recruiter requested more details from candidate (should also contain notes that are appended to recruiter_notes)
+    | 'recruiter_proposed' // Recruiter proposed candidate to job (should also include notes that are appended to recruiter_notes)
+    | 'recruiter_review'   // Recruiter reviewing before submission
+
+    // Company review stages (replaces CRA gates)
+    | 'screen'             // Initial screen phase if no company recruiter, it will be shown to company and prompted for engaging a recruiter for screening
+    | 'submitted'          // Submitted to company
+    | 'company_review'     // Company reviewing candidate, now company can see candidate details
+    | 'company_feedback'   // Company provided feedback, awaiting next action (if company recruiter assigned, they handle feedback; if not, recruiter assigned to job handles feedback; if none assigned, candidate notified directly)
+    | 'interview'          // Interview scheduled/in-progress
     | 'offer'              // Offer extended
-    | 'hired'              // Candidate accepted offer
-    | 'rejected'           // Rejected by recruiter or company
+
+    // Terminal states
+    | 'hired'              // Candidate hired → create placement
+    | 'rejected'           // Company/recruiter rejected
     | 'withdrawn'          // Candidate withdrew
+    | 'expired'            // Timed out without action
     ;
 
 export type ApplicationFeedbackType =
@@ -260,17 +271,32 @@ export interface Application {
     id: string;
     job_id: string;
     candidate_id: string;
-    candidate_recruiter_id?: string;  // Renamed from recruiter_id for clarity - represents candidate (Closer role)
+    candidate_recruiter_id?: string | null;  // Renamed from recruiter_id for clarity - represents candidate (Closer role)
     stage: ApplicationStage;
+
+    // Application content and notes
     notes?: string;
-    recruiter_notes?: string;  // NEW: Recruiter's notes/pitch added during review
+    recruiter_notes?: string;  // Recruiter's notes/pitch added during review
     candidate_notes?: string;
+    internal_notes?: string;   // Internal company notes
+    cover_letter?: string;     // Candidate's cover letter
+    salary?: number;           // Candidate's requested salary
+
+    // Submission and hire tracking
+    submitted_at?: Date | null;
+    hired_at?: Date | null;
+    placement_id?: string | null;  // Link to placement record when hired
+
+    // Legacy fields (maintained for compatibility)
     accepted_by_company: boolean;
     accepted_at?: Date;
     ai_reviewed: boolean;  // Whether AI review has been completed
+
+    // Timestamps
     created_at: Date;
     updated_at: Date;
-    // Enriched data from service layer
+
+    // Enriched data from service layer (not stored in DB)
     candidate?: Candidate | MaskedCandidate;
     recruiter?: { id: string; name: string; email: string };
     job?: Job;
@@ -284,12 +310,20 @@ export interface Placement {
     job_id: string;
     candidate_id: string;
     company_id: string;
-    recruiter_id: string;
+
+    // 5-role commission structure (all nullable)
+    candidate_recruiter_id?: string | null;        // Closer role
+    company_recruiter_id?: string | null;          // Client/Hiring Facilitator role  
+    job_owner_recruiter_id?: string | null;        // Specs Owner role
+    candidate_sourcer_recruiter_id?: string | null; // Discovery role
+    company_sourcer_recruiter_id?: string | null;   // BD role
+
     application_id?: string;
     hired_at: Date;
     salary: number;
     fee_percentage: number;
     fee_amount: number;
+    placement_fee?: number | null;  // Total placement fee
     recruiter_share: number;
     platform_share: number;
     created_at: Date;
@@ -485,9 +519,6 @@ export interface RecruiterCandidateWithCandidate extends RecruiterCandidate {
     recruiter_bio?: string;
     recruiter_status?: string;
 }
-
-// NOTE: CandidateRoleAssignment types are now defined in candidate-role-assignments.ts
-// Import from there instead of duplicating here
 
 // Multi-Recruiter Placements
 export type CollaboratorRole = 'sourcer' | 'submitter' | 'closer' | 'support';

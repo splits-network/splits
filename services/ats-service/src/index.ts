@@ -107,11 +107,28 @@ async function main() {
         candidateRepository.getSupabase()
     );
 
+    // Initialize placement service for domain consumer
+    const placementRepository = new (await import('./v2/placements/repository')).PlacementRepository(
+        dbConfig.supabaseUrl,
+        dbConfig.supabaseServiceRoleKey || dbConfig.supabaseAnonKey
+    );
+    const companySourcerRepository = new (await import('./v2/company-sourcers/repository')).CompanySourcerRepository(
+        candidateRepository.getSupabase()
+    );
+    const placementService = new (await import('./v2/placements/service')).PlacementServiceV2(
+        placementRepository.getSupabase(),
+        placementRepository,
+        companySourcerRepository,
+        candidateSourcerRepository,
+        v2EventPublisher
+    );
+
     const domainConsumer = new DomainEventConsumer(
         rabbitConfig.url,
         applicationRepository,
         candidateRepository,
         candidateSourcerRepository,
+        placementService,
         v2EventPublisher,
         logger
     );

@@ -67,7 +67,6 @@ interface Application {
 interface ApplicationFiltersType {
     stage?: string;
     ai_score_filter?: string;
-    gate_status?: string;
 }
 
 // ===== TABLE COLUMNS =====
@@ -218,10 +217,6 @@ export default function ApplicationsList() {
         setFilter('ai_score_filter', value || undefined);
     };
 
-    const handleGateStatusFilterChange = (value: string) => {
-        setFilter('gate_status', value || undefined);
-    };
-
     // Accept application handler
     const handleAcceptApplication = async (applicationId: string) => {
         try {
@@ -344,12 +339,10 @@ export default function ApplicationsList() {
                                 searchQuery={searchInput}
                                 stageFilter={filters.stage || ''}
                                 aiScoreFilter={filters.ai_score_filter || ''}
-                                gateStatusFilter={filters.gate_status || ''}
                                 viewMode={viewMode}
                                 onSearchChange={setSearchInput}
                                 onStageFilterChange={handleStageFilterChange}
                                 onAIScoreFilterChange={handleAIScoreFilterChange}
-                                onGateStatusFilterChange={handleGateStatusFilterChange}
                                 onViewModeChange={setViewMode}
                             />
 
