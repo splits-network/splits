@@ -121,6 +121,14 @@ export class ApplicationServiceV2 {
             recruiterId = userContext.recruiterId;
         }
 
+        // If still no recruiterId, look up existing recruiter-candidate relationship
+        if (!recruiterId && candidateId) {
+            const activeRecruiter = await this.repository.findActiveRecruiterForCandidate(candidateId);
+            if (activeRecruiter && activeRecruiter.status === 'active') {
+                recruiterId = activeRecruiter.id;
+            }
+        }
+
         if (!candidateId || !userContext?.identityUserId) {
             throw new Error('Candidate ID & Identity User ID is required and could not be resolved from user context');
         }
@@ -137,7 +145,7 @@ export class ApplicationServiceV2 {
         const application = await this.repository.createApplication({
             ...applicationData,
             candidate_id: candidateId,
-            recruiter_id: recruiterId,
+            candidate_recruiter_id: recruiterId,
             stage: initialStage,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -586,11 +594,11 @@ export class ApplicationServiceV2 {
         if (!['ai_reviewed', 'screen'].includes(application.stage)) {
             throw new Error(`Cannot submit from stage: ${application.stage}. Application must be in ai_reviewed or screen stage.`);
         }
-
+        console.log(application.candidate_recruiter_id);
         // Determine next stage based on recruiter presence
         // Represented candidates (with recruiter) → screen (recruiter reviews first)
         // Direct candidates (no recruiter) → submitted (goes straight to company)
-        const nextStage = application.candidate_recruiter_id ? 'screen' : 'submitted';
+        const nextStage = application.candidate_recruiter_id ? 'recruiter_review' : 'submitted';
 
         // Update to appropriate stage
         const updated = await this.repository.updateApplication(applicationId, {

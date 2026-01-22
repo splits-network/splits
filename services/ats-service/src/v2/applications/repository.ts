@@ -213,27 +213,9 @@ export class ApplicationRepository {
     }
 
     async createApplication(application: any, clerkUserId?: string): Promise<any> {
-        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-
-        // If candidate is submitting (not recruiter), lookup their active recruiter
-        let recruiterId = accessContext.recruiterId || null;
-        if (!recruiterId && application.candidate_id) {
-            const { data: recruiterRelationship } = await this.supabase
-
-                .from('recruiter_candidates')
-                .select('candidate_recruiter_id')
-                .eq('candidate_id', application.candidate_id)
-                .eq('status', 'active')
-                .single();
-
-            if (recruiterRelationship) {
-                recruiterId = recruiterRelationship.candidate_recruiter_id;
-            }
-        }
         const { data, error } = await this.supabase
-
             .from('applications')
-            .insert({ ...application, candidate_recruiter_id: recruiterId })
+            .insert(application)
             .select()
             .single();
 
@@ -700,5 +682,28 @@ export class ApplicationRepository {
             uploaded_at: doc.created_at,
             is_primary: doc.metadata?.is_primary || false,
         }));
+    }
+
+    /**
+     * Find the active recruiter representing a candidate
+     * Returns null if no active relationship exists
+     */
+    async findActiveRecruiterForCandidate(candidateId: string): Promise<any> {
+        const { data: relationship } = await this.supabase
+            .from('recruiter_candidates')
+            .select(`
+                recruiter_id,
+                recruiter:recruiters!recruiter_id(
+                    id,
+                    user_id,
+                    status,
+                    user:users!user_id(name, email)
+                )
+            `)
+            .eq('candidate_id', candidateId)
+            .eq('status', 'active')
+            .single();
+
+        return relationship?.recruiter || null;
     }
 }
