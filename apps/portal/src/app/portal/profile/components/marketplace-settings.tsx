@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useDebouncedCallback } from '@/hooks/use-debounce';
@@ -72,6 +72,9 @@ export function MarketplaceSettings() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [lastSaved, setLastSaved] = useState<Date | null>(null);
+
+    // Accumulate changes for batch saving
+    const pendingChangesRef = useRef<Partial<MarketplaceSettings>>({});
 
     useEffect(() => {
         loadSettings();
@@ -155,17 +158,59 @@ export function MarketplaceSettings() {
     };
 
     // Debounced auto-save function
-    const debouncedSave = useDebouncedCallback(
-        (newSettings: MarketplaceSettings) => {
-            saveSettings(newSettings);
-        },
-        1000
-    );
+    const debouncedSave = useDebouncedCallback(async () => {
+        if (Object.keys(pendingChangesRef.current).length === 0) return;
+
+        setSaving(true);
+        try {
+            const token = await getToken();
+            if (!token) {
+                setError('Please sign in to update marketplace settings.');
+                return;
+            }
+
+            if (!recruiterId) {
+                setError('Recruiter profile not loaded. Please refresh and try again.');
+                return;
+            }
+
+            const client = createAuthenticatedClient(token);
+            const changesToSave = { ...pendingChangesRef.current };
+
+            // Clear pending changes before saving to prevent race conditions
+            pendingChangesRef.current = {};
+
+            const payload = {
+                marketplace_enabled: changesToSave.marketplace_enabled ?? settings.marketplace_enabled,
+                marketplace_visibility: changesToSave.marketplace_visibility ?? settings.marketplace_visibility,
+                industries: changesToSave.industries ?? settings.industries,
+                specialties: changesToSave.specialties ?? settings.specialties,
+                location: changesToSave.location ?? settings.location,
+                tagline: changesToSave.tagline ?? settings.tagline,
+                years_experience: changesToSave.years_experience ?? settings.years_experience,
+                bio: changesToSave.bio ?? settings.bio,
+                marketplace_profile: changesToSave.marketplace_profile ?? settings.marketplace_profile,
+                show_success_metrics: changesToSave.show_success_metrics ?? settings.show_success_metrics,
+                show_contact_info: changesToSave.show_contact_info ?? settings.show_contact_info,
+            };
+            await client.patch(`/recruiters/${recruiterId}`, payload);
+            setLastSaved(new Date());
+            setError('');
+        } catch (err) {
+            console.error('Failed to update marketplace settings:', err);
+            setError('Failed to auto-save. Please try again.');
+        } finally {
+            setSaving(false);
+        }
+    }, 1000);
 
     const updateSettings = (updates: Partial<MarketplaceSettings>) => {
         const newSettings = { ...settings, ...updates };
         setSettings(newSettings);
-        debouncedSave(newSettings);
+
+        // Accumulate changes for batch saving
+        pendingChangesRef.current = { ...pendingChangesRef.current, ...updates };
+        debouncedSave();
     };
 
     const toggleIndustry = (industry: string) => {

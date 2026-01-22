@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, FormEvent } from 'react';
+import { useState, useEffect, useMemo, FormEvent, useRef } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useDebouncedCallback } from '@/hooks/use-debounce';
@@ -77,6 +77,9 @@ export default function ProfilePage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+
+    // Accumulate changes for batch saving
+    const pendingChangesRef = useRef<Partial<CandidateSettings>>({});
 
     // Name edit state
     const [name, setName] = useState('');
@@ -189,8 +192,8 @@ export default function ProfilePage() {
         }
     };
 
-    const debouncedSave = useDebouncedCallback(async (updates: Partial<CandidateSettings>) => {
-        if (!candidateId) return;
+    const debouncedSave = useDebouncedCallback(async () => {
+        if (!candidateId || Object.keys(pendingChangesRef.current).length === 0) return;
 
         setSaving(true);
         try {
@@ -198,7 +201,12 @@ export default function ProfilePage() {
             if (!token) return;
 
             const client = createAuthenticatedClient(token);
-            await client.patch(`/candidates/${candidateId}`, updates);
+            const changesToSave = { ...pendingChangesRef.current };
+
+            // Clear pending changes before saving to prevent race conditions
+            pendingChangesRef.current = {};
+
+            await client.patch(`/candidates/${candidateId}`, changesToSave);
             toast.success('Profile updated!');
             setSaving(false);
         } catch (err: any) {
@@ -213,7 +221,10 @@ export default function ProfilePage() {
         if (!settings) return;
         const newSettings = { ...settings, ...updates };
         setSettings(newSettings);
-        debouncedSave(updates);
+
+        // Accumulate changes for batch saving
+        pendingChangesRef.current = { ...pendingChangesRef.current, ...updates };
+        debouncedSave();
     };
 
     const updateBioRich = (bio_rich: string) => {
