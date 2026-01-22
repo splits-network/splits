@@ -80,123 +80,119 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
     }
 
     return (
-        <div className="card">
-            {/* Tabs */}
-            <div role="tablist" className="tabs tabs-lift">
-                <button
-                    role="tab"
-                    className={`tab ${activeTab === 'recruiter' ? 'tab-active' : ''}`}
-                    onClick={() => setActiveTab('recruiter')}
-                >
-                    <i className="fa-duotone fa-regular fa-user-tie mr-2"></i>
-                    Recruiter Details
-                </button>
-                <button
-                    role="tab"
-                    className={`tab ${activeTab === 'candidate' ? 'tab-active' : ''}`}
-                    onClick={() => setActiveTab('candidate')}
-                >
-                    <i className="fa-duotone fa-regular fa-user mr-2"></i>
-                    Candidate Details
-                </button>
-                <button
-                    role="tab"
-                    className={`tab ${activeTab === 'requirements' ? 'tab-active' : ''}`}
-                    onClick={() => setActiveTab('requirements')}
-                >
-                    <i className="fa-duotone fa-regular fa-list-check mr-2"></i>
-                    Requirements
-                </button>
-                <button
-                    role="tab"
-                    className={`tab ${activeTab === 'pipeline' ? 'tab-active' : ''}`}
-                    onClick={() => setActiveTab('pipeline')}
-                >
-                    <i className="fa-duotone fa-regular fa-users mr-2"></i>
-                    Candidate Pipeline <span className='badge badge-info ml-2'>{job.applications?.length}</span>
-                </button>
-            </div>
-
-            {/* Tab Content */}
-            <div className="bg-base-100 rounded-xl rounded-tl-none p-6">
-                {/* Recruiter Info Tab */}
-                {activeTab === 'recruiter' && (
-                    <div className=''>
-                        {(job.recruiter_description || job.description) ? (
-                            <div>
-                                <h3 className="font-semibold text-lg mb-3">Description</h3>
-                                <MarkdownRenderer
-                                    content={job.recruiter_description || job.description || ''}
-                                    className="text-base-content/80"
-                                />
-                            </div>
-                        ) : (
-                            <div className="text-center py-8 text-base-content/60">
-                                <i className="fa-duotone fa-regular fa-info-circle text-4xl mb-3"></i>
-                                <p>No recruiter description provided.</p>
-                            </div>
-                        )}
+        <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                <div className="card lg:col-span-2 xl:col-span-2 2xl:col-span-2 bg-base-200 shadow">
+                    {/* Tabs */}
+                    <div role="tablist" className="tabs tabs-lift">
+                        <button
+                            role="tab"
+                            className={`tab ${activeTab === 'recruiter' ? 'tab-active' : ''}`}
+                            onClick={() => setActiveTab('recruiter')}
+                        >
+                            <i className="fa-duotone fa-regular fa-user-tie mr-2"></i>
+                            Recruiter Details
+                        </button>
+                        <button
+                            role="tab"
+                            className={`tab ${activeTab === 'candidate' ? 'tab-active' : ''}`}
+                            onClick={() => setActiveTab('candidate')}
+                        >
+                            <i className="fa-duotone fa-regular fa-user mr-2"></i>
+                            Candidate Details
+                        </button>
+                        <button
+                            role="tab"
+                            className={`tab ${activeTab === 'requirements' ? 'tab-active' : ''}`}
+                            onClick={() => setActiveTab('requirements')}
+                        >
+                            <i className="fa-duotone fa-regular fa-list-check mr-2"></i>
+                            Requirements
+                        </button>
                     </div>
-                )}
 
-                {/* Candidate Info Tab */}
-                {activeTab === 'candidate' && (
-                    <div>
-                        {job.candidate_description ? (
-                            <div>
-                                <h3 className="font-semibold text-lg mb-3">Description</h3>
-                                <MarkdownRenderer
-                                    content={job.candidate_description}
-                                    className="text-base-content/80"
-                                />
-                            </div>
-                        ) : (
-                            <div className="text-center py-8 text-base-content/60">
-                                <i className="fa-duotone fa-regular fa-info-circle text-4xl mb-3"></i>
-                                <p>No candidate description provided.</p>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Requirements Tab */}
-                {activeTab === 'requirements' && (
-                    <div>
-                        {job.requirements && job.requirements.length > 0 ? (
-                            <>
-                                {/* Mandatory Requirements */}
-                                {job.requirements.filter(r => r.requirement_type === 'mandatory').length > 0 && (
-                                    <div className="mb-6">
-                                        <h3 className="font-semibold text-lg mb-3">
-                                            <i className="fa-duotone fa-regular fa-check-circle mr-2 text-success"></i>
-                                            Mandatory Requirements
-                                        </h3>
-                                        <ul className="list-disc list-inside space-y-2">
-                                            {job.requirements
-                                                .filter(r => r.requirement_type === 'mandatory')
-                                                .map(r => (
-                                                    <li key={r.id} className="text-base-content/80">{r.description}</li>
-                                                ))}
-                                        </ul>
+                    {/* Tab Content */}
+                    <div className="bg-base-100 rounded-xl rounded-tl-none p-6">
+                        {/* Recruiter Info Tab */}
+                        {activeTab === 'recruiter' && (
+                            <div className=''>
+                                {(job.recruiter_description || job.description) ? (
+                                    <div>
+                                        <h3 className="font-semibold text-lg mb-3">Description</h3>
+                                        <MarkdownRenderer
+                                            content={job.recruiter_description || job.description || ''}
+                                            className="text-base-content/80"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8 text-base-content/60">
+                                        <i className="fa-duotone fa-regular fa-info-circle text-4xl mb-3"></i>
+                                        <p>No recruiter description provided.</p>
                                     </div>
                                 )}
-                            </>
-                        ) : (
-                            <div className="text-center py-8 text-base-content/60">
-                                <i className="fa-duotone fa-regular fa-info-circle text-4xl mb-3"></i>
-                                <p>No requirements specified.</p>
+                            </div>
+                        )}
+
+                        {/* Candidate Info Tab */}
+                        {activeTab === 'candidate' && (
+                            <div>
+                                {job.candidate_description ? (
+                                    <div>
+                                        <h3 className="font-semibold text-lg mb-3">Description</h3>
+                                        <MarkdownRenderer
+                                            content={job.candidate_description}
+                                            className="text-base-content/80"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8 text-base-content/60">
+                                        <i className="fa-duotone fa-regular fa-info-circle text-4xl mb-3"></i>
+                                        <p>No candidate description provided.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Requirements Tab */}
+                        {activeTab === 'requirements' && (
+                            <div>
+                                {job.requirements && job.requirements.length > 0 ? (
+                                    <>
+                                        {/* Mandatory Requirements */}
+                                        {job.requirements.filter(r => r.requirement_type === 'mandatory').length > 0 && (
+                                            <div className="mb-6">
+                                                <h3 className="font-semibold text-lg mb-3">
+                                                    <i className="fa-duotone fa-regular fa-check-circle mr-2 text-success"></i>
+                                                    Mandatory Requirements
+                                                </h3>
+                                                <ul className="list-disc list-inside space-y-2">
+                                                    {job.requirements
+                                                        .filter(r => r.requirement_type === 'mandatory')
+                                                        .map(r => (
+                                                            <li key={r.id} className="text-base-content/80">{r.description}</li>
+                                                        ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    <div className="text-center py-8 text-base-content/60">
+                                        <i className="fa-duotone fa-regular fa-info-circle text-4xl mb-3"></i>
+                                        <p>No requirements specified.</p>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
-                )}
+                </div>
 
-                {/* Candidate Pipeline Tab */}
-                {activeTab === 'pipeline' && (
-                    <div>
+                <div className="card lg:col-span-2 xl:col-span-2 2xl:col-span-2 bg-base-200 shadow">
+                    <div className='card-body'>
+                        {/* Candidate Pipeline Tab */}
                         <CandidatePipeline roleId={roleId} />
                     </div>
-                )}
+                </div>
             </div>
-        </div>
+        </>
     );
 }

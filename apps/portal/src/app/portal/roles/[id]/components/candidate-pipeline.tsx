@@ -22,9 +22,9 @@ interface Application {
 
 const stages: Array<{ key: ApplicationStage; label: string; color: string }> = [
     { key: 'recruiter_proposed', label: 'Proposed', color: 'badge-secondary' },
-    { key: 'recruiter_request', label: 'Recruiter Request', color: 'badge-info' },
-    { key: 'draft', label: 'Draft', color: 'badge-accent' },
-    { key: 'ai_review', label: 'AI Review', color: 'badge-info' },
+    // { key: 'recruiter_request', label: 'Recruiter Request', color: 'badge-info' },
+    // { key: 'draft', label: 'Draft', color: 'badge-accent' },
+    // { key: 'ai_review', label: 'AI Review', color: 'badge-info' },
     { key: 'screen', label: 'Screen', color: 'badge-info' },
     { key: 'submitted', label: 'Submitted', color: 'badge-neutral' },
     { key: 'interview', label: 'Interview', color: 'badge-primary' },
@@ -125,7 +125,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
             <h2 className="font-semibold text-lg mb-3">Candidate Pipeline</h2>
 
             {/* Stage Tabs */}
-            <div className="tabs tabs-boxed bg-base-200 mt-4">
+            <div className="tabs tabs-lift bg-base-200 mt-4">
                 <a
                     className={`tab ${!showNeedsPreScreen && selectedStage === null ? 'tab-active' : ''}`}
                     onClick={() => {

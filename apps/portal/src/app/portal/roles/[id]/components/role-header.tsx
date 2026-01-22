@@ -49,7 +49,7 @@ interface RoleHeaderProps {
 export default function RoleHeader({ roleId }: RoleHeaderProps) {
     const { getToken } = useAuth();
     const toast = useToast();
-    const { isAdmin, profile } = useUserProfile();
+    const { isAdmin, profile, isRecruiter } = useUserProfile();
     const [job, setJob] = useState<Job | null>(null);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
@@ -137,143 +137,147 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
     return (
         <>
             <div className="card bg-base-200 shadow">
-                <div className="card-body">
-                    <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-                        <div className="flex-1">
-                            <div className="flex items-top md:items-center gap-3 flex-wrap">
-                                <h1 className="text-3xl font-bold">{job.title}</h1>
-                                <div className={`badge ${getJobStatusBadge(job.status)}`}>
-                                    {job.status}
-                                </div>
-                                {getRoleBadges(job, [job]).map((badge: Badge, idx: number) => (
-                                    <div
-                                        key={idx}
-                                        className={`badge ${badge.class} gap-1 ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-bottom' : ''}`}
-                                        data-tip={badge.tooltip}
-                                    >
-                                        <i className={`fa-duotone fa-regular ${badge.icon}`}></i>
-                                        {badge.text && <span>{badge.text}</span>}
+                <div className="card bg-base-100 shadow-lg m-2">
+                    <div className="card-body">
+                        <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+                            <div className="flex-1">
+                                <div className="flex items-top md:items-center gap-3 flex-wrap">
+                                    <h1 className="text-3xl font-bold">{job.title}</h1>
+                                    <div className={`badge ${getJobStatusBadge(job.status)}`}>
+                                        {job.status}
                                     </div>
-                                ))}
-                            </div>
-                            <div className="flex flex-wrap items-center gap-4 mt-3 text-base-content/70">
-                                <span className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-building"></i>
-                                    {job.company.name}
-                                </span>
-                                {job.location && (
-                                    <span className="flex items-center gap-2">
-                                        <i className="fa-duotone fa-regular fa-location-dot"></i>
-                                        {job.location}
-                                    </span>
-                                )}
-                                {job.department && (
-                                    <span className="flex items-center gap-2">
-                                        <i className="fa-duotone fa-regular fa-briefcase"></i>
-                                        {job.department}
-                                    </span>
-                                )}
-                                {job.employment_type && (
-                                    <span className="flex items-center gap-2">
-                                        <i className="fa-duotone fa-regular fa-clock"></i>
-                                        {job.employment_type === 'full_time' ? 'Full-Time' :
-                                            job.employment_type === 'contract' ? 'Contract' : 'Temporary'}
-                                    </span>
-                                )}
-                                {job.open_to_relocation && (
-                                    <span className="flex items-center gap-2">
-                                        <i className="fa-duotone fa-regular fa-plane"></i>
-                                        Open to Relocation
-                                    </span>
-                                )}
-                                {job.show_salary_range && job.salary_min && job.salary_max && (
-                                    <span className="flex items-center gap-2">
-                                        <i className="fa-duotone fa-regular fa-dollar-sign"></i>
-                                        ${(job.salary_min / 1000).toFixed(0)}k - ${(job.salary_max / 1000).toFixed(0)}k
-                                    </span>
-                                )}
-                                <span className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-percent"></i>
-                                    {job.fee_percentage}% fee
-                                </span>
-                                <span className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-handshake"></i>
-                                    {job.splits_fee_percentage}% recruiter split
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex flex-col gap-2">
-                            <button
-                                className="btn btn-primary gap-2"
-                                onClick={() => setShowSubmitModal(true)}
-                            >
-                                <i className="fa-duotone fa-regular fa-user-plus"></i>
-                                Send Proposal
-                            </button>
-
-                            {canManageRole && (
-                                <>
-                                    <button
-                                        onClick={() => setShowEditModal(true)}
-                                        className="btn btn-ghost gap-2"
-                                    >
-                                        <i className="fa-duotone fa-regular fa-pen"></i>
-                                        Edit Role
-                                    </button>
-
-                                    {/* Status Management Dropdown */}
-                                    <div className="dropdown dropdown-end">
-                                        <button
-                                            tabIndex={0}
-                                            className="btn btn-ghost gap-2 w-full"
-                                            disabled={updating}
+                                    {getRoleBadges(job, [job]).map((badge: Badge, idx: number) => (
+                                        <div
+                                            key={idx}
+                                            className={`badge ${badge.class} gap-1 ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-bottom' : ''}`}
+                                            data-tip={badge.tooltip}
                                         >
-                                            {updating ? (
-                                                <span className="loading loading-spinner loading-xs"></span>
-                                            ) : (
-                                                <i className="fa-duotone fa-regular fa-ellipsis-vertical"></i>
-                                            )}
-                                            Status Actions
+                                            <i className={`fa-duotone fa-regular ${badge.icon}`}></i>
+                                            {badge.text && <span>{badge.text}</span>}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="flex flex-wrap items-center gap-4 mt-3 text-base-content/70">
+                                    <span className="flex items-center gap-2">
+                                        <i className="fa-duotone fa-regular fa-building"></i>
+                                        {job.company.name}
+                                    </span>
+                                    {job.location && (
+                                        <span className="flex items-center gap-2">
+                                            <i className="fa-duotone fa-regular fa-location-dot"></i>
+                                            {job.location}
+                                        </span>
+                                    )}
+                                    {job.department && (
+                                        <span className="flex items-center gap-2">
+                                            <i className="fa-duotone fa-regular fa-briefcase"></i>
+                                            {job.department}
+                                        </span>
+                                    )}
+                                    {job.employment_type && (
+                                        <span className="flex items-center gap-2">
+                                            <i className="fa-duotone fa-regular fa-clock"></i>
+                                            {job.employment_type === 'full_time' ? 'Full-Time' :
+                                                job.employment_type === 'contract' ? 'Contract' : 'Temporary'}
+                                        </span>
+                                    )}
+                                    {job.open_to_relocation && (
+                                        <span className="flex items-center gap-2">
+                                            <i className="fa-duotone fa-regular fa-plane"></i>
+                                            Open to Relocation
+                                        </span>
+                                    )}
+                                    {job.show_salary_range && job.salary_min && job.salary_max && (
+                                        <span className="flex items-center gap-2">
+                                            <i className="fa-duotone fa-regular fa-dollar-sign"></i>
+                                            ${(job.salary_min / 1000).toFixed(0)}k - ${(job.salary_max / 1000).toFixed(0)}k
+                                        </span>
+                                    )}
+                                    <span className="flex items-center gap-2">
+                                        <i className="fa-duotone fa-regular fa-percent"></i>
+                                        {job.fee_percentage}% fee
+                                    </span>
+                                    <span className="flex items-center gap-2">
+                                        <i className="fa-duotone fa-regular fa-handshake"></i>
+                                        {job.splits_fee_percentage}% recruiter split
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex flex-col gap-2">
+                                {isRecruiter || isAdmin && (
+                                    <button
+                                        className="btn btn-primary gap-2"
+                                        onClick={() => setShowSubmitModal(true)}
+                                    >
+                                        <i className="fa-duotone fa-regular fa-user-plus"></i>
+                                        Send Proposal
+                                    </button>
+                                )}
+
+                                {canManageRole && (
+                                    <>
+                                        <button
+                                            onClick={() => setShowEditModal(true)}
+                                            className="btn btn-ghost gap-2"
+                                        >
+                                            <i className="fa-duotone fa-regular fa-pen"></i>
+                                            Edit Role
                                         </button>
-                                        <ul tabIndex={0} className="dropdown-content z-1 menu p-2 shadow bg-base-100 rounded-box w-52">
-                                            {job.status !== 'active' && (
-                                                <li>
-                                                    <button onClick={() => handleStatusChange('active')}>
-                                                        <i className="fa-duotone fa-regular fa-play"></i>
-                                                        Activate
-                                                    </button>
-                                                </li>
-                                            )}
-                                            {job.status === 'active' && (
-                                                <li>
-                                                    <button onClick={() => handleStatusChange('paused')}>
-                                                        <i className="fa-duotone fa-regular fa-pause"></i>
-                                                        Pause
-                                                    </button>
-                                                </li>
-                                            )}
-                                            {job.status !== 'filled' && (
-                                                <li>
-                                                    <button onClick={() => handleStatusChange('filled')}>
-                                                        <i className="fa-duotone fa-regular fa-check"></i>
-                                                        Mark as Filled
-                                                    </button>
-                                                </li>
-                                            )}
-                                            {job.status !== 'closed' && (
-                                                <li>
-                                                    <button onClick={() => handleStatusChange('closed')}>
-                                                        <i className="fa-duotone fa-regular fa-xmark"></i>
-                                                        Close Role
-                                                    </button>
-                                                </li>
-                                            )}
-                                        </ul>
-                                    </div>
-                                </>
-                            )}
+
+                                        {/* Status Management Dropdown */}
+                                        <div className="dropdown dropdown-end">
+                                            <button
+                                                tabIndex={0}
+                                                className="btn btn-ghost gap-2 w-full"
+                                                disabled={updating}
+                                            >
+                                                {updating ? (
+                                                    <span className="loading loading-spinner loading-xs"></span>
+                                                ) : (
+                                                    <i className="fa-duotone fa-regular fa-ellipsis-vertical"></i>
+                                                )}
+                                                Status Actions
+                                            </button>
+                                            <ul tabIndex={0} className="dropdown-content z-1 menu p-2 shadow bg-base-100 rounded-box w-52">
+                                                {job.status !== 'active' && (
+                                                    <li>
+                                                        <button onClick={() => handleStatusChange('active')}>
+                                                            <i className="fa-duotone fa-regular fa-play"></i>
+                                                            Activate
+                                                        </button>
+                                                    </li>
+                                                )}
+                                                {job.status === 'active' && (
+                                                    <li>
+                                                        <button onClick={() => handleStatusChange('paused')}>
+                                                            <i className="fa-duotone fa-regular fa-pause"></i>
+                                                            Pause
+                                                        </button>
+                                                    </li>
+                                                )}
+                                                {job.status !== 'filled' && (
+                                                    <li>
+                                                        <button onClick={() => handleStatusChange('filled')}>
+                                                            <i className="fa-duotone fa-regular fa-check"></i>
+                                                            Mark as Filled
+                                                        </button>
+                                                    </li>
+                                                )}
+                                                {job.status !== 'closed' && (
+                                                    <li>
+                                                        <button onClick={() => handleStatusChange('closed')}>
+                                                            <i className="fa-duotone fa-regular fa-xmark"></i>
+                                                            Close Role
+                                                        </button>
+                                                    </li>
+                                                )}
+                                            </ul>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
