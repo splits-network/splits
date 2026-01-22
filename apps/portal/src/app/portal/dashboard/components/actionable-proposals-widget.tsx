@@ -17,6 +17,7 @@ interface PendingApplication {
     document_count?: number;
     pre_screen_answer_count?: number;
     created_at?: string;
+    stage?: string;
 }
 
 /**
@@ -115,7 +116,7 @@ export default function ActionableProposalsWidget({ compact = true }: Actionable
                                 <div className="grow">
                                     <div className="flex items-center gap-2 mb-2">
                                         <i className="fa-duotone fa-regular fa-user text-primary"></i>
-                                        <span className="badge badge-sm badge-info">Awaiting Review</span>
+                                        <span className="badge badge-sm badge-info">{application.stage}</span>
                                     </div>
 
                                     <h3 className="font-semibold text-base mb-1">
