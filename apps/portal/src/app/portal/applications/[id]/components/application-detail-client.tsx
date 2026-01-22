@@ -48,10 +48,6 @@ export default function ApplicationDetailClient({ applicationId }: { application
     const [error, setError] = useState<string | null>(null);
     const [token, setToken] = useState<string | null>(null);
 
-    // Use context for platform admin check
-    const isPlatformAdmin = isAdmin;
-
-
     // Data fetching logic
     const loadApplicationData = useCallback(async () => {
         if (profileLoading || !applicationId) return;
@@ -247,7 +243,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
             }
 
             const client = createAuthenticatedClient(token);
-            const userType = isRecruiter ? 'Recruiter' : isCompanyUser ? 'Company User' : isPlatformAdmin ? 'Platform Admin' : 'Unknown';
+            const userType = isRecruiter ? 'Recruiter' : isCompanyUser ? 'Company User' : isAdmin ? 'Platform Admin' : 'Unknown';
             const newNote = `\n[${formatDate(new Date().toISOString())}] ${userType}: ${note}`;
             await client.patch(`/applications/${application.id}`, {
                 notes: application.notes + newNote
@@ -264,49 +260,62 @@ export default function ApplicationDetailClient({ applicationId }: { application
         }
     };
 
-    const handleGateApprove = async (notes?: string) => {
-        if (!cra?.id) return;
-
+    const handleStageTransition = async (targetStage: string, notes?: string) => {
         setActionLoading(true);
         try {
             const token = await getToken();
             if (!token) throw new Error('Not authenticated');
 
             const client = createAuthenticatedClient(token);
-            await client.post(`/candidate-role-assignments/${cra.id}/approve-gate`, { notes });
-            await client.patch(`/applications/${application.id}`, { stage: 'submitted' });
+            await client.patch(`/applications/${application.id}`, {
+                stage: targetStage as ApplicationStage,
+                ...(notes && { notes })
+            });
 
-            toast.success('Application approved successfully');
+            toast.success('Application moved to next stage successfully');
             await loadApplicationData();
         } catch (error: any) {
-            console.error('Failed to approve gate:', error);
-            toast.error(error.message || 'Failed to approve application');
+            console.error('Failed to transition stage:', error);
+            toast.error(error.message || 'Failed to update application stage');
             throw error;
         } finally {
             setActionLoading(false);
         }
     };
 
-    const handleGateDeny = async (reason: string) => {
-        if (!cra?.id) return;
-
+    const handleReject = async (reason: string) => {
         setActionLoading(true);
         try {
             const token = await getToken();
             if (!token) throw new Error('Not authenticated');
 
             const client = createAuthenticatedClient(token);
-            await client.post(`/candidate-role-assignments/${cra.id}/deny-gate`, { reason });
+            await client.patch(`/applications/${application.id}`, {
+                stage: 'rejected' as ApplicationStage,
+                rejection_reason: reason
+            });
 
-            toast.success('Application denied');
+            toast.success('Application rejected');
             await loadApplicationData();
         } catch (error: any) {
-            console.error('Failed to deny gate:', error);
-            toast.error(error.message || 'Failed to deny application');
+            console.error('Failed to reject application:', error);
+            toast.error(error.message || 'Failed to reject application');
             throw error;
         } finally {
             setActionLoading(false);
         }
+    };
+
+    const handleGateApprove = async (notes?: string) => {
+        // Legacy CRA-based handler - replaced by handleStageTransition
+        toast.warning('This action is no longer supported. Please use the new stage-based workflow.');
+        return;
+    };
+
+    const handleGateDeny = async (reason: string) => {
+        // Legacy CRA-based handler - replaced by handleReject
+        toast.warning('This action is no longer supported. Please use the new stage-based workflow.');
+        return;
     };
 
     const handleGateRequestInfo = async (questions: string) => {
@@ -680,23 +689,21 @@ export default function ApplicationDetailClient({ applicationId }: { application
             </div>
             <div className='col-span-12 md:col-span-4 xl:col-span-4 space-y-6'>
 
-                {/* Gate Actions - Show if user has review responsibility */}
+                {/* Application Actions - Show if user has review responsibility */}
                 <GateActions
                     application={application}
-                    craId={cra?.id || null}
                     isRecruiter={isRecruiter || false}
                     isCompanyUser={isCompanyUser || false}
-                    currentGate={application?.current_gate || null}
-                    onGateAction={loadApplicationData}
-                    onApprove={handleGateApprove}
-                    onDeny={handleGateDeny}
+                    isPlatformAdmin={isAdmin || false}
+                    onStageTransition={handleStageTransition}
+                    onReject={handleReject}
                     onRequestInfo={handleGateRequestInfo}
                     onAddNote={handleAddNote}
                     showAddNoteModal={setShowNoteModal}
                     actionLoading={actionLoading}
                 />
 
-                {isPlatformAdmin && (
+                {isAdmin && (
                     <div className="card bg-base-200 shadow">
                         <div className="card-body">
                             <h2 className="card-title text-lg mb-4">
@@ -836,7 +843,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
             </div>
 
             {/* Stage Update Modal */}
-            {isPlatformAdmin && showStageModal && (
+            {isAdmin && showStageModal && (
                 <StageUpdateModal
                     currentStage={application.stage}
                     onClose={() => setShowStageModal(false)}

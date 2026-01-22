@@ -5,85 +5,183 @@ import ApproveGateModal from '../../components/approve-gate-modal';
 import DenyGateModal from '../../components/deny-gate-modal';
 import RequestInfoModal from '../../components/request-info-modal';
 
-interface GateActionsProps {
+interface ApplicationActionsProps {
     application: any;
-    craId: string | null;
     isRecruiter: boolean;
     isCompanyUser: boolean;
-    currentGate: string | null;
-    onGateAction: () => Promise<void>;
-    onApprove: (notes?: string) => Promise<void>;
-    onDeny: (reason: string) => Promise<void>;
+    isPlatformAdmin: boolean;
+    onStageTransition: (newStage: string, notes?: string) => Promise<void>;
+    onReject: (reason: string) => Promise<void>;
     onRequestInfo: (questions: string) => Promise<void>;
     onAddNote: (note: string) => Promise<void>;
     showAddNoteModal: (show: boolean) => void;
     actionLoading: boolean;
 }
 
-export default function GateActions({
+export default function ApplicationActions({
     application,
-    craId,
     isRecruiter,
     isCompanyUser,
-    currentGate,
-    onGateAction,
-    onApprove,
-    onDeny,
+    isPlatformAdmin,
+    onStageTransition,
+    onReject,
     onRequestInfo,
     onAddNote,
     showAddNoteModal,
     actionLoading = false,
-}: GateActionsProps) {
+}: ApplicationActionsProps) {
     const [modalType, setModalType] = useState<'approve' | 'deny' | 'request-info' | null>(null);
     const [nextStage, setNextStage] = useState<'interview' | 'offer'>('interview');
 
-    // Don't show if no CRA exists yet
-    if (!craId) {
+    const currentStage = application?.stage;
+
+    // Don't show actions for terminal stages
+    if (!currentStage || ['hired', 'rejected', 'withdrawn', 'expired'].includes(currentStage)) {
         return null;
     }
 
-    // Company users at company gate
-    const showCompanyActions = isCompanyUser && currentGate === 'company';
+    // Determine if current user can take actions based on stage
+    const canTakeAction = () => {
+        switch (currentStage) {
+            case 'screen':
+            case 'company_review':
+                return isCompanyUser || isPlatformAdmin;
+            case 'recruiter_review':
+            case 'recruiter_proposed':
+                return isRecruiter || isPlatformAdmin;
+            case 'company_feedback':
+                // Depends on recruiter assignment
+                if (application.candidate_recruiter_id) {
+                    return isRecruiter || isPlatformAdmin;
+                } else {
+                    return isCompanyUser || isPlatformAdmin;
+                }
+            default:
+                return false;
+        }
+    };
 
-    // Recruiter at candidate_recruiter gate
-    const showCandidateRecruiterActions = isRecruiter && currentGate === 'candidate_recruiter';
+    const userHasActions = canTakeAction();
 
-    // Recruiter at company_recruiter gate
-    const showCompanyRecruiterActions = isRecruiter && currentGate === 'company_recruiter';
-
-    // Determine if user has actions available at this gate
-    const userHasActions = showCompanyActions || showCandidateRecruiterActions || showCompanyRecruiterActions;
-
-    const getGateLabel = () => {
-        if (currentGate === 'company') return 'Company Gate';
-        if (currentGate === 'candidate_recruiter') return 'Candidate Recruiter Gate';
-        if (currentGate === 'company_recruiter') return 'Company Recruiter Gate';
-        return 'Gate';
+    const getStageLabel = () => {
+        switch (currentStage) {
+            case 'screen': return 'Initial Screening';
+            case 'company_review': return 'Company Review';
+            case 'recruiter_review': return 'Recruiter Review';
+            case 'recruiter_proposed': return 'Recruiter Proposal';
+            case 'company_feedback': return 'Company Feedback Stage';
+            case 'interview': return 'Interview Stage';
+            case 'offer': return 'Offer Stage';
+            default: return 'Application Review';
+        }
     };
 
     const getActionButtonText = () => {
-        if (showCompanyActions) return 'Approve & Move to Offer';
-        if (showCandidateRecruiterActions) return 'Approve & Forward to Company';
-        if (showCompanyRecruiterActions) return 'Approve & Forward to Company';
-        return 'Approve';
+        switch (currentStage) {
+            case 'screen':
+                return 'Approve & Submit to Company';
+            case 'company_review':
+                return 'Approve & Move Forward';
+            case 'recruiter_review':
+                return 'Approve & Forward to Company';
+            case 'recruiter_proposed':
+                return 'Approve Proposal';
+            case 'company_feedback':
+                return 'Approve & Continue';
+            default:
+                return 'Approve';
+        }
     };
 
     const getDenyButtonText = () => {
-        if (showCompanyActions) return 'Reject Application';
-        return 'Decline to Represent';
+        switch (currentStage) {
+            case 'screen':
+            case 'company_review':
+                return 'Reject Application';
+            case 'recruiter_review':
+            case 'recruiter_proposed':
+                return 'Decline to Represent';
+            default:
+                return 'Reject';
+        }
     };
 
     const getWaitingMessage = () => {
-        if (currentGate === 'candidate_recruiter') {
-            return 'Waiting for candidate recruiter to review and approve this application.';
+        switch (currentStage) {
+            case 'screen':
+                return 'Application is being screened by the hiring team.';
+            case 'company_review':
+                return 'Application is under company review.';
+            case 'recruiter_review':
+                return 'Waiting for recruiter to review this application.';
+            case 'recruiter_proposed':
+                return 'Waiting for recruiter proposal to be reviewed.';
+            case 'company_feedback':
+                if (application.candidate_recruiter_id) {
+                    return 'Waiting for recruiter to review company feedback.';
+                } else {
+                    return 'Application is pending further review.';
+                }
+            case 'interview':
+                return 'Application is in the interview stage.';
+            case 'offer':
+                return 'Application is in the offer stage.';
+            default:
+                return 'Application is being processed.';
         }
-        if (currentGate === 'company_recruiter') {
-            return 'Waiting for company recruiter to review and approve this application.';
+    };
+
+    const handleApprove = () => {
+        setModalType('approve');
+    };
+
+    const handleDeny = () => {
+        setModalType('deny');
+    };
+
+    const handleRequestInfo = () => {
+        setModalType('request-info');
+    };
+
+    const handleConfirmApprove = async (note?: string) => {
+        let targetStage;
+
+        switch (currentStage) {
+            case 'screen':
+                targetStage = 'submitted';
+                break;
+            case 'company_review':
+                targetStage = nextStage; // interview or offer
+                break;
+            case 'recruiter_review':
+                targetStage = 'company_review';
+                break;
+            case 'recruiter_proposed':
+                targetStage = 'company_review';
+                break;
+            case 'company_feedback':
+                if (application.candidate_recruiter_id) {
+                    targetStage = 'recruiter_review';
+                } else {
+                    targetStage = 'interview';
+                }
+                break;
+            default:
+                targetStage = 'company_review';
         }
-        if (currentGate === 'company') {
-            return 'Waiting for company hiring team to review and make a decision.';
-        }
-        return 'Application is being reviewed at this stage.';
+
+        await onStageTransition(targetStage, note);
+        setModalType(null);
+    };
+
+    const handleConfirmDeny = async (note: string) => {
+        await onReject(note);
+        setModalType(null);
+    };
+
+    const handleConfirmRequestInfo = async (note: string) => {
+        await onRequestInfo(note);
+        setModalType(null);
     };
 
     const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
@@ -96,14 +194,14 @@ export default function GateActions({
                     <div className="font-bold mb-2 text-sm">Debug Flags</div>
                     <div className="space-y-1">
                         <div>userHasActions: <span className={userHasActions ? 'text-success' : 'text-error'}>{String(userHasActions)}</span></div>
-                        <div>showCompanyActions: <span className={showCompanyActions ? 'text-success' : 'text-error'}>{String(showCompanyActions)}</span></div>
-                        <div>showCandidateRecruiterActions: <span className={showCandidateRecruiterActions ? 'text-success' : 'text-error'}>{String(showCandidateRecruiterActions)}</span></div>
-                        <div>showCompanyRecruiterActions: <span className={showCompanyRecruiterActions ? 'text-success' : 'text-error'}>{String(showCompanyRecruiterActions)}</span></div>
+                        <div>canTakeAction: <span className={canTakeAction() ? 'text-success' : 'text-error'}>{String(canTakeAction())}</span></div>
                         <div className="border-t border-base-content/20 pt-1 mt-1">
                             <div>isRecruiter: <span className={isRecruiter ? 'text-success' : 'text-error'}>{String(isRecruiter)}</span></div>
                             <div>isCompanyUser: <span className={isCompanyUser ? 'text-success' : 'text-error'}>{String(isCompanyUser)}</span></div>
-                            <div>currentGate: <span className="text-info">{currentGate || 'null'}</span></div>
-                            <div>craId: <span className="text-info">{craId || 'null'}</span></div>
+                            <div>isPlatformAdmin: <span className={isPlatformAdmin ? 'text-success' : 'text-error'}>{String(isPlatformAdmin)}</span></div>
+                            <div>currentStage: <span className="text-info">{currentStage || 'null'}</span></div>
+                            <div>applicationId: <span className="text-info">{application?.id || 'null'}</span></div>
+                            <div>candidateRecruiterId: <span className="text-info">{application?.candidate_recruiter_id || 'null'}</span></div>
                         </div>
                     </div>
                 </div>
@@ -114,16 +212,14 @@ export default function GateActions({
                     <h2 className="card-title">
                         <i className="fa-duotone fa-regular fa-circle-check"></i>
                         {userHasActions
-                            ? (showCompanyActions ? 'Company Decision Required' : 'Your Review Required')
-                            : (getWaitingMessage())
+                            ? `${getStageLabel()} - Action Required`
+                            : getStageLabel()
                         }
                     </h2>
 
                     <p className="text-sm text-base-content/70">
                         {userHasActions
-                            ? (showCompanyActions
-                                ? 'This application requires your approval to move forward in the hiring process.'
-                                : 'This application requires your approval before moving to the next stage.')
+                            ? 'You can take action on this application at this stage.'
                             : getWaitingMessage()
                         }
                     </p>
@@ -131,14 +227,10 @@ export default function GateActions({
                     <div className="alert alert-info">
                         <i className="fa-duotone fa-regular fa-circle-info"></i>
                         <div>
-                            <div className="font-semibold">Currently at: {getGateLabel()}</div>
+                            <div className="font-semibold">Currently at: {getStageLabel()}</div>
                             <div className="text-sm">
                                 {userHasActions ? (
-                                    <>
-                                        {showCompanyActions && 'Make your hiring decision for this candidate.'}
-                                        {showCandidateRecruiterActions && 'Review before forwarding to company recruiter.'}
-                                        {showCompanyRecruiterActions && 'Review before forwarding to company.'}
-                                    </>
+                                    'You can take action on this application at this stage.'
                                 ) : (
                                     'You will be notified when action is required from you.'
                                 )}
@@ -149,7 +241,7 @@ export default function GateActions({
                     {userHasActions && (
                         <div className="card-actions justify-end">
 
-                            {showCompanyActions ? (
+                            {currentStage === 'company_review' ? (
                                 <>
                                     <button
                                         className="btn btn-success btn-sm btn-block"
@@ -157,6 +249,7 @@ export default function GateActions({
                                             setNextStage('interview');
                                             setModalType('approve');
                                         }}
+                                        disabled={actionLoading}
                                     >
                                         <i className="fa-duotone fa-regular fa-calendar"></i>
                                         Move to Interview
@@ -167,18 +260,29 @@ export default function GateActions({
                                             setNextStage('offer');
                                             setModalType('approve');
                                         }}
+                                        disabled={actionLoading}
                                     >
                                         <i className="fa-duotone fa-regular fa-handshake"></i>
-                                        Skip to Offer
+                                        Move to Offer
                                     </button>
                                 </>
                             ) : (
                                 <button
-                                    className="btn btn-primary btn-sm btn-block"
-                                    onClick={() => setModalType('approve')}
+                                    className="btn btn-success btn-sm"
+                                    onClick={handleApprove}
+                                    disabled={actionLoading}
                                 >
-                                    <i className="fa-duotone fa-regular fa-circle-check"></i>
-                                    {getActionButtonText()}
+                                    {actionLoading ? (
+                                        <>
+                                            <span className="loading loading-spinner loading-sm"></span>
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="fa-duotone fa-regular fa-check"></i>
+                                            {getActionButtonText()}
+                                        </>
+                                    )}
                                 </button>
                             )}
 
@@ -202,7 +306,8 @@ export default function GateActions({
                             */}
                             <button
                                 className="btn btn-error btn-sm btn-block"
-                                onClick={() => setModalType('deny')}
+                                onClick={handleDeny}
+                                disabled={actionLoading}
                             >
                                 <i className="fa-duotone fa-regular fa-circle-xmark"></i>
                                 {getDenyButtonText()}
@@ -210,46 +315,35 @@ export default function GateActions({
                         </div>
                     )}
                 </div>
-            </div>
+            </div >
 
             {/* Modals */}
-            <ApproveGateModal
-                isOpen={modalType === 'approve'}
+            < ApproveGateModal
+                isOpen={modalType === 'approve'
+                }
                 onClose={() => setModalType(null)}
-                onApprove={async (notes) => {
-                    await onApprove(notes);
-                    await onGateAction();
-                    setModalType(null);
-                }}
+                onApprove={handleConfirmApprove}
                 candidateName={application.candidate?.full_name || 'Unknown'}
                 jobTitle={application.job?.title || 'Unknown'}
-                gateName={showCompanyActions && nextStage === 'offer' ? 'Company Gate (Skip to Offer)' : getGateLabel()}
+                gateName={getStageLabel()}
             />
 
             <DenyGateModal
                 isOpen={modalType === 'deny'}
                 onClose={() => setModalType(null)}
-                onDeny={async (reason) => {
-                    await onDeny(reason);
-                    await onGateAction();
-                    setModalType(null);
-                }}
+                onDeny={handleConfirmDeny}
                 candidateName={application.candidate?.full_name || 'Unknown'}
                 jobTitle={application.job?.title || 'Unknown'}
-                gateName={getGateLabel()}
+                gateName={getStageLabel()}
             />
 
             <RequestInfoModal
                 isOpen={modalType === 'request-info'}
                 onClose={() => setModalType(null)}
-                onRequestInfo={async (questions) => {
-                    await onRequestInfo(questions);
-                    await onGateAction();
-                    setModalType(null);
-                }}
+                onRequestInfo={handleConfirmRequestInfo}
                 candidateName={application.candidate?.full_name || 'Unknown'}
                 jobTitle={application.job?.title || 'Unknown'}
-                gateName={getGateLabel()}
+                gateName={getStageLabel()}
             />
         </>
     );
