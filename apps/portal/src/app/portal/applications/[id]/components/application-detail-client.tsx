@@ -17,6 +17,7 @@ import DocumentViewerModal from './document-viewer-modal';
 import GateActions from './gate-actions';
 import { getApplicationStageBadge, getApplicationStageLabel } from '@/lib/utils/badge-styles';
 import type { ApplicationStage } from '@splits-network/shared-types';
+import { format } from 'path';
 
 export default function ApplicationDetailClient({ applicationId }: { applicationId: string }) {
     const { getToken } = useAuth();
@@ -220,7 +221,7 @@ export default function ApplicationDetailClient({ applicationId }: { application
             const client = createAuthenticatedClient(token);
             await client.patch(`/applications/${application.id}`, {
                 stage: newStage,
-                ...(notes && { notes })
+                notes: formatNotes(notes || ''),
             });
 
             setShowStageModal(false);
@@ -234,6 +235,12 @@ export default function ApplicationDetailClient({ applicationId }: { application
         }
     };
 
+    const formatNotes = async (notes: string | null) => {
+        const userType = isRecruiter ? 'Recruiter' : isCompanyUser ? 'Company User' : isAdmin ? 'Platform Admin' : 'Unknown';
+        const timestamp = formatDate(new Date().toISOString());
+        return (application.notes ?? '') + `\n[${timestamp}] ${userType}: ${notes ?? ''}`;
+    }
+
     const handleAddNote = async (note: string) => {
         setActionLoading(true);
         try {
@@ -243,10 +250,8 @@ export default function ApplicationDetailClient({ applicationId }: { application
             }
 
             const client = createAuthenticatedClient(token);
-            const userType = isRecruiter ? 'Recruiter' : isCompanyUser ? 'Company User' : isAdmin ? 'Platform Admin' : 'Unknown';
-            const newNote = `\n[${formatDate(new Date().toISOString())}] ${userType}: ${note}`;
             await client.patch(`/applications/${application.id}`, {
-                notes: application.notes + newNote
+                notes: await formatNotes(note)
             });
 
             setShowNoteModal(false);
@@ -260,19 +265,31 @@ export default function ApplicationDetailClient({ applicationId }: { application
         }
     };
 
-    const handleStageTransition = async (targetStage: string, notes?: string) => {
+    const handleStageTransition = async (targetStage: string, notes?: string, salary?: number, acceptedByCompany?: boolean) => {
         setActionLoading(true);
         try {
             const token = await getToken();
             if (!token) throw new Error('Not authenticated');
 
             const client = createAuthenticatedClient(token);
-            await client.patch(`/applications/${application.id}`, {
-                stage: targetStage as ApplicationStage,
-                ...(notes && { notes })
-            });
 
-            toast.success('Application moved to next stage successfully');
+            const updateData: any = {
+                stage: targetStage as ApplicationStage,
+                notes: await formatNotes(notes || ''),
+                ...(salary && { salary }),
+                ...(acceptedByCompany && {
+                    accepted_by_company: true,
+                    accepted_at: new Date().toISOString()
+                })
+            };
+
+            await client.patch(`/applications/${application.id}`, updateData);
+
+            if (acceptedByCompany) {
+                toast.success('Application accepted and moved to company review');
+            } else {
+                toast.success(targetStage === 'hired' ? 'Candidate marked as hired successfully' : 'Application moved to next stage successfully');
+            }
             await loadApplicationData();
         } catch (error: any) {
             console.error('Failed to transition stage:', error);
@@ -292,7 +309,8 @@ export default function ApplicationDetailClient({ applicationId }: { application
             const client = createAuthenticatedClient(token);
             await client.patch(`/applications/${application.id}`, {
                 stage: 'rejected' as ApplicationStage,
-                rejection_reason: reason
+                decline_reason: reason,
+                notes: await formatNotes(reason) // Also set notes field for compatibility
             });
 
             toast.success('Application rejected');
@@ -304,43 +322,6 @@ export default function ApplicationDetailClient({ applicationId }: { application
         } finally {
             setActionLoading(false);
         }
-    };
-
-    const handleGateApprove = async (notes?: string) => {
-        // Legacy CRA-based handler - replaced by handleStageTransition
-        toast.warning('This action is no longer supported. Please use the new stage-based workflow.');
-        return;
-    };
-
-    const handleGateDeny = async (reason: string) => {
-        // Legacy CRA-based handler - replaced by handleReject
-        toast.warning('This action is no longer supported. Please use the new stage-based workflow.');
-        return;
-    };
-
-    const handleGateRequestInfo = async (questions: string) => {
-        toast.info('This feature is coming soon!');
-        return;
-
-        // if (!cra?.id) return;
-
-        // setActionLoading(true);
-        // try {
-        //     const token = await getToken();
-        //     if (!token) return;
-
-        //     const client = createAuthenticatedClient(token);
-        //     await client.post(`/candidate-role-assignments/${cra.id}/request-info`, { questions });
-
-        //     toast.success('Information request sent');
-        //     await loadApplicationData();
-        // } catch (error: any) {
-        //     console.error('Failed to request info:', error);
-        //     toast.error(error.message || 'Failed to request information');
-        //     throw error;
-        // } finally {
-        //     setActionLoading(false);
-        // }
     };
 
     const handleOpenCandidateModal = () => {
@@ -697,7 +678,6 @@ export default function ApplicationDetailClient({ applicationId }: { application
                     isPlatformAdmin={isAdmin || false}
                     onStageTransition={handleStageTransition}
                     onReject={handleReject}
-                    onRequestInfo={handleGateRequestInfo}
                     onAddNote={handleAddNote}
                     showAddNoteModal={setShowNoteModal}
                     actionLoading={actionLoading}

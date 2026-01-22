@@ -360,6 +360,7 @@ export class PlacementServiceV2 {
             application_id: application.id,
             candidate_id: application.candidate_id,
             job_id: application.job_id,
+            company_id: job.company_id, // Add missing company_id from job
 
             // Snapshot all 5 role IDs from referential data (all nullable)
             candidate_recruiter_id: candidateRecruiterId,

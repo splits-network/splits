@@ -67,23 +67,6 @@ export function AIReviewedActions({ applicationId, jobTitle }: AIReviewedActions
                 </div>
             )}
             <button
-                onClick={handleReturnToDraft}
-                disabled={actionLoading !== null}
-                className="btn btn-accent btn-outline btn-block"
-            >
-                {actionLoading === 'draft' ? (
-                    <>
-                        <span className="loading loading-spinner loading-sm"></span>
-                        Returning to Draft...
-                    </>
-                ) : (
-                    <>
-                        <i className="fa-duotone fa-regular fa-pen-to-square mr-2"></i>
-                        Edit Application
-                    </>
-                )}
-            </button>
-            <button
                 onClick={handleSubmitApplication}
                 disabled={actionLoading !== null}
                 className="btn btn-success btn-block"
@@ -97,6 +80,23 @@ export function AIReviewedActions({ applicationId, jobTitle }: AIReviewedActions
                     <>
                         <i className="fa-duotone fa-regular fa-paper-plane mr-2"></i>
                         Submit Application
+                    </>
+                )}
+            </button>
+            <button
+                onClick={handleReturnToDraft}
+                disabled={actionLoading !== null}
+                className="btn btn-accent btn-outline btn-block"
+            >
+                {actionLoading === 'draft' ? (
+                    <>
+                        <span className="loading loading-spinner loading-sm"></span>
+                        Returning to Draft...
+                    </>
+                ) : (
+                    <>
+                        <i className="fa-duotone fa-regular fa-pen-to-square mr-2"></i>
+                        Edit Application
                     </>
                 )}
             </button>

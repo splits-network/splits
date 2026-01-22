@@ -3,16 +3,14 @@
 import { useState } from 'react';
 import ApproveGateModal from '../../components/approve-gate-modal';
 import DenyGateModal from '../../components/deny-gate-modal';
-import RequestInfoModal from '../../components/request-info-modal';
 
 interface ApplicationActionsProps {
     application: any;
     isRecruiter: boolean;
     isCompanyUser: boolean;
     isPlatformAdmin: boolean;
-    onStageTransition: (newStage: string, notes?: string) => Promise<void>;
+    onStageTransition: (newStage: string, notes?: string, salary?: number, acceptedByCompany?: boolean) => Promise<void>;
     onReject: (reason: string) => Promise<void>;
-    onRequestInfo: (questions: string) => Promise<void>;
     onAddNote: (note: string) => Promise<void>;
     showAddNoteModal: (show: boolean) => void;
     actionLoading: boolean;
@@ -25,13 +23,12 @@ export default function ApplicationActions({
     isPlatformAdmin,
     onStageTransition,
     onReject,
-    onRequestInfo,
     onAddNote,
     showAddNoteModal,
     actionLoading = false,
 }: ApplicationActionsProps) {
     const [modalType, setModalType] = useState<'approve' | 'deny' | 'request-info' | null>(null);
-    const [nextStage, setNextStage] = useState<'interview' | 'offer'>('interview');
+    const [nextStage, setNextStage] = useState<'interview' | 'offer' | 'hired'>('interview');
 
     const currentStage = application?.stage;
 
@@ -44,6 +41,7 @@ export default function ApplicationActions({
     const canTakeAction = () => {
         switch (currentStage) {
             case 'screen':
+            case 'submitted':
             case 'company_review':
                 return isCompanyUser || isPlatformAdmin;
             case 'recruiter_review':
@@ -56,6 +54,9 @@ export default function ApplicationActions({
                 } else {
                     return isCompanyUser || isPlatformAdmin;
                 }
+            case 'interview':
+            case 'offer':
+                return isCompanyUser || isPlatformAdmin;
             default:
                 return false;
         }
@@ -80,14 +81,22 @@ export default function ApplicationActions({
         switch (currentStage) {
             case 'screen':
                 return 'Approve & Submit to Company';
+            case 'submitted':
+                return 'Approve & Move to Company Review';
             case 'company_review':
                 return 'Approve & Move Forward';
             case 'recruiter_review':
-                return 'Approve & Forward to Company';
+                // "Recruiter reviewing before submission" → submit to company
+                return 'Approve & Submit to Company';
             case 'recruiter_proposed':
-                return 'Approve Proposal';
+                // "Recruiter proposed candidate to job" → company reviews proposal
+                return 'Approve Proposal for Company Review';
             case 'company_feedback':
                 return 'Approve & Continue';
+            case 'interview':
+                return 'Extend Offer';
+            case 'offer':
+                return 'Mark as Hired';
             default:
                 return 'Approve';
         }
@@ -143,44 +152,55 @@ export default function ApplicationActions({
         setModalType('request-info');
     };
 
-    const handleConfirmApprove = async (note?: string) => {
+    const handleConfirmApprove = async (note?: string, salary?: number) => {
         let targetStage;
+        let acceptedByCompany = false;
 
         switch (currentStage) {
             case 'screen':
                 targetStage = 'submitted';
                 break;
+            case 'submitted':
+                // "Submitted to company" → company starts reviewing and accepts
+                targetStage = 'company_review';
+                acceptedByCompany = true; // Company user is approving/accepting the application
+                break;
             case 'company_review':
                 targetStage = nextStage; // interview or offer
                 break;
             case 'recruiter_review':
-                targetStage = 'company_review';
+                // "Recruiter reviewing before submission" → submit to company
+                targetStage = 'submitted';
                 break;
             case 'recruiter_proposed':
+                // "Recruiter proposed candidate to job" → company needs to review
                 targetStage = 'company_review';
                 break;
             case 'company_feedback':
                 if (application.candidate_recruiter_id) {
+                    // Company provided feedback, candidate recruiter handles it
                     targetStage = 'recruiter_review';
                 } else {
+                    // No candidate recruiter, proceed to interview
                     targetStage = 'interview';
                 }
+                break;
+            case 'interview':
+                targetStage = 'offer';
+                break;
+            case 'offer':
+                targetStage = 'hired';
                 break;
             default:
                 targetStage = 'company_review';
         }
 
-        await onStageTransition(targetStage, note);
+        await onStageTransition(targetStage, note, salary, acceptedByCompany);
         setModalType(null);
     };
 
     const handleConfirmDeny = async (note: string) => {
         await onReject(note);
-        setModalType(null);
-    };
-
-    const handleConfirmRequestInfo = async (note: string) => {
-        await onRequestInfo(note);
         setModalType(null);
     };
 
@@ -268,7 +288,7 @@ export default function ApplicationActions({
                                 </>
                             ) : (
                                 <button
-                                    className="btn btn-success btn-sm"
+                                    className="btn btn-success btn-sm btn-block"
                                     onClick={handleApprove}
                                     disabled={actionLoading}
                                 >
@@ -319,28 +339,19 @@ export default function ApplicationActions({
 
             {/* Modals */}
             < ApproveGateModal
-                isOpen={modalType === 'approve'
-                }
+                isOpen={modalType === 'approve'}
                 onClose={() => setModalType(null)}
                 onApprove={handleConfirmApprove}
                 candidateName={application.candidate?.full_name || 'Unknown'}
                 jobTitle={application.job?.title || 'Unknown'}
                 gateName={getStageLabel()}
+                isHireTransition={currentStage === 'offer'}
             />
 
             <DenyGateModal
                 isOpen={modalType === 'deny'}
                 onClose={() => setModalType(null)}
                 onDeny={handleConfirmDeny}
-                candidateName={application.candidate?.full_name || 'Unknown'}
-                jobTitle={application.job?.title || 'Unknown'}
-                gateName={getStageLabel()}
-            />
-
-            <RequestInfoModal
-                isOpen={modalType === 'request-info'}
-                onClose={() => setModalType(null)}
-                onRequestInfo={handleConfirmRequestInfo}
                 candidateName={application.candidate?.full_name || 'Unknown'}
                 jobTitle={application.job?.title || 'Unknown'}
                 gateName={getStageLabel()}

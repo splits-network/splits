@@ -392,21 +392,6 @@ export default async function ApplicationDetailPage({
                                         jobTitle={job.title || 'this position'}
                                     />
                                 )}
-
-                                {/* Review AI Feedback - for ai_reviewed stage */}
-                                {application.stage === 'ai_reviewed' && (
-                                    <Link
-                                        href="#"
-                                        // href={`/portal/applications/${application.id}/ai-review`}
-                                        className="btn btn-primary btn-block"
-                                    >
-                                        <div className='indicator'>
-                                            <span className="indicator-item badge badge-warning badge-xs">Coming Soon</span>
-                                            <i className="fa-duotone fa-regular fa-sparkles mr-2"></i>
-                                            Review AI Feedback
-                                        </div>
-                                    </Link>
-                                )}
                                 {/* Edit & Submit - for draft applications */}
                                 {application.stage === 'draft' && (
                                     <EditDraftButton
