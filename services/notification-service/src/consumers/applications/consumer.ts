@@ -115,12 +115,19 @@ export class ApplicationsEventConsumer {
                 case 'screen':
 
                     if (candidateEmail) {
-                        await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
+                        let recruiterName = 'Your recruiter';
+                        if (effectiveRecruiterId) {
+                            const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                            if (recruiterContact) {
+                                recruiterName = recruiterContact.name;
+                            }
+                        }
+
+                        await this.emailService.sendCandidateApplicationWithRecruiter(candidateEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
                             companyName: job.company?.name || 'Unknown Company',
-                            hasRecruiter: !!effectiveRecruiterId,
-                            nextSteps: 'Your recruiter will contact you to schedule an initial screening call.',
+                            recruiterName: recruiterName,
                             applicationId: application_id,
                             userId: candidateUserId || undefined,
                         });
@@ -145,15 +152,30 @@ export class ApplicationsEventConsumer {
                 case 'submitted':
 
                     if (candidateEmail) {
-                        await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
-                            candidateName: candidate.full_name,
-                            jobTitle: job.title,
-                            companyName: job.company?.name || 'Unknown Company',
-                            hasRecruiter: !!effectiveRecruiterId,
-                            nextSteps: 'Your application has been submitted to the company for review.',
-                            applicationId: application_id,
-                            userId: candidateUserId || undefined,
-                        });
+                        if (effectiveRecruiterId) {
+                            let recruiterName = 'Your recruiter';
+                            const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                            if (recruiterContact) {
+                                recruiterName = recruiterContact.name;
+                            }
+
+                            await this.emailService.sendCandidateApplicationWithRecruiter(candidateEmail, {
+                                candidateName: candidate.full_name,
+                                jobTitle: job.title,
+                                companyName: job.company?.name || 'Unknown Company',
+                                recruiterName: recruiterName,
+                                applicationId: application_id,
+                                userId: candidateUserId || undefined,
+                            });
+                        } else {
+                            await this.emailService.sendCandidateDirectApplication(candidateEmail, {
+                                candidateName: candidate.full_name,
+                                jobTitle: job.title,
+                                companyName: job.company?.name || 'Unknown Company',
+                                applicationId: application_id,
+                                userId: candidateUserId || undefined,
+                            });
+                        }
                     }
 
                     const companyAdmins = await this.contactLookup.getCompanyAdminContacts(job.company_id);
@@ -185,13 +207,21 @@ export class ApplicationsEventConsumer {
                 case 'interview':
 
                     if (candidateEmail) {
-                        await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
+                        let recruiterName = undefined;
+                        if (effectiveRecruiterId) {
+                            const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                            if (recruiterContact) {
+                                recruiterName = recruiterContact.name;
+                            }
+                        }
+
+                        await this.emailService.sendCandidateInterviewInvite(candidateEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
                             companyName: job.company?.name || 'Unknown Company',
-                            hasRecruiter: !!effectiveRecruiterId,
-                            nextSteps: 'The company would like to interview you! They will contact you to schedule.',
                             applicationId: application_id,
+                            hasRecruiter: !!effectiveRecruiterId,
+                            recruiterName: recruiterName,
                             userId: candidateUserId || undefined,
                         });
                     }
@@ -215,13 +245,21 @@ export class ApplicationsEventConsumer {
                 case 'offer':
 
                     if (candidateEmail) {
-                        await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
+                        let recruiterName = undefined;
+                        if (effectiveRecruiterId) {
+                            const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                            if (recruiterContact) {
+                                recruiterName = recruiterContact.name;
+                            }
+                        }
+
+                        await this.emailService.sendCandidateOfferReceived(candidateEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
                             companyName: job.company?.name || 'Unknown Company',
-                            hasRecruiter: !!effectiveRecruiterId,
-                            nextSteps: 'Congratulations! The company has extended an offer. Review the details and next steps.',
                             applicationId: application_id,
+                            hasRecruiter: !!effectiveRecruiterId,
+                            recruiterName: recruiterName,
                             userId: candidateUserId || undefined,
                         });
                     }
@@ -245,13 +283,20 @@ export class ApplicationsEventConsumer {
                 case 'hired':
 
                     if (candidateEmail) {
-                        await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
+                        let recruiterName = undefined;
+                        if (effectiveRecruiterId) {
+                            const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                            if (recruiterContact) {
+                                recruiterName = recruiterContact.name;
+                            }
+                        }
+
+                        await this.emailService.sendCandidateHired(candidateEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
                             companyName: job.company?.name || 'Unknown Company',
                             hasRecruiter: !!effectiveRecruiterId,
-                            nextSteps: 'Congratulations on your new role! Welcome to the team.',
-                            applicationId: application_id,
+                            recruiterName: recruiterName,
                             userId: candidateUserId || undefined,
                         });
                     }
@@ -287,13 +332,20 @@ export class ApplicationsEventConsumer {
                 case 'rejected':
 
                     if (candidateEmail) {
-                        await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
+                        let recruiterName = undefined;
+                        if (effectiveRecruiterId) {
+                            const recruiterContact = await getRecruiterContact(effectiveRecruiterId);
+                            if (recruiterContact) {
+                                recruiterName = recruiterContact.name;
+                            }
+                        }
+
+                        await this.emailService.sendCandidateApplicationRejected(candidateEmail, {
                             candidateName: candidate.full_name,
                             jobTitle: job.title,
                             companyName: job.company?.name || 'Unknown Company',
                             hasRecruiter: !!effectiveRecruiterId,
-                            nextSteps: 'Thank you for your interest. The company has decided to move forward with other candidates at this time.',
-                            applicationId: application_id,
+                            recruiterName: recruiterName,
                             userId: candidateUserId || undefined,
                         });
                     }
@@ -434,12 +486,14 @@ export class ApplicationsEventConsumer {
                 const nextSteps = 'Your application has been sent to your recruiter for review. They will enhance and submit it to the company.';
 
                 if (candidateEmail) {
-                    await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
+                    const recruiterContact = await this.contactLookup.getRecruiterContact(recruiter_id);
+                    const recruiterName = recruiterContact?.name || 'Your recruiter';
+
+                    await this.emailService.sendCandidateApplicationWithRecruiter(candidateEmail, {
                         candidateName: candidate.full_name,
                         jobTitle: job.title,
                         companyName: job.company?.name || 'Unknown Company',
-                        hasRecruiter: true,
-                        nextSteps,
+                        recruiterName,
                         applicationId: application_id,
                         userId: candidateUserId || undefined,
                     });
@@ -468,12 +522,10 @@ export class ApplicationsEventConsumer {
                 const nextSteps = 'Your application has been submitted directly to the company. They will review and contact you if interested.';
 
                 if (candidateEmail) {
-                    await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
+                    await this.emailService.sendCandidateDirectApplication(candidateEmail, {
                         candidateName: candidate.full_name,
                         jobTitle: job.title,
                         companyName: job.company?.name || 'Unknown Company',
-                        hasRecruiter: false,
-                        nextSteps,
                         applicationId: application_id,
                         userId: candidateUserId || undefined,
                     });
@@ -524,12 +576,11 @@ export class ApplicationsEventConsumer {
                     : 'Your application is being reviewed by our AI system. Once complete, it will be submitted to the company for their review.';
 
                 if (candidateEmail) {
-                    await this.emailService.sendCandidateApplicationSubmitted(candidateEmail, {
+                    await this.emailService.sendCandidateAIReview(candidateEmail, {
                         candidateName: candidate.full_name,
                         jobTitle: job.title,
                         companyName: job.company?.name || 'Unknown Company',
                         hasRecruiter: !!recruiter_id,
-                        nextSteps,
                         applicationId: application_id,
                         userId: candidateUserId || undefined,
                     });
@@ -598,12 +649,11 @@ export class ApplicationsEventConsumer {
 
             const candidateContact = await this.contactLookup.getCandidateContact(candidate_id);
             if (candidateContact) {
-                await this.emailService.sendCandidateApplicationSubmitted(candidateContact.email, {
+                await this.emailService.sendCandidateApplicationSubmittedByRecruiter(candidateContact.email, {
                     candidateName: candidate.full_name,
                     jobTitle: job.title,
                     companyName: job.company?.name || 'Unknown Company',
-                    hasRecruiter: true,
-                    nextSteps: 'Your recruiter has reviewed and submitted your application to the company. They will be in touch if there is interest.',
+                    recruiterName: recruiterContact.name,
                     applicationId: application_id,
                     userId: candidate_user_id || undefined,
                 });

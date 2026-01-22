@@ -1,6 +1,6 @@
 /**
  * Base HTML Email Template for Splits Network
- * Matches brand styling from the portal: #0d9488 primary teal, #14b8a6 secondary teal
+ * Matches brand styling from the portal with consistent theme colors
  * Features white header with dynamic logo switching based on recipient role:
  * - source: 'candidate' → Applicant Network logo
  * - source: 'portal' → Splits Network logo (default for recruiters, admins, etc.)
@@ -9,11 +9,38 @@
 
 export type EmailSource = 'portal' | 'candidate' | 'corporate';
 
+export interface EmailTheme {
+    primary: string;      // Main brand color
+    secondary: string;    // Secondary brand color  
+    accent: string;       // Success/accent color
+    warning: string;      // Warning color
+    error: string;        // Error color
+    text: string;         // Primary text color
+    textMuted: string;    // Muted text color
+    background: string;   // Background color
+    border: string;       // Border color
+}
+
+// Brand colors matching the website theme
+export const defaultTheme: EmailTheme = {
+    primary: '#233876',     // Brand blue
+    secondary: '#0d9488',   // Teal
+    accent: '#10b981',      // Success green
+    warning: '#f59e0b',     // Warning orange
+    error: '#ef4444',       // Error red
+    text: '#374151',        // Dark gray text
+    textMuted: '#6b7280',   // Muted gray text
+    background: '#ffffff',  // White background
+    border: '#e5e7eb',      // Light border
+};
+
 export interface BaseEmailProps {
     preheader?: string;
     content: string;
     /** Source determines which logo/branding to show. Use 'candidate' for candidates, 'portal' for all other users */
     source?: EmailSource;
+    /** Custom theme colors. Defaults to brand theme if not provided */
+    theme?: Partial<EmailTheme>;
 }
 
 /**
@@ -38,12 +65,12 @@ function getLogoUrl(source?: EmailSource): string {
 function getTagline(source?: EmailSource): string {
     switch (source) {
         case 'candidate':
-            return 'Your Career Journey';
+            return 'Your Career, Represented';
         case 'corporate':
-            return 'Split-Fee Recruiting Platform';
+            return 'Powering the Future of Hiring';
         case 'portal':
         default:
-            return 'Split-Fee Recruiting Marketplace';
+            return 'The Marketplace for Collaborative Recruiting';
     }
 }
 
@@ -51,9 +78,10 @@ function getTagline(source?: EmailSource): string {
  * Base email template with header, footer, and brand styling
  * Optimized for email clients with inline styles
  */
-export function baseEmailTemplate({ preheader, content, source }: BaseEmailProps): string {
+export function baseEmailTemplate({ preheader, content, source, theme }: BaseEmailProps): string {
     const logoUrl = getLogoUrl(source);
     const tagline = getTagline(source);
+    const emailTheme = { ...defaultTheme, ...theme };
     return `
 <!DOCTYPE html>
 <html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -135,15 +163,15 @@ export function baseEmailTemplate({ preheader, content, source }: BaseEmailProps
                 <table cellpadding="0" cellspacing="0" role="presentation" style="width: 100%;">
                   <tr>
                     <td style="text-align: center; padding-bottom: 16px;">
-                      <a href="https://splits.network" style="color: #0d9488; text-decoration: none; font-size: 14px; font-weight: 600;">
+                      <a href="https://splits.network" style="color: ${emailTheme.primary}; text-decoration: none; font-size: 14px; font-weight: 600;">
                         Splits Network
                       </a>
                       <span style="color: #9ca3af; margin: 0 12px;">•</span>
-                      <a href="https://applicant.network" style="color: #0d9488; text-decoration: none; font-size: 14px; font-weight: 600;">
+                      <a href="https://applicant.network" style="color: ${emailTheme.primary}; text-decoration: none; font-size: 14px; font-weight: 600;">
                         Applicant Network
                       </a>
                       <span style="color: #9ca3af; margin: 0 12px;">•</span>
-                      <a href="https://splits.network/help" style="color: #0d9488; text-decoration: none; font-size: 14px; font-weight: 600;">
+                      <a href="https://splits.network/help" style="color: ${emailTheme.primary}; text-decoration: none; font-size: 14px; font-weight: 600;">
                         Help Center
                       </a>
                     </td>
@@ -152,9 +180,9 @@ export function baseEmailTemplate({ preheader, content, source }: BaseEmailProps
                     <td style="text-align: center; color: #6b7280; font-size: 13px; line-height: 20px;">
                       © ${new Date().getFullYear()} Employment Networks, Inc. All rights reserved.
                       <br>
-                      <a href="https://splits.network/privacy" style="color: #6b7280; text-decoration: underline;">Privacy Policy</a>
+                      <a href="https://splits.network/privacy" style="color: ${emailTheme.textMuted}; text-decoration: underline;">Privacy Policy</a>
                       <span style="margin: 0 8px;">•</span>
-                      <a href="https://splits.network/terms" style="color: #6b7280; text-decoration: underline;">Terms of Service</a>
+                      <a href="https://splits.network/terms" style="color: ${emailTheme.textMuted}; text-decoration: underline;">Terms of Service</a>
                     </td>
                   </tr>
                 </table>

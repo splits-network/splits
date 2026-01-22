@@ -7,14 +7,22 @@ export interface ButtonProps {
     href: string;
     text: string;
     variant?: 'primary' | 'secondary' | 'accent';
+    theme?: { primary: string; secondary: string; accent: string; };
 }
 
-export function button({ href, text, variant = 'primary' }: ButtonProps): string {
-    const colors = {
-        primary: { bg: '#0d9488', text: '#ffffff' }, // Teal to match dashboard
-        secondary: { bg: '#14b8a6', text: '#ffffff' }, // Lighter teal
-        accent: { bg: '#233876', text: '#ffffff' }, // Navy blue accent
+export function button({ href, text, variant = 'primary', theme }: ButtonProps): string {
+    const defaultColors = {
+        primary: { bg: '#233876', text: '#ffffff' }, // Brand blue
+        secondary: { bg: '#0d9488', text: '#ffffff' }, // Teal
+        accent: { bg: '#10b981', text: '#ffffff' }, // Success green
     };
+
+    // Use theme colors if provided
+    const colors = theme ? {
+        primary: { bg: theme.primary, text: '#ffffff' },
+        secondary: { bg: theme.secondary, text: '#ffffff' },
+        accent: { bg: theme.accent, text: '#ffffff' },
+    } : defaultColors;
 
     const color = colors[variant];
 
@@ -34,18 +42,26 @@ export function button({ href, text, variant = 'primary' }: ButtonProps): string
 export interface InfoCardProps {
     title: string;
     items: Array<{ label: string; value: string | number; highlight?: boolean }>;
+    theme?: { primary: string; border: string; background: string; };
 }
 
-export function infoCard({ title, items }: InfoCardProps): string {
+export function infoCard({ title, items, theme }: InfoCardProps): string {
+    const defaultTheme = {
+        primary: '#233876',
+        border: '#e5e7eb',
+        background: '#f9fafb'
+    };
+
+    const colors = theme || defaultTheme;
     const rows = items
         .map(
             (item) => `
 <tr>
-  <td style="padding: 12px 20px; border-bottom: 1px solid #e5e7eb;">
+  <td style="padding: 12px 20px; border-bottom: 1px solid ${colors.border};">
     <span style="font-size: 13px; color: #6b7280; font-weight: 500;">${item.label}</span>
   </td>
-  <td style="padding: 12px 20px; border-bottom: 1px solid #e5e7eb; text-align: right;">
-    <span style="font-size: 14px; color: ${item.highlight ? '#233876' : '#111827'}; font-weight: ${item.highlight ? '700' : '600'};">
+  <td style="padding: 12px 20px; border-bottom: 1px solid ${colors.border}; text-align: right;">
+    <span style="font-size: 14px; color: ${item.highlight ? colors.primary : '#111827'}; font-weight: ${item.highlight ? '700' : '600'};">
       ${item.value}
     </span>
   </td>
@@ -55,9 +71,9 @@ export function infoCard({ title, items }: InfoCardProps): string {
         .join('\n');
 
     return `
-<table cellpadding="0" cellspacing="0" role="presentation" style="width: 100%; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin: 24px 0;">
+<table cellpadding="0" cellspacing="0" role="presentation" style="width: 100%; border: 1px solid ${colors.border}; border-radius: 12px; overflow: hidden; margin: 24px 0;">
   <tr>
-    <td colspan="2" style="background-color: #f9fafb; padding: 16px 20px; border-bottom: 2px solid #e5e7eb;">
+    <td colspan="2" style="background-color: ${colors.background}; padding: 16px 20px; border-bottom: 2px solid ${colors.border};">
       <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #111827;">
         ${title}
       </h3>

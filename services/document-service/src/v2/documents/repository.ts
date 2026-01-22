@@ -474,54 +474,25 @@ export class DocumentRepositoryV2 {
 
     private async canModifyEntity(entityType: string, entityId: string, context: AccessContext): Promise<boolean> {
         // Debug logging for authorization checks
-        console.log(`[DOCUMENT_AUTH] Authorization check:`, {
-            entityType,
-            entityId,
-            isPlatformAdmin: context.isPlatformAdmin,
-            candidateId: context.candidateId,
-            organizationIds: context.organizationIds,
-            roles: context.roles,
-        });
 
         if (context.isPlatformAdmin) {
-            console.log(`[DOCUMENT_AUTH] Platform admin access granted`);
             return true;
         }
 
         // Candidates can upload to their own profile
         if (context.candidateId && entityType === 'candidate' && entityId === context.candidateId) {
-            console.log(`[DOCUMENT_AUTH] Candidate self-access granted`);
             return true;
         }
 
-        // Debug logging - log what we're comparing
-        if (entityType === 'candidate') {
-            console.warn(`[DOCUMENT_AUTH] Candidate authorization check:`, {
-                contextCandidateId: context.candidateId,
-                requestedEntityId: entityId,
-                match: context.candidateId === entityId,
-                contextRoles: context.roles,
-                isPlatformAdmin: context.isPlatformAdmin,
-            });
-        }
 
         // Company users can upload to company entities
         if (context.organizationIds.length > 0 && entityType === 'company') {
             const hasAccess = context.organizationIds.includes(entityId);
-            console.log(`[DOCUMENT_AUTH] Company entity access check:`, {
-                hasAccess,
-                userOrganizations: context.organizationIds,
-                requestedCompanyId: entityId
-            });
             return hasAccess;
         }
 
         // Company users can upload documents to applications for their company's jobs
         if (context.organizationIds.length > 0 && entityType === 'application') {
-            console.log(`[DOCUMENT_AUTH] Application access check started:`, {
-                userOrganizations: context.organizationIds,
-                applicationId: entityId
-            });
 
             try {
                 // First get the application info
@@ -530,11 +501,6 @@ export class DocumentRepositoryV2 {
                     .select('job_id')
                     .eq('id', entityId)
                     .maybeSingle();
-                    
-                console.log(`[DOCUMENT_AUTH] Application lookup result:`, { 
-                    application, 
-                    error: applicationError 
-                });
 
                 if (applicationError) {
                     console.error(`[DOCUMENT_AUTH] Application lookup error:`, applicationError);
@@ -548,11 +514,6 @@ export class DocumentRepositoryV2 {
                         .select('company_id')
                         .eq('id', application.job_id)
                         .maybeSingle();
-                        
-                    console.log(`[DOCUMENT_AUTH] Job lookup result:`, { 
-                        job, 
-                        error: jobError 
-                    });
 
                     if (jobError) {
                         console.error(`[DOCUMENT_AUTH] Job lookup error:`, jobError);
@@ -566,11 +527,6 @@ export class DocumentRepositoryV2 {
                             .select('identity_organization_id')
                             .eq('id', job.company_id)
                             .maybeSingle();
-                            
-                        console.log(`[DOCUMENT_AUTH] Company lookup result:`, { 
-                            company, 
-                            error: companyError 
-                        });
 
                         if (companyError) {
                             console.error(`[DOCUMENT_AUTH] Company lookup error:`, companyError);
@@ -579,7 +535,6 @@ export class DocumentRepositoryV2 {
                             
                         if (company?.identity_organization_id && 
                             context.organizationIds.includes(company.identity_organization_id)) {
-                            console.log(`[DOCUMENT_AUTH] Application access granted`);
                             return true;
                         } else {
                             console.log(`[DOCUMENT_AUTH] Application access denied - organization mismatch:`, {
@@ -590,17 +545,12 @@ export class DocumentRepositoryV2 {
                     }
                 } else {
                     // Let's try without schema specification to see if that's the issue
-                    console.log(`[DOCUMENT_AUTH] Trying application lookup without schema...`);
                     const { data: applicationNoSchema, error: errorNoSchema } = await this.supabase
                         .from('applications')
                         .select('job_id')
                         .eq('id', entityId)
                         .maybeSingle();
-                        
-                    console.log(`[DOCUMENT_AUTH] Application lookup (no schema):`, { 
-                        application: applicationNoSchema, 
-                        error: errorNoSchema 
-                    });
+                       
                 }
             } catch (error) {
                 console.error(`[DOCUMENT_AUTH] Unexpected error during application access check:`, error);
@@ -608,7 +558,6 @@ export class DocumentRepositoryV2 {
             }
         }
 
-        console.log(`[DOCUMENT_AUTH] Access denied - no matching authorization rules`);
         return false;
     }
 }
