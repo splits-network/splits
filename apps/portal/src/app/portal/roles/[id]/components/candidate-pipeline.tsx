@@ -64,7 +64,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
 
             const client = createAuthenticatedClient(token);
             const response: any = await client.get('/applications', {
-                params: { job_id: roleId }
+                params: { filters: { job_id: roleId } }
             });
             // V2 API returns { data: [...] }
             const applicationsData = response.data || [];
@@ -175,7 +175,7 @@ export default function CandidatePipeline({ roleId }: CandidatePipelineProps) {
 
             {/* Candidates List */}
             {filteredApplications.length > 0 ? (
-                <div className="overflow-x-auto mt-6">
+                <div className="overflow-x-auto -mt-2 bg-base-100 rounded-lg rounded-tl-none shadow">
                     <table className="table table-zebra">
                         <thead>
                             <tr>

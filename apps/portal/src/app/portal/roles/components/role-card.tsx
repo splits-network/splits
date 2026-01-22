@@ -192,7 +192,7 @@ export function RoleCard({ job, allJobs, userRole, canManageRole, onEditRole }: 
                             </button>
                         )}
                         <span className="text-primary text-sm font-medium group-hover:underline">
-                            <Link href={`/portal/roles/${job.id}`}>
+                            <Link href={`/portal/roles/${job.id}`} className='btn btn-primary btn-sm'>
                                 View Details →
                             </Link>
                         </span>

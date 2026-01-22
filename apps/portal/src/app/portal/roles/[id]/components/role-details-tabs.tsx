@@ -25,7 +25,7 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
     const { getToken } = useAuth();
     const [job, setJob] = useState<Job | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'recruiter' | 'candidate' | 'requirements' | 'pipeline'>('recruiter');
+    const [activeTab, setActiveTab] = useState<'recruiter' | 'candidate' | 'requirements'>('recruiter');
 
     useEffect(() => {
         fetchJob();
@@ -42,9 +42,16 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
 
             const client = createAuthenticatedClient(token);
             const response = await client.get(`/jobs/${roleId}`, {
-                params: { include: 'requirements,applications' }
+                params: { include: 'requirements' }
             }) as { data: Job };
             const jobData = response.data;
+
+            const stages = ['proposed', 'screen', 'submitted', 'interview', 'offer', 'hired', 'declined', 'rejected'];
+            const applicationsResponse = await client.get(`/applications`, {
+                params: { filters: { job_id: roleId } }
+            }) as { data: Array<any> };
+            console.log('applications: ', applicationsResponse);
+            jobData.applications = applicationsResponse.data;//.filter(app => stages.includes(app.stage));
 
             setJob(jobData);
         } catch (error) {
@@ -81,8 +88,8 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
 
     return (
         <>
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-                <div className="card lg:col-span-2 xl:col-span-2 2xl:col-span-2 bg-base-200 shadow">
+            <div className="grid grid-cols-4 gap-6">
+                <div className="card col-span-4 2xl:col-span-2 bg-base-200 shadow">
                     {/* Tabs */}
                     <div role="tablist" className="tabs tabs-lift">
                         <button
@@ -186,7 +193,7 @@ export default function RoleDetailsTabs({ roleId }: RoleDetailsTabsProps) {
                     </div>
                 </div>
 
-                <div className="card lg:col-span-2 xl:col-span-2 2xl:col-span-2 bg-base-200 shadow">
+                <div className="card col-span-4 2xl:col-span-2 bg-base-200 shadow">
                     <div className='card-body'>
                         {/* Candidate Pipeline Tab */}
                         <CandidatePipeline roleId={roleId} />

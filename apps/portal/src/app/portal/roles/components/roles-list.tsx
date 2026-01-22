@@ -17,6 +17,7 @@ import { RoleCard, type Job } from './role-card';
 import { RoleTableRow } from './role-table-row';
 import { RolesTrendsChart, TIME_PERIODS, calculateStatTrends } from '../../../../components/charts/roles-trends-chart';
 import AddRoleWizardModal from './add-role-wizard-modal';
+import Link from 'next/link';
 
 // ===== TYPES =====
 
@@ -130,223 +131,225 @@ export default function RolesList() {
     }
 
     return (
-        <div className="grid grid-cols-12 gap-6">
-            <div className="col-span-12 md:col-span-8 xl:col-span-10">
-                <div className='card bg-base-200'>
-                    <StatCardGrid className='m-2 shadow-lg'>
-                        <StatCard
-                            title="Total Roles"
-                            value={total}
-                            icon="fa-briefcase"
-                            color="primary"
-                            trend={statTrends.total}
-                            trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
-                        />
-                        <StatCard
-                            title="Active"
-                            value={jobs.filter(j => j.status === 'active').length}
-                            icon="fa-circle-check"
-                            color="success"
-                            trend={statTrends.active}
-                            trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
-                        />
-                        <StatCard
-                            title="Paused"
-                            value={jobs.filter(j => j.status === 'paused').length}
-                            icon="fa-pause"
-                            color="warning"
-                            trend={statTrends.paused}
-                            trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
-                        />
-                        <StatCard
-                            title="Filled"
-                            value={jobs.filter(j => j.status === 'filled').length}
-                            icon="fa-check-double"
-                            color="info"
-                            trend={statTrends.filled}
-                            trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
-                        />
-                    </StatCardGrid>
-                    <div className="p-4 pt-0">
-                        <RolesTrendsChart
-                            jobs={jobs}
-                            loading={loading && jobs.length === 0}
-                            trendPeriod={trendPeriod}
-                            onTrendPeriodChange={setTrendPeriod}
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <div className="col-span-12 md:col-span-4 xl:col-span-2 space-y-6">
-
-
-                {/* Filters and View Toggle */}
-                <div className="card bg-base-200 shadow">
-                    <div className="card-body p-4 space-y-4">
-                        <h3 className='card-title'>
-                            <i className='fa-duotone fa-regular fa-filter mr-2' />
-                            Options
-                        </h3>
-                        {profile?.is_platform_admin || (profile?.roles?.includes('company_admin') || profile?.roles?.includes('hiring_manager') || (profile?.roles?.includes('recruiter')) && profile?.organization_ids?.length > 0) &&
-                            <>
-                                <button
-                                    className="btn btn-primary w-full"
-                                    onClick={() => setShowAddModal(true)}
-                                >
-                                    <i className="fa-duotone fa-regular fa-plus"></i>
-                                    Add Role
-                                </button>
-                            </>
-                        }
-                        <div className="flex flex-wrap gap-4 items-center">
-                            {/* Status Filter */}
-                            <div className="fieldset w-full">
-                                <select
-                                    name="status-selector"
-                                    className="select w-full"
-                                    value={filters.status || 'all'}
-                                    onChange={(e) => setFilter('status', e.target.value === 'all' ? undefined : e.target.value)}
-                                >
-                                    <option value="all">All Statuses</option>
-                                    <option value="active">Active</option>
-                                    <option value="paused">Paused</option>
-                                    <option value="filled">Filled</option>
-                                    <option value="closed">Closed</option>
-                                </select>
-                            </div>
-
-                            {/* Ownership Filter (for recruiters and company users) */}
-                            {(userRole === 'recruiter' || userRole === 'company_admin' || userRole === 'hiring_manager') && (
-                                <div className="fieldset w-full">
-                                    <select
-                                        name="job-owner-filter"
-                                        className="select w-full"
-                                        value={filters.job_owner_filter || 'all'}
-                                        onChange={(e) => setFilter('job_owner_filter', e.target.value as 'all' | 'assigned')}
-                                    >
-                                        <option value="all">
-                                            {userRole === 'recruiter' ? 'All Jobs' : 'All Organization Jobs'}
-                                        </option>
-                                        <option value="assigned">My Assigned Jobs</option>
-                                    </select>
-                                </div>
-                            )}
-
-                            {/* Search */}
-                            <SearchInput
-                                value={searchInput}
-                                onChange={setSearchInput}
-                                onClear={clearSearch}
-                                placeholder="Search roles..."
-                                loading={loading}
-                                className="flex-1 min-w-[200px]"
+        <>
+            <div className="grid grid-cols-12 gap-6">
+                <div className="col-span-12 md:col-span-8 xl:col-span-10">
+                    <div className='card bg-base-200'>
+                        <StatCardGrid className='m-2 shadow-lg'>
+                            <StatCard
+                                title="Total Roles"
+                                value={total}
+                                icon="fa-briefcase"
+                                color="primary"
+                                trend={statTrends.total}
+                                trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
                             />
-
-                            {/* View Toggle */}
-                            <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+                            <StatCard
+                                title="Active"
+                                value={jobs.filter(j => j.status === 'active').length}
+                                icon="fa-circle-check"
+                                color="success"
+                                trend={statTrends.active}
+                                trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
+                            />
+                            <StatCard
+                                title="Paused"
+                                value={jobs.filter(j => j.status === 'paused').length}
+                                icon="fa-pause"
+                                color="warning"
+                                trend={statTrends.paused}
+                                trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
+                            />
+                            <StatCard
+                                title="Filled"
+                                value={jobs.filter(j => j.status === 'filled').length}
+                                icon="fa-check-double"
+                                color="info"
+                                trend={statTrends.filled}
+                                trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
+                            />
+                        </StatCardGrid>
+                        <div className="p-4 pt-0">
+                            <RolesTrendsChart
+                                jobs={jobs}
+                                loading={loading && jobs.length === 0}
+                                trendPeriod={trendPeriod}
+                                onTrendPeriodChange={setTrendPeriod}
+                            />
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div className="col-span-12 gap-4">
-                {/* Loading State */}
-                {loading && jobs.length === 0 && <LoadingState />}
+                <div className="col-span-12 md:col-span-4 xl:col-span-2 space-y-6">
 
-                {/* Grid View */}
-                {!loading && viewMode === 'grid' && jobs.length > 0 && (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-                        {jobs.map((job) => (
-                            <RoleCard
-                                key={job.id}
-                                job={job}
-                                allJobs={jobs}
-                                userRole={userRole}
-                                canManageRole={canManageRole}
-                                onEditRole={handleEditRole}
-                            />
-                        ))}
+
+                    {/* Filters and View Toggle */}
+                    <div className="card bg-base-200 shadow">
+                        <div className="card-body p-4 space-y-4">
+                            <h3 className='card-title'>
+                                <i className='fa-duotone fa-regular fa-filter mr-2' />
+                                Options
+                            </h3>
+                            {profile?.is_platform_admin || (profile?.roles?.includes('company_admin') || profile?.roles?.includes('hiring_manager') || (profile?.roles?.includes('recruiter')) && profile?.organization_ids?.length > 0) &&
+                                <>
+                                    <button
+                                        className="btn btn-primary w-full"
+                                        onClick={() => setShowAddModal(true)}
+                                    >
+                                        <i className="fa-duotone fa-regular fa-plus"></i>
+                                        Add Role
+                                    </button>
+                                </>
+                            }
+                            <div className="flex flex-wrap gap-4 items-center">
+                                {/* Status Filter */}
+                                <div className="fieldset w-full">
+                                    <select
+                                        name="status-selector"
+                                        className="select w-full"
+                                        value={filters.status || 'all'}
+                                        onChange={(e) => setFilter('status', e.target.value === 'all' ? undefined : e.target.value)}
+                                    >
+                                        <option value="all">All Statuses</option>
+                                        <option value="active">Active</option>
+                                        <option value="paused">Paused</option>
+                                        <option value="filled">Filled</option>
+                                        <option value="closed">Closed</option>
+                                    </select>
+                                </div>
+
+                                {/* Ownership Filter (for recruiters and company users) */}
+                                {(userRole === 'recruiter' || userRole === 'company_admin' || userRole === 'hiring_manager') && (
+                                    <div className="fieldset w-full">
+                                        <select
+                                            name="job-owner-filter"
+                                            className="select w-full"
+                                            value={filters.job_owner_filter || 'all'}
+                                            onChange={(e) => setFilter('job_owner_filter', e.target.value as 'all' | 'assigned')}
+                                        >
+                                            <option value="all">
+                                                {userRole === 'recruiter' ? 'All Jobs' : 'All Organization Jobs'}
+                                            </option>
+                                            <option value="assigned">My Assigned Jobs</option>
+                                        </select>
+                                    </div>
+                                )}
+
+                                {/* Search */}
+                                <SearchInput
+                                    value={searchInput}
+                                    onChange={setSearchInput}
+                                    onClear={clearSearch}
+                                    placeholder="Search roles..."
+                                    loading={loading}
+                                    className="flex-1 min-w-[200px]"
+                                />
+
+                                {/* View Toggle */}
+                                <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+                            </div>
+                        </div>
                     </div>
-                )}
+                </div>
 
-                {/* Table View */}
-                {!loading && viewMode === 'table' && jobs.length > 0 && (
-                    <DataTable
-                        columns={roleColumns}
-                        sortBy={sortBy}
-                        sortOrder={sortOrder}
-                        onSort={handleSort}
-                        showExpandColumn={true}
-                        isEmpty={jobs.length === 0}
+                <div className="col-span-12 gap-4">
+                    {/* Loading State */}
+                    {loading && jobs.length === 0 && <LoadingState />}
+
+                    {/* Grid View */}
+                    {!loading && viewMode === 'grid' && jobs.length > 0 && (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                            {jobs.map((job) => (
+                                <RoleCard
+                                    key={job.id}
+                                    job={job}
+                                    allJobs={jobs}
+                                    userRole={userRole}
+                                    canManageRole={canManageRole}
+                                    onEditRole={handleEditRole}
+                                />
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Table View */}
+                    {!loading && viewMode === 'table' && jobs.length > 0 && (
+                        <DataTable
+                            columns={roleColumns}
+                            sortBy={sortBy}
+                            sortOrder={sortOrder}
+                            onSort={handleSort}
+                            showExpandColumn={true}
+                            isEmpty={jobs.length === 0}
+                            loading={loading}
+                        >
+                            {jobs.map((job) => (
+                                <RoleTableRow
+                                    key={job.id}
+                                    job={job}
+                                    allJobs={jobs}
+                                    canManageRole={canManageRole}
+                                    onEditRole={handleEditRole}
+                                />
+                            ))}
+                        </DataTable>
+                    )}
+
+                    {/* Empty State */}
+                    {!loading && jobs.length === 0 && (
+                        <EmptyState
+                            icon="fa-briefcase"
+                            title="No Roles Found"
+                            description={
+                                searchInput
+                                    ? 'Try adjusting your search or filters'
+                                    : 'No roles have been created yet'
+                            }
+                        />
+                    )}
+
+                    {/* Pagination */}
+                    <PaginationControls
+                        page={page}
+                        totalPages={totalPages}
+                        total={total}
+                        limit={limit}
+                        onPageChange={goToPage}
+                        onLimitChange={setLimit}
                         loading={loading}
-                    >
-                        {jobs.map((job) => (
-                            <RoleTableRow
-                                key={job.id}
-                                job={job}
-                                allJobs={jobs}
-                                canManageRole={canManageRole}
-                                onEditRole={handleEditRole}
-                            />
-                        ))}
-                    </DataTable>
-                )}
-
-                {/* Empty State */}
-                {!loading && jobs.length === 0 && (
-                    <EmptyState
-                        icon="fa-briefcase"
-                        title="No Roles Found"
-                        description={
-                            searchInput
-                                ? 'Try adjusting your search or filters'
-                                : 'No roles have been created yet'
-                        }
                     />
-                )}
+                </div>
 
-                {/* Pagination */}
-                <PaginationControls
-                    page={page}
-                    totalPages={totalPages}
-                    total={total}
-                    limit={limit}
-                    onPageChange={goToPage}
-                    onLimitChange={setLimit}
-                    loading={loading}
-                />
-            </div>
+                {/* Add Role Modal */}
+                {
+                    showAddModal && (
+                        <AddRoleWizardModal
+                            isOpen={showAddModal}
+                            onClose={() => setShowAddModal(false)}
+                            onSuccess={() => {
+                                setShowAddModal(false);
+                                refresh(); // Refresh the list
+                            }}
+                        />
+                    )
+                }
 
-            {/* Add Role Modal */}
-            {
-                showAddModal && (
-                    <AddRoleWizardModal
-                        isOpen={showAddModal}
-                        onClose={() => setShowAddModal(false)}
-                        onSuccess={() => {
-                            setShowAddModal(false);
-                            refresh(); // Refresh the list
-                        }}
-                    />
-                )
-            }
-
-            {/* Edit Role Modal */}
-            {
-                editingJobId && (
-                    <AddRoleWizardModal
-                        isOpen={true}
-                        jobId={editingJobId}
-                        mode="edit"
-                        onClose={handleCloseEditModal}
-                        onSuccess={() => {
-                            handleCloseEditModal();
-                            refresh(); // Refresh the list
-                        }}
-                    />
-                )
-            }
-        </div >
+                {/* Edit Role Modal */}
+                {
+                    editingJobId && (
+                        <AddRoleWizardModal
+                            isOpen={true}
+                            jobId={editingJobId}
+                            mode="edit"
+                            onClose={handleCloseEditModal}
+                            onSuccess={() => {
+                                handleCloseEditModal();
+                                refresh(); // Refresh the list
+                            }}
+                        />
+                    )
+                }
+            </div >
+        </>
     );
 }

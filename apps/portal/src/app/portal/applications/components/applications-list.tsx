@@ -24,6 +24,7 @@ import ApplicationsStats from './applications-stats';
 import ApplicationsTrendsChart, { calculateApplicationTrends } from '@/components/charts/applications-trends-chart';
 import BulkActionModal from './bulk-action-modal';
 import type { ApplicationStage } from '@splits-network/shared-types';
+import Link from 'next/link';
 
 // ===== TYPES =====
 
@@ -87,6 +88,8 @@ export default function ApplicationsList() {
     const { getToken } = useAuth();
     const toast = useToast();
     const { profile, isLoading: profileLoading, isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
+    const canSubmitCandidate = isAdmin || isRecruiter || profile?.roles?.includes('company_admin') || profile?.roles?.includes('hiring_manager');
+
 
     // Company resolution for company users
     const [companyId, setCompanyId] = useState<string | null>(null);
@@ -334,6 +337,12 @@ export default function ApplicationsList() {
                             Options
                         </h3>
                         <div className="flex flex-wrap gap-4 items-center">
+                            {canSubmitCandidate && (
+                                <Link href="/portal/roles" className="btn btn-primary btn-block gap-2">
+                                    <i className="fa-duotone fa-regular fa-user-plus"></i>
+                                    Submit Candidate
+                                </Link>
+                            )}
                             {/* Filters */}
                             <ApplicationFilters
                                 searchQuery={searchInput}

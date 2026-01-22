@@ -134,6 +134,7 @@ export class ApplicationRepository {
 
         if (filters.job_id) {
             query = query.eq('job_id', filters.job_id);
+            console.log('filtering by job_id: ', filters.job_id);
         }
         if (filters.candidate_id) {
             query = query.eq('candidate_id', filters.candidate_id);
@@ -148,7 +149,7 @@ export class ApplicationRepository {
         query = query.range(offset, offset + limit - 1);
 
         const { data, error, count } = await query;
-
+        console.log('findApplications data: ', data, error, count);
         if (error) {
             throw error;
         }

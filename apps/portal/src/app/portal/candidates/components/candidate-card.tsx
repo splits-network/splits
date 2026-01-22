@@ -267,7 +267,7 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
                         Added {formatRelativeTime(candidate.created_at)}
                     </span>
                     <span className="text-primary text-sm font-medium group-hover:underline">
-                        <Link href={`/portal/candidates/${candidate.id}`}>
+                        <Link href={`/portal/candidates/${candidate.id}`} className='btn btn-primary btn-sm'>
                             View Details →
                         </Link>
                     </span>

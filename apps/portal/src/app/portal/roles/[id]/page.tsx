@@ -56,61 +56,18 @@ export default function RoleDetailPage() {
     return (
         <>
             <div className='flex'>
-                <Link href="/portal/roles" className="btn btn-ghost btn-sm gap-2">
-                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
-                    Back to Roles
-                </Link>
+                <div className='text-sm breadcrumbs py-4'>
+                    <ul>
+                        <li><a href="/portal/dashboard">Dashboard</a></li>
+                        <li><Link href='/portal/roles'>Roles</Link></li>
+                        <li>{loading ? 'Loading...' : job?.title || 'Role Details'}</li>
+                    </ul>
+                </div>
             </div>
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between">
-                <div className="w-full md:flex-1 md:mr-4 space-y-6">
+            <div>
+                <div className="space-y-6">
                     <RoleHeader roleId={id} />
                     <RoleDetailsTabs roleId={id} />
-                </div>
-                <div className="w-full md:w-64 lg:w-72 xl:w-80 shrink-0 mt-6 md:mt-0">
-                    {/* Preferred Requirements */}
-                    {!loading &&
-                        (job?.job_requirements?.filter(r => r.requirement_type === 'preferred').length && (
-                            <div>
-                                <h3 className="font-semibold text-lg mb-3">
-                                    <i className="fa-duotone fa-regular fa-star mr-2 text-warning"></i>
-                                    Preferred Requirements
-                                </h3>
-                                <ul className="list-disc list-inside space-y-2">
-                                    {job.job_requirements
-                                        .filter(r => r.requirement_type === 'preferred')
-                                        .map(r => (
-                                            <li key={r.id} className="text-base-content/70">{r.description}</li>
-                                        ))}
-                                </ul>
-                            </div>
-                        ),
-                            (job?.job_requirements?.filter(r => r.requirement_type === 'required').length && (
-                                <div>
-                                    <h3 className="font-semibold text-lg mb-3">
-                                        <i className="fa-duotone fa-regular fa-check-circle mr-2 text-success"></i>
-                                        Required Requirements
-                                    </h3>
-                                    <ul className="list-disc list-inside space-y-2">
-                                        {job.job_requirements
-                                            .filter(r => r.requirement_type === 'required')
-                                            .map(r => (
-                                                <li key={r.id} className="text-base-content/80">{r.description}</li>
-                                            ))}
-                                    </ul>
-                                </div>
-                            )
-
-
-                            )
-                        )
-                    }
-                    {loading && (
-                        <div className="space-y-3">
-                            <div className="h-6 bg-base-300 rounded animate-pulse"></div>
-                            <div className="h-4 bg-base-300 rounded animate-pulse"></div>
-                            <div className="h-4 bg-base-300 rounded animate-pulse"></div>
-                        </div>
-                    )}
                 </div>
             </div>
         </>
