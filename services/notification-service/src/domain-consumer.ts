@@ -12,7 +12,6 @@ import { CollaborationEventConsumer } from './consumers/collaboration/consumer';
 import { InvitationsConsumer } from './consumers/invitations/consumer';
 import { RecruiterSubmissionEventConsumer } from './consumers/recruiter-submission/consumer';
 import { SupportEventConsumer } from './consumers/support/consumer';
-import { GateEventsConsumer } from './consumers/gate-events/consumer';
 import { ContactLookupHelper } from './helpers/contact-lookup';
 import { DataLookupHelper } from './helpers/data-lookup';
 
@@ -30,7 +29,6 @@ export class DomainEventConsumer {
     private invitationsConsumer: InvitationsConsumer;
     private recruiterSubmissionConsumer: RecruiterSubmissionEventConsumer;
     private supportConsumer: SupportEventConsumer;
-    private gateEventsConsumer: GateEventsConsumer;
 
     constructor(
         private rabbitMqUrl: string,
@@ -100,12 +98,6 @@ export class DomainEventConsumer {
             contactLookup
         );
         this.supportConsumer = new SupportEventConsumer(notificationService.support, logger);
-        this.gateEventsConsumer = new GateEventsConsumer(
-            notificationService.gateEvents,
-            logger,
-            dataLookup,
-            contactLookup
-        );
     }
 
     async connect(): Promise<void> {
@@ -175,13 +167,6 @@ export class DomainEventConsumer {
 
             // Status page contact submissions
             await this.channel.bindQueue(this.queue, this.exchange, 'status.contact_submitted');
-
-            // Phase 3 events - Gate Review System
-            await this.channel.bindQueue(this.queue, this.exchange, 'gate.approved');
-            await this.channel.bindQueue(this.queue, this.exchange, 'gate.denied');
-            await this.channel.bindQueue(this.queue, this.exchange, 'gate.info_requested');
-            await this.channel.bindQueue(this.queue, this.exchange, 'gate.info_provided');
-            await this.channel.bindQueue(this.queue, this.exchange, 'gate.entered');
 
             this.logger.info('Connected to RabbitMQ and bound to events');
 
@@ -346,23 +331,6 @@ export class DomainEventConsumer {
                 break;
             case 'status.contact_submitted':
                 await this.supportConsumer.handleStatusContact(event);
-                break;
-
-            // Phase 3 - Gate Review System
-            case 'gate.approved':
-                await this.gateEventsConsumer.handleGateApproved(event);
-                break;
-            case 'gate.denied':
-                await this.gateEventsConsumer.handleGateDenied(event);
-                break;
-            case 'gate.info_requested':
-                await this.gateEventsConsumer.handleGateInfoRequested(event);
-                break;
-            case 'gate.info_provided':
-                await this.gateEventsConsumer.handleGateInfoProvided(event);
-                break;
-            case 'gate.entered':
-                await this.gateEventsConsumer.handleGateEntered(event);
                 break;
 
             default:

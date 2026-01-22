@@ -1,8 +1,8 @@
 /**
- * Proposal Timeout Automation Job
+ * Application Timeout Automation Job
  * 
- * Checks for proposals that have exceeded the 72-hour response deadline
- * and automatically transitions them to 'timed_out' state.
+ * Checks for applications in 'recruiter_proposed' stage that have exceeded 
+ * the 72-hour response deadline and automatically transitions them to 'expired' stage.
  * 
  * Runs as a Kubernetes CronJob every 6 hours.
  * 
@@ -42,9 +42,10 @@ interface ExpiredProposal {
     id: string;
     job_id: string;
     candidate_id: string;
-    recruiter_id: string;
-    proposed_at: string;
-    response_due_at: string;
+    candidate_recruiter_id: string | null;
+    stage: string;
+    created_at: string;
+    updated_at: string;
 }
 
 /**
@@ -88,25 +89,26 @@ export async function checkProposalTimeouts(): Promise<void> {
         
         await rabbitmqChannel.assertExchange('domain_events', 'topic', { durable: true });
 
-        // Find expired proposals
-        const now = new Date().toISOString();
+        // Find expired proposals (applications in recruiter_proposed stage older than 72 hours)
+        const now = new Date();
+        const seventyTwoHoursAgo = new Date(now.getTime() - 72 * 60 * 60 * 1000).toISOString();
         const { data: expiredProposals, error: queryError } = await supabase
-            .from('candidate_role_assignments')
-            .select('id, job_id, candidate_id, recruiter_id, proposed_at, response_due_at')
-            .eq('state', 'proposed')
-            .lt('response_due_at', now);
+            .from('applications')
+            .select('id, job_id, candidate_id, candidate_recruiter_id, stage, created_at, updated_at')
+            .eq('stage', 'recruiter_proposed')
+            .lt('updated_at', seventyTwoHoursAgo);
 
         if (queryError) {
-            logger.error({ error: queryError }, 'Failed to query expired proposals');
+            logger.error({ error: queryError }, 'Failed to query expired applications');
             checkErrors.inc();
             throw queryError;
         }
 
         const proposals = expiredProposals as ExpiredProposal[] || [];
-        logger.info({ count: proposals.length }, 'Found expired proposals');
+        logger.info({ count: proposals.length }, 'Found expired applications');
 
         if (proposals.length === 0) {
-            logger.info('No expired proposals to process');
+            logger.info('No expired applications to process');
             endTimer();
             return;
         }
@@ -164,8 +166,8 @@ export async function checkProposalTimeouts(): Promise<void> {
 }
 
 /**
- * Process a single expired proposal
- * Updates state to 'timed_out' and publishes event
+ * Process a single expired application
+ * Updates stage to 'expired' and publishes event
  */
 async function processExpiredProposal(
     supabase: SupabaseClient,
@@ -173,15 +175,14 @@ async function processExpiredProposal(
     proposal: ExpiredProposal,
     logger: any
 ): Promise<void> {
-    const timedOutAt = new Date().toISOString();
+    const expiredAt = new Date().toISOString();
 
-    // Update proposal state
+    // Update application stage to expired
     const { error: updateError } = await supabase
-        .from('candidate_role_assignments')
+        .from('applications')
         .update({
-            state: 'timed_out',
-            timed_out_at: timedOutAt,
-            updated_at: timedOutAt,
+            stage: 'expired',
+            updated_at: expiredAt,
         })
         .eq('id', proposal.id);
 
@@ -189,24 +190,25 @@ async function processExpiredProposal(
         throw updateError;
     }
 
-    logger.info({ proposalId: proposal.id }, 'Updated proposal to timed_out state');
+    logger.info({ applicationId: proposal.id }, 'Updated application to expired stage');
 
     // Publish event to RabbitMQ
     const event = {
-        type: 'proposal.timed_out',
-        timestamp: timedOutAt,
+        type: 'application.stage_changed',
+        timestamp: expiredAt,
         data: {
-            proposal_id: proposal.id,
+            application_id: proposal.id,
             job_id: proposal.job_id,
             candidate_id: proposal.candidate_id,
-            recruiter_id: proposal.recruiter_id,
-            proposed_at: proposal.proposed_at,
-            response_due_at: proposal.response_due_at,
-            timed_out_at: timedOutAt,
+            candidate_recruiter_id: proposal.candidate_recruiter_id,
+            previous_stage: 'recruiter_proposed',
+            new_stage: 'expired',
+            stage_changed_at: expiredAt,
+            reason: 'timeout_after_72_hours',
         },
     };
 
-    const routingKey = 'proposal.timed_out';
+    const routingKey = 'application.stage_changed';
     channel.publish(
         'domain_events',
         routingKey,
@@ -214,7 +216,7 @@ async function processExpiredProposal(
         { persistent: true }
     );
 
-    logger.info({ proposalId: proposal.id, routingKey }, 'Published proposal.timed_out event');
+    logger.info({ applicationId: proposal.id, routingKey }, 'Published application.stage_changed event');
 }
 
 /**

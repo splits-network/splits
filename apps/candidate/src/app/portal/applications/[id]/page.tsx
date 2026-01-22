@@ -8,7 +8,6 @@ import AIReviewPanel from './components/ai-review-panel';
 import { ApplicationDetailClient } from './components/application-detail-client';
 import { AIReviewedActions } from './components/ai-reviewed-actions';
 import EditDraftButton from './components/edit-draft-button';
-import GateHistoryTimeline from '@/components/gate-history-timeline';
 import { createAuthenticatedClient } from '@/lib/api-client';
 
 const getFitScoreColor = (score: number | null) => {
@@ -118,20 +117,8 @@ export default async function ApplicationDetailPage({
         return notFound();
     }
 
-    // Fetch candidate role assignment (CRA) with gate history
-    let candidateRoleAssignment: any = null;
-    try {
-        const client = createAuthenticatedClient(token);
-        const craResponse = await client.get('/candidate-role-assignments', {
-            params: { application_id: id }
-        });
-        // V2 API returns { data: [...] }
-        const craData = (craResponse as any).data;
-        candidateRoleAssignment = Array.isArray(craData) && craData.length > 0 ? craData[0] : null;
-    } catch (error) {
-        console.error('Error fetching candidate role assignment:', error);
-        // Gate history is optional - don't fail the page if CRA fetch fails
-    }
+    // Note: Gate history tracking moved to application stage workflow
+    // CRA system was deprecated - application.stage now tracks workflow progress
 
     return (
         <div className="container mx-auto px-4 space-y-4">
@@ -229,25 +216,6 @@ export default async function ApplicationDetailPage({
                             <AIReviewPanel
                                 aiReviewId={application.ai_review.id}
                             />
-                        )}
-
-                    {/* Gate Review History - Show when application has been submitted */}
-                    {candidateRoleAssignment &&
-                        candidateRoleAssignment.gate_history &&
-                        candidateRoleAssignment.gate_history.length > 0 &&
-                        application.stage !== 'draft' &&
-                        application.stage !== 'ai_review' && (
-                            <div className="card bg-base-100 shadow mb-4">
-                                <div className="card-body">
-                                    <h2 className="card-title">
-                                        <i className="fa-duotone fa-regular fa-clipboard-check"></i>
-                                        Review Progress
-                                    </h2>
-                                    <GateHistoryTimeline
-                                        history={candidateRoleAssignment.gate_history}
-                                    />
-                                </div>
-                            </div>
                         )}
 
                     {/** This should be a  */}

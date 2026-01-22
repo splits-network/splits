@@ -570,7 +570,7 @@ export class ApplicationServiceV2 {
      * Submit application after AI review
      * Candidate is satisfied with AI feedback and ready to submit
      * 
-     * Phase 2: Creates CandidateRoleAssignment with gate routing
+     * Phase 2: Application stage workflow handles routing and reviews\n     * Note: CandidateRoleAssignment system was deprecated - now uses application.stage field
      */
     async submitApplication(applicationId: string, clerkUserId: string, data?: any): Promise<{
         application: any;

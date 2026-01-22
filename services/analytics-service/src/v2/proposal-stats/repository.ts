@@ -8,28 +8,42 @@ export class ProposalStatsRepository {
     async getSummary(clerkUserId: string, filters: ProposalStatsFilters): Promise<ProposalSummary> {
         const context = await resolveAccessContext(this.supabase, clerkUserId);
 
-        // Query candidate_role_assignments (proposals) table from network schema
+        // Query applications table for proposals (stage = 'recruiter_proposed')
         const query = this.supabase
-            .from('candidate_role_assignments')
-            .select('id, state, response_due_at, proposed_by, candidate_recruiter_id, company_recruiter_id');
+            .from('applications')
+            .select('id, stage, candidate_recruiter_id, created_at, updated_at');
 
         // Apply role-based filtering
         if (context.recruiterId) {
-            // Recruiter sees proposals where they're candidate OR company recruiter
-            query.or(`candidate_recruiter_id.eq.${context.recruiterId},company_recruiter_id.eq.${context.recruiterId}`);
+            // Recruiter sees applications where they're the candidate recruiter
+            query.eq('candidate_recruiter_id', context.recruiterId);
         } else if (context.organizationIds && context.organizationIds.length > 0 && !context.isPlatformAdmin) {
-            // Company users - for now, allow all (TODO: filter by company_id when CRA has it)
-            // Leave query unfiltered for company users
+            // Company users - get applications for jobs from their companies
+            // Need to join with jobs table to filter by company
+            const { data: jobIds } = await this.supabase
+                .from('jobs')
+                .select('id')
+                .in('company_id', context.organizationIds);
+            
+            if (jobIds && jobIds.length > 0) {
+                query.in('job_id', jobIds.map(j => j.id));
+            } else {
+                // No jobs for this company, return empty result
+                query.eq('id', 'no-match');
+            }
         }
         // Platform admins see everything (no filter)
+        
+        // Filter to only proposal-stage applications
+        query.eq('stage', 'recruiter_proposed');
 
-        const { data: proposals, error } = await query;
+        const { data: applications, error } = await query;
 
         if (error) {
-            throw new Error(`Failed to fetch proposals: ${error.message}`);
+            throw new Error(`Failed to fetch applications: ${error.message}`);
         }
 
-        if (!proposals || proposals.length === 0) {
+        if (!applications || applications.length === 0) {
             return {
                 actionable_count: 0,
                 waiting_count: 0,
@@ -38,35 +52,34 @@ export class ProposalStatsRepository {
             };
         }
 
-        // Compute counts
+        // Compute counts based on applications in 'recruiter_proposed' stage
         const now = new Date();
-        const urgent_threshold = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
 
         return {
-            // Actionable: proposals in 'proposed' state where current user is NOT the proposer
-            actionable_count: proposals.filter(p => 
-                p.state === 'proposed' && 
-                p.proposed_by !== context.identityUserId &&
-                (p.company_recruiter_id === context.recruiterId || p.candidate_recruiter_id === context.recruiterId)
+            // Actionable: recent applications in 'recruiter_proposed' stage
+            actionable_count: applications.filter(a => 
+                a.stage === 'recruiter_proposed' && 
+                new Date(a.updated_at) > threeDaysAgo
             ).length,
             
-            // Waiting: proposals in 'proposed' state where current user IS the proposer
-            waiting_count: proposals.filter(p => 
-                p.state === 'proposed' && 
-                p.proposed_by === context.identityUserId
+            // Waiting: applications that have been in 'recruiter_proposed' stage for a while
+            waiting_count: applications.filter(a => 
+                a.stage === 'recruiter_proposed' && 
+                new Date(a.updated_at) <= threeDaysAgo
             ).length,
             
-            // Urgent: proposals expiring within 24 hours
-            urgent_count: proposals.filter(p => 
-                p.state === 'proposed' && 
-                p.response_due_at && 
-                new Date(p.response_due_at) <= urgent_threshold && 
-                new Date(p.response_due_at) > now
+            // Urgent: applications that have been pending for more than 3 days
+            urgent_count: applications.filter(a => 
+                a.stage === 'recruiter_proposed' && 
+                new Date(a.updated_at) <= threeDaysAgo
             ).length,
             
-            // Overdue: proposals that timed out
-            overdue_count: proposals.filter(p => 
-                p.state === 'timed_out'
+            // Overdue: applications that have been pending for more than 7 days
+            overdue_count: applications.filter(a => 
+                a.stage === 'recruiter_proposed' && 
+                new Date(a.updated_at) <= sevenDaysAgo
             ).length,
         };
     }

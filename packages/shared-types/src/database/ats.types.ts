@@ -4,7 +4,7 @@
  * Generated from Supabase database schema.
  * Includes: applications, application_feedback, candidates, jobs, companies, placements, 
  * ai_reviews, application_audit_log, job_requirements, job_pre_screen_questions, 
- * job_pre_screen_answers, candidate_sourcers, candidate_role_assignments, recruiter_candidates
+ * job_pre_screen_answers, candidate_sourcers, recruiter_candidates\n * \n * Note: candidate_role_assignments table was dropped during application flow consolidation
  */
 
 import type { Database, Tables, TablesInsert, TablesUpdate } from '../supabase/database.types';
@@ -132,14 +132,6 @@ export type CandidateSourcerUpdate = DbTableUpdate<'candidate_sourcers'>;
 export type CompanySourcer = DbTable<'company_sourcers'>;
 export type CompanySourcerInsert = DbTableInsert<'company_sourcers'>;
 export type CompanySourcerUpdate = DbTableUpdate<'company_sourcers'>;
-
-// ============================================================================
-// CANDIDATE ROLE ASSIGNMENTS (PROPOSALS)
-// ============================================================================
-
-export type CandidateRoleAssignment = DbTable<'candidate_role_assignments'>;
-export type CandidateRoleAssignmentInsert = DbTableInsert<'candidate_role_assignments'>;
-export type CandidateRoleAssignmentUpdate = DbTableUpdate<'candidate_role_assignments'>;
 
 // ============================================================================
 // RECRUITER CANDIDATES

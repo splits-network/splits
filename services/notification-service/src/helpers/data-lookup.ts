@@ -112,19 +112,7 @@ export interface InvitationData {
     created_at: string;
 }
 
-export interface CandidateRoleAssignmentData {
-    id: string;
-    job_id: string;
-    candidate_id: string;
-    candidate_recruiter_id: string | null;
-    company_recruiter_id: string | null;
-    state: string;
-    current_gate: string | null;
-    gate_sequence: any;
-    gate_history: any;
-    created_at: string;
-    updated_at: string;
-}
+// Note: CandidateRoleAssignment interface removed - data now tracked via applications with stage workflow
 
 export class DataLookupHelper {
     constructor(
@@ -437,27 +425,6 @@ export class DataLookupHelper {
 
         if (error) {
             this.logger.error({ error, proposalId }, 'Failed to fetch proposal');
-            return null;
-        }
-
-        return data;
-    }
-
-    /**
-     * Get candidate role assignment (CRA) by ID
-     * Used for gate notification workflows
-     * Note: candidate_role_assignments table was dropped during application flow consolidation
-     */
-    async getCandidateRoleAssignment(craId: string): Promise<CandidateRoleAssignmentData | null> {
-        // Note: candidate_role_assignments table was dropped - CRA data now tracked via applications
-        const { data, error } = await this.supabase
-            .from('applications')
-            .select('*')
-            .eq('id', craId)
-            .single();
-
-        if (error) {
-            this.logger.error({ error, craId }, 'Failed to fetch candidate role assignment');
             return null;
         }
 

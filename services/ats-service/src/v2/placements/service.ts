@@ -58,16 +58,16 @@ export class PlacementServiceV2 {
 
     /**
      * Gather all 5 attribution role IDs for commission calculation:
-     * 1. Candidate Recruiter (from CRA)
-     * 2. Company Recruiter (from CRA)
-     * 3. Job Owner (from Job)
+     * 1. Candidate Recruiter (from application)
+     * 2. Company Recruiter (from job)
+     * 3. Job Owner (from job)
      * 4. Candidate Sourcer (if active)
      * 5. Company Sourcer (if active)
      */
     private async gatherAttribution(
         candidateId: string,
         jobId: string,
-        craId?: string
+        applicationId: string
     ): Promise<{
         candidate_recruiter_id: string | null;
         company_recruiter_id: string | null;
@@ -75,22 +75,23 @@ export class PlacementServiceV2 {
         candidate_sourcer_recruiter_id: string | null;
         company_sourcer_recruiter_id: string | null;
     }> {
-        // 1 & 2: Get CRA for candidate_recruiter_id and company_recruiter_id
-        let candidateRecruiterId: string | null = null;
-        let companyRecruiterId: string | null = null;
+        // 1: Get candidate_recruiter_id from application
+        const { data: application } = await this.supabase
+            .from('applications')
+            .select('candidate_recruiter_id')
+            .eq('id', applicationId)
+            .single();
 
-        if (craId) {
-            // Note: candidate_role_assignments table was dropped during application flow consolidation
-            // CRA data is now tracked via applications.candidate_recruiter_id
-            // This code path should not be used anymore
-            console.warn('Legacy CRA ID provided to placement service - candidate_role_assignments table was dropped');
-            // candidateRecruiterId will be obtained from application data instead
+        if (!application) {
+            throw new Error(`Application ${applicationId} not found for attribution gathering`);
         }
 
-        // 3: Get job for job_owner_recruiter_id and company_id
+        const candidateRecruiterId = application.candidate_recruiter_id || null;
+
+        // 2 & 3: Get job for company_recruiter_id, job_owner_recruiter_id and company_id
         const { data: job } = await this.supabase
             .from('jobs')
-            .select('job_owner_recruiter_id, company_id')
+            .select('company_recruiter_id, job_owner_recruiter_id, company_id')
             .eq('id', jobId)
             .single();
 
@@ -98,6 +99,7 @@ export class PlacementServiceV2 {
             throw new Error(`Job ${jobId} not found for attribution gathering`);
         }
 
+        const companyRecruiterId = job.company_recruiter_id || null;
         const jobOwnerRecruiterId = job.job_owner_recruiter_id || null;
 
         // 4: Get candidate sourcer (check if active)
@@ -170,7 +172,7 @@ export class PlacementServiceV2 {
         const attribution = await this.gatherAttribution(
             data.candidate_id,
             data.job_id,
-            data.candidate_role_assignment_id
+            data.application_id
         );
 
         // Emit event with all attribution data

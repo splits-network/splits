@@ -1,28 +1,16 @@
 /**
- * Candidate Role Assignment Types
+ * Candidate Role Assignment Types - DEPRECATED
  * 
- * Manages the fiscal tracking and recruiter attribution for candidate-job pairings.
- * Each assignment tracks the relationship between a candidate, job, and up to TWO
- * distinct recruiter roles:
+ * This file is deprecated as the CRA system has been replaced by application-centered workflow.
+ * All candidate-job relationships are now tracked via the applications table with stage-based workflow.
  * 
- * 1. Candidate Recruiter ("Closer") - Represents the candidate
- * 2. Company Recruiter ("Client/Hiring Facilitator") - Represents the company
- * 
- * Both roles are optional (nullable). Assignments can exist with:
- * - Both recruiters (full recruiter collaboration)
- * - Only candidate recruiter (candidate represented, company direct)
- * - Only company recruiter (company represented, candidate direct)
- * - Neither recruiter (direct candidate-company connection)
- * 
- * Key Concepts:
- * - One assignment per candidate-job pair (uniqueness enforced)
- * - Tracks proposal lifecycle through gate review system
- * - Gate sequence determined by which recruiter roles are filled
- * - Used for placement fee attribution and deal routing
- * - State machine enforces business rules around assignments
+ * @deprecated Use application stage workflow instead of CRA gates
  */
 
-import type { CandidateRoleAssignment } from './database/ats.types';
+// All types in this file are deprecated and should not be used in new code
+// Use Application types from ./applications.ts instead
+
+// Legacy imports removed - CandidateRoleAssignment no longer exists in database types
 
 /**
  * Assignment State Machine
@@ -77,9 +65,9 @@ export interface GateHistoryEntry {
 }
 
 /**
- * Enriched assignment with related data
+ * @deprecated Use Application types instead
  */
-export interface EnrichedCandidateRoleAssignment extends CandidateRoleAssignment {
+export interface EnrichedCandidateRoleAssignment {
     job?: {
         id: string;
         title: string;

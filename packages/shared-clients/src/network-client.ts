@@ -2,7 +2,6 @@ import { BaseClient, BaseClientConfig, ApiResponse } from './base-client';
 import {
     Recruiter,
     RoleAssignment,
-    CandidateRoleAssignment,
     RecruiterReputation,
 } from '@splits-network/shared-types';
 
@@ -68,58 +67,59 @@ export class NetworkClient extends BaseClient {
     }
 
     // ========================================================================
-    // Phase 2: Candidate-Role Assignment Proposals
+    // Phase 2: Candidate-Role Assignment Proposals - DEPRECATED
+    // Note: CRA system replaced by application stage workflow
+    // These methods are deprecated and should not be used
     // ========================================================================
 
-    async createProposal(data: {
-        job_id: string;
-        candidate_id: string;
-        recruiter_id: string;
-        proposed_by?: string;
-        proposal_notes?: string;
-        response_due_days?: number;
-    }): Promise<ApiResponse<CandidateRoleAssignment>> {
-        return this.post('/proposals', data);
+    /**
+     * @deprecated CRA system replaced by application stage workflow
+     * Use application-based proposal system instead
+     */
+    async createProposal(): Promise<never> {
+        throw new Error('CRA proposals are deprecated - use application stage workflow instead');
     }
 
-    async getProposal(assignmentId: string): Promise<ApiResponse<CandidateRoleAssignment>> {
-        return this.get(`/proposals/${assignmentId}`);
+    /**
+     * @deprecated CRA system replaced by application stage workflow
+     */
+    async getProposal(): Promise<never> {
+        throw new Error('CRA proposals are deprecated - use application stage workflow instead');
     }
 
-    async listProposals(filters?: {
-        recruiter_id?: string;
-        job_id?: string;
-        candidate_id?: string;
-        state?: string;
-    }): Promise<ApiResponse<CandidateRoleAssignment[]>> {
-        const queryParams = new URLSearchParams();
-        if (filters?.recruiter_id) queryParams.set('recruiter_id', filters.recruiter_id);
-        if (filters?.job_id) queryParams.set('job_id', filters.job_id);
-        if (filters?.candidate_id) queryParams.set('candidate_id', filters.candidate_id);
-        if (filters?.state) queryParams.set('state', filters.state);
-        
-        const query = queryParams.toString() ? `?${queryParams.toString()}` : '';
-        return this.get(`/proposals${query}`);
+    /**
+     * @deprecated CRA system replaced by application stage workflow
+     */
+    async listProposals(): Promise<never> {
+        throw new Error('CRA proposals are deprecated - use application stage workflow instead');
     }
 
-    async acceptProposal(assignmentId: string, data?: {
-        response_notes?: string;
-    }): Promise<ApiResponse<CandidateRoleAssignment>> {
-        return this.post(`/proposals/${assignmentId}/accept`, data || {});
+    /**
+     * @deprecated CRA system replaced by application stage workflow
+     */
+    async acceptProposal(): Promise<never> {
+        throw new Error('CRA proposals are deprecated - use application stage workflow instead');
     }
 
-    async declineProposal(assignmentId: string, data?: {
-        response_notes?: string;
-    }): Promise<ApiResponse<CandidateRoleAssignment>> {
-        return this.post(`/proposals/${assignmentId}/decline`, data || {});
+    /**
+     * @deprecated CRA system replaced by application stage workflow
+     */
+    async declineProposal(): Promise<never> {
+        throw new Error('CRA proposals are deprecated - use application stage workflow instead');
     }
 
-    async markProposalSubmitted(assignmentId: string): Promise<ApiResponse<CandidateRoleAssignment>> {
-        return this.post(`/proposals/${assignmentId}/submit`, {});
+    /**
+     * @deprecated CRA system replaced by application stage workflow
+     */
+    async markProposalSubmitted(): Promise<never> {
+        throw new Error('CRA proposals are deprecated - use application stage workflow instead');
     }
 
-    async closeProposal(assignmentId: string): Promise<ApiResponse<CandidateRoleAssignment>> {
-        return this.post(`/proposals/${assignmentId}/close`, {});
+    /**
+     * @deprecated CRA system replaced by application stage workflow
+     */
+    async closeProposal(): Promise<never> {
+        throw new Error('CRA proposals are deprecated - use application stage workflow instead');
     }
 
     // ========================================================================
@@ -144,7 +144,7 @@ export class NetworkClient extends BaseClient {
         const queryParams = new URLSearchParams();
         if (filters?.limit) queryParams.set('limit', filters.limit.toString());
         if (filters?.metric) queryParams.set('metric', filters.metric);
-        
+
         const query = queryParams.toString() ? `?${queryParams.toString()}` : '';
         return this.get(`/leaderboard${query}`);
     }

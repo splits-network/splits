@@ -361,7 +361,6 @@ export class ApplicationRepository {
                     // Requirements are part of the job - already fetched with job.requirements
                     // This is a separate query via getJobRequirements if needed
                     break;
-                // Note: current_gate and candidate_role_assignments removed - table was dropped during application flow consolidation
                 case 'ai_review':
                 case 'ai-review':
                     // AI reviews use one-to-many relationship - get only the latest
