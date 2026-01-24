@@ -11,7 +11,7 @@ export function registerSubscriptionRoutes(
     config: RegisterSubscriptionRoutesConfig
 ) {
     // GET /me endpoint - must be BEFORE generic /subscriptions routes
-    app.get('/v2/subscriptions/me', async (request, reply) => {
+    app.get('/api/v2/subscriptions/me', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const subscription = await config.subscriptionService.getSubscriptionByClerkId(clerkUserId);
@@ -23,7 +23,7 @@ export function registerSubscriptionRoutes(
         }
     });
 
-    app.get('/v2/subscriptions', async (request, reply) => {
+    app.get('/api/v2/subscriptions', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const pagination = validatePaginationParams(request.query as Record<string, any>);
@@ -38,7 +38,7 @@ export function registerSubscriptionRoutes(
         }
     });
 
-    app.get('/v2/subscriptions/:id', async (request, reply) => {
+    app.get('/api/v2/subscriptions/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -49,7 +49,7 @@ export function registerSubscriptionRoutes(
         }
     });
 
-    app.post('/v2/subscriptions', async (request, reply) => {
+    app.post('/api/v2/subscriptions', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const subscription = await config.subscriptionService.createSubscription(
@@ -62,7 +62,7 @@ export function registerSubscriptionRoutes(
         }
     });
 
-    app.patch('/v2/subscriptions/:id', async (request, reply) => {
+    app.patch('/api/v2/subscriptions/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -77,12 +77,57 @@ export function registerSubscriptionRoutes(
         }
     });
 
-    app.delete('/v2/subscriptions/:id', async (request, reply) => {
+    app.delete('/api/v2/subscriptions/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
             const subscription = await config.subscriptionService.cancelSubscription(id, clerkUserId);
             return reply.send({ data: subscription });
+        } catch (error: any) {
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
+    // Stripe-specific routes
+    app.post('/api/v2/subscriptions/checkout-session', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { plan_id, success_url, cancel_url } = request.body as {
+                plan_id: string;
+                success_url?: string;
+                cancel_url?: string;
+            };
+
+            if (!plan_id) {
+                return reply.code(400).send({
+                    error: { message: 'plan_id is required' }
+                });
+            }
+
+            const result = await config.subscriptionService.createCheckoutSession(
+                plan_id,
+                clerkUserId,
+                success_url,
+                cancel_url
+            );
+
+            return reply.send({ data: result });
+        } catch (error: any) {
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
+    app.post('/api/v2/subscriptions/portal-session', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { return_url } = request.body as { return_url?: string };
+
+            const result = await config.subscriptionService.createPortalSession(
+                clerkUserId,
+                return_url
+            );
+
+            return reply.send({ data: result });
         } catch (error: any) {
             return reply.code(400).send({ error: { message: error.message } });
         }

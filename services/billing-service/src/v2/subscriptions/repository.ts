@@ -70,6 +70,10 @@ export class SubscriptionRepository {
         return data;
     }
 
+    async getSubscriptionById(id: string): Promise<Subscription | null> {
+        return this.findSubscription(id);
+    }
+
     async findByUserId(userId: string): Promise<Subscription | null> {
         const { data, error } = await this.supabase
 
@@ -77,6 +81,24 @@ export class SubscriptionRepository {
             .select('*')
             .eq('user_id', userId)
             .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') return null;
+            throw error;
+        }
+        return data;
+    }
+
+    async getActiveSubscriptionByUserId(userId: string): Promise<Subscription | null> {
+        const { data, error } = await this.supabase
+
+            .from('subscriptions')
+            .select('*')
+            .eq('user_id', userId)
+            .in('status', ['active', 'trialing', 'past_due'])
             .order('created_at', { ascending: false })
             .limit(1)
             .single();
@@ -110,6 +132,24 @@ export class SubscriptionRepository {
             .single();
 
         if (error) throw error;
+        return data;
+    }
+
+    /**
+     * Get user details by Clerk user ID (for creating Stripe customers)
+     */
+    async getUserDetailsByClerkId(clerkUserId: string): Promise<{ email: string; name: string } | null> {
+        const { data, error } = await this.supabase
+
+            .from('users')
+            .select('email, name')
+            .eq('clerk_user_id', clerkUserId)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') return null;
+            throw error;
+        }
         return data;
     }
 }

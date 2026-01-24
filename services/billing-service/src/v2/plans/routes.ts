@@ -7,7 +7,7 @@ interface RegisterPlanRoutesConfig {
 }
 
 export function registerPlanRoutes(app: FastifyInstance, config: RegisterPlanRoutesConfig) {
-    app.get('/v2/plans', async (request, reply) => {
+    app.get('/api/v2/plans', async (request, reply) => {
         try {
             const pagination = validatePaginationParams(request.query as Record<string, any>);
             const filters = {
@@ -21,7 +21,7 @@ export function registerPlanRoutes(app: FastifyInstance, config: RegisterPlanRou
         }
     });
 
-    app.get('/v2/plans/:id', async (request, reply) => {
+    app.get('/api/v2/plans/:id', async (request, reply) => {
         try {
             const { id } = request.params as { id: string };
             const plan = await config.planService.getPlan(id);
@@ -31,7 +31,7 @@ export function registerPlanRoutes(app: FastifyInstance, config: RegisterPlanRou
         }
     });
 
-    app.post('/v2/plans', async (request, reply) => {
+    app.post('/api/v2/plans', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const plan = await config.planService.createPlan(request.body as any, clerkUserId);
@@ -41,7 +41,7 @@ export function registerPlanRoutes(app: FastifyInstance, config: RegisterPlanRou
         }
     });
 
-    app.patch('/v2/plans/:id', async (request, reply) => {
+    app.patch('/api/v2/plans/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -52,7 +52,7 @@ export function registerPlanRoutes(app: FastifyInstance, config: RegisterPlanRou
         }
     });
 
-    app.delete('/v2/plans/:id', async (request, reply) => {
+    app.delete('/api/v2/plans/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };

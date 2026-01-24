@@ -9,8 +9,7 @@ interface PlacementCreatedEvent {
     candidate_id: string;
     job_id: string;
     application_id: string;
-    salary: number;
-    fee_percentage: number;
+    placement_fee: number; // Changed from salary/fee_percentage calculation
 
     // 5 role IDs for commission attribution
     candidate_recruiter_id: string | null;
@@ -77,7 +76,7 @@ export class PlacementEventConsumer {
 
             // Route to appropriate handler
             if (routingKey === 'placement.created') {
-                await this.handlePlacementCreated(content);
+                await this.handlePlacementCreated(content.payload || content);
             }
 
             // Acknowledge message
@@ -99,11 +98,23 @@ export class PlacementEventConsumer {
         this.logger.info({ placement_id: event.placement_id }, 'Processing placement.created event');
 
         try {
-            // Calculate total fee
-            const totalFee = event.salary * (event.fee_percentage / 100);
+            // Use the placement fee from the event
+            const totalFee = event.placement_fee;
+
+            // Skip processing placements with zero fee
+            if (!totalFee || totalFee <= 0) {
+                this.logger.info(
+                    {
+                        placement_id: event.placement_id,
+                        placement_fee: totalFee,
+                    },
+                    'Skipping placement with zero fee - no commission to process'
+                );
+                return;
+            }
 
             // Get subscription tier from database
-            // For Phase 5, we'll default to STANDARD tier
+            // For Phase 5, we'll default to paid tier
             // TODO: Query from placements table or determine from recruiter subscription
             const { data: placement } = await this.supabase
                 .from('placements')
@@ -111,7 +122,7 @@ export class PlacementEventConsumer {
                 .eq('id', event.placement_id)
                 .single();
 
-            const subscriptionTier = (placement?.subscription_tier as any) || 'STANDARD';
+            const subscriptionTier = (placement?.subscription_tier as any) || 'paid';
 
             // Create immutable snapshot with all 5 role attributions
             await this.snapshotService.createSnapshot({
@@ -121,7 +132,7 @@ export class PlacementEventConsumer {
                 job_owner_recruiter_id: event.job_owner_recruiter_id,
                 candidate_sourcer_recruiter_id: event.candidate_sourcer_recruiter_id,
                 company_sourcer_recruiter_id: event.company_sourcer_recruiter_id,
-                total_fee: totalFee,
+                total_placement_fee: totalFee,
                 subscription_tier: subscriptionTier,
             });
 

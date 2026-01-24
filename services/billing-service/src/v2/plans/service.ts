@@ -9,7 +9,7 @@ export class PlanServiceV2 {
         private repository: PlanRepository,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
         private eventPublisher?: EventPublisher
-    ) {}
+    ) { }
 
     async getPlans(filters: PlanListFilters = {}): Promise<{
         data: Plan[];
@@ -43,13 +43,13 @@ export class PlanServiceV2 {
         if (!payload.slug) {
             throw new Error('Plan slug is required');
         }
-        if (!payload.price_cents || payload.price_cents <= 0) {
-            throw new Error('price_cents must be greater than zero');
+        if (!payload.price_monthly || parseFloat(payload.price_monthly) < 0) {
+            throw new Error('price_monthly must be zero or greater');
         }
 
         const plan = await this.repository.createPlan({
             ...payload,
-            status: payload.status || 'active',
+            is_active: payload.is_active ?? true,
         });
 
         await this.publishEvent('plan.created', plan);

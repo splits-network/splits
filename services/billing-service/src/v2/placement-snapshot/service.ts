@@ -13,7 +13,7 @@ import { PlacementSnapshotCreate, PlacementSnapshot } from './types';
  * 5. Company Sourcer ("BD" - first recruiter to bring company)
  */
 const COMMISSION_RATES = {
-    FREE: {
+    free: {
         candidate_recruiter: 0.20,      // 20%
         company_recruiter: 0.10,        // 10%
         job_owner: 0.10,                // 10%
@@ -21,7 +21,7 @@ const COMMISSION_RATES = {
         company_sourcer: 0.06,          // 6%
         platform_remainder: 0.48,       // 48% (goes to platform if roles are null)
     },
-    STANDARD: {
+    paid: {
         candidate_recruiter: 0.30,      // 30%
         company_recruiter: 0.15,        // 15%
         job_owner: 0.15,                // 15%
@@ -29,21 +29,13 @@ const COMMISSION_RATES = {
         company_sourcer: 0.08,          // 8% (6% base + 2% bonus)
         platform_remainder: 0.24,       // 24%
     },
-    PRO: {
+    premium: {
         candidate_recruiter: 0.40,      // 40%
         company_recruiter: 0.20,        // 20%
         job_owner: 0.20,                // 20%
         candidate_sourcer: 0.10,        // 10% (6% base + 4% bonus)
         company_sourcer: 0.10,          // 10% (6% base + 4% bonus)
         platform_remainder: 0.00,       // 0% (100% paid to roles)
-    },
-    ENTERPRISE: {
-        candidate_recruiter: 0.40,      // 40% (same as PRO)
-        company_recruiter: 0.20,        // 20%
-        job_owner: 0.20,                // 20%
-        candidate_sourcer: 0.10,        // 10%
-        company_sourcer: 0.10,          // 10%
-        platform_remainder: 0.00,       // 0%
     },
 };
 
@@ -67,19 +59,19 @@ export class PlacementSnapshotService {
         const snapshot = await this.repository.create({
             ...createData,
             candidate_recruiter_rate: createData.candidate_recruiter_id
-                ? rates.candidate_recruiter * createData.total_fee
+                ? rates.candidate_recruiter * createData.total_placement_fee
                 : null,
             company_recruiter_rate: createData.company_recruiter_id
-                ? rates.company_recruiter * createData.total_fee
+                ? rates.company_recruiter * createData.total_placement_fee
                 : null,
             job_owner_rate: createData.job_owner_recruiter_id
-                ? rates.job_owner * createData.total_fee
+                ? rates.job_owner * createData.total_placement_fee
                 : null,
             candidate_sourcer_rate: createData.candidate_sourcer_recruiter_id
-                ? rates.candidate_sourcer * createData.total_fee
+                ? rates.candidate_sourcer * createData.total_placement_fee
                 : null,
             company_sourcer_rate: createData.company_sourcer_recruiter_id
-                ? rates.company_sourcer * createData.total_fee
+                ? rates.company_sourcer * createData.total_placement_fee
                 : null,
         });
 
@@ -112,6 +104,6 @@ export class PlacementSnapshotService {
      */
     calculatePlatformRemainder(snapshot: PlacementSnapshot): number {
         const totalCommissions = this.calculateTotalCommissions(snapshot);
-        return snapshot.total_fee - totalCommissions;
+        return snapshot.total_placement_fee - totalCommissions;
     }
 }

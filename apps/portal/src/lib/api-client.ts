@@ -8,7 +8,39 @@
 
 import { SplitsApiClient, type ApiResponse } from '@splits-network/shared-api-client';
 import type { ApplicationStage } from '@splits-network/shared-types';
+
+// Billing and subscription types
 type DashboardStats = Record<string, any>;
+
+interface Plan {
+    id: string;
+    name: string;
+    slug: string;
+    price_monthly: string;
+    features: {
+        candidate_submissions?: boolean;
+        basic_analytics?: boolean;
+        advanced_analytics?: boolean;
+        ai_matching?: boolean;
+        priority_support?: boolean;
+        api_access?: boolean;
+        white_label?: boolean;
+        applications_per_month: number;
+    };
+    is_active: boolean;
+}
+
+interface LocalSubscription {
+    id: string;
+    user_id: string;
+    plan_id: string;
+    status: 'active' | 'trialing' | 'past_due' | 'canceled' | 'incomplete' | 'incomplete_expired';
+    current_period_start?: string;
+    current_period_end?: string;
+    cancel_at?: string;
+    canceled_at?: string;
+    plan?: Plan;
+}
 
 /**
  * Portal API client - simplified wrapper around shared client
@@ -71,13 +103,8 @@ export class ApiClient {
         return await this.get('/recruiters/me');
     }
 
-    /**
-     * Get current user's active subscription
-     * Uses /me endpoint for security
-     */
-    async getCurrentSubscription(): Promise<{ data: any }> {
-        return await this.get('/subscriptions/me');
-    }
+    // ===== SUBSCRIPTION & BILLING METHODS =====
+    
 }
 
 // Export a singleton instance

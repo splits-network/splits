@@ -128,7 +128,7 @@ export class PayoutServiceV2 {
                 recruiter_id: snapshot.candidate_recruiter_id,
                 role: 'candidate_recruiter', // ✅ Explicit role from snapshot
                 split_percentage: snapshot.candidate_recruiter_rate,
-                split_amount: (snapshot.total_fee * snapshot.candidate_recruiter_rate) / 100,
+                split_amount: (snapshot.total_placement_fee * snapshot.candidate_recruiter_rate) / 100,
             });
         }
 
@@ -139,7 +139,7 @@ export class PayoutServiceV2 {
                 recruiter_id: snapshot.company_recruiter_id,
                 role: 'company_recruiter',
                 split_percentage: snapshot.company_recruiter_rate,
-                split_amount: (snapshot.total_fee * snapshot.company_recruiter_rate) / 100,
+                split_amount: (snapshot.total_placement_fee * snapshot.company_recruiter_rate) / 100,
             });
         }
 
@@ -150,7 +150,7 @@ export class PayoutServiceV2 {
                 recruiter_id: snapshot.job_owner_recruiter_id,
                 role: 'job_owner',
                 split_percentage: snapshot.job_owner_rate,
-                split_amount: (snapshot.total_fee * snapshot.job_owner_rate) / 100,
+                split_amount: (snapshot.total_placement_fee * snapshot.job_owner_rate) / 100,
             });
         }
 
@@ -161,7 +161,7 @@ export class PayoutServiceV2 {
                 recruiter_id: snapshot.candidate_sourcer_recruiter_id,
                 role: 'candidate_sourcer',
                 split_percentage: snapshot.candidate_sourcer_rate,
-                split_amount: (snapshot.total_fee * snapshot.candidate_sourcer_rate) / 100,
+                split_amount: (snapshot.total_placement_fee * snapshot.candidate_sourcer_rate) / 100,
             });
         }
 
@@ -172,7 +172,7 @@ export class PayoutServiceV2 {
                 recruiter_id: snapshot.company_sourcer_recruiter_id,
                 role: 'company_sourcer',
                 split_percentage: snapshot.company_sourcer_rate,
-                split_amount: (snapshot.total_fee * snapshot.company_sourcer_rate) / 100,
+                split_amount: (snapshot.total_placement_fee * snapshot.company_sourcer_rate) / 100,
             });
         }
 
@@ -240,7 +240,7 @@ export class PayoutServiceV2 {
         const remainderPercent = 100 - totalPaid;
 
         // Return dollar amount
-        return (snapshot.total_fee * remainderPercent) / 100;
+        return (snapshot.total_placement_fee * remainderPercent) / 100;
     }
 
     private async publishEvent(eventType: string, payload: Record<string, any>): Promise<void> {

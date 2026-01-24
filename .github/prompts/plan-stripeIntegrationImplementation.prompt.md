@@ -151,17 +151,66 @@ export default function ChangePlanPage() {
 
 #### 4.4 API Client Integration
 ```tsx
-// apps/portal/src/lib/api-client.ts
-export class ApiClient {
-  // Subscription methods
-  async getCurrentSubscription(): Promise<Subscription>
-  async createCheckoutSession(planId: string): Promise<{ checkout_url: string }>
-  async createPortalSession(): Promise<{ portal_url: string }>
-  async cancelSubscription(): Promise<void>
-  
-  // Plans
-  async getPlans(): Promise<Plan[]>
-}
+// V2 API Client Pattern - Use this pattern in all billing components
+const { getToken } = useAuth();
+
+// Load subscription data
+const loadBillingData = async () => {
+    const token = await getToken();
+    if (!token) return;
+    
+    const client = createAuthenticatedClient(token);
+    
+    // Get current subscription using V2 endpoints
+    const subscription = await client.get('/subscriptions/me');
+    const plans = await client.get('/plans', { params: { active: true } });
+};
+
+// Create subscription directly (no Stripe checkout)
+const handleUpgrade = async (planId: string) => {
+    const token = await getToken();
+    if (!token) return;
+    
+    const client = createAuthenticatedClient(token);
+    
+    // Create new subscription
+    await client.post('/subscriptions', {
+        plan_id: planId,
+        status: 'active'
+    });
+};
+
+// Update existing subscription
+const handlePlanChange = async (subscriptionId: string, planId: string) => {
+    const token = await getToken();
+    if (!token) return;
+    
+    const client = createAuthenticatedClient(token);
+    
+    // Update subscription plan
+    await client.patch(`/subscriptions/${subscriptionId}`, {
+        plan_id: planId,
+        status: 'active'
+    });
+};
+
+// Cancel subscription (downgrade to free)
+const handleCancel = async (subscriptionId: string) => {
+    const token = await getToken();
+    if (!token) return;
+    
+    const client = createAuthenticatedClient(token);
+    
+    // Find free plan
+    const plans = await client.get('/plans', { params: { active: true } });
+    const freePlan = plans.find(p => p.slug === 'free');
+    
+    // Downgrade to free plan
+    await client.patch(`/subscriptions/${subscriptionId}`, {
+        plan_id: freePlan.id,
+        status: 'active'
+    });
+};
 ```
 
 ### Phase 5: Company Billing (Week 3-4)

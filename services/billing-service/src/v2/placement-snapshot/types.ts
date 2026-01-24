@@ -17,7 +17,7 @@ export interface PlacementSnapshot {
     company_sourcer_rate: number | null;
 
     // Fee calculation
-    total_fee: number;
+    total_placement_fee: number;
     subscription_tier: string;
 
     // Timestamps
@@ -35,8 +35,8 @@ export interface PlacementSnapshotCreate {
     company_sourcer_recruiter_id: string | null;
 
     // Fee information
-    total_fee: number;
-    subscription_tier: 'FREE' | 'STANDARD' | 'PRO' | 'ENTERPRISE';
+    total_placement_fee: number;
+    subscription_tier: 'premium' | 'paid' | 'free';
 }
 
 export interface PlacementSnapshotFilters {

@@ -107,7 +107,7 @@ importers:
         specifier: ^10.4.20
         version: 10.4.23(postcss@8.5.6)
       daisyui:
-        specifier: ^5.5.8
+        specifier: ^5.5.14
         version: 5.5.14
       postcss:
         specifier: ^8.4.49
@@ -171,8 +171,8 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0
       daisyui:
-        specifier: ^5.5.8
-        version: 5.5.8
+        specifier: ^5.5.14
+        version: 5.5.14
       postcss:
         specifier: ^8.4.49
         version: 8.5.6
@@ -644,6 +644,9 @@ importers:
       amqplib:
         specifier: ^0.10.5
         version: 0.10.9
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.6.1
       fastify:
         specifier: ^5.6.2
         version: 5.6.2
@@ -2821,9 +2824,6 @@ packages:
 
   daisyui@5.5.14:
     resolution: {integrity: sha512-L47rvw7I7hK68TA97VB8Ee0woHew+/ohR6Lx6Ah/krfISOqcG4My7poNpX5Mo5/ytMxiR40fEaz6njzDi7cuSg==}
-
-  daisyui@5.5.8:
-    resolution: {integrity: sha512-6psL9jIEOFOw68V10j/BKCWcRgx8dh81mmNxShr+g7HDM6UHNoPharlp9zq/PQkHNuGU1ZQsajR3HgpvavbRKQ==}
 
   date-fns@4.1.0:
     resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
@@ -6599,8 +6599,6 @@ snapshots:
   csstype@3.2.3: {}
 
   daisyui@5.5.14: {}
-
-  daisyui@5.5.8: {}
 
   date-fns@4.1.0: {}
 

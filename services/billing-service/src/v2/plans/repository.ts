@@ -21,7 +21,7 @@ export class PlanRepository {
         const offset = (page - 1) * limit;
 
         let query = this.supabase
-            
+
             .from('plans')
             .select('*', { count: 'exact' });
 
@@ -29,13 +29,18 @@ export class PlanRepository {
             query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
         }
         if (filters.status) {
-            query = query.eq('status', filters.status);
+            // Map status filter to is_active column
+            if (filters.status === 'active') {
+                query = query.eq('is_active', true);
+            } else if (filters.status === 'archived') {
+                query = query.eq('is_active', false);
+            }
         }
         if (filters.billing_interval) {
             query = query.eq('billing_interval', filters.billing_interval);
         }
 
-        const sortBy = filters.sort_by || 'price_cents';
+        const sortBy = filters.sort_by || 'price_monthly';
         const sortOrder = (filters.sort_order || 'asc').toLowerCase() === 'asc';
         query = query.order(sortBy, { ascending: sortOrder });
 
@@ -53,7 +58,7 @@ export class PlanRepository {
 
     async findPlan(id: string): Promise<Plan | null> {
         const { data, error } = await this.supabase
-            
+
             .from('plans')
             .select('*')
             .eq('id', id)
@@ -66,9 +71,29 @@ export class PlanRepository {
         return data;
     }
 
+    async findPlanBySlug(slug: string): Promise<Plan | null> {
+        const { data, error } = await this.supabase
+
+            .from('plans')
+            .select('*')
+            .eq('slug', slug)
+            .eq('is_active', true)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') return null;
+            throw error;
+        }
+        return data;
+    }
+
+    async getPlanById(id: string): Promise<Plan | null> {
+        return this.findPlan(id);
+    }
+
     async createPlan(payload: PlanCreateInput): Promise<Plan> {
         const { data, error } = await this.supabase
-            
+
             .from('plans')
             .insert(payload)
             .select('*')
@@ -80,7 +105,7 @@ export class PlanRepository {
 
     async updatePlan(id: string, updates: PlanUpdateInput): Promise<Plan> {
         const { data, error } = await this.supabase
-            
+
             .from('plans')
             .update({ ...updates, updated_at: new Date().toISOString() })
             .eq('id', id)
@@ -93,7 +118,7 @@ export class PlanRepository {
 
     async archivePlan(id: string): Promise<Plan> {
         return this.updatePlan(id, {
-            status: 'archived',
+            is_active: false,
         } as PlanUpdateInput);
     }
 }

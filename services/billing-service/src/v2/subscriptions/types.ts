@@ -2,21 +2,12 @@
  * Subscription Domain Types
  */
 
+import { Subscription as DBSubscription } from '../shared/database-types';
+
 export type SubscriptionStatus = 'active' | 'past_due' | 'canceled' | 'trialing';
 
-export interface Subscription {
-    id: string;
-    user_id: string;
-    plan_id: string;
-    stripe_subscription_id: string | null;
-    status: SubscriptionStatus;
-    current_period_start: string;
-    current_period_end: string;
-    cancel_at: string | null;
-    canceled_at: string | null;
-    created_at: string;
-    updated_at: string;
-}
+// Use the database type as the main Subscription type
+export type Subscription = DBSubscription;
 
 export interface SubscriptionFilters {
     user_id?: string;
@@ -31,5 +22,5 @@ export interface SubscriptionListFilters extends SubscriptionFilters {
     sort_order?: 'asc' | 'desc';
 }
 
-export type SubscriptionCreateInput = Omit<Subscription, 'id' | 'created_at' | 'updated_at'>;
-export type SubscriptionUpdateInput = Partial<Omit<Subscription, 'id' | 'created_at' | 'updated_at'>>;
+export type SubscriptionCreateInput = Partial<Omit<DBSubscription, 'id' | 'created_at' | 'updated_at'>>;
+export type SubscriptionUpdateInput = Partial<Omit<DBSubscription, 'id' | 'created_at' | 'updated_at'>>;

@@ -1,0 +1,313 @@
+import Stripe from 'stripe';
+import { WebhookRepositoryV2 } from './repository';
+import { SubscriptionServiceV2 } from '../subscriptions/service';
+import { SubscriptionRepository } from '../subscriptions/repository';
+import { Logger } from '@splits-network/shared-logging';
+import { EventPublisher } from '../shared/events';
+
+/**
+ * Webhook Service V2
+ * Handles Stripe webhook events using V2 architecture
+ */
+export class WebhookServiceV2 {
+    constructor(
+        private repository: WebhookRepositoryV2,
+        private subscriptionService: SubscriptionServiceV2,
+        private subscriptionRepository: SubscriptionRepository,
+        private eventPublisher: EventPublisher,
+        private logger: Logger
+    ) {}
+
+    /**
+     * Process Stripe webhook event with proper error handling and idempotency
+     */
+    async handleStripeWebhook(event: Stripe.Event): Promise<void> {
+        const { id: eventId, type: eventType } = event;
+
+        this.logger.info({ eventId, eventType }, 'Processing Stripe webhook');
+
+        try {
+            // Check idempotency - don't process events twice
+            const alreadyProcessed = await this.repository.isEventProcessed(eventId);
+            if (alreadyProcessed) {
+                this.logger.info({ eventId }, 'Webhook event already processed, skipping');
+                return;
+            }
+
+            // Log that we're processing this event
+            await this.repository.logWebhookEvent(eventType, eventId, 'processing', event.data);
+
+            // Process the specific event type
+            await this.processWebhookEvent(event);
+
+            // Mark as completed
+            await this.repository.logWebhookEvent(eventType, eventId, 'completed', event.data);
+
+            this.logger.info({ eventId, eventType }, 'Webhook processed successfully');
+
+        } catch (error: any) {
+            this.logger.error({ eventId, eventType, error: error.message }, 'Webhook processing failed');
+            
+            // Log the failure
+            await this.repository.logWebhookEvent(
+                eventType, 
+                eventId, 
+                'failed', 
+                event.data, 
+                error.message
+            );
+
+            throw error;
+        }
+    }
+
+    /**
+     * Process specific webhook event types
+     */
+    private async processWebhookEvent(event: Stripe.Event): Promise<void> {
+        switch (event.type) {
+            case 'customer.subscription.created':
+                await this.handleSubscriptionCreated(event);
+                break;
+
+            case 'customer.subscription.updated':
+                await this.handleSubscriptionUpdated(event);
+                break;
+
+            case 'customer.subscription.deleted':
+                await this.handleSubscriptionDeleted(event);
+                break;
+
+            case 'customer.created':
+                await this.handleCustomerCreated(event);
+                break;
+
+            case 'invoice.payment_succeeded':
+                await this.handlePaymentSucceeded(event);
+                break;
+
+            case 'invoice.payment_failed':
+                await this.handlePaymentFailed(event);
+                break;
+
+            default:
+                this.logger.debug({ type: event.type }, 'Unhandled webhook event type');
+        }
+    }
+
+    /**
+     * Handle subscription creation from Stripe
+     */
+    private async handleSubscriptionCreated(event: Stripe.Event): Promise<void> {
+        const subscription = event.data.object as Stripe.Subscription;
+        
+        this.logger.info({ 
+            stripeSubscriptionId: subscription.id,
+            customerId: subscription.customer,
+            status: subscription.status 
+        }, 'Handling subscription created');
+
+        // Find the subscription in our database by Stripe subscription ID
+        const { data: existingSubscription } = await this.subscriptionRepository.supabase
+            .from('subscriptions')
+            .select('*')
+            .eq('stripe_subscription_id', subscription.id)
+            .single();
+
+        if (existingSubscription) {
+            // Update the subscription with latest Stripe data
+            await this.subscriptionRepository.supabase
+                .from('subscriptions')
+                .update({
+                    status: subscription.status,
+                    current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+                    current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', existingSubscription.id);
+
+            // Publish event for other services
+            await this.eventPublisher.publish('subscription.activated', {
+                subscriptionId: existingSubscription.id,
+                userId: existingSubscription.user_id,
+                planId: existingSubscription.plan_id,
+                stripeSubscriptionId: subscription.id
+            });
+        } else {
+            this.logger.warn({ 
+                stripeSubscriptionId: subscription.id 
+            }, 'Subscription created webhook received but no matching subscription found in database');
+        }
+    }
+
+    /**
+     * Handle subscription updates from Stripe
+     */
+    private async handleSubscriptionUpdated(event: Stripe.Event): Promise<void> {
+        const subscription = event.data.object as Stripe.Subscription;
+        
+        this.logger.info({ 
+            stripeSubscriptionId: subscription.id,
+            status: subscription.status 
+        }, 'Handling subscription updated');
+
+        // Find and update the subscription
+        const { data: existingSubscription } = await this.subscriptionRepository.supabase
+            .from('subscriptions')
+            .select('*')
+            .eq('stripe_subscription_id', subscription.id)
+            .single();
+
+        if (existingSubscription) {
+            const updates: any = {
+                status: subscription.status,
+                current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+                current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+                updated_at: new Date().toISOString()
+            };
+
+            // If subscription is being canceled, set canceled_at
+            if (subscription.status === 'canceled' && subscription.canceled_at) {
+                updates.canceled_at = new Date(subscription.canceled_at * 1000).toISOString();
+            }
+
+            await this.subscriptionRepository.supabase
+                .from('subscriptions')
+                .update(updates)
+                .eq('id', existingSubscription.id);
+
+            // Publish appropriate event based on status change
+            const eventType = subscription.status === 'canceled' 
+                ? 'subscription.canceled'
+                : 'subscription.updated';
+
+            await this.eventPublisher.publish(eventType, {
+                subscriptionId: existingSubscription.id,
+                userId: existingSubscription.user_id,
+                planId: existingSubscription.plan_id,
+                stripeSubscriptionId: subscription.id,
+                oldStatus: existingSubscription.status,
+                newStatus: subscription.status
+            });
+        }
+    }
+
+    /**
+     * Handle subscription deletion from Stripe
+     */
+    private async handleSubscriptionDeleted(event: Stripe.Event): Promise<void> {
+        const subscription = event.data.object as Stripe.Subscription;
+        
+        this.logger.info({ 
+            stripeSubscriptionId: subscription.id 
+        }, 'Handling subscription deleted');
+
+        // Mark subscription as canceled
+        const { data: existingSubscription } = await this.subscriptionRepository.supabase
+            .from('subscriptions')
+            .select('*')
+            .eq('stripe_subscription_id', subscription.id)
+            .single();
+
+        if (existingSubscription) {
+            await this.subscriptionRepository.supabase
+                .from('subscriptions')
+                .update({
+                    status: 'canceled',
+                    canceled_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', existingSubscription.id);
+
+            await this.eventPublisher.publish('subscription.deleted', {
+                subscriptionId: existingSubscription.id,
+                userId: existingSubscription.user_id,
+                stripeSubscriptionId: subscription.id
+            });
+        }
+    }
+
+    /**
+     * Handle customer creation from Stripe
+     */
+    private async handleCustomerCreated(event: Stripe.Event): Promise<void> {
+        const customer = event.data.object as Stripe.Customer;
+        
+        this.logger.info({ 
+            customerId: customer.id,
+            email: customer.email 
+        }, 'Handling customer created');
+
+        // Customer should already be created by our subscription service
+        // This is mainly for logging/audit purposes
+    }
+
+    /**
+     * Handle successful payment
+     */
+    private async handlePaymentSucceeded(event: Stripe.Event): Promise<void> {
+        const invoice = event.data.object as Stripe.Invoice;
+        
+        this.logger.info({ 
+            invoiceId: invoice.id,
+            subscriptionId: invoice.subscription,
+            amount: invoice.amount_paid 
+        }, 'Handling payment succeeded');
+
+        if (invoice.subscription) {
+            // Find subscription and update last payment date
+            const { data: subscription } = await this.subscriptionRepository.supabase
+                .from('subscriptions')
+                .select('*')
+                .eq('stripe_subscription_id', invoice.subscription)
+                .single();
+
+            if (subscription) {
+                await this.subscriptionRepository.supabase
+                    .from('subscriptions')
+                    .update({
+                        status: 'active', // Ensure it's marked as active after payment
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', subscription.id);
+
+                await this.eventPublisher.publish('subscription.payment_succeeded', {
+                    subscriptionId: subscription.id,
+                    userId: subscription.user_id,
+                    invoiceId: invoice.id,
+                    amountPaid: invoice.amount_paid
+                });
+            }
+        }
+    }
+
+    /**
+     * Handle failed payment
+     */
+    private async handlePaymentFailed(event: Stripe.Event): Promise<void> {
+        const invoice = event.data.object as Stripe.Invoice;
+        
+        this.logger.info({ 
+            invoiceId: invoice.id,
+            subscriptionId: invoice.subscription,
+            attemptCount: invoice.attempt_count 
+        }, 'Handling payment failed');
+
+        if (invoice.subscription) {
+            const { data: subscription } = await this.subscriptionRepository.supabase
+                .from('subscriptions')
+                .select('*')
+                .eq('stripe_subscription_id', invoice.subscription)
+                .single();
+
+            if (subscription) {
+                await this.eventPublisher.publish('subscription.payment_failed', {
+                    subscriptionId: subscription.id,
+                    userId: subscription.user_id,
+                    invoiceId: invoice.id,
+                    attemptCount: invoice.attempt_count
+                });
+            }
+        }
+    }
+}

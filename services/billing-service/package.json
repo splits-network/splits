@@ -9,7 +9,9 @@
         "start": "node dist/index.js",
         "clean": "rm -rf dist *.tsbuildinfo",
         "job:payout-schedules": "node dist/jobs/process-payout-schedules.js",
-        "job:escrow-releases": "node dist/jobs/process-escrow-releases.js"
+        "job:escrow-releases": "node dist/jobs/process-escrow-releases.js",
+        "setup:phase1": "tsx scripts/phase1-setup.ts",
+        "stripe:sync-plans": "tsx scripts/phase1-setup.ts"
     },
     "dependencies": {
         "@fastify/swagger": "^9.5.0",
@@ -22,6 +24,7 @@
         "@splits-network/shared-types": "workspace:*",
         "@supabase/supabase-js": "^2.86.2",
         "amqplib": "^0.10.5",
+        "dotenv": "^16.4.7",
         "fastify": "^5.6.2",
         "stripe": "^20.0.0"
     },

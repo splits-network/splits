@@ -37,9 +37,10 @@ const BILLING_RESOURCES: ResourceDefinition[] = [
     },
 ];
 
-function registerSubscriptionMeRoute(app: FastifyInstance, services: ServiceRegistry) {
+function registerCustomBillingRoutes(app: FastifyInstance, services: ServiceRegistry) {
     const billingService = () => services.get('billing');
 
+    // GET /subscriptions/me - Current user's subscription
     app.get(
         '/api/v2/subscriptions/me',
         {
@@ -51,7 +52,7 @@ function registerSubscriptionMeRoute(app: FastifyInstance, services: ServiceRegi
 
             try {
                 const data = await billingService().get(
-                    '/v2/subscriptions/me',
+                    '/api/v2/subscriptions/me',
                     undefined,
                     correlationId,
                     authHeaders
@@ -65,11 +66,65 @@ function registerSubscriptionMeRoute(app: FastifyInstance, services: ServiceRegi
             }
         }
     );
+
+    // POST /subscriptions/checkout-session - Create Stripe checkout session
+    app.post(
+        '/api/v2/subscriptions/checkout-session',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().post(
+                    '/api/v2/subscriptions/checkout-session',
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to create checkout session');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: 'Failed to create checkout session' } });
+            }
+        }
+    );
+
+    // POST /subscriptions/portal-session - Create Stripe billing portal session
+    app.post(
+        '/api/v2/subscriptions/portal-session',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().post(
+                    '/api/v2/subscriptions/portal-session',
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to create portal session');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: 'Failed to create billing portal session' } });
+            }
+        }
+    );
 }
 
 export function registerBillingRoutes(app: FastifyInstance, services: ServiceRegistry) {
-    // Register /me route FIRST (must be before generic CRUD routes)
-    registerSubscriptionMeRoute(app, services);
+    // Register custom routes FIRST (must be before generic CRUD routes)
+    registerCustomBillingRoutes(app, services);
 
     BILLING_RESOURCES.forEach(resource => registerResourceRoutes(app, services, resource));
 }

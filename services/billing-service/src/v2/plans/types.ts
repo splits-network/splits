@@ -2,22 +2,13 @@
  * Plan Domain Types
  */
 
+import { Plan as DBPlan } from '../shared/database-types';
+
 export type BillingInterval = 'monthly' | 'annual';
 export type PlanStatus = 'active' | 'archived';
 
-export interface Plan {
-    id: string;
-    name: string;
-    slug: string;
-    description: string | null;
-    price_cents: number;
-    currency: string;
-    billing_interval: BillingInterval;
-    features: Record<string, any>;
-    status: PlanStatus;
-    created_at: string;
-    updated_at: string;
-}
+// Use the database type as the main Plan type
+export type Plan = DBPlan;
 
 export interface PlanFilters {
     search?: string;
@@ -32,5 +23,5 @@ export interface PlanListFilters extends PlanFilters {
     sort_order?: 'asc' | 'desc';
 }
 
-export type PlanCreateInput = Omit<Plan, 'id' | 'created_at' | 'updated_at'>;
-export type PlanUpdateInput = Partial<Omit<Plan, 'id' | 'created_at' | 'updated_at'>>;
+export type PlanCreateInput = Partial<Omit<DBPlan, 'id' | 'created_at' | 'updated_at'>>;
+export type PlanUpdateInput = Partial<Omit<DBPlan, 'id' | 'created_at' | 'updated_at'>>;
