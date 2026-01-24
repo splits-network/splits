@@ -168,6 +168,22 @@ jobs:
                     --name ${{ secrets.AKS_CLUSTER_NAME }} \
                     --overwrite-existing
 
+            - name: Install cert-manager
+              run: |
+                  # Check if cert-manager is already installed
+                  if ! kubectl get namespace cert-manager &>/dev/null; then
+                    echo "Installing cert-manager..."
+                    kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.4/cert-manager.yaml
+                    
+                    # Wait for cert-manager to be ready
+                    echo "Waiting for cert-manager pods to be ready..."
+                    kubectl wait --for=condition=Available deployment/cert-manager -n cert-manager --timeout=120s
+                    kubectl wait --for=condition=Available deployment/cert-manager-webhook -n cert-manager --timeout=120s
+                    kubectl wait --for=condition=Available deployment/cert-manager-cainjector -n cert-manager --timeout=120s
+                  else
+                    echo "cert-manager already installed"
+                  fi
+
             - name: Apply cert-manager ClusterIssuer
               run: |
                   kubectl apply -f infra/k8s/cert-manager/cluster-issuer.yaml
