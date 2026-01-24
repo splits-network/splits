@@ -43,21 +43,38 @@ spec:
                 secretKeyRef:
                   name: supabase-secrets
                   key: supabase-service-role-key
-            - name: CLERK_PUBLISHABLE_KEY
+            # Portal app (splits.network) Clerk credentials
+            - name: SPLITS_CLERK_PUBLISHABLE_KEY
               valueFrom:
                 secretKeyRef:
                   name: clerk-secrets
-                  key: clerk-publishable-key
-            - name: CLERK_SECRET_KEY
+                  key: splits-clerk-publishable-key
+            - name: SPLITS_CLERK_SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   name: clerk-secrets
-                  key: clerk-secret-key
-            - name: CLERK_JWKS_URL
+                  key: splits-clerk-secret-key
+            - name: SPLITS_CLERK_JWKS_URL
               valueFrom:
                 secretKeyRef:
                   name: clerk-secrets
-                  key: clerk-jwks-url
+                  key: splits-clerk-jwks-url
+            # Candidate app (applicant.network) Clerk credentials
+            - name: APP_CLERK_PUBLISHABLE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: clerk-secrets
+                  key: app-clerk-publishable-key
+            - name: APP_CLERK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: clerk-secrets
+                  key: app-clerk-secret-key
+            - name: APP_CLERK_JWKS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: clerk-secrets
+                  key: app-clerk-jwks-url
             - name: REDIS_HOST
               value: "redis"
             - name: REDIS_PORT

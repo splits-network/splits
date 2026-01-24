@@ -1,16 +1,19 @@
-name: Deploy to AKS
+name: Deploy to Staging AKS
 
 on:
     push:
         branches:
-            - main
+            - staging
     workflow_dispatch:
+
+env:
+    NAMESPACE: splits-network
 
 jobs:
     build-and-push:
         name: Build and Push Images
         runs-on: ubuntu-latest
-        environment: production
+        environment: staging
         strategy:
             matrix:
                 service:
@@ -46,7 +49,7 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
-            - name: Setup Node.js (for Sentry source maps)
+            - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
                   node-version: "20"
@@ -64,7 +67,7 @@ jobs:
               with:
                   creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-            - name: Login to ACR
+            - name: Login to Staging ACR
               run: |
                   az acr login --name ${{ secrets.ACR_NAME }}
 
@@ -72,7 +75,7 @@ jobs:
               run: |
                   VERSION=$(cat VERSION)
                   IMAGE_TAG=${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.service.name }}:${{ github.sha }}
-                  VERSION_TAG=${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.service.name }}:v${VERSION}
+                  VERSION_TAG=${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.service.name }}:v${VERSION}-staging
 
                   # Build with appropriate build args based on service
                   if [ "${{ matrix.service.name }}" = "portal" ]; then
@@ -80,7 +83,7 @@ jobs:
                       -f ${{ matrix.service.path }}/Dockerfile \
                       -t $IMAGE_TAG \
                       --target production \
-                      --build-arg NEXT_PUBLIC_API_URL=https://api.splits.network/api \
+                      --build-arg NEXT_PUBLIC_API_URL=https://api.staging.splits.network/api \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.SPLITS_CLERK_PUBLISHABLE_KEY }} \
                       --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
                       .
@@ -89,9 +92,9 @@ jobs:
                       -f ${{ matrix.service.path }}/Dockerfile \
                       -t $IMAGE_TAG \
                       --target production \
-                      --build-arg NEXT_PUBLIC_API_URL=https://api.splits.network/api \
-                      --build-arg NEXT_PUBLIC_API_GATEWAY_URL=https://api.splits.network \
-                      --build-arg NEXT_PUBLIC_APP_URL=https://applicant.network \
+                      --build-arg NEXT_PUBLIC_API_URL=https://api.staging.splits.network/api \
+                      --build-arg NEXT_PUBLIC_API_GATEWAY_URL=https://api.staging.splits.network \
+                      --build-arg NEXT_PUBLIC_APP_URL=https://staging.applicant.network \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.APP_CLERK_PUBLISHABLE_KEY }} \
                       --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
                       .
@@ -100,7 +103,7 @@ jobs:
                       -f ${{ matrix.service.path }}/Dockerfile \
                       -t $IMAGE_TAG \
                       --target production \
-                      --build-arg NEXT_PUBLIC_APP_URL=https://employment-networks.com \
+                      --build-arg NEXT_PUBLIC_APP_URL=https://staging.employment-networks.com \
                       .
                   else
                     docker build \
@@ -113,15 +116,15 @@ jobs:
                   # Push with commit SHA
                   docker push $IMAGE_TAG
 
-                  # Tag and push with version
+                  # Tag and push with version-staging
                   docker tag $IMAGE_TAG $VERSION_TAG
                   docker push $VERSION_TAG
 
-                  # Tag and push as latest
-                  docker tag $IMAGE_TAG ${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.service.name }}:latest
-                  docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.service.name }}:latest
+                  # Tag and push as staging-latest
+                  docker tag $IMAGE_TAG ${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.service.name }}:staging-latest
+                  docker push ${{ secrets.ACR_LOGIN_SERVER }}/${{ matrix.service.name }}:staging-latest
 
-            - name: Create Sentry release
+            - name: Create Sentry release (staging)
               if: matrix.service.name == 'portal' || matrix.service.name == 'candidate' || matrix.service.name == 'corporate' || matrix.service.name == 'api-gateway' || matrix.service.name == 'identity-service' || matrix.service.name == 'ats-service' || matrix.service.name == 'network-service' || matrix.service.name == 'billing-service' || matrix.service.name == 'notification-service' || matrix.service.name == 'ai-service' || matrix.service.name == 'analytics-service'
               continue-on-error: true
               env:
@@ -129,7 +132,7 @@ jobs:
                   SENTRY_ORG: splitsnetwork
               run: |
                   VERSION=$(cat VERSION)
-                  RELEASE="${{ matrix.service.name }}@v${VERSION}"
+                  RELEASE="${{ matrix.service.name }}@v${VERSION}-staging"
                   PROJECT_SLUG="${{ matrix.service.name }}"
 
                   # Install Sentry CLI
@@ -138,16 +141,16 @@ jobs:
                   # Create release
                   sentry-cli releases new $RELEASE --project $PROJECT_SLUG --finalize
 
-                  # Associate commits (--ignore-missing handles first releases or shallow clones)
+                  # Associate commits
                   sentry-cli releases set-commits $RELEASE --project $PROJECT_SLUG --auto --ignore-missing
 
-                  # Deploy to production
-                  sentry-cli releases deploys $RELEASE --project $PROJECT_SLUG new -e production
+                  # Deploy to staging
+                  sentry-cli releases deploys $RELEASE --project $PROJECT_SLUG new -e staging
 
     deploy:
-        name: Deploy to AKS
+        name: Deploy to Staging AKS
         runs-on: ubuntu-latest
-        environment: production
+        environment: staging
         needs: build-and-push
         steps:
             - name: Checkout code
@@ -158,16 +161,20 @@ jobs:
               with:
                   creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-            - name: Get AKS credentials
+            - name: Get Staging AKS credentials
               run: |
                   az aks get-credentials \
                     --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} \
                     --name ${{ secrets.AKS_CLUSTER_NAME }} \
                     --overwrite-existing
 
+            - name: Apply cert-manager ClusterIssuer
+              run: |
+                  kubectl apply -f infra/k8s/cert-manager/cluster-issuer.yaml
+
             - name: Create namespace if not exists
               run: |
-                  kubectl create namespace splits-network --dry-run=client -o yaml | kubectl apply -f -
+                  kubectl create namespace ${{ env.NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
 
             - name: Create secrets
               run: |
@@ -175,7 +182,7 @@ jobs:
                     --from-literal=supabase-url=${{ secrets.SUPABASE_URL }} \
                     --from-literal=supabase-anon-key=${{ secrets.SUPABASE_ANON_KEY }} \
                     --from-literal=supabase-service-role-key=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }} \
-                    --namespace=splits-network \
+                    --namespace=${{ env.NAMESPACE }} \
                     --dry-run=client -o yaml | kubectl apply -f -
 
                   # Clerk secrets for API Gateway (both portal and candidate app credentials)
@@ -186,29 +193,29 @@ jobs:
                     --from-literal=app-clerk-publishable-key=${{ secrets.APP_CLERK_PUBLISHABLE_KEY }} \
                     --from-literal=app-clerk-secret-key=${{ secrets.APP_CLERK_SECRET_KEY }} \
                     --from-literal=app-clerk-jwks-url=${{ secrets.APP_CLERK_JWKS_URL }} \
-                    --namespace=splits-network \
+                    --namespace=${{ env.NAMESPACE }} \
                     --dry-run=client -o yaml | kubectl apply -f -
 
                   kubectl create secret generic stripe-secrets \
                     --from-literal=stripe-secret-key=${{ secrets.STRIPE_SECRET_KEY }} \
                     --from-literal=stripe-webhook-secret=${{ secrets.STRIPE_WEBHOOK_SECRET }} \
                     --from-literal=stripe-publishable-key=${{ secrets.STRIPE_PUBLISHABLE_KEY }} \
-                    --namespace=splits-network \
+                    --namespace=${{ env.NAMESPACE }} \
                     --dry-run=client -o yaml | kubectl apply -f -
 
                   kubectl create secret generic resend-secrets \
                     --from-literal=resend-api-key=${{ secrets.RESEND_API_KEY }} \
-                    --namespace=splits-network \
+                    --namespace=${{ env.NAMESPACE }} \
                     --dry-run=client -o yaml | kubectl apply -f -
 
                   kubectl create secret generic openai-secrets \
                     --from-literal=openai-api-key=${{ secrets.OPENAI_API_KEY }} \
-                    --namespace=splits-network \
+                    --namespace=${{ env.NAMESPACE }} \
                     --dry-run=client -o yaml | kubectl apply -f -
 
                   kubectl create secret generic internal-service-secrets \
                     --from-literal=internal-service-key=${{ secrets.INTERNAL_SERVICE_KEY }} \
-                    --namespace=splits-network \
+                    --namespace=${{ env.NAMESPACE }} \
                     --dry-run=client -o yaml | kubectl apply -f -
 
             - name: Update image tags in manifests
@@ -224,76 +231,70 @@ jobs:
 
             - name: Deploy infrastructure (Redis, RabbitMQ)
               run: |
-                  kubectl apply -f infra/k8s/redis/ --namespace=splits-network
-                  kubectl apply -f infra/k8s/rabbitmq/ --namespace=splits-network
+                  kubectl apply -f infra/k8s/redis/ --namespace=${{ env.NAMESPACE }}
+                  kubectl apply -f infra/k8s/rabbitmq/ --namespace=${{ env.NAMESPACE }}
 
             - name: Wait for infrastructure to be ready
               run: |
-                  kubectl rollout status deployment/redis --timeout=120s --namespace=splits-network
-                  kubectl rollout status deployment/rabbitmq --timeout=120s --namespace=splits-network
+                  kubectl rollout status deployment/redis --timeout=120s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/rabbitmq --timeout=120s --namespace=${{ env.NAMESPACE }}
 
-            - name: Deploy services
+            - name: Deploy backend services
               run: |
-                  kubectl apply -f infra/k8s/identity-service/ --namespace=splits-network
-                  kubectl apply -f infra/k8s/ats-service/ --namespace=splits-network
-                  kubectl apply -f infra/k8s/network-service/ --namespace=splits-network
-                  kubectl apply -f infra/k8s/billing-service/ --namespace=splits-network
-                  kubectl apply -f infra/k8s/notification-service/ --namespace=splits-network
-                  kubectl apply -f infra/k8s/automation-service/ --namespace=splits-network
-                  kubectl apply -f infra/k8s/document-service/ --namespace=splits-network
-                  kubectl apply -f infra/k8s/ai-service/ --namespace=splits-network
-                  kubectl apply -f infra/k8s/document-processing-service/ --namespace=splits-network
-                  kubectl apply -f infra/k8s/analytics-service/ --namespace=splits-network
+                  SERVICES="identity-service ats-service network-service billing-service notification-service automation-service document-service document-processing-service ai-service analytics-service"
+                  for svc in $SERVICES; do
+                    if [ -f "infra/k8s/$svc/deployment.yaml" ]; then
+                      kubectl apply -f "infra/k8s/$svc/" --namespace=${{ env.NAMESPACE }}
+                    fi
+                  done
 
             - name: Wait for services to be ready
               run: |
-                  kubectl rollout status deployment/identity-service --timeout=180s --namespace=splits-network
-                  kubectl rollout status deployment/ats-service --timeout=180s --namespace=splits-network
-                  kubectl rollout status deployment/network-service --timeout=180s --namespace=splits-network
-                  kubectl rollout status deployment/billing-service --timeout=180s --namespace=splits-network
-                  kubectl rollout status deployment/notification-service --timeout=180s --namespace=splits-network
-                  kubectl rollout status deployment/automation-service --timeout=180s --namespace=splits-network
-                  kubectl rollout status deployment/document-service --timeout=180s --namespace=splits-network
-                  kubectl rollout status deployment/ai-service --timeout=180s --namespace=splits-network
-                  kubectl rollout status deployment/document-processing-service --timeout=180s --namespace=splits-network
-                  kubectl rollout status deployment/analytics-service --timeout=180s --namespace=splits-network
+                  kubectl rollout status deployment/identity-service --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/ats-service --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/network-service --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/billing-service --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/notification-service --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/automation-service --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/document-service --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/ai-service --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/document-processing-service --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/analytics-service --timeout=180s --namespace=${{ env.NAMESPACE }}
 
             - name: Deploy API Gateway
               run: |
-                  kubectl apply -f infra/k8s/api-gateway/ --namespace=splits-network
+                  kubectl apply -f infra/k8s/api-gateway/ --namespace=${{ env.NAMESPACE }}
 
             - name: Wait for API Gateway to be ready
               run: |
-                  kubectl rollout status deployment/api-gateway --timeout=180s --namespace=splits-network
+                  kubectl rollout status deployment/api-gateway --timeout=180s --namespace=${{ env.NAMESPACE }}
 
-            - name: Deploy Portal
+            - name: Deploy frontend apps
               run: |
-                  kubectl apply -f infra/k8s/portal/ --namespace=splits-network
+                  FRONTENDS="portal candidate corporate"
+                  for app in $FRONTENDS; do
+                    if [ -f "infra/k8s/$app/deployment.yaml" ]; then
+                      kubectl apply -f "infra/k8s/$app/" --namespace=${{ env.NAMESPACE }}
+                    fi
+                  done
 
-            - name: Wait for Portal to be ready
+            - name: Wait for frontends to be ready
               run: |
-                  kubectl rollout status deployment/portal --timeout=180s --namespace=splits-network
+                  kubectl rollout status deployment/portal --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/candidate --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/corporate --timeout=180s --namespace=${{ env.NAMESPACE }}
 
-            - name: Deploy Candidate Website
+            - name: Deploy staging ingress
               run: |
-                  kubectl apply -f infra/k8s/candidate/ --namespace=splits-network
-
-            - name: Wait for Candidate Website to be ready
-              run: |
-                  kubectl rollout status deployment/candidate --timeout=180s --namespace=splits-network
-
-            - name: Deploy Corporate Website
-              run: |
-                  kubectl apply -f infra/k8s/corporate/ --namespace=splits-network
-
-            - name: Wait for Corporate Website to be ready
-              run: |
-                  kubectl rollout status deployment/corporate --timeout=180s --namespace=splits-network
-
-            - name: Deploy Ingress
-              run: |
-                  kubectl apply -f infra/k8s/ingress.yaml --namespace=splits-network
+                  kubectl apply -f infra/k8s/staging-ingress.yaml --namespace=${{ env.NAMESPACE }}
 
             - name: Get deployment status
               run: |
-                  kubectl get all --namespace=splits-network
+                  echo "=== Staging Deployment Status ==="
+                  kubectl get all --namespace=${{ env.NAMESPACE }}
+                  echo ""
+                  echo "=== Ingress Status ==="
+                  kubectl get ingress --namespace=${{ env.NAMESPACE }}
+                  echo ""
+                  echo "=== Services ==="
+                  kubectl get svc --namespace=${{ env.NAMESPACE }}

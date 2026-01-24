@@ -40,6 +40,15 @@ export interface ClerkConfig {
     jwksUrl: string;
 }
 
+/**
+ * Multi-tenant Clerk configuration for API Gateway
+ * Supports authenticating tokens from multiple Clerk applications
+ */
+export interface MultiClerkConfig {
+    portal: ClerkConfig;    // SPLITS_ prefixed - main portal app
+    candidate: ClerkConfig; // APP_ prefixed - candidate app
+}
+
 export interface StripeConfig {
     secretKey: string;
     webhookSecret: string;
@@ -112,7 +121,7 @@ export function loadRabbitMQConfig(): RabbitMQConfig {
 }
 
 /**
- * Load Clerk configuration
+ * Load Clerk configuration (single app - for backwards compatibility)
  * If USE_VAULT=true, secrets will be fetched from Supabase Vault
  */
 export function loadClerkConfig(): ClerkConfig {
@@ -123,6 +132,31 @@ export function loadClerkConfig(): ClerkConfig {
             'CLERK_JWKS_URL',
             'https://api.clerk.com/v1/jwks'
         ),
+    };
+}
+
+/**
+ * Load multi-tenant Clerk configuration for API Gateway
+ * Supports authenticating tokens from both Portal and Candidate apps
+ */
+export function loadMultiClerkConfig(): MultiClerkConfig {
+    return {
+        portal: {
+            publishableKey: getEnvOrThrow('SPLITS_CLERK_PUBLISHABLE_KEY'),
+            secretKey: getEnvOrThrow('SPLITS_CLERK_SECRET_KEY'),
+            jwksUrl: getEnvOrDefault(
+                'SPLITS_CLERK_JWKS_URL',
+                'https://api.clerk.com/v1/jwks'
+            ),
+        },
+        candidate: {
+            publishableKey: getEnvOrThrow('APP_CLERK_PUBLISHABLE_KEY'),
+            secretKey: getEnvOrThrow('APP_CLERK_SECRET_KEY'),
+            jwksUrl: getEnvOrDefault(
+                'APP_CLERK_JWKS_URL',
+                'https://api.clerk.com/v1/jwks'
+            ),
+        },
     };
 }
 

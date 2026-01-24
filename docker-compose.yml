@@ -367,9 +367,14 @@ services:
       AI_SERVICE_URL: http://ai-service:3009
       ANALYTICS_SERVICE_URL: http://analytics-service:3010
       CORS_ORIGIN: http://localhost:3100,http://localhost:3101
-      CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY}
-      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
-      CLERK_JWKS_URL: ${CLERK_JWKS_URL}
+      # Portal app (splits.network) Clerk credentials
+      SPLITS_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}
+      SPLITS_CLERK_SECRET_KEY: ${SPLITS_CLERK_SECRET_KEY}
+      SPLITS_CLERK_JWKS_URL: ${SPLITS_CLERK_JWKS_URL}
+      # Candidate app (applicant.network) Clerk credentials
+      APP_CLERK_PUBLISHABLE_KEY: ${APP_CLERK_PUBLISHABLE_KEY}
+      APP_CLERK_SECRET_KEY: ${APP_CLERK_SECRET_KEY}
+      APP_CLERK_JWKS_URL: ${APP_CLERK_JWKS_URL}
     volumes:
       - ./services/api-gateway/src:/app/services/api-gateway/src
       - ./packages:/app/packages
@@ -406,8 +411,8 @@ services:
       NODE_ENV: development
       NEXT_PUBLIC_API_URL: http://localhost:3000/api
       NEXT_PUBLIC_API_GATEWAY_URL: http://api-gateway:3000
-      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
-      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY}
+      CLERK_SECRET_KEY: ${SPLITS_CLERK_SECRET_KEY}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}
       IDENTITY_SERVICE_URL: http://identity-service:3001
       ATS_SERVICE_URL: http://ats-service:3002
       NETWORK_SERVICE_URL: http://network-service:3003
@@ -444,8 +449,8 @@ services:
       PORT: 3101
       NEXT_PUBLIC_API_URL: http://localhost:3000/api
       NEXT_PUBLIC_API_GATEWAY_URL: http://api-gateway:3000
-      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY}
-      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${APP_CLERK_PUBLISHABLE_KEY}
+      CLERK_SECRET_KEY: ${APP_CLERK_SECRET_KEY}
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
       NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
       NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: /portal/dashboard
