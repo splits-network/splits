@@ -8,31 +8,7 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
     return (
-        <div className="min-h-screen">
-            {/* Header / Navigation */}
-            <header className="navbar bg-base-100 border-b border-base-300 px-6 lg:px-12">
-                <div className="navbar-start">
-                    <Link href="/" className="text-2xl font-bold text-primary">
-                        <img src="/logo.svg" alt="Employment Networks" className="h-14" />
-                    </Link>
-                </div>
-                <div className="navbar-center hidden lg:flex">
-                    <ul className="menu menu-horizontal px-1 gap-2">
-                        <li><Link href="#products">Products</Link></li>
-                        <li><Link href="#about">About</Link></li>
-                        <li><Link href="#contact">Contact</Link></li>
-                    </ul>
-                </div>
-                <div className="navbar-end gap-2">
-                    <Link href="https://splits.network" className="btn btn-ghost btn-sm">
-                        Recruiter Login
-                    </Link>
-                    <Link href="https://applicant.network" className="btn btn-primary btn-sm">
-                        Candidate Portal
-                    </Link>
-                </div>
-            </header>
-
+        <>
             {/* Hero Section */}
             <section className="hero min-h-[600px] bg-linear-to-br from-primary/5 to-secondary/5">
                 <div className="hero-content text-center max-w-4xl px-6">
@@ -205,31 +181,6 @@ export default function HomePage() {
                     </div>
                 </div>
             </section>
-
-            {/* Footer */}
-            <footer className="footer footer-center p-10 bg-base-200 text-base-content border-t border-base-300">
-                <aside>
-                    <p className="font-bold text-xl text-primary mb-2">
-                        <img src="/logo.svg" alt="Employment Networks" className="h-14 inline-block mr-2" />
-                    </p>
-                    <p className="text-base-content/70">
-                        Building the future of recruiting and employment through innovative platforms.
-                    </p>
-                    <p className="text-sm text-base-content/50 mt-4">
-                        © {new Date().getFullYear()} Employment Networks, Inc. All rights reserved.
-                    </p>
-                </aside>
-                <nav>
-                    <div className="grid grid-flow-col gap-6">
-                        <Link href="#products" className="link link-hover">Products</Link>
-                        <Link href="#about" className="link link-hover">About</Link>
-                        <Link href="#contact" className="link link-hover">Contact</Link>
-                        <Link href="/public/status" className="link link-hover">System Status</Link>
-                        <a href="https://splits.network" className="link link-hover">Splits</a>
-                        <a href="https://applicant.network" className="link link-hover">Applicant</a>
-                    </div>
-                </nav>
-            </footer>
-        </div>
+        </>
     );
 }

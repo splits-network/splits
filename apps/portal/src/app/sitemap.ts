@@ -7,13 +7,16 @@ const routes = [
     '/public/about',
     '/public/blog',
     '/public/careers',
+    '/public/cookie-policy',
     '/public/features',
     '/public/how-it-works',
     '/public/integration-partners',
     '/public/partners',
     '/public/press',
     '/public/pricing',
+    '/public/privacy-policy',
     '/public/status',
+    '/public/terms-of-service',
     '/public/updates',
 ];
 

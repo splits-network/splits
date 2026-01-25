@@ -153,16 +153,16 @@ export function Footer() {
                             © {currentYear} Employment Networks, Inc. All rights reserved.
                         </div>
                         <div className="flex flex-wrap justify-center gap-6 text-sm">
-                            <a href="#" className="link link-hover text-base-content/60 hover:text-base-content">
+                            <Link href="/public/privacy-policy" className="link link-hover text-base-content/60 hover:text-base-content">
                                 Privacy Policy
-                            </a>
-                            <a href="#" className="link link-hover text-base-content/60 hover:text-base-content">
+                            </Link>
+                            <Link href="/public/terms-of-service" className="link link-hover text-base-content/60 hover:text-base-content">
                                 Terms of Service
-                            </a>
-                            <a href="#" className="link link-hover text-base-content/60 hover:text-base-content">
+                            </Link>
+                            <Link href="/public/cookie-policy" className="link link-hover text-base-content/60 hover:text-base-content">
                                 Cookie Policy
-                            </a>
-                            <a href="#" className="link link-hover text-base-content/60 hover:text-base-content">
+                            </Link>
+                            <a href="/sitemap.xml" className="link link-hover text-base-content/60 hover:text-base-content">
                                 Sitemap
                             </a>
                         </div>

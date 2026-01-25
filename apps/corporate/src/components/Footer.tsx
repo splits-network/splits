@@ -1,39 +1,40 @@
+'use client';
+
 import Link from 'next/link';
 
-export default function Footer() {
+export function Footer() {
     return (
         <>
-            <footer className="footer sm:footer-horizontal bg-neutral text-neutral-content p-10">
+            {/* Footer */}
+            <footer className="footer sm:footer-horizontal bg-base-200 text-base-content p-10">
                 <nav>
                     <div className="flex items-center gap-2 mb-2">
-                        <img src="/logo.svg" alt="Applicant Network" className="h-18" />
+                        <img src="/logo.svg" alt="Employment Networks" className="h-14" />
                     </div>
-                    <p className="max-w-xs">
-                        Connecting talented candidates with amazing opportunities through expert recruiters.
+                    <p className="max-w-xs text-base-content/70">
+                        Building the future of recruiting and employment through innovative platforms.
                     </p>
                 </nav>
                 <nav>
-                    <h6 className="footer-title">Platform</h6>
-                    <Link href="/public/jobs" className="link link-hover">Browse Jobs</Link>
-                    <Link href="/public/how-it-works" className="link link-hover">How It Works</Link>
-                    <Link href="/public/for-recruiters" className="link link-hover">For Recruiters</Link>
-                    <Link href="/public/help" className="link link-hover">Help Center</Link>
+                    <h6 className="footer-title">Products</h6>
+                    <a href="https://splits.network" target="_blank" rel="noopener noreferrer" className="link link-hover">Splits Network</a>
+                    <a href="https://applicant.network" target="_blank" rel="noopener noreferrer" className="link link-hover">Applicant Network</a>
+                    <Link href="#products" className="link link-hover">View All</Link>
                 </nav>
                 <nav>
                     <h6 className="footer-title">Company</h6>
-                    <Link href="/public/about" className="link link-hover">About Us</Link>
-                    <Link href="/public/contact" className="link link-hover">Contact</Link>
-                    <a href="https://splits.network" className="link link-hover" target="_blank" rel="noopener noreferrer">Splits Network</a>
+                    <Link href="#about" className="link link-hover">About Us</Link>
+                    <Link href="#contact" className="link link-hover">Contact</Link>
+                    <Link href="/status" className="link link-hover">System Status</Link>
                 </nav>
                 <nav>
                     <h6 className="footer-title">Legal</h6>
-                    <Link href="/public/privacy-policy" className="link link-hover">Privacy Policy</Link>
-                    <Link href="/public/terms-of-service" className="link link-hover">Terms of Service</Link>
-                    <Link href="/public/cookie-policy" className="link link-hover">Cookie Policy</Link>
-                    <Link href="/public/status" className="link link-hover">System Status</Link>
+                    <Link href="/privacy-policy" className="link link-hover">Privacy Policy</Link>
+                    <Link href="/terms-of-service" className="link link-hover">Terms of Service</Link>
+                    <Link href="/cookie-policy" className="link link-hover">Cookie Policy</Link>
                 </nav>
             </footer>
-            <footer className="footer footer-center p-4 bg-neutral text-neutral-content border-t border-base-300">
+            <footer className="footer footer-center p-4 bg-base-200 text-base-content border-t border-base-300">
                 <aside>
                     <p>Copyright © {new Date().getFullYear()} Employment Networks, Inc. All rights reserved.</p>
                 </aside>
