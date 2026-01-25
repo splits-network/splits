@@ -53,7 +53,19 @@ export default function AddCandidateModal({
             onClose();
         } catch (error: any) {
             console.error('Failed to create candidate:', error);
-            setError(error.message || 'Failed to create candidate');
+            
+            // Handle specific error cases with user-friendly messages
+            const errorMessage = error.message || error.response?.data?.error?.message || '';
+            
+            if (errorMessage.includes('candidates_email_key') || 
+                errorMessage.includes('duplicate key') ||
+                errorMessage.includes('already exists')) {
+                setError('A candidate with this email address already exists. Please use a different email or search for the existing candidate.');
+            } else if (errorMessage.includes('Not authenticated')) {
+                setError('Your session has expired. Please refresh the page and try again.');
+            } else {
+                setError(errorMessage || 'Failed to create candidate. Please try again.');
+            }
         } finally {
             setSubmitting(false);
         }
@@ -94,7 +106,14 @@ export default function AddCandidateModal({
                     {error && (
                         <div className="alert alert-error mb-4">
                             <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                            <span>{error}</span>
+                            <div className="flex-1">
+                                <span>{error}</span>
+                                {error.includes('already exists') && (
+                                    <p className="text-sm mt-1 opacity-80">
+                                        You can search for existing candidates from the candidates list.
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     )}
 
