@@ -462,6 +462,62 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
+                    {/* Online Presence */}
+                    <div className="card bg-base-200 shadow">
+                        <div className="card-body">
+                            <h2 className="card-title">
+                                <i className="fa-duotone fa-regular fa-globe"></i>
+                                Online Presence
+                            </h2>
+                            <p className="text-sm text-base-content/70 mb-4">
+                                Add links to your professional profiles and portfolio
+                            </p>
+
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">
+                                    <i className="fa-brands fa-linkedin text-[#0077B5] mr-1"></i>
+                                    LinkedIn URL
+                                </legend>
+                                <input
+                                    type="url"
+                                    className="input w-full"
+                                    placeholder="https://linkedin.com/in/yourprofile"
+                                    value={settings?.linkedin_url || ''}
+                                    onChange={(e) => updateSettings({ linkedin_url: e.target.value })}
+                                />
+                            </fieldset>
+
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">
+                                    <i className="fa-brands fa-github mr-1"></i>
+                                    GitHub URL
+                                </legend>
+                                <input
+                                    type="url"
+                                    className="input w-full"
+                                    placeholder="https://github.com/yourusername"
+                                    value={settings?.github_url || ''}
+                                    onChange={(e) => updateSettings({ github_url: e.target.value })}
+                                />
+                            </fieldset>
+
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">
+                                    <i className="fa-duotone fa-regular fa-briefcase mr-1"></i>
+                                    Portfolio URL
+                                </legend>
+                                <input
+                                    type="url"
+                                    className="input w-full"
+                                    placeholder="https://yourportfolio.com"
+                                    value={settings?.portfolio_url || ''}
+                                    onChange={(e) => updateSettings({ portfolio_url: e.target.value })}
+                                />
+                                <p className="fieldset-label">Personal website, portfolio, or other professional URL</p>
+                            </fieldset>
+                        </div>
+                    </div>
+
                     {/* Industries */}
                     <div className="card bg-base-200 shadow">
                         <div className="card-body">
