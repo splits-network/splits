@@ -58,12 +58,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: clerk-secrets
-                  key: clerk-publishable-key
+                  key: app-clerk-publishable-key
             - name: CLERK_SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   name: clerk-secrets
-                  key: clerk-secret-key
+                  key: app-clerk-secret-key
             - name: NEXT_PUBLIC_CLERK_SIGN_IN_URL
               value: "/sign-in"
             - name: NEXT_PUBLIC_CLERK_SIGN_UP_URL
