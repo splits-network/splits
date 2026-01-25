@@ -18,6 +18,9 @@ out/
 .env.local
 .env.*.local
 
+# Secrets files (never commit actual secrets)
+scripts/secrets.json
+
 # Logs
 logs/
 *.log

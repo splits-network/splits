@@ -1,6 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { createClerkClient, verifyToken } from '@clerk/backend';
 import { UnauthorizedError, ForbiddenError } from '@splits-network/shared-fastify';
+import { MultiClerkConfig, ClerkConfig } from '@splits-network/shared-config';
 
 export type UserRole = 'candidate' | 'recruiter' | 'company_admin' | 'hiring_manager' | 'platform_admin';
 
@@ -17,15 +18,35 @@ export interface AuthContext {
     email: string;
     name: string;
     memberships: MembershipContext[];
+    sourceApp?: 'portal' | 'candidate'; // Track which app the token came from
+}
+
+interface ClerkClientEntry {
+    name: 'portal' | 'candidate';
+    client: ReturnType<typeof createClerkClient>;
+    secretKey: string;
 }
 
 export class AuthMiddleware {
-    private clerkClient;
-    private secretKey: string;
+    private clerkClients: ClerkClientEntry[];
 
-    constructor(clerkSecretKey: string) {
-        this.secretKey = clerkSecretKey;
-        this.clerkClient = createClerkClient({ secretKey: clerkSecretKey });
+    /**
+     * Create AuthMiddleware with multiple Clerk applications
+     * Allows authenticating tokens from both Portal and Candidate apps
+     */
+    constructor(config: MultiClerkConfig) {
+        this.clerkClients = [
+            {
+                name: 'portal',
+                client: createClerkClient({ secretKey: config.portal.secretKey }),
+                secretKey: config.portal.secretKey,
+            },
+            {
+                name: 'candidate',
+                client: createClerkClient({ secretKey: config.candidate.secretKey }),
+                secretKey: config.candidate.secretKey,
+            },
+        ];
     }
 
     async verifyToken(request: FastifyRequest): Promise<AuthContext> {
@@ -37,39 +58,48 @@ export class AuthMiddleware {
 
         const token = authHeader.substring(7);
 
-        try {
-            // Verify the token with Clerk using the standalone verifyToken function
-            const verified = await verifyToken(token, {
-                secretKey: this.secretKey,
-            });
+        // Try each Clerk client until one succeeds
+        let lastError: Error | null = null;
+        
+        for (const entry of this.clerkClients) {
+            try {
+                // Verify the token with this Clerk client
+                const verified = await verifyToken(token, {
+                    secretKey: entry.secretKey,
+                });
 
-            if (!verified || !verified.sub) {
-                throw new UnauthorizedError('Invalid token');
+                if (!verified || !verified.sub) {
+                    continue; // Try next client
+                }
+
+                // Get user details from Clerk
+                const user = await entry.client.users.getUser(verified.sub);
+
+                if (!user) {
+                    continue; // Try next client
+                }
+
+                return {
+                    userId: '', // Will be filled by identity service
+                    clerkUserId: user.id,
+                    email: user.emailAddresses[0]?.emailAddress || '',
+                    name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Unknown',
+                    memberships: [], // Will be filled when resolving user context
+                    sourceApp: entry.name,
+                };
+            } catch (error: any) {
+                lastError = error;
+                // Continue to try next client
             }
-
-            // Get user details from Clerk
-            const user = await this.clerkClient.users.getUser(verified.sub);
-
-            if (!user) {
-                throw new UnauthorizedError('User not found');
-            }
-
-            return {
-                userId: '', // Will be filled by identity service
-                clerkUserId: user.id,
-                email: user.emailAddresses[0]?.emailAddress || '',
-                name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Unknown',
-                memberships: [], // Will be filled when resolving user context
-            };
-        } catch (error: any) {
-            request.log.error({
-                err: error,
-                message: error?.message,
-                stack: error?.stack,
-                details: error
-            }, 'Token verification failed');
-            throw new UnauthorizedError('Token verification failed');
         }
+
+        // All clients failed
+        request.log.error({
+            err: lastError,
+            message: lastError?.message,
+        }, 'Token verification failed with all Clerk clients');
+        
+        throw new UnauthorizedError('Token verification failed');
     }
 
     createMiddleware() {

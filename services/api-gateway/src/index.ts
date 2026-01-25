@@ -1,4 +1,4 @@
-import { loadBaseConfig, loadClerkConfig, loadRabbitMQConfig, loadRedisConfig } from '@splits-network/shared-config';
+import { loadBaseConfig, loadMultiClerkConfig, loadRabbitMQConfig, loadRedisConfig } from '@splits-network/shared-config';
 import { createLogger } from '@splits-network/shared-logging';
 import { buildServer, errorHandler } from '@splits-network/shared-fastify';
 import rateLimit from '@fastify/rate-limit';
@@ -15,7 +15,7 @@ import { EventPublisher } from './events/event-publisher';
 
 async function main() {
     const baseConfig = loadBaseConfig('api-gateway');
-    const clerkConfig = loadClerkConfig();
+    const clerkConfig = loadMultiClerkConfig();
     const redisConfig = loadRedisConfig();
     const rabbitConfig = loadRabbitMQConfig();
 
@@ -229,8 +229,9 @@ async function main() {
         }
     });
 
-    // Initialize auth middleware
-    const authMiddleware = new AuthMiddleware(clerkConfig.secretKey);
+    // Initialize auth middleware with multi-tenant Clerk support
+    // Accepts tokens from both Portal (SPLITS_) and Candidate (APP_) apps
+    const authMiddleware = new AuthMiddleware(clerkConfig);
     let eventPublisher: EventPublisher | null = null;
 
     try {

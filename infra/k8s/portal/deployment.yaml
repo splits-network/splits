@@ -56,12 +56,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: clerk-secrets
-                  key: clerk-publishable-key
+                  key: splits-clerk-publishable-key
             - name: CLERK_SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   name: clerk-secrets
-                  key: clerk-secret-key
+                  key: splits-clerk-secret-key
             - name: NEXT_PUBLIC_CLERK_SIGN_IN_URL
               value: "/sign-in"
             - name: NEXT_PUBLIC_CLERK_SIGN_UP_URL
@@ -96,7 +96,7 @@ metadata:
   name: portal
   namespace: splits-network
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
     - port: 80
       targetPort: 3100

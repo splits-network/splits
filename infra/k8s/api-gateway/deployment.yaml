@@ -27,7 +27,7 @@ spec:
             - name: SENTRY_DSN
               value: "https://97c3c1c116302303b44a844fb1ea9d77@o4510570789732352.ingest.us.sentry.io/4510570904944640"
             - name: CORS_ORIGIN
-              value: "https://splits.network,https://www.splits.network,https://applicant.network"
+              value: "https://splits.network,https://www.splits.network,https://applicant.network,https://staging.splits.network,https://staging.applicant.network,https://staging.employment-networks.com"
             - name: SUPABASE_URL
               valueFrom:
                 secretKeyRef:
@@ -43,21 +43,38 @@ spec:
                 secretKeyRef:
                   name: supabase-secrets
                   key: supabase-service-role-key
-            - name: CLERK_PUBLISHABLE_KEY
+            # Portal app (splits.network) Clerk credentials
+            - name: SPLITS_CLERK_PUBLISHABLE_KEY
               valueFrom:
                 secretKeyRef:
                   name: clerk-secrets
-                  key: clerk-publishable-key
-            - name: CLERK_SECRET_KEY
+                  key: splits-clerk-publishable-key
+            - name: SPLITS_CLERK_SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   name: clerk-secrets
-                  key: clerk-secret-key
-            - name: CLERK_JWKS_URL
+                  key: splits-clerk-secret-key
+            - name: SPLITS_CLERK_JWKS_URL
               valueFrom:
                 secretKeyRef:
                   name: clerk-secrets
-                  key: clerk-jwks-url
+                  key: splits-clerk-jwks-url
+            # Candidate app (applicant.network) Clerk credentials
+            - name: APP_CLERK_PUBLISHABLE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: clerk-secrets
+                  key: app-clerk-publishable-key
+            - name: APP_CLERK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: clerk-secrets
+                  key: app-clerk-secret-key
+            - name: APP_CLERK_JWKS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: clerk-secrets
+                  key: app-clerk-jwks-url
             - name: REDIS_HOST
               value: "redis"
             - name: REDIS_PORT
@@ -108,7 +125,7 @@ metadata:
   name: api-gateway
   namespace: splits-network
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
     - port: 80
       targetPort: 3000
