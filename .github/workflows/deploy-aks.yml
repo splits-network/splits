@@ -165,6 +165,22 @@ jobs:
                     --name ${{ secrets.AKS_CLUSTER_NAME }} \
                     --overwrite-existing
 
+            - name: Install nginx-ingress controller
+              run: |
+                  # Check if ingress-nginx is already installed
+                  if ! kubectl get namespace ingress-nginx &>/dev/null; then
+                    echo "Installing nginx-ingress controller..."
+                    kubectl apply -f infra/k8s/ingress-nginx/deploy.yaml
+                    
+                    # Wait for ingress-nginx to be ready
+                    echo "Waiting for ingress-nginx controller to be ready..."
+                    kubectl wait --for=condition=Available deployment/ingress-nginx-controller -n ingress-nginx --timeout=180s
+                  else
+                    echo "nginx-ingress controller already installed, ensuring latest version..."
+                    kubectl apply -f infra/k8s/ingress-nginx/deploy.yaml
+                    kubectl wait --for=condition=Available deployment/ingress-nginx-controller -n ingress-nginx --timeout=180s
+                  fi
+
             - name: Install cert-manager
               run: |
                   # Check if cert-manager is already installed
