@@ -6,6 +6,7 @@ const routes = [
     '',
     '/public/about',
     '/public/contact',
+    '/public/cookie-policy',
     '/public/cookies',
     '/public/for-recruiters',
     '/public/help',
@@ -13,6 +14,7 @@ const routes = [
     '/public/jobs',
     '/public/marketplace',
     '/public/privacy',
+    '/public/privacy-policy',
     '/public/resources/career-guides',
     '/public/resources/career-guides/switch-careers',
     '/public/resources/career-guides/networking',
@@ -27,6 +29,7 @@ const routes = [
     '/public/resources/success-stories',
     '/public/status',
     '/public/terms',
+    '/public/terms-of-service',
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

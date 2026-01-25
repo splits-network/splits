@@ -4,7 +4,10 @@ const baseUrl = 'https://employment-networks.com';
 
 const routes = [
     '',
+    '/cookie-policy',
+    '/privacy-policy',
     '/status',
+    '/terms-of-service',
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

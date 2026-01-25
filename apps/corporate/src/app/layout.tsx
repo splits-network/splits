@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Script from 'next/script';
 import './globals.css';
 import { ServiceStatusBanner } from '@/components/ServiceStatusBanner';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
     metadataBase: new URL('https://employment-networks.com'),
@@ -118,9 +120,13 @@ export default function RootLayout({
                 />
                 <link rel="stylesheet" href="https://kit.fontawesome.com/728c8ddec8.css" crossOrigin="anonymous" />
             </head>
-            <body className="antialiased">
+            <body className="antialiased flex flex-col min-h-screen">
+                <Header />
                 <ServiceStatusBanner />
-                {children}
+                <main className="flex-grow">
+                    {children}
+                </main>
+                <Footer />
             </body>
         </html>
     );
