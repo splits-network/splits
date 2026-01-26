@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { Suspense } from 'react';
-import { AuthenticateWithRedirectCallback } from '@clerk/nextjs';
-import { useAuth, useUser } from '@clerk/nextjs';
-import { useEffect, useState, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { ensureUserInDatabase } from '@/lib/user-registration';
+import { Suspense } from "react";
+import { AuthenticateWithRedirectCallback } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
+import { useEffect, useState, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ensureUserInDatabase } from "@/lib/user-registration";
 
-type SSOStatus = 'authenticating' | 'creating_user' | 'redirecting' | 'error';
+type SSOStatus = "authenticating" | "creating_user" | "redirecting" | "error";
 
 /**
  * Inner component that uses useSearchParams - must be wrapped in Suspense
@@ -17,10 +17,10 @@ function SSOCallbackInner() {
     const { user, isLoaded: userLoaded } = useUser();
     const router = useRouter();
     const searchParams = useSearchParams();
-    
-    const [status, setStatus] = useState<SSOStatus>('authenticating');
+
+    const [status, setStatus] = useState<SSOStatus>("authenticating");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    
+
     // Track if we've already attempted user creation to prevent double execution
     const hasAttemptedRef = useRef(false);
 
@@ -40,89 +40,105 @@ function SSOCallbackInner() {
                 // Get token for API calls
                 const token = await getToken();
                 if (!token) {
-                    throw new Error('Failed to get authentication token');
+                    throw new Error("Failed to get authentication token");
                 }
 
                 // Update status to creating user
-                setStatus('creating_user');
+                setStatus("creating_user");
 
                 if (!user) {
-                    throw new Error('User data is unavailable');
+                    throw new Error("User data is unavailable");
                 }
 
                 // Ensure user exists in database
                 const result = await ensureUserInDatabase(token, {
                     clerk_user_id: user.id,
-                    email: user.primaryEmailAddress?.emailAddress || '',
-                    name: user.fullName || user.firstName || '',
+                    email: user.primaryEmailAddress?.emailAddress || "",
+                    name: user.fullName || user.firstName || "",
                     image_url: user.imageUrl,
                 });
 
                 if (!result.success) {
                     // Log the error but don't block - onboarding will catch this
-                    console.warn('[SSOCallback] User creation warning:', result.error);
+                    console.warn(
+                        "[SSOCallback] User creation warning:",
+                        result.error,
+                    );
                 }
 
                 // Update status to redirecting
-                setStatus('redirecting');
+                setStatus("redirecting");
 
                 // Determine redirect destination
-                const invitationId = searchParams.get('invitation_id');
-                
+                const invitationId = searchParams.get("invitation_id");
+
                 if (invitationId) {
                     // Redirect to invitation acceptance page
-                    router.replace(`/portal/accept-invitation?invitation_id=${invitationId}`);
+                    router.replace(
+                        `/portal/accept-invitation?invitation_id=${invitationId}`,
+                    );
                 } else {
                     // Default redirect to dashboard
-                    router.replace('/portal/dashboard');
+                    router.replace("/portal/dashboard");
                 }
-
             } catch (error: any) {
-                console.error('[SSOCallback] Error:', error);
-                setErrorMessage(error?.message || 'An error occurred during sign in');
-                setStatus('error');
-                
+                console.error("[SSOCallback] Error:", error);
+                setErrorMessage(
+                    error?.message || "An error occurred during sign in",
+                );
+                setStatus("error");
+
                 // Even on error, redirect after a delay - onboarding provider will handle it
                 setTimeout(() => {
-                    router.replace('/portal/dashboard');
+                    router.replace("/portal/dashboard");
                 }, 3000);
             }
         }
 
         ensureUserAndRedirect();
-    }, [authLoaded, userLoaded, isSignedIn, user, getToken, router, searchParams]);
+    }, [
+        authLoaded,
+        userLoaded,
+        isSignedIn,
+        user,
+        getToken,
+        router,
+        searchParams,
+    ]);
 
     // Render UI based on status
     const getStatusContent = () => {
         switch (status) {
-            case 'authenticating':
+            case "authenticating":
                 return {
-                    title: 'Completing sign in...',
-                    message: 'Verifying your credentials.',
+                    title: "Completing sign in...",
+                    message: "Verifying your credentials.",
                     showSpinner: true,
                 };
-            case 'creating_user':
+            case "creating_user":
                 return {
-                    title: 'Setting up your account...',
-                    message: 'Just a moment while we prepare your workspace.',
+                    title: "Setting up your account...",
+                    message: "Just a moment while we prepare your workspace.",
                     showSpinner: true,
                 };
-            case 'redirecting':
+            case "redirecting":
                 return {
-                    title: 'Welcome!',
-                    message: 'Redirecting you to your dashboard...',
+                    title: "Welcome!",
+                    message: "Redirecting you to your dashboard...",
                     showSpinner: true,
                 };
-            case 'error':
+            case "error":
                 return {
-                    title: 'Something went wrong',
-                    message: errorMessage || 'We encountered an issue. Redirecting anyway...',
+                    title: "Something went wrong",
+                    message:
+                        errorMessage ||
+                        "We encountered an issue. Redirecting anyway...",
                     showSpinner: false,
                 };
             default:
                 return {
-                    title: 'Please wait...',
-                    message: 'Processing your request.',
+                    title: "Please wait...",
+                    message: "Processing your request.",
                     showSpinner: true,
                 };
         }
@@ -145,7 +161,7 @@ function SSOCallbackInner() {
                     <p className="text-sm text-base-content/70">
                         {content.message}
                     </p>
-                    {status === 'error' && (
+                    {status === "error" && (
                         <p className="text-xs text-base-content/50 mt-2">
                             Redirecting in a few seconds...
                         </p>
