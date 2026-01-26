@@ -46,7 +46,7 @@ export function BaseCard({
     padding = 'default',
     onClick,
 }: BaseCardProps) {
-    const baseClasses = 'bg-base-100 rounded-xl border border-base-200/50';
+    const baseClasses = 'bg-base-200 rounded-xl border border-base-200/50';
     const shadowClass = elevationClasses[elevation];
     const paddingClass = paddingClasses[padding];
     const hoverClasses = hover

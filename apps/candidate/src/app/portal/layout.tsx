@@ -1,4 +1,5 @@
 import { ServiceStatusBanner } from '@/components/ServiceStatusBanner';
+import { OnboardingProvider, OnboardingWizardModal } from '@/components/onboarding';
 
 export default function AuthenticatedLayout({
     children,
@@ -6,9 +7,12 @@ export default function AuthenticatedLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="bg-base-300 p-6">
-            <ServiceStatusBanner />
-            {children}
-        </div>
+        <OnboardingProvider>
+            <div className="bg-base-300 p-6">
+                <ServiceStatusBanner />
+                {children}
+            </div>
+            <OnboardingWizardModal />
+        </OnboardingProvider>
     );
 }

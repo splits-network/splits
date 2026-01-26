@@ -3,22 +3,32 @@
 /**
  * Onboarding Context Provider
  * Manages state for the onboarding wizard across components
+ * 
+ * Includes fallback user creation for SSO sign-ups where
+ * the user record may not have been created yet.
  */
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useUser, useAuth } from '@clerk/nextjs';
+import { useUser, useAuth, useClerk } from '@clerk/nextjs';
 import { OnboardingState, OnboardingContextType, UserRole } from './types';
 import { ApiClient, createAuthenticatedClient } from '@/lib/api-client';
 import { useUserProfile } from '@/contexts';
-import { PhoneNumber } from '@clerk/nextjs/server';
-import { spec } from 'node:test/reporters';
+import { ensureUserInDatabase } from '@/lib/user-registration';
+
+type InitStatus = 'loading' | 'creating_account' | 'ready' | 'error';
 
 const OnboardingContext = createContext<OnboardingContextType | null>(null);
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {
     const { user } = useUser();
     const { getToken } = useAuth();
+    const { signOut } = useClerk();
     const { isAdmin, isLoading: profileLoading } = useUserProfile();
+    
+    // Initialization state
+    const [initStatus, setInitStatus] = useState<InitStatus>('loading');
+    const [initMessage, setInitMessage] = useState<string>('Loading...');
+    
     const [state, setState] = useState<OnboardingState>({
         currentStep: 1,
         status: 'pending',
@@ -33,19 +43,63 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         if (!user || profileLoading) return;
 
         const fetchOnboardingStatus = async () => {
+            setInitStatus('loading');
+            setInitMessage('Loading your profile...');
+            
             try {
                 const token = await getToken();
                 if (!token) throw new Error('No authentication token');
 
                 const apiClient = createAuthenticatedClient(token);
+                let userData = null;
 
-                // Get current user data using V2 API
-                const response = await apiClient.get('/users', { params: { limit: 1 } });
-                if (!response?.data) throw new Error('No user data found');
+                // Step 1: Try /users/me endpoint first (most direct)
+                try {
+                    const meResponse = await apiClient.get('/users/me');
+                    if (meResponse?.data) {
+                        userData = meResponse.data;
+                    }
+                } catch (meError: any) {
+                    // 404 or 500 - user doesn't exist, continue to fallback
+                    console.log('[OnboardingProvider] /users/me failed, trying fallback...');
+                }
 
-                // Handle both array and single object responses
-                const userData = Array.isArray(response.data) ? response.data[0] : response.data;
-                if (!userData) throw new Error('No user data found');
+                // Step 2: If /me failed, try list endpoint with limit: 1
+                if (!userData) {
+                    try {
+                        const listResponse = await apiClient.get('/users', { params: { limit: 1 } });
+                        if (listResponse?.data) {
+                            userData = Array.isArray(listResponse.data) 
+                                ? listResponse.data[0] 
+                                : listResponse.data;
+                        }
+                    } catch (listError) {
+                        console.log('[OnboardingProvider] /users list failed, will create user...');
+                    }
+                }
+
+                // Step 3: If still no user, create via fallback
+                if (!userData) {
+                    setInitStatus('creating_account');
+                    setInitMessage('Setting up your account...');
+                    
+                    const result = await ensureUserInDatabase(token, {
+                        clerk_user_id: user.id,
+                        email: user.primaryEmailAddress?.emailAddress || '',
+                        name: user.fullName || user.firstName || '',
+                        image_url: user.imageUrl,
+                    });
+
+                    if (result.success && result.user) {
+                        userData = result.user;
+                    } else {
+                        throw new Error(result.error || 'Failed to create user account');
+                    }
+                }
+
+                if (!userData) {
+                    throw new Error('Unable to load or create user profile');
+                }
 
                 // Skip onboarding modal for platform_admin users (use context value)
                 if (isAdmin) {
@@ -55,6 +109,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                         status: 'completed', // Mark as completed so modal never shows
                         isModalOpen: false,
                     }));
+                    setInitStatus('ready');
                     return;
                 }
 
@@ -67,13 +122,25 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                     status: userData.onboarding_status || 'pending',
                     isModalOpen: shouldShowModal,
                 }));
+                
+                setInitStatus('ready');
             } catch (error) {
-                console.error('Failed to fetch onboarding status:', error);
+                console.error('[OnboardingProvider] Failed to fetch onboarding status:', error);
+                setInitStatus('error');
+                setInitMessage(error instanceof Error ? error.message : 'Failed to load your profile');
             }
         };
 
         fetchOnboardingStatus();
     }, [user, getToken, profileLoading, isAdmin]);
+
+    const handleRetry = () => {
+        window.location.reload();
+    };
+
+    const handleSignOut = async () => {
+        await signOut();
+    };
 
     const actions = {
         setStep: async (step: number) => {
@@ -249,6 +316,70 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
             }
         },
     };
+
+    // Show loading/creating account overlay during initialization
+    if (initStatus === 'loading' || initStatus === 'creating_account') {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-base-200">
+                <div className="card w-full max-w-md bg-base-100 shadow-xl">
+                    <div className="card-body items-center text-center">
+                        <span className="loading loading-spinner loading-lg text-primary"></span>
+                        <h2 className="card-title mt-4">
+                            {initStatus === 'creating_account' ? 'Setting Up Your Account' : 'Loading...'}
+                        </h2>
+                        <p className="text-base-content/70">
+                            {initStatus === 'creating_account' 
+                                ? 'Finalizing your account setup...' 
+                                : initMessage}
+                        </p>
+                        {initStatus === 'creating_account' && (
+                            <p className="text-sm text-base-content/50 mt-2">
+                                This only takes a moment...
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Show error state with retry options
+    if (initStatus === 'error') {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-base-200">
+                <div className="card w-full max-w-md bg-base-100 shadow-xl">
+                    <div className="card-body items-center text-center">
+                        <div className="w-16 h-16 rounded-full bg-error/10 flex items-center justify-center">
+                            <i className="fa-duotone fa-regular fa-circle-exclamation text-3xl text-error"></i>
+                        </div>
+                        <h2 className="card-title mt-4">Unable to Load Profile</h2>
+                        <p className="text-base-content/70">
+                            {initMessage}
+                        </p>
+                        <p className="text-sm text-base-content/50 mt-2">
+                            Please try again or sign out and sign back in.
+                        </p>
+                        <div className="card-actions mt-4 gap-2">
+                            <button 
+                                className="btn btn-primary"
+                                onClick={handleRetry}
+                            >
+                                <i className="fa-duotone fa-regular fa-arrows-rotate mr-2"></i>
+                                Try Again
+                            </button>
+                            <button 
+                                className="btn btn-ghost"
+                                onClick={handleSignOut}
+                            >
+                                <i className="fa-duotone fa-regular fa-right-from-bracket mr-2"></i>
+                                Sign Out
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <OnboardingContext.Provider value={{ state, actions }}>

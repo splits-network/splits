@@ -127,7 +127,9 @@ function registerUserRegistrationRoute(app: FastifyInstance, services: ServiceRe
     app.post(
         '/api/v2/users/register',
         {
-            // No authentication required for registration - it's for new users
+            // Authentication IS required - we need Clerk user ID to ensure user
+            // can only register themselves (security check in backend)
+            preHandler: requireAuth(),
         },
         async (request: FastifyRequest, reply: FastifyReply) => {
             const correlationId = getCorrelationId(request);
