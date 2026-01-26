@@ -1,9 +1,16 @@
-import ApplicationsList from './components/applications-list';
+import ApplicationsList from "./components/applications-list";
+import { PageTitle } from "@/components/page-title";
 
 export default function ApplicationsPage() {
     return (
-        <div className="space-y-6">
-            <ApplicationsList />
-        </div>
+        <>
+            <PageTitle
+                title="Applications"
+                subtitle="Track candidate applications"
+            />
+            <div className="space-y-6">
+                <ApplicationsList />
+            </div>
+        </>
     );
 }

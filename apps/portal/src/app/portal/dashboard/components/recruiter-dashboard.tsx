@@ -194,23 +194,6 @@ export default function RecruiterDashboard() {
 
     return (
         <div className="space-y-6 animate-fade-in">
-            {/* Welcome Section - Enhanced gradient card */}
-            <div className="">
-                <div className="relative p-4">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h2 className="text-2xl md:text-3xl font-bold">
-                                Welcome back,{" "}
-                                {profile?.name?.split(" ")[0] || "Recruiter"}!
-                            </h2>
-                            <p className="text-lg opacity-90 mt-1">
-                                Here's an overview of your recruiting activity.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             {/* Key Stats Grid - Using new StatCard component */}
             <div className="card bg-base-200">
                 <StatCardGrid className="m-2">
