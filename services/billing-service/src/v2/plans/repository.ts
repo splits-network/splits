@@ -26,16 +26,18 @@ export class PlanRepository {
             .select('*', { count: 'exact' });
 
         if (filters.search) {
-            query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+            query = query.ilike('name', `%${filters.search}%`);
         }
+        // Map 'status' filter to 'is_active' boolean column
         if (filters.status) {
-            query = query.eq('status', filters.status);
+            const isActive = filters.status === 'active';
+            query = query.eq('is_active', isActive);
         }
-        if (filters.billing_interval) {
-            query = query.eq('billing_interval', filters.billing_interval);
+        if (filters.tier) {
+            query = query.eq('tier', filters.tier);
         }
 
-        const sortBy = filters.sort_by || 'price_cents';
+        const sortBy = filters.sort_by || 'price_monthly';
         const sortOrder = (filters.sort_order || 'asc').toLowerCase() === 'asc';
         query = query.order(sortBy, { ascending: sortOrder });
 
@@ -93,7 +95,7 @@ export class PlanRepository {
 
     async archivePlan(id: string): Promise<Plan> {
         return this.updatePlan(id, {
-            status: 'archived',
+            is_active: false,
         } as PlanUpdateInput);
     }
 }

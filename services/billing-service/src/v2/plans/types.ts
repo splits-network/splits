@@ -34,7 +34,7 @@ export interface Plan {
 export interface PlanFilters {
     search?: string;
     status?: PlanStatus;
-    billing_interval?: BillingInterval;
+    tier?: PlanTier;
 }
 
 export interface PlanListFilters extends PlanFilters {

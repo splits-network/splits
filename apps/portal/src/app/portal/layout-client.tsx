@@ -2,14 +2,18 @@
 
 /**
  * Client Wrapper for Authenticated Layout
- * Provides user profile context, page title context, and onboarding context
+ * Provides user profile context, page title context, subscription context, and onboarding context
  */
 
 import {
     OnboardingProvider,
     OnboardingWizardModal,
 } from "@/components/onboarding";
-import { UserProfileProvider, PageTitleProvider } from "@/contexts";
+import {
+    UserProfileProvider,
+    PageTitleProvider,
+    SubscriptionProvider,
+} from "@/contexts";
 
 export function AuthenticatedLayoutClient({
     children,
@@ -18,12 +22,14 @@ export function AuthenticatedLayoutClient({
 }) {
     return (
         <UserProfileProvider>
-            <PageTitleProvider>
-                <OnboardingProvider>
-                    {children}
-                    <OnboardingWizardModal />
-                </OnboardingProvider>
-            </PageTitleProvider>
+            <SubscriptionProvider>
+                <PageTitleProvider>
+                    <OnboardingProvider>
+                        {children}
+                        <OnboardingWizardModal />
+                    </OnboardingProvider>
+                </PageTitleProvider>
+            </SubscriptionProvider>
         </UserProfileProvider>
     );
 }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useUserProfile } from "@/contexts";
 import { usePageTitle } from "@/contexts/page-title-context";
 import NotificationBell from "@/components/notification-bell";
+import { PlanBadge } from "@/components/plan-badge";
 import { useClerk, useUser } from "@clerk/nextjs";
 
 export function PortalHeader() {
@@ -89,10 +90,13 @@ export function PortalHeader() {
             </div>
 
             {/* User controls */}
-            <div className="flex-none flex items-center gap-1">
+            <div className="flex-none flex items-center gap-1 ">
+                {/* Plan indicator badge */}
+                <PlanBadge />
+
                 {/* Theme toggle */}
                 <label
-                    className="swap swap-rotate cursor-pointer btn btn-ghost btn-circle"
+                    className="swap swap-rotate cursor-pointer btn btn-ghost btn-circle ml-2"
                     title="Toggle Theme"
                 >
                     <input

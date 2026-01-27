@@ -74,7 +74,10 @@ export class SubscriptionRepository {
         const { data, error } = await this.supabase
 
             .from('subscriptions')
-            .select('*')
+            .select(`
+                *,
+                plan:plans(*)
+            `)
             .eq('user_id', userId)
             .eq('status', 'active')
             .order('created_at', { ascending: false })

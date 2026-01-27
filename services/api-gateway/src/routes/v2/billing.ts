@@ -51,7 +51,7 @@ function registerSubscriptionMeRoute(app: FastifyInstance, services: ServiceRegi
 
             try {
                 const data = await billingService().get(
-                    '/v2/subscriptions/me',
+                    '/api/v2/subscriptions/me',
                     undefined,
                     correlationId,
                     authHeaders
@@ -81,7 +81,7 @@ function registerSubscriptionSetupIntentRoute(app: FastifyInstance, services: Se
 
             try {
                 const data = await billingService().post(
-                    '/v2/subscriptions/setup-intent',
+                    '/api/v2/subscriptions/setup-intent',
                     request.body,
                     correlationId,
                     authHeaders
@@ -111,7 +111,7 @@ function registerSubscriptionActivateRoute(app: FastifyInstance, services: Servi
 
             try {
                 const data = await billingService().post(
-                    '/v2/subscriptions/activate',
+                    '/api/v2/subscriptions/activate',
                     request.body,
                     correlationId,
                     authHeaders
@@ -127,11 +127,106 @@ function registerSubscriptionActivateRoute(app: FastifyInstance, services: Servi
     );
 }
 
+function registerSubscriptionPaymentMethodsRoute(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    app.get(
+        '/api/v2/subscriptions/payment-methods',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().get(
+                    '/api/v2/subscriptions/payment-methods',
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch payment methods');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch payment methods' } });
+            }
+        }
+    );
+}
+
+function registerSubscriptionUpdatePaymentMethodRoute(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    app.post(
+        '/api/v2/subscriptions/update-payment-method',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().post(
+                    '/api/v2/subscriptions/update-payment-method',
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to update payment method');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to update payment method' } });
+            }
+        }
+    );
+}
+
+function registerSubscriptionInvoicesRoute(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    app.get(
+        '/api/v2/subscriptions/invoices',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const query = request.query as { limit?: string };
+
+            try {
+                const params = query.limit ? { limit: query.limit } : undefined;
+                const data = await billingService().get(
+                    '/api/v2/subscriptions/invoices',
+                    params,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch invoices');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch invoices' } });
+            }
+        }
+    );
+}
+
 export function registerBillingRoutes(app: FastifyInstance, services: ServiceRegistry) {
     // Register specific routes FIRST (must be before generic CRUD routes)
     registerSubscriptionMeRoute(app, services);
     registerSubscriptionSetupIntentRoute(app, services);
     registerSubscriptionActivateRoute(app, services);
+    registerSubscriptionPaymentMethodsRoute(app, services);
+    registerSubscriptionUpdatePaymentMethodRoute(app, services);
+    registerSubscriptionInvoicesRoute(app, services);
 
     BILLING_RESOURCES.forEach(resource => registerResourceRoutes(app, services, resource));
 }

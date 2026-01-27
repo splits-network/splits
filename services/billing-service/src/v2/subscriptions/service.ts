@@ -12,6 +12,11 @@ import {
     SetupIntentResponse,
     ActivateSubscriptionRequest,
     ActivateSubscriptionResponse,
+    PaymentMethodResponse,
+    PaymentMethodDetails,
+    UpdatePaymentMethodResponse,
+    InvoicesResponse,
+    Invoice,
 } from './types';
 
 export class SubscriptionServiceV2 {
@@ -142,6 +147,11 @@ export class SubscriptionServiceV2 {
             }
         }
 
+        // Handle Stripe plan/billing period changes
+        if ((updates.plan_id || updates.billing_period) && subscription.stripe_subscription_id) {
+            await this.handleStripePlanChange(subscription, updates);
+        }
+
         const updated = await this.repository.updateSubscription(id, updates);
         await this.publishEvent('subscription.updated', {
             id: updated.id,
@@ -149,6 +159,65 @@ export class SubscriptionServiceV2 {
         });
 
         return updated;
+    }
+
+    /**
+     * Handle Stripe subscription updates when plan or billing period changes.
+     * Implements proration for immediate billing adjustments.
+     */
+    private async handleStripePlanChange(
+        subscription: any,
+        updates: SubscriptionUpdateInput
+    ): Promise<void> {
+        const newPlanId = updates.plan_id || subscription.plan_id;
+        const newBillingPeriod = updates.billing_period || subscription.billing_period || 'monthly';
+
+        // Get the plan details
+        const newPlan = await this.planRepository.findPlan(newPlanId);
+        if (!newPlan) {
+            throw new Error('Plan not found');
+        }
+
+        // For free tier, we don't update Stripe
+        if (newPlan.tier === 'starter' || newPlan.price_monthly === 0) {
+            return;
+        }
+
+        // Get the correct price ID based on billing period
+        const priceId = newBillingPeriod === 'annual'
+            ? newPlan.stripe_price_id_annual
+            : newPlan.stripe_price_id_monthly;
+
+        if (!priceId) {
+            throw new Error(`Plan does not have Stripe pricing configured for ${newBillingPeriod} billing`);
+        }
+
+        // Get current Stripe subscription to find the subscription item ID
+        const stripeSubscription = await this.stripe.subscriptions.retrieve(
+            subscription.stripe_subscription_id
+        );
+        const itemId = stripeSubscription.items.data[0]?.id;
+
+        if (!itemId) {
+            throw new Error('Unable to find subscription item for plan change');
+        }
+
+        // Update Stripe subscription with proration
+        const updatedStripeSub = await this.stripe.subscriptions.update(subscription.stripe_subscription_id, {
+            items: [{ id: itemId, price: priceId }],
+            proration_behavior: 'create_prorations',
+            metadata: {
+                ...stripeSubscription.metadata,
+                plan_id: newPlanId,
+                billing_period: newBillingPeriod,
+            },
+        });
+
+        // Update the period end from Stripe response
+        const periodEndTimestamp = (updatedStripeSub as any).current_period_end;
+        if (periodEndTimestamp) {
+            updates.current_period_end = new Date(periodEndTimestamp * 1000).toISOString();
+        }
     }
 
     async cancelSubscription(id: string, clerkUserId: string): Promise<any> {
@@ -350,6 +419,202 @@ export class SubscriptionServiceV2 {
             trial_end: null,
             current_period_end: periodEnd,
         };
+    }
+
+    /**
+     * Get payment method information from Stripe.
+     * We NEVER store payment data in our database - always fetch from Stripe.
+     */
+    async getPaymentMethods(clerkUserId: string): Promise<PaymentMethodResponse> {
+        const access = await this.resolveAccessContext(clerkUserId);
+
+        if (!access.identityUserId) {
+            throw new Error('Unable to resolve user for payment methods');
+        }
+
+        // Get the subscription to find the Stripe customer ID
+        const subscription = await this.repository.findByUserId(access.identityUserId);
+        
+        if (!subscription?.stripe_customer_id) {
+            return {
+                has_payment_method: false,
+                default_payment_method: null,
+            };
+        }
+
+        try {
+            // Fetch customer with expanded payment method from Stripe
+            const customer = await this.stripe.customers.retrieve(subscription.stripe_customer_id, {
+                expand: ['invoice_settings.default_payment_method'],
+            });
+
+            // Handle deleted customers
+            if ((customer as any).deleted) {
+                return {
+                    has_payment_method: false,
+                    default_payment_method: null,
+                };
+            }
+
+            const defaultPaymentMethod = (customer as Stripe.Customer).invoice_settings?.default_payment_method;
+            
+            if (!defaultPaymentMethod || typeof defaultPaymentMethod === 'string') {
+                return {
+                    has_payment_method: false,
+                    default_payment_method: null,
+                };
+            }
+
+            const paymentMethod = defaultPaymentMethod as Stripe.PaymentMethod;
+            const card = paymentMethod.card;
+
+            if (!card) {
+                return {
+                    has_payment_method: false,
+                    default_payment_method: null,
+                };
+            }
+
+            const paymentMethodDetails: PaymentMethodDetails = {
+                id: paymentMethod.id,
+                brand: card.brand,
+                last4: card.last4,
+                exp_month: card.exp_month,
+                exp_year: card.exp_year,
+            };
+
+            return {
+                has_payment_method: true,
+                default_payment_method: paymentMethodDetails,
+            };
+        } catch (error: any) {
+            // If customer doesn't exist in Stripe, return no payment method
+            if (error.code === 'resource_missing') {
+                return {
+                    has_payment_method: false,
+                    default_payment_method: null,
+                };
+            }
+            throw error;
+        }
+    }
+
+    /**
+     * Update the default payment method for a user.
+     * Attaches the new payment method to the customer and sets it as default.
+     */
+    async updatePaymentMethod(
+        clerkUserId: string,
+        paymentMethodId: string
+    ): Promise<UpdatePaymentMethodResponse> {
+        const access = await this.resolveAccessContext(clerkUserId);
+
+        if (!access.identityUserId) {
+            throw new Error('Unable to resolve user for payment method update');
+        }
+
+        // Get the subscription to find the Stripe customer ID
+        const subscription = await this.repository.findByUserId(access.identityUserId);
+        
+        if (!subscription?.stripe_customer_id) {
+            throw new Error('No active subscription found. Cannot update payment method.');
+        }
+
+        // Attach payment method to customer
+        await this.stripe.paymentMethods.attach(paymentMethodId, {
+            customer: subscription.stripe_customer_id,
+        });
+
+        // Set as default payment method
+        await this.stripe.customers.update(subscription.stripe_customer_id, {
+            invoice_settings: {
+                default_payment_method: paymentMethodId,
+            },
+        });
+
+        // Fetch the payment method details to return
+        const paymentMethod = await this.stripe.paymentMethods.retrieve(paymentMethodId);
+        const card = paymentMethod.card;
+
+        if (!card) {
+            throw new Error('Payment method is not a card');
+        }
+
+        const paymentMethodDetails: PaymentMethodDetails = {
+            id: paymentMethod.id,
+            brand: card.brand,
+            last4: card.last4,
+            exp_month: card.exp_month,
+            exp_year: card.exp_year,
+        };
+
+        await this.publishEvent('subscription.payment_method_updated', {
+            user_id: access.identityUserId,
+            payment_method_id: paymentMethodId,
+            last4: card.last4,
+        });
+
+        return {
+            success: true,
+            payment_method: paymentMethodDetails,
+        };
+    }
+
+    /**
+     * Get invoices/billing history from Stripe.
+     * We NEVER store invoice data in our database - always fetch from Stripe.
+     */
+    async getInvoices(clerkUserId: string, limit: number = 10): Promise<InvoicesResponse> {
+        const access = await this.resolveAccessContext(clerkUserId);
+
+        if (!access.identityUserId) {
+            throw new Error('Unable to resolve user for invoices');
+        }
+
+        // Get the subscription to find the Stripe customer ID
+        const subscription = await this.repository.findByUserId(access.identityUserId);
+        
+        if (!subscription?.stripe_customer_id) {
+            return {
+                invoices: [],
+                has_more: false,
+            };
+        }
+
+        try {
+            // Fetch invoices from Stripe
+            const stripeInvoices = await this.stripe.invoices.list({
+                customer: subscription.stripe_customer_id,
+                limit: limit,
+            });
+
+            const invoices: Invoice[] = stripeInvoices.data.map((invoice) => ({
+                id: invoice.id,
+                number: invoice.number,
+                amount_due: invoice.amount_due,
+                amount_paid: invoice.amount_paid,
+                currency: invoice.currency,
+                status: invoice.status as Invoice['status'],
+                created: new Date(invoice.created * 1000).toISOString(),
+                invoice_pdf: invoice.invoice_pdf ?? null,
+                period_start: new Date(invoice.period_start * 1000).toISOString(),
+                period_end: new Date(invoice.period_end * 1000).toISOString(),
+            }));
+
+            return {
+                invoices,
+                has_more: stripeInvoices.has_more,
+            };
+        } catch (error: any) {
+            // If customer doesn't exist in Stripe, return empty invoices
+            if (error.code === 'resource_missing') {
+                return {
+                    invoices: [],
+                    has_more: false,
+                };
+            }
+            throw error;
+        }
     }
 
     private async publishEvent(eventType: string, payload: Record<string, any>): Promise<void> {
