@@ -9,6 +9,7 @@ export type BillingPeriod = 'monthly' | 'annual';
 export interface Subscription {
     id: string;
     user_id: string;
+    recruiter_id: string | null;
     plan_id: string;
     stripe_subscription_id: string | null;
     stripe_customer_id: string | null;
@@ -48,6 +49,7 @@ export interface SubscriptionListFilters extends SubscriptionFilters {
 export type SubscriptionCreateInput = Partial<Omit<Subscription, 'id' | 'created_at' | 'updated_at'>> & {
     user_id: string;
     plan_id: string;
+    recruiter_id?: string | null;
 };
 export type SubscriptionUpdateInput = Partial<Omit<Subscription, 'id' | 'created_at' | 'updated_at'>>;
 

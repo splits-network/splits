@@ -117,6 +117,7 @@ export class SubscriptionServiceV2 {
 
         const subscription = await this.repository.createSubscription({
             ...payload,
+            recruiter_id: access.recruiterId || null,
             status: payload.status || 'active',
             current_period_start: payload.current_period_start || new Date().toISOString(),
         });
@@ -329,6 +330,7 @@ export class SubscriptionServiceV2 {
         if (plan.tier === 'starter' || plan.price_monthly === 0) {
             const subscription = await this.repository.createSubscription({
                 user_id: access.identityUserId,
+                recruiter_id: access.recruiterId || null,
                 plan_id: request.plan_id,
                 status: 'active',
                 current_period_start: new Date().toISOString(),
@@ -399,6 +401,7 @@ export class SubscriptionServiceV2 {
         // Create local subscription record
         const subscription = await this.repository.createSubscription({
             user_id: access.identityUserId,
+            recruiter_id: access.recruiterId || null,
             plan_id: request.plan_id,
             status: 'active',
             stripe_subscription_id: stripeSubscription.id,
