@@ -125,7 +125,7 @@ export default function CandidateListPanel({
     }, [candidates, selectedId, onSelect]);
 
     return (
-        <div className="flex flex-col h-full bg-base-100 border-r border-base-200">
+        <div className="flex flex-col h-full bg-base-200 border-r border-base-200">
             {/* Header: Search & Add */}
             <div className="flex-none z-20">
                 <div className="p-3 pb-0 flex gap-2">
@@ -218,7 +218,7 @@ export default function CandidateListPanel({
                     <div className="p-4 border-t border-base-300">
                         <PaginationControls
                             pagination={pagination}
-                            goToPage={goToPage}
+                            onPageChange={goToPage}
                         />
                     </div>
                 )}

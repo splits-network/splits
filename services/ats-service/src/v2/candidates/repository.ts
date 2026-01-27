@@ -39,7 +39,10 @@ export class CandidateRepository {
             recruiter_relationships:recruiter_candidates(
                 id,
                 recruiter_id,
-                status
+                status,
+                consent_given,
+                invitation_expires_at,
+                declined_at
             )`;
 
         if (!include) {
@@ -441,13 +444,23 @@ export class CandidateRepository {
                 // Check if current recruiter has an active relationship
                 const hasActiveRelationship = currentRecruiterId &&
                     relationships.some((rel: any) =>
-                        rel.recruiter_id === currentRecruiterId && rel.status === 'active'
+                        rel.recruiter_id === currentRecruiterId && rel.status === 'active' && rel.consent_given
+                    );
+
+                // Check for pending invitation
+                const hasPendingInvitation = currentRecruiterId && !hasActiveRelationship &&
+                    relationships.some((rel: any) =>
+                        rel.recruiter_id === currentRecruiterId &&
+                        !rel.consent_given &&
+                        !rel.declined_at &&
+                        rel.status !== 'terminated' &&
+                        new Date(rel.invitation_expires_at) > new Date()
                     );
 
                 // Count other active recruiters
                 const otherRecruiters = new Set(
                     relationships
-                        .filter((rel: any) => rel.status === 'active' && (!currentRecruiterId || rel.recruiter_id !== currentRecruiterId))
+                        .filter((rel: any) => rel.status === 'active' && rel.consent_given && (!currentRecruiterId || rel.recruiter_id !== currentRecruiterId))
                         .map((rel: any) => rel.recruiter_id)
                 );
 
@@ -456,6 +469,7 @@ export class CandidateRepository {
                     recruiter_relationships: undefined, // Remove the JOIN array to keep response clean
                     is_sourcer: currentRecruiterId && candidate.sourcer_recruiter_id === currentRecruiterId,
                     has_active_relationship: hasActiveRelationship,
+                    has_pending_invitation: hasPendingInvitation,
                     has_other_active_recruiters: otherRecruiters.size > 0,
                     other_active_recruiters_count: otherRecruiters.size,
                     is_new: new Date(candidate.created_at) > sevenDaysAgo,

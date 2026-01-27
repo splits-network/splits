@@ -27,6 +27,7 @@ export interface Candidate {
     other_active_recruiters_count?: number;
     is_sourcer?: boolean;
     has_active_relationship?: boolean;
+    has_pending_invitation?: boolean;
     created_at: string;
     updated_at?: string;
     
@@ -46,4 +47,19 @@ export interface Candidate {
     open_to_remote?: boolean;
     open_to_relocation?: boolean;
     availability?: string;
+}
+
+export interface RecruiterCandidate {
+    id: string;
+    recruiter_id: string;
+    candidate_id: string;
+    status: string;
+    invited_at: string;
+    invitation_expires_at: string;
+    consent_given: boolean;
+    consent_given_at?: string;
+    declined_at?: string;
+    declined_reason?: string;
+    created_at: string;
+    updated_at: string;
 }

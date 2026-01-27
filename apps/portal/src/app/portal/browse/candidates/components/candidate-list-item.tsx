@@ -68,6 +68,12 @@ export default function CandidateListItem({
                                 Representing
                             </span>
                         )}
+                        {candidate.has_pending_invitation && (
+                            <span className="badge badge-xs badge-info badge-soft gap-1 border-0">
+                                <i className="fa-duotone fa-solid fa-envelope-open-text text-[10px]"></i>
+                                Invited
+                            </span>
+                        )}
                         {!candidate.has_active_relationship &&
                             !candidate.has_other_active_recruiters && (
                                 <span className="badge badge-xs badge-accent badge-soft gap-1 border-0">

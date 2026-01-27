@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { Candidate } from "./types";
 import DetailHeader from "./detail-header";
+import DetailInvitation from "./detail-invitation";
 import DetailBio from "./detail-bio";
 import DetailPreferences from "./detail-preferences";
 import DetailSkills from "./detail-skills";
@@ -136,6 +137,9 @@ export default function CandidateDetailPanel({
 
                         {/* Sidebar Content (1 col) */}
                         <div className="space-y-8">
+                            <DetailInvitation
+                                candidateId={candidateId as string}
+                            />
                             <DetailPreferences candidate={candidate} />
                             <DetailSkills candidate={candidate} />
                             <DetailDocuments candidateId={candidateId} />
