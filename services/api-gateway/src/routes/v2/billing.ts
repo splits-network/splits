@@ -67,9 +67,71 @@ function registerSubscriptionMeRoute(app: FastifyInstance, services: ServiceRegi
     );
 }
 
+function registerSubscriptionSetupIntentRoute(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    app.post(
+        '/api/v2/subscriptions/setup-intent',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().post(
+                    '/v2/subscriptions/setup-intent',
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to create setup intent');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to create setup intent' } });
+            }
+        }
+    );
+}
+
+function registerSubscriptionActivateRoute(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    app.post(
+        '/api/v2/subscriptions/activate',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().post(
+                    '/v2/subscriptions/activate',
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.status(201).send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to activate subscription');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to activate subscription' } });
+            }
+        }
+    );
+}
+
 export function registerBillingRoutes(app: FastifyInstance, services: ServiceRegistry) {
-    // Register /me route FIRST (must be before generic CRUD routes)
+    // Register specific routes FIRST (must be before generic CRUD routes)
     registerSubscriptionMeRoute(app, services);
+    registerSubscriptionSetupIntentRoute(app, services);
+    registerSubscriptionActivateRoute(app, services);
 
     BILLING_RESOURCES.forEach(resource => registerResourceRoutes(app, services, resource));
 }

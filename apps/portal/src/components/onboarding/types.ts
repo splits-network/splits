@@ -7,6 +7,21 @@ export type OnboardingStatus = 'pending' | 'in_progress' | 'completed' | 'skippe
 
 export type UserRole = 'recruiter' | 'company_admin';
 
+export type PlanTier = 'starter' | 'pro' | 'partner';
+
+export interface SelectedPlan {
+  id: string;
+  tier: PlanTier;
+  name: string;
+  price_monthly: number;
+  trial_days?: number;
+}
+
+export interface StripePaymentInfo {
+  customerId: string;
+  paymentMethodId: string;
+}
+
 export interface OnboardingState {
   // From database
   currentStep: number; // 1-4
@@ -15,6 +30,10 @@ export interface OnboardingState {
   // Wizard state
   isModalOpen: boolean;
   selectedRole: UserRole | null;
+
+  // Plan selection state
+  selectedPlan: SelectedPlan | null;
+  stripePaymentInfo: StripePaymentInfo | null;
 
   // Form data
   recruiterProfile?: {
@@ -44,6 +63,8 @@ export interface OnboardingContextType {
   actions: {
     setStep: (step: number) => void;
     setRole: (role: UserRole) => void;
+    setSelectedPlan: (plan: SelectedPlan | null) => void;
+    setStripePaymentInfo: (info: StripePaymentInfo | null) => void;
     setRecruiterProfile: (profile: OnboardingState['recruiterProfile']) => void;
     setCompanyInfo: (info: OnboardingState['companyInfo']) => void;
     submitOnboarding: () => Promise<void>;

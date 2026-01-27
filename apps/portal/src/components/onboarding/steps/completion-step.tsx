@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
 /**
  * Step 4: Completion Step
  * Shows confirmation and submits the onboarding data
  */
 
-import { useOnboarding } from '../onboarding-provider';
+import { useOnboarding } from "../onboarding-provider";
 
 export function CompletionStep() {
     const { state, actions } = useOnboarding();
@@ -32,65 +32,140 @@ export function CompletionStep() {
                 {/* Role Summary */}
                 <div className="flex items-center gap-3 pb-4 border-b border-base-300">
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <i className={`fa-duotone fa-regular ${state.selectedRole === 'recruiter' ? 'fa-user-tie' : 'fa-building'} text-xl text-primary`}></i>
+                        <i
+                            className={`fa-duotone fa-regular ${state.selectedRole === "recruiter" ? "fa-user-tie" : "fa-building"} text-xl text-primary`}
+                        ></i>
                     </div>
                     <div>
                         <p className="text-sm text-base-content/70">Role</p>
                         <p className="font-semibold">
-                            {state.selectedRole === 'recruiter' ? 'Recruiter' : 'Company Admin'}
+                            {state.selectedRole === "recruiter"
+                                ? "Recruiter"
+                                : "Company Admin"}
                         </p>
                     </div>
                 </div>
 
                 {/* Recruiter Profile Summary */}
-                {state.selectedRole === 'recruiter' && state.recruiterProfile && (
-                    <div className="space-y-2">
-                        <div>
-                            <p className="text-sm text-base-content/70">Phone</p>
-                            <p className="font-medium">{state.recruiterProfile.phone}</p>
+                {state.selectedRole === "recruiter" &&
+                    state.recruiterProfile && (
+                        <div className="space-y-2">
+                            <div>
+                                <p className="text-sm text-base-content/70">
+                                    Phone
+                                </p>
+                                <p className="font-medium">
+                                    {state.recruiterProfile.phone}
+                                </p>
+                            </div>
+                            {state.recruiterProfile.industries && (
+                                <div>
+                                    <p className="text-sm text-base-content/70">
+                                        Industries
+                                    </p>
+                                    <p className="font-medium">
+                                        {state.recruiterProfile.industries?.join(
+                                            ", ",
+                                        )}
+                                    </p>
+                                </div>
+                            )}
+                            {state.recruiterProfile.teamInviteCode && (
+                                <div>
+                                    <p className="text-sm text-base-content/70">
+                                        Team Invite Code
+                                    </p>
+                                    <p className="font-medium">
+                                        {state.recruiterProfile.teamInviteCode}
+                                    </p>
+                                </div>
+                            )}
+                            <div>
+                                <p className="text-sm text-base-content/70">
+                                    Bio
+                                </p>
+                                <p className="font-medium line-clamp-3">
+                                    {state.recruiterProfile.bio}
+                                </p>
+                            </div>
                         </div>
-                        {state.recruiterProfile.industries && (
-                            <div>
-                                <p className="text-sm text-base-content/70">Industries</p>
-                                <p className="font-medium">{state.recruiterProfile.industries?.join(', ')}</p>
+                    )}
+
+                {/* Subscription Plan Summary */}
+                {state.selectedRole === "recruiter" && state.selectedPlan && (
+                    <div className="pt-4 border-t border-base-300">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center">
+                                <i className="fa-duotone fa-regular fa-credit-card text-success"></i>
                             </div>
-                        )}
-                        {state.recruiterProfile.teamInviteCode && (
-                            <div>
-                                <p className="text-sm text-base-content/70">Team Invite Code</p>
-                                <p className="font-medium">{state.recruiterProfile.teamInviteCode}</p>
+                            <div className="flex-1">
+                                <p className="text-sm text-base-content/70">
+                                    Subscription Plan
+                                </p>
+                                <p className="font-semibold">
+                                    {state.selectedPlan.name}
+                                </p>
                             </div>
-                        )}
-                        <div>
-                            <p className="text-sm text-base-content/70">Bio</p>
-                            <p className="font-medium line-clamp-3">{state.recruiterProfile.bio}</p>
+                            {state.selectedPlan.price_monthly > 0 ? (
+                                <div className="text-right">
+                                    <p className="font-semibold">
+                                        ${state.selectedPlan.price_monthly}/mo
+                                    </p>
+                                    <p className="text-xs text-success">
+                                        {state.selectedPlan.trial_days || 14}
+                                        -day free trial
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="badge badge-success">Free</div>
+                            )}
                         </div>
                     </div>
                 )}
 
                 {/* Company Info Summary */}
-                {state.selectedRole === 'company_admin' && state.companyInfo && (
-                    <div className="space-y-2">
-                        <div>
-                            <p className="text-sm text-base-content/70">Company Name</p>
-                            <p className="font-semibold text-lg">{state.companyInfo.name}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-base-content/70">Website</p>
-                            <p className="font-medium">{state.companyInfo.website}</p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
+                {state.selectedRole === "company_admin" &&
+                    state.companyInfo && (
+                        <div className="space-y-2">
                             <div>
-                                <p className="text-sm text-base-content/70">Industry</p>
-                                <p className="font-medium capitalize">{state.companyInfo.industry?.replace('_', ' ')}</p>
+                                <p className="text-sm text-base-content/70">
+                                    Company Name
+                                </p>
+                                <p className="font-semibold text-lg">
+                                    {state.companyInfo.name}
+                                </p>
                             </div>
                             <div>
-                                <p className="text-sm text-base-content/70">Size</p>
-                                <p className="font-medium">{state.companyInfo.size} employees</p>
+                                <p className="text-sm text-base-content/70">
+                                    Website
+                                </p>
+                                <p className="font-medium">
+                                    {state.companyInfo.website}
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-sm text-base-content/70">
+                                        Industry
+                                    </p>
+                                    <p className="font-medium capitalize">
+                                        {state.companyInfo.industry?.replace(
+                                            "_",
+                                            " ",
+                                        )}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-base-content/70">
+                                        Size
+                                    </p>
+                                    <p className="font-medium">
+                                        {state.companyInfo.size} employees
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
             </div>
 
             {/* Info Alert */}
@@ -99,7 +174,7 @@ export function CompletionStep() {
                 <div className="flex-1">
                     <p className="font-semibold">What happens next?</p>
                     <p className="text-sm">
-                        {state.selectedRole === 'recruiter'
+                        {state.selectedRole === "recruiter"
                             ? "You'll be taken to your dashboard where you can start browsing jobs and submitting candidates."
                             : "You'll be taken to your dashboard where you can post jobs and manage applications."}
                     </p>
