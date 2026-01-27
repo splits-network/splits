@@ -10,7 +10,7 @@ export function registerPayoutRoutes(
     app: FastifyInstance,
     config: RegisterPayoutRoutesConfig
 ) {
-    app.get('/v2/payouts', async (request, reply) => {
+    app.get('/api/v2/payouts', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const pagination = validatePaginationParams(request.query as Record<string, any>);
@@ -25,7 +25,7 @@ export function registerPayoutRoutes(
         }
     });
 
-    app.get('/v2/payouts/:id', async (request, reply) => {
+    app.get('/api/v2/payouts/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -36,7 +36,7 @@ export function registerPayoutRoutes(
         }
     });
 
-    app.post('/v2/payouts', async (request, reply) => {
+    app.post('/api/v2/payouts', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const payout = await config.payoutService.createPayout(request.body as any, clerkUserId);
@@ -46,7 +46,7 @@ export function registerPayoutRoutes(
         }
     });
 
-    app.patch('/v2/payouts/:id', async (request, reply) => {
+    app.patch('/api/v2/payouts/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -57,7 +57,7 @@ export function registerPayoutRoutes(
         }
     });
 
-    app.delete('/v2/payouts/:id', async (request, reply) => {
+    app.delete('/api/v2/payouts/:id', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -79,7 +79,7 @@ export function registerPayoutRoutes(
      * 
      * Requires: billing admin access
      */
-    app.post('/v2/payouts/create-for-placement', async (request, reply) => {
+    app.post('/api/v2/payouts/create-for-placement', async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { placement_id } = request.body as { placement_id: string };

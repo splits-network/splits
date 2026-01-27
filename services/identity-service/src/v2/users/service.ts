@@ -187,12 +187,16 @@ export class UserServiceV2 {
     /**
      * Register user (self-registration during sign-up)
      * Allows users to create their own account without admin permissions
+     * 
+     * This method is IDEMPOTENT - safe to call multiple times:
+     * - If user already exists, returns existing user
+     * - Handles duplicate key errors from race conditions with webhooks
      */
     async registerUser(clerkUserId: string, userData: any) {
         this.logger.info({ clerkUserId }, 'UserService.registerUser');
 
         // Security check: Ensure user can only register themselves
-        if (userData.clerk_user_id !== clerkUserId) {
+        if (userData.clerk_user_id && userData.clerk_user_id !== clerkUserId) {
             throw new Error('Users can only register themselves');
         }
 
@@ -201,11 +205,11 @@ export class UserServiceV2 {
             throw new Error('Email is required for user registration');
         }
 
-        // Check if user already exists
+        // Check if user already exists - return existing user for idempotency
         const existingUser = await this.repository.findUserByClerkId(clerkUserId);
-
         if (existingUser) {
-            throw new Error('User already registered');
+            this.logger.info({ id: existingUser.id, clerkUserId }, 'UserService.registerUser - user already exists, returning existing');
+            return existingUser;
         }
 
         // Create user data
@@ -215,21 +219,39 @@ export class UserServiceV2 {
             name: userData.name || '',
             //image_url: userData.image_url,
             onboarding_status: 'pending',
+            onboarding_step: 1,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         };
 
-        const user = await this.repository.create(clerkUserId, createData);
+        try {
+            const user = await this.repository.create(clerkUserId, createData);
 
-        // Publish event for other services
-        await this.eventPublisher?.publish('user.registered', {
-            userId: user.id,
-            clerkUserId,
-            email: user.email,
-        });
+            // Publish event for other services
+            await this.eventPublisher?.publish('user.registered', {
+                userId: user.id,
+                clerkUserId,
+                email: user.email,
+            });
 
-        this.logger.info({ id: user.id }, 'UserService.registerUser - user registered');
-        return user;
+            this.logger.info({ id: user.id }, 'UserService.registerUser - user registered');
+            return user;
+        } catch (error: any) {
+            // Handle duplicate key error (race condition with webhook)
+            // Postgres error code 23505 = unique_violation
+            if (error?.code === '23505' || error?.message?.includes('duplicate')) {
+                this.logger.info({ clerkUserId }, 'UserService.registerUser - duplicate key, fetching existing user');
+                
+                // User was created by webhook during our check, fetch them
+                const raceUser = await this.repository.findUserByClerkId(clerkUserId);
+                if (raceUser) {
+                    return raceUser;
+                }
+            }
+            
+            // Re-throw other errors
+            throw error;
+        }
     }
 
     /**

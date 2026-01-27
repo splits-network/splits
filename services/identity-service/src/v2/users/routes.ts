@@ -49,7 +49,12 @@ export function registerUserRoutes(
             reply.send({ data: user });
         } catch (error) {
             logError('GET /api/v2/users/:id failed', error);
-            reply.code(500).send({ error: { message: 'Failed to fetch user' } });
+            const errorMessage = (error as Error).message || '';
+            if (errorMessage.includes('not found')) {
+                reply.code(404).send({ error: { message: 'User not found' } });
+            } else {
+                reply.code(500).send({ error: { message: 'Failed to fetch user' } });
+            }
         }
     });
 
@@ -60,7 +65,13 @@ export function registerUserRoutes(
             reply.send({ data: user });
         } catch (error) {
             logError('GET /api/v2/users/me failed', error);
-            reply.code(500).send({ error: { message: 'Failed to fetch current user' } });
+            const errorMessage = (error as Error).message || '';
+            // Return 404 if user not found - this is expected for new SSO users
+            if (errorMessage.includes('not found') || errorMessage.includes('User not found')) {
+                reply.code(404).send({ error: { message: 'User not found' } });
+            } else {
+                reply.code(500).send({ error: { message: 'Failed to fetch current user' } });
+            }
         }
     });
 

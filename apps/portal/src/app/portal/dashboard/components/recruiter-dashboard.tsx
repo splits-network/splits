@@ -1,15 +1,20 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useUserProfile } from '@/contexts';
-import ActionableProposalsWidget from './actionable-proposals-widget';
-import { getActivityIcon } from '@/lib/utils';
-import { StatCard, StatCardGrid, ContentCard, EmptyState } from '@/components/ui/cards';
-import { TrendBadge } from '@/components/ui';
-import { AnalyticsChart } from '@/components/charts/analytics-chart';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useUserProfile } from "@/contexts";
+import ActionableProposalsWidget from "./actionable-proposals-widget";
+import { getActivityIcon } from "@/lib/utils";
+import {
+    StatCard,
+    StatCardGrid,
+    ContentCard,
+    EmptyState,
+} from "@/components/ui/cards";
+import { TrendBadge } from "@/components/ui";
+import { AnalyticsChart } from "@/components/charts/analytics-chart";
 
 interface RecruiterStats {
     active_roles: number;
@@ -30,7 +35,11 @@ interface RecruiterStats {
 
 interface RecentActivity {
     id: string;
-    type: 'application_submitted' | 'stage_changed' | 'offer_extended' | 'placement_created';
+    type:
+        | "application_submitted"
+        | "stage_changed"
+        | "offer_extended"
+        | "placement_created";
     message: string;
     job_title?: string;
     candidate_name?: string;
@@ -38,24 +47,24 @@ interface RecentActivity {
     link?: string;
 }
 
-const ACTIVITY_TYPE_BY_STAGE: Record<string, RecentActivity['type']> = {
-    draft: 'application_submitted',
-    screen: 'application_submitted',
-    submitted: 'stage_changed',
-    interview: 'stage_changed',
-    offer: 'offer_extended',
-    hired: 'placement_created',
-    rejected: 'stage_changed',
+const ACTIVITY_TYPE_BY_STAGE: Record<string, RecentActivity["type"]> = {
+    draft: "application_submitted",
+    screen: "application_submitted",
+    submitted: "stage_changed",
+    interview: "stage_changed",
+    offer: "offer_extended",
+    hired: "placement_created",
+    rejected: "stage_changed",
 };
 
 const STAGE_MESSAGE: Record<string, string> = {
-    draft: 'started a draft application',
-    screen: 'needs your review',
-    submitted: 'was submitted to the company',
-    interview: 'moved to interview stage',
-    offer: 'has an offer pending',
-    hired: 'was marked as hired',
-    rejected: 'was rejected',
+    draft: "started a draft application",
+    screen: "needs your review",
+    submitted: "was submitted to the company",
+    interview: "moved to interview stage",
+    offer: "has an offer pending",
+    hired: "was marked as hired",
+    rejected: "was rejected",
 };
 
 const formatActivityTimestamp = (value?: string) => {
@@ -64,18 +73,21 @@ const formatActivityTimestamp = (value?: string) => {
 };
 
 const mapApplicationToActivity = (application: any): RecentActivity => {
-    const stage = application.stage || 'submitted';
-    const candidateName = application.candidate?.full_name || 'Unknown Candidate';
+    const stage = application.stage || "submitted";
+    const candidateName =
+        application.candidate?.full_name || "Unknown Candidate";
     const jobTitle = application.job?.title;
-    const messageSuffix = STAGE_MESSAGE[stage] || 'was updated';
+    const messageSuffix = STAGE_MESSAGE[stage] || "was updated";
 
     return {
         id: application.id,
-        type: ACTIVITY_TYPE_BY_STAGE[stage] || 'stage_changed',
-        message: `${candidateName} ${messageSuffix}${jobTitle ? ` for ${jobTitle}` : ''}`,
+        type: ACTIVITY_TYPE_BY_STAGE[stage] || "stage_changed",
+        message: `${candidateName} ${messageSuffix}${jobTitle ? ` for ${jobTitle}` : ""}`,
         job_title: jobTitle,
         candidate_name: candidateName,
-        timestamp: formatActivityTimestamp(application.updated_at || application.created_at),
+        timestamp: formatActivityTimestamp(
+            application.updated_at || application.created_at,
+        ),
         link: `/portal/applications/${application.id}`,
     };
 };
@@ -102,11 +114,11 @@ export default function RecruiterDashboard() {
             const api = createAuthenticatedClient(token);
 
             // Load recruiter stats using V2 analytics endpoint
-            const statsResponse: any = await api.get('/stats', {
+            const statsResponse: any = await api.get("/stats", {
                 params: {
-                    scope: 'recruiter',
-                    range: 'ytd',
-                }
+                    scope: "recruiter",
+                    range: "ytd",
+                },
             });
             const recruiterStats =
                 statsResponse?.data?.metrics ||
@@ -123,36 +135,37 @@ export default function RecruiterDashboard() {
                     placements_this_year: 0,
                     total_earnings_ytd: 0,
                     pending_payouts: 0,
-                }
+                },
             );
 
             // Load recent activity from latest applications
-            const activityResponse: any = await api.get('/applications', {
+            const activityResponse: any = await api.get("/applications", {
                 params: {
                     limit: 8,
-                    sort_by: 'updated_at',
-                    sort_order: 'desc',
+                    sort_by: "updated_at",
+                    sort_order: "desc",
                 },
             });
 
-            const applications = activityResponse?.data || activityResponse || [];
+            const applications =
+                activityResponse?.data || activityResponse || [];
             setRecentActivity(
                 Array.isArray(applications)
                     ? applications.map(mapApplicationToActivity)
-                    : []
+                    : [],
             );
 
             // Load top active roles
-            const rolesResponse: any = await api.get('/jobs', {
+            const rolesResponse: any = await api.get("/jobs", {
                 params: {
-                    status: 'active',
+                    status: "active",
                     limit: 5,
-                }
+                },
             });
 
             setTopRoles(rolesResponse.data || rolesResponse || []);
         } catch (error) {
-            console.error('Failed to load dashboard data:', error);
+            console.error("Failed to load dashboard data:", error);
         } finally {
             setLoading(false);
         }
@@ -166,7 +179,13 @@ export default function RecruiterDashboard() {
                 {/* Stats skeleton */}
                 <StatCardGrid>
                     {[1, 2, 3, 4].map((i) => (
-                        <StatCard key={i} title="" value={0} icon="fa-spinner" loading />
+                        <StatCard
+                            key={i}
+                            title=""
+                            value={0}
+                            icon="fa-spinner"
+                            loading
+                        />
                     ))}
                 </StatCardGrid>
             </div>
@@ -175,25 +194,9 @@ export default function RecruiterDashboard() {
 
     return (
         <div className="space-y-6 animate-fade-in">
-            {/* Welcome Section - Enhanced gradient card */}
-            <div className="">
-                <div className="relative p-4">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h2 className="text-2xl md:text-3xl font-bold">
-                                Welcome back, {profile?.name?.split(' ')[0] || 'Recruiter'}!
-                            </h2>
-                            <p className="text-lg opacity-90 mt-1">
-                                Here's an overview of your recruiting activity.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             {/* Key Stats Grid - Using new StatCard component */}
-            <div className='card bg-base-200'>
-                <StatCardGrid>
+            <div className="card bg-base-200">
+                <StatCardGrid className="m-2">
                     <StatCard
                         title="Active Roles"
                         value={stats?.active_roles || 0}
@@ -230,7 +233,7 @@ export default function RecruiterDashboard() {
                         href="/portal/placements"
                     />
                 </StatCardGrid>
-                <div className='p-4 pt-0'>
+                <div className="p-4 pt-0">
                     <AnalyticsChart
                         type="placement-trends"
                         title="Placement Trends"
@@ -242,10 +245,11 @@ export default function RecruiterDashboard() {
                         trendPeriod={trendPeriod}
                         onTrendPeriodChange={setTrendPeriod}
                     />
-                    <div className='alert alert-info alert-outline'>
+                    <div className="alert alert-info alert-outline">
                         <i className="fa-duotone fa-regular fa-info-circle text-base-content/40"></i>
-                        <span className='text-sm text-base-content/70'>
-                            This is an example of integrating an analytics chart into the dashboard.
+                        <span className="text-sm text-base-content/70">
+                            This is an example of integrating an analytics chart
+                            into the dashboard.
                         </span>
                     </div>
                 </div>
@@ -257,7 +261,10 @@ export default function RecruiterDashboard() {
                     title="Earnings This Year"
                     icon="fa-chart-line"
                     headerActions={
-                        <Link href="/portal/placements" className="btn btn-sm btn-ghost text-success">
+                        <Link
+                            href="/portal/placements"
+                            className="btn btn-sm btn-ghost text-success"
+                        >
                             View Details
                             <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                         </Link>
@@ -265,10 +272,16 @@ export default function RecruiterDashboard() {
                 >
                     <div className="flex items-baseline gap-3 mt-2">
                         <div className="text-4xl font-bold text-success">
-                            ${((stats?.total_earnings_ytd || 0) / 1000).toFixed(1)}k
+                            $
+                            {((stats?.total_earnings_ytd || 0) / 1000).toFixed(
+                                1,
+                            )}
+                            k
                         </div>
                         {stats?.trends?.placements_this_year && (
-                            <TrendBadge value={stats.trends.placements_this_year} />
+                            <TrendBadge
+                                value={stats.trends.placements_this_year}
+                            />
                         )}
                     </div>
                     <div className="flex items-center gap-4 mt-4 pt-4 border-t border-base-200">
@@ -277,8 +290,13 @@ export default function RecruiterDashboard() {
                                 <i className="fa-duotone fa-regular fa-calendar-check text-success"></i>
                             </div>
                             <div>
-                                <div className="text-sm text-base-content/60">This Month</div>
-                                <div className="text-lg font-semibold">{stats?.placements_this_month || 0} placements</div>
+                                <div className="text-sm text-base-content/60">
+                                    This Month
+                                </div>
+                                <div className="text-lg font-semibold">
+                                    {stats?.placements_this_month || 0}{" "}
+                                    placements
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -288,7 +306,10 @@ export default function RecruiterDashboard() {
                     title="Pending Payouts"
                     icon="fa-money-bill-transfer"
                     headerActions={
-                        <Link href="/earnings" className="btn btn-sm btn-ghost text-primary">
+                        <Link
+                            href="/earnings"
+                            className="btn btn-sm btn-ghost text-primary"
+                        >
                             View Payouts
                             <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                         </Link>
@@ -296,7 +317,8 @@ export default function RecruiterDashboard() {
                 >
                     <div className="flex items-baseline gap-3 mt-2">
                         <div className="text-4xl font-bold text-primary">
-                            ${((stats?.pending_payouts || 0) / 1000).toFixed(1)}k
+                            ${((stats?.pending_payouts || 0) / 1000).toFixed(1)}
+                            k
                         </div>
                     </div>
                     <div className="flex items-center gap-2 mt-4 pt-4 border-t border-base-200">
@@ -318,7 +340,10 @@ export default function RecruiterDashboard() {
                         subtitle="Review and submit these applications to the hiring companies."
                         icon="fa-inbox"
                         headerActions={
-                            <Link href="/portal/applications" className="btn btn-sm btn-ghost">
+                            <Link
+                                href="/portal/applications"
+                                className="btn btn-sm btn-ghost"
+                            >
                                 View all applications
                                 <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                             </Link>
@@ -333,7 +358,10 @@ export default function RecruiterDashboard() {
                         icon="fa-clock-rotate-left"
                         headerActions={
                             recentActivity.length > 5 && (
-                                <Link href="/activity" className="btn btn-sm btn-ghost">
+                                <Link
+                                    href="/activity"
+                                    className="btn btn-sm btn-ghost"
+                                >
                                     View all
                                     <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                                 </Link>
@@ -352,24 +380,42 @@ export default function RecruiterDashboard() {
                                 {recentActivity.slice(0, 8).map((activity) => (
                                     <Link
                                         key={activity.id}
-                                        href={activity.link || '#'}
+                                        href={activity.link || "#"}
                                         className="flex items-start gap-4 p-3 rounded-xl hover:bg-base-200/70 transition-all group"
                                     >
-                                        <div className={`
+                                        <div
+                                            className={`
                                             w-10 h-10 rounded-xl flex items-center justify-center shrink-0
-                                            ${activity.type === 'placement_created' ? 'bg-success/10 text-success' :
-                                                activity.type === 'offer_extended' ? 'bg-accent/10 text-accent' :
-                                                    activity.type === 'application_submitted' ? 'bg-primary/10 text-primary' :
-                                                        'bg-secondary/10 text-secondary'}
-                                        `}>
-                                            <i className={`fa-duotone fa-regular ${getActivityIcon(activity.type)}`}></i>
+                                            ${
+                                                activity.type ===
+                                                "placement_created"
+                                                    ? "bg-success/10 text-success"
+                                                    : activity.type ===
+                                                        "offer_extended"
+                                                      ? "bg-accent/10 text-accent"
+                                                      : activity.type ===
+                                                          "application_submitted"
+                                                        ? "bg-primary/10 text-primary"
+                                                        : "bg-secondary/10 text-secondary"
+                                            }
+                                        `}
+                                        >
+                                            <i
+                                                className={`fa-duotone fa-regular ${getActivityIcon(activity.type)}`}
+                                            ></i>
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="font-medium text-sm line-clamp-1">{activity.message}</p>
+                                            <p className="font-medium text-sm line-clamp-1">
+                                                {activity.message}
+                                            </p>
                                             {activity.job_title && (
-                                                <p className="text-xs text-primary mt-0.5">{activity.job_title}</p>
+                                                <p className="text-xs text-primary mt-0.5">
+                                                    {activity.job_title}
+                                                </p>
                                             )}
-                                            <p className="text-xs text-base-content/50 mt-0.5">{activity.timestamp}</p>
+                                            <p className="text-xs text-base-content/50 mt-0.5">
+                                                {activity.timestamp}
+                                            </p>
                                         </div>
                                         <i className="fa-duotone fa-regular fa-chevron-right text-base-content/30 group-hover:text-primary transition-colors"></i>
                                     </Link>
@@ -384,19 +430,31 @@ export default function RecruiterDashboard() {
                     {/* Quick Actions - Enhanced buttons */}
                     <ContentCard title="Quick Actions" icon="fa-bolt">
                         <div className="flex flex-col gap-2">
-                            <Link href="/portal/roles" className="btn btn-primary w-full justify-start gap-3">
+                            <Link
+                                href="/portal/roles"
+                                className="btn btn-primary w-full justify-start gap-3"
+                            >
                                 <i className="fa-duotone fa-regular fa-briefcase w-4"></i>
                                 Browse Roles
                             </Link>
-                            <Link href="/portal/candidates" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
+                            <Link
+                                href="/portal/candidates"
+                                className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200"
+                            >
                                 <i className="fa-duotone fa-regular fa-users w-4"></i>
                                 My Candidates
                             </Link>
-                            <Link href="/portal/proposals" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
+                            <Link
+                                href="/portal/proposals"
+                                className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200"
+                            >
                                 <i className="fa-duotone fa-regular fa-inbox w-4"></i>
                                 Proposals
                             </Link>
-                            <Link href="/portal/placements" className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200">
+                            <Link
+                                href="/portal/placements"
+                                className="btn btn-outline w-full justify-start gap-3 hover:bg-base-200"
+                            >
                                 <i className="fa-duotone fa-regular fa-trophy w-4"></i>
                                 My Placements
                             </Link>
@@ -408,7 +466,10 @@ export default function RecruiterDashboard() {
                         title="Top Active Roles"
                         icon="fa-fire"
                         headerActions={
-                            <Link href="/portal/roles" className="btn btn-sm btn-ghost">
+                            <Link
+                                href="/portal/roles"
+                                className="btn btn-sm btn-ghost"
+                            >
                                 All roles
                                 <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                             </Link>
@@ -436,11 +497,17 @@ export default function RecruiterDashboard() {
                                                 </div>
                                                 <div className="text-xs text-base-content/60 flex items-center gap-1.5 mt-1">
                                                     <i className="fa-duotone fa-regular fa-building text-[10px]"></i>
-                                                    <span className="line-clamp-1">{role.company?.name}</span>
+                                                    <span className="line-clamp-1">
+                                                        {role.company?.name}
+                                                    </span>
                                                     {role.location && (
                                                         <>
-                                                            <span className="text-base-content/30">•</span>
-                                                            <span className="line-clamp-1">{role.location}</span>
+                                                            <span className="text-base-content/30">
+                                                                •
+                                                            </span>
+                                                            <span className="line-clamp-1">
+                                                                {role.location}
+                                                            </span>
                                                         </>
                                                     )}
                                                 </div>
@@ -460,20 +527,33 @@ export default function RecruiterDashboard() {
             </div>
 
             {/* Getting Started Tips - Enhanced alert */}
-            {(stats?.active_roles === 0 || stats?.candidates_in_process === 0) && (
+            {(stats?.active_roles === 0 ||
+                stats?.candidates_in_process === 0) && (
                 <div className="alert bg-info/10 border-info/20 shadow-sm">
                     <div className="w-10 h-10 rounded-xl bg-info/20 flex items-center justify-center shrink-0">
                         <i className="fa-duotone fa-regular fa-lightbulb text-info"></i>
                     </div>
                     <div>
-                        <h4 className="font-bold text-info">Getting Started Tips</h4>
+                        <h4 className="font-bold text-info">
+                            Getting Started Tips
+                        </h4>
                         <div className="text-sm mt-1 text-base-content/70">
                             {stats?.active_roles === 0 && (
-                                <p>• Browse available roles and start submitting qualified candidates</p>
+                                <p>
+                                    • Browse available roles and start
+                                    submitting qualified candidates
+                                </p>
                             )}
-                            {stats?.candidates_in_process === 0 && stats?.active_roles > 0 && (
-                                <p>• You have {stats.active_roles} active role{stats.active_roles !== 1 ? 's' : ''} - submit your first candidate to get started!</p>
-                            )}
+                            {stats?.candidates_in_process === 0 &&
+                                stats?.active_roles > 0 && (
+                                    <p>
+                                        • You have {stats.active_roles} active
+                                        role
+                                        {stats.active_roles !== 1 ? "s" : ""} -
+                                        submit your first candidate to get
+                                        started!
+                                    </p>
+                                )}
                         </div>
                     </div>
                 </div>
