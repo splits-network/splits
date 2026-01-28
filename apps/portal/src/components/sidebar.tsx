@@ -27,7 +27,7 @@ const navItems: NavItem[] = [
         mobileDock: true,
     },
     {
-        href: "/portal/roles",
+        href: "/portal/browse/roles",
         label: "Roles",
         icon: "fa-briefcase",
         roles: ["all"],
@@ -122,6 +122,12 @@ const soonToBeRemovedNavItems: NavItem[] = [
         label: "Candidates",
         icon: "fa-ghost",
         roles: ["recruiter", "platform_admin"],
+    },
+    {
+        href: "/portal/roles",
+        label: "Roles",
+        icon: "fa-ghost",
+        roles: ["all"],
     },
 ];
 

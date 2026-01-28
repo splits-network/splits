@@ -63,3 +63,10 @@ export interface RecruiterCandidate {
     created_at: string;
     updated_at: string;
 }
+
+export interface CandidateFilters {
+    scope?: "mine" | "all";
+    open_to_remote?: boolean;
+    desired_job_type?: string;
+    verification_status?: string;
+}

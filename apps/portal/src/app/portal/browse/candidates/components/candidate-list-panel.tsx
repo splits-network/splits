@@ -11,7 +11,8 @@ import {
 } from "@/hooks/use-standard-list";
 import CandidateListItem from "./candidate-list-item";
 import AddCandidateModal from "@/app/portal/candidates/components/add-candidate-modal";
-import { Candidate } from "./types";
+import FilterDropdown from "./filter-dropdown";
+import { Candidate, CandidateFilters } from "./types";
 
 interface CandidateListPanelProps {
     selectedId: string | null;
@@ -48,7 +49,10 @@ export default function CandidateListPanel({
         [getToken],
     );
 
-    const defaultFilters = useMemo(() => ({ scope: "mine" }), []);
+    const defaultFilters = useMemo(
+        () => ({ scope: "mine" }) as CandidateFilters,
+        [],
+    );
 
     const {
         data: candidates,
@@ -59,8 +63,10 @@ export default function CandidateListPanel({
         setSearchInput,
         goToPage,
         refresh,
+        filters,
+        setFilters,
         setFilter,
-    } = useStandardList<Candidate, any>({
+    } = useStandardList<Candidate, CandidateFilters>({
         fetchFn: fetchCandidates,
         defaultFilters,
         defaultSortBy: "created_at",
@@ -126,16 +132,40 @@ export default function CandidateListPanel({
 
     return (
         <div className="flex flex-col h-full bg-base-200 border-r border-base-200">
-            {/* Header: Search & Add */}
-            <div className="flex-none z-20">
-                <div className="p-3 pb-0 flex gap-2">
-                    <SearchInput
-                        value={searchInput}
-                        onChange={setSearchInput}
-                        placeholder="Search candidates..."
-                        // @ts-ignore - passing className even if interface might not support it (defensive)
-                        className="w-full"
-                    />
+            {/* Header: Tabs, Search & Add */}
+            <div className="p-4 border-b border-base-300 bg-base-100/50 backdrop-blur-sm sticky top-0 z-20">
+                {/* Tabs */}
+                <div role="tablist" className="tabs tabs-box w-full mb-4">
+                    <a
+                        role="tab"
+                        className={`tab ${activeTab === "mine" ? "tab-active" : ""}`}
+                        onClick={() => handleTabChange("mine")}
+                    >
+                        My Candidates
+                    </a>
+                    <a
+                        role="tab"
+                        className={`tab ${activeTab === "all" ? "tab-active" : ""}`}
+                        onClick={() => handleTabChange("all")}
+                    >
+                        All Candidates
+                    </a>
+                </div>
+
+                {/* Search & Add */}
+                <div className="flex gap-2">
+                    <div className="flex-1">
+                        <SearchInput
+                            value={searchInput}
+                            onChange={setSearchInput}
+                            placeholder="Search candidates..."
+                            // @ts-ignore - passing className even if interface might not support it (defensive)
+                            className="w-full"
+                        />
+                    </div>
+
+                    <FilterDropdown filters={filters} onChange={setFilters} />
+
                     <div
                         className="tooltip tooltip-bottom"
                         data-tip="Add Candidate"
@@ -147,29 +177,6 @@ export default function CandidateListPanel({
                         >
                             <i className="fa-duotone fa-regular fa-plus text-lg"></i>
                         </button>
-                    </div>
-                </div>
-
-                {/* Tabs */}
-                <div className="px-3 pt-3">
-                    <div
-                        role="tablist"
-                        className="tabs tabs-bordered w-full grid grid-cols-2"
-                    >
-                        <a
-                            role="tab"
-                            className={`tab ${activeTab === "mine" ? "tab-active font-medium" : ""}`}
-                            onClick={() => handleTabChange("mine")}
-                        >
-                            My Candidates
-                        </a>
-                        <a
-                            role="tab"
-                            className={`tab ${activeTab === "all" ? "tab-active font-medium" : ""}`}
-                            onClick={() => handleTabChange("all")}
-                        >
-                            All Candidates
-                        </a>
                     </div>
                 </div>
             </div>
