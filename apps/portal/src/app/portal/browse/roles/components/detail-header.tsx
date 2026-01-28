@@ -14,7 +14,7 @@ export default function DetailHeader({ job, onClose }: DetailHeaderProps) {
                         onClick={onClose}
                         className="md:hidden btn btn-ghost btn-circle btn-sm -ml-2"
                     >
-                        <i className="fa-regular fa-arrow-left" />
+                        <i className="fa-duotone fa-regular fa-arrow-left" />
                     </button>
                     <h1 className="text-xl sm:text-2xl font-bold text-base-content line-clamp-1">
                         {job.title}
@@ -38,7 +38,7 @@ export default function DetailHeader({ job, onClose }: DetailHeaderProps) {
 
             <div className="flex items-center gap-2 shrink-0">
                 <button className="btn btn-ghost btn-sm hidden sm:inline-flex">
-                    <i className="fa-regular fa-pen-to-square" />
+                    <i className="fa-duotone fa-regular fa-pen-to-square" />
                     Edit
                 </button>
                 <button className="btn btn-primary btn-sm">

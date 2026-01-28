@@ -115,7 +115,7 @@ export default function CandidateDetailPanel({
                     onClick={onClose}
                     className="btn btn-ghost btn-sm gap-2"
                 >
-                    <i className="fa-regular fa-arrow-left"></i>
+                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
                     Back to List
                 </button>
             </div>

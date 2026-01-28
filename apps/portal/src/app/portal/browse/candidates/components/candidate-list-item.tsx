@@ -64,26 +64,26 @@ export default function CandidateListItem({
                     <div className="flex flex-wrap gap-1.5">
                         {candidate.has_active_relationship && (
                             <span className="badge badge-xs badge-success badge-soft gap-1 border-0">
-                                <i className="fa-duotone fa-solid fa-user-check text-[10px]"></i>
+                                <i className="fa-duotone fa-regular fa-user-check text-[10px]"></i>
                                 Representing
                             </span>
                         )}
                         {candidate.has_pending_invitation && (
                             <span className="badge badge-xs badge-info badge-soft gap-1 border-0">
-                                <i className="fa-duotone fa-solid fa-envelope-open-text text-[10px]"></i>
+                                <i className="fa-duotone fa-regular fa-envelope-open-text text-[10px]"></i>
                                 Invited
                             </span>
                         )}
                         {!candidate.has_active_relationship &&
                             !candidate.has_other_active_recruiters && (
                                 <span className="badge badge-xs badge-accent badge-soft gap-1 border-0">
-                                    <i className="fa-duotone fa-solid fa-user-plus text-[10px]"></i>
+                                    <i className="fa-duotone fa-regular fa-user-plus text-[10px]"></i>
                                     Available
                                 </span>
                             )}
                         {candidate.is_sourcer && (
                             <span className="badge badge-xs badge-info badge-soft gap-1 border-0">
-                                <i className="fa-duotone fa-solid fa-magnifying-glass text-[10px]"></i>
+                                <i className="fa-duotone fa-regular fa-magnifying-glass text-[10px]"></i>
                                 Sourcer
                             </span>
                         )}
@@ -92,7 +92,7 @@ export default function CandidateListItem({
                                 className="badge badge-xs badge-warning badge-soft gap-1 border-0"
                                 title={`${candidate.other_active_recruiters_count} other recruiter(s)`}
                             >
-                                <i className="fa-duotone fa-solid fa-users text-[10px]"></i>
+                                <i className="fa-duotone fa-regular fa-users text-[10px]"></i>
                                 Represented
                             </span>
                         )}
@@ -126,7 +126,7 @@ export default function CandidateListItem({
                                 navigator.clipboard.writeText(url);
                             }}
                         >
-                            <i className="fa-duotone fa-solid fa-link text-xs"></i>
+                            <i className="fa-duotone fa-regular fa-link text-xs"></i>
                         </button>
                     </div>
                 </div>

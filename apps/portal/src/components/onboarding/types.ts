@@ -51,6 +51,9 @@ export interface OnboardingState {
     website?: string;
     industry?: string;
     size?: string;
+    description?: string;
+    headquarters_location?: string;
+    logo_url?: string;
   };
 
   // UI state

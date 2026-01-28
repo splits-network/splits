@@ -1,7 +1,7 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 export const metadata = {
-    title: 'Page Not Found',
+    title: "Page Not Found",
 };
 
 export default function NotFound() {
@@ -11,9 +11,11 @@ export default function NotFound() {
                 {/* Large 404 with gradient background */}
                 <div className="relative mb-8">
                     <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                        <i className="fa-duotone fa-solid fa-magnifying-glass text-[20rem] text-primary"></i>
+                        <i className="fa-duotone fa-regular fa-magnifying-glass text-[20rem] text-primary"></i>
                     </div>
-                    <h1 className="text-9xl font-bold text-primary relative z-10">404</h1>
+                    <h1 className="text-9xl font-bold text-primary relative z-10">
+                        404
+                    </h1>
                 </div>
 
                 {/* Main message */}
@@ -25,14 +27,17 @@ export default function NotFound() {
                         Looks like this role has been filled...
                     </p>
                     <p className="text-base-content/60">
-                        The page you're looking for doesn't exist or has been moved.
+                        The page you're looking for doesn't exist or has been
+                        moved.
                     </p>
                 </div>
 
                 {/* Quick links card */}
                 <div className="card bg-base-100 shadow-xl mb-8">
                     <div className="card-body">
-                        <h3 className="card-title text-lg mb-4">Try these instead:</h3>
+                        <h3 className="card-title text-lg mb-4">
+                            Try these instead:
+                        </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <Link
                                 href="/portal/dashboard"
@@ -67,15 +72,21 @@ export default function NotFound() {
                 </div>
 
                 {/* Home button */}
-                <Link href="/portal/dashboard" className="btn btn-primary btn-lg gap-2">
+                <Link
+                    href="/portal/dashboard"
+                    className="btn btn-primary btn-lg gap-2"
+                >
                     <i className="fa-duotone fa-regular fa-house"></i>
                     Back to Dashboard
                 </Link>
 
                 {/* Help text */}
                 <p className="mt-8 text-sm text-base-content/50">
-                    Need help? Contact{' '}
-                    <a href="mailto:support@splits.network" className="link link-primary">
+                    Need help? Contact{" "}
+                    <a
+                        href="mailto:support@splits.network"
+                        className="link link-primary"
+                    >
                         support@splits.network
                     </a>
                 </p>

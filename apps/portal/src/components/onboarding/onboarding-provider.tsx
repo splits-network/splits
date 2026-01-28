@@ -372,6 +372,10 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                             website: companyInfo?.website || null,
                             industry: companyInfo?.industry || null,
                             company_size: companyInfo?.size || null,
+                            description: companyInfo?.description || null,
+                            headquarters_location:
+                                companyInfo?.headquarters_location || null,
+                            logo_url: companyInfo?.logo_url || null,
                         },
                     );
 

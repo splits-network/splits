@@ -1,25 +1,28 @@
-'use client';
+"use client";
 
 /**
  * Step 3b: Company Info Form
  * Shown when user selects "Company Admin" role
  */
 
-import { useState, FormEvent } from 'react';
-import { useOnboarding } from '../onboarding-provider';
+import { useState, FormEvent } from "react";
+import { useOnboarding } from "../onboarding-provider";
 
 export function CompanyInfoStep() {
     const { state, actions } = useOnboarding();
 
     const [formData, setFormData] = useState({
-        name: state.companyInfo?.name || '',
-        website: state.companyInfo?.website || '',
-        industry: state.companyInfo?.industry || '',
-        size: state.companyInfo?.size || '',
+        name: state.companyInfo?.name || "",
+        website: state.companyInfo?.website || "",
+        industry: state.companyInfo?.industry || "",
+        size: state.companyInfo?.size || "",
+        description: state.companyInfo?.description || "",
+        headquarters_location: state.companyInfo?.headquarters_location || "",
+        logo_url: state.companyInfo?.logo_url || "",
     });
 
     const handleChange = (field: string, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
     const handleSubmit = (e: FormEvent) => {
@@ -29,15 +32,19 @@ export function CompanyInfoStep() {
     };
 
     const handleBack = () => {
-        actions.setStep(2);
+        // Skip step 2 (subscription) as it's not applicable for company admins
+        actions.setStep(1);
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 max-w-3xl w-xl mx-auto">
             <div className="text-center">
-                <h2 className="text-2xl font-bold">Tell Us About Your Company</h2>
+                <h2 className="text-2xl font-bold">
+                    Tell Us About Your Company
+                </h2>
                 <p className="text-base-content/70 mt-2">
-                    Help recruiters understand your organization and hiring needs
+                    Help recruiters understand your organization and hiring
+                    needs
                 </p>
             </div>
 
@@ -49,7 +56,7 @@ export function CompanyInfoStep() {
                         type="text"
                         className="input w-full"
                         value={formData.name}
-                        onChange={(e) => handleChange('name', e.target.value)}
+                        onChange={(e) => handleChange("name", e.target.value)}
                         placeholder="Acme Corporation"
                         required
                     />
@@ -62,20 +69,55 @@ export function CompanyInfoStep() {
                         type="url"
                         className="input w-full"
                         value={formData.website}
-                        onChange={(e) => handleChange('website', e.target.value)}
+                        onChange={(e) =>
+                            handleChange("website", e.target.value)
+                        }
                         placeholder="https://www.example.com"
                         required
                     />
                 </div>
 
+                {/* Headquarters Location */}
+                <div className="fieldset">
+                    <label className="label">Headquarters Location</label>
+                    <input
+                        type="text"
+                        className="input w-full"
+                        value={formData.headquarters_location}
+                        onChange={(e) =>
+                            handleChange(
+                                "headquarters_location",
+                                e.target.value,
+                            )
+                        }
+                        placeholder="City, Country"
+                    />
+                </div>
+
+                {/* Logo URL */}
+                <div className="fieldset">
+                    <label className="label">Logo URL</label>
+                    <input
+                        type="url"
+                        className="input w-full"
+                        value={formData.logo_url}
+                        onChange={(e) =>
+                            handleChange("logo_url", e.target.value)
+                        }
+                        placeholder="https://example.com/logo.png"
+                    />
+                </div>
+
                 {/* Industry */}
-                <div className='flex justify-evenly gap-4'>
+                <div className="flex justify-evenly gap-4">
                     <div className="fieldset w-full">
                         <label className="label">Industry *</label>
                         <select
                             className="select"
                             value={formData.industry}
-                            onChange={(e) => handleChange('industry', e.target.value)}
+                            onChange={(e) =>
+                                handleChange("industry", e.target.value)
+                            }
                             required
                         >
                             <option value="">Select industry...</option>
@@ -86,15 +128,23 @@ export function CompanyInfoStep() {
                             <option value="retail">Retail</option>
                             <option value="education">Education</option>
                             <option value="consulting">Consulting</option>
-                            <option value="professional_services">Professional Services</option>
+                            <option value="professional_services">
+                                Professional Services
+                            </option>
                             <option value="real_estate">Real Estate</option>
                             <option value="recruitment">Recruitment</option>
                             <option value="hospitality">Hospitality</option>
                             <option value="construction">Construction</option>
                             <option value="energy">Energy</option>
-                            <option value="telecommunications">Telecommunications</option>
-                            <option value="media_entertainment">Media & Entertainment</option>
-                            <option value="transportation">Transportation</option>
+                            <option value="telecommunications">
+                                Telecommunications
+                            </option>
+                            <option value="media_entertainment">
+                                Media & Entertainment
+                            </option>
+                            <option value="transportation">
+                                Transportation
+                            </option>
                             <option value="other">Other</option>
                         </select>
                     </div>
@@ -105,7 +155,9 @@ export function CompanyInfoStep() {
                         <select
                             className="select"
                             value={formData.size}
-                            onChange={(e) => handleChange('size', e.target.value)}
+                            onChange={(e) =>
+                                handleChange("size", e.target.value)
+                            }
                             required
                         >
                             <option value="">Select size...</option>
@@ -114,10 +166,25 @@ export function CompanyInfoStep() {
                             <option value="51-200">51-200 employees</option>
                             <option value="201-500">201-500 employees</option>
                             <option value="501-1000">501-1000 employees</option>
-                            <option value="1001-5000">1001-5000 employees</option>
+                            <option value="1001-5000">
+                                1001-5000 employees
+                            </option>
                             <option value="5001+">5001+ employees</option>
                         </select>
                     </div>
+                </div>
+
+                {/* Description */}
+                <div className="fieldset">
+                    <label className="label">Description</label>
+                    <textarea
+                        className="textarea w-full h-24"
+                        value={formData.description}
+                        onChange={(e) =>
+                            handleChange("description", e.target.value)
+                        }
+                        placeholder="Brief description of your company..."
+                    />
                 </div>
 
                 {state.error && (

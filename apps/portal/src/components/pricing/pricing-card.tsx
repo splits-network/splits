@@ -17,13 +17,18 @@ export function PricingCard({
 }: PricingCardProps) {
     const { features } = plan;
     const isPopular = features.is_popular;
-    const isFree = plan.price_cents === 0;
+    const isFree = plan.price_monthly === 0;
 
-    // Calculate display price
-    const displayPrice =
-        isAnnual && features.annual_price_cents
-            ? Math.round(features.annual_price_cents / 12 / 100)
-            : Math.round(plan.price_cents / 100);
+    // Calculate display price and period
+    const displayPrice = isAnnual ? plan.price_annual : plan.price_monthly;
+    const pricePeriod = isAnnual ? "/year" : "/month";
+
+    // Calculate savings for annual plans
+    const annualSavings = isFree
+        ? 0
+        : plan.price_monthly * 12 - plan.price_annual;
+    const monthlySavingsEquivalent =
+        isAnnual && !isFree ? Math.round(plan.price_annual / 12) : null;
 
     const isCompact = variant === "compact";
 
@@ -54,18 +59,7 @@ export function PricingCard({
     };
 
     return (
-        <div
-            className={`${cardClasses} ${onSelect && !disabled ? "cursor-pointer hover:shadow-xl transition-shadow" : ""}`}
-            onClick={handleClick}
-            role={onSelect ? "button" : undefined}
-            tabIndex={onSelect && !disabled ? 0 : undefined}
-            onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleClick();
-                }
-            }}
-        >
+        <div className={cardClasses}>
             <div className={`card-body ${isCompact ? "p-4" : ""}`}>
                 {/* Badge */}
                 <div className={badgeClass}>
@@ -84,24 +78,41 @@ export function PricingCard({
                             <span
                                 className={`${isCompact ? "text-sm" : "text-lg"} font-normal ${priceSubtextClass}`}
                             >
-                                /month
+                                {pricePeriod}
                             </span>
                         </>
                     )}
                 </h3>
 
-                {/* Annual savings badge */}
-                {!isFree && isAnnual && features.annual_savings_text && (
-                    <div className="badge badge-success badge-sm mb-2">
-                        {features.annual_savings_text}
+                {/* Monthly equivalent for annual plans */}
+                {!isFree && isAnnual && monthlySavingsEquivalent && (
+                    <div
+                        className={`${isCompact ? "text-xs" : "text-sm"} ${priceSubtextClass} -mt-2 mb-1`}
+                    >
+                        ${monthlySavingsEquivalent}/month when paid annually
                     </div>
                 )}
 
+                {/* Annual savings badge */}
+                {!isFree && isAnnual && annualSavings > 0 && (
+                    <div className="badge badge-success badge-sm mb-2">
+                        Save ${annualSavings}
+                        {features.annual_savings_text &&
+                            ` (${features.annual_savings_text.replace("Save ", "")})`}
+                    </div>
+                )}
+
+                <div>
+                    <span className={`${subtitleClass} font-bold`}>
+                        {features.headline}
+                    </span>
+                </div>
+
                 {/* Headline/Subheadline (default variant only) */}
                 {!isCompact && (
-                    <p className={`${subtitleClass} mb-4`}>
+                    <div className={`${subtitleClass} `}>
                         {features.subheadline}
-                    </p>
+                    </div>
                 )}
 
                 <div className="divider my-2"></div>
@@ -151,35 +162,40 @@ export function PricingCard({
                             </li>
                         ))}
                 </ul>
+                <div className="mt-auto">
+                    {/* Selection indicator or CTA */}
+                    {onSelect ? (
+                        <button
+                            onClick={handleClick}
+                            disabled={disabled}
+                            className={`btn ${isSelected ? "btn-success" : isPopular ? "btn-secondary" : "btn-primary"} btn-block ${isCompact ? "btn-sm" : ""}`}
+                        >
+                            {isSelected ? (
+                                <>
+                                    <i className="fa-duotone fa-regular fa-check"></i>
+                                    Selected
+                                </>
+                            ) : (
+                                features.cta
+                            )}
+                        </button>
+                    ) : (
+                        <div
+                            className={`btn ${isPopular ? "btn-secondary" : plan.tier === "partner" ? "btn-accent" : "btn-primary"} btn-block ${isCompact ? "btn-sm" : ""}`}
+                        >
+                            {features.cta}
+                        </div>
+                    )}
 
-                {/* Selection indicator or CTA */}
-                {onSelect ? (
-                    <div
-                        className={`btn ${isSelected ? "btn-success" : isPopular ? "btn-secondary" : "btn-primary"} btn-block ${isCompact ? "btn-sm" : ""}`}
-                    >
-                        {isSelected ? (
-                            <>
-                                <i className="fa-duotone fa-regular fa-check"></i>
-                                Selected
-                            </>
-                        ) : (
-                            features.cta_text
-                        )}
-                    </div>
-                ) : (
-                    <div
-                        className={`btn ${isPopular ? "btn-secondary" : plan.tier === "partner" ? "btn-accent" : "btn-primary"} btn-block ${isCompact ? "btn-sm" : ""}`}
-                    >
-                        {features.cta_text}
-                    </div>
-                )}
-
-                {/* Footnote (default variant only) */}
-                {!isCompact && features.footnote && (
-                    <p className={`text-xs ${subtitleClass} mt-2 text-center`}>
-                        {features.footnote}
-                    </p>
-                )}
+                    {/* Footnote (default variant only) */}
+                    {!isCompact && features.footnote && (
+                        <p
+                            className={`text-xs ${subtitleClass} mt-2 text-center`}
+                        >
+                            {features.footnote}
+                        </p>
+                    )}
+                </div>
             </div>
         </div>
     );

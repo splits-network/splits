@@ -78,7 +78,7 @@ export default function DetailPanel({ id, onClose }: DetailPanelProps) {
             <div className="flex-1 flex items-center justify-center bg-base-100">
                 <div className="text-center max-w-md p-6">
                     <div className="alert alert-error">
-                        <i className="fa-regular fa-circle-exclamation" />
+                        <i className="fa-duotone fa-regular fa-circle-exclamation" />
                         <span>{error || "Role not found"}</span>
                     </div>
                     <button

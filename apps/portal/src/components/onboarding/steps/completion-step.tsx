@@ -143,6 +143,19 @@ export function CompletionStep() {
                                     {state.companyInfo.website}
                                 </p>
                             </div>
+                            {state.companyInfo.headquarters_location && (
+                                <div>
+                                    <p className="text-sm text-base-content/70">
+                                        Location
+                                    </p>
+                                    <p className="font-medium">
+                                        {
+                                            state.companyInfo
+                                                .headquarters_location
+                                        }
+                                    </p>
+                                </div>
+                            )}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <p className="text-sm text-base-content/70">
