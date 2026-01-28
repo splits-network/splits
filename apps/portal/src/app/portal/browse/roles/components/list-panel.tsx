@@ -12,7 +12,7 @@ import {
 } from "@/hooks/use-standard-list";
 import RoleListItem from "./list-item";
 import FilterDropdown from "./filter-dropdown";
-import AddRoleWizardModal from "@/app/portal/roles/components/add-role-wizard-modal";
+import AddRoleWizardModal from "./role-wizard-modal";
 import { Job, JobFilters } from "./types";
 
 interface ListPanelProps {
@@ -23,7 +23,7 @@ interface ListPanelProps {
 export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
     const { getToken } = useAuth();
     const { isRecruiter, isCompanyUser, profile } = useUserProfile();
-    const [activeTab, setActiveTab] = useState<"mine" | "all">("mine");
+    const [activeTab, setActiveTab] = useState<"mine" | "all">("all");
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
     // Permission check for creating roles
@@ -53,7 +53,10 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
         [getToken],
     );
 
-    const defaultFilters = useMemo(() => ({ scope: "mine" }) as JobFilters, []);
+    const defaultFilters = useMemo(
+        () => ({ job_owner_filter: "all" }) as JobFilters,
+        [],
+    );
 
     const {
         data: jobs,
@@ -76,7 +79,8 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
 
     const handleTabChange = (scope: "mine" | "all") => {
         setActiveTab(scope);
-        setFilter("scope", scope);
+        const filterValue = scope === "mine" ? "assigned" : "all";
+        setFilter("job_owner_filter", filterValue);
         goToPage(1);
     };
 
@@ -150,7 +154,7 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
                         <i className="fa-duotone fa-briefcase text-4xl mb-3 opacity-50" />
                         <p>No roles found</p>
                         <button
-                            onClick={() => setFilter("scope", "all")}
+                            onClick={() => setFilter("job_owner_filter", "all")}
                             className="btn btn-ghost btn-xs mt-2"
                         >
                             Reset Filters

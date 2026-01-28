@@ -98,12 +98,20 @@ export async function resolveAccessContext(
         const activeRecruiter = Array.isArray(recruitersData)
             ? recruitersData.find(r => r.status === 'active')
             : (recruitersData?.status === 'active' ? recruitersData : null);
+        
+        if(activeRecruiter) {
+            roles.push('recruiter');
+        }
 
         // Handle both array and single object cases for candidates
         const candidatesData = identityUserResult.data?.candidates as { id: string }[] | { id: string } | null;
         const candidateId = Array.isArray(candidatesData)
             ? candidatesData[0]?.id
             : candidatesData?.id || null;
+
+        if(candidateId) {
+            roles.push('candidate');
+        }
 
         const finalContext = {
             identityUserId,

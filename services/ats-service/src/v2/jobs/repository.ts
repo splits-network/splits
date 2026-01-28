@@ -32,11 +32,24 @@ export class JobRepository {
      */
     async findJobs(
         clerkUserId: string | undefined,
-        filters: JobFilters = {}
+        params: JobFilters = {}
     ): Promise<RepositoryListResponse<any>> {
-        const page = filters.page || 1;
-        const limit = filters.limit || 25;
+        const page = params.page || 1;
+        const limit = params.limit || 25;
         const offset = (page - 1) * limit;
+
+        // Parse filters if it's a string (from query params)
+        let filters: any = {};
+        if (typeof params.filters === 'string') {
+            try {
+                filters = JSON.parse(params.filters);
+            } catch (e) {
+                console.error('Failed to parse filters:', e);
+                filters = {};
+            }
+        } else if (params.filters) {
+            filters = params.filters;
+        }
 
         let query = this.supabase
 
@@ -51,7 +64,7 @@ export class JobRepository {
 
         if (clerkUserId) {
             const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-
+            
             if (accessContext.isPlatformAdmin) {
                 // Platform admins see all jobs
             } else if (accessContext.recruiterId && accessContext.roles.includes('recruiter')) {
@@ -59,12 +72,7 @@ export class JobRepository {
                 // OR only jobs where they have active involvement if job_owner_filter is 'assigned'
                 // NOTE: Check recruiter FIRST before company roles, even if they have both
                 query = query.eq('status', 'active');
-                // Recruiters see all active jobs (marketplace model)
-                // OR only jobs where they have active involvement if job_owner_filter is 'assigned'
-                query = query.eq('status', 'active');
-
                 if (filters.job_owner_filter === 'assigned') {
-
                     // Filter to jobs where recruiter has:
                     // 1. Applications in active stages (recruiter_proposed, draft, ai_review, screen, submitted, interview, offer)
                     // 2. OR placements (hired candidates)
@@ -74,7 +82,7 @@ export class JobRepository {
 
                         .from('applications')
                         .select('job_id, stage, candidate_id')
-                        .eq('recruiter_id', accessContext.recruiterId)
+                        .eq('candidate_recruiter_id', accessContext.recruiterId)
                         .in('stage', ['recruiter_proposed', 'draft', 'recruiter_request', 'ai_review', 'screen', 'submitted', 'interview', 'offer']);
 
                     // Get job IDs from placements
@@ -82,14 +90,18 @@ export class JobRepository {
 
                         .from('placements')
                         .select('job_id, candidate_id')
-                        .eq('recruiter_id', accessContext.recruiterId);
+                        .eq('candidate_recruiter_id', accessContext.recruiterId);
+
+                    // we need to query jobs where the current recruiterid is either the job_owner_recruiter_id or company_recruiter_id
+                    query = query.or(
+                        `job_owner_recruiter_id.eq.${accessContext.recruiterId},company_recruiter_id.eq.${accessContext.recruiterId}`
+                    );
 
 
                     // Combine unique job IDs
                     const applicationJobIds = applications?.map(a => a.job_id) || [];
                     const placementJobIds = placements?.map(p => p.job_id) || [];
                     const involvedJobIds = [...new Set([...applicationJobIds, ...placementJobIds])];
-
 
                     if (involvedJobIds.length > 0) {
                         query = query.in('id', involvedJobIds);
@@ -121,9 +133,9 @@ export class JobRepository {
 
         // Apply full-text search
         let useRelevanceSort = false;
-        if (filters.search) {
+        if (params.search) {
             // Convert search query to tsquery format (AND logic for multiple words)
-            const tsquery = filters.search.split(/\s+/).filter(t => t.trim()).join(' & ');
+            const tsquery = params.search?.split(/\s+/).filter(t => t.trim()).join(' & ');
 
             // Use PostgreSQL full-text search with search_vector column
             query = query.textSearch('search_vector', tsquery, {
@@ -139,7 +151,7 @@ export class JobRepository {
         if (filters.status) {
             query = query.eq('status', filters.status);
         }
-        if (filters.location && !filters.search) {
+        if (filters.location && !params.search) {
             query = query.ilike('location', `%${filters.location}%`);
         }
         if (filters.employment_type) {
@@ -155,8 +167,8 @@ export class JobRepository {
             // In future, implement proper ts_rank with tsvector indexes
             query = query.order('created_at', { ascending: false });
         } else {
-            const sortBy = filters.sort_by || 'created_at';
-            const sortOrder = filters.sort_order?.toLowerCase() === 'asc' ? true : false;
+            const sortBy = filters.sort_by || params.sort_by || 'created_at';
+            const sortOrder = (filters.sort_order || params.sort_order)?.toLowerCase() === 'asc' ? true : false;
             query = query.order(sortBy, { ascending: sortOrder });
         }
 

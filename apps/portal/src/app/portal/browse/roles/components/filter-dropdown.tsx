@@ -24,7 +24,7 @@ export default function FilterDropdown({
 
     const handleReset = () => {
         onChange({
-            scope: filters.scope, // Preserve scope
+            job_owner_filter: filters.job_owner_filter, // Preserve job_owner_filter
         });
     };
 
