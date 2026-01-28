@@ -85,6 +85,7 @@ jobs:
                       --target production \
                       --build-arg NEXT_PUBLIC_API_URL=https://api.staging.splits.network/api \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.SPLITS_CLERK_PUBLISHABLE_KEY }} \
+                      --build-arg NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }} \
                       --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
                       .
                   elif [ "${{ matrix.service.name }}" = "candidate" ]; then
