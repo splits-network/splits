@@ -197,18 +197,36 @@ All required endpoints already exist and function correctly.
 
 ## Success Criteria
 
-- [ ] User can upgrade from Free to Pro without seeing technical error messages
-- [ ] Payment collection happens seamlessly within the modal
-- [ ] User can complete upgrade in single flow (no page navigation)
-- [ ] Free plan selection never triggers payment collection
-- [ ] Users with existing payment methods can upgrade without re-entering card
-- [ ] Clear feedback on what will be charged and when
+- [x] User can upgrade from Free to Pro without seeing technical error messages
+- [x] Payment collection happens seamlessly within the modal
+- [x] User can complete upgrade in single flow (no page navigation)
+- [x] Free plan selection never triggers payment collection
+- [x] Users with existing payment methods can upgrade without re-entering card
+- [x] Clear feedback on what will be charged and when
 
 ## Testing Scenarios
 
-1. New user (no subscription, no Stripe customer) → Free plan
-2. New user (no subscription, no Stripe customer) → Pro plan
-3. Free user (has subscription, no payment method) → Pro plan
-4. Pro user (has subscription, has payment method) → Partner plan
-5. Pro user (has subscription, has payment method) → Free plan (downgrade)
-6. Payment fails (declined card) → Shows error, allows retry
+1. New user (no subscription, no Stripe customer) → Free plan ✅
+2. New user (no subscription, no Stripe customer) → Pro plan ✅
+3. Free user (has subscription, no payment method) → Pro plan ✅
+4. Pro user (has subscription, has payment method) → Partner plan ✅
+5. Pro user (has subscription, has payment method) → Free plan (downgrade) ✅
+6. Payment fails (declined card) → Shows error, allows retry ✅
+
+## Implementation Status: ✅ COMPLETE
+
+**Completed January 27, 2026**
+
+### What was implemented:
+- 3-step wizard flow: Select Plan → Payment (if needed) → Confirm
+- `checkPaymentMethod()` - Checks if user has existing payment method
+- `createSetupIntent()` - Creates Stripe SetupIntent for payment collection
+- Payment form integrated using existing `StripeProvider` and `PaymentForm` components
+- Smart routing: Free plans skip payment, paid plans with existing card skip payment form
+- Clear price preview and change summary on confirm step
+- Error handling and loading states throughout
+
+### Database migrations applied:
+- Added `billing_period` column to subscriptions table
+- Added `recruiter_id` to subscription records
+- Backfilled existing subscription data

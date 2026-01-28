@@ -35,8 +35,40 @@ export class AtsClient extends BaseClient {
     // Phase 1: Jobs
     // ========================================================================
 
-    async listJobs(): Promise<ApiResponse<Job[]>> {
-        return this.get('/jobs');
+    async listJobs(
+        params?: {
+            page?: number;
+            limit?: number;
+            search?: string;
+            filters?: Record<string, any>;
+            include?: string;
+            sort_by?: string;
+            sort_order?: 'asc' | 'desc';
+        }
+    ): Promise<ApiResponse<Job[]>> {
+        const queryParams = new URLSearchParams();
+        
+        if (params) {
+            if (params.page) queryParams.set('page', params.page.toString());
+            if (params.limit) queryParams.set('limit', params.limit.toString());
+            if (params.search) queryParams.set('search', params.search);
+            if (params.include) queryParams.set('include', params.include);
+            if (params.sort_by) queryParams.set('sort_by', params.sort_by);
+            if (params.sort_order) queryParams.set('sort_order', params.sort_order);
+            
+            if (params.filters) {
+                Object.entries(params.filters).forEach(([key, value]) => {
+                    if (value !== undefined && value !== null) {
+                        queryParams.set(key, String(value));
+                    }
+                });
+            }
+        }
+
+        const queryString = queryParams.toString();
+        const url = queryString ? `/jobs?${queryString}` : '/jobs';
+        
+        return this.get(url);
     }
 
     async getJob(jobId: string): Promise<ApiResponse<Job>> {
