@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 import {
     useStandardList,
     PaginationControls,
@@ -9,60 +9,72 @@ import {
     EmptyState,
     LoadingState,
     ErrorState,
-} from '@/hooks/use-standard-list';
-import { StatCard, StatCardGrid } from '@/components/ui/cards';
-import { DataTable, type TableColumn } from '@/components/ui/tables';
-import { useUserProfile } from '@/contexts';
-import { RoleCard, type Job } from './role-card';
-import { RoleTableRow } from './role-table-row';
-import { RolesTrendsChart, TIME_PERIODS, calculateStatTrends } from '../../../../components/charts/roles-trends-chart';
-import AddRoleWizardModal from './add-role-wizard-modal';
-import Link from 'next/link';
+} from "@/hooks/use-standard-list";
+import { StatCard, StatCardGrid } from "@/components/ui/cards";
+import { DataTable, type TableColumn } from "@/components/ui/tables";
+import { useUserProfile } from "@/contexts";
+import { RoleCard, type Job } from "./role-card";
+import { RoleTableRow } from "./role-table-row";
+import {
+    RolesTrendsChart,
+    TIME_PERIODS,
+    calculateStatTrends,
+} from "../../../../components/charts/roles-trends-chart";
+import AddRoleWizardModal from "./add-role-wizard-modal";
+import Link from "next/link";
 
 // ===== TYPES =====
 
 interface JobFilters {
     status?: string;
-    job_owner_filter?: 'all' | 'assigned';
+    job_owner_filter?: "all" | "assigned";
 }
 
 // ===== TABLE COLUMNS =====
 
 const roleColumns: TableColumn[] = [
-    { key: 'title', label: 'Role', sortable: true },
+    { key: "title", label: "Role", sortable: true },
     // { key: 'location', label: 'Location', sortable: true },
-    { key: 'salary_max', label: 'Salary', sortable: true },
-    { key: 'fee_percentage', label: 'Fee', sortable: true },
-    { key: 'commission', label: 'Commission' },
-    { key: 'status', label: 'Status', sortable: true },
-    { key: 'created_at', label: 'Posted', sortable: true },
-    { key: 'actions', label: 'Actions', align: 'right' },
+    { key: "salary_max", label: "Salary", sortable: true },
+    { key: "fee_percentage", label: "Fee", sortable: true },
+    { key: "commission", label: "Commission" },
+    { key: "status", label: "Status", sortable: true },
+    { key: "created_at", label: "Posted", sortable: true },
+    { key: "actions", label: "Actions", align: "right" },
 ];
 
 // ===== COMPONENT =====
 
 export default function RolesList() {
-    const { profile, isAdmin, isRecruiter, isLoading: profileLoading } = useUserProfile();
+    const {
+        profile,
+        isAdmin,
+        isRecruiter,
+        isLoading: profileLoading,
+    } = useUserProfile();
 
     // Derive user role from context
     const userRole = isAdmin
-        ? 'platform_admin'
-        : profile?.roles?.includes('company_admin')
-            ? 'company_admin'
-            : profile?.roles?.includes('hiring_manager')
-                ? 'hiring_manager'
-                : isRecruiter
-                    ? 'recruiter'
-                    : profile?.roles?.[0] || null;
+        ? "platform_admin"
+        : profile?.roles?.includes("company_admin")
+          ? "company_admin"
+          : profile?.roles?.includes("hiring_manager")
+            ? "hiring_manager"
+            : isRecruiter
+              ? "recruiter"
+              : profile?.roles?.[0] || null;
 
     // Check if user can manage roles
-    const canManageRole = isAdmin || profile?.roles?.includes('company_admin');
+    const canManageRole = isAdmin || profile?.roles?.includes("company_admin");
 
     // Memoize defaultFilters to prevent unnecessary re-renders
-    const defaultFilters = useMemo<JobFilters>(() => ({
-        status: undefined,
-        job_owner_filter: 'all'
-    }), []);
+    const defaultFilters = useMemo<JobFilters>(
+        () => ({
+            status: undefined,
+            job_owner_filter: "all",
+        }),
+        [],
+    );
 
     // Use the standard list hook with server-side pagination/filtering
     const {
@@ -88,13 +100,13 @@ export default function RolesList() {
         setViewMode,
         refresh,
     } = useStandardList<Job, JobFilters>({
-        endpoint: '/jobs',
+        endpoint: "/jobs",
         defaultFilters,
-        defaultSortBy: 'created_at',
-        defaultSortOrder: 'desc',
+        defaultSortBy: "created_at",
+        defaultSortOrder: "desc",
         defaultLimit: 25,
         syncToUrl: true,
-        viewModeKey: 'rolesViewMode',
+        viewModeKey: "rolesViewMode",
     });
 
     // Time period state for trends (shared with chart)
@@ -105,9 +117,9 @@ export default function RolesList() {
     const [editingJobId, setEditingJobId] = useState<string | null>(null);
 
     // Calculate stat trends based on selected time period
-    const statTrends = useMemo(() =>
-        calculateStatTrends(jobs, trendPeriod),
-        [jobs, trendPeriod]
+    const statTrends = useMemo(
+        () => calculateStatTrends(jobs, trendPeriod),
+        [jobs, trendPeriod],
     );
 
     // Handler for opening edit modal
@@ -134,39 +146,64 @@ export default function RolesList() {
         <>
             <div className="grid grid-cols-12 gap-6">
                 <div className="col-span-12 md:col-span-8 xl:col-span-10">
-                    <div className='card bg-base-200'>
-                        <StatCardGrid className='m-2 shadow-lg'>
+                    <div className="card bg-base-200">
+                        <StatCardGrid className="m-2 shadow-lg">
                             <StatCard
                                 title="Total Roles"
                                 value={total}
                                 icon="fa-briefcase"
                                 color="primary"
                                 trend={statTrends.total}
-                                trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
+                                trendLabel={
+                                    TIME_PERIODS.find(
+                                        (p) => p.value === trendPeriod,
+                                    )?.label
+                                }
                             />
                             <StatCard
                                 title="Active"
-                                value={jobs.filter(j => j.status === 'active').length}
+                                value={
+                                    jobs.filter((j) => j.status === "active")
+                                        .length
+                                }
                                 icon="fa-circle-check"
                                 color="success"
                                 trend={statTrends.active}
-                                trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
+                                trendLabel={
+                                    TIME_PERIODS.find(
+                                        (p) => p.value === trendPeriod,
+                                    )?.label
+                                }
                             />
                             <StatCard
                                 title="Paused"
-                                value={jobs.filter(j => j.status === 'paused').length}
+                                value={
+                                    jobs.filter((j) => j.status === "paused")
+                                        .length
+                                }
                                 icon="fa-pause"
                                 color="warning"
                                 trend={statTrends.paused}
-                                trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
+                                trendLabel={
+                                    TIME_PERIODS.find(
+                                        (p) => p.value === trendPeriod,
+                                    )?.label
+                                }
                             />
                             <StatCard
                                 title="Filled"
-                                value={jobs.filter(j => j.status === 'filled').length}
+                                value={
+                                    jobs.filter((j) => j.status === "filled")
+                                        .length
+                                }
                                 icon="fa-check-double"
                                 color="info"
                                 trend={statTrends.filled}
-                                trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
+                                trendLabel={
+                                    TIME_PERIODS.find(
+                                        (p) => p.value === trendPeriod,
+                                    )?.label
+                                }
                             />
                         </StatCardGrid>
                         <div className="p-4 pt-0">
@@ -181,36 +218,52 @@ export default function RolesList() {
                 </div>
 
                 <div className="col-span-12 md:col-span-4 xl:col-span-2 space-y-6">
-
-
                     {/* Filters and View Toggle */}
                     <div className="card bg-base-200 shadow">
                         <div className="card-body p-4 space-y-4">
-                            <h3 className='card-title'>
-                                <i className='fa-duotone fa-regular fa-filter mr-2' />
+                            <h3 className="card-title">
+                                <i className="fa-duotone fa-regular fa-filter mr-2" />
                                 Options
                             </h3>
-                            {profile?.is_platform_admin || (profile?.roles?.includes('company_admin') || profile?.roles?.includes('hiring_manager') || (profile?.roles?.includes('recruiter')) && profile?.organization_ids?.length > 0) &&
-                                <>
-                                    <button
-                                        className="btn btn-primary w-full"
-                                        onClick={() => setShowAddModal(true)}
-                                    >
-                                        <i className="fa-duotone fa-regular fa-plus"></i>
-                                        Add Role
-                                    </button>
-                                </>
-                            }
+                            {profile?.is_platform_admin ||
+                                ((profile?.roles?.includes("company_admin") ||
+                                    profile?.roles?.includes(
+                                        "hiring_manager",
+                                    ) ||
+                                    (profile?.roles?.includes("recruiter") &&
+                                        profile?.organization_ids?.length >
+                                            0)) && (
+                                    <>
+                                        <button
+                                            className="btn btn-primary w-full"
+                                            onClick={() =>
+                                                setShowAddModal(true)
+                                            }
+                                        >
+                                            <i className="fa-duotone fa-regular fa-plus"></i>
+                                            Add Role
+                                        </button>
+                                    </>
+                                ))}
                             <div className="flex flex-wrap gap-4 items-center">
                                 {/* Status Filter */}
                                 <div className="fieldset w-full">
                                     <select
                                         name="status-selector"
                                         className="select w-full"
-                                        value={filters.status || 'all'}
-                                        onChange={(e) => setFilter('status', e.target.value === 'all' ? undefined : e.target.value)}
+                                        value={filters.status || "all"}
+                                        onChange={(e) =>
+                                            setFilter(
+                                                "status",
+                                                e.target.value === "all"
+                                                    ? undefined
+                                                    : e.target.value,
+                                            )
+                                        }
                                     >
-                                        <option value="all">All Statuses</option>
+                                        <option value="all">
+                                            All Statuses
+                                        </option>
                                         <option value="active">Active</option>
                                         <option value="paused">Paused</option>
                                         <option value="filled">Filled</option>
@@ -219,18 +272,34 @@ export default function RolesList() {
                                 </div>
 
                                 {/* Ownership Filter (for recruiters and company users) */}
-                                {(userRole === 'recruiter' || userRole === 'company_admin' || userRole === 'hiring_manager') && (
+                                {(userRole === "recruiter" ||
+                                    userRole === "company_admin" ||
+                                    userRole === "hiring_manager") && (
                                     <div className="fieldset w-full">
                                         <select
                                             name="job-owner-filter"
                                             className="select w-full"
-                                            value={filters.job_owner_filter || 'all'}
-                                            onChange={(e) => setFilter('job_owner_filter', e.target.value as 'all' | 'assigned')}
+                                            value={
+                                                filters.job_owner_filter ||
+                                                "all"
+                                            }
+                                            onChange={(e) =>
+                                                setFilter(
+                                                    "job_owner_filter",
+                                                    e.target.value as
+                                                        | "all"
+                                                        | "assigned",
+                                                )
+                                            }
                                         >
                                             <option value="all">
-                                                {userRole === 'recruiter' ? 'All Jobs' : 'All Organization Jobs'}
+                                                {userRole === "recruiter"
+                                                    ? "All Jobs"
+                                                    : "All Organization Jobs"}
                                             </option>
-                                            <option value="assigned">My Assigned Jobs</option>
+                                            <option value="assigned">
+                                                My Assigned Jobs
+                                            </option>
                                         </select>
                                     </div>
                                 )}
@@ -246,7 +315,10 @@ export default function RolesList() {
                                 />
 
                                 {/* View Toggle */}
-                                <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+                                <ViewModeToggle
+                                    viewMode={viewMode}
+                                    onViewModeChange={setViewMode}
+                                />
                             </div>
                         </div>
                     </div>
@@ -257,7 +329,7 @@ export default function RolesList() {
                     {loading && jobs.length === 0 && <LoadingState />}
 
                     {/* Grid View */}
-                    {!loading && viewMode === 'grid' && jobs.length > 0 && (
+                    {!loading && viewMode === "grid" && jobs.length > 0 && (
                         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                             {jobs.map((job) => (
                                 <RoleCard
@@ -273,7 +345,7 @@ export default function RolesList() {
                     )}
 
                     {/* Table View */}
-                    {!loading && viewMode === 'table' && jobs.length > 0 && (
+                    {!loading && viewMode === "table" && jobs.length > 0 && (
                         <DataTable
                             columns={roleColumns}
                             sortBy={sortBy}
@@ -302,8 +374,8 @@ export default function RolesList() {
                             title="No Roles Found"
                             description={
                                 searchInput
-                                    ? 'Try adjusting your search or filters'
-                                    : 'No roles have been created yet'
+                                    ? "Try adjusting your search or filters"
+                                    : "No roles have been created yet"
                             }
                         />
                     )}
@@ -321,35 +393,31 @@ export default function RolesList() {
                 </div>
 
                 {/* Add Role Modal */}
-                {
-                    showAddModal && (
-                        <AddRoleWizardModal
-                            isOpen={showAddModal}
-                            onClose={() => setShowAddModal(false)}
-                            onSuccess={() => {
-                                setShowAddModal(false);
-                                refresh(); // Refresh the list
-                            }}
-                        />
-                    )
-                }
+                {showAddModal && (
+                    <AddRoleWizardModal
+                        isOpen={showAddModal}
+                        onClose={() => setShowAddModal(false)}
+                        onSuccess={() => {
+                            setShowAddModal(false);
+                            refresh(); // Refresh the list
+                        }}
+                    />
+                )}
 
                 {/* Edit Role Modal */}
-                {
-                    editingJobId && (
-                        <AddRoleWizardModal
-                            isOpen={true}
-                            jobId={editingJobId}
-                            mode="edit"
-                            onClose={handleCloseEditModal}
-                            onSuccess={() => {
-                                handleCloseEditModal();
-                                refresh(); // Refresh the list
-                            }}
-                        />
-                    )
-                }
-            </div >
+                {editingJobId && (
+                    <AddRoleWizardModal
+                        isOpen={true}
+                        jobId={editingJobId}
+                        mode="edit"
+                        onClose={handleCloseEditModal}
+                        onSuccess={() => {
+                            handleCloseEditModal();
+                            refresh(); // Refresh the list
+                        }}
+                    />
+                )}
+            </div>
         </>
     );
 }

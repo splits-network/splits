@@ -1,7 +1,7 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 export const metadata = {
-    title: 'Page Not Found',
+    title: "Page Not Found",
 };
 
 export default function NotFound() {
@@ -34,19 +34,26 @@ export default function NotFound() {
                                     This Page Has Been Recruited Away
                                 </h2>
                                 <p className="text-lg md:text-xl text-base-content/70 max-w-2xl mx-auto mb-4">
-                                    Looks like this page found a better opportunity elsewhere.
-                                    Don't worry — we have plenty more to explore.
+                                    Looks like this page found a better
+                                    opportunity elsewhere. Don't worry — we have
+                                    plenty more to explore.
                                 </p>
                             </div>
 
                             {/* CTA Buttons */}
                             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                                <Link href="/" className="btn btn-primary btn-lg gap-3">
-                                    <i className="fa-duotone fa-solid fa-house text-xl"></i>
+                                <Link
+                                    href="/"
+                                    className="btn btn-primary btn-lg gap-3"
+                                >
+                                    <i className="fa-duotone fa-regular fa-house text-xl"></i>
                                     Back to Home
                                 </Link>
-                                <a href="https://splits.network" className="btn btn-outline btn-lg gap-3">
-                                    <i className="fa-duotone fa-solid fa-handshake text-xl"></i>
+                                <a
+                                    href="https://splits.network"
+                                    className="btn btn-outline btn-lg gap-3"
+                                >
+                                    <i className="fa-duotone fa-regular fa-handshake text-xl"></i>
                                     Visit Splits Platform
                                 </a>
                             </div>
@@ -57,11 +64,14 @@ export default function NotFound() {
                                 <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
                                     <div className="card-body items-center text-center">
                                         <div className="bg-primary/10 p-4 rounded-full mb-4">
-                                            <i className="fa-duotone fa-solid fa-users-between-lines text-4xl text-primary"></i>
+                                            <i className="fa-duotone fa-regular fa-users-between-lines text-4xl text-primary"></i>
                                         </div>
-                                        <h3 className="card-title text-lg">For Recruiters</h3>
+                                        <h3 className="card-title text-lg">
+                                            For Recruiters
+                                        </h3>
                                         <p className="text-sm text-base-content/70 mb-4">
-                                            Collaborate and split fees on placements
+                                            Collaborate and split fees on
+                                            placements
                                         </p>
                                         <a
                                             href="https://splits.network"
@@ -76,9 +86,11 @@ export default function NotFound() {
                                 <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
                                     <div className="card-body items-center text-center">
                                         <div className="bg-secondary/10 p-4 rounded-full mb-4">
-                                            <i className="fa-duotone fa-solid fa-briefcase text-4xl text-secondary"></i>
+                                            <i className="fa-duotone fa-regular fa-briefcase text-4xl text-secondary"></i>
                                         </div>
-                                        <h3 className="card-title text-lg">For Job Seekers</h3>
+                                        <h3 className="card-title text-lg">
+                                            For Job Seekers
+                                        </h3>
                                         <p className="text-sm text-base-content/70 mb-4">
                                             Find your next career opportunity
                                         </p>
@@ -95,9 +107,11 @@ export default function NotFound() {
                                 <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow">
                                     <div className="card-body items-center text-center">
                                         <div className="bg-accent/10 p-4 rounded-full mb-4">
-                                            <i className="fa-duotone fa-solid fa-envelope text-4xl text-accent"></i>
+                                            <i className="fa-duotone fa-regular fa-envelope text-4xl text-accent"></i>
                                         </div>
-                                        <h3 className="card-title text-lg">Need Help?</h3>
+                                        <h3 className="card-title text-lg">
+                                            Need Help?
+                                        </h3>
                                         <p className="text-sm text-base-content/70 mb-4">
                                             Our support team is here for you
                                         </p>

@@ -1,7 +1,7 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 export const metadata = {
-    title: 'Page Not Found',
+    title: "Page Not Found",
 };
 
 export default function NotFound() {
@@ -14,12 +14,12 @@ export default function NotFound() {
                         {/* Animated icon */}
                         <div className="mb-6">
                             <div className="relative">
-                                <i className="fa-duotone fa-solid fa-map-location-dot text-8xl text-primary animate-pulse"></i>
+                                <i className="fa-duotone fa-regular fa-map-location-dot text-8xl text-primary animate-pulse"></i>
                                 <div className="absolute -top-2 -right-2">
                                     <span className="relative flex h-6 w-6">
                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
                                         <span className="relative inline-flex rounded-full h-6 w-6 bg-error">
-                                            <i className="fa-solid fa-question text-white text-xs m-auto"></i>
+                                            <i className="fa-regular fa-question text-white text-xs m-auto"></i>
                                         </span>
                                     </span>
                                 </div>
@@ -36,19 +36,27 @@ export default function NotFound() {
                             Lost Your Way?
                         </h1>
                         <p className="text-xl text-base-content/80 mb-2">
-                            This page seems to have taken a different career path.
+                            This page seems to have taken a different career
+                            path.
                         </p>
                         <p className="text-base-content/60 mb-8 max-w-md">
-                            The page you're looking for doesn't exist. Let's get you back on track to finding your dream job.
+                            The page you're looking for doesn't exist. Let's get
+                            you back on track to finding your dream job.
                         </p>
 
                         {/* Quick action buttons */}
                         <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md mb-8">
-                            <Link href="/jobs" className="btn btn-primary flex-1 gap-2">
+                            <Link
+                                href="/jobs"
+                                className="btn btn-primary flex-1 gap-2"
+                            >
                                 <i className="fa-duotone fa-regular fa-magnifying-glass"></i>
                                 Browse Jobs
                             </Link>
-                            <Link href="/" className="btn btn-outline flex-1 gap-2">
+                            <Link
+                                href="/"
+                                className="btn btn-outline flex-1 gap-2"
+                            >
                                 <i className="fa-duotone fa-regular fa-house"></i>
                                 Go Home
                             </Link>
@@ -92,8 +100,11 @@ export default function NotFound() {
 
                 {/* Help footer */}
                 <div className="text-center mt-6 text-sm text-base-content/60">
-                    Still can't find what you're looking for?{' '}
-                    <a href="mailto:support@applicant.network" className="link link-primary font-semibold">
+                    Still can't find what you're looking for?{" "}
+                    <a
+                        href="mailto:support@applicant.network"
+                        className="link link-primary font-semibold"
+                    >
                         Contact Support
                     </a>
                 </div>

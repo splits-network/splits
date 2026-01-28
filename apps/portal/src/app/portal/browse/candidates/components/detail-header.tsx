@@ -32,14 +32,14 @@ export default function DetailHeader({ candidate }: { candidate: Candidate }) {
                         )}
                         {candidate.has_active_relationship && (
                             <span className="badge badge-sm badge-success gap-1">
-                                <i className="fa-duotone fa-solid fa-user-check"></i>
+                                <i className="fa-duotone fa-regular fa-user-check"></i>
                                 Representing
                             </span>
                         )}
                         {!candidate.has_active_relationship &&
                             !candidate.has_other_active_recruiters && (
                                 <span className="badge badge-sm badge-accent badge-soft gap-1 border-0">
-                                    <i className="fa-duotone fa-solid fa-user-plus"></i>
+                                    <i className="fa-duotone fa-regular fa-user-plus"></i>
                                     Available
                                 </span>
                             )}
@@ -48,13 +48,13 @@ export default function DetailHeader({ candidate }: { candidate: Candidate }) {
                                 className="badge badge-sm badge-warning gap-1"
                                 title={`${candidate.other_active_recruiters_count} recruiter(s)`}
                             >
-                                <i className="fa-duotone fa-solid fa-users"></i>
+                                <i className="fa-duotone fa-regular fa-users"></i>
                                 Represented
                             </span>
                         )}
                         {candidate.is_sourcer && (
                             <span className="badge badge-sm badge-info gap-1">
-                                <i className="fa-duotone fa-solid fa-magnifying-glass"></i>
+                                <i className="fa-duotone fa-regular fa-magnifying-glass"></i>
                                 Sourcer
                             </span>
                         )}

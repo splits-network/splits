@@ -10,7 +10,7 @@ export interface PlanFeatures {
     subheadline: string;
     included: string[];
     not_included: string[];
-    cta_text: string;
+    cta: string;
     footnote: string;
     is_popular?: boolean;
     annual_price_cents?: number;
@@ -22,12 +22,14 @@ export interface Plan {
     name: string;
     slug: string;
     tier: PlanTier;
-    price_cents: number;
     price_monthly: number;
+    price_annual: number;
     interval: 'month' | 'year';
     trial_days: number;
     features: PlanFeatures;
-    stripe_price_id: string | null;
+    stripe_price_id?: string | null;
+    stripe_price_id_monthly?: string;
+    stripe_price_id_annual?: string;
     stripe_product_id: string | null;
     is_active: boolean;
     created_at: string;

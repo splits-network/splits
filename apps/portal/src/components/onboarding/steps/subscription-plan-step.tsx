@@ -33,6 +33,15 @@ export function SubscriptionPlanStep() {
     const [clientSecret, setClientSecret] = useState<string | null>(null);
     const [customerId, setCustomerId] = useState<string | null>(null);
     const [paymentError, setPaymentError] = useState<string | null>(null);
+    const [isAnnual, setIsAnnual] = useState(false);
+
+    // Safety check: redirect non-recruiters if they somehow land here
+    useEffect(() => {
+        // Only run this check if we know the role
+        if (state.selectedRole && state.selectedRole !== "recruiter") {
+            actions.setStep(3);
+        }
+    }, [state.selectedRole, actions]);
 
     // Fetch available plans
     useEffect(() => {
@@ -165,7 +174,7 @@ export function SubscriptionPlanStep() {
     // Render plan selection view
     if (viewState === "select_plan") {
         return (
-            <div className="space-y-6">
+            <div className="space-y-6 max-w-6xl">
                 <div className="text-center">
                     <h2 className="text-2xl font-bold">Choose Your Plan</h2>
                     <p className="text-base-content/70 mt-2">
@@ -194,12 +203,32 @@ export function SubscriptionPlanStep() {
                     </div>
                 )}
 
+                <div className="flex justify-center items-center gap-4 py-2">
+                    <span className={`text-sm ${!isAnnual ? "font-bold" : ""}`}>
+                        Monthly
+                    </span>
+                    <input
+                        type="checkbox"
+                        className="toggle toggle-primary"
+                        checked={isAnnual}
+                        onChange={(e) => setIsAnnual(e.target.checked)}
+                        aria-label="Toggle annual billing"
+                    />
+                    <span className={`text-sm ${isAnnual ? "font-bold" : ""}`}>
+                        Yearly{" "}
+                        <span className="badge badge-sm badge-success ml-1">
+                            Save ~16%
+                        </span>
+                    </span>
+                </div>
+
                 <PricingCardGrid
                     plans={plans}
                     loading={plansLoading}
                     selectedPlanId={state.selectedPlan?.id || null}
                     onSelectPlan={handlePlanSelect}
-                    variant="compact"
+                    variant="default"
+                    isAnnual={isAnnual}
                 />
 
                 {/* Starter plan info */}
@@ -265,7 +294,7 @@ export function SubscriptionPlanStep() {
         const selectedPlanData = state.selectedPlan;
 
         return (
-            <div className="space-y-6">
+            <div className="space-y-6 max-w-3xl w-xl">
                 <div className="text-center">
                     <h2 className="text-2xl font-bold">
                         Complete Your Subscription
@@ -306,33 +335,13 @@ export function SubscriptionPlanStep() {
                 )}
 
                 {/* Stripe Payment Form */}
-                <div className="card card-border p-6">
-                    <StripeProvider clientSecret={clientSecret}>
-                        <PaymentForm
-                            onPaymentSuccess={handlePaymentSuccess}
-                            onCancel={() => setViewState("select_plan")}
-                            submitButtonText="Subscribe Now"
-                        />
-                    </StripeProvider>
-                </div>
-
-                {/* Security note */}
-                <div className="text-center text-sm text-base-content/50">
-                    <i className="fa-duotone fa-regular fa-lock mr-1"></i>
-                    Your payment information is securely processed by Stripe
-                </div>
-
-                {/* Back button */}
-                <div className="flex justify-start">
-                    <button
-                        type="button"
-                        onClick={handleBack}
-                        className="btn btn-ghost"
-                    >
-                        <i className="fa-duotone fa-regular fa-arrow-left"></i>
-                        Back to Plans
-                    </button>
-                </div>
+                <StripeProvider clientSecret={clientSecret}>
+                    <PaymentForm
+                        onPaymentSuccess={handlePaymentSuccess}
+                        onCancel={() => setViewState("select_plan")}
+                        submitButtonText="Subscribe Now"
+                    />
+                </StripeProvider>
             </div>
         );
     }

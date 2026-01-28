@@ -16,17 +16,12 @@ export function PricingCardGrid({
     variant = "default",
     loading = false,
 }: PricingCardGridProps) {
-    // Sort plans by price (free first, then ascending)
-    const sortedPlans = [...plans].sort(
-        (a, b) => a.price_cents - b.price_cents,
-    );
-
     const isCompact = variant === "compact";
 
     if (loading) {
         return (
             <div
-                className={`grid ${isCompact ? "grid-cols-1 gap-3" : "md:grid-cols-3 gap-6"}`}
+                className={`grid ${isCompact ? "grid-cols-1 md:grid-cols-3 gap-3" : "md:grid-cols-3 gap-6"}`}
             >
                 {[1, 2, 3].map((i) => (
                     <div key={i} className="card bg-base-200 shadow">
@@ -59,18 +54,20 @@ export function PricingCardGrid({
 
     return (
         <div
-            className={`grid ${isCompact ? "grid-cols-1 gap-3" : "md:grid-cols-3 gap-6 items-start"}`}
+            className={`grid ${isCompact ? "grid-cols-1 md:grid-cols-3 gap-3" : "md:grid-cols-3 gap-6"}`}
         >
-            {sortedPlans.map((plan) => (
-                <PricingCard
-                    key={plan.id}
-                    plan={plan}
-                    isSelected={selectedPlanId === plan.id}
-                    onSelect={onSelectPlan}
-                    isAnnual={isAnnual}
-                    variant={variant}
-                />
-            ))}
+            {plans
+                .sort((a, b) => a.price_monthly - b.price_monthly)
+                .map((plan) => (
+                    <PricingCard
+                        key={plan.id}
+                        plan={plan}
+                        isSelected={selectedPlanId === plan.id}
+                        onSelect={onSelectPlan}
+                        isAnnual={isAnnual}
+                        variant={variant}
+                    />
+                ))}
         </div>
     );
 }
