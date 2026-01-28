@@ -119,7 +119,7 @@ const adminNavItems: NavItem[] = [
 const soonToBeRemovedNavItems: NavItem[] = [
     {
         href: "/portal/candidates",
-        label: "Old Candidates",
+        label: "Candidates",
         icon: "fa-ghost",
         roles: ["recruiter", "platform_admin"],
     },
