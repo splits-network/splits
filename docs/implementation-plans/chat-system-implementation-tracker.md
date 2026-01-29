@@ -38,6 +38,9 @@ Implement a unified, safe, and auditable chat system across **splits.network** (
 - Read receipts: optional (user setting or per-user default off).
 - No “acting as” identities; users have a **single role** only.
 - Retention is **configurable** system-wide; **no deletions** allowed in initial release.
+  - `message_retention_days`: **730** (24 months)
+  - `attachment_retention_days`: **365**
+  - `audit_retention_days`: **1095** (36 months)
 
 ---
 
@@ -53,8 +56,9 @@ Implement a unified, safe, and auditable chat system across **splits.network** (
 
 ### Phase 1 — Data Model & API (Backend Core)
 
-- [ ] Create chat tables: conversations, participants, messages, blocks, reports
-- [ ] Add indexes for conversation lists + message pagination
+- [ ] Apply chat schema from `docs/originals/splits_chat_full_guidance/chat_schema_reference_ddl.md`
+- [ ] Add retention config defaults (message 730 days, attachment 365, audit 1095)
+- [ ] Optional: job runner bookkeeping for retention visibility
 - [ ] Implement service layer: create/find conversation (de-dupe), list, send, accept/decline
 - [ ] Enforce idempotent send via `clientMessageId`
 - [ ] Implement block/report workflows with audit logging
@@ -64,11 +68,11 @@ Implement a unified, safe, and auditable chat system across **splits.network** (
 
 ### Phase 2 — Realtime & Notifications
 
+- [ ] Redis pub/sub event wiring (message/conversation/attachment events)
+- [ ] Resync strategy via REST on reconnect/visibility changes
 - [ ] WebSocket gateway service (auth, subscribe, fanout)
-- [ ] Redis pub/sub backplane + presence keys (TTL heartbeat)
-- [ ] REST resync contract on reconnect/visibility change
+- [ ] Presence + typing (rate limited)
 - [ ] Read state sync (lastReadAt updates)
-- [ ] Typing + presence events (rate limited)
 - [ ] Notification batching/limits
 - [ ] Instrumentation: send rate, fail rate, report rate
 
@@ -139,19 +143,28 @@ Implement a unified, safe, and auditable chat system across **splits.network** (
 - [ ] `chat_reports` table with evidence pointer
 - [ ] `moderation_actions` table for audit trail
 
+### 1.5 Retention Config
+
+- [ ] `message_retention_days` default 730 (configurable)
+- [ ] `attachment_retention_days` default 365 (configurable)
+- [ ] `audit_retention_days` default 1095 (configurable)
+- [ ] Optional job runner bookkeeping table for retention runs
+
 ---
 
 ## Section 2: Backend Services & APIs
 
 ### 2.1 Conversation APIs
 
-- [ ] POST `/chat/conversations` (create/find with de-dupe)
-- [ ] GET `/chat/conversations` (filters: inbox/requests/archived/unread)
+- [ ] POST `/chat/conversations` (create/find with deterministic pair ordering + context de-dupe)
+- [ ] GET `/chat/conversations` (filters: inbox/requests/archived/unread, pagination)
 - [ ] GET `/chat/conversations/:id/messages` (cursor pagination)
 
 ### 2.2 Messaging APIs
 
 - [ ] POST `/chat/conversations/:id/messages` (idempotent send)
+- [ ] GET `/chat/conversations/:id/messages?after=messageId&limit=50` (cursor)
+- [ ] Message edit + redaction flags (system/admin only)
 - [ ] Enforce access checks per message send
 - [ ] Prevent sends when blocked or request pending
 
@@ -159,10 +172,11 @@ Implement a unified, safe, and auditable chat system across **splits.network** (
 
 - [ ] POST `/chat/conversations/:id/accept`
 - [ ] POST `/chat/conversations/:id/decline`
-- [ ] POST `/chat/conversations/:id/mute`
-- [ ] POST `/chat/conversations/:id/archive`
-- [ ] POST `/chat/block` / DELETE `/chat/block`
-- [ ] POST `/chat/reports`
+- [ ] POST `/chat/conversations/:id/mute` / DELETE `/chat/conversations/:id/mute`
+- [ ] POST `/chat/conversations/:id/archive` / DELETE `/chat/conversations/:id/archive`
+- [ ] POST `/chat/blocks` / DELETE `/chat/blocks/:blockedUserId`
+- [ ] POST `/chat/reports` (bundle last N messages + metadata)
+- [ ] Update read receipt + maintain unread_count transactionally
 
 ### 2.4 Moderation APIs
 
@@ -183,12 +197,20 @@ Implement a unified, safe, and auditable chat system across **splits.network** (
 
 ### 3.1 Realtime
 
-- [ ] Publish message events on send (Redis channels: `user:{id}`, `conv:{id}`)
+- [ ] Publish events on: message created/updated, conversation updated, attachment updated
+- [ ] Redis channels: `user:{userId}` and `conv:{conversationId}`
 - [ ] Subscribe and update inbox counts
 - [ ] Presence tracking via Redis keys with TTL
 - [ ] Typing events (ephemeral)
 - [ ] Read receipts (persisted + event)
-- [ ] Resync on reconnect/tab focus
+- [ ] Resync on reconnect/tab focus/heartbeat miss
+
+### 3.2 Resync Strategy (Mandatory)
+
+- [ ] Client stores `lastSeenMessageId` per conversation
+- [ ] On reconnect/tab-visible/gateway reconnect/heartbeat miss:
+  - [ ] `GET /chat/conversations/:id/messages?after=<lastSeenMessageId>`
+  - [ ] Refresh inbox list
 
 ### 3.2 Notifications
 
@@ -216,8 +238,48 @@ Implement a unified, safe, and auditable chat system across **splits.network** (
 - [ ] Metrics: send rate, fail rate, report rate
 - [ ] Logging for moderation actions
 - [ ] WS + Redis operational metrics (connections, pubsub throughput, auth failures)
+  - [ ] Realtime health endpoint (lightweight)
 
 ---
+
+## Section 6: WebSocket Gateway (AKS)
+
+- [ ] Auth handshake (Clerk JWT validation)
+- [ ] Always subscribe to `user:{userId}`
+- [ ] Subscribe to `conv:{id}` for open conversation (optional inbox preload)
+- [ ] Fanout Redis pub/sub → sockets
+- [ ] Client inbound events:
+  - [ ] typing started/stopped (rate limited)
+  - [ ] presence ping (update Redis TTL)
+  - [ ] read receipts (forward to Chat API)
+
+---
+
+## Section 7: RabbitMQ Workers
+
+- [ ] Email notifications worker (respect mute + request state, batch sends)
+- [ ] Attachment scanning worker (update DB status + publish `attachment.updated`)
+- [ ] Optional moderation automation worker (spam wave heuristics)
+
+---
+
+## Section 8: Retention Jobs
+
+- [ ] Nightly message retention: redact content older than retention
+- [ ] Attachment retention: delete blob + mark deleted
+- [ ] Audit retention: archive/delete per policy
+- [ ] Publish updates (message.updated / attachment.updated)
+
+---
+
+## Section 9: Test Suite (Demo-Proofing)
+
+- [ ] Idempotent send
+- [ ] Conversation de-dupe by pair + context
+- [ ] Request gating (1 message max until accepted; links/attachments blocked)
+- [ ] Block enforcement (server-side)
+- [ ] Unread count + read receipt correctness
+- [ ] Resync path works (simulate missed pub/sub events)
 
 ## Acceptance Criteria (MVP)
 
@@ -232,4 +294,4 @@ Implement a unified, safe, and auditable chat system across **splits.network** (
 
 ## Open Questions
 
-- Retention policy details: default duration (config value) and future deletion allowance
+- Whether future deletion allowance will be added (admin-only vs user-request)
