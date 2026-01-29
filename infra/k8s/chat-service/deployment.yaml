@@ -46,7 +46,7 @@ spec:
                       - name: REDIS_PORT
                         value: "6379"
                       - name: RABBITMQ_URL
-                        value: "amqp://rabbitmq:5672"
+                        value: "amqp://splits:splits_production@rabbitmq:5672"
                       - name: CHAT_ATTACHMENTS_BUCKET
                         value: "chat-attachments"
                       - name: CHAT_ATTACHMENTS_ENABLED
