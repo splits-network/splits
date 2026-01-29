@@ -50,6 +50,11 @@ export function ResumeStep() {
 
             const apiClient = createAuthenticatedClient(token);
 
+            // Ensure candidateId is available
+            if (!candidateId) {
+                throw new Error("No candidate ID available for file upload");
+            }
+
             // Direct upload with FormData (matches working pattern)
             const formData = new FormData();
             formData.append("file", file);

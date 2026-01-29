@@ -16,6 +16,7 @@ import {
     ReactNode,
 } from "react";
 import { useUser, useAuth, useClerk } from "@clerk/nextjs";
+import { usePathname } from "next/navigation";
 import {
     CandidateOnboardingState,
     CandidateOnboardingContextType,
@@ -68,6 +69,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     const { user } = useUser();
     const { getToken } = useAuth();
     const { signOut } = useClerk();
+    const pathname = usePathname();
 
     // Initialization state
     const [initStatus, setInitStatus] = useState<InitStatus>("loading");
@@ -83,9 +85,23 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         error: null,
     });
 
+    // Check if we're on invitation-related routes that should skip onboarding
+    const isInvitationRoute = pathname?.startsWith("/portal/invitation/");
+
     // Fetch candidate's onboarding status on mount
     useEffect(() => {
         if (!user) return;
+
+        // Skip onboarding logic for invitation routes
+        if (isInvitationRoute) {
+            console.log(
+                "[OnboardingProvider] Skipping onboarding for invitation route:",
+                pathname,
+            );
+            setInitStatus("ready");
+            setInitMessage("");
+            return;
+        }
 
         const fetchOnboardingStatus = async () => {
             setInitStatus("loading");
@@ -209,7 +225,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         };
 
         fetchOnboardingStatus();
-    }, [user, getToken]);
+    }, [user, getToken, isInvitationRoute, pathname]);
 
     const handleRetry = () => {
         window.location.reload();
