@@ -47,6 +47,13 @@ const SPECIALTY_OPTIONS = [
 export function RecruiterProfileStep() {
     const { state, actions } = useOnboarding();
 
+    // Debug logging
+    console.log("[RecruiterProfileStep] Component rendering");
+    console.log("[RecruiterProfileStep] State:", {
+        currentStep: state.currentStep,
+        selectedRole: state.selectedRole,
+    });
+
     const [formData, setFormData] = useState({
         bio: state.recruiterProfile?.bio || "",
         phone: state.recruiterProfile?.phone || "",

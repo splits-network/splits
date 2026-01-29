@@ -75,6 +75,12 @@ export function OnboardingWizardModal() {
 
                     {/* Step Content */}
                     <div className="py-4">
+                        {console.log(
+                            "[OnboardingModal] Rendering step content - currentStep:",
+                            state.currentStep,
+                            "selectedRole:",
+                            state.selectedRole,
+                        )}
                         {state.currentStep === 1 && <RoleSelectionStep />}
                         {state.currentStep === 2 && <SubscriptionPlanStep />}
                         {state.currentStep === 3 &&
