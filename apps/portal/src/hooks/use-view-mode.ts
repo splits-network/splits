@@ -1,32 +1,51 @@
 import { useState, useEffect } from 'react';
 
-type ViewMode = 'grid' | 'table';
+export type ViewMode = 'grid' | 'table' | 'browse';
 
 /**
- * Custom hook to manage and persist view mode (grid/table) preference in localStorage
+ * Custom hook to manage and persist view mode (grid/table/browse) preference in localStorage
  * @param storageKey - Unique key for localStorage (e.g., 'rolesViewMode')
  * @param defaultMode - Default view mode if none is stored (defaults to 'grid')
- * @returns [viewMode, setViewMode] tuple
+ * @returns Object with viewMode, setViewMode, cycleView, and isLoaded
  */
 export function useViewMode(
     storageKey: string,
     defaultMode: ViewMode = 'grid'
-): [ViewMode, (mode: ViewMode) => void] {
-    const [viewMode, setViewModeState] = useState<ViewMode>(() => {
-        // Initialize from localStorage if available
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem(storageKey);
-            return (saved === 'grid' || saved === 'table') ? saved : defaultMode;
-        }
-        return defaultMode;
-    });
+) {
+    const [viewMode, setViewModeState] = useState<ViewMode>(defaultMode);
+    const [isLoaded, setIsLoaded] = useState(false);
 
-    // Persist view mode to localStorage whenever it changes
+    // Load from localStorage on mount
     useEffect(() => {
-        if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem(storageKey);
+        if (saved && ['grid', 'table', 'browse'].includes(saved)) {
+            setViewModeState(saved as ViewMode);
+        }
+        setIsLoaded(true);
+    }, [storageKey]);
+
+    // Save to localStorage when view changes
+    useEffect(() => {
+        if (isLoaded) {
             localStorage.setItem(storageKey, viewMode);
         }
-    }, [viewMode, storageKey]);
+    }, [viewMode, storageKey, isLoaded]);
 
-    return [viewMode, setViewModeState];
+    const cycleView = () => {
+        setViewModeState(prev => {
+            switch (prev) {
+                case 'grid': return 'table';
+                case 'table': return 'browse';
+                case 'browse': return 'grid';
+                default: return 'grid';
+            }
+        });
+    };
+
+    return {
+        viewMode,
+        setViewMode: setViewModeState,
+        cycleView,
+        isLoaded
+    };
 }

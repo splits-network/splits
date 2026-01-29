@@ -5,6 +5,10 @@ import { useState, useRef, useEffect } from 'react';
 import { formatDate } from '@/lib/utils';
 import { getStatusColor, formatStage } from '@/lib/application-utils';
 import { EntityCard, DataList, DataRow, VerticalDataRow, InteractiveDataRow } from '@/components/ui';
+import { useAuth } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import { startChatConversation } from '@/lib/chat-start';
+import { useToast } from '@/lib/toast-context';
 
 interface ApplicationCardProps {
     application: {
@@ -24,6 +28,7 @@ interface ApplicationCardProps {
                 description: string;
             }[];
             company?: {
+                id?: string;
                 name?: string;
                 industry?: string;
                 headquarters_location?: string;
@@ -32,6 +37,7 @@ interface ApplicationCardProps {
         };
         recruiter?: {
             user?: {
+                id?: string;
                 name?: string;
                 email?: string;
             };
@@ -44,7 +50,11 @@ interface ApplicationCardProps {
 }
 
 export default function ApplicationCard({ application: app }: ApplicationCardProps) {
+    const { getToken } = useAuth();
+    const router = useRouter();
+    const toast = useToast();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [startingChat, setStartingChat] = useState(false);
     const modalRef = useRef<HTMLDialogElement>(null);
 
     // Handle modal open/close
@@ -65,6 +75,11 @@ export default function ApplicationCard({ application: app }: ApplicationCardPro
 
     // Compute initials for company logo
     const companyInitial = (app.job?.company?.name || 'C')[0].toUpperCase();
+
+    const recruiterUserId = app.recruiter?.user?.id;
+    const chatDisabledReason = recruiterUserId
+        ? null
+        : "Your recruiter isn't linked to a user yet.";
 
     return (
         <EntityCard className="group hover:shadow-lg transition-all duration-200">
@@ -204,10 +219,63 @@ export default function ApplicationCard({ application: app }: ApplicationCardPro
                     <span className="text-xs text-base-content/50">
                         Updated {formatDate(app.updated_at)}
                     </span>
-                    <Link href={`/portal/applications/${app.id}`} className='btn btn-primary btn-sm'>
-                        View Details
-                        <i className="fa-duotone fa-regular fa-arrow-right ml-1.5"></i>
-                    </Link>
+                    <div className="flex items-center gap-2">
+                        <span title={chatDisabledReason || undefined}>
+                            <button
+                                className="btn btn-outline btn-sm"
+                                disabled={!recruiterUserId || startingChat}
+                                onClick={async (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (!recruiterUserId) {
+                                        return;
+                                    }
+                                    try {
+                                        setStartingChat(true);
+                                        const conversationId =
+                                            await startChatConversation(
+                                                getToken,
+                                                recruiterUserId,
+                                                {
+                                                    application_id: app.id,
+                                                    job_id: app.job_id,
+                                                    company_id:
+                                                        app.job?.company?.id ??
+                                                        null,
+                                                },
+                                            );
+                                        router.push(
+                                            `/portal/messages/${conversationId}`,
+                                        );
+                                    } catch (err: any) {
+                                        console.error(
+                                            "Failed to start chat:",
+                                            err,
+                                        );
+                                        toast.error(
+                                            err?.message ||
+                                                "Failed to start chat",
+                                        );
+                                    } finally {
+                                        setStartingChat(false);
+                                    }
+                                }}
+                            >
+                                {startingChat ? (
+                                    <span className="loading loading-spinner loading-xs"></span>
+                                ) : (
+                                    "Message"
+                                )}
+                            </button>
+                        </span>
+                        <Link
+                            href={`/portal/applications/${app.id}`}
+                            className="btn btn-primary btn-sm"
+                        >
+                            View Details
+                            <i className="fa-duotone fa-regular fa-arrow-right ml-1.5"></i>
+                        </Link>
+                    </div>
                 </div>
             </EntityCard.Footer>
 

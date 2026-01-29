@@ -7,8 +7,101 @@ export interface User {
     onboarding_status?: string;
     onboarding_step?: number;
     onboarding_completed_at?: Date;
+    onboarding_metadata?: OnboardingMetadata; // New persistent state
     created_at: Date;
     updated_at: Date;
+}
+
+// Onboarding types
+export type OnboardingUserType = 'recruiter' | 'company' | null;
+
+export interface PersonalInfo {
+    name?: string;
+    email?: string;
+    phone?: string;
+    experience_years?: number;
+    resume_url?: string;
+}
+
+export interface CompanyInfo {
+    name?: string;
+    website?: string;
+    size?: number;
+    description?: string;
+}
+
+export interface JobInfo {
+    title?: string;
+    description?: string;
+    requirements?: string[];
+    locations?: string[];
+    salary_min?: number;
+    salary_max?: number;
+    remote_ok?: boolean;
+}
+
+export interface MarketplaceProfile {
+    // Recruitment specialization
+    industries?: string[];
+    job_levels?: string[];
+    skills_expertise?: string[];
+    
+    // Rates and fees
+    placement_fee_type?: 'percentage' | 'flat';
+    placement_fee_amount?: number;
+    
+    // Professional profile
+    bio?: string;
+    linkedin_url?: string;
+    website_url?: string;
+    
+    // Service settings
+    available_for_work?: boolean;
+    max_concurrent_roles?: number;
+    preferred_communication?: string[];
+}
+
+export interface SelectedPlan {
+    plan_id?: string;
+    billing_cycle?: 'monthly' | 'annual';
+    price?: number;
+}
+
+export interface StripePaymentInfo {
+    payment_method_id?: string;
+    customer_id?: string;
+    subscription_id?: string;
+}
+
+export interface OnboardingMetadata {
+    // Core onboarding state
+    user_type?: OnboardingUserType;
+    current_step?: number;
+    completed_steps?: number[];
+    last_active_step?: number;
+    
+    // Form data by step
+    personal_info?: PersonalInfo;
+    company_info?: CompanyInfo;
+    job_info?: JobInfo;
+    marketplace_profile?: MarketplaceProfile;
+    selected_plan?: SelectedPlan;
+    stripe_payment_info?: StripePaymentInfo;
+    
+    // Step completion tracking
+    personal_info_completed?: boolean;
+    company_info_completed?: boolean;
+    job_info_completed?: boolean;
+    marketplace_profile_completed?: boolean;
+    payment_completed?: boolean;
+    
+    // Session metadata
+    started_at?: string; // ISO date string
+    last_updated_at?: string; // ISO date string
+    device_info?: {
+        user_agent?: string;
+        platform?: string;
+    };
 }
 
 export interface Organization {
@@ -513,7 +606,7 @@ export interface RecruiterCandidateWithCandidate extends RecruiterCandidate {
         email: string;
         phone?: string;
         profile_picture?: string;
-        current_job_title?: string;
+        current_title?: string;
         current_company?: string;
         location?: string;
         verification_status?: string;

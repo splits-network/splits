@@ -57,6 +57,22 @@ Event-driven email notifications using Resend.
 - Email delivery via Resend
 - Notification logging
 
+### 7. **chat-service** (Port 3011)
+Internal chat API for conversations, messages, requests, and attachments.
+
+**Key Responsibilities:**
+- Chat conversations + messages (REST source of truth)
+- Requests, mute/archive, block/report
+- Attachment metadata + signed URL issuance (feature-flagged)
+
+### 8. **chat-gateway** (Port 3020)
+WebSocket gateway for realtime chat events and presence.
+
+**Key Responsibilities:**
+- WebSocket auth + channel subscriptions
+- Redis pub/sub fanout
+- Presence + typing event relay
+
 ## Getting Started
 
 ### Prerequisites

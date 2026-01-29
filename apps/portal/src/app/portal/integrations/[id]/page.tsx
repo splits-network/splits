@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getSyncStatusBadge } from '@/lib/utils/badge-styles';
 import { ApiClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
 
 interface ATSIntegration {
     id: string;
@@ -48,6 +49,7 @@ export default function IntegrationDetailPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
+    const toast = useToast();
 
     // Form state
     const [formData, setFormData] = useState({
@@ -111,7 +113,7 @@ export default function IntegrationDetailPage() {
             const apiClient = new ApiClient();
             const updated = await apiClient.patch(`/api/integrations/${integrationId}`, formData);
             setIntegration(updated);
-            alert('Settings saved successfully');
+            toast.success('Settings saved successfully');
         } catch (err: any) {
             console.error('Failed to save settings:', err);
             setError(err.message);
@@ -125,11 +127,11 @@ export default function IntegrationDetailPage() {
             const apiClient = new ApiClient();
             await apiClient.post(`/api/integrations/${integrationId}/sync`, { direction });
 
-            alert(`${direction === 'inbound' ? 'Import' : 'Export'} sync triggered`);
+            toast.success(`${direction === 'inbound' ? 'Import' : 'Export'} sync triggered`);
             await loadLogs();
         } catch (err: any) {
             console.error('Failed to trigger sync:', err);
-            alert(`Error: ${err.message}`);
+            toast.error(`Error: ${err.message}`);
         }
     };
 
@@ -139,13 +141,13 @@ export default function IntegrationDetailPage() {
             const result = await apiClient.post(`/api/integrations/${integrationId}/test`);
 
             if (result.success) {
-                alert('Connection test successful!');
+                toast.success('Connection test successful!');
             } else {
-                alert(`Connection test failed: ${result.error}`);
+                toast.error(`Connection test failed: ${result.error}`);
             }
         } catch (err: any) {
             console.error('Connection test failed:', err);
-            alert(`Error: ${err.message}`);
+            toast.error(`Error: ${err.message}`);
         }
     };
 
@@ -161,7 +163,7 @@ export default function IntegrationDetailPage() {
             router.push('/integrations');
         } catch (err: any) {
             console.error('Failed to delete integration:', err);
-            alert(`Error: ${err.message}`);
+            toast.error(`Error: ${err.message}`);
         }
     };
 

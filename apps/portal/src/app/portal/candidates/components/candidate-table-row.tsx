@@ -9,6 +9,11 @@ import {
     ExpandedDetailSection,
 } from '@/components/ui/tables';
 import type { Candidate } from './candidate-card';
+import { useAuth } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import { startChatConversation } from '@/lib/chat-start';
+import { useToast } from '@/lib/toast-context';
+import { useState } from 'react';
 
 // ===== TYPES =====
 
@@ -20,6 +25,14 @@ interface CandidateTableRowProps {
 // ===== COMPONENT =====
 
 export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowProps) {
+    const { getToken } = useAuth();
+    const router = useRouter();
+    const toast = useToast();
+    const [startingChat, setStartingChat] = useState(false);
+    const canChat = Boolean(candidate.user_id);
+    const chatDisabledReason = canChat
+        ? null
+        : "This candidate isn't linked to a user yet.";
     // Get initials for avatar
     const getInitials = (name: string) => {
         const names = name.split(' ');
@@ -128,6 +141,48 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
             </td>
             <td onClick={(e) => e.stopPropagation()}>
                 <div className="flex gap-1 justify-end">
+                    <span title={chatDisabledReason || undefined}>
+                        <button
+                            className="btn btn-outline btn-sm"
+                            title="Message Candidate"
+                            disabled={!canChat || startingChat}
+                            onClick={async (e) => {
+                                e.stopPropagation();
+                                if (!candidate.user_id) {
+                                    return;
+                                }
+                                try {
+                                    setStartingChat(true);
+                                    const conversationId =
+                                        await startChatConversation(
+                                            getToken,
+                                            candidate.user_id,
+                                            {
+                                                company_id:
+                                                    candidate.company_id ||
+                                                    null,
+                                            },
+                                        );
+                                    router.push(
+                                        `/portal/messages/${conversationId}`,
+                                    );
+                                } catch (err: any) {
+                                    console.error(
+                                        "Failed to start chat:",
+                                        err,
+                                    );
+                                    toast.error(
+                                        err?.message ||
+                                            "Failed to start chat",
+                                    );
+                                } finally {
+                                    setStartingChat(false);
+                                }
+                            }}
+                        >
+                            <i className="fa-duotone fa-regular fa-messages text-xs"></i>
+                        </button>
+                    </span>
                     <Link
                         href={`/portal/candidates/${candidate.id}`}
                         className="btn btn-primary btn-sm"
@@ -247,6 +302,48 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
                             <i className="fa-duotone fa-regular fa-eye"></i>
                             View Pipeline
                         </Link>
+                        <span title={chatDisabledReason || undefined}>
+                            <button
+                                className="btn btn-outline btn-sm gap-2"
+                                disabled={!canChat || startingChat}
+                                onClick={async (e) => {
+                                    e.stopPropagation();
+                                    if (!candidate.user_id) {
+                                        return;
+                                    }
+                                    try {
+                                        setStartingChat(true);
+                                        const conversationId =
+                                            await startChatConversation(
+                                                getToken,
+                                                candidate.user_id,
+                                                {
+                                                    company_id:
+                                                        candidate.company_id ||
+                                                        null,
+                                                },
+                                            );
+                                        router.push(
+                                            `/portal/messages/${conversationId}`,
+                                        );
+                                    } catch (err: any) {
+                                        console.error(
+                                            "Failed to start chat:",
+                                            err,
+                                        );
+                                        toast.error(
+                                            err?.message ||
+                                                "Failed to start chat",
+                                        );
+                                    } finally {
+                                        setStartingChat(false);
+                                    }
+                                }}
+                            >
+                                <i className="fa-duotone fa-regular fa-messages"></i>
+                                Message
+                            </button>
+                        </span>
                         <Link
                             href={`/portal/candidates/${candidate.id}?tab=candidates`}
                             className="btn btn-outline btn-sm gap-2"

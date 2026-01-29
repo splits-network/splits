@@ -8,6 +8,7 @@ import { registerBillingRoutes } from './billing';
 import { registerNotificationRoutes } from './notification';
 import { registerDocumentRoutes } from './documents';
 import { registerAutomationRoutes } from './automation';
+import { registerChatRoutes } from './chat';
 import { registerStatusRoutes } from './status';
 import { EventPublisher } from '../../events/event-publisher';
 
@@ -19,6 +20,7 @@ export function registerV2GatewayRoutes(
     registerAnalyticsRoutes(app, services);
     registerAtsRoutes(app, services);
     registerAutomationRoutes(app, services);
+    registerChatRoutes(app, services);
     registerBillingRoutes(app, services);
     registerDocumentRoutes(app, services);
     registerIdentityRoutes(app, services);

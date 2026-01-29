@@ -21,6 +21,7 @@ interface PaginationControlsProps {
     loading?: boolean;
     showLimitSelector?: boolean;
     limitOptions?: number[];
+    compact?: boolean; // For sidebar/narrow layouts
 }
 
 export function PaginationControls(props: PaginationControlsProps) {
@@ -32,6 +33,7 @@ export function PaginationControls(props: PaginationControlsProps) {
         loading = false,
         showLimitSelector = true,
         limitOptions = [10, 25, 50, 100],
+        compact = false,
     } = props;
 
     // Support both individual props and pagination object
@@ -48,12 +50,87 @@ export function PaginationControls(props: PaginationControlsProps) {
 
     if (total === 0) return null;
 
+    if (compact) {
+        return (
+            <div className="flex flex-col gap-2 mt-4 w-full">
+                {/* Compact results info */}
+                <div className="text-xs text-base-content/60 text-center">
+                    {startItem}-{endItem} of {total}
+                </div>
+
+                {/* Compact controls */}
+                <div className="flex items-center justify-center gap-1">
+                    {/* Page controls - smaller buttons */}
+                    {handlePageChange && (
+                        <div className="join">
+                            <button
+                                className="join-item btn btn-xs"
+                                onClick={() => handlePageChange(1)}
+                                disabled={page === 1 || loading}
+                                title="First page"
+                            >
+                                <i className="fa-duotone fa-regular fa-angles-left text-xs"></i>
+                            </button>
+                            <button
+                                className="join-item btn btn-xs"
+                                onClick={() => handlePageChange(page - 1)}
+                                disabled={page === 1 || loading}
+                                title="Previous page"
+                            >
+                                <i className="fa-duotone fa-regular fa-angle-left text-xs"></i>
+                            </button>
+                            <button className="join-item btn btn-xs pointer-events-none min-w-12">
+                                {page}/{totalPages}
+                            </button>
+                            <button
+                                className="join-item btn btn-xs"
+                                onClick={() => handlePageChange(page + 1)}
+                                disabled={page === totalPages || loading}
+                                title="Next page"
+                            >
+                                <i className="fa-duotone fa-regular fa-angle-right text-xs"></i>
+                            </button>
+                            <button
+                                className="join-item btn btn-xs"
+                                onClick={() => handlePageChange(totalPages)}
+                                disabled={page === totalPages || loading}
+                                title="Last page"
+                            >
+                                <i className="fa-duotone fa-regular fa-angles-right text-xs"></i>
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Compact limit selector - only show if enabled */}
+                {showLimitSelector && onLimitChange && (
+                    <div className="flex items-center justify-center gap-1">
+                        <select
+                            className="select select-xs text-xs"
+                            value={limit}
+                            onChange={(e) =>
+                                onLimitChange(Number(e.target.value))
+                            }
+                            disabled={loading}
+                        >
+                            {limitOptions.map((opt) => (
+                                <option key={opt} value={opt}>
+                                    {opt}/page
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 mt-6 w-full">
             {/* Results info */}
             <div className="text-sm text-base-content/70 text-center sm:text-left">
-                Showing <span className="font-medium">{startItem}</span> to{' '}
-                <span className="font-medium">{endItem}</span> of{' '}
+                Showing <span className="font-medium">{startItem}</span> to{" "}
+                <span className="font-medium">{endItem}</span> of{" "}
                 <span className="font-medium">{total}</span> results
             </div>
 
@@ -61,11 +138,15 @@ export function PaginationControls(props: PaginationControlsProps) {
                 {/* Limit selector */}
                 {showLimitSelector && onLimitChange && (
                     <div className="flex items-center gap-2">
-                        <span className="text-sm text-base-content/70 whitespace-nowrap">Per page:</span>
+                        <span className="text-sm text-base-content/70 whitespace-nowrap">
+                            Per page:
+                        </span>
                         <select
                             className="select select-sm"
                             value={limit}
-                            onChange={(e) => onLimitChange(Number(e.target.value))}
+                            onChange={(e) =>
+                                onLimitChange(Number(e.target.value))
+                            }
                             disabled={loading}
                         >
                             {limitOptions.map((opt) => (
@@ -97,7 +178,11 @@ export function PaginationControls(props: PaginationControlsProps) {
                             <i className="fa-duotone fa-regular fa-angle-left"></i>
                         </button>
                         <button className="join-item btn btn-sm pointer-events-none min-w-20 sm:min-w-28">
-                            <span className="hidden sm:inline">Page </span>{page}<span className="hidden sm:inline"> of </span><span className="sm:hidden">/</span>{totalPages}
+                            <span className="hidden sm:inline">Page </span>
+                            {page}
+                            <span className="hidden sm:inline"> of </span>
+                            <span className="sm:hidden">/</span>
+                            {totalPages}
                         </button>
                         <button
                             className="join-item btn btn-sm"

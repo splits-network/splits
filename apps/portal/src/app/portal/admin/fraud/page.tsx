@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { ApiClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
 
 export default function FraudSignalsPage() {
     const [signals, setSignals] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<string>('active');
+    const toast = useToast();
 
     useEffect(() => {
         loadSignals();
@@ -38,11 +40,11 @@ export default function FraudSignalsPage() {
                 is_false_positive: isFalsePositive,
                 notes,
             });
-            alert('Signal resolved');
+            toast.success('Signal resolved');
             loadSignals();
         } catch (error) {
             console.error('Failed to resolve signal:', error);
-            alert('Failed to resolve signal');
+            toast.error('Failed to resolve signal');
         }
     };
 

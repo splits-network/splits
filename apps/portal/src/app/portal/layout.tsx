@@ -25,7 +25,7 @@ export default async function AuthenticatedLayout({
                     className="drawer-toggle"
                 />
                 <Sidebar />
-                <div className="drawer-content flex flex-col min-h-screen">
+                <div className="drawer-content flex flex-col min-h-[calc(100vh-4rem)]">
                     <main className="p-6 flex-1">{children}</main>
                 </div>
             </div>

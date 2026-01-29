@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { startChatConversation } from '@/lib/chat-start';
+import { useUserProfile } from '@/contexts';
+import { useToast } from '@/lib/toast-context';
 import DocumentList from '@/components/document-list';
 import SubmitToJobWizard from './submit-to-job-wizard';
 import VerificationModal from './verification-modal';
@@ -24,11 +27,11 @@ interface CandidateDetailClientProps {
 export default function CandidateDetailClient({ candidateId }: CandidateDetailClientProps) {
     const { getToken } = useAuth();
     const router = useRouter();
+    const toast = useToast();
 
     // Candidate data (loads first - fast)
     const [candidate, setCandidate] = useState<any>(null);
-    const [canEdit, setCanEdit] = useState(false);
-    const [userContext, setUserContext] = useState<any>(null);
+    const { profile, isAdmin, isRecruiter } = useUserProfile();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -46,6 +49,11 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
 
     // Verification modal
     const [showVerificationModal, setShowVerificationModal] = useState(false);
+    const [startingChat, setStartingChat] = useState(false);
+    const canChat = Boolean(candidate?.user_id);
+    const chatDisabledReason = canChat
+        ? null
+        : "This candidate isn't linked to a user yet.";
 
     // Load candidate data first (fast)
     useEffect(() => {
@@ -62,29 +70,8 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
 
                 const client = createAuthenticatedClient(token);
 
-                // Fetch candidate details and user context
-                const [candidateResponse, userContextResponse] = await Promise.all([
-                    client.get(`/candidates/${candidateId}`),
-                    client.get('/users/me')
-                ]);
-
+                const candidateResponse = await client.get(`/candidates/${candidateId}`);
                 setCandidate(candidateResponse.data);
-
-                // Check if user can edit (upload documents for) this candidate
-                const userContext = userContextResponse.data;
-                if (!userContext) {
-                    throw new Error('User context not found');
-                }
-
-                setUserContext(userContext);
-
-                // Only platform_admin can upload documents for candidates
-                // Candidates manage their own documents via the candidate portal
-                const canEditCandidate = userContext && (
-                    userContext.roles?.some((role: string) => role === 'platform_admin')
-                );
-
-                setCanEdit(canEditCandidate);
 
             } catch (err: any) {
                 console.error('Failed to load candidate:', err);
@@ -180,10 +167,8 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
         setCandidate(updatedCandidate);
     };
 
-    // Check if user can verify candidates (recruiters and platform admins)
-    const canVerifyCandidate = userContext && (
-        userContext.roles?.some((role: string) => ['platform_admin', 'recruiter'].includes(role))
-    );
+    const canEditCandidate = Boolean(profile?.roles?.includes('platform_admin'));
+    const canVerifyCandidate = Boolean(isAdmin || isRecruiter);
 
     // Check if candidate is already verified or rejected
     const isVerificationComplete = candidate?.verification_status === 'verified' || candidate?.verification_status === 'rejected';
@@ -223,13 +208,32 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
             }
 
             // Show success message
-            alert(`Job opportunity sent to ${candidate?.full_name || 'candidate'}! They'll receive an email notification and can review and approve the opportunity.`);
+            toast.success(`Job opportunity sent to ${candidate?.full_name || 'candidate'}!`);
 
             // Redirect to the new application detail page
             router.push(`/portal/applications/${applicationId}`);
         } catch (err: any) {
             console.error('Failed to propose job to candidate:', err);
             throw new Error(err.message || 'Failed to send job opportunity to candidate');
+        }
+    };
+
+    const handleStartChat = async () => {
+        if (!candidate?.user_id) {
+            toast.error("This candidate isn't linked to a user yet.");
+            return;
+        }
+        try {
+            setStartingChat(true);
+            const conversationId = await startChatConversation(getToken, candidate.user_id, {
+                company_id: candidate.company_id || null,
+            });
+            router.push(`/portal/messages/${conversationId}`);
+        } catch (err: any) {
+            console.error("Failed to start chat:", err);
+            toast.error(err?.message || "Failed to start chat");
+        } finally {
+            setStartingChat(false);
         }
     };
 
@@ -380,8 +384,22 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                             </div>
                         </div>
                         <div className="flex gap-2">
-                            {canEdit && (
+                            {canEditCandidate && (
                                 <>
+                                    <span title={chatDisabledReason || undefined}>
+                                        <button
+                                            onClick={handleStartChat}
+                                            className="btn btn-outline gap-2"
+                                            disabled={!canChat || startingChat}
+                                        >
+                                            {startingChat ? (
+                                                <span className="loading loading-spinner loading-xs"></span>
+                                            ) : (
+                                                <i className="fa-duotone fa-regular fa-messages"></i>
+                                            )}
+                                            Message
+                                        </button>
+                                    </span>
                                     <Link
                                         href={`/portal/candidates/${candidateId}/propose`}
                                         className="btn btn-success gap-2"
@@ -584,7 +602,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                             <DocumentList
                                 entityType="candidate"
                                 entityId={candidateId}
-                                showUpload={canEdit}
+                                showUpload={canEditCandidate}
                             />
                         </div>
                     </div>

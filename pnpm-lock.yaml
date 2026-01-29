@@ -670,6 +670,98 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  services/chat-gateway:
+    dependencies:
+      '@clerk/backend':
+        specifier: ^2.14.0
+        version: 2.29.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@splits-network/shared-config':
+        specifier: workspace:*
+        version: link:../../packages/shared-config
+      '@splits-network/shared-logging':
+        specifier: workspace:*
+        version: link:../../packages/shared-logging
+      ioredis:
+        specifier: ^5.7.0
+        version: 5.8.2
+      ws:
+        specifier: ^8.18.3
+        version: 8.18.3
+    devDependencies:
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.10.1
+      '@types/ws':
+        specifier: ^8.18.1
+        version: 8.18.1
+      tsx:
+        specifier: ^4.19.2
+        version: 4.21.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  services/chat-service:
+    dependencies:
+      '@fastify/swagger':
+        specifier: ^9.5.0
+        version: 9.6.1
+      '@fastify/swagger-ui':
+        specifier: ^5.2.3
+        version: 5.2.3
+      '@sentry/node':
+        specifier: ^10.32.1
+        version: 10.32.1
+      '@splits-network/shared-access-context':
+        specifier: workspace:*
+        version: link:../../packages/shared-access-context
+      '@splits-network/shared-config':
+        specifier: workspace:*
+        version: link:../../packages/shared-config
+      '@splits-network/shared-fastify':
+        specifier: workspace:*
+        version: link:../../packages/shared-fastify
+      '@splits-network/shared-job-queue':
+        specifier: workspace:*
+        version: link:../../packages/shared-job-queue
+      '@splits-network/shared-logging':
+        specifier: workspace:*
+        version: link:../../packages/shared-logging
+      '@splits-network/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
+      '@supabase/supabase-js':
+        specifier: ^2.86.2
+        version: 2.86.2
+      amqplib:
+        specifier: ^0.10.9
+        version: 0.10.9
+      fastify:
+        specifier: ^5.6.2
+        version: 5.6.2
+      ioredis:
+        specifier: ^5.7.0
+        version: 5.8.2
+    devDependencies:
+      '@types/amqplib':
+        specifier: ^0.10.5
+        version: 0.10.8
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.10.1
+      '@vitest/coverage-v8':
+        specifier: ^3.0.0
+        version: 3.2.4(vitest@3.2.4(@types/node@24.10.1)(lightningcss@1.30.2)(terser@5.44.1))
+      tsx:
+        specifier: ^4.19.2
+        version: 4.21.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.4(@types/node@24.10.1)(lightningcss@1.30.2)(terser@5.44.1)
+
   services/document-processing-service:
     dependencies:
       '@splits-network/shared-access-context':

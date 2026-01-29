@@ -23,4 +23,10 @@ export type {
     MarketplaceProfile,
     ApplicationStage,
     RecruiterCandidateWithCandidate,
+    OnboardingMetadata,
+    User,
+    SelectedPlan,
+    StripePaymentInfo,
+    PersonalInfo,
+    CompanyInfo,
 } from './models';

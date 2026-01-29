@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { formatDate } from '@/lib/utils';
+import { useRouter } from "next/navigation";
+import { formatDate } from "@/lib/utils";
 import {
     ExpandableTableRow,
     ExpandedDetailGrid,
     ExpandedDetailItem,
     ExpandedDetailSection,
-} from '@/components/ui/tables';
-import type { RecruiterCandidateWithCandidate } from '@splits-network/shared-types';
+} from "@/components/ui/tables";
+import type { RecruiterCandidateWithCandidate } from "@splits-network/shared-types";
 
 // ===== TYPES =====
 
@@ -24,49 +24,50 @@ interface InvitationTableRowProps {
 // ===== HELPER FUNCTIONS =====
 
 function getStatusBadge(invitation: RecruiterCandidateWithCandidate) {
-    if (invitation.status === 'active') {
+    if (invitation.status === "active") {
         return (
             <span className="badge badge-success badge-sm gap-1.5">
                 <i className="fa-duotone fa-regular fa-check"></i> Active
             </span>
         );
     }
-    if (invitation.status === 'expired') {
+    if (invitation.status === "expired") {
         return (
             <span className="badge badge-warning badge-sm gap-1.5">
                 <i className="fa-duotone fa-regular fa-clock"></i> Expired
             </span>
         );
     }
-    if (invitation.status === 'terminated') {
+    if (invitation.status === "terminated") {
         return (
             <span className="badge badge-neutral badge-sm gap-1.5">
                 <i className="fa-duotone fa-regular fa-ban"></i> Terminated
             </span>
         );
     }
-    if (invitation.status === 'pending') {
+    if (invitation.status === "pending") {
         return (
             <span className="badge badge-info badge-sm gap-1.5">
-                <i className="fa-duotone fa-regular fa-hourglass-half"></i> Pending
+                <i className="fa-duotone fa-regular fa-hourglass-half"></i>{" "}
+                Pending
             </span>
         );
     }
-    if (invitation.status === 'accepted') {
+    if (invitation.status === "accepted") {
         return (
             <span className="badge badge-success badge-sm gap-1.5">
                 <i className="fa-duotone fa-regular fa-check"></i> Accepted
             </span>
         );
     }
-    if (invitation.status === 'declined') {
+    if (invitation.status === "declined") {
         return (
             <span className="badge badge-error badge-sm gap-1.5">
                 <i className="fa-duotone fa-regular fa-times"></i> Declined
             </span>
         );
     }
-    if (invitation.status === 'cancelled') {
+    if (invitation.status === "cancelled") {
         return (
             <span className="badge badge-neutral badge-sm gap-1.5">
                 <i className="fa-duotone fa-regular fa-ban"></i> Cancelled
@@ -74,7 +75,8 @@ function getStatusBadge(invitation: RecruiterCandidateWithCandidate) {
         );
     }
 
-    const isExpired = invitation.invitation_expires_at &&
+    const isExpired =
+        invitation.invitation_expires_at &&
         new Date(invitation.invitation_expires_at) < new Date();
 
     if (isExpired) {
@@ -92,8 +94,14 @@ function getStatusBadge(invitation: RecruiterCandidateWithCandidate) {
     );
 }
 
-function canResendInvitation(invitation: RecruiterCandidateWithCandidate): boolean {
-    const resendState = invitation.status === 'terminated' || invitation.status === 'cancelled' || invitation.status === 'declined' || invitation.status === 'accepted';
+function canResendInvitation(
+    invitation: RecruiterCandidateWithCandidate,
+): boolean {
+    const resendState =
+        invitation.status === "terminated" ||
+        invitation.status === "cancelled" ||
+        invitation.status === "declined" ||
+        invitation.status === "accepted";
     return !invitation.consent_given && !invitation.declined_at && !resendState;
 }
 
@@ -123,16 +131,20 @@ export function InvitationTableRow({
                                     alt={invitation.candidate.full_name}
                                     className="w-full h-full object-cover rounded-full"
                                     onError={(e) => {
-                                        e.currentTarget.style.display = 'none';
+                                        e.currentTarget.style.display = "none";
                                     }}
                                 />
                             ) : (
-                                (invitation.candidate?.full_name || 'C')[0].toUpperCase()
+                                (invitation.candidate?.full_name ||
+                                    "C")[0].toUpperCase()
                             )}
                         </div>
                     </div>
                     <div className="text-sm min-w-0">
-                        <span className="font-semibold" title={invitation.candidate?.full_name}>
+                        <span
+                            className="font-semibold"
+                            title={invitation.candidate?.full_name}
+                        >
                             {invitation.candidate?.full_name}
                         </span>
                         <div className="text-sm text-base-content/60">
@@ -148,7 +160,9 @@ export function InvitationTableRow({
             </td>
             <td>
                 <span className="text-sm text-base-content/60">
-                    {invitation.invitation_expires_at ? formatDate(invitation.invitation_expires_at) : 'N/A'}
+                    {invitation.invitation_expires_at
+                        ? formatDate(invitation.invitation_expires_at)
+                        : "N/A"}
                 </span>
             </td>
             <td>{getStatusBadge(invitation)}</td>
@@ -157,7 +171,11 @@ export function InvitationTableRow({
                     <button
                         type="button"
                         className="btn btn-ghost btn-sm btn-square"
-                        onClick={() => router.push(`/portal/candidates/${invitation.candidate_id}`)}
+                        onClick={() =>
+                            router.push(
+                                `/portal/candidates/${invitation.candidate_id}`,
+                            )
+                        }
                         title="View candidate profile"
                     >
                         <i className="fa-duotone fa-regular fa-eye fa-fw"></i>
@@ -168,7 +186,10 @@ export function InvitationTableRow({
                                 type="button"
                                 className="btn btn-primary btn-sm btn-square"
                                 onClick={() => onResend(invitation.id)}
-                                disabled={resendingId === invitation.id || cancellingId === invitation.id}
+                                disabled={
+                                    resendingId === invitation.id ||
+                                    cancellingId === invitation.id
+                                }
                                 title="Resend invitation"
                             >
                                 {resendingId === invitation.id ? (
@@ -181,7 +202,10 @@ export function InvitationTableRow({
                                 type="button"
                                 className="btn btn-error btn-sm btn-square"
                                 onClick={() => onCancel(invitation)}
-                                disabled={resendingId === invitation.id || cancellingId === invitation.id}
+                                disabled={
+                                    resendingId === invitation.id ||
+                                    cancellingId === invitation.id
+                                }
                                 title="Cancel invitation"
                             >
                                 {cancellingId === invitation.id ? (
@@ -196,7 +220,12 @@ export function InvitationTableRow({
                         <button
                             type="button"
                             className="btn btn-sm btn-square"
-                            onClick={() => onViewDeclineReason(invitation.declined_reason || 'No reason provided')}
+                            onClick={() =>
+                                onViewDeclineReason(
+                                    invitation.declined_reason ||
+                                        "No reason provided",
+                                )
+                            }
                             title="View decline reason"
                         >
                             <i className="fa-duotone fa-regular fa-comment"></i>
@@ -213,26 +242,36 @@ export function InvitationTableRow({
             {/* Status Details */}
             <ExpandedDetailSection title="Invitation Details">
                 <div className="space-y-2">
-                    {invitation.status === 'pending' && invitation.invitation_expires_at && (
-                        <div className="text-sm">
-                            {new Date(invitation.invitation_expires_at) < new Date() ? (
-                                <span className="text-error">
-                                    <i className="fa-duotone fa-regular fa-clock mr-2"></i>
-                                    Invitation expired on {formatDate(invitation.invitation_expires_at)}
-                                </span>
-                            ) : (
-                                <span className="text-warning">
-                                    <i className="fa-duotone fa-regular fa-clock mr-2"></i>
-                                    Expires on {formatDate(invitation.invitation_expires_at)}
-                                </span>
-                            )}
-                        </div>
-                    )}
+                    {invitation.status === "pending" &&
+                        invitation.invitation_expires_at && (
+                            <div className="text-sm">
+                                {new Date(invitation.invitation_expires_at) <
+                                new Date() ? (
+                                    <span className="text-error">
+                                        <i className="fa-duotone fa-regular fa-clock mr-2"></i>
+                                        Invitation expired on{" "}
+                                        {formatDate(
+                                            invitation.invitation_expires_at,
+                                        )}
+                                    </span>
+                                ) : (
+                                    <span className="text-warning">
+                                        <i className="fa-duotone fa-regular fa-clock mr-2"></i>
+                                        Expires on{" "}
+                                        {formatDate(
+                                            invitation.invitation_expires_at,
+                                        )}
+                                    </span>
+                                )}
+                            </div>
+                        )}
                     {invitation.declined_reason && (
                         <div className="alert alert-error alert-sm">
                             <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                             <div>
-                                <div className="font-semibold">Decline Reason:</div>
+                                <div className="font-semibold">
+                                    Decline Reason:
+                                </div>
                                 <div>{invitation.declined_reason}</div>
                             </div>
                         </div>
@@ -259,17 +298,21 @@ export function InvitationTableRow({
                 <ExpandedDetailItem
                     icon="fa-location-dot"
                     label="Location"
-                    value={invitation.candidate?.location || 'Not specified'}
+                    value={invitation.candidate?.location || "Not specified"}
                 />
                 <ExpandedDetailItem
                     icon="fa-building"
                     label="Current Company"
-                    value={invitation.candidate?.current_company || 'Not specified'}
+                    value={
+                        invitation.candidate?.current_company || "Not specified"
+                    }
                 />
                 <ExpandedDetailItem
                     icon="fa-briefcase"
                     label="Current Role"
-                    value={invitation.candidate?.current_job_title || 'Not specified'}
+                    value={
+                        invitation.candidate?.current_title || "Not specified"
+                    }
                 />
             </ExpandedDetailGrid>
 
@@ -280,7 +323,9 @@ export function InvitationTableRow({
                     className="btn btn-primary btn-sm gap-2"
                     onClick={(e) => {
                         e.stopPropagation();
-                        router.push(`/portal/candidates/${invitation.candidate_id}`);
+                        router.push(
+                            `/portal/candidates/${invitation.candidate_id}`,
+                        );
                     }}
                 >
                     <i className="fa-duotone fa-regular fa-eye"></i>
@@ -296,7 +341,10 @@ export function InvitationTableRow({
                                     e.stopPropagation();
                                     onResend(invitation.id);
                                 }}
-                                disabled={resendingId === invitation.id || cancellingId === invitation.id}
+                                disabled={
+                                    resendingId === invitation.id ||
+                                    cancellingId === invitation.id
+                                }
                             >
                                 <i className="fa-duotone fa-regular fa-paper-plane"></i>
                                 Resend Invitation
@@ -308,7 +356,10 @@ export function InvitationTableRow({
                                     e.stopPropagation();
                                     onCancel(invitation);
                                 }}
-                                disabled={resendingId === invitation.id || cancellingId === invitation.id}
+                                disabled={
+                                    resendingId === invitation.id ||
+                                    cancellingId === invitation.id
+                                }
                             >
                                 <i className="fa-duotone fa-regular fa-trash"></i>
                                 Cancel Invitation
@@ -321,7 +372,10 @@ export function InvitationTableRow({
                             className="btn btn-ghost btn-sm gap-2"
                             onClick={(e) => {
                                 e.stopPropagation();
-                                onViewDeclineReason(invitation.declined_reason || 'No reason provided');
+                                onViewDeclineReason(
+                                    invitation.declined_reason ||
+                                        "No reason provided",
+                                );
                             }}
                         >
                             <i className="fa-duotone fa-regular fa-comment"></i>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import RecruiterReputationBadge from '@/components/recruiter-reputation-badge';
+import { useToast } from '@/lib/toast-context';
 
 interface RecruiterReputation {
     recruiter_user_id: string;
@@ -53,6 +54,7 @@ export default function ReputationManagementClient() {
     const [recruiters, setRecruiters] = useState<RecruiterWithReputation[]>([]);
     const [sortBy, setSortBy] = useState<'reputation_score' | 'hire_rate' | 'completion_rate'>('reputation_score');
     const [error, setError] = useState<string | null>(null);
+    const toast = useToast();
 
     useEffect(() => {
         loadRecruitersWithReputation();
@@ -130,7 +132,7 @@ export default function ReputationManagementClient() {
             await loadRecruitersWithReputation();
         } catch (err: any) {
             console.error('Failed to refresh reputation:', err);
-            alert('Failed to refresh reputation: ' + (err.message || 'Unknown error'));
+            toast.error('Failed to refresh reputation: ' + (err.message || 'Unknown error'));
         }
     }
 

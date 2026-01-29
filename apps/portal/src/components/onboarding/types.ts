@@ -3,6 +3,10 @@
  * Shared types for the onboarding wizard system
  */
 
+import { OnboardingMetadata } from '@splits-network/shared-types';
+
+export type { OnboardingMetadata };
+
 export type OnboardingStatus = 'pending' | 'in_progress' | 'completed' | 'skipped';
 
 export type UserRole = 'recruiter' | 'company_admin';
@@ -47,7 +51,7 @@ export interface OnboardingState {
     teamInviteCode?: string;
   };
   companyInfo?: {
-    name: string;
+    name?: string;
     website?: string;
     industry?: string;
     size?: string;
@@ -59,10 +63,14 @@ export interface OnboardingState {
   // UI state
   submitting: boolean;
   error: string | null;
+  loading?: boolean; // Loading state from database
+  persisting?: boolean; // Auto-saving state to database
 }
 
 export interface OnboardingContextType {
   state: OnboardingState;
+  loading: boolean;
+  persisting: boolean;
   actions: {
     setStep: (step: number) => void;
     setRole: (role: UserRole) => void;

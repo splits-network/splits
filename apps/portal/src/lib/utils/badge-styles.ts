@@ -6,41 +6,35 @@
  */
 
 /**
- * Get badge color for application stages
+ * Get badge style and label for application stages
  */
-export function getApplicationStageBadge(stage: string): string {
-    const colors: Record<string, string> = {
-        draft: 'badge-neutral',
-        recruiter_proposed: 'badge-primary',
-        recruiter_request: 'badge-info',
-        ai_review: 'badge-warning',
-        screen: 'badge-info',
-        submitted: 'badge-primary',
-        interview: 'badge-warning',
-        offer: 'badge-success',
-        hired: 'badge-success',
-        rejected: 'badge-error',
+export function getApplicationStageBadge(stage: string | null | undefined): { className: string; label: string } {
+    if (!stage) {
+        return { className: 'badge-ghost', label: 'Unknown' };
+    }
+    
+    const styles: Record<string, { className: string; label: string }> = {
+        draft: { className: 'badge-neutral', label: 'Draft' },
+        recruiter_proposed: { className: 'badge-primary', label: 'Proposed by Recruiter' },
+        recruiter_request: { className: 'badge-info', label: 'Recruiter Request' },
+        ai_review: { className: 'badge-warning', label: 'AI Review' },
+        screen: { className: 'badge-info', label: 'Screening' },
+        submitted: { className: 'badge-primary', label: 'Submitted' },
+        interview: { className: 'badge-warning', label: 'Interview' },
+        offer: { className: 'badge-success', label: 'Offer' },
+        hired: { className: 'badge-success', label: 'Hired' },
+        rejected: { className: 'badge-error', label: 'Rejected' },
     };
-    return colors[stage] || 'badge-ghost';
+    
+    return styles[stage] || { className: 'badge-ghost', label: stage };
 }
 
 /**
- * Get human-readable label for application stages
+ * Backward compatibility wrapper - only returns className
+ * @deprecated Use getApplicationStageBadge instead for full object
  */
-export function getApplicationStageLabel(stage: string): string {
-    const labels: Record<string, string> = {
-        draft: 'Draft',
-        recruiter_proposed: 'Proposed by Recruiter',
-        recruiter_request: 'Recruiter Request',
-        ai_review: 'AI Review',
-        screen: 'Screening',
-        submitted: 'Submitted',
-        interview: 'Interview',
-        offer: 'Offer',
-        hired: 'Hired',
-        rejected: 'Rejected',
-    };
-    return labels[stage] || stage;
+export function getApplicationStageClass(stage: string | null | undefined): string {
+    return getApplicationStageBadge(stage).className;
 }
 
 /**

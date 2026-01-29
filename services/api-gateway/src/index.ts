@@ -169,6 +169,14 @@ async function main() {
         // Add correlation ID to response headers
         reply.header('x-correlation-id', correlationId);
 
+        // Skip logging for noisy endpoints to reduce log spam
+        if (request.url === '/health' || 
+            request.url.includes('/docs') ||
+            request.url.includes('/notifications/unread-count') ||
+            request.url.includes('/notifications?')) {
+            return;
+        }
+
         // Log incoming request
         logger.info({
             correlationId,
@@ -184,6 +192,14 @@ async function main() {
 
     // Add response logging middleware
     app.addHook('onResponse', async (request, reply) => {
+        // Skip logging for noisy endpoints to reduce log spam
+        if (request.url === '/health' || 
+            request.url.includes('/docs') ||
+            request.url.includes('/notifications/unread-count') ||
+            request.url.includes('/notifications?')) {
+            return;
+        }
+
         const correlationId = (request as any).correlationId;
         const startTime = (request as any).startTime;
         const responseTime = Date.now() - startTime;
@@ -200,7 +216,7 @@ async function main() {
     // Add enhanced debug logging for profile-related API calls (exclude notification polling noise)
     app.addHook('onResponse', async (request, reply) => {
         // Skip notification calls to reduce log noise
-        if (request.url.includes('/notifications/unread-count') || request.url.includes('/notifications?')) {
+        if (request.url.includes('/notifications')) {
             return;
         }
 
@@ -332,6 +348,7 @@ async function main() {
     services.register('document-processing', process.env.DOCUMENT_PROCESSING_SERVICE_URL || 'http://localhost:3008');
     services.register('ai', process.env.AI_SERVICE_URL || 'http://localhost:3009');
     services.register('analytics', process.env.ANALYTICS_SERVICE_URL || 'http://localhost:3010');
+    services.register('chat', process.env.CHAT_SERVICE_URL || 'http://localhost:3011');
 
     // Register V2 proxy routes only
     registerV2GatewayRoutes(app, services, { eventPublisher });
