@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useUserProfile } from "@/contexts";
-import { useState, useEffect, useMemo } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useChatGateway } from "@/hooks/use-chat-gateway";
+import {
+    registerChatRefresh,
+    requestChatRefresh,
+} from "@/lib/chat-refresh-queue";
+import { getCachedCurrentUserId } from "@/lib/current-user";
+import { useState, useEffect, useMemo, useCallback } from "react";
 
 interface NavItem {
     href: string;
@@ -59,6 +67,14 @@ const navItems: NavItem[] = [
         label: "Applications",
         icon: "fa-file-lines",
         roles: ["company_admin", "hiring_manager", "recruiter"],
+        section: "management",
+        mobileDock: true,
+    },
+    {
+        href: "/portal/messages",
+        label: "Messages",
+        icon: "fa-messages",
+        roles: ["recruiter", "company_admin", "hiring_manager"],
         section: "management",
         mobileDock: true,
     },
@@ -179,9 +195,73 @@ export function Sidebar() {
     const pathname = usePathname();
     const router = useRouter();
     const { isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
+    const { getToken } = useAuth();
 
     // Badge counts (could be fetched from API)
     const [badges, setBadges] = useState<Record<string, number>>({});
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+    const fetchUnreadCount = useCallback(async () => {
+        const token = await getToken();
+        if (!token) return;
+        const client = createAuthenticatedClient(token);
+        const response: any = await client.get("/chat/conversations", {
+            params: { filter: "inbox", limit: 100 },
+        });
+        const rows = (response?.data || []) as Array<{ unread_count?: number }>;
+        const total = rows.reduce(
+            (sum, row) => sum + (row.unread_count || 0),
+            0,
+        );
+        setBadges((prev) => ({
+            ...prev,
+            "/portal/messages": total,
+        }));
+    }, [getToken]);
+
+    useEffect(() => {
+        let mounted = true;
+        const load = async () => {
+            const userId = await getCachedCurrentUserId(getToken);
+            if (!mounted) return;
+            setCurrentUserId(userId);
+            await fetchUnreadCount();
+        };
+        load();
+        return () => {
+            mounted = false;
+        };
+    }, [fetchUnreadCount, getToken]);
+
+    useEffect(() => {
+        const unregister = registerChatRefresh(() => fetchUnreadCount());
+        return () => {
+            unregister();
+        };
+    }, [fetchUnreadCount]);
+
+    useChatGateway({
+        enabled: Boolean(currentUserId),
+        channels: currentUserId ? [`user:${currentUserId}`] : [],
+        getToken,
+        onReconnect: () => {
+            requestChatRefresh();
+        },
+        onEvent: (event) => {
+            if (
+                [
+                    "message.created",
+                    "message.updated",
+                    "conversation.updated",
+                    "conversation.requested",
+                    "conversation.accepted",
+                    "conversation.declined",
+                ].includes(event.type)
+            ) {
+                requestChatRefresh();
+            }
+        },
+    });
 
     // Filter items based on user role
     const filterByRole = (item: NavItem) => {
@@ -209,12 +289,12 @@ export function Sidebar() {
 
     return (
         <>
-            <div className="drawer-side z-30 overflow-visible hidden md:block bg-base-200">
+            <div className="drawer-side z-30 overflow-visible hidden md:block bg-base-200 h-[calc(100vh-4rem)]">
                 <label
                     htmlFor="sidebar-drawer"
                     className="drawer-overlay"
                 ></label>
-                <aside className=" w-64 min-h-screen flex flex-col border-r border-base-200">
+                <aside className=" w-64 flex flex-col border-r border-base-200">
                     {/* Navigation */}
                     <nav className="flex-1 px-3 py-4 overflow-y-auto scrollbar-thin">
                         {/* Main Section */}

@@ -2,21 +2,27 @@
 
 import { useState, useEffect } from 'react';
 import { ApiClient } from '@/lib/api-client';
+import { useAuth } from '@clerk/nextjs';
 
 export default function MarketplaceMetricsPage() {
+    const { getToken } = useAuth();
     const [metrics, setMetrics] = useState<any>(null);
     const [healthScore, setHealthScore] = useState<any>(null);
+    const [chatMetrics, setChatMetrics] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [dateRange, setDateRange] = useState('7'); // days
 
     useEffect(() => {
         loadMetrics();
         loadHealthScore();
-    }, [dateRange]);
+        loadChatMetrics();
+    }, [dateRange, getToken]);
 
     const loadHealthScore = async () => {
         try {
-            const api = new ApiClient();
+            const token = await getToken();
+            if (!token) return;
+            const api = new ApiClient(token);
             const response = await api.get<{ health_score: number; status: string }>('/automation/metrics/health');
             setHealthScore(response);
         } catch (error) {
@@ -27,7 +33,12 @@ export default function MarketplaceMetricsPage() {
     const loadMetrics = async () => {
         setLoading(true);
         try {
-            const api = new ApiClient();
+            const token = await getToken();
+            if (!token) {
+                setMetrics(null);
+                return;
+            }
+            const api = new ApiClient(token);
             const response = await api.get<{ data: any[] }>(`/automation/metrics/recent?days=${dateRange}`);
 
             // Calculate aggregate metrics from daily data
@@ -73,6 +84,24 @@ export default function MarketplaceMetricsPage() {
             setMetrics(null);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadChatMetrics = async () => {
+        try {
+            const token = await getToken();
+            if (!token) {
+                setChatMetrics(null);
+                return;
+            }
+            const api = new ApiClient(token);
+            const response: any = await api.get('/admin/chat/metrics', {
+                params: { rangeDays: dateRange },
+            });
+            setChatMetrics(response?.data || null);
+        } catch (error) {
+            console.error('Failed to load chat metrics:', error);
+            setChatMetrics(null);
         }
     };
 
@@ -150,6 +179,146 @@ export default function MarketplaceMetricsPage() {
                 <div className="alert alert-info">
                     <i className="fa-duotone fa-regular fa-info-circle"></i>
                     <span>No metrics data available for the selected date range. Run the daily metrics aggregation job to populate data.</span>
+                </div>
+            )}
+
+            {chatMetrics && (
+                <div className="mb-8">
+                    <h2 className="text-xl font-semibold mb-4">Chat Health</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="stats shadow">
+                            <div className="stat">
+                                <div className="stat-figure text-primary">
+                                    <i className="fa-duotone fa-regular fa-messages text-3xl"></i>
+                                </div>
+                                <div className="stat-title">Messages</div>
+                                <div className="stat-value text-primary">
+                                    {chatMetrics.totals.messages}
+                                </div>
+                                <div className="stat-desc">Last {dateRange} days</div>
+                            </div>
+                        </div>
+                        <div className="stats shadow">
+                            <div className="stat">
+                                <div className="stat-figure text-secondary">
+                                    <i className="fa-duotone fa-regular fa-comments text-3xl"></i>
+                                </div>
+                                <div className="stat-title">Conversations</div>
+                                <div className="stat-value text-secondary">
+                                    {chatMetrics.totals.conversations}
+                                </div>
+                                <div className="stat-desc">Created in range</div>
+                            </div>
+                        </div>
+                        <div className="stats shadow">
+                            <div className="stat">
+                                <div className="stat-figure text-accent">
+                                    <i className="fa-duotone fa-regular fa-paperclip text-3xl"></i>
+                                </div>
+                                <div className="stat-title">Attachments</div>
+                                <div className="stat-value text-accent">
+                                    {chatMetrics.totals.attachments}
+                                </div>
+                                <div className="stat-desc">Uploaded in range</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <div className={`stats shadow ${chatMetrics.requests.pending > 50 ? 'border-2 border-warning' : ''}`}>
+                            <div className="stat">
+                                <div className="stat-figure text-warning">
+                                    <i className="fa-duotone fa-regular fa-user-clock text-3xl"></i>
+                                </div>
+                                <div className="stat-title">Pending Requests</div>
+                                <div className="stat-value text-warning">
+                                    {chatMetrics.requests.pending}
+                                </div>
+                                <div className="stat-desc">
+                                    {chatMetrics.requests.pending > 50 ? '⚠️ Above threshold' : 'Normal'}
+                                </div>
+                            </div>
+                        </div>
+                        <div className={`stats shadow ${chatMetrics.totals.reports > 10 ? 'border-2 border-error' : ''}`}>
+                            <div className="stat">
+                                <div className="stat-figure text-error">
+                                    <i className="fa-duotone fa-regular fa-flag text-3xl"></i>
+                                </div>
+                                <div className="stat-title">Reports</div>
+                                <div className="stat-value text-error">
+                                    {chatMetrics.totals.reports}
+                                </div>
+                                <div className="stat-desc">
+                                    {chatMetrics.totals.reports > 10 ? '⚠️ Spike detected' : 'Normal'}
+                                </div>
+                            </div>
+                        </div>
+                        <div className={`stats shadow ${chatMetrics.totals.attachments_blocked > 0 ? 'border-2 border-warning' : ''}`}>
+                            <div className="stat">
+                                <div className="stat-figure text-warning">
+                                    <i className="fa-duotone fa-regular fa-shield text-3xl"></i>
+                                </div>
+                                <div className="stat-title">Blocked Files</div>
+                                <div className="stat-value text-warning">
+                                    {chatMetrics.totals.attachments_blocked}
+                                </div>
+                                <div className="stat-desc">
+                                    {chatMetrics.totals.attachments_blocked > 0 ? '⚠️ Review needed' : 'None'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <div className="stats shadow">
+                            <div className="stat">
+                                <div className="stat-title">Blocks</div>
+                                <div className="stat-value">{chatMetrics.totals.blocks}</div>
+                                <div className="stat-desc">Last {dateRange} days</div>
+                            </div>
+                        </div>
+                        <div className="stats shadow">
+                            <div className="stat">
+                                <div className="stat-title">Redactions</div>
+                                <div className="stat-value">{chatMetrics.totals.redactions}</div>
+                                <div className="stat-desc">Last {dateRange} days</div>
+                            </div>
+                        </div>
+                        <div className="stats shadow">
+                            <div className="stat">
+                                <div className="stat-title">Moderation Actions</div>
+                                <div className="stat-value">{chatMetrics.totals.moderation_actions}</div>
+                                <div className="stat-desc">Last {dateRange} days</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div className={`stats shadow ${chatMetrics.retention.last_status === 'running' ? 'border-2 border-info' : ''}`}>
+                            <div className="stat">
+                                <div className="stat-title">Retention Job</div>
+                                <div className="stat-value text-sm">
+                                    {chatMetrics.retention.last_status || 'unknown'}
+                                </div>
+                                <div className="stat-desc">
+                                    Last run: {chatMetrics.retention.last_run_at
+                                        ? new Date(chatMetrics.retention.last_run_at).toLocaleString()
+                                        : '—'}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="stats shadow">
+                            <div className="stat">
+                                <div className="stat-title">Retention Actions</div>
+                                <div className="stat-value text-sm">
+                                    {chatMetrics.retention.messages_redacted} redacted
+                                </div>
+                                <div className="stat-desc">
+                                    {chatMetrics.retention.attachments_deleted} files, {chatMetrics.retention.audits_archived} audits
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
 

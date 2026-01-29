@@ -1,4 +1,11 @@
+'use client';
+
 import Link from 'next/link';
+import { useAuth } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { startChatConversation } from '@/lib/chat-start';
+import { useToast } from '@/lib/toast-context';
 
 interface ApplicationTableRowProps {
     application: {
@@ -13,14 +20,17 @@ interface ApplicationTableRowProps {
             _masked?: boolean;
         };
         job?: {
+            id?: string;
             title: string;
             status?: string;
         };
         company?: {
+            id?: string;
             name: string;
         };
         recruiter?: {
             user?: {
+                id?: string;
                 name: string;
                 email?: string;
             };
@@ -39,8 +49,16 @@ export function ApplicationTableRow({
     getStageColor,
     formatDate,
 }: ApplicationTableRowProps) {
+    const { getToken } = useAuth();
+    const router = useRouter();
+    const toast = useToast();
+    const [startingChat, setStartingChat] = useState(false);
     const candidate = application.candidate;
     const isMasked = candidate._masked;
+    const recruiterUserId = application.recruiter?.user?.id;
+    const chatDisabledReason = recruiterUserId
+        ? null
+        : "Your recruiter isn't linked to a user yet.";
 
     return (
         <tr className="hover">
@@ -108,6 +126,54 @@ export function ApplicationTableRow({
             </td>
             <td className="text-right">
                 <div className="flex gap-2 justify-end">
+                    <span title={chatDisabledReason || undefined}>
+                        <button
+                            className="btn btn-outline btn-sm"
+                            disabled={!recruiterUserId || startingChat}
+                            onClick={async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (!recruiterUserId) {
+                                    return;
+                                }
+                                try {
+                                    setStartingChat(true);
+                                    const conversationId =
+                                        await startChatConversation(
+                                            getToken,
+                                            recruiterUserId,
+                                            {
+                                                application_id: application.id,
+                                                job_id: application.job?.id,
+                                                company_id:
+                                                    application.company?.id ??
+                                                    null,
+                                            },
+                                        );
+                                    router.push(
+                                        `/portal/messages/${conversationId}`,
+                                    );
+                                } catch (err: any) {
+                                    console.error(
+                                        "Failed to start chat:",
+                                        err,
+                                    );
+                                    toast.error(
+                                        err?.message ||
+                                            "Failed to start chat",
+                                    );
+                                } finally {
+                                    setStartingChat(false);
+                                }
+                            }}
+                        >
+                            {startingChat ? (
+                                <span className="loading loading-spinner loading-xs"></span>
+                            ) : (
+                                <i className="fa-duotone fa-regular fa-messages"></i>
+                            )}
+                        </button>
+                    </span>
                     <Link
                         href={`/portal/applications/${application.id}`}
                         className="btn btn-primary btn-sm"

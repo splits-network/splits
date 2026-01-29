@@ -9,6 +9,7 @@ import { ApplicationDetailClient } from './components/application-detail-client'
 import { AIReviewedActions } from './components/ai-reviewed-actions';
 import EditDraftButton from './components/edit-draft-button';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { MessageRecruiterButton } from './components/message-recruiter-button';
 
 const getFitScoreColor = (score: number | null) => {
     if (!score) return 'bg-base-300/30 text-base-300 border-base-300/10';
@@ -111,7 +112,7 @@ export default async function ApplicationDetailPage({
         application = responseData || response;
         job = application?.job || {};
         company = job?.company || {};
-        recruiter = application?.recruiter || null;
+    recruiter = application?.recruiter || null;
     } catch (error) {
         console.error('Error fetching application data:', error);
         return notFound();
@@ -119,6 +120,9 @@ export default async function ApplicationDetailPage({
 
     // Note: Gate history tracking moved to application stage workflow
     // CRA system was deprecated - application.stage now tracks workflow progress
+
+    const recruiterUserId =
+        recruiter?.user?.id ?? recruiter?.user_id ?? null;
 
     return (
         <div className="container mx-auto px-4 space-y-4">
@@ -385,6 +389,12 @@ export default async function ApplicationDetailPage({
                             </h2>
 
                             <div className="space-y-2 gap-2">
+                                <MessageRecruiterButton
+                                    recruiterUserId={recruiterUserId}
+                                    applicationId={application.id}
+                                    jobId={job?.id || application.job_id}
+                                    companyId={company?.id || job?.company?.id || null}
+                                />
                                 {/* Edit Application and Submit - for ai_reviewed stage after reviewing AI feedback */}
                                 {application.stage === 'ai_reviewed' && (
                                     <AIReviewedActions

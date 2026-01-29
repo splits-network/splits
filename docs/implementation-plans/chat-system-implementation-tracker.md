@@ -56,59 +56,67 @@ Implement a unified, safe, and auditable chat system across **splits.network** (
 
 ### Phase 1 — Data Model & API (Backend Core)
 
-- [ ] Apply chat schema from `docs/originals/splits_chat_full_guidance/chat_schema_reference_ddl.md`
-- [ ] Add retention config defaults (message 730 days, attachment 365, audit 1095)
-- [ ] Optional: job runner bookkeeping for retention visibility
-- [ ] Implement service layer: create/find conversation (de-dupe), list, send, accept/decline
-- [ ] Enforce idempotent send via `clientMessageId`
-- [ ] Implement block/report workflows with audit logging
-- [ ] Implement moderation endpoints + admin actions
-- [ ] Add rate limits and abuse throttles
-- [ ] Add notification triggers (in-app + email)
+- [x] Apply chat schema from `docs/originals/splits_chat_full_guidance/chat_schema_reference_ddl.md`
+- [x] Add retention config defaults (message 730 days, attachment 365, audit 1095)
+- [x] Optional: job runner bookkeeping for retention visibility
+- [x] Implement service layer: create/find conversation (de-dupe), list, send, accept/decline
+- [x] Enforce idempotent send via `clientMessageId`
+- [x] Implement block/report workflows with audit logging
+- [x] Implement moderation endpoints + admin actions
+- [x] Add rate limits and abuse throttles
+- [x] Add notification triggers (in-app + email)
 
 ### Phase 2 — Realtime & Notifications
 
-- [ ] Redis pub/sub event wiring (message/conversation/attachment events)
-- [ ] Resync strategy via REST on reconnect/visibility changes
-- [ ] WebSocket gateway service (auth, subscribe, fanout)
-- [ ] Presence + typing (rate limited)
-- [ ] Read state sync (lastReadAt updates)
-- [ ] Notification batching/limits
-- [ ] Instrumentation: send rate, fail rate, report rate
+- [x] Redis pub/sub event wiring (message/conversation/attachment events)
+- [x] Resync strategy via REST on reconnect/visibility changes
+- [x] WebSocket gateway service (auth, subscribe, fanout)
+- [x] Presence + typing (rate limited)
+- [x] Read state sync (lastReadAt updates)
+- [x] Notification batching/limits
+- [x] Instrumentation: send rate, fail rate, report rate
 
 ### Phase 3 — Frontend (splits.network)
 
-- [ ] Messages nav entry
-- [ ] Inbox list with filters + search input
-- [ ] Requests tab (if enabled for role)
-- [ ] Conversation view with context banner
-- [ ] Composer disabled states (requests, block)
-- [ ] Actions: mute, archive, block, report
-- [ ] Empty states + error handling
-
-### Phase 4 — Frontend (applicant.network)
-
-- [ ] Inbox list with filters + search input
-- [ ] Requests tab with trust indicators
-- [ ] Conversation view with context banner
-- [ ] Composer disabled states (requests, block)
-- [ ] Actions: mute, archive, block, report
-- [ ] Empty states + error handling
-
-### Phase 5 — Moderation Tooling
-
-- [ ] Reports queue view
-- [ ] Evidence bundle viewer (last N messages)
-- [ ] Admin actions (warn, suspend, ban messaging)
-- [ ] Audit log for moderation actions
+- [x] Messages nav entry
+- [x] Inbox list with filters + search input
+- [x] Requests tab (if enabled for role)
+- [x] Conversation view with context banner
+- [x] Composer disabled states (requests, block)
+- [x] Actions: mute, archive, block, report
+- [x] Empty states + error handling
+- [x] Chat entry points: candidates list (grid + table), candidate detail, browse detail
+- [x] Chat entry points: applications list (grid + table) + application detail header
+- [x] Invitations intentionally excluded from chat entry points
+- [x] Disabled chat buttons include tooltip when user identity missing
 
 ### Phase 6 — QA, Rollout, Metrics
 
-- [ ] Unit tests: idempotent send, block enforcement
+### Phase 4 — Frontend (applicant.network)
+
+- [x] Inbox list with filters + search input
+- [x] Requests tab with trust indicators
+- [x] Conversation view with context banner
+- [x] Composer disabled states (requests, block)
+- [x] Actions: mute, archive, block, report
+- [x] Empty states + error handling
+- [x] Chat entry points: applications list (card + table) + application detail actions
+- [x] Dashboard recent applications include chat button (candidate app)
+
+### Phase 5 — Moderation Tooling
+
+- [x] Reports queue view
+- [x] Evidence bundle viewer (last N messages)
+- [x] Admin actions (warn, suspend, ban messaging)
+- [x] Audit log for moderation actions
+
+### Phase 6 — QA, Rollout, Metrics
+
+- [x] Unit tests: idempotent send, block enforcement
 - [ ] Integration tests: request flow, notification flow
 - [ ] Load test: inbox list + burst send
 - [ ] Feature flags for staged rollout
-- [ ] Metrics dashboards + alerts
+- [x] Metrics dashboards + alerts
 
 ---
 
@@ -118,37 +126,37 @@ Implement a unified, safe, and auditable chat system across **splits.network** (
 
 ### 1.1 Conversations
 
-- [ ] `conversations` table with context fields (jobId, applicationId, companyId)
-- [ ] De-dupe constraint for participant pair + context key
-- [ ] `last_message_at` + `created_at`
+- [x] `conversations` table with context fields (jobId, applicationId, companyId)
+- [x] De-dupe constraint for participant pair + context key
+- [x] `last_message_at` + `created_at`
 
 ### 1.2 Participants
 
-- [ ] `conversation_participants` with per-user state:
-    - [ ] `last_read_at`
-    - [ ] `muted_at`
-    - [ ] `archived_at`
-    - [ ] `request_state`
-    - [ ] `role_snapshot`
+- [x] `conversation_participants` with per-user state:
+    - [x] `last_read_at`
+    - [x] `muted_at`
+    - [x] `archived_at`
+    - [x] `request_state`
+    - [x] `role_snapshot`
 
 ### 1.3 Messages
 
-- [ ] `messages` table with `client_message_id` for idempotency
-- [ ] Metadata jsonb for moderation flags and link detection
-- [ ] Index on `(conversation_id, created_at)`
+- [x] `messages` table with `client_message_id` for idempotency
+- [x] Metadata jsonb for moderation flags and link detection
+- [x] Index on `(conversation_id, created_at)`
 
 ### 1.4 Blocks & Reports
 
-- [ ] `user_blocks` table (global)
-- [ ] `chat_reports` table with evidence pointer
-- [ ] `moderation_actions` table for audit trail
+- [x] `user_blocks` table (global)
+- [x] `chat_reports` table with evidence pointer
+- [x] `moderation_actions` table for audit trail
 
 ### 1.5 Retention Config
 
-- [ ] `message_retention_days` default 730 (configurable)
-- [ ] `attachment_retention_days` default 365 (configurable)
-- [ ] `audit_retention_days` default 1095 (configurable)
-- [ ] Optional job runner bookkeeping table for retention runs
+- [x] `message_retention_days` default 730 (configurable)
+- [x] `attachment_retention_days` default 365 (configurable)
+- [x] `audit_retention_days` default 1095 (configurable)
+- [x] Optional job runner bookkeeping table for retention runs
 
 ---
 
@@ -156,40 +164,40 @@ Implement a unified, safe, and auditable chat system across **splits.network** (
 
 ### 2.1 Conversation APIs
 
-- [ ] POST `/chat/conversations` (create/find with deterministic pair ordering + context de-dupe)
-- [ ] GET `/chat/conversations` (filters: inbox/requests/archived/unread, pagination)
-- [ ] GET `/chat/conversations/:id/messages` (cursor pagination)
+- [x] POST `/chat/conversations` (create/find with deterministic pair ordering + context de-dupe)
+- [x] GET `/chat/conversations` (filters: inbox/requests/archived/unread, pagination)
+- [x] GET `/chat/conversations/:id/messages` (cursor pagination)
 
 ### 2.2 Messaging APIs
 
-- [ ] POST `/chat/conversations/:id/messages` (idempotent send)
-- [ ] GET `/chat/conversations/:id/messages?after=messageId&limit=50` (cursor)
-- [ ] Message edit + redaction flags (system/admin only)
-- [ ] Enforce access checks per message send
-- [ ] Prevent sends when blocked or request pending
+- [x] POST `/chat/conversations/:id/messages` (idempotent send)
+- [x] GET `/chat/conversations/:id/messages?after=messageId&limit=50` (cursor)
+- [x] Message edit + redaction flags (system/admin only)
+- [x] Enforce access checks per message send
+- [x] Prevent sends when blocked or request pending
 
 ### 2.3 Requests & Actions
 
-- [ ] POST `/chat/conversations/:id/accept`
-- [ ] POST `/chat/conversations/:id/decline`
-- [ ] POST `/chat/conversations/:id/mute` / DELETE `/chat/conversations/:id/mute`
-- [ ] POST `/chat/conversations/:id/archive` / DELETE `/chat/conversations/:id/archive`
-- [ ] POST `/chat/blocks` / DELETE `/chat/blocks/:blockedUserId`
-- [ ] POST `/chat/reports` (bundle last N messages + metadata)
-- [ ] Update read receipt + maintain unread_count transactionally
+- [x] POST `/chat/conversations/:id/accept`
+- [x] POST `/chat/conversations/:id/decline`
+- [x] POST `/chat/conversations/:id/mute` / DELETE `/chat/conversations/:id/mute`
+- [x] POST `/chat/conversations/:id/archive` / DELETE `/chat/conversations/:id/archive`
+- [x] POST `/chat/blocks` / DELETE `/chat/blocks/:blockedUserId`
+- [x] POST `/chat/reports` (bundle last N messages + metadata)
+- [x] Update read receipt + maintain unread_count transactionally
 
 ### 2.4 Moderation APIs
 
-- [ ] GET `/admin/chat/reports`
-- [ ] POST `/admin/chat/reports/:id/action` (warn/suspend/ban)
-- [ ] GET `/admin/chat/audit`
+- [x] GET `/admin/chat/reports`
+- [x] POST `/admin/chat/reports/:id/action` (warn/suspend/ban)
+- [x] GET `/admin/chat/audit`
 
 ### 2.5 Attachments (Flagged Off)
 
-- [ ] `POST /chat/attachments/init` (signed upload URL)
-- [ ] `POST /chat/attachments/:id/complete` (mark uploaded + enqueue scan)
-- [ ] `GET /chat/attachments/:id/download-url` (signed download URL)
-- [ ] RabbitMQ scan job worker (mark `pending_scan` → `available`/`blocked`)
+- [x] `POST /chat/attachments/init` (signed upload URL)
+- [x] `POST /chat/attachments/:id/complete` (mark uploaded + enqueue scan)
+- [x] `GET /chat/attachments/:id/download-url` (signed download URL)
+- [x] RabbitMQ scan job worker (mark `pending_scan` → `available`/`blocked`)
 
 ---
 
@@ -197,89 +205,144 @@ Implement a unified, safe, and auditable chat system across **splits.network** (
 
 ### 3.1 Realtime
 
-- [ ] Publish events on: message created/updated, conversation updated, attachment updated
-- [ ] Redis channels: `user:{userId}` and `conv:{conversationId}`
-- [ ] Subscribe and update inbox counts
-- [ ] Presence tracking via Redis keys with TTL
-- [ ] Typing events (ephemeral)
-- [ ] Read receipts (persisted + event)
-- [ ] Resync on reconnect/tab focus/heartbeat miss
+- [x] Publish events on: message created/updated, conversation updated, attachment updated
+- [x] Redis channels: `user:{userId}` and `conv:{conversationId}`
+- [x] Subscribe and update inbox counts
+- [x] Presence tracking via Redis keys with TTL
+- [x] Typing events (ephemeral)
+- [x] Read receipts (persisted + event)
+- [x] Resync on reconnect/tab focus/heartbeat miss
 
 ### 3.2 Resync Strategy (Mandatory)
 
-- [ ] Client stores `lastSeenMessageId` per conversation
-- [ ] On reconnect/tab-visible/gateway reconnect/heartbeat miss:
-  - [ ] `GET /chat/conversations/:id/messages?after=<lastSeenMessageId>`
-  - [ ] Refresh inbox list
+- [x] Client stores `lastSeenMessageId` per conversation
+- [x] On reconnect/tab-visible/gateway reconnect/heartbeat miss:
+  - [x] `GET /chat/conversations/:id/messages?after=<lastSeenMessageId>`
+  - [x] Refresh inbox list
 
 ### 3.2 Notifications
 
-- [ ] In-app notifications on new message
-- [ ] Email notifications with rate limits
-- [ ] Respect mute + user preferences
+- [x] In-app notifications on new message
+- [x] Email notifications with rate limits
+- [x] Respect mute + user preferences
 
 ---
 
 ## Section 4: Frontend UX (Shared Requirements)
 
-- [ ] Consistent conversation IDs across apps
-- [ ] Context banner with job/application/company
-- [ ] Requests UX with accept/decline/block/report
-- [ ] Neutral block copy (“Message could not be delivered.”)
-- [ ] Empty states and error states per UX doc
+- [x] Consistent conversation IDs across apps
+- [x] Context banner with job/application/company
+- [x] Requests UX with accept/decline/block/report
+- [x] Neutral block copy (“Message could not be delivered.”)
+- [x] Empty states and error states per UX doc
 
 ---
 
 ## Section 5: Security, Compliance, Observability
 
-- [ ] Authorization checks for every read/write
-- [ ] Rate limiting + abuse throttles
-- [ ] Retention policy enforcement (configurable duration; no deletion in MVP)
-- [ ] Metrics: send rate, fail rate, report rate
-- [ ] Logging for moderation actions
-- [ ] WS + Redis operational metrics (connections, pubsub throughput, auth failures)
-  - [ ] Realtime health endpoint (lightweight)
+- [x] Authorization checks for every read/write
+- [x] Rate limiting + abuse throttles
+- [x] Retention policy enforcement (configurable duration; no deletion in MVP)
+- [x] Metrics: send rate, fail rate, report rate
+- [x] Logging for moderation actions
+- [x] WS + Redis operational metrics (connections, pubsub throughput, auth failures)
+  - [x] Realtime health endpoint (lightweight)
 
 ---
 
 ## Section 6: WebSocket Gateway (AKS)
 
-- [ ] Auth handshake (Clerk JWT validation)
-- [ ] Always subscribe to `user:{userId}`
-- [ ] Subscribe to `conv:{id}` for open conversation (optional inbox preload)
-- [ ] Fanout Redis pub/sub → sockets
-- [ ] Client inbound events:
-  - [ ] typing started/stopped (rate limited)
-  - [ ] presence ping (update Redis TTL)
-  - [ ] read receipts (forward to Chat API)
+- [x] Auth handshake (Clerk JWT validation)
+- [x] Always subscribe to `user:{userId}`
+- [x] Subscribe to `conv:{id}` for open conversation (optional inbox preload)
+- [x] Fanout Redis pub/sub → sockets
+- [x] Client inbound events:
+  - [x] typing started/stopped (rate limited)
+  - [x] presence ping (update Redis TTL)
+  - [x] read receipts (forward to Chat API)
 
 ---
 
 ## Section 7: RabbitMQ Workers
 
-- [ ] Email notifications worker (respect mute + request state, batch sends)
-- [ ] Attachment scanning worker (update DB status + publish `attachment.updated`)
-- [ ] Optional moderation automation worker (spam wave heuristics)
+- [x] Email notifications worker (respect mute + request state, batch sends)
+- [x] Attachment scanning worker (update DB status + publish `attachment.updated`)
+- [x] Optional moderation automation worker (spam wave heuristics)
+
+---
+
+## Environment & Local Dev
+
+- [x] `docker-compose.yml` includes `chat-service`, `chat-gateway`, and chat workers
+- [x] Dockerfiles added for `chat-service` and `chat-gateway`
+- [x] Portal + Candidate env include `NEXT_PUBLIC_CHAT_GATEWAY_URL`
 
 ---
 
 ## Section 8: Retention Jobs
 
-- [ ] Nightly message retention: redact content older than retention
-- [ ] Attachment retention: delete blob + mark deleted
-- [ ] Audit retention: archive/delete per policy
-- [ ] Publish updates (message.updated / attachment.updated)
+- [x] Nightly message retention: redact content older than retention
+- [x] Attachment retention: delete blob + mark deleted
+- [x] Audit retention: archive/delete per policy
+- [x] Publish updates (message.updated / attachment.updated)
 
 ---
 
 ## Section 9: Test Suite (Demo-Proofing)
 
-- [ ] Idempotent send
-- [ ] Conversation de-dupe by pair + context
-- [ ] Request gating (1 message max until accepted; links/attachments blocked)
-- [ ] Block enforcement (server-side)
-- [ ] Unread count + read receipt correctness
-- [ ] Resync path works (simulate missed pub/sub events)
+- [x] Idempotent send
+- [x] Conversation de-dupe by pair + context
+- [x] Request gating (1 message max until accepted; links/attachments blocked)
+- [x] Block enforcement (server-side)
+- [x] Unread count + read receipt correctness
+- [x] Resync path works (unit-level)
+
+---
+
+## Section 10: API + Events Spec (Source of Truth)
+
+### 10.1 REST API
+
+- [x] `POST /chat/conversations` (create/find)
+  - [x] Deterministic participant ordering + context de-dupe
+- [x] `GET /chat/conversations?filter=inbox|requests|archived&cursor=...`
+- [x] `GET /chat/conversations/:id/messages?after=messageId&limit=50`
+- [x] `POST /chat/conversations/:id/messages` (idempotent)
+- [x] `POST /chat/conversations/:id/accept`
+- [x] `POST /chat/conversations/:id/decline`
+- [x] `POST /chat/conversations/:id/mute` / `DELETE /chat/conversations/:id/mute`
+- [x] `POST /chat/conversations/:id/archive` / `DELETE /chat/conversations/:id/archive`
+- [x] `POST /chat/blocks` / `DELETE /chat/blocks/:blockedUserId`
+- [x] `POST /chat/reports`
+- [x] `POST /chat/attachments/init`
+- [x] `POST /chat/attachments/:id/complete`
+- [x] `GET /chat/attachments/:id/download-url`
+
+### 10.2 WebSocket Gateway
+
+- [x] Connect: `wss://<host>/ws/chat?token=<jwt>`
+- [x] Server hello: `{ type: "hello", eventVersion: 1, serverTime: "iso" }`
+- [x] Subscribe: `{ type: "subscribe", channels: ["user:uuid", "conv:uuid"] }`
+
+Server → Client events:
+- [x] `message.created`
+- [x] `message.updated`
+- [x] `conversation.updated`
+- [x] `conversation.requested` / `conversation.accepted` / `conversation.declined`
+- [x] `typing.started` / `typing.stopped`
+- [x] `presence.updated`
+- [x] `read.receipt`
+
+Client → Server events:
+- [x] `typing.started` / `typing.stopped`
+- [x] `presence.ping`
+- [x] `read.receipt`
+
+### 10.3 Redis Channels
+
+- [x] `user:{userId}`
+- [x] `conv:{conversationId}`
+- [x] Presence key: `presence:user:{userId}` (TTL)
 
 ## Acceptance Criteria (MVP)
 

@@ -202,6 +202,13 @@ export default function AdminDashboardClient() {
                         href="/portal/admin/decision-log"
                         color="accent"
                     />
+                    <ActionCard
+                        title="Chat Moderation"
+                        description="Review reports, evidence, and actions"
+                        icon="fa-duotone fa-regular fa-comments-question"
+                        href="/portal/admin/chat"
+                        color="warning"
+                    />
                 </ActionCardGrid>
             </div>
         </div>

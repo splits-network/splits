@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
+import { useToast } from '@/lib/toast-context';
 
 interface DecisionLog {
     id: string;
@@ -21,6 +22,7 @@ interface DecisionLog {
 
 export default function DecisionAuditLogClient() {
     const { getToken } = useAuth();
+    const toast = useToast();
     const [logs, setLogs] = useState<DecisionLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<string>('all');
@@ -254,7 +256,7 @@ export default function DecisionAuditLogClient() {
                                                             <li>
                                                                 <button
                                                                     onClick={() => {
-                                                                        alert(JSON.stringify(log.decision_data, null, 2));
+                                                                        toast.info(JSON.stringify(log.decision_data, null, 2));
                                                                     }}
                                                                 >
                                                                     <i className="fa-duotone fa-regular fa-eye"></i>
@@ -265,7 +267,7 @@ export default function DecisionAuditLogClient() {
                                                                 <li>
                                                                     <button
                                                                         onClick={() => {
-                                                                            alert(log.ai_reasoning?.join('\n'));
+                                                                            toast.info(log.ai_reasoning?.join('\n') || '');
                                                                         }}
                                                                     >
                                                                         <i className="fa-duotone fa-regular fa-brain"></i>

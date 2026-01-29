@@ -1,6 +1,11 @@
 "use client";
 
 import { Candidate } from "./types";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { startChatConversation } from "@/lib/chat-start";
+import { useToast } from "@/lib/toast-context";
+import { useState } from "react";
 
 interface CandidateListItemProps {
     candidate: Candidate;
@@ -13,7 +18,15 @@ export default function CandidateListItem({
     isSelected,
     onSelect,
 }: CandidateListItemProps) {
+    const { getToken } = useAuth();
+    const router = useRouter();
+    const toast = useToast();
+    const [startingChat, setStartingChat] = useState(false);
     const isNew = candidate.is_new;
+    const canChat = Boolean(candidate.user_id);
+    const chatDisabledReason = canChat
+        ? null
+        : "This candidate isn't linked to a user yet.";
 
     return (
         <div
@@ -119,6 +132,48 @@ export default function CandidateListItem({
                         ${isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}
                     `}
                     >
+                        <span title={chatDisabledReason || undefined}>
+                            <button
+                                className="btn btn-xs btn-square btn-ghost h-6 w-6"
+                                title="Message Candidate"
+                                disabled={!canChat || startingChat}
+                                onClick={async (e) => {
+                                    e.stopPropagation();
+                                    if (!candidate.user_id) {
+                                        return;
+                                    }
+                                    try {
+                                        setStartingChat(true);
+                                        const conversationId =
+                                            await startChatConversation(
+                                                getToken,
+                                                candidate.user_id,
+                                                {
+                                                    company_id:
+                                                        candidate.company_id ||
+                                                        null,
+                                                },
+                                            );
+                                        router.push(
+                                            `/portal/messages/${conversationId}`,
+                                        );
+                                    } catch (err: any) {
+                                        console.error(
+                                            "Failed to start chat:",
+                                            err,
+                                        );
+                                        toast.error(
+                                            err?.message ||
+                                                "Failed to start chat",
+                                        );
+                                    } finally {
+                                        setStartingChat(false);
+                                    }
+                                }}
+                            >
+                                <i className="fa-duotone fa-regular fa-messages text-xs"></i>
+                            </button>
+                        </span>
                         <button
                             className="btn btn-xs btn-square btn-ghost h-6 w-6"
                             title="Copy Link"

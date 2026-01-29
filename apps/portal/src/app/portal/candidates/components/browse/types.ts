@@ -20,6 +20,10 @@ export interface Candidate extends Omit<BaseCandidate, 'created_at' | 'updated_a
     
     // Legacy fields that may exist in API but not in shared types
     description?: string;
+
+    // Identity linkage (for chat)
+    user_id: string | null;
+    company_id?: string | null;
     
     // Computed relationship status fields
     is_new?: boolean;

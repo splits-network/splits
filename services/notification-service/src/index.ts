@@ -25,6 +25,7 @@ async function main() {
     const atsServiceUrl = process.env.ATS_SERVICE_URL || 'http://localhost:3002';
     const networkServiceUrl = process.env.NETWORK_SERVICE_URL || 'http://localhost:3003';
     const candidateWebsiteUrl = process.env.CANDIDATE_WEBSITE_URL || 'http://localhost:3101';
+    const portalUrl = process.env.PORTAL_URL || 'http://localhost:3001';
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
@@ -86,7 +87,15 @@ async function main() {
     );
 
     // Initialize domain event consumer
-    const consumer = new DomainEventConsumer(rabbitConfig.url, notificationService, services, repository, logger);
+    const consumer = new DomainEventConsumer(
+        rabbitConfig.url,
+        notificationService,
+        services,
+        repository,
+        logger,
+        portalUrl,
+        candidateWebsiteUrl
+    );
     await consumer.connect();
 
     const v2EventPublisher = new V2EventPublisher(

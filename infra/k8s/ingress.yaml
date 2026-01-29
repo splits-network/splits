@@ -1,146 +1,157 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: splits-network-ingress
-  namespace: splits-network
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    # Enforce TLS 1.2 and higher
-    nginx.ingress.kubernetes.io/ssl-protocols: "TLSv1.2 TLSv1.3"
-    nginx.ingress.kubernetes.io/ssl-ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384"
+    name: splits-network-ingress
+    namespace: splits-network
+    annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        # Enforce TLS 1.2 and higher
+        nginx.ingress.kubernetes.io/ssl-protocols: "TLSv1.2 TLSv1.3"
+        nginx.ingress.kubernetes.io/ssl-ciphers: "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384"
+        # WebSocket support for chat gateway
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+        nginx.ingress.kubernetes.io/proxy-connect-timeout: "10"
 spec:
-  ingressClassName: nginx
-  tls:
-    - hosts:
-        - splits.network
-        - api.splits.network
-        - applicant.network
-        - employment-networks.com
-      secretName: splits-network-tls
-  rules:
-    - host: splits.network
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: portal
-                port:
-                  number: 80
-    - host: applicant.network
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: candidate
-                port:
-                  number: 80
-    - host: api.splits.network
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: api-gateway
-                port:
-                  number: 80
-    - host: employment-networks.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: corporate
-                port:
-                  number: 80
+    ingressClassName: nginx
+    tls:
+        - hosts:
+              - splits.network
+              - api.splits.network
+              - applicant.network
+              - employment-networks.com
+          secretName: splits-network-tls
+    rules:
+        - host: splits.network
+          http:
+              paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: portal
+                            port:
+                                number: 80
+        - host: applicant.network
+          http:
+              paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: candidate
+                            port:
+                                number: 80
+        - host: api.splits.network
+          http:
+              paths:
+                  - path: /chat
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: chat-gateway
+                            port:
+                                number: 80
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: api-gateway
+                            port:
+                                number: 80
+        - host: employment-networks.com
+          http:
+              paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: corporate
+                            port:
+                                number: 80
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: splits-network-www-redirect
-  namespace: splits-network
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/permanent-redirect: https://splits.network$request_uri
+    name: splits-network-www-redirect
+    namespace: splits-network
+    annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/permanent-redirect: https://splits.network$request_uri
 spec:
-  ingressClassName: nginx
-  tls:
-    - hosts:
-        - www.splits.network
-      secretName: splits-network-www-tls
-  rules:
-    - host: www.splits.network
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: portal
-                port:
-                  number: 80
+    ingressClassName: nginx
+    tls:
+        - hosts:
+              - www.splits.network
+          secretName: splits-network-www-tls
+    rules:
+        - host: www.splits.network
+          http:
+              paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: portal
+                            port:
+                                number: 80
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: applicant-network-www-redirect
-  namespace: splits-network
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/permanent-redirect: https://applicant.network$request_uri
+    name: applicant-network-www-redirect
+    namespace: splits-network
+    annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/permanent-redirect: https://applicant.network$request_uri
 spec:
-  ingressClassName: nginx
-  tls:
-    - hosts:
-        - www.applicant.network
-      secretName: applicant-network-www-tls
-  rules:
-    - host: www.applicant.network
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: candidate
-                port:
-                  number: 80
+    ingressClassName: nginx
+    tls:
+        - hosts:
+              - www.applicant.network
+          secretName: applicant-network-www-tls
+    rules:
+        - host: www.applicant.network
+          http:
+              paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: candidate
+                            port:
+                                number: 80
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: employment-networks-www-redirect
-  namespace: splits-network
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/permanent-redirect: https://employment-networks.com$request_uri
+    name: employment-networks-www-redirect
+    namespace: splits-network
+    annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/permanent-redirect: https://employment-networks.com$request_uri
 spec:
-  ingressClassName: nginx
-  tls:
-    - hosts:
-        - www.employment-networks.com
-      secretName: employment-networks-www-tls
-  rules:
-    - host: www.employment-networks.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: corporate
-                port:
-                  number: 80
+    ingressClassName: nginx
+    tls:
+        - hosts:
+              - www.employment-networks.com
+          secretName: employment-networks-www-tls
+    rules:
+        - host: www.employment-networks.com
+          http:
+              paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                        service:
+                            name: corporate
+                            port:
+                                number: 80

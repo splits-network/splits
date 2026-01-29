@@ -1,8 +1,22 @@
 "use client";
 
 import { Candidate } from "./types";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { startChatConversation } from "@/lib/chat-start";
+import { useToast } from "@/lib/toast-context";
+import { useState } from "react";
 
 export default function DetailHeader({ candidate }: { candidate: Candidate }) {
+    const { getToken } = useAuth();
+    const router = useRouter();
+    const toast = useToast();
+    const [startingChat, setStartingChat] = useState(false);
+    const canChat = Boolean(candidate.user_id);
+    const chatDisabledReason = canChat
+        ? null
+        : "This candidate isn't linked to a user yet.";
+
     return (
         <div className="flex flex-col sm:flex-row gap-6 items-start justify-between">
             <div className="flex gap-5 items-start">
@@ -138,6 +152,49 @@ export default function DetailHeader({ candidate }: { candidate: Candidate }) {
             </div>
 
             <div className="flex gap-2">
+                <span title={chatDisabledReason || undefined}>
+                    <button
+                        className="btn btn-sm btn-outline"
+                        disabled={!canChat || startingChat}
+                        onClick={async () => {
+                            if (!candidate.user_id) {
+                                return;
+                            }
+                            try {
+                                setStartingChat(true);
+                                const conversationId =
+                                    await startChatConversation(
+                                        getToken,
+                                        candidate.user_id,
+                                        {
+                                            company_id:
+                                                candidate.company_id || null,
+                                        },
+                                    );
+                                router.push(
+                                    `/portal/messages/${conversationId}`,
+                                );
+                            } catch (err: any) {
+                                console.error(
+                                    "Failed to start chat:",
+                                    err,
+                                );
+                                toast.error(
+                                    err?.message || "Failed to start chat",
+                                );
+                            } finally {
+                                setStartingChat(false);
+                            }
+                        }}
+                    >
+                        {startingChat ? (
+                            <span className="loading loading-spinner loading-xs"></span>
+                        ) : (
+                            <i className="fa-duotone fa-regular fa-messages"></i>
+                        )}
+                        Message
+                    </button>
+                </span>
                 <button className="btn btn-sm btn-ghost">
                     <i className="fa-duotone fa-regular fa-pen"></i> Edit
                 </button>

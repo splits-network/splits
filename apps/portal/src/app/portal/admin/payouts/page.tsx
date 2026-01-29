@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
 import {
     useStandardList,
     PaginationControls,
@@ -34,6 +35,7 @@ interface PayoutFilters {
 export default function PayoutsAdminPage() {
     const { getToken } = useAuth();
     const [processingId, setProcessingId] = useState<string | null>(null);
+    const toast = useToast();
     const [badgeCounts, setBadgeCounts] = useState({
         pending_schedules: 0,
         active_holds: 0,
@@ -113,11 +115,11 @@ export default function PayoutsAdminPage() {
             if (!token) throw new Error('No auth token');
             const apiClient = createAuthenticatedClient(token);
             await apiClient.post(`/payouts/${payoutId}/process`);
-            alert('Payout processed successfully');
+            toast.success('Payout processed successfully');
             refresh();
         } catch (error) {
             console.error('Failed to process payout:', error);
-            alert('Failed to process payout');
+            toast.error('Failed to process payout');
         } finally {
             setProcessingId(null);
         }

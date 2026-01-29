@@ -270,6 +270,7 @@ export function BrowseInvitationsClient() {
                         limit={limit}
                         onLimitChange={setLimit}
                         loading={loading}
+                        compact={true}
                     />
                 </div>
             </div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
 
 interface Job {
     id: string;
@@ -34,6 +35,7 @@ export default function RoleAssignmentsPage() {
     const [assignments, setAssignments] = useState<Map<string, string[]>>(new Map());
     const [loading, setLoading] = useState(true);
     const [assigning, setAssigning] = useState(false);
+    const toast = useToast();
 
     useEffect(() => {
         loadData();
@@ -80,7 +82,7 @@ export default function RoleAssignmentsPage() {
 
     async function assignRecruiter() {
         if (!selectedJob || !selectedRecruiter) {
-            alert('Please select both a job and a recruiter');
+            toast.error('Please select both a job and a recruiter');
             return;
         }
 
@@ -109,10 +111,10 @@ export default function RoleAssignmentsPage() {
 
             // Reset selection
             setSelectedRecruiter('');
-            alert('Recruiter assigned successfully!');
+            toast.success('Recruiter assigned successfully!');
         } catch (error) {
             console.error('Failed to assign recruiter:', error);
-            alert('Failed to assign recruiter');
+            toast.error('Failed to assign recruiter');
         } finally {
             setAssigning(false);
         }
@@ -140,10 +142,10 @@ export default function RoleAssignmentsPage() {
                 return newMap;
             });
 
-            alert('Assignment removed successfully!');
+            toast.success('Assignment removed successfully!');
         } catch (error) {
             console.error('Failed to remove assignment:', error);
-            alert('Failed to remove assignment');
+            toast.error('Failed to remove assignment');
         }
     }
 

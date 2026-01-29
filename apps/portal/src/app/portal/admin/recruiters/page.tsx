@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
 import {
     useStandardList,
     PaginationControls,
@@ -31,6 +32,7 @@ interface RecruiterFilters {
 export default function RecruiterManagementPage() {
     const { getToken } = useAuth();
     const [updatingId, setUpdatingId] = useState<string | null>(null);
+    const toast = useToast();
 
     // Memoize defaultFilters to prevent infinite re-renders in useStandardList
     const defaultFilters = useMemo<RecruiterFilters>(() => ({}), []);
@@ -80,7 +82,7 @@ export default function RecruiterManagementPage() {
             refresh();
         } catch (error) {
             console.error('Failed to update recruiter status:', error);
-            alert('Failed to update recruiter status');
+            toast.error('Failed to update recruiter status');
         } finally {
             setUpdatingId(null);
         }

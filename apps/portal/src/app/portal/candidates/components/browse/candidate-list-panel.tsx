@@ -235,6 +235,7 @@ export default function CandidateListPanel({
                         <PaginationControls
                             pagination={pagination}
                             onPageChange={goToPage}
+                            compact={true}
                         />
                     </div>
                 )}

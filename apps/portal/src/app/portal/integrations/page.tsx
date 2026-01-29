@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { getPlatformIcon } from '@/lib/utils/icon-styles';
 import { getPlatformBadge } from '@/lib/utils/badge-styles';
 import { ApiClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
 
 interface ATSIntegration {
     id: string;
@@ -29,6 +30,7 @@ export default function IntegrationsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
+    const toast = useToast();
 
     // Load integrations
     useEffect(() => {
@@ -79,11 +81,11 @@ export default function IntegrationsPage() {
                 direction: 'inbound'
             });
 
-            alert('Sync triggered successfully');
+            toast.success('Sync triggered successfully');
             await loadIntegrations();
         } catch (err: any) {
             console.error('Failed to trigger sync:', err);
-            alert(`Error: ${err.message}`);
+            toast.error(`Error: ${err.message}`);
         }
     };
 

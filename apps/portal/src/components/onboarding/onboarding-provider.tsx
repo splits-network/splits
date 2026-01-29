@@ -26,6 +26,7 @@ import {
 import { ApiClient, createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
 import { ensureUserInDatabase } from "@/lib/user-registration";
+import { getCachedCurrentUserProfile, setCachedCurrentUserProfile } from "@/lib/current-user-profile";
 
 type InitStatus = "loading" | "creating_account" | "ready" | "error";
 
@@ -74,9 +75,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
                 // Step 1: Try /users/me endpoint first (most direct)
                 try {
-                    const meResponse = await apiClient.get("/users/me");
-                    if (meResponse?.data) {
-                        userData = meResponse.data;
+                    const cached = await getCachedCurrentUserProfile(getToken);
+                    if (cached) {
+                        userData = cached;
                     }
                 } catch (meError: any) {
                     // 404 or 500 - user doesn't exist, continue to fallback
@@ -117,6 +118,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
                     if (result.success && result.user) {
                         userData = result.user;
+                        setCachedCurrentUserProfile(result.user);
                     } else {
                         throw new Error(
                             result.error || "Failed to create user account",
