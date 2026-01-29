@@ -261,6 +261,8 @@ jobs:
               run: |
                   export IMAGE_TAG=${{ github.sha }}
                   export ACR_SERVER=${{ secrets.ACR_LOGIN_SERVER }}
+                  export API_BASE_URL="https://api.staging.splits.network"
+                  export CHAT_GATEWAY_URL="wss://api.staging.splits.network/chat"
 
                   # Use envsubst to replace image tags in all deployment files
                   for file in infra/k8s/*/deployment.yaml; do

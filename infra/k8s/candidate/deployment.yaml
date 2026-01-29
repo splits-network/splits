@@ -29,13 +29,11 @@ spec:
                       - name: NEXT_PUBLIC_SENTRY_DSN
                         value: "https://f211943fa2d49fe2fff649d35e7a3707@o4510570789732352.ingest.us.sentry.io/4510570904551424"
                       - name: NEXT_PUBLIC_API_URL
-                        value: "https://api.staging.splits.network/api"
+                        value: "${API_BASE_URL}/api"
                       - name: NEXT_PUBLIC_API_GATEWAY_URL
-                        value: "https://api.staging.splits.network"
+                        value: "${API_BASE_URL}"
                       - name: NEXT_PUBLIC_CHAT_GATEWAY_URL
-                        value: "wss://api.staging.splits.network/chat"
-                      - name: NEXT_PUBLIC_CHAT_GATEWAY_URL
-                        value: "wss://api.splits.network/chat"
+                        value: "${CHAT_GATEWAY_URL}"
                       - name: NEXT_PUBLIC_APP_URL
                         value: "https://applicant.network"
                       - name: IDENTITY_SERVICE_URL
