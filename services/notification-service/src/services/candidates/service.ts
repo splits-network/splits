@@ -203,7 +203,7 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `Candidate Sourced: ${data.candidateName}`;
-        const candidatesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/candidates`;
+        const candidatesUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/candidates`;
 
         const html = candidateSourcedEmail({
             candidateName: data.candidateName,
@@ -233,7 +233,7 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `Candidate Sourced: ${data.candidateName}`;
-        const candidatesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/candidates`;
+        const candidatesUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/candidates`;
 
         const html = candidateSourcedEmail({
             candidateName: data.candidateName,
@@ -262,7 +262,7 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = "You've Been Added to a Recruiter's Network";
-        const portalUrl = `${process.env.CANDIDATE_PORTAL_URL || 'https://applicant.network'}/portal/profile`;
+        const portalUrl = `${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}/portal/profile`;
 
         const html = candidateAddedToNetworkEmail({
             candidateName: data.candidateName,
@@ -290,7 +290,7 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `Ownership Conflict Detected: ${data.candidateName}`;
-        const candidateUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/candidates`;
+        const candidateUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/candidates`;
 
         const html = ownershipConflictEmail({
             candidateName: data.candidateName,
@@ -318,7 +318,7 @@ export class CandidatesEmailService {
         }
     ): Promise<void> {
         const subject = `Candidate Already Claimed: ${data.candidateName}`;
-        const candidatesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/candidates`;
+        const candidatesUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/candidates`;
 
         const html = ownershipConflictRejectionEmail({
             candidateName: data.candidateName,

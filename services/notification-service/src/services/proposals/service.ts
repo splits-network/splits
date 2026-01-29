@@ -167,7 +167,7 @@ export class ProposalsEmailService {
         }
     ): Promise<void> {
         const subject = `Proposal Accepted: ${data.candidateName} for ${data.jobTitle}`;
-        const proposalUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/roles`;
+        const proposalUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/roles`;
 
         const html = proposalAcceptedEmail({
             candidateName: data.candidateName,
@@ -197,7 +197,7 @@ export class ProposalsEmailService {
         }
     ): Promise<void> {
         const subject = `Proposal Declined: ${data.candidateName}`;
-        const rolesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/roles`;
+        const rolesUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/roles`;
 
         const html = proposalDeclinedEmail({
             candidateName: data.candidateName,
@@ -226,7 +226,7 @@ export class ProposalsEmailService {
         }
     ): Promise<void> {
         const subject = `Proposal Expired: ${data.candidateName}`;
-        const rolesUrl = `${process.env.PORTAL_URL || 'https://splits.network'}/portal/roles`;
+        const rolesUrl = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/roles`;
 
         const html = proposalTimeoutEmail({
             candidateName: data.candidateName,
