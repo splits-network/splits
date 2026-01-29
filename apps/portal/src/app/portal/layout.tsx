@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { PortalHeader } from "@/components/portal-header";
 import { AuthenticatedLayoutClient } from "./layout-client";
-import { ServiceStatusBanner } from "@/components/service-status-banner";
 
 export default async function AuthenticatedLayout({
     children,
@@ -27,7 +26,6 @@ export default async function AuthenticatedLayout({
                 />
                 <Sidebar />
                 <div className="drawer-content flex flex-col min-h-screen">
-                    <ServiceStatusBanner />
                     <main className="p-6 flex-1">{children}</main>
                 </div>
             </div>

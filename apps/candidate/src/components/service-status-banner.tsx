@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useServiceHealth } from '@/hooks/useServiceHealth';
+import { useServiceHealth } from '@/hooks/use-service-health';
 
 const BANNER_DISMISSED_KEY = 'service-status-banner-dismissed';
 const BANNER_DISMISSED_TIMESTAMP_KEY = 'service-status-banner-dismissed-timestamp';
@@ -65,7 +65,7 @@ export function ServiceStatusBanner() {
     const moreText = unhealthyCount > 3 ? ` and ${unhealthyCount - 3} more` : '';
 
     return (
-        <div className="fixed top-16 left-0 right-0 z-50 p-4">
+        <div className="w-full p-4 bg-error/10 border-b border-error/20">
             <div className="container mx-auto">
                 <div role="alert" className="alert alert-vertical alert-error sm:alert-horizontal shadow-lg">
                     <i className="fa-duotone fa-regular fa-bug fa-beat text-xl"></i>
@@ -76,7 +76,7 @@ export function ServiceStatusBanner() {
                         </div>
                     </span>
                     <div>
-                        <Link href="https://splits.network/public/status" target="_blank" className="btn btn-sm btn-ghost">
+                        <Link href="/status" className="btn btn-sm btn-ghost">
                             View Status
                         </Link>
                         <button
