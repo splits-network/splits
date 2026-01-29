@@ -56,6 +56,10 @@ spec:
                         value: "http://ats-service:3002"
                       - name: NETWORK_SERVICE_URL
                         value: "http://network-service:3003"
+                      - name: PORTAL_URL
+                        value: "${PORTAL_URL}"
+                      - name: CANDIDATE_WEBSITE_URL
+                        value: "${CANDIDATE_URL}"
                       - name: NEXT_PUBLIC_PORTAL_URL
                         value: "${PORTAL_URL}"
                       - name: NEXT_PUBLIC_CANDIDATE_URL

@@ -10,6 +10,7 @@ export interface BuildServerOptions {
         credentials?: boolean;
     };
     helmet?: boolean;
+    disableRequestLogging?: boolean;
 }
 
 /**
@@ -18,13 +19,13 @@ export interface BuildServerOptions {
 export async function buildServer(
     options: BuildServerOptions
 ): Promise<FastifyInstance> {
-    const { logger, cors: corsOptions, helmet: useHelmet = true } = options;
+    const { logger, cors: corsOptions, helmet: useHelmet = true, disableRequestLogging = false } = options;
 
     // Fastify 5.x expects logger to be true, false, or a pino options object
     // We pass true and then the logger instance will be used internally
     const serverOptions: FastifyServerOptions = {
         logger: true,
-        disableRequestLogging: false,
+        disableRequestLogging,
         requestIdLogLabel: 'reqId',
     };
 
