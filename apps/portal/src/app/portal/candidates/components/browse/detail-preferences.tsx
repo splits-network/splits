@@ -67,12 +67,8 @@ export default function DetailPreferences({
                         Availability
                     </span>
                     <span className="font-medium capitalize">
-                        {candidate.marketplace_profile?.availability ||
-                        candidate.availability ? (
-                            (
-                                candidate.marketplace_profile?.availability ||
-                                candidate.availability
-                            )?.replace(/_/g, " ")
+                        {candidate.availability ? (
+                            candidate.availability.replace(/_/g, " ")
                         ) : (
                             <span className="text-sm opacity-40 italic">
                                 Not specified

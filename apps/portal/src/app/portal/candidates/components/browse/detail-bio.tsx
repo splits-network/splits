@@ -6,7 +6,7 @@ import { MarkdownRenderer } from "@/components/markdown-renderer";
 export default function DetailBio({ candidate }: { candidate: Candidate }) {
     // Prioritize rich bio from marketplace profile → then standard bio → then legacy description
     const bioText =
-        candidate.marketplace_profile?.bio_rich ||
+        candidate.marketplace_profile?.bio ||
         candidate.bio ||
         candidate.description;
 

@@ -12,7 +12,7 @@ export function PortalHeader() {
     const { user } = useUser();
     const { signOut } = useClerk();
     const { isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
-    const { title, subtitle } = usePageTitle();
+    const { title, subtitle, children: titleChildren } = usePageTitle();
     const [isDark, setIsDark] = useState(false);
 
     useEffect(() => {
@@ -75,18 +75,27 @@ export function PortalHeader() {
 
             {/* Page title & subtitle */}
             <div className="flex-1 ml-40 min-w-0 px-2">
-                {title && (
-                    <div className="flex flex-col items-start gap-0">
-                        <h1 className="text-lg font-semibold truncate">
-                            {title}
-                        </h1>
-                        {subtitle && (
-                            <span className="text-sm text-base-content/60 truncate hidden sm:inline">
-                                {subtitle}
-                            </span>
+                <div className="flex items-center justify-between">
+                    <div className="min-w-0 flex-1">
+                        {title && (
+                            <div className="flex flex-col items-start gap-0">
+                                <h1 className="text-lg font-semibold truncate">
+                                    {title}
+                                </h1>
+                                {subtitle && (
+                                    <span className="text-sm text-base-content/60 truncate hidden sm:inline">
+                                        {subtitle}
+                                    </span>
+                                )}
+                            </div>
                         )}
                     </div>
-                )}
+                    {titleChildren && (
+                        <div className="flex items-center gap-4 ml-4">
+                            {titleChildren}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* User controls */}

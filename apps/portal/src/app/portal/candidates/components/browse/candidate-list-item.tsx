@@ -104,10 +104,12 @@ export default function CandidateListItem({
                     <span
                         className={`text-[10px] ${isNew ? "font-semibold text-primary" : "text-base-content/40"}`}
                     >
-                        {new Date(candidate.created_at).toLocaleDateString(
-                            undefined,
-                            { month: "short", day: "numeric" },
-                        )}
+                        {candidate.created_at
+                            ? new Date(candidate.created_at).toLocaleDateString(
+                                  undefined,
+                                  { month: "short", day: "numeric" },
+                              )
+                            : ""}
                     </span>
 
                     {/* Quick Actions - Visible on Hover/Selected */}

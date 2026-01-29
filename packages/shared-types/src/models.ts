@@ -606,7 +606,7 @@ export interface RecruiterCandidateWithCandidate extends RecruiterCandidate {
         email: string;
         phone?: string;
         profile_picture?: string;
-        current_job_title?: string;
+        current_title?: string;
         current_company?: string;
         location?: string;
         verification_status?: string;

@@ -16,15 +16,6 @@ import { CompletionStep } from "./steps/completion-step";
 export function OnboardingWizardModal() {
     const { state, loading, persisting } = useOnboarding();
 
-    console.log(
-        "[OnboardingModal] Rendering - currentStep:",
-        state.currentStep,
-        "selectedRole:",
-        state.selectedRole,
-        "loading:",
-        loading,
-    );
-
     // Block body scroll when modal is open
     useEffect(() => {
         if (state.isModalOpen) {

@@ -206,9 +206,18 @@ export default function CandidateListPanel({
                 {error && <ErrorState message={error} onRetry={refresh} />}
 
                 {!loading && !error && candidates.length === 0 && (
-                    <div className="h-full flex flex-col items-center justify-center p-6 text-center opacity-60">
-                        <i className="fa-duotone fa-regular fa-inbox text-4xl mb-2"></i>
+                    <div className="flex flex-col items-center justify-center h-64 p-4 text-center text-base-content/50">
+                        <i className="fa-duotone fa-regular fa-inbox text-4xl mb-3 opacity-50" />
                         <p>No candidates found</p>
+                        <button
+                            onClick={() => {
+                                setFilter("scope", "all");
+                                setActiveTab("all");
+                            }}
+                            className="btn btn-ghost btn-xs mt-2"
+                        >
+                            Reset Filters
+                        </button>
                     </div>
                 )}
 
@@ -222,7 +231,7 @@ export default function CandidateListPanel({
                 ))}
 
                 {!loading && candidates.length > 0 && (
-                    <div className="p-4 border-t border-base-300">
+                    <div className="p-4 border-t border-base-300 flex justify-center">
                         <PaginationControls
                             pagination={pagination}
                             onPageChange={goToPage}

@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import {
     useStandardList,
     PaginationControls,
-    ViewModeToggle,
     SearchInput,
     EmptyState,
     LoadingState,
@@ -22,12 +21,17 @@ import {
 } from "../../../../components/charts/roles-trends-chart";
 import AddRoleWizardModal from "./add-role-wizard-modal";
 import Link from "next/link";
+import { ViewMode } from "@/hooks/use-view-mode";
 
 // ===== TYPES =====
 
 interface JobFilters {
     status?: string;
     job_owner_filter?: "all" | "assigned";
+}
+
+interface RolesListProps {
+    view: Exclude<ViewMode, "browse">; // Only grid or table
 }
 
 // ===== TABLE COLUMNS =====
@@ -45,7 +49,7 @@ const roleColumns: TableColumn[] = [
 
 // ===== COMPONENT =====
 
-export default function RolesList() {
+export default function RolesList({ view }: RolesListProps) {
     const {
         profile,
         isAdmin,
@@ -96,8 +100,6 @@ export default function RolesList() {
         total,
         goToPage,
         setLimit,
-        viewMode,
-        setViewMode,
         refresh,
     } = useStandardList<Job, JobFilters>({
         endpoint: "/jobs",
@@ -106,7 +108,6 @@ export default function RolesList() {
         defaultSortOrder: "desc",
         defaultLimit: 25,
         syncToUrl: true,
-        viewModeKey: "rolesViewMode",
     });
 
     // Time period state for trends (shared with chart)
@@ -313,12 +314,6 @@ export default function RolesList() {
                                     loading={loading}
                                     className="flex-1 min-w-[200px]"
                                 />
-
-                                {/* View Toggle */}
-                                <ViewModeToggle
-                                    viewMode={viewMode}
-                                    onViewModeChange={setViewMode}
-                                />
                             </div>
                         </div>
                     </div>
@@ -329,7 +324,7 @@ export default function RolesList() {
                     {loading && jobs.length === 0 && <LoadingState />}
 
                     {/* Grid View */}
-                    {!loading && viewMode === "grid" && jobs.length > 0 && (
+                    {!loading && view === "grid" && jobs.length > 0 && (
                         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                             {jobs.map((job) => (
                                 <RoleCard
@@ -345,7 +340,7 @@ export default function RolesList() {
                     )}
 
                     {/* Table View */}
-                    {!loading && viewMode === "table" && jobs.length > 0 && (
+                    {!loading && view === "table" && jobs.length > 0 && (
                         <DataTable
                             columns={roleColumns}
                             sortBy={sortBy}

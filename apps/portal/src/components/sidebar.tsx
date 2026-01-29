@@ -27,7 +27,7 @@ const navItems: NavItem[] = [
         mobileDock: true,
     },
     {
-        href: "/portal/browse/roles",
+        href: "/portal/roles",
         label: "Roles",
         icon: "fa-briefcase",
         roles: ["all"],
@@ -47,7 +47,7 @@ const navItems: NavItem[] = [
     // { href: '/portal/proposals', label: 'Proposals', icon: 'fa-handshake', roles: ['recruiter', 'company_admin', 'hiring_manager'], section: 'management', mobileDock: true },
     // { href: '/portal/gate-reviews', label: 'Gate Reviews', icon: 'fa-clipboard-check', roles: ['recruiter', 'company_admin', 'hiring_manager'], section: 'management', mobileDock: false },
     {
-        href: "/portal/browse/candidates",
+        href: "/portal/candidates",
         label: "Candidates",
         icon: "fa-users",
         roles: ["recruiter", "platform_admin"],
@@ -113,21 +113,6 @@ const adminNavItems: NavItem[] = [
         icon: "fa-gauge-high",
         roles: ["platform_admin"],
         section: "main",
-    },
-];
-
-const soonToBeRemovedNavItems: NavItem[] = [
-    {
-        href: "/portal/candidates",
-        label: "Candidates",
-        icon: "fa-ghost",
-        roles: ["recruiter", "platform_admin"],
-    },
-    {
-        href: "/portal/roles",
-        label: "Roles",
-        icon: "fa-ghost",
-        roles: ["all"],
     },
 ];
 
@@ -292,23 +277,6 @@ export function Sidebar() {
                             <div>
                                 <SectionHeader title="Platform" />
                                 {adminNavItems.map((item) => (
-                                    <NavItem
-                                        key={item.href}
-                                        item={item}
-                                        isActive={
-                                            pathname === item.href ||
-                                            pathname.startsWith(item.href + "/")
-                                        }
-                                    />
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Soon to be removed */}
-                        {soonToBeRemovedNavItems.length > 0 && (
-                            <div className="mt-6">
-                                <SectionHeader title="Deprecated" />
-                                {soonToBeRemovedNavItems.map((item) => (
                                     <NavItem
                                         key={item.href}
                                         item={item}
