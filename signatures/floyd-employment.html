@@ -5,517 +5,276 @@
     width="500px"
     style="
         vertical-align: -webkit-baseline-middle;
-        font-size: small;
-        font-family: Arial;
+        font-family: &quot;Segoe UI&quot;, Arial, sans-serif;
+        background: linear-gradient(
+            135deg,
+            rgb(35, 56, 118) 0%,
+            rgb(28, 45, 95) 100%
+        );
+        border-radius: 8px;
+        padding: 20px;
+        color: white;
     "
 >
     <tbody>
         <tr>
             <td>
-                <table
-                    cellpadding="0"
-                    cellspacing="0"
-                    border="0"
-                    style="
-                        vertical-align: -webkit-baseline-middle;
-                        font-size: small;
-                        font-family: Arial;
-                    "
-                >
+                <table cellpadding="0" cellspacing="0" border="0" width="100%">
                     <tbody>
                         <tr>
-                            <td style="vertical-align: middle">
-                                <h2
+                            <!-- Left Side: Name, Title, Contact -->
+                            <td
+                                style="
+                                    vertical-align: top;
+                                    width: 60%;
+                                    padding-right: 20px;
+                                "
+                            >
+                                <!-- Name and Title -->
+                                <h1
                                     style="
-                                        margin: 0px;
-                                        font-size: 16px;
-                                        font-family: Arial;
-                                        color: rgb(0, 0, 0);
-                                        font-weight: 600;
-                                        line-height: 24px;
+                                        margin: 0px 0px 4px 0px;
+                                        font-size: 28px;
+                                        font-family:
+                                            &quot;Segoe UI&quot;, Arial,
+                                            sans-serif;
+                                        color: white;
+                                        font-weight: 700;
+                                        line-height: 32px;
+                                        letter-spacing: -0.5px;
                                     "
                                 >
-                                    <span>Floyd</span><span>&nbsp;</span
-                                    ><span>Kobler</span>
-                                </h2>
+                                    Floyd Kobler
+                                </h1>
                                 <p
                                     style="
-                                        margin: 0px;
-                                        color: rgb(0, 0, 0);
-                                        font-size: 12px;
+                                        margin: 0px 0px 16px 0px;
+                                        color: white;
+                                        font-size: 16px;
+                                        font-weight: 400;
                                         line-height: 20px;
+                                        opacity: 0.9;
                                     "
                                 >
-                                    <span>Founder</span>
+                                    Founder
                                 </p>
-                                <div
-                                    style="
-                                        margin: 0px;
-                                        font-weight: 500;
-                                        color: rgb(0, 0, 0);
-                                        font-size: 12px;
-                                        line-height: 20px;
-                                    "
-                                >
-                                    <span>Employment Networks</span>
-                                </div>
-                            </td>
-                            <td width="30" aria-label="Vertical Spacer">
-                                <div style="width: 30px"></div>
-                            </td>
-                            <td
-                                width="1"
-                                aria-label="Divider"
-                                style="
-                                    width: 1px;
-                                    height: auto;
-                                    border-bottom: none;
-                                    border-left: 1px solid rgb(35, 56, 118);
-                                "
-                            ></td>
-                            <td width="30" aria-label="Vertical Spacer">
-                                <div style="width: 30px"></div>
-                            </td>
-                            <td style="vertical-align: middle">
+
+                                <!-- Contact Information -->
                                 <table
                                     cellpadding="0"
                                     cellspacing="0"
                                     border="0"
-                                    style="
-                                        vertical-align: -webkit-baseline-middle;
-                                        font-size: small;
-                                        font-family: Arial;
-                                        line-height: 1;
-                                    "
                                 >
                                     <tbody>
-                                        <tr
-                                            style="
-                                                vertical-align: middle;
-                                                height: 26px;
-                                            "
-                                        >
+                                        <!-- Phone -->
+                                        <tr>
                                             <td
-                                                width="24"
-                                                style="vertical-align: middle"
+                                                style="
+                                                    vertical-align: middle;
+                                                    padding-right: 10px;
+                                                    padding-bottom: 8px;
+                                                "
                                             >
-                                                <table
-                                                    cellpadding="0"
-                                                    cellspacing="0"
-                                                    border="0"
+                                                <img
+                                                    src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNjQwIiBmaWxsPSJ3aGl0ZSI+PHBhdGggb3BhY2l0eT0iLjQiIGQ9Ik0xMjEuNCAyMjcuNEMxNDguNSAzODEuMiAyNTguOCA0OTEuNiA0MTIuNiA1MTguN0M0NjEgNTI3LjIgNTA0LjUgNDkzLjQgNTE5LjYgNDQ4LjJDNTIwLjkgNDQ0LjIgNTE5IDQzOS45IDUxNS4yIDQzOC4yTDQyOCAzOTguNEM0MjQuNiAzOTYuOSA0MjAuNiAzOTcuOCA0MTguMyA0MDAuN0wzODQuOCA0NDIuNkMzNzcuOCA0NTEuMyAzNjUuOCA0NTQuMSAzNTUuOCA0NDkuM0MyODMuMyA0MTQuOSAyMjUuMyAzNTUgMTkzLjQgMjgxLjFDMTg5LjEgMjcxLjIgMTkyIDI1OS42IDIwMC40IDI1Mi45TDIzOS4zIDIyMS44QzI0Mi4yIDIxOS41IDI0My4yIDIxNS41IDI0MS42IDIxMi4xTDIwMS45IDEyNC43QzIwMC4yIDEyMC45IDE5NS45IDExOSAxOTEuOSAxMjAuM0MxNDYuNyAxMzUuNCAxMTIuOCAxNzguOSAxMjEuNCAyMjcuM3oiLz48cGF0aCBkPSJNMTc2LjggNzQuOUMyMDQuMSA2NS44IDIzMy44IDc4LjggMjQ1LjcgMTA0LjlMMjg1LjQgMTkyLjJDMjk2IDIxNS42IDI4OS40IDI0My4yIDI2OS40IDI1OS4zTDI0NS4yIDI3OC42QzI3MC43IDMyOC42IDMxMC43IDM3MCAzNTkuNiAzOTcuNEwzODAuOCAzNzAuOEMzOTYuOSAzNTAuNyA0MjQuNSAzNDQuMSA0NDcuOSAzNTQuOEw1MzUuMiAzOTQuNUM1NjEuNCA0MDYuNCA1NzQuMyA0MzYuMSA1NjUuMiA0NjMuNEM1NDQuNSA1MjUuNyA0ODEuNSA1NzkuNiA0MDQuMyA1NjZDMjMwLjYgNTM1LjQgMTA0LjcgNDA5LjUgNzQuMSAyMzUuOEM2MC41IDE1OC42IDExNC41IDk1LjcgMTc2LjcgNzQuOXpNMjAyIDEyNC44QzIwMC4zIDEyMSAxOTYgMTE5LjEgMTkyIDEyMC40QzE0Ni44IDEzNS41IDExMi45IDE3OSAxMjEuNSAyMjcuNEMxNDguNiAzODEuMiAyNTguOSA0OTEuNiA0MTIuNyA1MTguN0M0NjEuMSA1MjcuMiA1MDQuNiA0OTMuNCA1MTkuNyA0NDguMkM1MjEgNDQ0LjIgNTE5LjEgNDM5LjkgNTE1LjMgNDM4LjJMNDI4IDM5OC40QzQyNC42IDM5Ni45IDQyMC42IDM5Ny44IDQxOC4zIDQwMC43TDM4NC44IDQ0Mi42QzM3Ny44IDQ1MS4zIDM2NS44IDQ1NC4xIDM1NS44IDQ0OS4zQzI4My4zIDQxNC45IDIyNS4zIDM1NSAxOTMuNCAyODEuMUMxODkuMSAyNzEuMiAxOTIgMjU5LjYgMjAwLjQgMjUyLjlMMjM5LjMgMjIxLjhDMjQyLjIgMjE5LjUgMjQzLjIgMjE1LjUgMjQxLjYgMjEyLjFMMjAxLjkgMTI0Ljd6Ii8+PC9zdmc+"
+                                                    alt="Phone"
                                                     style="
-                                                        vertical-align: -webkit-baseline-middle;
-                                                        font-size: small;
-                                                        font-family: Arial;
-                                                        width: 24px;
+                                                        width: 16px;
+                                                        height: 16px;
+                                                        display: block;
                                                     "
-                                                >
-                                                    <tbody>
-                                                        <tr>
-                                                            <td
-                                                                style="
-                                                                    vertical-align: bottom;
-                                                                "
-                                                            >
-                                                                <span
-                                                                    style="
-                                                                        display: inline-block;
-                                                                        background-color: rgb(
-                                                                            35,
-                                                                            56,
-                                                                            118
-                                                                        );
-                                                                    "
-                                                                    ><img
-                                                                        src="https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/phone-icon-dark-2x.png"
-                                                                        alt="mobilePhone"
-                                                                        width="16"
-                                                                        style="
-                                                                            display: block;
-                                                                            background-image: linear-gradient(
-                                                                                rgb(
-                                                                                    35,
-                                                                                    56,
-                                                                                    118
-                                                                                ),
-                                                                                rgb(
-                                                                                    35,
-                                                                                    56,
-                                                                                    118
-                                                                                )
-                                                                            );
-                                                                        "
-                                                                /></span>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
+                                                />
                                             </td>
                                             <td
                                                 style="
-                                                    padding: 0px;
-                                                    color: rgb(0, 0, 0);
+                                                    vertical-align: middle;
+                                                    padding-bottom: 8px;
                                                 "
                                             >
                                                 <a
                                                     href="tel:+1 (844) 877-5487"
                                                     style="
                                                         text-decoration: none;
-                                                        color: rgb(0, 0, 0);
-                                                        font-size: 12px;
+                                                        color: white;
+                                                        font-size: 14px;
+                                                        font-weight: 400;
                                                     "
-                                                    ><span
-                                                        >+1 (844) 877-5487</span
-                                                    ></a
                                                 >
+                                                    (844) 877-5487
+                                                </a>
                                             </td>
                                         </tr>
-                                        <tr
-                                            style="
-                                                vertical-align: middle;
-                                                height: 26px;
-                                            "
-                                        >
+
+                                        <!-- Email -->
+                                        <tr>
                                             <td
-                                                width="24"
-                                                style="vertical-align: middle"
+                                                style="
+                                                    vertical-align: middle;
+                                                    padding-right: 10px;
+                                                    padding-bottom: 8px;
+                                                "
                                             >
-                                                <table
-                                                    cellpadding="0"
-                                                    cellspacing="0"
-                                                    border="0"
+                                                <img
+                                                    src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNjQwIiBmaWxsPSJ3aGl0ZSI+PHBhdGggb3BhY2l0eT0iLjQiIGQ9Ik0xMTIgMTg5LjRDMTEyIDE5My42IDExNCAzOTcuNiAxMTcuMyAyMDAuMUwyOTUuOCAzMzUuNUMzMTAuMSAzNDYuMyAzMjkuOSAzNDYuMyAzNDQuMiAzMzUuNUw1MjIuNyAyMDAuMUM1MjYgMTk3LjYgNTI4IDE5My42IDUyOCAxODkuNEM1MjggMTgyIDUyMiAxNzYgNTE0LjYgMTc2TDEyNS40IDE3NkMxMTggMTc2IDExMiAxODIgMTEyIDE4OS40ek0xMTIgMjU2LjNMMTEyIDQ0OEMxMTIgNDU2LjggMTE5LjIgNDY0IDEyOCA0NjRMNTEyIDQ2NEM1MjAuOCA0NjQgNTI4IDQ1Ni44IDUyOCA0NDhMNTI4IDI1Ni4zTDM3My4yIDM3My43QzM0MS44IDM5Ny42IDI5OC4zIDM5Ny42IDI2Ni44IDM3My43TDExMiAyNTYuM3oiLz48cGF0aCBkPSJNMTI1LjQgMTI4QzkxLjUgMTI4IDY0IDE1NS41IDY0IDE4OS40QzY0IDE5MC4zIDY0IDE5MS4xIDY0LjEgMTkyTDY0IDE5Mkw2NCA0NDhDNjQgNDgzLjMgOTIuNyA1MTIgMTI4IDUxMkw1MTIgNTEyQzU0Ny4zIDUxMiA1NzYgNDgzLjMgNTc2IDQ0OEw1NzYgMTkyTDU3NS45IDE5MkM1NzUuOSAxOTEuMSA1NzYgMTkwLjMgNTc2IDE4OS40QzU3NiAxNTUuNSA1NDguNSAxMjggNTE0LjYgMTI4TDEyNS40IDEyOHpNNTI4IDI1Ni4zTDUyOCA0NDhDNTI4IDQ1Ni44IDUyMC44IDQ2NCA1MTIgNDY0TDEyOCA0NjRDMTE5LjIgNDY0IDExMiA0NTYuOCAxMTIgNDQ4TDExMiAyNTYuM0wyNjYuOCAzNzMuN0MyOTguMiAzOTcuNiAzNDEuNyAzOTcuNiAzNzMuMiAzNzMuN0w1MjggMjU2LjN6TTExMiAxODkuNEMxMTIgMTgyIDExOCAxNzYgMTI1LjQgMTc2TDUxNC42IDE3NkM1MjIgMTc2IDUyOCAxODIgNTI4IDE4OS40QzUyOCAxOTMuNiA1MjYgMTk3LjYgNTIyLjcgMjAwLjFMMzQ0LjIgMzM1LjVDMzI5LjkgMzQ2LjMgMzEwLjEgMzQ2LjMgMjk1LjggMzM1LjVMMTE3LjMgMjAwLjFDMTE0IDE5Ny42IDExMiAxOTMuNiAxMTIgMTg5LjR6Ii8+PC9zdmc+"
+                                                    alt="Email"
                                                     style="
-                                                        vertical-align: -webkit-baseline-middle;
-                                                        font-size: small;
-                                                        font-family: Arial;
-                                                        width: 24px;
+                                                        width: 16px;
+                                                        height: 16px;
+                                                        display: block;
                                                     "
-                                                >
-                                                    <tbody>
-                                                        <tr>
-                                                            <td
-                                                                style="
-                                                                    vertical-align: bottom;
-                                                                "
-                                                            >
-                                                                <span
-                                                                    style="
-                                                                        display: inline-block;
-                                                                        background-color: rgb(
-                                                                            35,
-                                                                            56,
-                                                                            118
-                                                                        );
-                                                                    "
-                                                                    ><img
-                                                                        src="https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/email-icon-dark-2x.png"
-                                                                        alt="emailAddress"
-                                                                        width="16"
-                                                                        style="
-                                                                            display: block;
-                                                                            background-image: linear-gradient(
-                                                                                rgb(
-                                                                                    35,
-                                                                                    56,
-                                                                                    118
-                                                                                ),
-                                                                                rgb(
-                                                                                    35,
-                                                                                    56,
-                                                                                    118
-                                                                                )
-                                                                            );
-                                                                        "
-                                                                /></span>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
+                                                />
                                             </td>
                                             <td
                                                 style="
-                                                    padding: 0px;
-                                                    color: rgb(0, 0, 0);
+                                                    vertical-align: middle;
+                                                    padding-bottom: 8px;
                                                 "
                                             >
                                                 <a
                                                     href="mailto:floyd@employment-networks.com"
                                                     style="
                                                         text-decoration: none;
-                                                        color: rgb(0, 0, 0);
-                                                        font-size: 12px;
+                                                        color: white;
+                                                        font-size: 14px;
+                                                        font-weight: 400;
                                                     "
-                                                    ><span
-                                                        >floyd@employment-networks.com</span
-                                                    ></a
                                                 >
+                                                    floyd@employment-networks.com
+                                                </a>
                                             </td>
                                         </tr>
-                                        <tr
-                                            style="
-                                                vertical-align: middle;
-                                                height: 26px;
-                                            "
-                                        >
-                                            <td
-                                                width="24"
-                                                style="vertical-align: middle"
-                                            >
-                                                <table
-                                                    cellpadding="0"
-                                                    cellspacing="0"
-                                                    border="0"
-                                                    style="
-                                                        vertical-align: -webkit-baseline-middle;
-                                                        font-size: small;
-                                                        font-family: Arial;
-                                                        width: 24px;
-                                                    "
-                                                >
-                                                    <tbody>
-                                                        <tr>
-                                                            <td
-                                                                style="
-                                                                    vertical-align: bottom;
-                                                                "
-                                                            >
-                                                                <span
-                                                                    style="
-                                                                        display: inline-block;
-                                                                        background-color: rgb(
-                                                                            35,
-                                                                            56,
-                                                                            118
-                                                                        );
-                                                                    "
-                                                                    ><img
-                                                                        src="https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/link-icon-dark-2x.png"
-                                                                        alt="website"
-                                                                        width="16"
-                                                                        style="
-                                                                            display: block;
-                                                                            background-image: linear-gradient(
-                                                                                rgb(
-                                                                                    35,
-                                                                                    56,
-                                                                                    118
-                                                                                ),
-                                                                                rgb(
-                                                                                    35,
-                                                                                    56,
-                                                                                    118
-                                                                                )
-                                                                            );
-                                                                        "
-                                                                /></span>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </td>
+
+                                        <!-- Website -->
+                                        <tr>
                                             <td
                                                 style="
-                                                    padding: 0px;
-                                                    color: rgb(0, 0, 0);
+                                                    vertical-align: middle;
+                                                    padding-right: 10px;
                                                 "
                                             >
+                                                <img
+                                                    src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNjQwIiBmaWxsPSJ3aGl0ZSI+PHBhdGggb3BhY2l0eT0iLjQiIGQ9Ik0xMTMuNCAyOTZMMTkyLjYgMjk2QzE5NS45IDIzMiAyMTIuMiAxNzIuNCAyMzYuMiAxMjkuNkMxNzAgMTU4LjcgMTIxLjkgMjIxLjQgMTEzLjQgMjk2ek0xMTMuNCAzNDRDMTIyIDQxOC42IDE3MC4xIDQ4MS4zIDIzNi4yIDUxMC40QzIxMi4yIDQ2Ny42IDE5NS45IDQwOCAxOTIuNiAzNDRMMTEzLjQgMzQ0ek0yNDAuNyAyOTZMMzk5LjMgMjk2QzM5Ni4zIDI0NC41IDM4NC4xIDE5Ny40IDM2Ny4yIDE2M0MzNDUuNyAxMTkuMyAzMjUuOCAxMTIgMzIwIDExMkMzMTQuMiAxMTIgMjk0LjMgMTE5LjMgMjcyLjggMTYzQzI1NS44IDE5Ny41IDI0My42IDI0NC42IDI0MC43IDI5NnpNMjQwLjcgMzQ0QzI0My43IDM5NS41IDI1NS45IDQ0Mi42IDI3Mi44IDQ3N0MyOTQuMyA1MjAuNyAzMTQuMiA1MjggMzIwIDUyOEMzMjUuOCA1MjggMzQ1LjcgNTIwLjcgMzY3LjIgNDc3QzM4NC4yIDQ0Mi41IDM5Ni40IDM5NS40IDM5OS4zIDM0NEwyNDAuNyAzNDR6TTQwMy44IDEyOS42QzQyNy44IDE3Mi40IDQ0NC4xIDIzMiA0NDcuNCAyOTZMNTI2LjYgMjk2QzUxOC4xIDIyMS40IDQ3MCAxNTguNyA0MDMuOCAxMjkuNnpNNDAzLjggNTEwLjRDNDcwIDQ4MS4zIDUxOC4xIDQxOC42IDUyNi42IDM0NEw0NDcuNCAzNDRDNDQ0LjEgNDA4IDQyNy44IDQ2Ny42IDQwMy44IDUxMC40eiIvPjxwYXRoIGQ9Ik0zNjcuMiA0NzdDMzQ1LjcgNTIwLjcgMzI1LjggNTI4IDMyMCA1MjhDMzE0LjIgNTI4IDI5NC4zIDUyMC43IDI3Mi44IDQ3N0MyNTUuOCA0NDIuNSAyNDMuNiAzOTUuNCAyNDAuNyAzNDRMMzk5LjMgMzQ0QzM5Ni4zIDM5NS41IDM4NC4xIDQ0Mi42IDM2Ny4yIDQ3N3pNMzk5LjMgMjk2TDI0MC43IDI5NkMyNDMuNyAyNDQuNSAyNTUuOSAxOTcuNCAyNzIuOCAxNjNDMjk0LjMgMTE5LjMgMzE0LjIgMTEyIDMyMCAxMTJDMzI1LjggMTEyIDM0NS43IDExOS4zIDM2Ny4yIDE2M0MzODQuMiAxOTcuNSAzOTYuNCAyNDQuNiAzOTkuMyAyOTZ6TTQ0Ny40IDM0NEw1MjYuNiAzNDRDNTE4IDQxOC42IDQ2OS45IDQ4MS4zIDQwMy44IDUxMC40QzQyNy44IDQ2Ny42IDQ0NC4xIDQwOCA0NDcuNCAzNDR6TTUyNi42IDI5Nkw0NDcuNCAyOTZDNDQ0LjEgMjMyIDQyNy44IDE3Mi40IDQwMy44IDEyOS42QzQ2OS45IDE1OC44IDUxOCAyMjEuNCA1MjYuNiAyOTZ6TTE5Mi42IDI5NkwxMTMuNCAyOTZDMTIyIDIyMS40IDE3MC4xIDE1OC43IDIzNi4yIDEyOS42QzIxMi4yIDE3Mi40IDE5NS45IDIzMiAxOTIuNiAyOTZ6TTExMy40IDM0NEwxOTIuNiAzNDRDMTk1LjkgNDA4IDIxMi4yIDQ2Ny42IDIzNi4yIDUxMC40QzE3MC4xIDQ4MS4yIDEyMiA0MTguNiAxMTMuNCAzNDR6TTMyMCA1NzZDNDYxLjQgNTc2IDU3NiA0NjEuNCA1NzYgMzIwQzU3NiAxNzguNiA0NjEuNCA2NCAzMjAgNjRDMTc4LjYgNjQgNjQgMTc4LjYgNjQgMzIwQzY0IDQ2MS40IDE3OC42IDU3NiAzMjAgNTc2eiIvPjwvc3ZnPgo="
+                                                    alt="Website"
+                                                    style="
+                                                        width: 16px;
+                                                        height: 16px;
+                                                        display: block;
+                                                    "
+                                                />
+                                            </td>
+                                            <td style="vertical-align: middle">
                                                 <a
-                                                    href="//employment-networks.com"
+                                                    href="https://employment-networks.com"
                                                     style="
                                                         text-decoration: none;
-                                                        color: rgb(0, 0, 0);
-                                                        font-size: 12px;
+                                                        color: white;
+                                                        font-size: 14px;
+                                                        font-weight: 400;
                                                     "
-                                                    ><span
-                                                        >employment-networks.com</span
-                                                    ></a
                                                 >
+                                                    employment-networks.com
+                                                </a>
                                             </td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <table
-                    cellpadding="0"
-                    cellspacing="0"
-                    border="0"
-                    style="
-                        vertical-align: -webkit-baseline-middle;
-                        font-size: small;
-                        font-family: Arial;
-                        width: 100%;
-                    "
-                >
-                    <tbody>
-                        <tr>
-                            <td height="24" aria-label="Horizontal Spacer"></td>
-                        </tr>
-                        <tr>
+
+                            <!-- Right Side: Logo and Social Media -->
                             <td
-                                width="auto"
-                                aria-label="Divider"
                                 style="
-                                    width: 100%;
-                                    height: 1px;
-                                    border-bottom: 1px solid rgb(35, 56, 118);
-                                    border-left: none;
-                                    display: block;
+                                    vertical-align: top;
+                                    width: 40%;
+                                    text-align: center;
                                 "
-                            ></td>
-                        </tr>
-                        <tr>
-                            <td height="24" aria-label="Horizontal Spacer"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <table
-                    cellpadding="0"
-                    cellspacing="0"
-                    border="0"
-                    style="
-                        vertical-align: -webkit-baseline-middle;
-                        font-size: small;
-                        font-family: Arial;
-                        width: 100%;
-                    "
-                >
-                    <tbody>
-                        <tr>
-                            <td style="vertical-align: top">
+                            >
+                                <!-- Logo -->
                                 <img
                                     src="https://employment-networks.com/logo-05.png"
                                     role="presentation"
                                     width="200"
                                     style="
                                         max-width: 200px;
-                                        display: inline-block;
+                                        display: block;
+                                        margin: 0 auto 16px auto;
+                                        filter: brightness(0) invert(1);
                                     "
                                 />
-                            </td>
-                            <td style="text-align: right; vertical-align: top">
-                                <div>
+
+                                <!-- Social Media Icons -->
+                                <div style="text-align: center">
                                     <a
                                         href="https://www.linkedin.com/company/employment-networks-inc"
                                         style="
                                             display: inline-block;
-                                            padding: 0px;
-                                            background-color: rgb(15, 157, 138);
-                                            border-radius: 50%;
+                                            margin: 0 6px;
+                                            text-decoration: none;
                                         "
-                                        ><img
-                                            src="https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/linkedin-icon-dark-2x.png"
-                                            alt="linkedin"
-                                            width="24"
-                                            loading="lazy"
+                                    >
+                                        <img
+                                            src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNjQwIiBmaWxsPSJ3aGl0ZSI+PHBhdGggZD0iTTE2MCA5NkMxMjQuNyA5NiA5NiAxMjQuNyA5NiAxNjBMOTYgNDgwQzk2IDUxNS4zIDEyNC43IDU0NCAxNjAgNTQ0TDQ4MCA1NDRDNTE1LjMgNTQ0IDU0NCA1MTUuMyA1NDQgNDgwTDU0NCAxNjBDNTQ0IDEyNC43IDUxNS4zIDk2IDQ4MCA5NkwxNjAgOTZ6TTE2NSAyNjYuMkwyMzEuNSAyNjYuMkwyMzEuNSA0ODBMMTY1IDQ4MEwxNjUgMjY2LjJ6TTIzNi43IDE5OC41QzIzNi43IDIxOS44IDIxOS41IDIzNyAxOTguMiAyMzdDMTc2LjkgMjM3IDE1OS43IDIxOS44IDE1OS43IDE5OC41QzE1OS43IDE3Ny4yIDE3Ni45IDE2MCAxOTguMiAxNjBDMjE5LjUgMTYwIDIzNi43IDE3Ny4yIDIzNi43IDE5OC41ek00MTMuOSA0ODBMNDEzLjkgMzc2QzQxMy45IDM1MS4yIDQxMy40IDMxOS4zIDM3OS40IDMxOS4zQzM0NC44IDMxOS4zIDMzOS41IDM0Ni4zIDMzOS41IDM3NC4yTDMzOS41IDQ4MEwyNzMuMSA0ODBMMjczLjEgMjY2LjJMMzM2LjggMjY2LjJMMzM2LjggMjk1LjRMMzM3LjcgMjk1LjRDMzQ2LjYgMjc4LjYgMzY4LjMgMjYwLjkgNDAwLjYgMjYwLjlDNDY3LjggMjYwLjkgNDgwLjMgMzA1LjIgNDgwLjMgMzYyLjhMNDgwLjMgNDgwTDQxMy45IDQ4MHoiLz48L3N2Zz4K"
+                                            alt="LinkedIn"
                                             style="
-                                                background-color: rgb(
-                                                    15,
-                                                    157,
-                                                    138
-                                                );
-                                                max-width: 135px;
+                                                width: 20px;
+                                                height: 20px;
                                                 display: block;
-                                                border-radius: inherit;
-                                            " /></a
-                                    ><span
-                                        style="
-                                            display: inline-block;
-                                            width: 5px;
-                                        "
-                                    ></span
-                                    ><a
+                                            "
+                                        />
+                                    </a>
+                                    <a
                                         href="https://x.com/employ_networks"
                                         style="
                                             display: inline-block;
-                                            padding: 0px;
-                                            background-color: rgb(15, 157, 138);
-                                            border-radius: 50%;
+                                            margin: 0 6px;
+                                            text-decoration: none;
                                         "
-                                        ><img
-                                            src="https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/x-icon-dark-2x.png"
-                                            alt="twitter"
-                                            width="24"
-                                            loading="lazy"
+                                    >
+                                        <img
+                                            src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNjQwIiBmaWxsPSJ3aGl0ZSI+PHBhdGggZD0iTTE2MCA5NkMxMjQuNyA5NiA5NiAxMjQuNyA5NiAxNjBMOTYgNDgwQzk2IDUxNS4zIDEyNC43IDU0NCAxNjAgNTQ0TDQ4MCA1NDRDNTE1LjMgNTQ0IDU0NCA1MTUuMyA1NDQgNDgwTDU0NCAxNjBDNTQ0IDEyNC43IDUxNS4zIDk2IDQ4MCA5NkwxNjAgOTZ6TTQ1Ny4xIDE4MEwzNTMuMyAyOTguNkw0NzUuNCA0NjBMMzc5LjggNDYwTDMwNSAzNjIuMUwyMTkuMyA0NjBMMTcxLjggNDYwTDI4Mi44IDMzMy4xTDE2NS43IDE4MEwyNjMuNyAxODBMMzMxLjQgMjY5LjVMNDA5LjYgMTgwTDQ1Ny4xIDE4MHpNNDE5LjMgNDMxLjZMMjQ5LjQgMjA2LjlMMjIxLjEgMjA2LjlMMzkyLjkgNDMxLjZMNDE5LjMgNDMxLjZ6Ii8+PC9zdmc+"
+                                            alt="X (Twitter)"
                                             style="
-                                                background-color: rgb(
-                                                    15,
-                                                    157,
-                                                    138
-                                                );
-                                                max-width: 135px;
+                                                width: 20px;
+                                                height: 20px;
                                                 display: block;
-                                                border-radius: inherit;
-                                            " /></a
-                                    ><span
-                                        style="
-                                            display: inline-block;
-                                            width: 5px;
-                                        "
-                                    ></span
-                                    ><a
+                                            "
+                                        />
+                                    </a>
+                                    <a
                                         href="https://www.facebook.com/profile.php?id=61586842350461"
                                         style="
                                             display: inline-block;
-                                            padding: 0px;
-                                            background-color: rgb(15, 157, 138);
-                                            border-radius: 50%;
+                                            margin: 0 6px;
+                                            text-decoration: none;
                                         "
-                                        ><img
-                                            src="https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/facebook-icon-dark-2x.png"
-                                            alt="facebook"
-                                            width="24"
-                                            loading="lazy"
+                                    >
+                                        <img
+                                            src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NDAgNjQwIiBmaWxsPSJ3aGl0ZSI+PHBhdGggZD0iTTE2MCA5NkMxMjQuNyA5NiA5NiAxMjQuNyA5NiAxNjBMOTYgNDgwQzk2IDUxNS4zIDEyNC43IDU0NCAxNjAgNTQ0TDI1OC4yIDU0NEwyNTguMiAzOTguMkwyMDUuNCAzOTguMkwyMDUuNCAzMjBMMjU4LjIgMzIwTDI1OC4yIDI4Ni4zQzI1OC4yIDE5OS4yIDI5Ny42IDE1OC44IDM4My4yIDE1OC44QzM5OS40IDE1OC44IDQyNy40IDE2MiA0MzguOSAxNjUuMkw0MzguOSAyMzZDNDMyLjkgMjM1LjQgNDIyLjQgMjM1IDQwOS4zIDIzNUMzNjcuMyAyMzUgMzUxLjEgMjUwLjkgMzUxLjEgMjkyLjJMMzUxLjEgMzIwTDQzNC43IDMyMEw0MjAuMyAzOTguMkwzNTEgMzk4LjJMMzUxIDU0NEw0ODAgNTQ0QzUxNS4zIDU0NCA1NDQgNTE1LjMgNTQ0IDQ4MEw1NDQgMTYwQzU0NCAxMjQuNyA1MTUuMyA5NiA0ODAgOTZMMTYwIDk2eiIvPjwvc3ZnPgo="
+                                            alt="Facebook"
                                             style="
-                                                background-color: rgb(
-                                                    15,
-                                                    157,
-                                                    138
-                                                );
-                                                max-width: 135px;
+                                                width: 20px;
+                                                height: 20px;
                                                 display: block;
-                                                border-radius: inherit;
-                                            " /></a
-                                    ><span
-                                        style="
-                                            display: inline-block;
-                                            width: 5px;
-                                        "
-                                    ></span
-                                    ><a
+                                            "
+                                        />
+                                    </a>
+                                    <a
                                         href="https://www.instagram.com/employ_networks/"
                                         style="
                                             display: inline-block;
-                                            padding: 0px;
-                                            background-color: rgb(15, 157, 138);
-                                            border-radius: 50%;
+                                            margin: 0 6px;
+                                            text-decoration: none;
                                         "
-                                        ><img
-                                            src="https://cdn2.hubspot.net/hubfs/53/tools/email-signature-generator/icons/instagram-icon-dark-2x.png"
-                                            alt="instagram"
-                                            width="24"
-                                            loading="lazy"
+                                    >
+                                        <span
                                             style="
-                                                background-color: rgb(
-                                                    15,
-                                                    157,
-                                                    138
-                                                );
-                                                max-width: 135px;
+                                                font-family: &quot;Font Awesome 6 Brands&quot;;
+                                                font-size: 20px;
+                                                color: white;
                                                 display: block;
-                                                border-radius: inherit;
                                             "
-                                    /></a>
+                                            >&#xf082;</span
+                                        >
+                                    </a>
                                 </div>
                             </td>
                         </tr>
