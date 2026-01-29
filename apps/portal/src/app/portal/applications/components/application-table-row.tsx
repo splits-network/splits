@@ -1,15 +1,18 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { formatRelativeTime } from '@/lib/utils';
-import { getApplicationStageBadge } from '@/lib/utils/badge-styles';
+import Link from "next/link";
+import { formatRelativeTime } from "@/lib/utils";
+import {
+    getApplicationStageBadge,
+    getApplicationStageClass,
+} from "@/lib/utils/badge-styles";
 import {
     ExpandableTableRow,
     ExpandedDetailGrid,
     ExpandedDetailItem,
     ExpandedDetailSection,
-} from '@/components/ui/tables';
-import type { Application } from './application-card';
+} from "@/components/ui/tables";
+import type { Application } from "./application-card";
 
 // ===== TYPES =====
 
@@ -37,16 +40,16 @@ interface ApplicationTableRowProps {
 // Get AI recommendation badge
 function getAIRecommendationBadge(recommendation: string): string {
     switch (recommendation) {
-        case 'strong_fit':
-            return 'badge-success';
-        case 'good_fit':
-            return 'badge-info';
-        case 'fair_fit':
-            return 'badge-warning';
-        case 'poor_fit':
-            return 'badge-error';
+        case "strong_fit":
+            return "badge-success";
+        case "good_fit":
+            return "badge-info";
+        case "fair_fit":
+            return "badge-warning";
+        case "poor_fit":
+            return "badge-error";
         default:
-            return 'badge-ghost';
+            return "badge-ghost";
     }
 }
 
@@ -57,14 +60,17 @@ export function ApplicationTableRow({
     canAccept = false,
     isAccepting = false,
     onAccept,
-    getStageColor = getApplicationStageBadge,
+    getStageColor = getApplicationStageClass,
     formatDate,
     isSelected = false,
     onToggleSelect,
     isRecruiter = false,
     isCompanyUser = false,
 }: ApplicationTableRowProps) {
-    const companyName = application.company_name || application.job?.company?.name || 'Unknown Company';
+    const companyName =
+        application.company_name ||
+        application.job?.company?.name ||
+        "Unknown Company";
     const hasAIReview = application.ai_reviewed && application.ai_review;
     const isMasked = application.candidate._masked;
 
@@ -73,38 +79,40 @@ export function ApplicationTableRow({
 
     if (application.accepted_by_company) {
         badges.push({
-            class: 'badge-success',
-            icon: 'fa-check-circle',
-            text: 'Accepted',
-            tooltip: 'Accepted by company',
+            class: "badge-success",
+            icon: "fa-check-circle",
+            text: "Accepted",
+            tooltip: "Accepted by company",
         });
     }
 
     if (hasAIReview) {
         badges.push({
-            class: getAIRecommendationBadge(application.ai_review!.recommendation),
-            icon: 'fa-robot',
+            class: getAIRecommendationBadge(
+                application.ai_review!.recommendation,
+            ),
+            icon: "fa-robot",
             text: `AI: ${application.ai_review!.fit_score}%`,
-            tooltip: `AI Fit Score: ${application.ai_review!.recommendation.replace('_', ' ')}`,
+            tooltip: `AI Fit Score: ${application.ai_review!.recommendation.replace("_", " ")}`,
         });
     }
 
-    if (application.stage === 'screen') {
+    if (application.stage === "screen") {
         badges.push({
-            class: 'badge-warning',
-            icon: 'fa-clock',
-            text: 'Awaiting Review',
-            tooltip: 'Pending company review',
+            class: "badge-warning",
+            icon: "fa-clock",
+            text: "Awaiting Review",
+            tooltip: "Pending company review",
             animated: true,
         });
     }
 
     if (isMasked) {
         badges.push({
-            class: 'badge-warning',
-            icon: 'fa-eye-slash',
-            text: 'Anonymous',
-            tooltip: 'Anonymous candidate',
+            class: "badge-warning",
+            icon: "fa-eye-slash",
+            text: "Anonymous",
+            tooltip: "Anonymous candidate",
         });
     }
 
@@ -124,10 +132,16 @@ export function ApplicationTableRow({
                         </div>
                     </div>
                     <div className="text-sm min-w-0">
-                        <span className="font-semibold whitespace-pre-line flex items-center gap-2" title={application.candidate.full_name}>
+                        <span
+                            className="font-semibold whitespace-pre-line flex items-center gap-2"
+                            title={application.candidate.full_name}
+                        >
                             {application.candidate.full_name}
                             {isMasked && (
-                                <i className="fa-duotone fa-regular fa-eye-slash text-warning" title="Anonymous"></i>
+                                <i
+                                    className="fa-duotone fa-regular fa-eye-slash text-warning"
+                                    title="Anonymous"
+                                ></i>
                             )}
                         </span>
                         <div className="text-sm text-base-content/60">
@@ -145,22 +159,30 @@ export function ApplicationTableRow({
             <td>
                 {hasAIReview ? (
                     <div className="flex items-center gap-2">
-                        <span className="font-semibold text-base">{application.ai_review!.fit_score}</span>
-                        <span className="text-xs text-base-content/60">/100</span>
+                        <span className="font-semibold text-base">
+                            {application.ai_review!.fit_score}
+                        </span>
+                        <span className="text-xs text-base-content/60">
+                            /100
+                        </span>
                     </div>
-                ) : application.stage === 'ai_review' ? (
+                ) : application.stage === "ai_review" ? (
                     <span className="loading loading-spinner loading-sm"></span>
                 ) : (
                     <span className="text-base-content/30">—</span>
                 )}
             </td>
             <td>
-                <div className={`badge badge-sm ${getStageColor(application.stage)}`}>
+                <div
+                    className={`badge badge-sm ${getStageColor(application.stage)}`}
+                >
                     {application.stage}
                 </div>
             </td>
             <td>
-                <span className="text-sm text-base-content/60">{formatRelativeTime(application.created_at)}</span>
+                <span className="text-sm text-base-content/60">
+                    {formatRelativeTime(application.created_at)}
+                </span>
             </td>
             <td onClick={(e) => e.stopPropagation()}>
                 <div className="flex gap-1 justify-end">
@@ -200,10 +222,12 @@ export function ApplicationTableRow({
                         {badges.map((badge: Badge, idx: number) => (
                             <span
                                 key={idx}
-                                className={`badge ${badge.class} gap-1.5 ${badge.animated ? 'animate-pulse' : ''}`}
+                                className={`badge ${badge.class} gap-1.5 ${badge.animated ? "animate-pulse" : ""}`}
                                 title={badge.tooltip}
                             >
-                                <i className={`fa-duotone fa-regular ${badge.icon}`}></i>
+                                <i
+                                    className={`fa-duotone fa-regular ${badge.icon}`}
+                                ></i>
                                 {badge.text}
                             </span>
                         ))}
@@ -220,7 +244,9 @@ export function ApplicationTableRow({
                         <div>
                             <div>{application.candidate.full_name}</div>
                             {!isMasked && (
-                                <div className="text-xs text-base-content/50">{application.candidate.email}</div>
+                                <div className="text-xs text-base-content/50">
+                                    {application.candidate.email}
+                                </div>
                             )}
                         </div>
                     }
@@ -242,7 +268,9 @@ export function ApplicationTableRow({
                         value={
                             <div>
                                 <div>{application.recruiter.name}</div>
-                                <div className="text-xs text-base-content/50">{application.recruiter.email}</div>
+                                <div className="text-xs text-base-content/50">
+                                    {application.recruiter.email}
+                                </div>
                             </div>
                         }
                     />
@@ -260,7 +288,7 @@ export function ApplicationTableRow({
                                 {application.ai_review!.fit_score}/100
                             </span>
                         ) : (
-                            'Not reviewed'
+                            "Not reviewed"
                         )
                     }
                 />
@@ -268,7 +296,9 @@ export function ApplicationTableRow({
                     icon="fa-signal"
                     label="Stage"
                     value={
-                        <span className={`badge badge-sm ${getStageColor(application.stage)}`}>
+                        <span
+                            className={`badge badge-sm ${getStageColor(application.stage)}`}
+                        >
                             {application.stage}
                         </span>
                     }
@@ -305,28 +335,31 @@ export function ApplicationTableRow({
                     <i className="fa-duotone fa-regular fa-clock-rotate-left"></i>
                     View Timeline
                 </Link>
-                {canAccept && isCompanyUser && onAccept && !application.accepted_by_company && (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onAccept();
-                        }}
-                        className="btn btn-success btn-sm gap-2"
-                        disabled={isAccepting}
-                    >
-                        {isAccepting ? (
-                            <>
-                                <span className="loading loading-spinner loading-xs"></span>
-                                Accepting...
-                            </>
-                        ) : (
-                            <>
-                                <i className="fa-duotone fa-regular fa-check"></i>
-                                Accept Application
-                            </>
-                        )}
-                    </button>
-                )}
+                {canAccept &&
+                    isCompanyUser &&
+                    onAccept &&
+                    !application.accepted_by_company && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onAccept();
+                            }}
+                            className="btn btn-success btn-sm gap-2"
+                            disabled={isAccepting}
+                        >
+                            {isAccepting ? (
+                                <>
+                                    <span className="loading loading-spinner loading-xs"></span>
+                                    Accepting...
+                                </>
+                            ) : (
+                                <>
+                                    <i className="fa-duotone fa-regular fa-check"></i>
+                                    Accept Application
+                                </>
+                            )}
+                        </button>
+                    )}
             </div>
         </div>
     );

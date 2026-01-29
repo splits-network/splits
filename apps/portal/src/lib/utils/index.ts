@@ -8,7 +8,7 @@
 // Badge utilities
 export {
     getApplicationStageBadge,
-    getApplicationStageLabel,
+    getApplicationStageClass,
     getJobStatusBadge,
     getRelationshipStatusBadge,
     getVerificationStatusBadge,

@@ -7,7 +7,6 @@ import {
     useStandardList,
     PaginationControls,
     SearchInput,
-    ViewModeToggle,
     EmptyState,
     LoadingState,
     ErrorState,
@@ -16,7 +15,10 @@ import { DataTable, type TableColumn } from "@/components/ui/tables";
 import { useUserProfile } from "@/contexts";
 import { useToast } from "@/lib/toast-context";
 import { formatDate } from "@/lib/utils";
-import { getApplicationStageBadge } from "@/lib/utils/badge-styles";
+import {
+    getApplicationStageBadge,
+    getApplicationStageClass,
+} from "@/lib/utils/badge-styles";
 import { ApplicationCard } from "./application-card";
 import { ApplicationTableRow } from "./application-table-row";
 import { ApplicationFilters } from "./application-filters";
@@ -27,6 +29,7 @@ import ApplicationsTrendsChart, {
 import BulkActionModal from "./bulk-action-modal";
 import type { ApplicationStage } from "@splits-network/shared-types";
 import Link from "next/link";
+import { ViewMode } from "@/hooks/use-view-mode";
 
 // ===== TYPES =====
 
@@ -67,9 +70,14 @@ interface Application {
         recommendation: "strong_fit" | "good_fit" | "fair_fit" | "poor_fit";
     };
 }
+
 interface ApplicationFiltersType {
     stage?: string;
     ai_score_filter?: string;
+}
+
+interface ApplicationsListProps {
+    view: Exclude<ViewMode, "browse">; // Only grid or table
 }
 
 // ===== TABLE COLUMNS =====
@@ -86,7 +94,7 @@ const applicationColumns: TableColumn[] = [
 
 // ===== COMPONENT =====
 
-export default function ApplicationsList() {
+export default function ApplicationsList({ view }: ApplicationsListProps) {
     const { getToken } = useAuth();
     const toast = useToast();
     const {
@@ -188,8 +196,6 @@ export default function ApplicationsList() {
         total,
         goToPage,
         setLimit,
-        viewMode,
-        setViewMode,
         refresh,
     } = useStandardList<Application, ApplicationFiltersType>({
         endpoint: "/applications",
@@ -199,7 +205,6 @@ export default function ApplicationsList() {
         defaultSortOrder: "desc",
         defaultLimit: 25,
         syncToUrl: true,
-        viewModeKey: "applicationsViewMode",
         //additionalParams: companyId ? { company_id: companyId } : undefined,
     });
 
@@ -395,13 +400,11 @@ export default function ApplicationsList() {
                                 searchQuery={searchInput}
                                 stageFilter={filters.stage || ""}
                                 aiScoreFilter={filters.ai_score_filter || ""}
-                                viewMode={viewMode}
                                 onSearchChange={setSearchInput}
                                 onStageFilterChange={handleStageFilterChange}
                                 onAIScoreFilterChange={
                                     handleAIScoreFilterChange
                                 }
-                                onViewModeChange={setViewMode}
                             />
 
                             {/* Search */}
@@ -412,12 +415,6 @@ export default function ApplicationsList() {
                                 placeholder="Search applications..."
                                 loading={loading}
                                 className="flex-1 min-w-[200px]"
-                            />
-
-                            {/* View Toggle */}
-                            <ViewModeToggle
-                                viewMode={viewMode}
-                                onViewModeChange={setViewMode}
                             />
                         </div>
                     </div>
@@ -472,7 +469,7 @@ export default function ApplicationsList() {
                 )}
 
                 {/* Grid View */}
-                {!loading && viewMode === "grid" && applications.length > 0 && (
+                {!loading && view === "grid" && applications.length > 0 && (
                     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
                         {applications.map((application) => (
                             <ApplicationCard
@@ -495,44 +492,40 @@ export default function ApplicationsList() {
                 )}
 
                 {/* Table View */}
-                {!loading &&
-                    viewMode === "table" &&
-                    applications.length > 0 && (
-                        <DataTable
-                            columns={applicationColumns}
-                            sortBy={sortBy}
-                            sortOrder={sortOrder}
-                            onSort={handleSort}
-                            showExpandColumn={true}
-                            isEmpty={applications.length === 0}
-                            loading={loading}
-                        >
-                            {applications.map((application) => (
-                                <ApplicationTableRow
-                                    key={application.id}
-                                    application={application}
-                                    isSelected={selectedItems.has(
-                                        application.id,
-                                    )}
-                                    onToggleSelect={() =>
-                                        toggleItemSelection(application.id)
-                                    }
-                                    canAccept={
-                                        isCompanyUser &&
-                                        !application.accepted_by_company
-                                    }
-                                    isAccepting={acceptingId === application.id}
-                                    onAccept={() =>
-                                        handleAcceptApplication(application.id)
-                                    }
-                                    getStageColor={getApplicationStageBadge}
-                                    formatDate={formatDate}
-                                    isRecruiter={isRecruiter}
-                                    isCompanyUser={isCompanyUser}
-                                />
-                            ))}
-                        </DataTable>
-                    )}
+                {!loading && view === "table" && applications.length > 0 && (
+                    <DataTable
+                        columns={applicationColumns}
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        onSort={handleSort}
+                        showExpandColumn={true}
+                        isEmpty={applications.length === 0}
+                        loading={loading}
+                    >
+                        {applications.map((application) => (
+                            <ApplicationTableRow
+                                key={application.id}
+                                application={application}
+                                isSelected={selectedItems.has(application.id)}
+                                onToggleSelect={() =>
+                                    toggleItemSelection(application.id)
+                                }
+                                canAccept={
+                                    isCompanyUser &&
+                                    !application.accepted_by_company
+                                }
+                                isAccepting={acceptingId === application.id}
+                                onAccept={() =>
+                                    handleAcceptApplication(application.id)
+                                }
+                                getStageColor={getApplicationStageClass}
+                                formatDate={formatDate}
+                                isRecruiter={isRecruiter}
+                                isCompanyUser={isCompanyUser}
+                            />
+                        ))}
+                    </DataTable>
+                )}
 
                 {/* Empty State */}
                 {!loading && applications.length === 0 && (
