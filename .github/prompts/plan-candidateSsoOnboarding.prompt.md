@@ -503,7 +503,7 @@ export { JOB_TYPE_OPTIONS, SALARY_RANGES } from './types';
 **File**: `apps/candidate/src/app/portal/layout.tsx`
 
 ```tsx
-import { ServiceStatusBanner } from '@/components/ServiceStatusBanner';
+import { ServiceStatusBanner } from '@/components/service-status-banner';
 import { OnboardingProvider, OnboardingWizardModal } from '@/components/onboarding';
 
 export default function AuthenticatedLayout({
