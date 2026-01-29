@@ -40,6 +40,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     // Initialization state
     const [initStatus, setInitStatus] = useState<InitStatus>("loading");
     const [initMessage, setInitMessage] = useState<string>("Loading...");
+    const [persisting, setPersisting] = useState(false);
 
     const [state, setState] = useState<OnboardingState>({
         currentStep: 1,
@@ -48,8 +49,12 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         selectedRole: null,
         selectedPlan: null,
         stripePaymentInfo: null,
+        recruiterProfile: {},
+        companyInfo: {},
         submitting: false,
         error: null,
+        loading: true,
+        persisting: false,
     });
 
     // Fetch user's onboarding status on mount
@@ -123,13 +128,50 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                     throw new Error("Unable to load or create user profile");
                 }
 
+                // Load onboarding state from metadata if available
+                let loadedState = {
+                    currentStep: userData.onboarding_step || 1,
+                    status: userData.onboarding_status || "pending",
+                    selectedRole: null as UserRole | null,
+                    selectedPlan: null,
+                    stripePaymentInfo: null,
+                    recruiterProfile: {},
+                    companyInfo: {},
+                };
+
+                // Restore state from onboarding_metadata if exists
+                if (
+                    userData.onboarding_metadata &&
+                    Object.keys(userData.onboarding_metadata).length > 0
+                ) {
+                    const metadata = userData.onboarding_metadata;
+                    loadedState = {
+                        currentStep:
+                            metadata.current_step ||
+                            userData.onboarding_step ||
+                            1,
+                        status:
+                            metadata.status === "completed"
+                                ? "completed"
+                                : metadata.status === "in_progress"
+                                  ? "in_progress"
+                                  : "pending",
+                        selectedRole: (metadata.user_type as UserRole) || null,
+                        selectedPlan: metadata.selected_plan || null,
+                        stripePaymentInfo: metadata.stripe_payment_info || null,
+                        recruiterProfile: metadata.personal_info || {},
+                        companyInfo: metadata.company_info || {},
+                    };
+                }
+
                 // Skip onboarding modal for platform_admin users (use context value)
                 if (isAdmin) {
                     setState((prev) => ({
                         ...prev,
-                        currentStep: userData.onboarding_step || 1,
+                        ...loadedState,
                         status: "completed", // Mark as completed so modal never shows
                         isModalOpen: false,
+                        loading: false,
                     }));
                     setInitStatus("ready");
                     return;
@@ -137,14 +179,14 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
                 // Show modal if onboarding is pending or in progress
                 const shouldShowModal =
-                    userData.onboarding_status === "pending" ||
-                    userData.onboarding_status === "in_progress";
+                    loadedState.status === "pending" ||
+                    loadedState.status === "in_progress";
 
                 setState((prev) => ({
                     ...prev,
-                    currentStep: userData.onboarding_step || 1,
-                    status: userData.onboarding_status || "pending",
+                    ...loadedState,
                     isModalOpen: shouldShowModal,
+                    loading: false,
                 }));
 
                 setInitStatus("ready");
@@ -165,6 +207,98 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         fetchOnboardingStatus();
     }, [user, getToken, profileLoading, isAdmin]);
 
+    // Auto-save state changes to database (debounced)
+    useEffect(() => {
+        if (
+            initStatus !== "ready" ||
+            state.loading ||
+            state.status === "completed"
+        )
+            return;
+        if (!user?.id) return;
+
+        const timeoutId = setTimeout(() => {
+            persistOnboardingState();
+        }, 1000); // Debounce 1 second
+
+        return () => clearTimeout(timeoutId);
+    }, [
+        state.currentStep,
+        state.selectedRole,
+        state.selectedPlan,
+        state.stripePaymentInfo,
+        state.recruiterProfile,
+        state.companyInfo,
+        initStatus,
+        state.loading,
+        state.status,
+        user?.id,
+    ]);
+
+    const persistOnboardingState = async () => {
+        if (persisting || !user?.id) return; // Prevent concurrent saves
+
+        try {
+            setPersisting(true);
+            const token = await getToken();
+            if (!token) return;
+
+            const apiClient = createAuthenticatedClient(token);
+
+            const metadata = {
+                user_type: state.selectedRole,
+                current_step: state.currentStep,
+                completed_steps: Array.from(
+                    { length: state.currentStep - 1 },
+                    (_, i) => i + 1,
+                ),
+                last_active_step: state.currentStep,
+
+                // Form data
+                personal_info:
+                    state.selectedRole === "recruiter"
+                        ? state.recruiterProfile
+                        : undefined,
+                company_info:
+                    state.selectedRole !== "recruiter"
+                        ? state.companyInfo
+                        : undefined,
+                selected_plan: state.selectedPlan,
+                stripe_payment_info: state.stripePaymentInfo,
+
+                // Completion tracking
+                personal_info_completed:
+                    state.selectedRole === "recruiter" &&
+                    !!state.recruiterProfile?.bio,
+                company_info_completed:
+                    state.selectedRole !== "recruiter" &&
+                    !!state.companyInfo?.name,
+                payment_completed:
+                    !state.selectedPlan || !!state.stripePaymentInfo,
+
+                // Session metadata
+                started_at: new Date().toISOString(),
+                last_updated_at: new Date().toISOString(),
+                device_info: {
+                    user_agent: navigator.userAgent,
+                    platform: navigator.platform,
+                },
+            };
+
+            await apiClient.patch("/users/me", {
+                onboarding_metadata: metadata,
+                onboarding_step: state.currentStep,
+                onboarding_status: state.status,
+            });
+
+            console.log("Onboarding state persisted to database");
+        } catch (error) {
+            console.error("Failed to persist onboarding state:", error);
+        } finally {
+            setPersisting(false);
+        }
+    };
+
     const handleRetry = () => {
         window.location.reload();
     };
@@ -180,33 +314,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 currentStep: step,
                 status: step === 2 ? "in_progress" : prev.status,
             }));
-
-            // Update backend with new step
-            try {
-                const token = await getToken();
-                if (!token) return;
-
-                const apiClient = new ApiClient(token);
-
-                // Get current user data using V2 API
-                const response = await apiClient.get("/users", {
-                    params: { limit: 1 },
-                });
-                if (!response?.data) return;
-
-                // Handle both array and single object responses
-                const userData = Array.isArray(response.data)
-                    ? response.data[0]
-                    : response.data;
-                if (!userData) return;
-
-                // Update onboarding step using API client
-                await apiClient.patch(`/users/${userData.id}`, {
-                    onboarding_step: step,
-                });
-            } catch (error) {
-                console.error("Failed to update onboarding step:", error);
-            }
+            // State will auto-persist via useEffect
         },
 
         setRole: (role: UserRole) => {
@@ -494,7 +602,14 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     }
 
     return (
-        <OnboardingContext.Provider value={{ state, actions }}>
+        <OnboardingContext.Provider
+            value={{
+                state,
+                loading: state.loading || false,
+                persisting: persisting,
+                actions,
+            }}
+        >
             {children}
         </OnboardingContext.Provider>
     );

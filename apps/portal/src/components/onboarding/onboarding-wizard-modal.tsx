@@ -14,7 +14,16 @@ import { CompanyInfoStep } from "./steps/company-info-step";
 import { CompletionStep } from "./steps/completion-step";
 
 export function OnboardingWizardModal() {
-    const { state } = useOnboarding();
+    const { state, loading, persisting } = useOnboarding();
+
+    console.log(
+        "[OnboardingModal] Rendering - currentStep:",
+        state.currentStep,
+        "selectedRole:",
+        state.selectedRole,
+        "loading:",
+        loading,
+    );
 
     // Block body scroll when modal is open
     useEffect(() => {
@@ -28,6 +37,25 @@ export function OnboardingWizardModal() {
             document.body.style.overflow = "";
         };
     }, [state.isModalOpen]);
+
+    // Show loading spinner while loading state from database
+    if (loading) {
+        return (
+            <>
+                <div className="fixed inset-0 bg-black/50 z-998" />
+                <div className="fixed inset-0 z-999 flex items-center justify-center p-4">
+                    <div className="bg-base-100 rounded-box shadow p-8 max-w-md w-full">
+                        <div className="flex items-center justify-center py-8">
+                            <span className="loading loading-spinner loading-lg text-primary"></span>
+                            <span className="ml-3">
+                                Loading your progress...
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+    }
 
     if (!state.isModalOpen) {
         return null;
@@ -58,10 +86,20 @@ export function OnboardingWizardModal() {
                             <span className="text-sm font-medium">
                                 Step {displayStep} of {totalSteps}
                             </span>
-                            <span className="text-sm text-base-content/70">
-                                {Math.round((displayStep / totalSteps) * 100)}%
-                                Complete
-                            </span>
+                            <div className="flex items-center gap-2">
+                                {persisting && (
+                                    <div className="flex items-center text-sm text-base-content/60">
+                                        <span className="loading loading-spinner loading-xs mr-1"></span>
+                                        Saving...
+                                    </div>
+                                )}
+                                <span className="text-sm text-base-content/70">
+                                    {Math.round(
+                                        (displayStep / totalSteps) * 100,
+                                    )}
+                                    % Complete
+                                </span>
+                            </div>
                         </div>
                         <div className="w-full bg-base-300 rounded-full h-2">
                             <div
@@ -75,12 +113,6 @@ export function OnboardingWizardModal() {
 
                     {/* Step Content */}
                     <div className="py-4">
-                        {console.log(
-                            "[OnboardingModal] Rendering step content - currentStep:",
-                            state.currentStep,
-                            "selectedRole:",
-                            state.selectedRole,
-                        )}
                         {state.currentStep === 1 && <RoleSelectionStep />}
                         {state.currentStep === 2 && <SubscriptionPlanStep />}
                         {state.currentStep === 3 &&
@@ -96,15 +128,21 @@ export function OnboardingWizardModal() {
 
                     {/* Help Text */}
                     <div className="mt-6 pt-4 border-t border-base-300">
-                        <p className="text-xs text-center text-base-content/60">
-                            Need help? Contact support at{" "}
-                            <a
-                                href="mailto:help@splits.network"
-                                className="link link-primary"
-                            >
-                                help@splits.network
-                            </a>
-                        </p>
+                        <div className="text-xs text-center text-base-content/60 space-y-1">
+                            <p className="mb-2">
+                                Your progress is automatically saved and synced
+                                across devices
+                            </p>
+                            <p>
+                                Need help? Contact support at{" "}
+                                <a
+                                    href="mailto:help@splits.network"
+                                    className="link link-primary"
+                                >
+                                    help@splits.network
+                                </a>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
