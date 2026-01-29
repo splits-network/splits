@@ -100,9 +100,9 @@ spec:
                       - name: ANALYTICS_SERVICE_URL
                         value: "http://analytics-service:3010"
                       - name: CHAT_GATEWAY_URL
-                        value: "http://chat-gateway:3020"
+                        value: "http://chat-gateway:80"
                       - name: CHAT_SERVICE_URL
-                        value: "http://chat-service:3011"
+                        value: "http://chat-service:80"
                   resources:
                       requests:
                           cpu: 200m
