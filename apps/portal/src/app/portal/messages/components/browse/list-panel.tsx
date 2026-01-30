@@ -1,48 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
-import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { PageTitle } from "@/components/page-title";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useChatGateway } from "@/hooks/use-chat-gateway";
-import {
-    registerChatRefresh,
-    requestChatRefresh,
-} from "@/lib/chat-refresh-queue";
+import { registerChatRefresh, requestChatRefresh } from "@/lib/chat-refresh-queue";
 import { getCachedCurrentUserId } from "@/lib/current-user";
 import { getCachedUserSummary } from "@/lib/user-cache";
+import MessageListItem from "./list-item";
+import { ConversationRow, UserSummary } from "./types";
 
-type ConversationRow = {
-    conversation_id: string;
-    user_id: string;
-    muted_at: string | null;
-    archived_at: string | null;
-    request_state: "none" | "pending" | "accepted" | "declined";
-    last_read_at: string | null;
-    last_read_message_id: string | null;
-    unread_count: number;
-    chat_conversations: {
-        id: string;
-        participant_a_id: string;
-        participant_b_id: string;
-        application_id: string | null;
-        job_id: string | null;
-        company_id: string | null;
-        last_message_at: string | null;
-        last_message_id: string | null;
-        created_at: string;
-        updated_at: string;
-    };
-};
+interface ListPanelProps {
+    selectedId: string | null;
+    onSelect: (id: string) => void;
+}
 
-type UserSummary = {
-    id: string;
-    name: string | null;
-    email: string;
-};
-
-export default function MessagesPage() {
+export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
     const { getToken } = useAuth();
     const [filter, setFilter] = useState<"inbox" | "requests" | "archived">(
         "inbox",
@@ -52,6 +25,7 @@ export default function MessagesPage() {
     const [rows, setRows] = useState<ConversationRow[]>([]);
     const [userMap, setUserMap] = useState<Record<string, UserSummary>>({});
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [searchInput, setSearchInput] = useState("");
 
     const fetchConversations = useCallback(async () => {
         const token = await getToken();
@@ -100,7 +74,7 @@ export default function MessagesPage() {
         return () => {
             mounted = false;
         };
-    }, [filter]);
+    }, [filter, fetchConversations, getToken]);
 
     const otherUserIds = useMemo(() => {
         if (!currentUserId) return [];
@@ -152,93 +126,99 @@ export default function MessagesPage() {
         },
     });
 
-    return (
-        <>
-            <PageTitle
-                title="Messages"
-                subtitle="Manage candidate and company conversations"
-            />
+    const filteredRows = useMemo(() => {
+        if (!searchInput.trim()) return rows;
+        const query = searchInput.toLowerCase();
+        return rows.filter((row) => {
+            const convo = row.chat_conversations;
+            const otherId =
+                currentUserId && convo.participant_a_id === currentUserId
+                    ? convo.participant_b_id
+                    : convo.participant_a_id;
+            const other = otherId ? userMap[otherId] : null;
+            const name = other?.name || "";
+            const email = other?.email || "";
+            return (
+                name.toLowerCase().includes(query) ||
+                email.toLowerCase().includes(query)
+            );
+        });
+    }, [rows, searchInput, currentUserId, userMap]);
 
-            <div className="space-y-4">
-                <div role="tablist" className="tabs tabs-box w-full">
-                    {(["inbox", "requests", "archived"] as const).map((tab) => (
-                        <a
-                            key={tab}
-                            role="tab"
-                            className={`tab ${filter === tab ? "tab-active" : ""}`}
-                            onClick={() => setFilter(tab)}
-                        >
-                            {tab[0].toUpperCase() + tab.slice(1)}
-                        </a>
-                    ))}
+    return (
+        <div
+            className={`flex flex-col border-r border-base-300 bg-base-200 w-full md:w-96 lg:w-[420px] ${
+                selectedId ? "hidden md:flex" : "flex"
+            }`}
+        >
+            <div className="p-4 border-b border-base-300 bg-base-100/50 backdrop-blur-sm sticky top-0 z-20">
+                <div role="tablist" className="tabs tabs-box w-full mb-4">
+                    {(["inbox", "requests", "archived"] as const).map(
+                        (tab) => (
+                            <a
+                                key={tab}
+                                role="tab"
+                                className={`tab ${
+                                    filter === tab ? "tab-active" : ""
+                                }`}
+                                onClick={() => setFilter(tab)}
+                            >
+                                {tab[0].toUpperCase() + tab.slice(1)}
+                            </a>
+                        ),
+                    )}
                 </div>
 
-                {loading ? (
-                    <div className="p-8 text-center text-base-content/60">
+                <div className="flex gap-2">
+                    <input
+                        type="search"
+                        className="input input-bordered w-full"
+                        placeholder="Search messages..."
+                        value={searchInput}
+                        onChange={(event) => setSearchInput(event.target.value)}
+                    />
+                </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto min-h-0 relative">
+                {loading && rows.length === 0 ? (
+                    <div className="p-8 text-center text-base-content/50">
                         <span className="loading loading-spinner loading-md mb-2"></span>
                         <p>Loading conversations...</p>
                     </div>
                 ) : error ? (
                     <div className="p-8 text-center text-error">{error}</div>
-                ) : rows.length === 0 ? (
-                    <div className="p-12 text-center text-base-content/50">
-                        <i className="fa-duotone fa-regular fa-inbox text-4xl mb-3 opacity-50"></i>
-                        <p>No conversations yet.</p>
+                ) : filteredRows.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-64 p-4 text-center text-base-content/50">
+                        <i className="fa-duotone fa-regular fa-inbox text-4xl mb-3 opacity-50" />
+                        <p>No conversations found</p>
                     </div>
                 ) : (
-                    <div className="divide-y divide-base-200 rounded-lg border border-base-200 bg-base-100">
-                        {rows.map((row) => {
+                    <div className="divide-y divide-base-300">
+                        {filteredRows.map((row) => {
                             const convo = row.chat_conversations;
                             const otherId =
+                                currentUserId &&
                                 convo.participant_a_id === currentUserId
                                     ? convo.participant_b_id
                                     : convo.participant_a_id;
-                            const other = otherId ? userMap[otherId] : null;
-                            const name =
-                                other?.name || other?.email || "Unknown user";
-
+                            const other = otherId
+                                ? userMap[otherId]
+                                : null;
                             return (
-                                <Link
+                                <MessageListItem
                                     key={row.conversation_id}
-                                    href={`/portal/messages/${convo.id}`}
-                                    className="flex items-center justify-between p-4 hover:bg-base-200/60"
-                                >
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-semibold">
-                                                {name}
-                                            </span>
-                                            {row.request_state ===
-                                                "pending" && (
-                                                <span className="badge badge-warning badge-sm">
-                                                    Request
-                                                </span>
-                                            )}
-                                            {row.archived_at && (
-                                                <span className="badge badge-ghost badge-sm">
-                                                    Archived
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="text-xs text-base-content/60">
-                                            {convo.last_message_at
-                                                ? new Date(
-                                                      convo.last_message_at,
-                                                  ).toLocaleString()
-                                                : "No messages yet"}
-                                        </div>
-                                    </div>
-                                    {row.unread_count > 0 && (
-                                        <span className="badge badge-primary">
-                                            {row.unread_count}
-                                        </span>
-                                    )}
-                                </Link>
+                                    row={row}
+                                    currentUserId={currentUserId}
+                                    otherUser={other}
+                                    isSelected={selectedId === convo.id}
+                                    onSelect={onSelect}
+                                />
                             );
                         })}
                     </div>
                 )}
             </div>
-        </>
+        </div>
     );
 }

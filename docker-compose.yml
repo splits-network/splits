@@ -574,7 +574,7 @@ services:
       NODE_ENV: development
       NEXT_PUBLIC_API_URL: http://localhost:3000/api
       NEXT_PUBLIC_API_GATEWAY_URL: http://api-gateway:3000
-      NEXT_PUBLIC_CHAT_GATEWAY_URL: ws://chat-gateway:3020
+      NEXT_PUBLIC_CHAT_GATEWAY_URL: ws://chat-gateway:3020/ws/chat
       CLERK_SECRET_KEY: ${SPLITS_CLERK_SECRET_KEY}
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}
       IDENTITY_SERVICE_URL: http://identity-service:3001
@@ -613,7 +613,7 @@ services:
       PORT: 3101
       NEXT_PUBLIC_API_URL: http://localhost:3000/api
       NEXT_PUBLIC_API_GATEWAY_URL: http://api-gateway:3000
-      NEXT_PUBLIC_CHAT_GATEWAY_URL: ws://chat-gateway:3020
+      NEXT_PUBLIC_CHAT_GATEWAY_URL: ws://chat-gateway:3020/ws/chat
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${APP_CLERK_PUBLISHABLE_KEY}
       CLERK_SECRET_KEY: ${APP_CLERK_SECRET_KEY}
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
