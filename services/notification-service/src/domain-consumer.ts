@@ -12,6 +12,7 @@ import { CollaborationEventConsumer } from './consumers/collaboration/consumer';
 import { InvitationsConsumer } from './consumers/invitations/consumer';
 import { RecruiterSubmissionEventConsumer } from './consumers/recruiter-submission/consumer';
 import { SupportEventConsumer } from './consumers/support/consumer';
+import { ChatEventConsumer } from './consumers/chat/consumer';
 import { ContactLookupHelper } from './helpers/contact-lookup';
 import { DataLookupHelper } from './helpers/data-lookup';
 
@@ -29,16 +30,17 @@ export class DomainEventConsumer {
     private invitationsConsumer: InvitationsConsumer;
     private recruiterSubmissionConsumer: RecruiterSubmissionEventConsumer;
     private supportConsumer: SupportEventConsumer;
+    private chatConsumer: ChatEventConsumer;
 
     constructor(
         private rabbitMqUrl: string,
         notificationService: NotificationService,
         services: ServiceRegistry,
         private repository: NotificationRepository,
-        private logger: Logger
+        private logger: Logger,
+        portalUrl: string,
+        candidateWebsiteUrl: string
     ) {
-        const portalUrl = process.env.PORTAL_URL || 'http://localhost:3001';
-
         // Create data lookup helper for direct database queries (avoiding inter-service HTTP calls)
         const dataLookup = new DataLookupHelper(repository.supabaseClient, logger);
 
@@ -85,7 +87,7 @@ export class DomainEventConsumer {
             notificationService,
             services,
             logger,
-            portalUrl,
+            candidateWebsiteUrl,
             dataLookup,
             contactLookup
         );
@@ -98,6 +100,14 @@ export class DomainEventConsumer {
             contactLookup
         );
         this.supportConsumer = new SupportEventConsumer(notificationService.support, logger);
+        this.chatConsumer = new ChatEventConsumer(
+            notificationService,
+            repository,
+            contactLookup,
+            logger,
+            portalUrl,
+            candidateWebsiteUrl
+        );
     }
 
     async connect(): Promise<void> {
@@ -167,6 +177,7 @@ export class DomainEventConsumer {
 
             // Status page contact submissions
             await this.channel.bindQueue(this.queue, this.exchange, 'status.contact_submitted');
+            await this.channel.bindQueue(this.queue, this.exchange, 'chat.message.created');
 
             this.logger.info('Connected to RabbitMQ and bound to events');
 
@@ -331,6 +342,9 @@ export class DomainEventConsumer {
                 break;
             case 'status.contact_submitted':
                 await this.supportConsumer.handleStatusContact(event);
+                break;
+            case 'chat.message.created':
+                await this.chatConsumer.handleMessageCreated(event.payload as any);
                 break;
 
             default:

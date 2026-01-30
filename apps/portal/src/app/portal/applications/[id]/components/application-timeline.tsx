@@ -1,6 +1,7 @@
 'use client';
 import { useAuth } from "@clerk/nextjs";
 import { useUserProfile } from "@/contexts";
+import { useToast } from "@/lib/toast-context";
 
 interface ApplicationAuditLog {
     id: string;
@@ -22,6 +23,7 @@ interface ApplicationTimelineProps {
 export default function ApplicationTimeline({ auditLogs }: ApplicationTimelineProps) {
     const { getToken } = useAuth();
     const { profile, isAdmin } = useUserProfile();
+    const toast = useToast();
     if (!auditLogs || auditLogs.length === 0) {
         return (
             <div className="card">
@@ -108,7 +110,7 @@ export default function ApplicationTimeline({ auditLogs }: ApplicationTimelinePr
                                                             new_value: log.new_value,
                                                             metadata: log.metadata,
                                                         };
-                                                        alert(JSON.stringify(details, null, 2));
+                                                        toast.info(JSON.stringify(details, null, 2));
                                                     }}
                                                 >
                                                     <i className="fa-duotone fa-regular fa-eye"></i>

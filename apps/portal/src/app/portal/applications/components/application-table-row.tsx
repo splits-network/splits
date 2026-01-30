@@ -13,6 +13,11 @@ import {
     ExpandedDetailSection,
 } from "@/components/ui/tables";
 import type { Application } from "./application-card";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { startChatConversation } from "@/lib/chat-start";
+import { useToast } from "@/lib/toast-context";
+import { useState } from "react";
 
 // ===== TYPES =====
 
@@ -67,12 +72,20 @@ export function ApplicationTableRow({
     isRecruiter = false,
     isCompanyUser = false,
 }: ApplicationTableRowProps) {
+    const { getToken } = useAuth();
+    const router = useRouter();
+    const toast = useToast();
+    const [startingChat, setStartingChat] = useState(false);
     const companyName =
         application.company_name ||
         application.job?.company?.name ||
         "Unknown Company";
     const hasAIReview = application.ai_reviewed && application.ai_review;
     const isMasked = application.candidate._masked;
+    const canChat = Boolean(application.candidate.user_id);
+    const chatDisabledReason = canChat
+        ? null
+        : "Candidate isn't linked to a user yet.";
 
     // Calculate badges
     const badges: Badge[] = [];
@@ -186,6 +199,51 @@ export function ApplicationTableRow({
             </td>
             <td onClick={(e) => e.stopPropagation()}>
                 <div className="flex gap-1 justify-end">
+                    <span title={chatDisabledReason || undefined}>
+                        <button
+                            className="btn btn-outline btn-sm"
+                            title="Message Candidate"
+                            disabled={!canChat || startingChat}
+                            onClick={async (e) => {
+                                e.stopPropagation();
+                                if (!application.candidate.user_id) {
+                                    return;
+                                }
+                                try {
+                                    setStartingChat(true);
+                                    const conversationId =
+                                        await startChatConversation(
+                                            getToken,
+                                            application.candidate.user_id,
+                                            {
+                                                application_id:
+                                                    application.id,
+                                                job_id: application.job.id,
+                                                company_id:
+                                                    application.job.company?.id ??
+                                                    null,
+                                            },
+                                        );
+                                    router.push(
+                                        `/portal/messages/${conversationId}`,
+                                    );
+                                } catch (err: any) {
+                                    console.error(
+                                        "Failed to start chat:",
+                                        err,
+                                    );
+                                    toast.error(
+                                        err?.message ||
+                                            "Failed to start chat",
+                                    );
+                                } finally {
+                                    setStartingChat(false);
+                                }
+                            }}
+                        >
+                            <i className="fa-duotone fa-regular fa-messages text-xs"></i>
+                        </button>
+                    </span>
                     {canAccept && isCompanyUser && onAccept && (
                         <button
                             onClick={onAccept}
@@ -327,6 +385,53 @@ export function ApplicationTableRow({
                     <i className="fa-duotone fa-regular fa-eye"></i>
                     View Details
                 </Link>
+                <span title={chatDisabledReason || undefined}>
+                    <button
+                        className="btn btn-outline btn-sm gap-2"
+                        disabled={!canChat || startingChat}
+                        onClick={async (e) => {
+                            e.stopPropagation();
+                            if (!application.candidate.user_id) {
+                                return;
+                            }
+                            try {
+                                setStartingChat(true);
+                                const conversationId =
+                                    await startChatConversation(
+                                        getToken,
+                                        application.candidate.user_id,
+                                        {
+                                            application_id: application.id,
+                                            job_id: application.job.id,
+                                            company_id:
+                                                application.job.company?.id ??
+                                                null,
+                                        },
+                                    );
+                                router.push(
+                                    `/portal/messages/${conversationId}`,
+                                );
+                            } catch (err: any) {
+                                console.error(
+                                    "Failed to start chat:",
+                                    err,
+                                );
+                                toast.error(
+                                    err?.message || "Failed to start chat",
+                                );
+                            } finally {
+                                setStartingChat(false);
+                            }
+                        }}
+                    >
+                        {startingChat ? (
+                            <span className="loading loading-spinner loading-xs"></span>
+                        ) : (
+                            <i className="fa-duotone fa-regular fa-messages"></i>
+                        )}
+                        Message
+                    </button>
+                </span>
                 <Link
                     href={`/portal/applications/${application.id}?tab=timeline`}
                     className="btn btn-outline btn-sm gap-2"

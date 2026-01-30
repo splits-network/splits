@@ -1,0 +1,25 @@
+{
+    "name": "@splits-network/chat-gateway",
+    "version": "0.1.0",
+    "private": true,
+    "main": "./dist/index.js",
+    "scripts": {
+        "dev": "tsx watch src/index.ts",
+        "build": "tsc -b",
+        "start": "node dist/index.js",
+        "clean": "rm -rf dist *.tsbuildinfo"
+    },
+    "dependencies": {
+        "@clerk/backend": "^2.14.0",
+        "@splits-network/shared-config": "workspace:*",
+        "@splits-network/shared-logging": "workspace:*",
+        "ioredis": "^5.7.0",
+        "ws": "^8.18.3"
+    },
+    "devDependencies": {
+        "@types/node": "^24.10.1",
+        "@types/ws": "^8.18.1",
+        "tsx": "^4.19.2",
+        "typescript": "^5.9.3"
+    }
+}

@@ -39,6 +39,10 @@ jobs:
                       path: services/document-processing-service
                     - name: analytics-service
                       path: services/analytics-service
+                    - name: chat-gateway
+                      path: services/chat-gateway
+                    - name: chat-service
+                      path: services/chat-service
                     - name: portal
                       path: apps/portal
                     - name: candidate
@@ -84,6 +88,7 @@ jobs:
                       -t $IMAGE_TAG \
                       --target production \
                       --build-arg NEXT_PUBLIC_API_URL=https://api.staging.splits.network/api \
+                      --build-arg NEXT_PUBLIC_CHAT_GATEWAY_URL=wss://api.staging.splits.network/chat \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.SPLITS_CLERK_PUBLISHABLE_KEY }} \
                       --build-arg NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }} \
                       --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
@@ -95,6 +100,7 @@ jobs:
                       --target production \
                       --build-arg NEXT_PUBLIC_API_URL=https://api.staging.splits.network/api \
                       --build-arg NEXT_PUBLIC_API_GATEWAY_URL=https://api.staging.splits.network \
+                      --build-arg NEXT_PUBLIC_CHAT_GATEWAY_URL=wss://api.staging.splits.network/chat \
                       --build-arg NEXT_PUBLIC_APP_URL=https://staging.applicant.network \
                       --build-arg NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.APP_CLERK_PUBLISHABLE_KEY }} \
                       --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
@@ -255,6 +261,11 @@ jobs:
               run: |
                   export IMAGE_TAG=${{ github.sha }}
                   export ACR_SERVER=${{ secrets.ACR_LOGIN_SERVER }}
+                  export API_BASE_URL="https://api.staging.splits.network"
+                  export CHAT_GATEWAY_URL="wss://api.staging.splits.network/chat"
+                  export PORTAL_URL="https://staging.splits.network"
+                  export CANDIDATE_URL="https://staging.applicant.network"
+                  export CORPORATE_URL="https://staging.employment-networks.com"
 
                   # Use envsubst to replace image tags in all deployment files
                   for file in infra/k8s/*/deployment.yaml; do
@@ -274,7 +285,7 @@ jobs:
 
             - name: Deploy backend services
               run: |
-                  SERVICES="identity-service ats-service network-service billing-service notification-service automation-service document-service document-processing-service ai-service analytics-service"
+                  SERVICES="identity-service ats-service network-service billing-service notification-service automation-service document-service document-processing-service ai-service analytics-service chat-gateway chat-service"
                   for svc in $SERVICES; do
                     if [ -f "infra/k8s/$svc/deployment.yaml" ]; then
                       kubectl apply -f "infra/k8s/$svc/" --namespace=${{ env.NAMESPACE }}
@@ -293,6 +304,8 @@ jobs:
                   kubectl rollout status deployment/ai-service --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/document-processing-service --timeout=180s --namespace=${{ env.NAMESPACE }}
                   kubectl rollout status deployment/analytics-service --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/chat-gateway --timeout=180s --namespace=${{ env.NAMESPACE }}
+                  kubectl rollout status deployment/chat-service --timeout=180s --namespace=${{ env.NAMESPACE }}
 
             - name: Deploy API Gateway
               run: |

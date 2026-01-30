@@ -12,7 +12,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
+import { getCachedCurrentUserProfile } from '@/lib/current-user-profile';
 
 /**
  * User profile data returned from /api/v2/users/me
@@ -68,7 +68,7 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchProfile = useCallback(async () => {
+    const fetchProfile = useCallback(async (force = false) => {
         if (!isAuthLoaded) return;
 
         try {
@@ -82,11 +82,10 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
                 return;
             }
 
-            const apiClient = createAuthenticatedClient(token);
-            const response: any = await apiClient.get('/users/me');
-            const profileData = response?.data || null;
-
-            setProfile(profileData);
+            const profileData = await getCachedCurrentUserProfile(getToken, {
+                force,
+            });
+            setProfile(profileData as UserProfile | null);
         } catch (err) {
             console.error('Failed to fetch user profile:', err);
             setError(err instanceof Error ? err.message : 'Failed to load profile');
@@ -128,7 +127,7 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
         isCandidate,
         hasRole,
         hasAnyRole,
-        refresh: fetchProfile,
+        refresh: () => fetchProfile(true),
     };
 
     return (

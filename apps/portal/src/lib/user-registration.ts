@@ -9,6 +9,7 @@
  */
 
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { getCachedCurrentUserProfile, setCachedCurrentUserProfile } from '@/lib/current-user-profile';
 
 /**
  * Data required to register a new user
@@ -65,13 +66,16 @@ export async function ensureUserInDatabase(
     try {
         // Step 1: Check if user already exists via /users/me
         try {
-            const existingResponse = await apiClient.get<{ data: UserRegistrationResult['user'] }>('/users/me');
-            
-            if (existingResponse?.data) {
-                console.log('[UserRegistration] User already exists:', existingResponse.data.id);
+            const existing = await getCachedCurrentUserProfile(
+                async () => token,
+                { force: true }
+            );
+
+            if (existing) {
+                console.log('[UserRegistration] User already exists:', existing.id);
                 return {
                     success: true,
-                    user: existingResponse.data,
+                    user: existing as UserRegistrationResult['user'],
                     wasExisting: true,
                 };
             }
@@ -96,6 +100,7 @@ export async function ensureUserInDatabase(
 
         if (createResponse?.data) {
             console.log('[UserRegistration] User created successfully:', createResponse.data.id);
+            setCachedCurrentUserProfile(createResponse.data);
             return {
                 success: true,
                 user: createResponse.data,
@@ -120,12 +125,16 @@ export async function ensureUserInDatabase(
             
             // User was created by webhook during our check, fetch them
             try {
-                const retryResponse = await apiClient.get<{ data: UserRegistrationResult['user'] }>('/users/me');
-                
-                if (retryResponse?.data) {
+                const retryUser = await getCachedCurrentUserProfile(
+                    async () => token,
+                    { force: true }
+                );
+
+                if (retryUser) {
+                    setCachedCurrentUserProfile(retryUser);
                     return {
                         success: true,
-                        user: retryResponse.data,
+                        user: retryUser as UserRegistrationResult['user'],
                         wasExisting: true,
                     };
                 }
@@ -154,11 +163,8 @@ export async function ensureUserInDatabase(
 export async function checkUserExists(
     token: string
 ): Promise<UserRegistrationResult['user'] | null> {
-    const apiClient = createAuthenticatedClient(token);
-
     try {
-        const response = await apiClient.get<{ data: UserRegistrationResult['user'] }>('/users/me');
-        return response?.data || null;
+        return await getCachedCurrentUserProfile(async () => token, { force: true }) as UserRegistrationResult['user'] | null;
     } catch {
         return null;
     }

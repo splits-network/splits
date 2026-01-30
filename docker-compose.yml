@@ -190,6 +190,7 @@ services:
       ATS_SERVICE_URL: http://ats-service:3002
       NETWORK_SERVICE_URL: http://network-service:3003
       CANDIDATE_WEBSITE_URL: http://candidate:3101
+      PORTAL_URL: http://portal:3100
       STATUS_CONTACT_RECIPIENTS: ${STATUS_CONTACT_RECIPIENTS:-help@applicant.network,help@splits.network,help@employment-networks.com}
     volumes:
       - ./services/notification-service/src:/app/services/notification-service/src
@@ -200,6 +201,167 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+
+  chat-service:
+    build:
+      context: .
+      dockerfile: services/chat-service/Dockerfile
+      target: development
+    container_name: splits-chat-service
+    ports:
+      - "3011:3011"
+    environment:
+      NODE_ENV: development
+      PORT: 3011
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CHAT_ATTACHMENTS_BUCKET: chat-attachments
+      CHAT_ATTACHMENTS_ENABLED: "false"
+    volumes:
+      - ./services/chat-service/src:/app/services/chat-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  chat-attachment-worker:
+    build:
+      context: .
+      dockerfile: services/chat-service/Dockerfile
+      target: development
+    container_name: splits-chat-attachment-worker
+    command:
+      [
+        "pnpm",
+        "--filter",
+        "@splits-network/chat-service",
+        "job:chat-attachments",
+      ]
+    environment:
+      NODE_ENV: development
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CHAT_ATTACHMENTS_BUCKET: chat-attachments
+    volumes:
+      - ./services/chat-service/src:/app/services/chat-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  chat-retention-job:
+    build:
+      context: .
+      dockerfile: services/chat-service/Dockerfile
+      target: development
+    container_name: splits-chat-retention-job
+    command:
+      ["pnpm", "--filter", "@splits-network/chat-service", "job:chat-retention"]
+    environment:
+      NODE_ENV: development
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CHAT_ATTACHMENTS_BUCKET: chat-attachments
+    volumes:
+      - ./services/chat-service/src:/app/services/chat-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  chat-moderation-worker:
+    build:
+      context: .
+      dockerfile: services/chat-service/Dockerfile
+      target: development
+    container_name: splits-chat-moderation-worker
+    command:
+      [
+        "pnpm",
+        "--filter",
+        "@splits-network/chat-service",
+        "job:chat-moderation",
+      ]
+    environment:
+      NODE_ENV: development
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CHAT_MODERATION_WINDOW_SECONDS: "60"
+      CHAT_MODERATION_THRESHOLD: "5"
+    volumes:
+      - ./services/chat-service/src:/app/services/chat-service/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  chat-gateway:
+    build:
+      context: .
+      dockerfile: services/chat-gateway/Dockerfile
+      target: development
+    container_name: splits-chat-gateway
+    ports:
+      - "3020:3020"
+    environment:
+      NODE_ENV: development
+      PORT: 3020
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      IDENTITY_SERVICE_URL: http://identity-service:3001
+      CHAT_SERVICE_URL: http://chat-service:3011
+      SPLITS_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}
+      SPLITS_CLERK_SECRET_KEY: ${SPLITS_CLERK_SECRET_KEY}
+      SPLITS_CLERK_JWKS_URL: ${SPLITS_CLERK_JWKS_URL}
+      APP_CLERK_PUBLISHABLE_KEY: ${APP_CLERK_PUBLISHABLE_KEY}
+      APP_CLERK_SECRET_KEY: ${APP_CLERK_SECRET_KEY}
+      APP_CLERK_JWKS_URL: ${APP_CLERK_JWKS_URL}
+    volumes:
+      - ./services/chat-gateway/src:/app/services/chat-gateway/src
+      - ./packages:/app/packages
+      - /app/node_modules
+    networks:
+      - splits-network
+    depends_on:
+      redis:
+        condition: service_healthy
+      identity-service:
+        condition: service_started
+      chat-service:
+        condition: service_started
 
   automation-service:
     build:
@@ -366,6 +528,7 @@ services:
       DOCUMENT_SERVICE_URL: http://document-service:3006
       AI_SERVICE_URL: http://ai-service:3009
       ANALYTICS_SERVICE_URL: http://analytics-service:3010
+      CHAT_SERVICE_URL: http://chat-service:3011
       CORS_ORIGIN: http://localhost:3100,http://localhost:3101
       # Portal app (splits.network) Clerk credentials
       SPLITS_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}
@@ -411,6 +574,7 @@ services:
       NODE_ENV: development
       NEXT_PUBLIC_API_URL: http://localhost:3000/api
       NEXT_PUBLIC_API_GATEWAY_URL: http://api-gateway:3000
+      NEXT_PUBLIC_CHAT_GATEWAY_URL: ws://chat-gateway:3020
       CLERK_SECRET_KEY: ${SPLITS_CLERK_SECRET_KEY}
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${SPLITS_CLERK_PUBLISHABLE_KEY}
       IDENTITY_SERVICE_URL: http://identity-service:3001
@@ -449,6 +613,7 @@ services:
       PORT: 3101
       NEXT_PUBLIC_API_URL: http://localhost:3000/api
       NEXT_PUBLIC_API_GATEWAY_URL: http://api-gateway:3000
+      NEXT_PUBLIC_CHAT_GATEWAY_URL: ws://chat-gateway:3020
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${APP_CLERK_PUBLISHABLE_KEY}
       CLERK_SECRET_KEY: ${APP_CLERK_SECRET_KEY}
       NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in

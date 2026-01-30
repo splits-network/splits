@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
 import {
     useStandardList,
     PaginationControls,
@@ -47,6 +48,7 @@ const ACTION_LABELS: Record<string, { label: string; color: string; icon: string
 
 export default function AuditLogPage() {
     const { getToken } = useAuth();
+    const toast = useToast();
     const [expandedEntry, setExpandedEntry] = useState<string | null>(null);
 
     const {
@@ -187,10 +189,10 @@ export default function AuditLogPage() {
             link.click();
             document.body.removeChild(link);
 
-            alert(`Exported ${allEntries.length} audit log entries to CSV`);
+            toast.success(`Exported ${allEntries.length} audit log entries to CSV`);
         } catch (error) {
             console.error('Failed to export audit log:', error);
-            alert('Failed to export audit log');
+            toast.error('Failed to export audit log');
         }
     }
 

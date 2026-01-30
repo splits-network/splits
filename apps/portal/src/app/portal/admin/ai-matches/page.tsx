@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { ApiClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
 
 export default function AIMatchesPage() {
     const [matches, setMatches] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const toast = useToast();
 
     useEffect(() => {
         loadMatches();
@@ -40,11 +42,11 @@ export default function AIMatchesPage() {
                 accepted,
                 rejection_reason: rejectionReason,
             });
-            alert(`Match ${action}ed`);
+            toast.success(`Match ${action}ed`);
             loadMatches();
         } catch (error) {
             console.error('Failed to review match:', error);
-            alert('Failed to review match');
+            toast.error('Failed to review match');
         }
     };
 

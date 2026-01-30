@@ -48,6 +48,8 @@ async function main() {
             origin: allowedOrigins,
             credentials: true,
         },
+        // Disable built-in Fastify request logging in production to use our custom logging
+        disableRequestLogging: baseConfig.nodeEnv === 'production',
     });
 
     app.setErrorHandler(errorHandler);
@@ -169,6 +171,15 @@ async function main() {
         // Add correlation ID to response headers
         reply.header('x-correlation-id', correlationId);
 
+        // Skip logging for noisy endpoints to reduce log spam
+        if (request.url === '/health' || 
+            request.url.includes('/docs') ||
+            request.url.includes('/notifications/unread-count') ||
+            request.url.includes('/notifications?') ||
+            request.method === 'OPTIONS') {
+            return;
+        }
+
         // Log incoming request
         logger.info({
             correlationId,
@@ -184,6 +195,15 @@ async function main() {
 
     // Add response logging middleware
     app.addHook('onResponse', async (request, reply) => {
+        // Skip logging for noisy endpoints to reduce log spam
+        if (request.url === '/health' || 
+            request.url.includes('/docs') ||
+            request.url.includes('/notifications/unread-count') ||
+            request.url.includes('/notifications?') ||
+            request.method === 'OPTIONS') {
+            return;
+        }
+
         const correlationId = (request as any).correlationId;
         const startTime = (request as any).startTime;
         const responseTime = Date.now() - startTime;
@@ -195,38 +215,6 @@ async function main() {
             statusCode: reply.statusCode,
             responseTime: `${responseTime}ms`,
         }, 'Request completed');
-    });
-
-    // Add enhanced debug logging for profile-related API calls (exclude notification polling noise)
-    app.addHook('onResponse', async (request, reply) => {
-        // Skip notification calls to reduce log noise
-        if (request.url.includes('/notifications/unread-count') || request.url.includes('/notifications?')) {
-            return;
-        }
-
-        // Skip health checks
-        if (request.url === '/health' || request.url.includes('/docs')) {
-            return;
-        }
-
-        const correlationId = (request as any).correlationId;
-        const startTime = (request as any).startTime;
-        const responseTime = Date.now() - startTime;
-
-        // Enhanced logging for API calls
-
-        // Log auth headers for debugging
-        const authHeader = request.headers.authorization;
-        const clerkUserId = (request as any).auth?.clerkUserId;
-
-        if (authHeader || clerkUserId) {
-            console.log(`[API Auth] User: ${clerkUserId || 'anonymous'} - Auth: ${authHeader ? 'present' : 'missing'} - Role resolved by service`);
-        }
-
-        // Log any errors for non-2xx responses
-        if (reply.statusCode >= 400) {
-            console.log(`[API Error] ${request.method} ${request.url} - ${reply.statusCode} - Correlation: ${correlationId}`);
-        }
     });
 
     // Initialize auth middleware with multi-tenant Clerk support
@@ -332,6 +320,7 @@ async function main() {
     services.register('document-processing', process.env.DOCUMENT_PROCESSING_SERVICE_URL || 'http://localhost:3008');
     services.register('ai', process.env.AI_SERVICE_URL || 'http://localhost:3009');
     services.register('analytics', process.env.ANALYTICS_SERVICE_URL || 'http://localhost:3010');
+    services.register('chat', process.env.CHAT_SERVICE_URL || 'http://localhost:3011');
 
     // Register V2 proxy routes only
     registerV2GatewayRoutes(app, services, { eventPublisher });

@@ -1,0 +1,45 @@
+import { createAuthenticatedClient } from "@/lib/api-client";
+
+type UserProfile = Record<string, any>;
+
+let cachedProfile: UserProfile | null = null;
+let pending: Promise<UserProfile | null> | null = null;
+
+export async function getCachedCurrentUserProfile(
+    getToken: () => Promise<string | null>,
+    options?: { force?: boolean },
+): Promise<UserProfile | null> {
+    if (options?.force) {
+        cachedProfile = null;
+    }
+    if (cachedProfile) return cachedProfile;
+    if (pending) return pending;
+
+    pending = (async () => {
+        const token = await getToken();
+        if (!token) return null;
+        const client = createAuthenticatedClient(token);
+        const response: any = await client.get("/users/me");
+        const profile = response?.data ?? null;
+        if (profile) {
+            cachedProfile = profile;
+        }
+        return profile;
+    })();
+
+    try {
+        return await pending;
+    } finally {
+        pending = null;
+    }
+}
+
+export function setCachedCurrentUserProfile(profile: UserProfile | null) {
+    if (profile) {
+        cachedProfile = profile;
+    }
+}
+
+export function clearCachedCurrentUserProfile() {
+    cachedProfile = null;
+}

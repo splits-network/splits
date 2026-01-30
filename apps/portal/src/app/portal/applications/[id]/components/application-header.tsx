@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { startChatConversation } from '@/lib/chat-start';
 import { useToast } from '@/lib/toast-context';
 import { useUserProfile } from '@/contexts';
 import { getApplicationStageBadge } from '@/lib/utils/badge-styles';
 import StageUpdateModal from './stage-update-modal';
 import type { ApplicationStage } from '@splits-network/shared-types';
+import { useRouter } from 'next/navigation';
 
 interface ApplicationHeaderProps {
     applicationId: string;
@@ -23,6 +25,7 @@ interface Application {
     updated_at: string;
     candidate: {
         id: string;
+        user_id?: string | null;
         full_name: string;
         email: string;
     };
@@ -47,11 +50,17 @@ interface Application {
 export default function ApplicationHeader({ applicationId }: ApplicationHeaderProps) {
     const { getToken } = useAuth();
     const toast = useToast();
+    const router = useRouter();
     const { isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
     const [application, setApplication] = useState<Application | null>(null);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
     const [showStageModal, setShowStageModal] = useState(false);
+    const [startingChat, setStartingChat] = useState(false);
+    const canChat = Boolean(application?.candidate?.user_id);
+    const chatDisabledReason = canChat
+        ? null
+        : "Candidate isn't linked to a user yet.";
 
     const canManageStage = isAdmin || isRecruiter;
 
@@ -199,6 +208,46 @@ export default function ApplicationHeader({ applicationId }: ApplicationHeaderPr
                             </div>
                         </div>
                         <div className="flex flex-wrap gap-2">
+                            <span title={chatDisabledReason || undefined}>
+                                <button
+                                    className="btn btn-outline gap-2"
+                                    onClick={async () => {
+                                        try {
+                                            if (!application.candidate.user_id) {
+                                                return;
+                                            }
+                                            setStartingChat(true);
+                                            const conversationId =
+                                                await startChatConversation(
+                                                    getToken,
+                                                    application.candidate.user_id as string,
+                                                    {
+                                                        application_id:
+                                                            application.id,
+                                                        job_id: application.job.id,
+                                                        company_id:
+                                                            application.job.company?.id ??
+                                                            null,
+                                                    },
+                                                );
+                                            router.push(`/portal/messages/${conversationId}`);
+                                        } catch (error: any) {
+                                            console.error('Failed to start chat:', error);
+                                            toast.error(error?.message || 'Failed to start chat');
+                                        } finally {
+                                            setStartingChat(false);
+                                        }
+                                    }}
+                                    disabled={!canChat || startingChat}
+                                >
+                                    {startingChat ? (
+                                        <span className="loading loading-spinner loading-xs"></span>
+                                    ) : (
+                                        <i className="fa-duotone fa-regular fa-messages"></i>
+                                    )}
+                                    Message Candidate
+                                </button>
+                            </span>
                             {canManageStage && (
                                 <button
                                     className="btn btn-primary gap-2"

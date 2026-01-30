@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
 /**
  * Resume Step - Step 3 of Candidate Onboarding
  * Optional resume upload
  */
 
-import { useState } from 'react';
-import { useAuth } from '@clerk/nextjs';
-import { useOnboarding } from '../onboarding-provider';
-import { createAuthenticatedClient } from '@/lib/api-client';
+import { useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { useOnboarding } from "../onboarding-provider";
+import { createAuthenticatedClient } from "@/lib/api-client";
 
-const ACCEPTED_FILE_TYPES = '.pdf,.doc,.docx,.txt';
+const ACCEPTED_FILE_TYPES = ".pdf,.doc,.docx,.txt";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export function ResumeStep() {
@@ -24,15 +24,20 @@ export function ResumeStep() {
         if (!file) return;
 
         // Validate file type
-        const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+        const validTypes = [
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "text/plain",
+        ];
         if (!validTypes.includes(file.type)) {
-            setUploadError('Please upload a PDF, DOC, DOCX, or TXT file');
+            setUploadError("Please upload a PDF, DOC, DOCX, or TXT file");
             return;
         }
 
         // Validate file size
         if (file.size > MAX_FILE_SIZE) {
-            setUploadError('File size must be less than 10MB');
+            setUploadError("File size must be less than 10MB");
             return;
         }
 
@@ -41,53 +46,38 @@ export function ResumeStep() {
 
         try {
             const token = await getToken();
-            if (!token) throw new Error('No authentication token');
+            if (!token) throw new Error("No authentication token");
 
             const apiClient = createAuthenticatedClient(token);
 
-            // Step 1: Get presigned upload URL
-            const presignedResponse = await apiClient.post<{ 
-                data: { 
-                    uploadUrl: string; 
-                    documentId: string;
-                    storagePath: string;
-                } 
-            }>('/documents/presigned-upload', {
-                filename: file.name,
-                content_type: file.type,
-                entity_type: 'candidate',
-                entity_id: candidateId,
-                document_type: 'resume',
-            });
-
-            const { uploadUrl, documentId } = presignedResponse.data;
-
-            // Step 2: Upload file directly to storage
-            const uploadResponse = await fetch(uploadUrl, {
-                method: 'PUT',
-                body: file,
-                headers: {
-                    'Content-Type': file.type,
-                },
-            });
-
-            if (!uploadResponse.ok) {
-                throw new Error('Failed to upload file to storage');
+            // Ensure candidateId is available
+            if (!candidateId) {
+                throw new Error("No candidate ID available for file upload");
             }
 
-            // Step 3: Confirm upload
-            await apiClient.post(`/documents/${documentId}/confirm`);
+            // Direct upload with FormData (matches working pattern)
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("entity_type", "candidate");
+            formData.append("entity_id", candidateId);
+            formData.append("document_type", "resume");
 
-            // Update state
+            const response = await apiClient.post("/documents", formData);
+
+            // Update state with document ID from V2 response
+            const documentId = response.data?.id || response.id;
             updateProfileData({
                 resumeFile: file,
                 resumeUploaded: true,
                 resumeDocumentId: documentId,
             });
-
         } catch (error) {
-            console.error('[ResumeStep] Upload failed:', error);
-            setUploadError(error instanceof Error ? error.message : 'Failed to upload resume');
+            console.error("[ResumeStep] Upload failed:", error);
+            setUploadError(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to upload resume",
+            );
         } finally {
             setUploading(false);
         }
@@ -99,10 +89,12 @@ export function ResumeStep() {
                 const token = await getToken();
                 if (token) {
                     const apiClient = createAuthenticatedClient(token);
-                    await apiClient.delete(`/documents/${state.profileData.resumeDocumentId}`);
+                    await apiClient.delete(
+                        `/documents/${state.profileData.resumeDocumentId}`,
+                    );
                 }
             } catch (error) {
-                console.error('[ResumeStep] Failed to delete document:', error);
+                console.error("[ResumeStep] Failed to delete document:", error);
             }
         }
 
@@ -114,7 +106,8 @@ export function ResumeStep() {
         setUploadError(null);
     };
 
-    const hasUploadedResume = state.profileData.resumeUploaded && state.profileData.resumeFile;
+    const hasUploadedResume =
+        state.profileData.resumeUploaded && state.profileData.resumeFile;
 
     return (
         <div className="space-y-6">
@@ -125,7 +118,9 @@ export function ResumeStep() {
                 </div>
                 <h2 className="text-xl font-bold mb-2 flex items-center justify-center gap-2">
                     Upload Your Resume
-                    <span className="badge badge-warning badge-sm">Optional</span>
+                    <span className="badge badge-warning badge-sm">
+                        Optional
+                    </span>
                 </h2>
                 <p className="text-base-content/70 text-sm">
                     A resume helps recruiters understand your experience better.
@@ -147,14 +142,13 @@ export function ResumeStep() {
                                         {state.profileData.resumeFile?.name}
                                     </p>
                                     <p className="text-xs text-base-content/60">
-                                        {state.profileData.resumeFile?.size 
+                                        {state.profileData.resumeFile?.size
                                             ? `${(state.profileData.resumeFile.size / 1024).toFixed(1)} KB`
-                                            : 'Uploaded'
-                                        }
+                                            : "Uploaded"}
                                     </p>
                                 </div>
                             </div>
-                            <button 
+                            <button
                                 type="button"
                                 className="btn btn-ghost btn-sm btn-circle"
                                 onClick={handleRemoveFile}
@@ -185,15 +179,15 @@ export function ResumeStep() {
                                     <p className="mt-3 text-sm">
                                         <label className="link link-primary cursor-pointer">
                                             Click to upload
-                                            <input 
+                                            <input
                                                 type="file"
                                                 className="hidden"
                                                 accept={ACCEPTED_FILE_TYPES}
                                                 onChange={handleFileSelect}
                                                 disabled={uploading}
                                             />
-                                        </label>
-                                        {' '}or drag and drop
+                                        </label>{" "}
+                                        or drag and drop
                                     </p>
                                     <p className="text-xs text-base-content/60 mt-1">
                                         PDF, DOC, DOCX, or TXT - Max 10MB
@@ -218,9 +212,12 @@ export function ResumeStep() {
                 <div className="flex items-start gap-3">
                     <i className="fa-duotone fa-regular fa-lightbulb text-info text-xl mt-0.5"></i>
                     <div>
-                        <h4 className="font-medium text-sm">No resume ready?</h4>
+                        <h4 className="font-medium text-sm">
+                            No resume ready?
+                        </h4>
                         <p className="text-xs text-base-content/70 mt-1">
-                            No problem! You can skip this step and upload your resume later from your profile page.
+                            No problem! You can skip this step and upload your
+                            resume later from your profile page.
                         </p>
                     </div>
                 </div>

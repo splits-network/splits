@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: chat-service
+    namespace: splits-network
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: chat-service
+    template:
+        metadata:
+            labels:
+                app: chat-service
+        spec:
+            containers:
+                - name: chat-service
+                  image: ${ACR_SERVER}/chat-service:${IMAGE_TAG}
+                  ports:
+                      - containerPort: 3011
+                        name: http
+                  env:
+                      - name: NODE_ENV
+                        value: "production"
+                      - name: PORT
+                        value: "3011"
+                      - name: SENTRY_DSN
+                        value: "https://97c3c1c116302303b44a844fb1ea9d77@o4510570789732352.ingest.us.sentry.io/4510570904944640"
+                      - name: SUPABASE_URL
+                        valueFrom:
+                            secretKeyRef:
+                                name: supabase-secrets
+                                key: supabase-url
+                      - name: SUPABASE_ANON_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: supabase-secrets
+                                key: supabase-anon-key
+                      - name: SUPABASE_SERVICE_ROLE_KEY
+                        valueFrom:
+                            secretKeyRef:
+                                name: supabase-secrets
+                                key: supabase-service-role-key
+                      - name: REDIS_HOST
+                        value: "redis"
+                      - name: REDIS_PORT
+                        value: "6379"
+                      - name: RABBITMQ_URL
+                        value: "amqp://splits:splits_production@rabbitmq:5672"
+                      - name: CHAT_ATTACHMENTS_BUCKET
+                        value: "chat-attachments"
+                      - name: CHAT_ATTACHMENTS_ENABLED
+                        value: "true"
+                  resources:
+                      requests:
+                          cpu: 200m
+                          memory: 256Mi
+                      limits:
+                          cpu: 1000m
+                          memory: 1Gi
+                  livenessProbe:
+                      httpGet:
+                          path: /health
+                          port: 3011
+                      initialDelaySeconds: 30
+                      periodSeconds: 10
+                  readinessProbe:
+                      httpGet:
+                          path: /health
+                          port: 3011
+                      initialDelaySeconds: 10
+                      periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: chat-service
+    namespace: splits-network
+spec:
+    type: ClusterIP
+    ports:
+        - port: 80
+          targetPort: 3011
+          name: http
+    selector:
+        app: chat-service

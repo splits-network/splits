@@ -5,6 +5,9 @@ import { useAuth, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import type { ApiResponse } from "@splits-network/shared-api-client";
+import { useRouter } from "next/navigation";
+import { startChatConversation } from "@/lib/chat-start";
+import { useToast } from "@/lib/toast-context";
 import {
   StatCard,
   StatCardGrid,
@@ -30,6 +33,7 @@ interface RecentApplication {
   company: string;
   status: string;
   applied_at: string;
+  recruiter_user_id?: string | null;
 }
 
 interface Application {
@@ -40,6 +44,11 @@ interface Application {
     title?: string;
     company?: {
       name?: string;
+    };
+  };
+  recruiter?: {
+    user?: {
+      id?: string;
     };
   };
 }
@@ -63,6 +72,8 @@ interface Candidate {
 export default function DashboardPage() {
   const { getToken } = useAuth();
   const { user } = useUser();
+  const router = useRouter();
+  const toast = useToast();
 
   const [stats, setStats] = useState<DashboardStats>({
     applications: 0,
@@ -80,6 +91,7 @@ export default function DashboardPage() {
   const [applicationsLoading, setApplicationsLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [startingChatId, setStartingChatId] = useState<string | null>(null);
 
   // Load stats and applications data
   useEffect(() => {
@@ -93,7 +105,7 @@ export default function DashboardPage() {
         // Fetch applications with job data included
         const applicationsResponse = await client.get<
           ApiResponse<Application[]>
-        >("/applications", { params: { include: "job,company" } });
+        >("/applications", { params: { include: "job,company,recruiter" } });
         const allApplications = applicationsResponse.data || [];
 
         // Calculate stats from applications
@@ -137,6 +149,7 @@ export default function DashboardPage() {
             company: app.job?.company?.name || "Unknown Company",
             status: app.stage || "applied",
             applied_at: app.created_at,
+            recruiter_user_id: app.recruiter?.user?.id || null,
           }));
 
         setRecentApplications(recent);
@@ -351,26 +364,78 @@ export default function DashboardPage() {
         >
           {recentApplications.length > 0 ? (
             <div className="flex flex-col gap-4">
-              {recentApplications.map((app) => (
-                <Link key={app.id} href={`/portal/applications/${app.id}`}>
-                  <div className="p-4 bg-base-100 rounded-xl hover:bg-base-200/70 transition-all cursor-pointer group">
-                    <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
-                      {app.job_title}
-                    </h3>
-                    <p className="text-sm text-base-content/70 mb-2">
-                      {app.company}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="badge badge-primary badge-sm">
-                        {app.status}
-                      </span>
-                      <span className="text-xs text-base-content/70">
-                        Applied {new Date(app.applied_at).toLocaleDateString()}
-                      </span>
+              {recentApplications.map((app) => {
+                const canChat = Boolean(app.recruiter_user_id);
+                const chatDisabledReason = canChat
+                  ? null
+                  : "Recruiter isn't linked to a user yet.";
+                return (
+                  <Link key={app.id} href={`/portal/applications/${app.id}`}>
+                    <div className="p-4 bg-base-100 rounded-xl hover:bg-base-200/70 transition-all cursor-pointer group">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
+                            {app.job_title}
+                          </h3>
+                          <p className="text-sm text-base-content/70 mb-2">
+                            {app.company}
+                          </p>
+                        </div>
+                        <span title={chatDisabledReason || undefined}>
+                          <button
+                            className="btn btn-ghost btn-sm btn-square"
+                            disabled={!canChat || startingChatId === app.id}
+                            onClick={async (event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              if (!app.recruiter_user_id) {
+                                return;
+                              }
+                              try {
+                                setStartingChatId(app.id);
+                                const conversationId =
+                                  await startChatConversation(
+                                    getToken,
+                                    app.recruiter_user_id,
+                                    { application_id: app.id },
+                                  );
+                                router.push(
+                                  `/portal/messages/${conversationId}`,
+                                );
+                              } catch (err: any) {
+                                console.error(
+                                  "Failed to start chat:",
+                                  err,
+                                );
+                                toast.error(
+                                  err?.message || "Failed to start chat",
+                                );
+                              } finally {
+                                setStartingChatId(null);
+                              }
+                            }}
+                          >
+                            {startingChatId === app.id ? (
+                              <span className="loading loading-spinner loading-xs"></span>
+                            ) : (
+                              <i className="fa-duotone fa-regular fa-messages"></i>
+                            )}
+                          </button>
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="badge badge-primary badge-sm">
+                          {app.status}
+                        </span>
+                        <span className="text-xs text-base-content/70">
+                          Applied{" "}
+                          {new Date(app.applied_at).toLocaleDateString()}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           ) : (
             <EmptyState

@@ -5,6 +5,11 @@ import { DataRow, DataList, KeyMetric, MetricCard, VerticalDataRow } from '@/com
 import { formatRelativeTime } from '@/lib/utils';
 import { getApplicationStageBadge } from '@/lib/utils/badge-styles';
 import type { ApplicationStage } from '@splits-network/shared-types';
+import { useAuth } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import { startChatConversation } from '@/lib/chat-start';
+import { useToast } from '@/lib/toast-context';
+import { useState } from 'react';
 
 // ===== TYPES =====
 
@@ -22,6 +27,7 @@ export interface Application {
     updated_at: string;
     candidate: {
         id: string;
+        user_id?: string | null;
         full_name: string;
         email: string;
         linkedin_url?: string;
@@ -96,9 +102,17 @@ export function ApplicationCard({
     onAccept,
     formatDate,
 }: ApplicationCardProps) {
+    const { getToken } = useAuth();
+    const router = useRouter();
+    const toast = useToast();
+    const [startingChat, setStartingChat] = useState(false);
     const companyName = application.company_name || application.job?.company?.name || 'Unknown Company';
     const hasAIReview = application.ai_reviewed && application.ai_review;
     const isMasked = application.candidate._masked;
+    const canChat = Boolean(application.candidate.user_id);
+    const chatDisabledReason = canChat
+        ? null
+        : "Candidate isn't linked to a user yet.";
 
     // Calculate badges
     const badges: Badge[] = [];
@@ -232,6 +246,56 @@ export function ApplicationCard({
                         Submitted {formatRelativeTime(application.created_at)}
                     </span>
                     <div className="flex items-center gap-2">
+                        <span title={chatDisabledReason || undefined}>
+                            <button
+                                className="btn btn-outline btn-sm"
+                                disabled={!canChat || startingChat}
+                                onClick={async (e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (!application.candidate.user_id) {
+                                        return;
+                                    }
+                                    try {
+                                        setStartingChat(true);
+                                        const conversationId =
+                                            await startChatConversation(
+                                                getToken,
+                                                application.candidate.user_id,
+                                                {
+                                                    application_id:
+                                                        application.id,
+                                                    job_id:
+                                                        application.job.id,
+                                                    company_id:
+                                                        application.job.company?.id ??
+                                                        null,
+                                                },
+                                            );
+                                        router.push(
+                                            `/portal/messages/${conversationId}`,
+                                        );
+                                    } catch (err: any) {
+                                        console.error(
+                                            "Failed to start chat:",
+                                            err,
+                                        );
+                                        toast.error(
+                                            err?.message ||
+                                                "Failed to start chat",
+                                        );
+                                    } finally {
+                                        setStartingChat(false);
+                                    }
+                                }}
+                            >
+                                {startingChat ? (
+                                    <span className="loading loading-spinner loading-xs"></span>
+                                ) : (
+                                    "Message"
+                                )}
+                            </button>
+                        </span>
                         {canAccept && onAccept && (
                             <span
                                 onClick={(e) => {

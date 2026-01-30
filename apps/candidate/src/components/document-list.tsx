@@ -5,6 +5,7 @@ import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import type { Document as ApiDocument } from '@/lib/document-utils';
 import UploadDocumentModal from './upload-document-modal';
+import { useToast } from '@/lib/toast-context';
 
 interface DocumentListProps {
     entityType: string;
@@ -22,6 +23,7 @@ export default function DocumentList({
     initialDocuments
 }: DocumentListProps) {
     const { getToken } = useAuth();
+    const toast = useToast();
     const [documents, setDocuments] = useState<ApiDocument[]>(initialDocuments || []);
     const [loading, setLoading] = useState(!initialDocuments);
     const [downloading, setDownloading] = useState<string | null>(null);
@@ -64,7 +66,7 @@ export default function DocumentList({
             }
         } catch (error) {
             console.error('Failed to download document:', error);
-            alert('Failed to download document');
+            toast.error('Failed to download document');
         } finally {
             setDownloading(null);
         }
@@ -82,7 +84,7 @@ export default function DocumentList({
             await fetchDocuments();
         } catch (error) {
             console.error('Failed to delete document:', error);
-            alert('Failed to delete document');
+            toast.error('Failed to delete document');
         }
     };
 

@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
 import {
     useStandardList,
     PaginationControls,
@@ -47,6 +48,7 @@ export default function EscrowHoldsPage() {
     const [holdToRelease, setHoldToRelease] = useState<EscrowHold | null>(null);
     const [stats, setStats] = useState<Stats | null>(null);
     const [loadingStats, setLoadingStats] = useState(true);
+    const toast = useToast();
 
     const defaultFilters = useMemo<HoldFilters>(() => ({ status: 'active' }), []);
 
@@ -129,11 +131,11 @@ export default function EscrowHoldsPage() {
             await apiClient.post(`/escrow-holds/${holdToRelease.id}/release`, {
                 notes: notes || undefined,
             });
-            alert('Escrow hold released successfully');
+            toast.success('Escrow hold released successfully');
             refresh();
         } catch (error) {
             console.error('Failed to release hold:', error);
-            alert('Failed to release hold');
+            toast.error('Failed to release hold');
             throw error; // Propagate to modal
         } finally {
             setReleasingId(null);
@@ -156,11 +158,11 @@ export default function EscrowHoldsPage() {
             if (!token) throw new Error('No auth token');
             const apiClient = createAuthenticatedClient(token);
             await apiClient.post(`/escrow-holds/${holdId}/cancel`);
-            alert('Escrow hold cancelled successfully');
+            toast.success('Escrow hold cancelled successfully');
             refresh();
         } catch (error) {
             console.error('Failed to cancel hold:', error);
-            alert('Failed to cancel hold');
+            toast.error('Failed to cancel hold');
         }
     }
 

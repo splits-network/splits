@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
 import {
     useStandardList,
     PaginationControls,
@@ -44,6 +45,7 @@ export default function PayoutSchedulesPage() {
     const [processingId, setProcessingId] = useState<string | null>(null);
     const [stats, setStats] = useState<Stats | null>(null);
     const [loadingStats, setLoadingStats] = useState(true);
+    const toast = useToast();
 
     const defaultFilters = useMemo<ScheduleFilters>(() => ({ status: 'pending' }), []);
 
@@ -118,11 +120,11 @@ export default function PayoutSchedulesPage() {
             if (!token) throw new Error('No auth token');
             const apiClient = createAuthenticatedClient(token);
             await apiClient.post(`/payout-schedules/${scheduleId}/trigger`);
-            alert('Schedule triggered successfully');
+            toast.success('Schedule triggered successfully');
             refresh();
         } catch (error) {
             console.error('Failed to trigger schedule:', error);
-            alert('Failed to trigger schedule');
+            toast.error('Failed to trigger schedule');
         } finally {
             setProcessingId(null);
         }
@@ -136,11 +138,11 @@ export default function PayoutSchedulesPage() {
             if (!token) throw new Error('No auth token');
             const apiClient = createAuthenticatedClient(token);
             await apiClient.delete(`/payout-schedules/${scheduleId}`);
-            alert('Schedule cancelled successfully');
+            toast.success('Schedule cancelled successfully');
             refresh();
         } catch (error) {
             console.error('Failed to cancel schedule:', error);
-            alert('Failed to cancel schedule');
+            toast.error('Failed to cancel schedule');
         }
     }
 
@@ -156,11 +158,11 @@ export default function PayoutSchedulesPage() {
                 status: 'pending',
                 retry_count: 0,
             });
-            alert('Schedule reset to pending');
+            toast.success('Schedule reset to pending');
             refresh();
         } catch (error) {
             console.error('Failed to retry schedule:', error);
-            alert('Failed to retry schedule');
+            toast.error('Failed to retry schedule');
         } finally {
             setProcessingId(null);
         }

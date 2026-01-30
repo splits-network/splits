@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ApiClient } from '@/lib/api-client';
 import Link from 'next/link';
+import { useToast } from '@/lib/toast-context';
 
 interface AutomationRule {
     id: string;
@@ -36,6 +37,7 @@ export default function AutomationControlsPage() {
     const [pendingExecutions, setPendingExecutions] = useState<AutomationExecution[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'rules' | 'executions'>('rules');
+    const toast = useToast();
 
     useEffect(() => {
         loadData();
@@ -72,7 +74,7 @@ export default function AutomationControlsPage() {
             await loadData();
         } catch (error) {
             console.error('Failed to update rule status:', error);
-            alert('Failed to update rule status');
+            toast.error('Failed to update rule status');
         }
     };
 
@@ -85,7 +87,7 @@ export default function AutomationControlsPage() {
             await loadData();
         } catch (error) {
             console.error('Failed to approve execution:', error);
-            alert('Failed to approve execution');
+            toast.error('Failed to approve execution');
         }
     };
 
@@ -99,7 +101,7 @@ export default function AutomationControlsPage() {
             await loadData();
         } catch (error) {
             console.error('Failed to reject execution:', error);
-            alert('Failed to reject execution');
+            toast.error('Failed to reject execution');
         }
     };
 
