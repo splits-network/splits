@@ -72,8 +72,9 @@ export async function registerChatRoutes(app: FastifyInstance, config: RegisterC
             const { id } = request.params as { id: string };
             const query = request.query as any;
             const after = query.after as string | undefined;
+            const before = query.before as string | undefined;
             const limit = Math.min(parseInt(query.limit || '50', 10), 100);
-            const messages = await service.listMessages(clerkUserId, id, after, limit);
+            const messages = await service.listMessages(clerkUserId, id, after, before, limit);
             return reply.send({ data: messages });
         } catch (error: any) {
             return reply.code(error.statusCode || 400).send({ error: error.message });
@@ -86,8 +87,9 @@ export async function registerChatRoutes(app: FastifyInstance, config: RegisterC
             const { id } = request.params as { id: string };
             const query = request.query as any;
             const after = query.after as string | undefined;
+            const before = query.before as string | undefined;
             const limit = Math.min(parseInt(query.limit || '50', 10), 100);
-            const result = await service.resyncConversation(clerkUserId, id, after, limit);
+            const result = await service.resyncConversation(clerkUserId, id, after, before, limit);
             return reply.send({ data: result });
         } catch (error: any) {
             return reply.code(error.statusCode || 400).send({ error: error.message });
@@ -281,7 +283,7 @@ export async function registerChatRoutes(app: FastifyInstance, config: RegisterC
             if (!attachment) {
                 return reply.code(404).send({ error: 'Attachment not found' });
             }
-            await service.listMessages(clerkUserId, attachment.conversation_id, undefined, 1);
+            await service.listMessages(clerkUserId, attachment.conversation_id, undefined, undefined, 1);
             const downloadUrl = await storage.createSignedDownloadUrl(attachment.storage_key);
             return reply.send({ data: { url: downloadUrl } });
         } catch (error: any) {

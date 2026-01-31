@@ -239,7 +239,13 @@ services:
       dockerfile: services/chat-service/Dockerfile
       target: development
     container_name: splits-chat-attachment-worker
-    command: ["pnpm", "--filter", "@splits-network/chat-service", "job:chat-attachments"]
+    command:
+      [
+        "pnpm",
+        "--filter",
+        "@splits-network/chat-service",
+        "job:chat-attachments",
+      ]
     environment:
       NODE_ENV: development
       SUPABASE_URL: ${SUPABASE_URL}
@@ -267,7 +273,8 @@ services:
       dockerfile: services/chat-service/Dockerfile
       target: development
     container_name: splits-chat-retention-job
-    command: ["pnpm", "--filter", "@splits-network/chat-service", "job:chat-retention"]
+    command:
+      ["pnpm", "--filter", "@splits-network/chat-service", "job:chat-retention"]
     environment:
       NODE_ENV: development
       SUPABASE_URL: ${SUPABASE_URL}
@@ -292,7 +299,13 @@ services:
       dockerfile: services/chat-service/Dockerfile
       target: development
     container_name: splits-chat-moderation-worker
-    command: ["pnpm", "--filter", "@splits-network/chat-service", "job:chat-moderation"]
+    command:
+      [
+        "pnpm",
+        "--filter",
+        "@splits-network/chat-service",
+        "job:chat-moderation",
+      ]
     environment:
       NODE_ENV: development
       SUPABASE_URL: ${SUPABASE_URL}

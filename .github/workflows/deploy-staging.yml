@@ -263,6 +263,9 @@ jobs:
                   export ACR_SERVER=${{ secrets.ACR_LOGIN_SERVER }}
                   export API_BASE_URL="https://api.staging.splits.network"
                   export CHAT_GATEWAY_URL="wss://api.staging.splits.network/chat"
+                  export PORTAL_URL="https://staging.splits.network"
+                  export CANDIDATE_URL="https://staging.applicant.network"
+                  export CORPORATE_URL="https://staging.employment-networks.com"
 
                   # Use envsubst to replace image tags in all deployment files
                   for file in infra/k8s/*/deployment.yaml; do

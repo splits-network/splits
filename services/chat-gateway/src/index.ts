@@ -1,9 +1,13 @@
-import http from 'http';
-import WebSocket, { WebSocketServer } from 'ws';
-import Redis from 'ioredis';
-import { createClerkClient, verifyToken } from '@clerk/backend';
-import { loadBaseConfig, loadMultiClerkConfig, loadRedisConfig } from '@splits-network/shared-config';
-import { createLogger } from '@splits-network/shared-logging';
+import http from "http";
+import WebSocket, { WebSocketServer } from "ws";
+import Redis from "ioredis";
+import { createClerkClient, verifyToken } from "@clerk/backend";
+import {
+    loadBaseConfig,
+    loadMultiClerkConfig,
+    loadRedisConfig,
+} from "@splits-network/shared-config";
+import { createLogger } from "@splits-network/shared-logging";
 
 type AuthContext = {
     clerkUserId: string;
@@ -11,38 +15,48 @@ type AuthContext = {
 };
 
 type ClientMessage =
-    | { type: 'subscribe'; channels: string[] }
-    | { type: 'typing.started'; conversationId: string }
-    | { type: 'typing.stopped'; conversationId: string }
-    | { type: 'presence.ping' }
-    | { type: 'read.receipt'; conversationId: string; lastReadMessageId?: string };
+    | { type: "subscribe"; channels: string[] }
+    | { type: "typing.started"; conversationId: string }
+    | { type: "typing.stopped"; conversationId: string }
+    | { type: "presence.ping" }
+    | {
+          type: "read.receipt";
+          conversationId: string;
+          lastReadMessageId?: string;
+      };
 
 const MAX_CHANNELS_PER_SOCKET = 200;
 const PRESENCE_TTL_SECONDS = 90;
 
 async function main() {
-    const baseConfig = loadBaseConfig('chat-gateway');
+    const baseConfig = loadBaseConfig("chat-gateway");
     const clerkConfig = loadMultiClerkConfig();
     const redisConfig = loadRedisConfig();
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,
-        level: baseConfig.nodeEnv === 'development' ? 'debug' : 'info',
-        prettyPrint: baseConfig.nodeEnv === 'development',
+        level: baseConfig.nodeEnv === "development" ? "debug" : "info",
+        prettyPrint: baseConfig.nodeEnv === "development",
     });
 
-    const identityServiceUrl = process.env.IDENTITY_SERVICE_URL || 'http://localhost:3001';
-    const chatServiceUrl = process.env.CHAT_SERVICE_URL || 'http://localhost:3011';
+    const identityServiceUrl =
+        process.env.IDENTITY_SERVICE_URL || "http://localhost:3001";
+    const chatServiceUrl =
+        process.env.CHAT_SERVICE_URL || "http://localhost:3011";
 
     const clerkClients = [
         {
-            name: 'portal',
-            client: createClerkClient({ secretKey: clerkConfig.portal.secretKey }),
+            name: "portal",
+            client: createClerkClient({
+                secretKey: clerkConfig.portal.secretKey,
+            }),
             secretKey: clerkConfig.portal.secretKey,
         },
         {
-            name: 'candidate',
-            client: createClerkClient({ secretKey: clerkConfig.candidate.secretKey }),
+            name: "candidate",
+            client: createClerkClient({
+                secretKey: clerkConfig.candidate.secretKey,
+            }),
             secretKey: clerkConfig.candidate.secretKey,
         },
     ];
@@ -64,23 +78,25 @@ async function main() {
     let subscribeDenied = 0;
 
     const server = http.createServer((req, res) => {
-        if (req.url === '/health') {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
-                status: 'ok',
-                service: 'chat-gateway',
-                active_connections: activeConnections,
-                events_out: eventsOut,
-                auth_failures: authFailures,
-                subscribe_denied: subscribeDenied,
-                timestamp: new Date().toISOString(),
-            }));
+        if (req.url === "/health") {
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(
+                JSON.stringify({
+                    status: "ok",
+                    service: "chat-gateway",
+                    active_connections: activeConnections,
+                    events_out: eventsOut,
+                    auth_failures: authFailures,
+                    subscribe_denied: subscribeDenied,
+                    timestamp: new Date().toISOString(),
+                }),
+            );
             return;
         }
         res.writeHead(404);
         res.end();
     });
-    const wss = new WebSocketServer({ server });
+    const wss = new WebSocketServer({ server, path: "/ws/chat" });
 
     const channelSockets = new Map<string, Set<WebSocket>>();
     const socketChannels = new Map<WebSocket, Set<string>>();
@@ -112,7 +128,7 @@ async function main() {
         socketChannels.delete(socket);
     };
 
-    redisPubSub.on('message', (channel, message) => {
+    redisPubSub.on("message", (channel, message) => {
         const sockets = channelSockets.get(channel);
         if (!sockets) return;
         for (const socket of sockets) {
@@ -123,26 +139,34 @@ async function main() {
         }
     });
 
-    wss.on('connection', async (socket, request) => {
+    wss.on("connection", async (socket, request) => {
         try {
-            const url = new URL(request.url || '', `http://${request.headers.host}`);
-            const token = url.searchParams.get('token');
+            const url = new URL(
+                request.url || "",
+                `http://${request.headers.host}`,
+            );
+            const token = url.searchParams.get("token");
+
             if (!token) {
-                socket.close(4001, 'Missing token');
+                socket.close(4001, "Missing token");
                 return;
             }
 
             const auth = await verifyClerkToken(token, clerkClients);
             if (!auth) {
                 authFailures += 1;
-                socket.close(4002, 'Invalid token');
+                socket.close(4002, "Invalid token");
                 return;
             }
 
-            const identityUserId = await fetchIdentityUserId(identityServiceUrl, auth.clerkUserId);
+            const identityUserId = await fetchIdentityUserId(
+                identityServiceUrl,
+                auth.clerkUserId,
+            );
+
             if (!identityUserId) {
                 authFailures += 1;
-                socket.close(4003, 'User not found');
+                socket.close(4003, "User not found");
                 return;
             }
 
@@ -157,13 +181,16 @@ async function main() {
 
             socket.send(
                 JSON.stringify({
-                    type: 'hello',
+                    type: "hello",
                     eventVersion: 1,
                     serverTime: new Date().toISOString(),
-                })
+                }),
             );
 
-            socket.on('message', async (data) => {
+            socket.on("message", async (data) => {
+                console.log("[chat-gateway] Received message from client", {
+                    data: data.toString(),
+                });
                 try {
                     const parsed = JSON.parse(data.toString()) as ClientMessage;
                     await handleClientMessage(
@@ -176,31 +203,42 @@ async function main() {
                             subscribeDenied += 1;
                         },
                         logger,
-                        redisData
+                        redisData,
                     );
                 } catch (err) {
-                    logger.warn({ err }, 'Failed to handle client message');
+                    logger.warn({ err }, "Failed to handle client message");
                 }
             });
 
             activeConnections += 1;
 
-            socket.on('close', async () => {
+            socket.on("close", async (e) => {
                 await unsubscribeSocket(socket);
                 activeConnections = Math.max(0, activeConnections - 1);
             });
         } catch (error) {
-            logger.error({ error }, 'WebSocket connection error');
-            socket.close(1011, 'Server error');
+            logger.error({ error }, "WebSocket connection error");
+            socket.close(1011, "Server error");
         }
     });
+
+    // server.on("upgrade", (req) => {
+    //     logger.info(
+    //         {
+    //             url: req.url,
+    //             origin: req.headers.origin,
+    //             host: req.headers.host,
+    //         },
+    //         "WS upgrade request",
+    //     );
+    // });
 
     server.listen(baseConfig.port, () => {
         logger.info(`Chat gateway listening on port ${baseConfig.port}`);
     });
 
-    process.on('SIGTERM', async () => {
-        logger.info('SIGTERM received, shutting down');
+    process.on("SIGTERM", async () => {
+        logger.info("SIGTERM received, shutting down");
         await redisPubSub.quit();
         await redisData.quit();
         wss.close();
@@ -211,11 +249,17 @@ async function main() {
 
 async function verifyClerkToken(
     token: string,
-    clerkClients: Array<{ name: string; client: ReturnType<typeof createClerkClient>; secretKey: string }>
+    clerkClients: Array<{
+        name: string;
+        client: ReturnType<typeof createClerkClient>;
+        secretKey: string;
+    }>,
 ): Promise<{ clerkUserId: string } | null> {
     for (const entry of clerkClients) {
         try {
-            const verified = await verifyToken(token, { secretKey: entry.secretKey });
+            const verified = await verifyToken(token, {
+                secretKey: entry.secretKey,
+            });
             if (!verified?.sub) continue;
             const user = await entry.client.users.getUser(verified.sub);
             if (!user) continue;
@@ -227,24 +271,31 @@ async function verifyClerkToken(
     return null;
 }
 
-async function fetchIdentityUserId(identityServiceUrl: string, clerkUserId: string): Promise<string | null> {
+async function fetchIdentityUserId(
+    identityServiceUrl: string,
+    clerkUserId: string,
+): Promise<string | null> {
     const response = await fetch(`${identityServiceUrl}/api/v2/users/me`, {
         headers: {
-            'x-clerk-user-id': clerkUserId,
+            "x-clerk-user-id": clerkUserId,
         },
     });
     if (!response.ok) {
         return null;
     }
-    const payload = await response.json() as any;
+    const payload = (await response.json()) as any;
     return payload?.data?.id ?? null;
 }
 
 async function setPresence(redisData: Redis, identityUserId: string) {
-    await redisData.setex(`presence:user:${identityUserId}`, PRESENCE_TTL_SECONDS, JSON.stringify({
-        status: 'online',
-        lastSeenAt: new Date().toISOString(),
-    }));
+    await redisData.setex(
+        `presence:user:${identityUserId}`,
+        PRESENCE_TTL_SECONDS,
+        JSON.stringify({
+            status: "online",
+            lastSeenAt: new Date().toISOString(),
+        }),
+    );
 }
 
 async function handleClientMessage(
@@ -255,26 +306,35 @@ async function handleClientMessage(
     subscribeChannel: (channel: string, socket: WebSocket) => Promise<void>,
     onSubscribeDenied: () => void,
     logger: ReturnType<typeof createLogger>,
-    redisData: Redis
+    redisData: Redis,
 ) {
-    if (message.type === 'subscribe') {
+    if (message.type === "subscribe") {
         const uniqueChannels = Array.from(new Set(message.channels || []));
         if (uniqueChannels.length > MAX_CHANNELS_PER_SOCKET) {
-            socket.send(JSON.stringify({ type: 'system.notice', reason: 'too_many_channels' }));
+            socket.send(
+                JSON.stringify({
+                    type: "system.notice",
+                    reason: "too_many_channels",
+                }),
+            );
             return;
         }
 
         for (const channel of uniqueChannels) {
-            if (channel.startsWith('user:')) {
+            if (channel.startsWith("user:")) {
                 if (channel !== `user:${authContext.identityUserId}`) {
                     continue;
                 }
                 await subscribeChannel(channel, socket);
                 continue;
             }
-            if (channel.startsWith('conv:')) {
-                const conversationId = channel.slice('conv:'.length);
-                const allowed = await authorizeConversation(chatServiceUrl, authContext.clerkUserId, conversationId);
+            if (channel.startsWith("conv:")) {
+                const conversationId = channel.slice("conv:".length);
+                const allowed = await authorizeConversation(
+                    chatServiceUrl,
+                    authContext.clerkUserId,
+                    conversationId,
+                );
                 if (allowed) {
                     await subscribeChannel(channel, socket);
                 } else {
@@ -286,12 +346,15 @@ async function handleClientMessage(
         return;
     }
 
-    if (message.type === 'presence.ping') {
+    if (message.type === "presence.ping") {
         await setPresence(redisData, authContext.identityUserId);
         return;
     }
 
-    if (message.type === 'typing.started' || message.type === 'typing.stopped') {
+    if (
+        message.type === "typing.started" ||
+        message.type === "typing.stopped"
+    ) {
         const type = message.type;
         const conversationId = message.conversationId;
         await publishEphemeral(redisData, `conv:${conversationId}`, {
@@ -306,32 +369,44 @@ async function handleClientMessage(
         return;
     }
 
-    if (message.type === 'read.receipt') {
-        await fetch(`${chatServiceUrl}/api/v2/chat/conversations/${message.conversationId}/read-receipt`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-clerk-user-id': authContext.clerkUserId,
+    if (message.type === "read.receipt") {
+        await fetch(
+            `${chatServiceUrl}/api/v2/chat/conversations/${message.conversationId}/read-receipt`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-clerk-user-id": authContext.clerkUserId,
+                },
+                body: JSON.stringify({
+                    lastReadMessageId: message.lastReadMessageId,
+                }),
             },
-            body: JSON.stringify({ lastReadMessageId: message.lastReadMessageId }),
-        });
+        );
     }
 }
 
 async function authorizeConversation(
     chatServiceUrl: string,
     clerkUserId: string,
-    conversationId: string
+    conversationId: string,
 ): Promise<boolean> {
-    const response = await fetch(`${chatServiceUrl}/api/v2/chat/conversations/${conversationId}/resync?limit=1`, {
-        headers: {
-            'x-clerk-user-id': clerkUserId,
+    const response = await fetch(
+        `${chatServiceUrl}/api/v2/chat/conversations/${conversationId}/resync?limit=1`,
+        {
+            headers: {
+                "x-clerk-user-id": clerkUserId,
+            },
         },
-    });
+    );
     return response.ok;
 }
 
-async function publishEphemeral(redisData: Redis, channel: string, payload: Record<string, any>) {
+async function publishEphemeral(
+    redisData: Redis,
+    channel: string,
+    payload: Record<string, any>,
+) {
     await redisData.publish(channel, JSON.stringify(payload));
 }
 

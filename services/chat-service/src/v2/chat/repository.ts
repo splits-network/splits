@@ -200,13 +200,14 @@ export class ChatRepository {
     async listMessages(
         conversationId: string,
         afterMessageId?: string,
+        beforeMessageId?: string,
         limit: number = 50
     ): Promise<ChatMessage[]> {
         let query = this.supabase
             .from('chat_messages')
             .select('*')
             .eq('conversation_id', conversationId)
-            .order('created_at', { ascending: true });
+            .order('created_at', { ascending: false });
 
         if (afterMessageId) {
             const { data: afterMessage } = await this.supabase
@@ -219,12 +220,24 @@ export class ChatRepository {
             }
         }
 
+        if (beforeMessageId) {
+            const { data: beforeMessage } = await this.supabase
+                .from('chat_messages')
+                .select('created_at')
+                .eq('id', beforeMessageId)
+                .maybeSingle();
+            if (beforeMessage?.created_at) {
+                query = query.lt('created_at', beforeMessage.created_at);
+            }
+        }
+
         const { data, error } = await query.limit(limit);
         if (error) {
             throw error;
         }
 
-        return (data || []) as ChatMessage[];
+        const rows = (data || []) as ChatMessage[];
+        return rows.reverse();
     }
 
     async listMessagesByIds(messageIds: string[]): Promise<ChatMessage[]> {

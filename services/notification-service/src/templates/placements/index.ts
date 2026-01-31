@@ -168,7 +168,7 @@ ${paragraph(
     )}
 
 ${button({
-        href: 'https://splits.network/portal/roles',
+        href: `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/portal/roles`,
         text: 'Find Your Next Placement →',
         variant: 'secondary',
     })}
@@ -226,7 +226,7 @@ ${paragraph(
     )}
 
 ${button({
-        href: 'https://splits.network/public/help',
+        href: `${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/public/help`,
         text: 'Contact Support',
         variant: 'secondary',
     })}

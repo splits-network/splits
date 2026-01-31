@@ -35,7 +35,7 @@ spec:
                       - name: NEXT_PUBLIC_CHAT_GATEWAY_URL
                         value: "${CHAT_GATEWAY_URL}"
                       - name: NEXT_PUBLIC_APP_URL
-                        value: "https://applicant.network"
+                        value: "${CANDIDATE_URL}"
                       - name: IDENTITY_SERVICE_URL
                         value: "http://identity-service.splits-network.svc.cluster.local:3001"
                       - name: ATS_SERVICE_URL

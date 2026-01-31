@@ -48,14 +48,18 @@ export interface BaseEmailProps {
  * Defaults to portal if not specified
  */
 function getLogoUrl(source?: EmailSource): string {
+    const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network';
+    const candidateUrl = process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network';
+    const corporateUrl = process.env.NEXT_PUBLIC_CORPORATE_URL || 'https://employment-networks.com';
+    
     switch (source) {
         case 'candidate':
-            return 'https://applicant.network/logo-email.png';
+            return `${candidateUrl}/logo-email.png`;
         case 'corporate':
-            return 'https://employment-networks.com/logo.png';
+            return `${corporateUrl}/logo.png`;
         case 'portal':
         default:
-            return 'https://splits.network/logo-email.png';
+            return `${portalUrl}/logo-email.png`;
     }
 }
 
@@ -163,15 +167,15 @@ export function baseEmailTemplate({ preheader, content, source, theme }: BaseEma
                 <table cellpadding="0" cellspacing="0" role="presentation" style="width: 100%;">
                   <tr>
                     <td style="text-align: center; padding-bottom: 16px;">
-                      <a href="https://splits.network" style="color: ${emailTheme.primary}; text-decoration: none; font-size: 14px; font-weight: 600;">
+                      <a href="${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}" style="color: ${emailTheme.primary}; text-decoration: none; font-size: 14px; font-weight: 600;">
                         Splits Network
                       </a>
                       <span style="color: #9ca3af; margin: 0 12px;">•</span>
-                      <a href="https://applicant.network" style="color: ${emailTheme.primary}; text-decoration: none; font-size: 14px; font-weight: 600;">
+                      <a href="${process.env.NEXT_PUBLIC_CANDIDATE_URL || 'https://applicant.network'}" style="color: ${emailTheme.primary}; text-decoration: none; font-size: 14px; font-weight: 600;">
                         Applicant Network
                       </a>
                       <span style="color: #9ca3af; margin: 0 12px;">•</span>
-                      <a href="https://splits.network/help" style="color: ${emailTheme.primary}; text-decoration: none; font-size: 14px; font-weight: 600;">
+                      <a href="${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/help" style="color: ${emailTheme.primary}; text-decoration: none; font-size: 14px; font-weight: 600;">
                         Help Center
                       </a>
                     </td>
@@ -180,9 +184,9 @@ export function baseEmailTemplate({ preheader, content, source, theme }: BaseEma
                     <td style="text-align: center; color: #6b7280; font-size: 13px; line-height: 20px;">
                       © ${new Date().getFullYear()} Employment Networks, Inc. All rights reserved.
                       <br>
-                      <a href="https://splits.network/privacy" style="color: ${emailTheme.textMuted}; text-decoration: underline;">Privacy Policy</a>
+                      <a href="${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/privacy" style="color: ${emailTheme.textMuted}; text-decoration: underline;">Privacy Policy</a>
                       <span style="margin: 0 8px;">•</span>
-                      <a href="https://splits.network/terms" style="color: ${emailTheme.textMuted}; text-decoration: underline;">Terms of Service</a>
+                      <a href="${process.env.NEXT_PUBLIC_PORTAL_URL || 'https://splits.network'}/terms" style="color: ${emailTheme.textMuted}; text-decoration: underline;">Terms of Service</a>
                     </td>
                   </tr>
                 </table>

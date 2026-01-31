@@ -134,15 +134,14 @@ export async function ensureUserAndCandidateInDatabase(
     let candidate: CandidateData | null = null;
     let userWasExisting = false;
     let candidateWasExisting = false;
-
+    
     try {
         // ========== STEP 1: Ensure User Exists ==========
         
         // Try /users/me first
         try {
             const existing = await getCachedCurrentUserProfile(async () => token, { force: true });
-            if (existing) {
-                console.log('[UserRegistration] User already exists:', existing.id);
+            if (existing) {;
                 user = existing as UserData;
                 userWasExisting = true;
             }
@@ -152,7 +151,7 @@ export async function ensureUserAndCandidateInDatabase(
                 console.warn('[UserRegistration] Error checking existing user:', checkError);
             }
         }
-
+        
         // If no user found, create via /users/register
         if (!user) {
             console.log('[UserRegistration] Creating new user for:', data.email);
@@ -166,7 +165,6 @@ export async function ensureUserAndCandidateInDatabase(
                 });
 
                 if (createResponse?.data) {
-                    console.log('[UserRegistration] User created successfully:', createResponse.data.id);
                     user = createResponse.data;
                     userWasExisting = false;
                     setCachedCurrentUserProfile(createResponse.data);
@@ -181,7 +179,6 @@ export async function ensureUserAndCandidateInDatabase(
                     createError?.response?.status === 409;
 
                 if (isDuplicateKey) {
-                    console.log('[UserRegistration] User created by webhook, fetching existing...');
                     
                     try {
                         const retryUser = await getCachedCurrentUserProfile(async () => token, { force: true });
