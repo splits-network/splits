@@ -153,7 +153,7 @@ export class ChatServiceV2 {
         }
 
         if (otherParticipant.request_state === 'pending') {
-            const existingMessages = await this.repository.listMessages(conversationId, undefined, 2);
+            const existingMessages = await this.repository.listMessages(conversationId, undefined, undefined, 2);
             if (existingMessages.length >= 1) {
                 throw new Error('Request pending; cannot send additional messages');
             }
@@ -322,7 +322,7 @@ export class ChatServiceV2 {
         const context = await this.requireIdentity(clerkUserId);
         await this.ensureParticipant(conversationId, context.identityUserId);
 
-        const evidenceMessages = await this.repository.listMessages(conversationId, undefined, 20);
+        const evidenceMessages = await this.repository.listMessages(conversationId, undefined, undefined, 20);
         const evidencePointer = JSON.stringify({
             message_ids: evidenceMessages.map((m) => m.id),
         });

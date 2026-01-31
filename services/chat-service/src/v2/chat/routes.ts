@@ -283,7 +283,7 @@ export async function registerChatRoutes(app: FastifyInstance, config: RegisterC
             if (!attachment) {
                 return reply.code(404).send({ error: 'Attachment not found' });
             }
-            await service.listMessages(clerkUserId, attachment.conversation_id, undefined, 1);
+            await service.listMessages(clerkUserId, attachment.conversation_id, undefined, undefined, 1);
             const downloadUrl = await storage.createSignedDownloadUrl(attachment.storage_key);
             return reply.send({ data: { url: downloadUrl } });
         } catch (error: any) {
