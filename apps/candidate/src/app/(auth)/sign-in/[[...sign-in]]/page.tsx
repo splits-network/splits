@@ -13,133 +13,131 @@ export default function SignInPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [errorType, setErrorType] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
     // Get redirect parameter (from invitation or other flow) and store in state
     // so it persists through the entire sign-in flow even if URL changes
     const [redirectUrl] = useState(() => searchParams.get("redirect_url"));
 
-    // DEBUG: Log environment and configuration on component mount
-    useEffect(() => {
-        console.log("🚀 [SIGN_IN_DEBUG] Component mounted");
-        console.log("🔧 [SIGN_IN_DEBUG] Environment variables:", {
-            NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-            NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
-                process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.substring(
-                    0,
-                    20,
-                ) + "...",
-            NEXT_PUBLIC_CLERK_SIGN_IN_URL:
-                process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL,
-            NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL:
-                process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL,
-            NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL:
-                process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL,
-        });
-        console.log("🌐 [SIGN_IN_DEBUG] Current URL:", window.location.href);
-        console.log(
-            "📍 [SIGN_IN_DEBUG] Redirect URL from params:",
-            redirectUrl,
-        );
-        console.log("📊 [SIGN_IN_DEBUG] Clerk isLoaded:", isLoaded);
-        console.log("🔍 [SIGN_IN_DEBUG] signIn object:", signIn);
-    }, [isLoaded, redirectUrl, signIn]);
-
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        console.log("📝 [SIGN_IN_DEBUG] Form submission started");
 
-        if (!isLoaded) {
-            console.error("❌ [SIGN_IN_DEBUG] Clerk not loaded yet");
-            return;
-        }
-
-        console.log("📧 [SIGN_IN_DEBUG] Email:", email);
-        console.log("🔒 [SIGN_IN_DEBUG] Password length:", password.length);
-        console.log(
-            "🎯 [SIGN_IN_DEBUG] Will redirect to:",
-            redirectUrl || "/portal/dashboard",
-        );
-
-        setError("");
+        if (!isLoaded) return;
+        setErrorType(null);
         setIsLoading(true);
 
         try {
-            console.log("🔄 [SIGN_IN_DEBUG] Creating sign-in attempt...");
             const signInAttempt = await signIn.create({
                 identifier: email,
                 password,
             });
 
-            console.log("✅ [SIGN_IN_DEBUG] Sign-in attempt created:", {
-                status: signInAttempt.status,
-                createdSessionId: signInAttempt.createdSessionId,
-                identifier: signInAttempt.identifier,
-            });
-
             if (signInAttempt.status === "complete") {
-                console.log(
-                    "🎉 [SIGN_IN_DEBUG] Sign-in complete! Setting active session...",
-                );
-                console.log(
-                    "🗝️ [SIGN_IN_DEBUG] Session ID:",
-                    signInAttempt.createdSessionId,
-                );
-
                 await setActive({ session: signInAttempt.createdSessionId });
-                console.log("✅ [SIGN_IN_DEBUG] Session set as active");
-
                 const finalRedirectUrl = redirectUrl || "/portal/dashboard";
-                console.log(
-                    "🚀 [SIGN_IN_DEBUG] Redirecting to:",
-                    finalRedirectUrl,
-                );
                 router.push(finalRedirectUrl);
             } else {
-                console.error("❌ [SIGN_IN_DEBUG] Sign-in incomplete:", {
-                    status: signInAttempt.status,
-                    identifier: signInAttempt.identifier,
-                    createdSessionId: signInAttempt.createdSessionId,
-                    attemptId: signInAttempt.id,
-                    // Full object for inspection
-                    fullAttemptObject: signInAttempt,
-                });
-                setError("Sign in incomplete. Please try again.");
+                // Provide specific feedback based on status
+                switch (signInAttempt.status) {
+                    case "needs_second_factor":
+                        setErrorType("two_factor");
+                        setError(
+                            "This account has two-factor authentication enabled. Please complete the second factor verification. If you need to disable 2FA, please sign in from a different browser where you have access to your second factor method.",
+                        );
+                        break;
+                    case "needs_identifier":
+                        setErrorType("missing_identifier");
+                        setError(
+                            "Please provide your email address to continue.",
+                        );
+                        break;
+                    case "needs_factor":
+                        setErrorType("needs_verification");
+                        setError(
+                            "Additional authentication required. Please complete the verification step.",
+                        );
+                        break;
+                    case "missing_requirements":
+                        setErrorType("account_incomplete");
+                        setError(
+                            "Account setup is incomplete. Please contact support for assistance.",
+                        );
+                        break;
+                    case "abandoned":
+                        setErrorType("session_expired");
+                        setError(
+                            "Sign-in session expired. Please refresh the page and try again.",
+                        );
+                        break;
+                    default:
+                        setErrorType("unknown_status");
+                        setError(
+                            `Authentication incomplete (${signInAttempt.status}). Please contact support if this continues.`,
+                        );
+                }
             }
         } catch (err: any) {
-            console.error("💥 [SIGN_IN_DEBUG] Sign-in error:", {
-                error: err,
-                message: err.message,
-                errors: err.errors,
-                clerkError: err.clerkError,
-            });
-            setError(err.errors?.[0]?.message || "Invalid email or password");
+            // Provide specific feedback based on error type
+            if (err.errors && err.errors.length > 0) {
+                const error = err.errors[0];
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                switch (errorCode) {
+                    case "form_identifier_not_found":
+                        setErrorType("account_not_found");
+                        setError("No account found with this email address.");
+                        break;
+                    case "form_password_incorrect":
+                        setErrorType("incorrect_password");
+                        setError("Incorrect password. Please try again.");
+                        break;
+                    case "session_exists":
+                        setErrorType("already_signed_in");
+                        setError("You are already signed in. Redirecting...");
+                        setTimeout(() => {
+                            router.push(redirectUrl || "/portal/dashboard");
+                        }, 1500);
+                        break;
+                    case "too_many_requests":
+                        setErrorType("rate_limited");
+                        setError(
+                            "Too many sign-in attempts. Please wait a moment and try again.",
+                        );
+                        break;
+                    case "identifier_already_signed_in":
+                        setErrorType("already_signed_in");
+                        setError(
+                            "Already signed in with this account. Redirecting...",
+                        );
+                        setTimeout(() => {
+                            router.push(redirectUrl || "/portal/dashboard");
+                        }, 1500);
+                        break;
+                    default:
+                        setErrorType("clerk_error");
+                        // Use the original error message from Clerk for other cases
+                        setError(errorMessage || "Invalid email or password");
+                }
+            } else {
+                setErrorType("generic_error");
+                setError(
+                    err.message ||
+                        "An unexpected error occurred. Please try again.",
+                );
+            }
         } finally {
             setIsLoading(false);
-            console.log("🏁 [SIGN_IN_DEBUG] Sign-in process finished");
         }
     };
 
     const signInWithOAuth = (
         provider: "oauth_google" | "oauth_github" | "oauth_microsoft",
     ) => {
-        console.log(
-            "🔗 [SIGN_IN_DEBUG] OAuth sign-in started with provider:",
-            provider,
-        );
-
-        if (!isLoaded) {
-            console.error("❌ [SIGN_IN_DEBUG] Clerk not loaded for OAuth");
-            return;
-        }
+        if (!isLoaded) return;
 
         const redirectUrlComplete = redirectUrl || "/portal/dashboard";
-        console.log(
-            "🎯 [SIGN_IN_DEBUG] OAuth will redirect to:",
-            redirectUrlComplete,
-        );
 
-        console.log("🔄 [SIGN_IN_DEBUG] Authenticating with redirect...");
         signIn.authenticateWithRedirect({
             strategy: provider,
             redirectUrl: "/sso-callback",
@@ -162,9 +160,84 @@ export default function SignInPage() {
                     </div>
 
                     {error && (
-                        <div className="alert alert-error mb-4">
-                            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                            <span>{error}</span>
+                        <div className="mb-4">
+                            <div className="alert alert-error">
+                                <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
+                                <span>{error}</span>
+                            </div>
+
+                            {/* Contextual help based on error type */}
+                            {errorType === "two_factor" && (
+                                <div className="alert alert-info mt-2">
+                                    <i className="fa-duotone fa-regular fa-info-circle"></i>
+                                    <div className="text-sm">
+                                        <p className="font-semibold">
+                                            Need help with 2FA?
+                                        </p>
+                                        <p>
+                                            You can try signing in using one of
+                                            the social options below, or contact
+                                            support if you need to disable
+                                            two-factor authentication.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {errorType === "account_not_found" && (
+                                <div className="alert alert-info mt-2">
+                                    <i className="fa-duotone fa-regular fa-info-circle"></i>
+                                    <div className="text-sm">
+                                        <p className="font-semibold">
+                                            Don't have an account yet?
+                                        </p>
+                                        <p>
+                                            <Link
+                                                href={
+                                                    redirectUrl
+                                                        ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`
+                                                        : "/sign-up"
+                                                }
+                                                className="link link-primary"
+                                            >
+                                                Create a free account
+                                            </Link>{" "}
+                                            to get started with your job search.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {errorType === "incorrect_password" && (
+                                <div className="alert alert-info mt-2">
+                                    <i className="fa-duotone fa-regular fa-info-circle"></i>
+                                    <div className="text-sm">
+                                        <p>
+                                            <Link
+                                                href="/forgot-password"
+                                                className="link link-primary"
+                                            >
+                                                Forgot your password?
+                                            </Link>{" "}
+                                            Reset it to regain access to your
+                                            account.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {errorType === "rate_limited" && (
+                                <div className="alert alert-warning mt-2">
+                                    <i className="fa-duotone fa-regular fa-clock"></i>
+                                    <div className="text-sm">
+                                        <p>
+                                            Please wait 60 seconds before trying
+                                            again, or use one of the social
+                                            sign-in options below.
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
 
