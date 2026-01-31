@@ -6,6 +6,8 @@ import Footer from "@/components/navigation/footer";
 import CookieConsent from "@/components/cookie-consent";
 import { ServiceStatusBanner } from "@/components/service-status-banner";
 import { ToastProvider } from "@/lib/toast-context";
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
 import "./globals.css";
 
 export const metadata: Metadata = {

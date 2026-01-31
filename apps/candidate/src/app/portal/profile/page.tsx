@@ -7,6 +7,7 @@ import { useDebouncedCallback } from '@/hooks/use-debounce';
 import { MarketplaceProfile } from '@splits-network/shared-types';
 import { calculateProfileCompleteness, TIER_CONFIG } from '@/lib/utils/profile-completeness';
 import { useToast } from '@/lib/toast-context';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 
 interface CandidateSettings {
     id: string;
@@ -584,47 +585,16 @@ export default function ProfilePage() {
                                 Share your story, achievements, and what makes you unique. Supports Markdown formatting.
                             </p>
 
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">
-                                    Your Story
-                                    <span className="text-base-content/60 font-normal text-sm ml-2">
-                                        ({(settings?.marketplace_profile?.bio_rich || '').length} characters)
-                                    </span>
-                                </legend>
-                                <textarea
-                                    className="textarea w-full h-48 font-mono text-sm"
-                                    placeholder={`Tell recruiters about yourself...\n\nExample:\n- **8+ years** of software engineering experience\n- Led teams of 5-10 developers at high-growth startups\n- Expert in React, TypeScript, Node.js\n- Built products used by 1M+ users\n\nUse **bold**, *italic*, and bullet points to make it engaging!`}
-                                    value={settings?.marketplace_profile?.bio_rich || ''}
-                                    onChange={(e) => updateBioRich(e.target.value)}
-                                />
-                                <p className="fieldset-label">
-                                    <i className="fa-duotone fa-regular fa-lightbulb"></i>
-                                    Tip: Use Markdown for formatting (**, *, bullets). This will appear prominently on your marketplace profile.
-                                </p>
-                            </fieldset>
-
-                            {/* Preview */}
-                            {settings?.marketplace_profile?.bio_rich && settings.marketplace_profile.bio_rich.length > 0 && (
-                                <div className="mt-4">
-                                    <div className="text-sm font-semibold mb-2">Preview:</div>
-                                    <div className="card bg-base-100 p-4">
-                                        <div className="prose prose-sm max-w-none">
-                                            {settings.marketplace_profile.bio_rich.split('\n').map((line, idx) => {
-                                                // Bold
-                                                line = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-                                                // Italic
-                                                line = line.replace(/\*(.+?)\*/g, '<em>$1</em>');
-                                                // Bullet points
-                                                if (line.trim().startsWith('- ')) {
-                                                    return <li key={idx} dangerouslySetInnerHTML={{ __html: line.replace(/^- /, '') }} />;
-                                                }
-                                                // Paragraphs
-                                                return line.trim() ? <p key={idx} dangerouslySetInnerHTML={{ __html: line }} /> : <br key={idx} />;
-                                            })}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+                            <MarkdownEditor
+                                className="fieldset"
+                                label="Your Story"
+                                showCount
+                                value={settings?.marketplace_profile?.bio_rich || ''}
+                                onChange={(value) => updateBioRich(value)}
+                                placeholder={`Tell recruiters about yourself...\n\nExample:\n- **8+ years** of software engineering experience\n- Led teams of 5-10 developers at high-growth startups\n- Expert in React, TypeScript, Node.js\n- Built products used by 1M+ users\n\nUse **bold**, *italic*, and bullet points to make it engaging!`}
+                                helperText="Tip: Use Markdown for formatting (**, *, bullets). This will appear prominently on your marketplace profile."
+                                height={240}
+                            />
                         </div>
                     </div>
 

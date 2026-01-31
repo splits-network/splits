@@ -5,6 +5,8 @@ import CookieConsent from "@/components/cookie-consent";
 import { ToastProvider } from "@/lib/toast-context";
 import { ThemeInitializer } from "./theme-initializer";
 import { ServiceStatusBanner } from "@/components/service-status-banner";
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
 import "./globals.css";
 
 export const metadata: Metadata = {

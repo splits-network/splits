@@ -33,9 +33,8 @@ Last updated: 2026-01-31
 ### 1) Shared editor wrapper
 Create a shared component so both apps use the same toolbar + preview configuration.
 
-Recommended location (choose one):
-- New package: packages/shared-ui/src/markdown/MarkdownEditor.tsx
-- Or app-level: apps/portal/src/components/markdown/MarkdownEditor.tsx and mirror in candidate
+Shared location (selected):
+- packages/shared-ui/src/markdown/markdown-editor.tsx
 
 Key responsibilities:
 - Wrap @uiw/react-md-editor with a consistent toolbar config.
@@ -51,9 +50,8 @@ Recommended approach:
 - Explicitly configure allowed elements/attributes (links, lists, headings, code)
 - Disallow raw HTML entirely
 
-Recommended location (choose one):
-- New package: packages/shared-ui/src/markdown/MarkdownRenderer.tsx
-- Or app-level renderer in each app, using the same config
+Shared location (selected):
+- packages/shared-ui/src/markdown/markdown-renderer.tsx
 
 ### 3) Preview rendering
 Ensure the editor preview uses the same renderer pipeline so preview == display.
@@ -75,7 +73,7 @@ Implementation note:
 
 ### Phase 0 - Planning and decisions
 - [ ] Confirm initial feature set for toolbar (bold, italic, list, link, code, headings) - approved
-- [ ] Decide shared component location (package vs app-level)
+- [ ] Decide shared component location (package vs app-level) - approved (packages/shared-ui)
 
 ### Phase 1 - Shared components
 - [ ] Add @uiw/react-md-editor to workspace dependencies

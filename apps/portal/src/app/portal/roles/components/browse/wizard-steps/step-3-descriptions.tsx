@@ -1,3 +1,4 @@
+import { MarkdownEditor } from '@splits-network/shared-ui';
 import { FormData } from './types';
 
 interface Step3DescriptionsProps {
@@ -19,27 +20,25 @@ export default function Step3Descriptions({
                 </div>
             </div>
 
-            <fieldset className="fieldset">
-                <legend className="fieldset-legend">Recruiter-Facing Description</legend>
-                <textarea
-                    className="textarea w-full h-32"
-                    value={formData.recruiter_description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, recruiter_description: e.target.value }))}
-                    placeholder="Internal notes for recruiters: pain points, urgency, ideal candidate profile, hiring manager notes..."
-                />
-                <p className="fieldset-label">Internal notes only recruiters will see</p>
-            </fieldset>
+            <MarkdownEditor
+                className="fieldset"
+                label="Recruiter-Facing Description"
+                value={formData.recruiter_description}
+                onChange={(value) => setFormData(prev => ({ ...prev, recruiter_description: value }))}
+                placeholder="Internal notes for recruiters: pain points, urgency, ideal candidate profile, hiring manager notes..."
+                helperText="Internal notes only recruiters will see"
+                height={160}
+            />
 
-            <fieldset className="fieldset">
-                <legend className="fieldset-legend">Candidate-Facing Description</legend>
-                <textarea
-                    className="textarea w-full h-32"
-                    value={formData.candidate_description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, candidate_description: e.target.value }))}
-                    placeholder="Public job description: responsibilities, team info, company culture, benefits..."
-                />
-                <p className="fieldset-label">Public description candidates will see</p>
-            </fieldset>
+            <MarkdownEditor
+                className="fieldset"
+                label="Candidate-Facing Description"
+                value={formData.candidate_description}
+                onChange={(value) => setFormData(prev => ({ ...prev, candidate_description: value }))}
+                placeholder="Public job description: responsibilities, team info, company culture, benefits..."
+                helperText="Public description candidates will see"
+                height={160}
+            />
         </div>
     );
 }

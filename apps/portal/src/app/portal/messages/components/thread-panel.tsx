@@ -11,6 +11,8 @@ import {
 } from "@/lib/chat-refresh-queue";
 import { getCachedUserSummary } from "@/lib/user-cache";
 import { useToast } from "@/lib/toast-context";
+import { MarkdownEditor } from "@splits-network/shared-ui";
+import { MarkdownRenderer } from "@/components/markdown-renderer";
 
 type ResyncData = {
     conversation: {
@@ -616,9 +618,12 @@ export default function ThreadPanel({
                                         {senderLabel}
                                     </div>
                                     <div className={bubbleClass}>
-                                        <p className="whitespace-pre-wrap">
-                                            {msg.body || "Message removed"}
-                                        </p>
+                                        <MarkdownRenderer
+                                            content={
+                                                msg.body || "Message removed"
+                                            }
+                                            className={`text-sm ${isOwnMessage ? "text-primary-content" : "text-base-content/90"} [&_p]:m-0 [&_ul]:my-2 [&_ol]:my-2`}
+                                        />
                                     </div>
                                     <div className="chat-footer opacity-60">
                                         {new Date(
@@ -645,12 +650,14 @@ export default function ThreadPanel({
             </div>
 
             <div className="border-t border-base-300 bg-base-100/80 backdrop-blur-sm p-4">
-                <div className="flex gap-2">
-                    <textarea
-                        className="textarea textarea-bordered w-full"
-                        rows={3}
+                <div className="flex gap-2 items-start">
+                    <MarkdownEditor
+                        className="flex-1"
                         value={draft}
-                        onChange={(event) => setDraft(event.target.value)}
+                        onChange={setDraft}
+                        height={140}
+                        preview="edit"
+                        disabled={disabled}
                         placeholder={
                             requestPending
                                 ? "Accept this request to reply."
@@ -660,7 +667,6 @@ export default function ThreadPanel({
                                     ? "Unarchive to reply."
                                     : "Type your message..."
                         }
-                        disabled={disabled}
                     />
                     <button
                         className="btn btn-primary"
