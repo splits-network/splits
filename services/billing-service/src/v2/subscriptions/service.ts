@@ -393,7 +393,7 @@ export class SubscriptionServiceV2 {
 
         // Apply promotion code if provided
         if (request.promotion_code) {
-            subscriptionCreateParams.promotion_code = request.promotion_code;
+            (subscriptionCreateParams as any).promotion_code = request.promotion_code;
         }
 
         const stripeSubscription = await this.stripe.subscriptions.create(subscriptionCreateParams);

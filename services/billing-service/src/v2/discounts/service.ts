@@ -78,7 +78,7 @@ export class DiscountServiceV2 {
         request: DiscountValidationRequest
     ): Promise<DiscountValidationResponse> {
         // Get plan details for savings calculation
-        const plan = await this.planRepository.findById(request.plan_id);
+        const plan = await this.planRepository.findPlan(request.plan_id);
         if (!plan) {
             return {
                 valid: false,
@@ -107,7 +107,7 @@ export class DiscountServiceV2 {
         }
 
         const promotionCode = promotionCodes.data[0];
-        const coupon = promotionCode.coupon;
+        const coupon = (promotionCode as any).coupon;
 
         // Check if expired
         if (promotionCode.expires_at && promotionCode.expires_at < Math.floor(Date.now() / 1000)) {

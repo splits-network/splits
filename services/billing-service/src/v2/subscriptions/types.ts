@@ -50,6 +50,7 @@ export type SubscriptionCreateInput = Partial<Omit<Subscription, 'id' | 'created
     user_id: string;
     plan_id: string;
     recruiter_id?: string | null;
+    promotion_code?: string;
 };
 export type SubscriptionUpdateInput = Partial<Omit<Subscription, 'id' | 'created_at' | 'updated_at'>>;
 
