@@ -47,7 +47,7 @@ spec:
         - host: api.splits.network
           http:
               paths:
-                  - path: /chat
+                  - path: /ws/chat
                     pathType: Prefix
                     backend:
                         service:

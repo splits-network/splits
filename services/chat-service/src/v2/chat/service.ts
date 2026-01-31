@@ -88,17 +88,19 @@ export class ChatServiceV2 {
         clerkUserId: string,
         conversationId: string,
         after?: string,
+        before?: string,
         limit: number = 50
     ): Promise<ChatMessage[]> {
         const context = await this.requireIdentity(clerkUserId);
         await this.ensureParticipant(conversationId, context.identityUserId);
-        return this.repository.listMessages(conversationId, after, limit);
+        return this.repository.listMessages(conversationId, after, before, limit);
     }
 
     async resyncConversation(
         clerkUserId: string,
         conversationId: string,
         after?: string,
+        before?: string,
         limit: number = 50
     ): Promise<{
         conversation: ChatConversation;
@@ -111,7 +113,7 @@ export class ChatServiceV2 {
         if (!conversation) {
             throw new Error('Conversation not found');
         }
-        const messages = await this.repository.listMessages(conversationId, after, limit);
+        const messages = await this.repository.listMessages(conversationId, after, before, limit);
 
         return {
             conversation,

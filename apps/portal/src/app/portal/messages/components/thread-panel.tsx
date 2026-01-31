@@ -69,6 +69,9 @@ export default function ThreadPanel({
     const messagesRef = useRef<HTMLDivElement | null>(null);
     const [isAtBottom, setIsAtBottom] = useState(true);
     const initialScrollDoneRef = useRef(false);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+    const pageSize = 50;
 
     const fetchResync = useCallback(async () => {
         const token = await getToken();
@@ -79,6 +82,7 @@ export default function ThreadPanel({
         );
         const payload = response?.data as ResyncData;
         setData(payload);
+        setHasMore((payload?.messages?.length || 0) >= pageSize);
         const lastMessageId =
             payload?.messages?.length > 0
                 ? payload.messages[payload.messages.length - 1].id
@@ -333,6 +337,62 @@ export default function ThreadPanel({
         messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }, []);
 
+    const loadOlderMessages = useCallback(async () => {
+        if (isLoadingMore || !hasMore) return;
+        const container = messagesRef.current;
+        if (!container || !data?.messages?.length) return;
+        const oldestMessageId = data.messages[0]?.id;
+        if (!oldestMessageId) return;
+
+        setIsLoadingMore(true);
+        const prevScrollHeight = container.scrollHeight;
+        const prevScrollTop = container.scrollTop;
+
+        try {
+            const token = await getToken();
+            if (!token) return;
+            const client = createAuthenticatedClient(token);
+            const response: any = await client.get(
+                `/chat/conversations/${conversationId}/messages`,
+                { params: { before: oldestMessageId, limit: pageSize } },
+            );
+            const incoming = (response?.data || []) as ResyncData["messages"];
+            setHasMore(incoming.length >= pageSize);
+
+            if (incoming.length > 0) {
+                setData((prev) => {
+                    if (!prev) return prev;
+                    if (prev.messages.length > 0) {
+                        const oldestKnownId = prev.messages[0]?.id;
+                        if (oldestKnownId !== oldestMessageId) {
+                            return prev;
+                        }
+                    }
+                    const existingIds = new Set(
+                        prev.messages.map((msg) => msg.id),
+                    );
+                    const nextMessages = incoming.filter(
+                        (msg) => !existingIds.has(msg.id),
+                    );
+                    return {
+                        ...prev,
+                        messages: [...nextMessages, ...prev.messages],
+                    };
+                });
+
+                requestAnimationFrame(() => {
+                    const updated = messagesRef.current;
+                    if (!updated) return;
+                    const newScrollHeight = updated.scrollHeight;
+                    updated.scrollTop =
+                        prevScrollTop + (newScrollHeight - prevScrollHeight);
+                });
+            }
+        } finally {
+            setIsLoadingMore(false);
+        }
+    }, [conversationId, data?.messages, getToken, hasMore, isLoadingMore]);
+
     const handleScroll = useCallback(() => {
         const container = messagesRef.current;
         if (!container) return;
@@ -342,7 +402,11 @@ export default function ThreadPanel({
             container.scrollTop -
             container.clientHeight;
         setIsAtBottom(distanceFromBottom <= threshold);
-    }, []);
+
+        if (container.scrollTop <= 40) {
+            loadOlderMessages();
+        }
+    }, [loadOlderMessages]);
 
     useEffect(() => {
         if (!data?.messages) return;
@@ -399,19 +463,77 @@ export default function ThreadPanel({
                                 {headerSubtitle}
                             </div>
                         </div>
-                        {onClose && (
-                            <button
-                                className="btn btn-ghost btn-sm"
-                                onClick={onClose}
-                            >
-                                Close
-                            </button>
-                        )}
+                        <div className="flex items-center gap-2">
+                            {requestPending && (
+                                <>
+                                    <button
+                                        className="btn btn-primary btn-sm"
+                                        onClick={handleAccept}
+                                    >
+                                        Accept
+                                    </button>
+                                    <button
+                                        className="btn btn-ghost btn-sm"
+                                        onClick={handleDecline}
+                                    >
+                                        Decline
+                                    </button>
+                                </>
+                            )}
+                            <div className="dropdown dropdown-end">
+                                <button
+                                    type="button"
+                                    className="btn btn-ghost btn-sm btn-circle"
+                                    aria-label="Conversation actions"
+                                >
+                                    <i className="fa-duotone fa-ellipsis-vertical"></i>
+                                </button>
+                                <ul className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                                    <li>
+                                        <button onClick={handleMute}>
+                                            <i className="fa-duotone fa-volume"></i>
+                                            {data.participant.muted_at
+                                                ? "Unmute"
+                                                : "Mute"}
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button onClick={handleArchive}>
+                                            <i className="fa-duotone fa-box-archive"></i>
+                                            {data.participant.archived_at
+                                                ? "Unarchive"
+                                                : "Archive"}
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button onClick={handleBlock}>
+                                            <i className="fa-duotone fa-ban"></i>
+                                            Block
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button onClick={handleReport}>
+                                            <i className="fa-duotone fa-flag"></i>
+                                            Report
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                            {onClose && (
+                                <button
+                                    className="btn btn-ghost btn-sm btn-circle"
+                                    onClick={onClose}
+                                    aria-label="Close thread"
+                                >
+                                    <i className="fa-duotone fa-xmark"></i>
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 min-h-0 flex flex-col gap-4 p-4">
                 {(data.conversation.application_id ||
                     data.conversation.job_id ||
                     data.conversation.company_id) && (
@@ -445,58 +567,20 @@ export default function ThreadPanel({
                     </div>
                 )}
 
-                <div className="flex flex-wrap gap-2">
-                    {requestPending && (
-                        <>
-                            <button
-                                className="btn btn-primary btn-sm"
-                                onClick={handleAccept}
-                            >
-                                Accept
-                            </button>
-                            <button
-                                className="btn btn-ghost btn-sm"
-                                onClick={handleDecline}
-                            >
-                                Decline
-                            </button>
-                        </>
-                    )}
-                    <button
-                        className="btn btn-ghost btn-sm"
-                        onClick={handleMute}
-                    >
-                        {data.participant.muted_at ? "Unmute" : "Mute"}
-                    </button>
-                    <button
-                        className="btn btn-ghost btn-sm"
-                        onClick={handleArchive}
-                    >
-                        {data.participant.archived_at ? "Unarchive" : "Archive"}
-                    </button>
-                    <button
-                        className="btn btn-ghost btn-sm"
-                        onClick={handleBlock}
-                    >
-                        Block
-                    </button>
-                    <button
-                        className="btn btn-ghost btn-sm"
-                        onClick={handleReport}
-                    >
-                        Report
-                    </button>
-                </div>
-
                 <div
                     ref={messagesRef}
                     onScroll={handleScroll}
-                    className="relative rounded-lg border border-base-200 bg-base-100 p-4 space-y-3 max-h-[55vh] overflow-y-auto"
+                    className="relative flex-1 min-h-0 rounded-lg border border-base-200 bg-base-100 p-4 space-y-3 overflow-y-auto"
                 >
-                    {data.messages.length === 0 ? (
-                        <div className="text-center text-base-content/50">
-                            No messages yet.
-                        </div>
+                {isLoadingMore && (
+                    <div className="text-center text-xs text-base-content/50">
+                        Loading more messages…
+                    </div>
+                )}
+                {data.messages.length === 0 ? (
+                    <div className="text-center text-base-content/50">
+                        No messages yet.
+                    </div>
                     ) : (
                         data.messages.map((msg) => {
                             const isOwnMessage =

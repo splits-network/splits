@@ -96,7 +96,7 @@ async function main() {
         res.writeHead(404);
         res.end();
     });
-    const wss = new WebSocketServer({ server });
+    const wss = new WebSocketServer({ server, path: "/ws/chat" });
 
     const channelSockets = new Map<string, Set<WebSocket>>();
     const socketChannels = new Map<WebSocket, Set<string>>();
@@ -146,6 +146,7 @@ async function main() {
                 `http://${request.headers.host}`,
             );
             const token = url.searchParams.get("token");
+
             if (!token) {
                 socket.close(4001, "Missing token");
                 return;
@@ -162,6 +163,7 @@ async function main() {
                 identityServiceUrl,
                 auth.clerkUserId,
             );
+
             if (!identityUserId) {
                 authFailures += 1;
                 socket.close(4003, "User not found");
@@ -186,6 +188,9 @@ async function main() {
             );
 
             socket.on("message", async (data) => {
+                console.log("[chat-gateway] Received message from client", {
+                    data: data.toString(),
+                });
                 try {
                     const parsed = JSON.parse(data.toString()) as ClientMessage;
                     await handleClientMessage(
@@ -207,7 +212,7 @@ async function main() {
 
             activeConnections += 1;
 
-            socket.on("close", async () => {
+            socket.on("close", async (e) => {
                 await unsubscribeSocket(socket);
                 activeConnections = Math.max(0, activeConnections - 1);
             });
@@ -216,6 +221,17 @@ async function main() {
             socket.close(1011, "Server error");
         }
     });
+
+    // server.on("upgrade", (req) => {
+    //     logger.info(
+    //         {
+    //             url: req.url,
+    //             origin: req.headers.origin,
+    //             host: req.headers.host,
+    //         },
+    //         "WS upgrade request",
+    //     );
+    // });
 
     server.listen(baseConfig.port, () => {
         logger.info(`Chat gateway listening on port ${baseConfig.port}`);
