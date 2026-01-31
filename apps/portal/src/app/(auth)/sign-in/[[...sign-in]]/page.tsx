@@ -65,22 +65,16 @@ export default function SignInPage() {
                             "Please provide your email address to continue.",
                         );
                         break;
-                    case "needs_factor":
+                    case "needs_first_factor":
                         setErrorType("needs_verification");
                         setError(
                             "Additional authentication required. Please complete the verification step.",
                         );
                         break;
-                    case "missing_requirements":
-                        setErrorType("account_incomplete");
+                    case "needs_new_password":
+                        setErrorType("password_reset_required");
                         setError(
-                            "Account setup is incomplete. Please contact support for assistance.",
-                        );
-                        break;
-                    case "abandoned":
-                        setErrorType("session_expired");
-                        setError(
-                            "Sign-in session expired. Please refresh the page and try again.",
+                            "Password reset required. Please update your password.",
                         );
                         break;
                     default:
