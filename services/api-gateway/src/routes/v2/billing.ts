@@ -219,6 +219,36 @@ function registerSubscriptionInvoicesRoute(app: FastifyInstance, services: Servi
     );
 }
 
+function registerDiscountValidationRoute(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    app.post(
+        '/api/v2/discounts/validate',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().post(
+                    '/api/v2/discounts/validate',
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to validate discount code');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to validate discount code' } });
+            }
+        }
+    );
+}
+
 export function registerBillingRoutes(app: FastifyInstance, services: ServiceRegistry) {
     // Register specific routes FIRST (must be before generic CRUD routes)
     registerSubscriptionMeRoute(app, services);
@@ -227,6 +257,7 @@ export function registerBillingRoutes(app: FastifyInstance, services: ServiceReg
     registerSubscriptionPaymentMethodsRoute(app, services);
     registerSubscriptionUpdatePaymentMethodRoute(app, services);
     registerSubscriptionInvoicesRoute(app, services);
+    registerDiscountValidationRoute(app, services);
 
     BILLING_RESOURCES.forEach(resource => registerResourceRoutes(app, services, resource));
 }

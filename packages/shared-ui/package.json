@@ -18,7 +18,10 @@
     },
     "peerDependencies": {
         "react": "^19.0.0",
-        "react-dom": "^19.0.0"
+        "react-dom": "^19.0.0",
+        "next": "^16.0.0",
+        "@clerk/nextjs": "^5.0.0",
+        "@splits-network/shared-types": "workspace:*"
     },
     "devDependencies": {
         "@types/react": "^19.0.1",

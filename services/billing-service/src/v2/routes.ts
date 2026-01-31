@@ -18,6 +18,9 @@ import { registerSubscriptionRoutes } from './subscriptions/routes';
 import { registerPayoutRoutes } from './payouts/routes';
 import { payoutScheduleRoutes } from './payout-schedules/routes';
 import { escrowHoldRoutes } from './escrow-holds/routes';
+import { discountRoutes } from './discounts/routes';
+import { DiscountRepository } from './discounts/repository';
+import { DiscountServiceV2 } from './discounts/service';
 import { resolveAccessContext } from './shared/access';
 
 interface BillingV2Config {
@@ -50,6 +53,15 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
         accessResolver,
         config.eventPublisher
     );
+    
+    // Initialize discount service
+    const discountRepository = new DiscountRepository(config.supabaseUrl, config.supabaseKey);
+    const discountService = new DiscountServiceV2(
+        discountRepository,
+        planRepository,
+        accessResolver,
+        config.eventPublisher
+    );
     const payoutService = new PayoutServiceV2(
         payoutRepository,
         snapshotRepository,  // Phase 6: Wire in PlacementSnapshotRepository
@@ -73,6 +85,7 @@ export async function registerV2Routes(app: FastifyInstance, config: BillingV2Co
     registerPlanRoutes(app, { planService });
     registerSubscriptionRoutes(app, { subscriptionService });
     registerPayoutRoutes(app, { payoutService });
+    discountRoutes(app, discountService);
 
     // Register automation routes
     await payoutScheduleRoutes(app, payoutScheduleService);

@@ -26,7 +26,10 @@ import {
 import { ApiClient, createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
 import { ensureUserInDatabase } from "@/lib/user-registration";
-import { getCachedCurrentUserProfile, setCachedCurrentUserProfile } from "@/lib/current-user-profile";
+import {
+    getCachedCurrentUserProfile,
+    setCachedCurrentUserProfile,
+} from "@/lib/current-user-profile";
 
 type InitStatus = "loading" | "creating_account" | "ready" | "error";
 
@@ -430,18 +433,28 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                                 selectedPlan.tier !== "starter" &&
                                 selectedPlan.price_monthly > 0;
 
-                            await apiClient.post("/subscriptions/activate", {
+                            const activateData: any = {
                                 plan_id: selectedPlan.id,
-                                // Only include payment info for paid plans
-                                ...(isPaidPlan && stripePaymentInfo
-                                    ? {
-                                          payment_method_id:
-                                              stripePaymentInfo.paymentMethodId,
-                                          customer_id:
-                                              stripePaymentInfo.customerId,
-                                      }
-                                    : {}),
-                            });
+                            };
+
+                            // Include payment info for paid plans
+                            if (isPaidPlan && stripePaymentInfo) {
+                                activateData.payment_method_id =
+                                    stripePaymentInfo.paymentMethodId;
+                                activateData.customer_id =
+                                    stripePaymentInfo.customerId;
+
+                                // Include promotion code if discount was applied
+                                if (stripePaymentInfo.appliedDiscount?.code) {
+                                    activateData.promotion_code =
+                                        stripePaymentInfo.appliedDiscount.code;
+                                }
+                            }
+
+                            await apiClient.post(
+                                "/subscriptions/activate",
+                                activateData,
+                            );
                         }
                     } catch (error: any) {
                         setState((prev) => ({

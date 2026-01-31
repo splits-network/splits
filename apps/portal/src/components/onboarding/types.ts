@@ -24,6 +24,7 @@ export interface SelectedPlan {
 export interface StripePaymentInfo {
   customerId: string;
   paymentMethodId: string;
+  appliedDiscount?: any;
 }
 
 export interface OnboardingState {
