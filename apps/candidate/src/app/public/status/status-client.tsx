@@ -2,6 +2,7 @@
 
 import { useServiceHealth, type ServiceHealth } from '@/hooks/useServiceHealth';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 
 const initialFormState = {
     name: '',
@@ -356,16 +357,14 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
                                             </select>
                                         </div>
                                     </div>
-                                    <div className="fieldset">
-                                        <label className="label">Message</label>
-                                        <textarea
-                                            className="textarea h-24 w-full"
-                                            required
-                                            value={formData.message}
-                                            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                            placeholder="Share any impact to your applications or recruiter convos."
-                                        />
-                                    </div>
+                                    <MarkdownEditor
+                                        className="fieldset"
+                                        label="Message"
+                                        value={formData.message}
+                                        onChange={(value) => setFormData({ ...formData, message: value })}
+                                        placeholder="Share any impact to your applications or recruiter convos."
+                                        height={160}
+                                    />
                                     <button className="btn btn-primary w-full" disabled={submitting} type="submit">
                                         {submitting ? (
                                             <>

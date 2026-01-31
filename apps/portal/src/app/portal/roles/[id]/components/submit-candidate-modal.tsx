@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 
@@ -313,15 +314,14 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                             </fieldset>
 
                             {/* Notes for existing candidate submission */}
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Submission Notes</legend>
-                                <textarea
-                                    className="textarea w-full h-24"
-                                    value={formData.notes}
-                                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                                    placeholder="Why is this candidate a great fit for this role?"
-                                />
-                            </fieldset>
+                            <MarkdownEditor
+                                className="fieldset"
+                                label="Submission Notes"
+                                value={formData.notes}
+                                onChange={(value) => setFormData({ ...formData, notes: value })}
+                                placeholder="Why is this candidate a great fit for this role?"
+                                height={160}
+                            />
                         </>
                     ) : (
                         <>
@@ -409,29 +409,27 @@ export default function SubmitCandidateModal({ roleId, onClose }: SubmitCandidat
                                 />
                             </fieldset>
 
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Submission Notes</legend>
-                                <textarea
-                                    className="textarea w-full h-24"
-                                    value={formData.notes}
-                                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                                    placeholder="Why is this candidate a great fit for this role?"
-                                />
-                            </fieldset>
+                            <MarkdownEditor
+                                className="fieldset"
+                                label="Submission Notes"
+                                value={formData.notes}
+                                onChange={(value) => setFormData({ ...formData, notes: value })}
+                                placeholder="Why is this candidate a great fit for this role?"
+                                height={160}
+                            />
                         </>
                     )}
 
-                    <fieldset className="fieldset">
-                        <legend className="fieldset-legend">Proposal Pitch *</legend>
-                        <textarea
-                            className="textarea w-full h-24"
-                            value={pitch}
-                            onChange={(e) => setPitch(e.target.value)}
-                            placeholder="Share why this role is a great fit for the candidate"
-                            required
-                        />
-                        <p className="fieldset-label">{pitch.length} / 500 characters</p>
-                    </fieldset>
+                    <MarkdownEditor
+                        className="fieldset"
+                        label="Proposal Pitch *"
+                        value={pitch}
+                        onChange={setPitch}
+                        placeholder="Share why this role is a great fit for the candidate"
+                        height={160}
+                        maxLength={500}
+                        showCount
+                    />
 
                     <fieldset className="fieldset">
                         <legend className="fieldset-legend">

@@ -6,6 +6,7 @@
  */
 
 import { useState, FormEvent } from "react";
+import { MarkdownEditor } from "@splits-network/shared-ui";
 import { useOnboarding } from "../onboarding-provider";
 
 export function CompanyInfoStep() {
@@ -175,17 +176,14 @@ export function CompanyInfoStep() {
                 </div>
 
                 {/* Description */}
-                <div className="fieldset">
-                    <label className="label">Description</label>
-                    <textarea
-                        className="textarea w-full h-24"
-                        value={formData.description}
-                        onChange={(e) =>
-                            handleChange("description", e.target.value)
-                        }
-                        placeholder="Brief description of your company..."
-                    />
-                </div>
+                <MarkdownEditor
+                    className="fieldset"
+                    label="Description"
+                    value={formData.description}
+                    onChange={(value) => handleChange("description", value)}
+                    placeholder="Brief description of your company..."
+                    height={140}
+                />
 
                 {state.error && (
                     <div className="alert alert-error">

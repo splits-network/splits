@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { createAuthenticatedClient } from '@/lib/api-client';
@@ -210,21 +211,17 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
                             />
                         </div>
 
-                        <div className="fieldset md:col-span-2">
-                            <label className="label">Company Description</label>
-                            <textarea
-                                name="description"
-                                className="textarea w-full h-32"
-                                value={formData.description}
-                                onChange={handleChange}
-                                placeholder="Tell us about your company, culture, and what makes you unique..."
-                            />
-                            <label className="label">
-                                <span className="label-text-alt">
-                                    This description will be visible to recruiters
-                                </span>
-                            </label>
-                        </div>
+                        <MarkdownEditor
+                            className="fieldset md:col-span-2"
+                            label="Company Description"
+                            value={formData.description}
+                            onChange={(value) =>
+                                setFormData((prev) => ({ ...prev, description: value }))
+                            }
+                            placeholder="Tell us about your company, culture, and what makes you unique..."
+                            helperText="This description will be visible to recruiters"
+                            height={200}
+                        />
 
                         <div className="fieldset md:col-span-2">
                             <label className="label">Logo URL (Optional)</label>

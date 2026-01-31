@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { MarkdownEditor, MarkdownRenderer } from '@splits-network/shared-ui';
 import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client'; import { useToast } from '@/lib/toast-context';
+import { createAuthenticatedClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
 interface SubmitCandidateWizardProps {
     roleId: string;
     roleTitle: string;
@@ -574,19 +576,17 @@ export default function SubmitCandidateWizard({
                             </div>
 
                             {/* Pitch */}
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Your Pitch to Candidate *</legend>
-                                <textarea
-                                    className="textarea h-48 w-full"
-                                    value={pitch}
-                                    onChange={(e) => setPitch(e.target.value)}
-                                    placeholder="Why is this role a great fit? This message will be included in the email notification to the candidate..."
-                                />
-                                <p className="fieldset-label">
-                                    Explain why you think {selectedCandidate.full_name} should consider this role. Be specific about how it matches their skills and career goals.
-                                    <span className="float-right">{pitch.length} / 500 characters</span>
-                                </p>
-                            </fieldset>
+                            <MarkdownEditor
+                                className="fieldset"
+                                label="Your Pitch to Candidate *"
+                                value={pitch}
+                                onChange={setPitch}
+                                placeholder="Why is this role a great fit? This message will be included in the email notification to the candidate..."
+                                helperText={`Explain why you think ${selectedCandidate.full_name} should consider this role. Be specific about how it matches their skills and career goals.`}
+                                height={220}
+                                maxLength={500}
+                                showCount
+                            />
 
                             {/* Resume Upload */}
                             <fieldset className="fieldset">
@@ -683,7 +683,7 @@ export default function SubmitCandidateWizard({
                                             <i className="fa-duotone fa-regular fa-message mr-2"></i>
                                             Your Pitch
                                         </h4>
-                                        <div className="whitespace-pre-wrap text-sm">{pitch}</div>
+                                        <MarkdownRenderer content={pitch} className="prose prose-sm max-w-none" />
                                     </div>
                                 </div>
                             )}

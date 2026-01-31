@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { MarkdownEditor, MarkdownRenderer } from '@splits-network/shared-ui';
 // TODO: Define proper type for UnifiedProposal
 type UnifiedProposal = any; // TODO: Define proper type
 
@@ -172,7 +173,10 @@ export default function UnifiedProposalCard({
                         <div className="font-medium mb-1 text-xs text-base-content/70">
                             {proposal.type === 'job_opportunity' ? 'Recruiter Notes:' : 'Notes:'}
                         </div>
-                        <p className="whitespace-pre-wrap">{proposal.proposal_notes}</p>
+                        <MarkdownRenderer
+                            content={proposal.proposal_notes}
+                            className="prose prose-sm max-w-none"
+                        />
                     </div>
                 )}
 
@@ -240,16 +244,16 @@ export default function UnifiedProposalCard({
                             </div>
                         )}
 
-                        <div className="fieldset">
-                            <label className="label">Your Response (optional)</label>
-                            <textarea
-                                className="textarea h-20 w-full"
-                                placeholder="Add notes about your decision..."
-                                value={responseNotes}
-                                onChange={(e) => setResponseNotes(e.target.value)}
-                                disabled={responding}
-                            />
-                        </div>
+                        <MarkdownEditor
+                            className="fieldset"
+                            label="Your Response (optional)"
+                            value={responseNotes}
+                            onChange={setResponseNotes}
+                            placeholder="Add notes about your decision..."
+                            height={120}
+                            preview="edit"
+                            disabled={responding}
+                        />
 
                         <div className="flex gap-2 justify-end">
                             <button

@@ -447,18 +447,17 @@ export default function ProfilePage() {
                             </fieldset>
 
                             <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Profile Summary (Card Preview)</legend>
-                                <textarea
-                                    className="textarea w-full h-24"
+                                <MarkdownEditor
+                                    className="fieldset"
+                                    label="Profile Summary (Card Preview)"
+                                    value={settings?.bio || ''}
+                                    onChange={(value) => updateSettings({ bio: value })}
                                     placeholder="Brief summary of your background and skills (shows on marketplace cards)"
                                     maxLength={500}
-                                    value={settings?.bio || ''}
-                                    onChange={(e) => updateSettings({ bio: e.target.value })}
+                                    showCount
+                                    height={160}
+                                    helperText="Short bio displayed on marketplace cards"
                                 />
-                                <p className="fieldset-label">
-                                    <span>Short bio displayed on marketplace cards</span>
-                                    <span>{(settings?.bio || '').length}/500 characters</span>
-                                </p>
                             </fieldset>
                         </div>
                     </div>

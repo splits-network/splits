@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 
 interface DenyGateModalProps {
     isOpen: boolean;
@@ -91,20 +92,17 @@ export default function DenyGateModal({
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    <fieldset className="fieldset mb-4">
-                        <legend className="fieldset-legend">Reason for Denial *</legend>
-                        <textarea
-                            className="textarea w-full h-32"
-                            value={reason}
-                            onChange={(e) => setReason(e.target.value)}
-                            placeholder="Please provide a detailed reason for denying this application..."
-                            disabled={submitting}
-                            required
-                        />
-                        <p className="fieldset-label">
-                            This reason will be shared with the candidate and their recruiter.
-                        </p>
-                    </fieldset>
+                    <MarkdownEditor
+                        className="fieldset mb-4"
+                        label="Reason for Denial *"
+                        value={reason}
+                        onChange={setReason}
+                        placeholder="Please provide a detailed reason for denying this application..."
+                        helperText="This reason will be shared with the candidate and their recruiter."
+                        height={180}
+                        preview="edit"
+                        disabled={submitting}
+                    />
 
                     <div className="flex gap-2 justify-end">
                         <button

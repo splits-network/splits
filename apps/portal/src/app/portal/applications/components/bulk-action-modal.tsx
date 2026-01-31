@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 import { useToast } from '@/lib/toast-context';
 import type { ApplicationStage } from '@splits-network/shared-types';
 
@@ -105,27 +106,26 @@ export default function BulkActionModal({
                         )}
 
                         {action === 'reject' && (
-                            <div className="fieldset">
-                                <label className="label">Rejection Reason *</label>
-                                <textarea
-                                    className="textarea h-24 w-full"
-                                    value={reason}
-                                    onChange={(e) => setReason(e.target.value)}
-                                    placeholder="E.g., Qualifications do not match requirements, Position filled, etc."
-                                    required
-                                />
-                            </div>
+                            <MarkdownEditor
+                                className="fieldset"
+                                label="Rejection Reason *"
+                                value={reason}
+                                onChange={setReason}
+                                placeholder="E.g., Qualifications do not match requirements, Position filled, etc."
+                                height={160}
+                                preview="edit"
+                            />
                         )}
 
-                        <div className="fieldset">
-                            <label className="label">Additional Notes (Optional)</label>
-                            <textarea
-                                className="textarea h-24 w-full"
-                                value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
-                                placeholder="Add any additional context or details..."
-                            />
-                        </div>
+                        <MarkdownEditor
+                            className="fieldset"
+                            label="Additional Notes (Optional)"
+                            value={notes}
+                            onChange={setNotes}
+                            placeholder="Add any additional context or details..."
+                            height={160}
+                            preview="edit"
+                        />
                     </div>
 
                     <div className="modal-action">

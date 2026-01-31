@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 
 interface PreScreenQuestion {
     id: string;
@@ -116,12 +117,13 @@ export default function StepQuestions({
 
                                 {/* Text Input */}
                                 {question.question_type === 'text' && (
-                                    <textarea
-                                        className="textarea h-24"
+                                    <MarkdownEditor
+                                        className="fieldset"
                                         value={(getAnswer(question.id) as string) || ''}
-                                        onChange={(e) => setAnswer(question.id, e.target.value)}
+                                        onChange={(value) => setAnswer(question.id, value)}
                                         placeholder="Enter your answer..."
-                                        required={question.is_required}
+                                        height={160}
+                                        preview="edit"
                                     />
                                 )}
 

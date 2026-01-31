@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 import { useRouter } from 'next/navigation';
 import { ApiClient } from '@/lib/api-client';
 
@@ -70,24 +71,18 @@ export default function ProposeJobModal({
                         </div>
                     )}
 
-                    <div className="fieldset mb-6">
-                        <label className="label">
-                            Your pitch (why this role fits) *
-                        </label>
-                        <textarea
-                            className="textarea h-32"
-                            placeholder="Tell the candidate why you think this role is a great fit for them..."
-                            value={pitch}
-                            onChange={(e) => setPitch(e.target.value)}
-                            disabled={loading}
-                            required
-                        ></textarea>
-                        <label className="label">
-                            <span className="label-text-alt">
-                                {pitch.length} / 500 characters
-                            </span>
-                        </label>
-                    </div>
+                    <MarkdownEditor
+                        className="fieldset mb-6"
+                        label="Your pitch (why this role fits) *"
+                        value={pitch}
+                        onChange={setPitch}
+                        placeholder="Tell the candidate why you think this role is a great fit for them..."
+                        maxLength={500}
+                        showCount
+                        height={180}
+                        preview="edit"
+                        disabled={loading}
+                    />
 
                     <div className="modal-action">
                         <button

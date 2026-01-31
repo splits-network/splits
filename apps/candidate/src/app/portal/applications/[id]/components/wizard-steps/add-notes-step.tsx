@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 
 interface AddNotesStepProps {
     notes: string;
@@ -23,20 +24,15 @@ export function AddNotesStep({ notes, onUpdate, onNext, onBack }: AddNotesStepPr
                 </p>
             </div>
 
-            <div className="fieldset">
-                <label className="label">Your Notes</label>
-                <textarea
-                    value={notes}
-                    onChange={(e) => onUpdate(e.target.value)}
-                    placeholder="Example: I'm particularly interested in this role because of my experience with..."
-                    className="textarea h-32 w-full"
-                />
-                <label className="label">
-                    <span className="label-text-alt">
-                        These notes will be visible to the employer and your recruiter
-                    </span>
-                </label>
-            </div>
+            <MarkdownEditor
+                className="fieldset"
+                label="Your Notes"
+                value={notes}
+                onChange={onUpdate}
+                placeholder="Example: I'm particularly interested in this role because of my experience with..."
+                helperText="These notes will be visible to the employer and your recruiter"
+                height={180}
+            />
 
             <div className="alert alert-info">
                 <i className="fa-duotone fa-regular fa-lightbulb"></i>

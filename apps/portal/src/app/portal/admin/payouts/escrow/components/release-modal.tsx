@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 
 interface EscrowHold {
     id: string;
@@ -112,19 +113,17 @@ export function ReleaseModal({ hold, onClose, onConfirm }: ReleaseModalProps) {
 
                     {/* Form */}
                     <form onSubmit={handleSubmit}>
-                        <fieldset className="fieldset">
-                            <legend className="fieldset-legend">Release Notes (Optional)</legend>
-                            <textarea
-                                className="textarea w-full h-24"
-                                value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
-                                placeholder="Enter reason for early release (e.g., 'Candidate completed guarantee period early')"
-                                disabled={loading}
-                            />
-                            <p className="fieldset-label">
-                                Optional notes will be recorded in the audit log
-                            </p>
-                        </fieldset>
+                        <MarkdownEditor
+                            className="fieldset"
+                            label="Release Notes (Optional)"
+                            value={notes}
+                            onChange={setNotes}
+                            placeholder="Enter reason for early release (e.g., 'Candidate completed guarantee period early')"
+                            helperText="Optional notes will be recorded in the audit log"
+                            height={160}
+                            preview="edit"
+                            disabled={loading}
+                        />
 
                         {/* Actions */}
                         <div className="modal-action">

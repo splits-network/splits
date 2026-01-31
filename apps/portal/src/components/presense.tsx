@@ -65,11 +65,10 @@ export function Presence({
     return (
         <span
             className={`${statusClass} ${sizeClass} ${
-                status === "online" ? "animate-pulse" : ""
+                status === "online" ? "animate-pulse" : "hidden"
             } ${className}`}
             aria-label={statusLabel}
             title={statusLabel}
         />
     );
 }
-

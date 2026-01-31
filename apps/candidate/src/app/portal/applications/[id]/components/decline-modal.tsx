@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, FormEvent } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 
 interface DeclineModalProps {
     isOpen: boolean;
@@ -104,24 +105,17 @@ export function DeclineModal({ isOpen, onClose, onSubmit, jobTitle }: DeclineMod
                         </select>
                     </div>
 
-                    <div className="fieldset">
-                        <label className="label">
-                            Additional details {reason === 'other' && '*'}
-                        </label>
-                        <textarea
-                            className="textarea h-24"
-                            value={details}
-                            onChange={(e) => setDetails(e.target.value)}
-                            placeholder="Help your recruiter understand your decision (optional)"
-                            disabled={submitting}
-                            required={reason === 'other'}
-                        />
-                        <label className="label">
-                            <span className="label-text-alt">
-                                This feedback helps your recruiter find better opportunities for you
-                            </span>
-                        </label>
-                    </div>
+                    <MarkdownEditor
+                        className="fieldset"
+                        label={`Additional details ${reason === 'other' ? '*' : ''}`}
+                        value={details}
+                        onChange={setDetails}
+                        placeholder="Help your recruiter understand your decision (optional)"
+                        helperText="This feedback helps your recruiter find better opportunities for you"
+                        height={160}
+                        preview="edit"
+                        disabled={submitting}
+                    />
 
                     <div className="modal-action">
                         <button

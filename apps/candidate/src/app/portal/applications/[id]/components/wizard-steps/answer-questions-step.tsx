@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 
 interface Question {
     id: string;
@@ -110,12 +111,13 @@ export function AnswerQuestionsStep({
             case 'text':
             default:
                 return (
-                    <textarea
+                    <MarkdownEditor
+                        className="fieldset"
                         value={answer}
-                        onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                        onChange={(value) => handleAnswerChange(question.id, value)}
                         placeholder="Type your answer here..."
-                        className="textarea h-24"
-                        required={question.is_required}
+                        height={160}
+                        preview="edit"
                     />
                 );
         }

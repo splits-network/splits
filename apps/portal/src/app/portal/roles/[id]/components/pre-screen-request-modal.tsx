@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 
@@ -124,16 +125,16 @@ export default function PreScreenRequestModal({
                         </label>
                     </div>
 
-                    <div className="fieldset">
-                        <label className="label">Message to Recruiter (Optional)</label>
-                        <textarea
-                            className="textarea h-24"
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            placeholder="Add any context or special requirements..."
-                            disabled={submitting}
-                        />
-                    </div>
+                    <MarkdownEditor
+                        className="fieldset"
+                        label="Message to Recruiter (Optional)"
+                        value={message}
+                        onChange={setMessage}
+                        placeholder="Add any context or special requirements..."
+                        height={140}
+                        preview="edit"
+                        disabled={submitting}
+                    />
 
                     <div className="alert alert-info">
                         <i className="fa-duotone fa-regular fa-circle-info"></i>

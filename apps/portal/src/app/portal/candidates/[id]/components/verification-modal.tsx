@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 
@@ -110,20 +111,16 @@ export default function VerificationModal({
                         </div>
 
                         {/* Notes */}
-                        <div className="fieldset">
-                            <label className="label">Verification Notes</label>
-                            <textarea
-                                className="textarea h-24 w-full"
-                                value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
-                                placeholder="Optional notes about the verification decision..."
-                            />
-                            <label className="label">
-                                <span className="label-text-alt">
-                                    Add any relevant notes about the verification process or decision
-                                </span>
-                            </label>
-                        </div>
+                        <MarkdownEditor
+                            className="fieldset"
+                            label="Verification Notes"
+                            value={notes}
+                            onChange={setNotes}
+                            placeholder="Optional notes about the verification decision..."
+                            helperText="Add any relevant notes about the verification process or decision"
+                            height={160}
+                            preview="edit"
+                        />
 
                         {/* Status Descriptions */}
                         <div className="alert alert-info">

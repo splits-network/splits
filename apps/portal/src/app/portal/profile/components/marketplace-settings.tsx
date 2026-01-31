@@ -441,20 +441,16 @@ export function MarketplaceSettings() {
                                 />
                             </div>
 
-                            <div className="fieldset">
-                                <label className="label">Profile Summary (Card Preview)</label>
-                                <textarea
-                                    className="textarea w-full h-24"
-                                    placeholder="Brief overview of your recruiting expertise and approach (shows on marketplace cards)"
-                                    maxLength={500}
-                                    value={settings.bio}
-                                    onChange={(e) => updateSettings({ bio: e.target.value })}
-                                />
-                                <label className="label">
-                                    <span className="label-text-alt">Short bio displayed on marketplace cards</span>
-                                    <span className="label-text-alt">{settings.bio.length}/500 characters</span>
-                                </label>
-                            </div>
+                            <MarkdownEditor
+                                className="fieldset"
+                                label="Profile Summary (Card Preview)"
+                                value={settings.bio}
+                                onChange={(value) => updateSettings({ bio: value })}
+                                placeholder="Brief overview of your recruiting expertise and approach (shows on marketplace cards)"
+                                maxLength={500}
+                                showCount
+                                height={140}
+                            />
                         </div>
                     </div>
 
