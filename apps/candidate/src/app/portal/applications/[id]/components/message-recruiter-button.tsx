@@ -5,6 +5,8 @@ import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { startChatConversation } from "@/lib/chat-start";
 import { useToast } from "@/lib/toast-context";
+import { usePresence } from "@/hooks/use-presence";
+import { Presence } from "@/components/presense";
 
 interface MessageRecruiterButtonProps {
     recruiterUserId?: string | null;
@@ -23,6 +25,12 @@ export function MessageRecruiterButton({
     const router = useRouter();
     const toast = useToast();
     const [startingChat, setStartingChat] = useState(false);
+    const presence = usePresence([recruiterUserId], {
+        enabled: Boolean(recruiterUserId),
+    });
+    const presenceStatus = recruiterUserId
+        ? presence[recruiterUserId]?.status
+        : undefined;
 
     const disabledReason = recruiterUserId
         ? null
@@ -60,11 +68,15 @@ export function MessageRecruiterButton({
                 {startingChat ? (
                     <span className="loading loading-spinner loading-xs"></span>
                 ) : (
-                    <i className="fa-duotone fa-regular fa-messages"></i>
+                    <span className="inline-flex items-center gap-2">
+                        <Presence status={presenceStatus} />
+                        <i className="fa-duotone fa-regular fa-messages"></i>
+                    </span>
                 )}
                 Message Recruiter
             </button>
         </span>
     );
 }
+
 

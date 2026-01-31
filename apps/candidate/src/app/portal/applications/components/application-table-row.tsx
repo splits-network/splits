@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { startChatConversation } from '@/lib/chat-start';
 import { useToast } from '@/lib/toast-context';
+import { usePresence } from '@/hooks/use-presence';
+import { Presence } from '@/components/presense';
 
 interface ApplicationTableRowProps {
     application: {
@@ -59,6 +61,12 @@ export function ApplicationTableRow({
     const chatDisabledReason = recruiterUserId
         ? null
         : "Your recruiter isn't linked to a user yet.";
+    const presence = usePresence([recruiterUserId], {
+        enabled: Boolean(recruiterUserId),
+    });
+    const presenceStatus = recruiterUserId
+        ? presence[recruiterUserId]?.status
+        : undefined;
 
     return (
         <tr className="hover">
@@ -128,7 +136,7 @@ export function ApplicationTableRow({
                 <div className="flex gap-2 justify-end">
                     <span title={chatDisabledReason || undefined}>
                         <button
-                            className="btn btn-outline btn-sm"
+                            className="btn btn-outline btn-sm relative"
                             disabled={!recruiterUserId || startingChat}
                             onClick={async (e) => {
                                 e.preventDefault();
@@ -167,6 +175,10 @@ export function ApplicationTableRow({
                                 }
                             }}
                         >
+                            <Presence
+                                status={presenceStatus}
+                                className="absolute -top-1 -right-1"
+                            />
                             {startingChat ? (
                                 <span className="loading loading-spinner loading-xs"></span>
                             ) : (
@@ -185,4 +197,5 @@ export function ApplicationTableRow({
         </tr >
     );
 }
+
 

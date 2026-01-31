@@ -13,6 +13,8 @@ import { useRouter } from "next/navigation";
 import { startChatConversation } from "@/lib/chat-start";
 import { useToast } from "@/lib/toast-context";
 import { useState } from "react";
+import { usePresence } from "@/hooks/use-presence";
+import { Presence } from "@/components/presense";
 
 export interface Candidate {
     id: string;
@@ -142,6 +144,10 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
     const chatDisabledReason = canChat
         ? null
         : "This candidate isn't linked to a user yet.";
+    const presence = usePresence([candidate.user_id], { enabled: canChat });
+    const presenceStatus = candidate.user_id
+        ? presence[candidate.user_id]?.status
+        : undefined;
 
     // Compute initials for avatar
     const initials = (() => {
@@ -316,7 +322,7 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
                     <div className="flex items-center gap-2">
                         <span title={chatDisabledReason || undefined}>
                             <button
-                                className="btn btn-outline btn-sm"
+                                className="btn btn-outline btn-sm relative"
                                 disabled={!canChat || startingChat}
                                 onClick={async (e) => {
                                     e.stopPropagation();
@@ -352,6 +358,10 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
                                     }
                                 }}
                             >
+                                <Presence
+                                    status={presenceStatus}
+                                    className="absolute -top-1 -right-1"
+                                />
                                 {startingChat ? (
                                     <span className="loading loading-spinner loading-xs"></span>
                                 ) : (
@@ -371,4 +381,5 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
         </EntityCard>
     );
 }
+
 

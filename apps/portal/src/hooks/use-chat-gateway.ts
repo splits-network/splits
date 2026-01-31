@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 type ChatGatewayEvent = {
   type: string;
@@ -13,6 +13,8 @@ type UseChatGatewayOptions = {
   getToken: () => Promise<string | null>;
   onEvent?: (event: ChatGatewayEvent) => void;
   onReconnect?: () => void;
+  presencePingEnabled?: boolean;
+  presencePingIntervalMs?: number;
 };
 
 function buildGatewayUrl(baseUrl: string, token: string) {
@@ -27,11 +29,14 @@ export function useChatGateway({
   getToken,
   onEvent,
   onReconnect,
+  presencePingEnabled = true,
+  presencePingIntervalMs = 30000,
 }: UseChatGatewayOptions) {
   const wsRef = useRef<WebSocket | null>(null);
   const closedRef = useRef(false);
   const retryRef = useRef(0);
   const reconnectTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const presenceIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const channelsRef = useRef<string[]>([]);
 
   // store callbacks in refs so effect deps don't churn
@@ -54,6 +59,13 @@ export function useChatGateway({
       wsRef.current.send(JSON.stringify({ type: "subscribe", channels: channelsRef.current }));
     }
   }, [normalizedChannels.join("|")]);
+
+  const sendPresencePing = useCallback(() => {
+    if (!presencePingEnabled) return;
+    const current = wsRef.current;
+    if (!current || current.readyState !== WebSocket.OPEN) return;
+    current.send(JSON.stringify({ type: "presence.ping" }));
+  }, [presencePingEnabled]);
 
   useEffect(() => {
     if (!enabled || normalizedChannels.length === 0) return;
@@ -83,6 +95,11 @@ export function useChatGateway({
         retryRef.current = 0;
         ws.send(JSON.stringify({ type: "subscribe", channels: channelsRef.current }));
         onReconnectRef.current?.();
+        sendPresencePing();
+        if (presencePingEnabled) {
+          if (presenceIntervalRef.current) clearInterval(presenceIntervalRef.current);
+          presenceIntervalRef.current = setInterval(sendPresencePing, presencePingIntervalMs);
+        }
       };
 
       ws.onmessage = (message) => {
@@ -96,7 +113,10 @@ export function useChatGateway({
       };
 
       ws.onclose = (e) => {
-        console.log("[portal-chat-gateway] WebSocket closed", { code: e.code, reason: e.reason });
+        if (presenceIntervalRef.current) {
+          clearInterval(presenceIntervalRef.current);
+          presenceIntervalRef.current = null;
+        }
         if (closedRef.current) return;
         const retry = Math.min(10000, 1000 * 2 ** retryRef.current);
         retryRef.current += 1;
@@ -119,6 +139,7 @@ export function useChatGateway({
       } else if (current.readyState === WebSocket.OPEN) {
         current.send(JSON.stringify({ type: "subscribe", channels: channelsRef.current }));
         onReconnectRef.current?.();
+        sendPresencePing();
       }
     };
 
@@ -128,8 +149,9 @@ export function useChatGateway({
       closedRef.current = true;
       document.removeEventListener("visibilitychange", handleVisibility);
       if (reconnectTimeout.current) clearTimeout(reconnectTimeout.current);
+      if (presenceIntervalRef.current) clearInterval(presenceIntervalRef.current);
       wsRef.current?.close();
       wsRef.current = null;
     };
-  }, [enabled, normalizedChannels.join("|")]);
+  }, [enabled, normalizedChannels.join("|"), presencePingEnabled, presencePingIntervalMs, sendPresencePing]);
 }

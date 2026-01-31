@@ -8,6 +8,8 @@ import type { ApiResponse } from "@splits-network/shared-api-client";
 import { useRouter } from "next/navigation";
 import { startChatConversation } from "@/lib/chat-start";
 import { useToast } from "@/lib/toast-context";
+import { usePresence } from "@/hooks/use-presence";
+import { Presence } from "@/components/presense";
 import {
   StatCard,
   StatCardGrid,
@@ -92,6 +94,9 @@ export default function DashboardPage() {
   const [profileLoading, setProfileLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [startingChatId, setStartingChatId] = useState<string | null>(null);
+  const presence = usePresence(
+    recentApplications.map((app) => app.recruiter_user_id),
+  );
 
   // Load stats and applications data
   useEffect(() => {
@@ -369,6 +374,9 @@ export default function DashboardPage() {
                 const chatDisabledReason = canChat
                   ? null
                   : "Recruiter isn't linked to a user yet.";
+                const presenceStatus = app.recruiter_user_id
+                  ? presence[app.recruiter_user_id]?.status
+                  : undefined;
                 return (
                   <Link key={app.id} href={`/portal/applications/${app.id}`}>
                     <div className="p-4 bg-base-100 rounded-xl hover:bg-base-200/70 transition-all cursor-pointer group">
@@ -383,7 +391,7 @@ export default function DashboardPage() {
                         </div>
                         <span title={chatDisabledReason || undefined}>
                           <button
-                            className="btn btn-ghost btn-sm btn-square"
+                            className="btn btn-ghost btn-sm btn-square relative"
                             disabled={!canChat || startingChatId === app.id}
                             onClick={async (event) => {
                               event.preventDefault();
@@ -415,6 +423,10 @@ export default function DashboardPage() {
                               }
                             }}
                           >
+                            <Presence
+                              status={presenceStatus}
+                              className="absolute -top-1 -right-1"
+                            />
                             {startingChatId === app.id ? (
                               <span className="loading loading-spinner loading-xs"></span>
                             ) : (
@@ -494,4 +506,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
 

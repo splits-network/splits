@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { startChatConversation } from "@/lib/chat-start";
 import { useToast } from "@/lib/toast-context";
 import { useState } from "react";
+import { usePresence } from "@/hooks/use-presence";
+import { Presence } from "@/components/presense";
 
 export default function DetailHeader({ candidate }: { candidate: Candidate }) {
     const { getToken } = useAuth();
@@ -16,6 +18,10 @@ export default function DetailHeader({ candidate }: { candidate: Candidate }) {
     const chatDisabledReason = canChat
         ? null
         : "This candidate isn't linked to a user yet.";
+    const presence = usePresence([candidate.user_id], { enabled: canChat });
+    const presenceStatus = candidate.user_id
+        ? presence[candidate.user_id]?.status
+        : undefined;
 
     return (
         <div className="flex flex-col sm:flex-row gap-6 items-start justify-between">
@@ -190,7 +196,10 @@ export default function DetailHeader({ candidate }: { candidate: Candidate }) {
                         {startingChat ? (
                             <span className="loading loading-spinner loading-xs"></span>
                         ) : (
-                            <i className="fa-duotone fa-regular fa-messages"></i>
+                            <span className="inline-flex items-center gap-2">
+                                <Presence status={presenceStatus} />
+                                <i className="fa-duotone fa-regular fa-messages"></i>
+                            </span>
                         )}
                         Message
                     </button>
@@ -206,4 +215,5 @@ export default function DetailHeader({ candidate }: { candidate: Candidate }) {
         </div>
     );
 }
+
 

@@ -14,6 +14,8 @@ import { useRouter } from 'next/navigation';
 import { startChatConversation } from '@/lib/chat-start';
 import { useToast } from '@/lib/toast-context';
 import { useState } from 'react';
+import { usePresence } from '@/hooks/use-presence';
+import { Presence } from '@/components/presense';
 
 // ===== TYPES =====
 
@@ -33,6 +35,10 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
     const chatDisabledReason = canChat
         ? null
         : "This candidate isn't linked to a user yet.";
+    const presence = usePresence([candidate.user_id], { enabled: canChat });
+    const presenceStatus = candidate.user_id
+        ? presence[candidate.user_id]?.status
+        : undefined;
     // Get initials for avatar
     const getInitials = (name: string) => {
         const names = name.split(' ');
@@ -143,7 +149,7 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
                 <div className="flex gap-1 justify-end">
                     <span title={chatDisabledReason || undefined}>
                         <button
-                            className="btn btn-outline btn-sm"
+                            className="btn btn-outline btn-sm relative"
                             title="Message Candidate"
                             disabled={!canChat || startingChat}
                             onClick={async (e) => {
@@ -180,6 +186,10 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
                                 }
                             }}
                         >
+                            <Presence
+                                status={presenceStatus}
+                                className="absolute -top-1 -right-1"
+                            />
                             <i className="fa-duotone fa-regular fa-messages text-xs"></i>
                         </button>
                     </span>
@@ -340,6 +350,7 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
                                     }
                                 }}
                             >
+                                <Presence status={presenceStatus} />
                                 <i className="fa-duotone fa-regular fa-messages"></i>
                                 Message
                             </button>
@@ -367,4 +378,5 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
         />
     );
 }
+
 

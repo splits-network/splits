@@ -10,6 +10,8 @@ import { useRouter } from 'next/navigation';
 import { startChatConversation } from '@/lib/chat-start';
 import { useToast } from '@/lib/toast-context';
 import { useState } from 'react';
+import { usePresence } from '@/hooks/use-presence';
+import { Presence } from '@/components/presense';
 
 // ===== TYPES =====
 
@@ -113,6 +115,12 @@ export function ApplicationCard({
     const chatDisabledReason = canChat
         ? null
         : "Candidate isn't linked to a user yet.";
+    const presence = usePresence([application.candidate.user_id], {
+        enabled: canChat,
+    });
+    const presenceStatus = application.candidate.user_id
+        ? presence[application.candidate.user_id]?.status
+        : undefined;
 
     // Calculate badges
     const badges: Badge[] = [];
@@ -292,7 +300,10 @@ export function ApplicationCard({
                                 {startingChat ? (
                                     <span className="loading loading-spinner loading-xs"></span>
                                 ) : (
-                                    "Message"
+                                    <span className="inline-flex items-center gap-2">
+                                        <Presence status={presenceStatus} />
+                                        Message
+                                    </span>
                                 )}
                             </button>
                         </span>
@@ -329,4 +340,5 @@ export function ApplicationCard({
         </MetricCard>
     );
 }
+
 

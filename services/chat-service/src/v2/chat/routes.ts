@@ -7,6 +7,7 @@ import { requireUserContext } from '../shared/helpers';
 import { JobQueue } from '@splits-network/shared-job-queue';
 import { ChatEventPublisher } from './events';
 import { EventPublisher } from '../shared/events';
+import Redis from 'ioredis';
 
 interface RegisterChatRoutesConfig {
     supabaseUrl: string;
@@ -20,6 +21,11 @@ export async function registerChatRoutes(app: FastifyInstance, config: RegisterC
     const repository = new ChatRepository(config.supabaseUrl, config.supabaseKey);
     const eventPublisher = new ChatEventPublisher(config.redisConfig, app.log as any);
     const service = new ChatServiceV2(repository, eventPublisher, config.eventPublisher);
+    const presenceRedis = new Redis({
+        host: config.redisConfig.host,
+        port: config.redisConfig.port,
+        password: config.redisConfig.password || undefined,
+    });
     const bucket = process.env.CHAT_ATTACHMENTS_BUCKET || 'chat-attachments';
     const storage = new ChatStorageClient(config.supabaseUrl, config.supabaseKey, bucket);
     const attachmentsEnabled = process.env.CHAT_ATTACHMENTS_ENABLED === 'true';
@@ -27,6 +33,58 @@ export async function registerChatRoutes(app: FastifyInstance, config: RegisterC
         rabbitMqUrl: config.rabbitMqUrl,
         queueName: 'chat-attachment-scan',
         logger: app.log as any,
+    });
+
+    presenceRedis.on('error', (err) => {
+        app.log.error({ err }, 'Redis presence error');
+    });
+
+    app.addHook('onClose', async () => {
+        await presenceRedis.quit();
+    });
+
+    app.get('/api/v2/chat/presence', async (request, reply) => {
+        try {
+            requireUserContext(request);
+            const query = request.query as any;
+            const rawUserIds = query.userIds;
+            const userIds = Array.isArray(rawUserIds)
+                ? rawUserIds.flatMap((value) => String(value).split(','))
+                : typeof rawUserIds === 'string'
+                  ? rawUserIds.split(',')
+                  : [];
+            const normalized = userIds
+                .map((value) => value.trim())
+                .filter(Boolean)
+                .slice(0, 100);
+
+            if (normalized.length === 0) {
+                return reply.send({ data: [] });
+            }
+
+            const keys = normalized.map((id) => `presence:user:${id}`);
+            const values = await presenceRedis.mget(keys);
+            const data = normalized.map((id, index) => {
+                const payload = values[index];
+                if (!payload) {
+                    return { userId: id, status: 'offline', lastSeenAt: null };
+                }
+                try {
+                    const parsed = JSON.parse(payload);
+                    return {
+                        userId: id,
+                        status: parsed?.status === 'online' ? 'online' : 'offline',
+                        lastSeenAt: parsed?.lastSeenAt || null,
+                    };
+                } catch {
+                    return { userId: id, status: 'offline', lastSeenAt: null };
+                }
+            });
+
+            return reply.send({ data });
+        } catch (error: any) {
+            return reply.code(error.statusCode || 400).send({ error: error.message });
+        }
     });
 
     await attachmentQueue.connect();

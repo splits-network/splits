@@ -572,15 +572,15 @@ export default function ThreadPanel({
                     onScroll={handleScroll}
                     className="relative flex-1 min-h-0 rounded-lg border border-base-200 bg-base-100 p-4 space-y-3 overflow-y-auto"
                 >
-                {isLoadingMore && (
-                    <div className="text-center text-xs text-base-content/50">
-                        Loading more messages…
-                    </div>
-                )}
-                {data.messages.length === 0 ? (
-                    <div className="text-center text-base-content/50">
-                        No messages yet.
-                    </div>
+                    {isLoadingMore && (
+                        <div className="text-center text-xs text-base-content/50">
+                            Loading more messages…
+                        </div>
+                    )}
+                    {data.messages.length === 0 ? (
+                        <div className="text-center text-base-content/50">
+                            No messages yet.
+                        </div>
                     ) : (
                         data.messages.map((msg) => {
                             const isOwnMessage =
@@ -603,8 +603,12 @@ export default function ThreadPanel({
                                 >
                                     <div className="chat-image avatar avatar-placeholder">
                                         <div className="bg-base-200 text-base-content rounded-full w-10">
-                                            <span className="text-xs font-semibold">
-                                                {getInitials(senderLabel)}
+                                            <span className="text-sm text-primary font-semibold">
+                                                {isOwnMessage ? (
+                                                    <i className="fa-duotone fa-user text-2xl"></i>
+                                                ) : (
+                                                    getInitials(senderLabel)
+                                                )}
                                             </span>
                                         </div>
                                     </div>
