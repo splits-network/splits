@@ -1,4 +1,5 @@
 "use client";
+
 import { ConversationRow, UserSummary } from "./types";
 
 interface MessageListItemProps {

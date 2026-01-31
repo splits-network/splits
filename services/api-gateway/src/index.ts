@@ -150,6 +150,12 @@ async function main() {
         max: 100,
         timeWindow: '1 minute',
         redis,
+        allowList: async (request: any) => {
+            const url = request.raw?.url || request.url || '';
+            if (url.startsWith('/api/v2/chat')) return true;
+            if (url.startsWith('/api/v2/admin/chat')) return true;
+            return false;
+        },
     });
 
     // Register multipart support for file uploads

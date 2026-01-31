@@ -202,9 +202,7 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
                                 convo.participant_a_id === currentUserId
                                     ? convo.participant_b_id
                                     : convo.participant_a_id;
-                            const other = otherId
-                                ? userMap[otherId]
-                                : null;
+                            const other = otherId ? userMap[otherId] : null;
                             return (
                                 <MessageListItem
                                     key={row.conversation_id}

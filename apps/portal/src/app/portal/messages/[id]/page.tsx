@@ -4,7 +4,7 @@ interface MessageThreadPageProps {
     params: Promise<{ id: string }>;
 }
 
-export default async function CandidateMessageThreadPage({
+export default async function MessageThreadPage({
     params,
 }: MessageThreadPageProps) {
     const { id } = await params;

@@ -206,7 +206,7 @@ export class ChatRepository {
             .from('chat_messages')
             .select('*')
             .eq('conversation_id', conversationId)
-            .order('created_at', { ascending: true });
+            .order('created_at', { ascending: false });
 
         if (afterMessageId) {
             const { data: afterMessage } = await this.supabase
@@ -224,7 +224,8 @@ export class ChatRepository {
             throw error;
         }
 
-        return (data || []) as ChatMessage[];
+        const rows = (data || []) as ChatMessage[];
+        return rows.reverse();
     }
 
     async listMessagesByIds(messageIds: string[]): Promise<ChatMessage[]> {
