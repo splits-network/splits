@@ -489,7 +489,7 @@ export default function ThreadPanel({
                 <div
                     ref={messagesRef}
                     onScroll={handleScroll}
-                    className="rounded-lg border border-base-200 bg-base-100 p-4 space-y-3 max-h-[55vh] overflow-y-auto"
+                    className="relative rounded-lg border border-base-200 bg-base-100 p-4 space-y-3 max-h-[55vh] overflow-y-auto"
                 >
                     {data.messages.length === 0 ? (
                         <div className="text-center text-base-content/50">
@@ -538,6 +538,18 @@ export default function ThreadPanel({
                                 </div>
                             );
                         })
+                    )}
+                    {!isAtBottom && (
+                        <div className="sticky bottom-4 flex justify-end pr-2">
+                            <button
+                                type="button"
+                                onClick={scrollToBottom}
+                                className="btn btn-circle btn-primary shadow-md"
+                                aria-label="Jump to latest"
+                            >
+                                <i className="fa-duotone fa-arrow-down"></i>
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>
