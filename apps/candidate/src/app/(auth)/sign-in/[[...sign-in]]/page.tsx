@@ -98,9 +98,11 @@ export default function SignInPage() {
             } else {
                 console.error("❌ [SIGN_IN_DEBUG] Sign-in incomplete:", {
                     status: signInAttempt.status,
-                    missingFields: signInAttempt.missingFields,
-                    unverifiedFields: signInAttempt.unverifiedFields,
-                    nextStep: signInAttempt.nextStep,
+                    identifier: signInAttempt.identifier,
+                    createdSessionId: signInAttempt.createdSessionId,
+                    attemptId: signInAttempt.id,
+                    // Full object for inspection
+                    fullAttemptObject: signInAttempt,
                 });
                 setError("Sign in incomplete. Please try again.");
             }

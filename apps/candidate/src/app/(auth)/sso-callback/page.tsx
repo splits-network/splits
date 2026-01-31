@@ -31,21 +31,31 @@ function SSOCallbackInner() {
 
     // DEBUG: Log environment and initial state on mount
     useEffect(() => {
-        console.log('🚀 [SSO_CALLBACK_DEBUG] Component mounted');
-        console.log('🔧 [SSO_CALLBACK_DEBUG] Environment variables:', {
+        console.log("🚀 [SSO_CALLBACK_DEBUG] Component mounted");
+        console.log("🔧 [SSO_CALLBACK_DEBUG] Environment variables:", {
             NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-            NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.substring(0, 20) + '...',
-            NEXT_PUBLIC_CLERK_SIGN_IN_URL: process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL,
-            NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL,
-            NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL,
+            NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
+                process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.substring(
+                    0,
+                    20,
+                ) + "...",
+            NEXT_PUBLIC_CLERK_SIGN_IN_URL:
+                process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL,
+            NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL:
+                process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL,
+            NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL:
+                process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL,
         });
-        console.log('🌐 [SSO_CALLBACK_DEBUG] Current URL:', window.location.href);
-        console.log('🔗 [SSO_CALLBACK_DEBUG] Referrer:', document.referrer);
+        console.log(
+            "🌐 [SSO_CALLBACK_DEBUG] Current URL:",
+            window.location.href,
+        );
+        console.log("🔗 [SSO_CALLBACK_DEBUG] Referrer:", document.referrer);
     }, []);
 
     useEffect(() => {
         // DEBUG: Log all state changes
-        console.log('📱 [SSO_CALLBACK_DEBUG] Effect triggered:', {
+        console.log("📱 [SSO_CALLBACK_DEBUG] Effect triggered:", {
             authLoaded,
             userLoaded,
             isSignedIn,
@@ -59,44 +69,53 @@ function SSOCallbackInner() {
 
         // Wait for Clerk to fully load
         if (!authLoaded || !userLoaded) {
-            console.log('⏳ [SSO_CALLBACK_DEBUG] Waiting for Clerk to load');
+            console.log("⏳ [SSO_CALLBACK_DEBUG] Waiting for Clerk to load");
             return;
         }
 
         // Wait until user is signed in
         if (!isSignedIn || !user) {
-            console.log('🚫 [SSO_CALLBACK_DEBUG] User not signed in yet');
+            console.log("🚫 [SSO_CALLBACK_DEBUG] User not signed in yet");
             return;
         }
 
         // Prevent double execution
         if (hasAttemptedRef.current) {
-            console.log('🔄 [SSO_CALLBACK_DEBUG] Already attempted user creation, skipping');
+            console.log(
+                "🔄 [SSO_CALLBACK_DEBUG] Already attempted user creation, skipping",
+            );
             return;
         }
         hasAttemptedRef.current = true;
 
-        console.log('🚀 [SSO_CALLBACK_DEBUG] Starting user creation and redirect process');
+        console.log(
+            "🚀 [SSO_CALLBACK_DEBUG] Starting user creation and redirect process",
+        );
 
         async function ensureUserAndRedirect() {
             try {
-                console.log('🎯 [SSO_CALLBACK_DEBUG] Getting auth token...');
+                console.log("🎯 [SSO_CALLBACK_DEBUG] Getting auth token...");
                 // Get token for API calls
                 const token = await getToken();
                 if (!token) {
                     throw new Error("Failed to get authentication token");
                 }
-                console.log('✅ [SSO_CALLBACK_DEBUG] Got auth token:', token.substring(0, 20) + '...');
+                console.log(
+                    "✅ [SSO_CALLBACK_DEBUG] Got auth token:",
+                    token.substring(0, 20) + "...",
+                );
 
                 // Update status to creating user
-                console.log('👤 [SSO_CALLBACK_DEBUG] Setting status to creating_user');
+                console.log(
+                    "👤 [SSO_CALLBACK_DEBUG] Setting status to creating_user",
+                );
                 setStatus("creating_user");
 
                 if (!user) {
                     throw new Error("User data is unavailable");
                 }
 
-                console.log('📊 [SSO_CALLBACK_DEBUG] User data:', {
+                console.log("📊 [SSO_CALLBACK_DEBUG] User data:", {
                     id: user.id,
                     email: user.primaryEmailAddress?.emailAddress,
                     name: user.fullName || user.firstName,
@@ -105,7 +124,9 @@ function SSOCallbackInner() {
                 });
 
                 // Ensure user and candidate exist in database
-                console.log('🔄 [SSO_CALLBACK_DEBUG] Creating user and candidate in database...');
+                console.log(
+                    "🔄 [SSO_CALLBACK_DEBUG] Creating user and candidate in database...",
+                );
                 const result = await ensureUserAndCandidateInDatabase(token, {
                     clerk_user_id: user.id,
                     email: user.primaryEmailAddress?.emailAddress || "",
@@ -113,16 +134,21 @@ function SSOCallbackInner() {
                     image_url: user.imageUrl,
                 });
 
-                console.log('📋 [SSO_CALLBACK_DEBUG] Database creation result:', {
-                    success: result.success,
-                    hasUser: !!result.user,
-                    hasCandidate: !!result.candidate,
-                    error: result.error,
-                });
+                console.log(
+                    "📋 [SSO_CALLBACK_DEBUG] Database creation result:",
+                    {
+                        success: result.success,
+                        hasUser: !!result.user,
+                        hasCandidate: !!result.candidate,
+                        error: result.error,
+                    },
+                );
 
                 if (result.user && !result.candidate) {
                     // User exists but candidate doesn't - show creating candidate status
-                    console.log('🎭 [SSO_CALLBACK_DEBUG] Setting status to creating_candidate');
+                    console.log(
+                        "🎭 [SSO_CALLBACK_DEBUG] Setting status to creating_candidate",
+                    );
                     setStatus("creating_candidate");
                 }
 
@@ -135,14 +161,16 @@ function SSOCallbackInner() {
                 }
 
                 // Update status to redirecting
-                console.log('🚀 [SSO_CALLBACK_DEBUG] Setting status to redirecting');
+                console.log(
+                    "🚀 [SSO_CALLBACK_DEBUG] Setting status to redirecting",
+                );
                 setStatus("redirecting");
 
                 // Determine redirect destination
                 const redirectUrl = searchParams.get("redirect_url");
                 const invitationId = searchParams.get("invitation_id");
 
-                console.log('🎯 [SSO_CALLBACK_DEBUG] Redirect parameters:', {
+                console.log("🎯 [SSO_CALLBACK_DEBUG] Redirect parameters:", {
                     redirectUrl,
                     invitationId,
                 });
@@ -150,21 +178,31 @@ function SSOCallbackInner() {
                 if (invitationId) {
                     // Redirect to invitation acceptance page
                     const invitationRedirectUrl = `/portal/accept-invitation?invitation_id=${invitationId}`;
-                    console.log('💌 [SSO_CALLBACK_DEBUG] Redirecting to invitation acceptance:', invitationRedirectUrl);
+                    console.log(
+                        "💌 [SSO_CALLBACK_DEBUG] Redirecting to invitation acceptance:",
+                        invitationRedirectUrl,
+                    );
                     router.replace(invitationRedirectUrl);
                 } else if (redirectUrl) {
                     // Redirect to specified URL (validate it's internal)
                     const isInternalUrl = redirectUrl.startsWith("/");
-                    const finalRedirectUrl = isInternalUrl ? redirectUrl : "/portal/dashboard";
-                    console.log('🔗 [SSO_CALLBACK_DEBUG] Redirecting to specified URL:', {
-                        originalUrl: redirectUrl,
-                        isInternal: isInternalUrl,
-                        finalUrl: finalRedirectUrl,
-                    });
+                    const finalRedirectUrl = isInternalUrl
+                        ? redirectUrl
+                        : "/portal/dashboard";
+                    console.log(
+                        "🔗 [SSO_CALLBACK_DEBUG] Redirecting to specified URL:",
+                        {
+                            originalUrl: redirectUrl,
+                            isInternal: isInternalUrl,
+                            finalUrl: finalRedirectUrl,
+                        },
+                    );
                     router.replace(finalRedirectUrl);
                 } else {
                     // Default redirect to dashboard
-                    console.log('🏠 [SSO_CALLBACK_DEBUG] Redirecting to default dashboard');
+                    console.log(
+                        "🏠 [SSO_CALLBACK_DEBUG] Redirecting to default dashboard",
+                    );
                     router.replace("/portal/dashboard");
                 }
             } catch (error: any) {
@@ -180,9 +218,13 @@ function SSOCallbackInner() {
                 setStatus("error");
 
                 // Even on error, redirect after a delay - onboarding provider will handle it
-                console.log('⏰ [SSO_CALLBACK_DEBUG] Scheduling redirect after error (3s delay)');
+                console.log(
+                    "⏰ [SSO_CALLBACK_DEBUG] Scheduling redirect after error (3s delay)",
+                );
                 setTimeout(() => {
-                    console.log('🏠 [SSO_CALLBACK_DEBUG] Redirecting to dashboard after error');
+                    console.log(
+                        "🏠 [SSO_CALLBACK_DEBUG] Redirecting to dashboard after error",
+                    );
                     router.replace("/portal/dashboard");
                 }, 3000);
             }
