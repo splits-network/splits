@@ -14,6 +14,8 @@
     "@splits-network/shared-api-client": "workspace:*",
     "@splits-network/shared-types": "workspace:*",
     "@splits-network/shared-ui": "workspace:*",
+    "@uiw/react-markdown-preview": "^5.1.5",
+    "@uiw/react-md-editor": "^4.0.0",
     "chart.js": "^4.5.1",
     "next": "^16.1.0",
     "react": "^19.2.1",
