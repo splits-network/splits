@@ -4,6 +4,7 @@
 
 export interface InvitationFilters {
     organization_id?: string;
+    company_id?: string | null;
     email?: string;
     status?: string;
     page?: number;

@@ -10,31 +10,24 @@ export class PlacementSnapshotService {
      * This captures the attribution and rates at placement time
      */
     async createSnapshot(createData: PlacementSnapshotCreate): Promise<PlacementSnapshot> {
-        // Get rates for subscription tier
-        const rates = COMMISSION_RATES[createData.subscription_tier];
-
-        if (!rates) {
-            throw new Error(`Invalid subscription tier: ${createData.subscription_tier}`);
-        }
-
         // Store commission percentages (0-100) in snapshot
         // Only set rate if role ID is present (null roles get null rates)
         const snapshot = await this.repository.create({
             ...createData,
             candidate_recruiter_rate: createData.candidate_recruiter_id
-                ? rates.candidate_recruiter
+                ? COMMISSION_RATES[createData.candidate_recruiter_tier || 'free'].candidate_recruiter
                 : null,
             company_recruiter_rate: createData.company_recruiter_id
-                ? rates.company_recruiter
+                ? COMMISSION_RATES[createData.company_recruiter_tier || 'free'].company_recruiter
                 : null,
             job_owner_rate: createData.job_owner_recruiter_id
-                ? rates.job_owner
+                ? COMMISSION_RATES[createData.job_owner_tier || 'free'].job_owner
                 : null,
             candidate_sourcer_rate: createData.candidate_sourcer_recruiter_id
-                ? rates.candidate_sourcer
+                ? COMMISSION_RATES[createData.candidate_sourcer_tier || 'free'].candidate_sourcer
                 : null,
             company_sourcer_rate: createData.company_sourcer_recruiter_id
-                ? rates.company_sourcer
+                ? COMMISSION_RATES[createData.company_sourcer_tier || 'free'].company_sourcer
                 : null,
         });
 

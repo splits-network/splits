@@ -18,6 +18,10 @@ export class BillingRepository {
         });
     }
 
+    getClient(): SupabaseClient {
+        return this.supabase;
+    }
+
     // Health check
     async healthCheck(): Promise<void> {
         // Simple query to verify database connectivity

@@ -27,11 +27,43 @@ export class MembershipServiceV2 {
         return access;
     }
 
+    private async requireCompanyAdminOrPlatformAdmin(
+        clerkUserId: string,
+        organizationId: string
+    ): Promise<AccessContext> {
+        const access = await this.resolveAccessContext(clerkUserId);
+
+        // Platform admins can always proceed
+        if (access.isPlatformAdmin) {
+            return access;
+        }
+
+        // Check if user is company_admin for this organization
+        if (!access.roles.includes('company_admin')) {
+            this.logger.warn({ clerkUserId }, 'User does not have company_admin role');
+            throw new Error('You must be a company admin');
+        }
+
+        if (!access.organizationIds.includes(organizationId)) {
+            this.logger.warn({ clerkUserId, organizationId }, 'User is not a member of this organization');
+            throw new Error('You must be a member of this organization');
+        }
+
+        return access;
+    }
+
     /**
      * Find all memberships with pagination and filters
      */
     async findMemberships(clerkUserId: string, filters: any) {
-        await this.requirePlatformAdmin(clerkUserId);
+        // Allow company admins to view memberships for their organization
+        if (filters.organization_id) {
+            await this.requireCompanyAdminOrPlatformAdmin(clerkUserId, filters.organization_id);
+        } else {
+            // If no organization filter, require platform admin
+            await this.requirePlatformAdmin(clerkUserId);
+        }
+
         this.logger.info({ filters }, 'MembershipService.findMemberships');
         const result = await this.repository.findMemberships(filters);
         return result;
@@ -41,12 +73,22 @@ export class MembershipServiceV2 {
      * Find membership by ID
      */
     async findMembershipById(clerkUserId: string, id: string) {
-        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id }, 'MembershipService.findMembershipById');
         const membership = await this.repository.findMembershipById(id);
         if (!membership) {
             throw new Error(`Membership not found: ${id}`);
         }
+
+        // Verify user has access to this membership's organization
+        const access = await this.resolveAccessContext(clerkUserId);
+        if (!access.isPlatformAdmin) {
+            // Check if user is company admin for this organization
+            if (!access.organizationIds.includes(membership.organization_id)) {
+                this.logger.warn({ clerkUserId, membershipOrgId: membership.organization_id }, 'User does not have access to this membership');
+                throw new Error('You do not have access to this membership');
+            }
+        }
+
         return membership;
     }
 
@@ -58,7 +100,9 @@ export class MembershipServiceV2 {
         this.logger.info(
             {
                 organization_id: membershipData.organization_id,
+                company_id: membershipData.company_id,
                 user_id: membershipData.user_id,
+                role: membershipData.role,
             },
             'MembershipService.createMembership'
         );
@@ -78,6 +122,7 @@ export class MembershipServiceV2 {
         const membership = await this.repository.createMembership({
             id: uuidv4(),
             organization_id: membershipData.organization_id,
+            company_id: membershipData.company_id || null,
             user_id: membershipData.user_id,
             role: membershipData.role,
             created_at: new Date().toISOString(),
@@ -87,6 +132,7 @@ export class MembershipServiceV2 {
         await this.eventPublisher.publish('membership.created', {
             membership_id: membership.id,
             organization_id: membership.organization_id,
+            company_id: membership.company_id,
             user_id: membership.user_id,
             role: membership.role,
         });

@@ -28,6 +28,7 @@ interface CompanySettingsFormProps {
 export default function CompanySettingsForm({ company: initialCompany, organizationId }: CompanySettingsFormProps) {
     const { getToken } = useAuth();
     const router = useRouter();
+    const [billingLoaded, setBillingLoaded] = useState(false);
 
     const [formData, setFormData] = useState({
         name: initialCompany?.name || '',
@@ -37,11 +38,39 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
         headquarters_location: initialCompany?.headquarters_location || '',
         description: initialCompany?.description || '',
         logo_url: initialCompany?.logo_url || '',
+        billing_terms: 'net_30',
+        billing_email: '',
     });
 
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+
+    useEffect(() => {
+        const loadBillingProfile = async () => {
+            if (!initialCompany?.id || billingLoaded) return;
+            try {
+                const token = await getToken();
+                if (!token) return;
+                const client = createAuthenticatedClient(token);
+                const response = await client.get(`/company-billing-profiles/${initialCompany.id}`);
+                const profile = response?.data;
+                if (profile) {
+                    setFormData((prev) => ({
+                        ...prev,
+                        billing_terms: profile.billing_terms || 'net_30',
+                        billing_email: profile.billing_email || '',
+                    }));
+                }
+                setBillingLoaded(true);
+            } catch (loadError: any) {
+                console.error('Failed to load billing profile:', loadError);
+                setBillingLoaded(true);
+            }
+        };
+
+        loadBillingProfile();
+    }, [initialCompany?.id, getToken, billingLoaded]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setFormData({
@@ -57,6 +86,13 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
         setSaving(true);
 
         try {
+            const billingEmail = formData.billing_email.trim();
+            if (!billingEmail) {
+                setError('Billing email is required');
+                setSaving(false);
+                return;
+            }
+
             const token = await getToken();
             if (!token) {
                 setError('Authentication required');
@@ -68,13 +104,29 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
 
             if (initialCompany) {
                 // Update existing company
-                await client.patch(`/companies/${initialCompany.id}`, formData);
+                const { billing_terms, billing_email, ...companyPayload } = formData;
+                await client.patch(`/companies/${initialCompany.id}`, companyPayload);
+                await client.post(`/company-billing-profiles/${initialCompany.id}`, {
+                    billing_terms,
+                    billing_email: billingEmail,
+                    invoice_delivery_method: 'email',
+                });
             } else {
                 // Create new company
-                await client.post('/companies', {
-                    ...formData,
+                const { billing_terms, billing_email, ...companyPayload } = formData;
+                const companyResponse = await client.post('/companies', {
+                    ...companyPayload,
                     identity_organization_id: organizationId,
                 });
+
+                const companyId = companyResponse?.data?.id;
+                if (companyId) {
+                    await client.post(`/company-billing-profiles/${companyId}`, {
+                        billing_terms,
+                        billing_email: billingEmail,
+                        invoice_delivery_method: 'email',
+                    });
+                }
             }
 
             setSuccess(true);
@@ -117,7 +169,7 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
     ];
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" id="company-settings-form">
             {error && (
                 <div className="alert alert-error">
                     <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
@@ -238,6 +290,49 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
                                     Enter a direct link to your company logo image
                                 </span>
                             </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="card bg-base-100 shadow">
+                <div className="card-body">
+                    <h2 className="card-title">
+                        <i className="fa-duotone fa-regular fa-file-invoice-dollar"></i>
+                        Billing Terms
+                    </h2>
+                    <p className="text-sm text-base-content/70">
+                        Configure when your company is billed after guarantee completion.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div className="fieldset">
+                            <label className="label">Payment Terms *</label>
+                            <select
+                                name="billing_terms"
+                                className="select w-full"
+                                value={formData.billing_terms}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="immediate">Immediate (Charge on completion)</option>
+                                <option value="net_30">Net 30</option>
+                                <option value="net_60">Net 60</option>
+                                <option value="net_90">Net 90</option>
+                            </select>
+                        </div>
+
+                        <div className="fieldset">
+                            <label className="label">Billing Email *</label>
+                            <input
+                                type="email"
+                                name="billing_email"
+                                className="input w-full"
+                                value={formData.billing_email}
+                                onChange={handleChange}
+                                placeholder="billing@company.com"
+                                required
+                            />
                         </div>
                     </div>
                 </div>

@@ -25,9 +25,10 @@ interface Organization {
 interface Props {
     invitation: Invitation;
     userId: string;
+    userEmail: string;
 }
 
-export default function AcceptInvitationClient({ invitation, userId }: Props) {
+export default function AcceptInvitationClient({ invitation, userId, userEmail }: Props) {
     const router = useRouter();
     const { getToken } = useAuth();
     const [organization, setOrganization] = useState<Organization | null>(null);
@@ -74,8 +75,9 @@ export default function AcceptInvitationClient({ invitation, userId }: Props) {
             }
             const apiClient = new ApiClient(token);
 
-            await apiClient.post(`/v1/invitations/${invitation.id}/accept`, {
+            await apiClient.post(`/v2/invitations/${invitation.id}/accept`, {
                 user_id: userId,
+                user_email: userEmail,
             });
 
             // Success! Redirect to dashboard or organization page

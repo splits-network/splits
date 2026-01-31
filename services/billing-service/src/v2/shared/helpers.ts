@@ -14,7 +14,7 @@ export interface UserContext {
     clerkUserId: string;
 }
 
-const BILLING_ADMIN_ROLES = ['platform_admin', 'billing_admin'];
+const BILLING_ADMIN_ROLES = ['platform_admin', 'company_admin'];
 
 /**
  * Extract user context from request headers

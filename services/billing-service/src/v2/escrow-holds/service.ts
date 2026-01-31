@@ -312,11 +312,7 @@ export class EscrowHoldServiceV2 {
             holdAmount: released.hold_amount,
         });
 
-        // TODO: Integrate with payout system
-        // When a hold is released, we may need to:
-        // 1. Create a new payout schedule
-        // 2. Process pending payouts that were blocked by this hold
-        // 3. Notify the recruiter
+        // TODO: Consider scheduling payouts for placements whose holds just released
     }
 
     /**

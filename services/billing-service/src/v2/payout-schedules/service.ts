@@ -5,6 +5,9 @@ import { StandardListParams, StandardListResponse } from '@splits-network/shared
 import { EventPublisher } from '../shared/events';
 import { PayoutScheduleRepository } from './repository';
 import { PayoutAuditRepository } from '../audit/repository';
+import { InvoiceEligibilityRepository } from './invoice-eligibility-repository';
+import { PlacementInvoice } from '../placement-invoices/types';
+import { PayoutServiceV2 } from '../payouts/service';
 import {
     PayoutSchedule,
     PayoutScheduleCreate,
@@ -18,15 +21,18 @@ export class PayoutScheduleServiceV2 {
     private repository: PayoutScheduleRepository;
     private eventPublisher: EventPublisher;
     private auditRepository: PayoutAuditRepository;
+    private invoiceRepository: InvoiceEligibilityRepository;
 
     constructor(
         supabase: SupabaseClient,
         eventPublisher: EventPublisher,
-        auditRepository: PayoutAuditRepository
+        auditRepository: PayoutAuditRepository,
+        private payoutService: PayoutServiceV2
     ) {
         this.repository = new PayoutScheduleRepository(supabase);
         this.eventPublisher = eventPublisher;
         this.auditRepository = auditRepository;
+        this.invoiceRepository = new InvoiceEligibilityRepository(supabase);
     }
 
     /**
@@ -232,6 +238,39 @@ export class PayoutScheduleServiceV2 {
         return results;
     }
 
+    async processDueSchedulesForPlacement(placementId: string): Promise<{
+        processed: number;
+        failed: number;
+        errors: Array<{ scheduleId: string; error: string }>;
+    }> {
+        const results = {
+            processed: 0,
+            failed: 0,
+            errors: [] as Array<{ scheduleId: string; error: string }>,
+        };
+
+        try {
+            const dueSchedules = await this.repository.findDueSchedulesForPlacement(placementId, new Date());
+            for (const schedule of dueSchedules) {
+                try {
+                    await this.processSchedule(schedule);
+                    results.processed++;
+                } catch (error) {
+                    results.failed++;
+                    results.errors.push({
+                        scheduleId: schedule.id,
+                        error: error instanceof Error ? error.message : 'Unknown error',
+                    });
+                    await this.handleScheduleFailure(schedule.id, error);
+                }
+            }
+        } catch (error) {
+            throw error;
+        }
+
+        return results;
+    }
+
     /**
      * Process a single schedule
      */
@@ -248,18 +287,26 @@ export class PayoutScheduleServiceV2 {
             );
         }
 
-        // TODO: Integrate with payout creation logic
-        // For now, we'll create a placeholder payout
-        // In real implementation, this would:
-        // 1. Calculate payout amount from placement
-        // 2. Check escrow holds
-        // 3. Create Stripe payout
-        // 4. Create payout record
-
         console.log(`Processing schedule ${schedule.id} for placement ${schedule.placement_id}`);
 
-        // Simulate payout creation (replace with actual logic)
-        const payoutId = `payout_${schedule.id}`;
+        // Check invoice collectibility
+        const invoice = await this.invoiceRepository.getInvoiceByPlacementId(schedule.placement_id);
+        if (!this.isInvoiceCollectible(invoice)) {
+            await this.repository.markFailed(
+                schedule.id,
+                'Invoice not collectible (missing, unpaid, or due date not reached)'
+            );
+            return;
+        }
+
+        // Execute Stripe transfers for all pending transactions (system user)
+        const systemUserId = process.env.SYSTEM_USER_ID || 'system';
+        const processed = await this.payoutService.processPlacementTransactions(
+            schedule.placement_id,
+            systemUserId
+        );
+
+        const payoutId = processed[0]?.id || `payout_${schedule.id}`;
 
         // Mark as processed
         await this.repository.markProcessed(schedule.id, payoutId);
@@ -278,6 +325,18 @@ export class PayoutScheduleServiceV2 {
             placementId: schedule.placement_id,
             payoutId,
         });
+    }
+
+    private isInvoiceCollectible(invoice: PlacementInvoice | null): boolean {
+        if (!invoice) return false;
+
+        if (invoice.invoice_status === 'paid') return true;
+
+        if (invoice.invoice_status === 'open' && invoice.collectible_at) {
+            return new Date(invoice.collectible_at) <= new Date();
+        }
+
+        return false;
     }
 
     /**

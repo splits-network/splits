@@ -87,6 +87,7 @@ export class DomainEventConsumer {
             notificationService,
             services,
             logger,
+            portalUrl,
             candidateWebsiteUrl,
             dataLookup,
             contactLookup

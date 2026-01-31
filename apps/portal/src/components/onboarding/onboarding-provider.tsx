@@ -350,6 +350,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 selectedPlan,
                 stripePaymentInfo,
             } = state;
+            const billingEmail = companyInfo?.billing_email?.trim();
 
             if (!selectedRole) {
                 setState((prev) => ({
@@ -363,6 +364,20 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 setState((prev) => ({
                     ...prev,
                     error: "Company name is required",
+                }));
+                return;
+            }
+            if (selectedRole === "company_admin" && !companyInfo?.billing_terms) {
+                setState((prev) => ({
+                    ...prev,
+                    error: "Billing terms are required",
+                }));
+                return;
+            }
+            if (selectedRole === "company_admin" && !billingEmail) {
+                setState((prev) => ({
+                    ...prev,
+                    error: "Billing email is required",
                 }));
                 return;
             }
@@ -499,6 +514,15 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                             headquarters_location:
                                 companyInfo?.headquarters_location || null,
                             logo_url: companyInfo?.logo_url || null,
+                        },
+                    );
+
+                    await apiClient.post(
+                        `/company-billing-profiles/${company.id}`,
+                        {
+                            billing_terms: companyInfo?.billing_terms || "net_30",
+                            billing_email: billingEmail || "",
+                            invoice_delivery_method: "email",
                         },
                     );
 

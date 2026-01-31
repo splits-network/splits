@@ -21,6 +21,13 @@ interface PlacementCreatedEvent {
 }
 
 type SubscriptionTier = 'free' | 'paid' | 'premium';
+type RoleTierMap = {
+    candidate_recruiter_tier: SubscriptionTier | null;
+    company_recruiter_tier: SubscriptionTier | null;
+    job_owner_tier: SubscriptionTier | null;
+    candidate_sourcer_tier: SubscriptionTier | null;
+    company_sourcer_tier: SubscriptionTier | null;
+};
 
 export class PlacementEventConsumer {
     private connection: Connection | null = null;
@@ -104,15 +111,8 @@ export class PlacementEventConsumer {
             // Calculate total fee
             const totalFee = event.salary * (event.fee_percentage / 100);
 
-            // Resolve subscription tier from the primary recruiter subscription
-            const primaryRecruiterId =
-                event.candidate_recruiter_id ||
-                event.company_recruiter_id ||
-                event.job_owner_recruiter_id ||
-                event.candidate_sourcer_recruiter_id ||
-                event.company_sourcer_recruiter_id;
-
-            const subscriptionTier = await this.resolveSubscriptionTier(primaryRecruiterId);
+            // Resolve subscription tier for each role (per recruiter)
+            const roleTiers = await this.resolveRoleTiers(event);
 
             // Create immutable snapshot with all 5 role attributions
             await this.snapshotService.createSnapshot({
@@ -123,14 +123,14 @@ export class PlacementEventConsumer {
                 candidate_sourcer_recruiter_id: event.candidate_sourcer_recruiter_id,
                 company_sourcer_recruiter_id: event.company_sourcer_recruiter_id,
                 total_placement_fee: totalFee,
-                subscription_tier: subscriptionTier,
+                ...roleTiers,
             });
 
             this.logger.info(
                 {
                     placement_id: event.placement_id,
                     total_placement_fee: totalFee,
-                    subscription_tier: subscriptionTier,
+                    role_tiers: roleTiers,
                     roles: {
                         candidate_recruiter: event.candidate_recruiter_id ? '✓' : '✗',
                         company_recruiter: event.company_recruiter_id ? '✓' : '✗',
@@ -179,8 +179,32 @@ export class PlacementEventConsumer {
         }
     }
 
-    private async resolveSubscriptionTier(recruiterId: string | null): Promise<SubscriptionTier> {
-        if (!recruiterId) return 'free';
+    private async resolveRoleTiers(event: PlacementCreatedEvent): Promise<RoleTierMap> {
+        const [
+            candidate_recruiter_tier,
+            company_recruiter_tier,
+            job_owner_tier,
+            candidate_sourcer_tier,
+            company_sourcer_tier,
+        ] = await Promise.all([
+            this.resolveSubscriptionTier(event.candidate_recruiter_id),
+            this.resolveSubscriptionTier(event.company_recruiter_id),
+            this.resolveSubscriptionTier(event.job_owner_recruiter_id),
+            this.resolveSubscriptionTier(event.candidate_sourcer_recruiter_id),
+            this.resolveSubscriptionTier(event.company_sourcer_recruiter_id),
+        ]);
+
+        return {
+            candidate_recruiter_tier,
+            company_recruiter_tier,
+            job_owner_tier,
+            candidate_sourcer_tier,
+            company_sourcer_tier,
+        };
+    }
+
+    private async resolveSubscriptionTier(recruiterId: string | null): Promise<SubscriptionTier | null> {
+        if (!recruiterId) return null;
 
         try {
             const { data, error } = await this.supabase

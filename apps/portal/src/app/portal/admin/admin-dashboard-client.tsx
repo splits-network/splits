@@ -168,6 +168,13 @@ export default function AdminDashboardClient() {
                         color="success"
                     />
                     <ActionCard
+                        title="Billing Profiles"
+                        description="Review company billing terms and invoices"
+                        icon="fa-duotone fa-regular fa-file-invoice-dollar"
+                        href="/portal/admin/billing-profiles"
+                        color="primary"
+                    />
+                    <ActionCard
                         title="Automation Controls"
                         description="Manage automation rules and executions"
                         icon="fa-duotone fa-regular fa-robot"

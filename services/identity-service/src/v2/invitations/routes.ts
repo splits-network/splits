@@ -26,6 +26,7 @@ export function registerInvitationRoutes(
             const result = await invitationService.findInvitations(clerkUserId, {
                 ...paginationParams,
                 organization_id: query.organization_id,
+                company_id: query.company_id,
                 status: query.status,
                 email: query.email,
             });
@@ -96,4 +97,42 @@ export function registerInvitationRoutes(
             reply.code(400).send({ error: { message: (error as Error).message } });
         }
     });
+
+    app.post(
+        '/api/v2/invitations/:id/accept',
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { clerkUserId } = requireUserContext(request);
+                const { id } = request.params as { id: string };
+                const body = request.body as { user_id: string; user_email: string };
+
+                if (!body.user_id || !body.user_email) {
+                    reply.code(400).send({ error: { message: 'user_id and user_email are required' } });
+                    return;
+                }
+
+                await invitationService.acceptInvitation(id, body.user_id, body.user_email);
+                reply.send({ success: true });
+            } catch (error) {
+                logError('POST /api/v2/invitations/:id/accept failed', error);
+                reply.code(400).send({ error: { message: (error as Error).message } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/invitations/:id/resend',
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { clerkUserId } = requireUserContext(request);
+                const { id } = request.params as { id: string };
+
+                await invitationService.resendInvitation(clerkUserId, id);
+                reply.send({ success: true });
+            } catch (error) {
+                logError('POST /api/v2/invitations/:id/resend failed', error);
+                reply.code(400).send({ error: { message: (error as Error).message } });
+            }
+        }
+    );
 }

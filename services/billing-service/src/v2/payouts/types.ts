@@ -121,6 +121,7 @@ export interface PlacementPayoutTransactionUpdate {
     status?: TransactionStatus;
     stripe_transfer_id?: string;
     stripe_payout_id?: string;
+    stripe_connect_account_id?: string | null;
     processing_started_at?: string;
     completed_at?: string;
     failed_at?: string;

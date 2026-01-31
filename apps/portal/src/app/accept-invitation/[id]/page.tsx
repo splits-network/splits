@@ -179,5 +179,5 @@ export default async function AcceptInvitationPage({ params }: PageProps) {
     }
 
     // Fetch organization details (need to get a token first - we'll handle this in the client component)
-    return <AcceptInvitationClient invitation={invitation} userId={user.id} />;
+    return <AcceptInvitationClient invitation={invitation} userId={user.id} userEmail={userEmail || ''} />;
 }

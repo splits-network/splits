@@ -47,6 +47,11 @@ interface RecentActivity {
     link?: string;
 }
 
+interface BillingProfileSummary {
+    billing_terms: string;
+    billing_email: string | null;
+}
+
 export default function CompanyDashboard() {
     const { getToken } = useAuth();
     const { profile } = useUserProfile();
@@ -59,6 +64,7 @@ export default function CompanyDashboard() {
     const [allJobs, setAllJobs] = useState<any[]>([]);
     const [placements, setPlacements] = useState<any[]>([]);
     const [trendPeriod, setTrendPeriod] = useState(6); // Shared trend period for all charts
+    const [billingProfile, setBillingProfile] = useState<BillingProfileSummary | null>(null);
 
     useEffect(() => {
         loadDashboardData();
@@ -180,6 +186,22 @@ export default function CompanyDashboard() {
                 }
             });
             setPlacements(placementsResponse.data || []);
+
+            // Load company billing profile (if available)
+            if (profile?.organization_ids?.length) {
+                const companiesResponse: any = await api.get('/companies', {
+                    params: { limit: 50 }
+                });
+                const companies = companiesResponse?.data || [];
+                const company = companies.find((c: any) =>
+                    c.identity_organization_id === profile.organization_ids[0]
+                );
+                const companyId = company?.id;
+                if (companyId) {
+                    const billingResponse: any = await api.get(`/company-billing-profiles/${companyId}`);
+                    setBillingProfile(billingResponse?.data || null);
+                }
+            }
 
             // TODO: Load recent activity - will need a V2 endpoint
             setRecentActivity([]);
@@ -459,6 +481,27 @@ export default function CompanyDashboard() {
 
                 {/* Right Sidebar */}
                 <div className="space-y-6">
+                    {/* Billing Summary */}
+                    <ContentCard title="Billing Terms" icon="fa-file-invoice-dollar" className='bg-base-200'>
+                        <div className="space-y-3">
+                            <div>
+                                <p className="text-sm text-base-content/70">Payment Terms</p>
+                                <p className="font-semibold capitalize">
+                                    {billingProfile?.billing_terms?.replace('_', ' ') || 'Not set'}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-sm text-base-content/70">Billing Email</p>
+                                <p className="font-medium">
+                                    {billingProfile?.billing_email || 'Not set'}
+                                </p>
+                            </div>
+                            <Link href="/portal/company/settings" className="btn btn-outline w-full">
+                                Manage Billing
+                            </Link>
+                        </div>
+                    </ContentCard>
+
                     {/* Quick Actions - Enhanced buttons */}
                     <ContentCard title="Quick Actions" icon="fa-bolt" className='bg-base-200'>
                         <div className="flex flex-col gap-2">

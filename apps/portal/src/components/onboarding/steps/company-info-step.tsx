@@ -20,6 +20,8 @@ export function CompanyInfoStep() {
         description: state.companyInfo?.description || "",
         headquarters_location: state.companyInfo?.headquarters_location || "",
         logo_url: state.companyInfo?.logo_url || "",
+        billing_terms: state.companyInfo?.billing_terms || "net_30",
+        billing_email: state.companyInfo?.billing_email || "",
     });
 
     const handleChange = (field: string, value: string) => {
@@ -173,6 +175,44 @@ export function CompanyInfoStep() {
                             <option value="5001+">5001+ employees</option>
                         </select>
                     </div>
+                </div>
+
+                {/* Billing Terms */}
+                <div className="fieldset">
+                    <label className="label">Billing Terms *</label>
+                    <select
+                        className="select w-full"
+                        value={formData.billing_terms}
+                        onChange={(e) =>
+                            handleChange("billing_terms", e.target.value)
+                        }
+                        required
+                    >
+                        <option value="immediate">Immediate (Charge on completion)</option>
+                        <option value="net_30">Net 30</option>
+                        <option value="net_60">Net 60</option>
+                        <option value="net_90">Net 90</option>
+                    </select>
+                    <label className="label">
+                        <span className="label-text-alt">
+                            Used for invoice timing after guarantee completion.
+                        </span>
+                    </label>
+                </div>
+
+                {/* Billing Email */}
+                <div className="fieldset">
+                    <label className="label">Billing Email *</label>
+                    <input
+                        type="email"
+                        className="input w-full"
+                        value={formData.billing_email}
+                        onChange={(e) =>
+                            handleChange("billing_email", e.target.value)
+                        }
+                        placeholder="billing@company.com"
+                        required
+                    />
                 </div>
 
                 {/* Description */}
