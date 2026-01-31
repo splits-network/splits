@@ -1,11 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useChatGateway } from "@/hooks/use-chat-gateway";
-import { registerChatRefresh, requestChatRefresh } from "@/lib/chat-refresh-queue";
+import {
+    registerChatRefresh,
+    requestChatRefresh,
+} from "@/lib/chat-refresh-queue";
 import { getCachedUserSummary } from "@/lib/user-cache";
 import { useToast } from "@/lib/toast-context";
 
@@ -63,6 +66,9 @@ export default function ThreadPanel({
     const [jobTitle, setJobTitle] = useState<string | null>(null);
     const [draft, setDraft] = useState("");
     const [sending, setSending] = useState(false);
+    const messagesRef = useRef<HTMLDivElement | null>(null);
+    const [isAtBottom, setIsAtBottom] = useState(true);
+    const initialScrollDoneRef = useRef(false);
 
     const fetchResync = useCallback(async () => {
         const token = await getToken();
@@ -129,9 +135,12 @@ export default function ThreadPanel({
         if (!token) return;
         const client = createAuthenticatedClient(token);
         try {
-            await client.post(`/chat/conversations/${conversationId}/read-receipt`, {
-                lastReadMessageId,
-            });
+            await client.post(
+                `/chat/conversations/${conversationId}/read-receipt`,
+                {
+                    lastReadMessageId,
+                },
+            );
         } catch {
             // Best-effort; avoid breaking the thread view.
         }
@@ -220,10 +229,13 @@ export default function ThreadPanel({
             const token = await getToken();
             if (!token) return;
             const client = createAuthenticatedClient(token);
-            await client.post(`/chat/conversations/${conversationId}/messages`, {
-                body: draft.trim(),
-                clientMessageId: crypto.randomUUID(),
-            });
+            await client.post(
+                `/chat/conversations/${conversationId}/messages`,
+                {
+                    body: draft.trim(),
+                    clientMessageId: crypto.randomUUID(),
+                },
+            );
             setDraft("");
             await fetchResync();
         } catch (err: any) {
@@ -257,7 +269,9 @@ export default function ThreadPanel({
         if (!token) return;
         const client = createAuthenticatedClient(token);
         if (data?.participant.archived_at) {
-            await client.delete(`/chat/conversations/${conversationId}/archive`);
+            await client.delete(
+                `/chat/conversations/${conversationId}/archive`,
+            );
         } else {
             await client.post(`/chat/conversations/${conversationId}/archive`);
         }
@@ -306,6 +320,41 @@ export default function ThreadPanel({
         });
         toast.success("Report submitted");
     };
+
+    const getInitials = (value?: string | null) => {
+        if (!value) return "??";
+        const parts = value.trim().split(/\s+/);
+        if (parts.length === 1) return parts[0]?.slice(0, 2).toUpperCase();
+        return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
+    };
+
+    const scrollToBottom = useCallback(() => {
+        if (!messagesRef.current) return;
+        messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
+    }, []);
+
+    const handleScroll = useCallback(() => {
+        const container = messagesRef.current;
+        if (!container) return;
+        const threshold = 80;
+        const distanceFromBottom =
+            container.scrollHeight -
+            container.scrollTop -
+            container.clientHeight;
+        setIsAtBottom(distanceFromBottom <= threshold);
+    }, []);
+
+    useEffect(() => {
+        if (!data?.messages) return;
+        if (!initialScrollDoneRef.current) {
+            initialScrollDoneRef.current = true;
+            requestAnimationFrame(scrollToBottom);
+            return;
+        }
+        if (isAtBottom) {
+            requestAnimationFrame(scrollToBottom);
+        }
+    }, [data?.messages?.length, isAtBottom, scrollToBottom]);
 
     if (loading) {
         return (
@@ -384,8 +433,7 @@ export default function ThreadPanel({
                                     className="link link-hover"
                                     href={`/portal/roles/${data.conversation.job_id}`}
                                 >
-                                    Role:{" "}
-                                    {jobTitle || data.conversation.job_id}
+                                    Role: {jobTitle || data.conversation.job_id}
                                 </Link>
                             )}
                             {data.conversation.company_id && (
@@ -414,7 +462,10 @@ export default function ThreadPanel({
                             </button>
                         </>
                     )}
-                    <button className="btn btn-ghost btn-sm" onClick={handleMute}>
+                    <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={handleMute}
+                    >
                         {data.participant.muted_at ? "Unmute" : "Mute"}
                     </button>
                     <button
@@ -423,7 +474,10 @@ export default function ThreadPanel({
                     >
                         {data.participant.archived_at ? "Unarchive" : "Archive"}
                     </button>
-                    <button className="btn btn-ghost btn-sm" onClick={handleBlock}>
+                    <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={handleBlock}
+                    >
                         Block
                     </button>
                     <button
@@ -434,33 +488,58 @@ export default function ThreadPanel({
                     </button>
                 </div>
 
-                <div className="rounded-lg border border-base-200 bg-base-100 p-4 space-y-3 max-h-[55vh] overflow-y-auto">
+                <div
+                    ref={messagesRef}
+                    onScroll={handleScroll}
+                    className="rounded-lg border border-base-200 bg-base-100 p-4 space-y-3 max-h-[55vh] overflow-y-auto"
+                >
                     {data.messages.length === 0 ? (
                         <div className="text-center text-base-content/50">
                             No messages yet.
                         </div>
                     ) : (
-                        data.messages.map((msg) => (
-                            <div
-                                key={msg.id}
-                                className={`flex ${
-                                    msg.sender_id === data.participant.user_id
-                                        ? "justify-end"
-                                        : "justify-start"
-                                }`}
-                            >
-                                <div className="max-w-[75%] rounded-xl bg-base-200 px-3 py-2 text-sm">
-                                    <p className="whitespace-pre-wrap">
-                                        {msg.body || "Message removed"}
-                                    </p>
-                                    <div className="text-[10px] text-base-content/50 mt-1">
+                        data.messages.map((msg) => {
+                            const isOwnMessage =
+                                msg.sender_id === data.participant.user_id;
+                            const senderLabel = isOwnMessage
+                                ? "You"
+                                : otherUser?.name ||
+                                  otherUser?.email ||
+                                  "Unknown user";
+                            const bubbleClass = isOwnMessage
+                                ? "chat-bubble chat-bubble-primary"
+                                : "chat-bubble";
+
+                            return (
+                                <div
+                                    key={msg.id}
+                                    className={`chat ${
+                                        isOwnMessage ? "chat-end" : "chat-start"
+                                    }`}
+                                >
+                                    <div className="chat-image avatar avatar-placeholder">
+                                        <div className="bg-base-200 text-base-content rounded-full w-10">
+                                            <span className="text-xs font-semibold">
+                                                {getInitials(senderLabel)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="chat-header">
+                                        {senderLabel}
+                                    </div>
+                                    <div className={bubbleClass}>
+                                        <p className="whitespace-pre-wrap">
+                                            {msg.body || "Message removed"}
+                                        </p>
+                                    </div>
+                                    <div className="chat-footer opacity-60">
                                         {new Date(
                                             msg.created_at,
                                         ).toLocaleString()}
                                     </div>
                                 </div>
-                            </div>
-                        ))
+                            );
+                        })
                     )}
                 </div>
             </div>

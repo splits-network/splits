@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import BrowseMessagesClient from "./components/browse/browse-messages-client";
 
 export default function MessagesPage() {
@@ -10,7 +11,16 @@ export default function MessagesPage() {
                 </p>
             </div>
 
-            <BrowseMessagesClient />
+            <Suspense
+                fallback={
+                    <div className="p-8 text-center text-base-content/60">
+                        <span className="loading loading-spinner loading-md mb-2"></span>
+                        <p>Loading conversations...</p>
+                    </div>
+                }
+            >
+                <BrowseMessagesClient />
+            </Suspense>
         </div>
     );
 }
