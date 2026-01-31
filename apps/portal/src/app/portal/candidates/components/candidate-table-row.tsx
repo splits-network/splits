@@ -164,7 +164,7 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
                                             },
                                         );
                                     router.push(
-                                        `/portal/messages/${conversationId}`,
+                                        `/portal/messages?conversationId=${conversationId}`,
                                     );
                                 } catch (err: any) {
                                     console.error(
@@ -324,7 +324,7 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
                                                 },
                                             );
                                         router.push(
-                                            `/portal/messages/${conversationId}`,
+                                            `/portal/messages?conversationId=${conversationId}`,
                                         );
                                     } catch (err: any) {
                                         console.error(
@@ -367,3 +367,4 @@ export function CandidateTableRow({ candidate, isRecruiter }: CandidateTableRowP
         />
     );
 }
+

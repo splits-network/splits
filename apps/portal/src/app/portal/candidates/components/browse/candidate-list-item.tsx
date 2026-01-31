@@ -155,7 +155,7 @@ export default function CandidateListItem({
                                                 },
                                             );
                                         router.push(
-                                            `/portal/messages/${conversationId}`,
+                                            `/portal/messages?conversationId=${conversationId}`,
                                         );
                                     } catch (err: any) {
                                         console.error(
@@ -191,3 +191,4 @@ export default function CandidateListItem({
         </div>
     );
 }
+

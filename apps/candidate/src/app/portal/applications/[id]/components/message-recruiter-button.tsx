@@ -48,7 +48,7 @@ export function MessageRecruiterButton({
                                 company_id: companyId || null,
                             },
                         );
-                        router.push(`/portal/messages/${conversationId}`);
+                        router.push(`/portal/messages?conversationId=${conversationId}`);
                     } catch (err: any) {
                         console.error("Failed to start chat:", err);
                         toast.error(err?.message || "Failed to start chat");
@@ -67,3 +67,4 @@ export function MessageRecruiterButton({
         </span>
     );
 }
+

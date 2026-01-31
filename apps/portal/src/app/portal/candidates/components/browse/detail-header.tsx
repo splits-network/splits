@@ -172,7 +172,7 @@ export default function DetailHeader({ candidate }: { candidate: Candidate }) {
                                         },
                                     );
                                 router.push(
-                                    `/portal/messages/${conversationId}`,
+                                    `/portal/messages?conversationId=${conversationId}`,
                                 );
                             } catch (err: any) {
                                 console.error(
@@ -206,3 +206,4 @@ export default function DetailHeader({ candidate }: { candidate: Candidate }) {
         </div>
     );
 }
+

@@ -245,7 +245,7 @@ export default function ApplicationCard({ application: app }: ApplicationCardPro
                                                 },
                                             );
                                         router.push(
-                                            `/portal/messages/${conversationId}`,
+                                            `/portal/messages?conversationId=${conversationId}`,
                                         );
                                     } catch (err: any) {
                                         console.error(
@@ -355,3 +355,4 @@ export default function ApplicationCard({ application: app }: ApplicationCardPro
         </EntityCard>
     );
 }
+

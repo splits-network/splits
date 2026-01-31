@@ -230,7 +230,7 @@ export default function ApplicationHeader({ applicationId }: ApplicationHeaderPr
                                                             null,
                                                     },
                                                 );
-                                            router.push(`/portal/messages/${conversationId}`);
+                                            router.push(`/portal/messages?conversationId=${conversationId}`);
                                         } catch (error: any) {
                                             console.error('Failed to start chat:', error);
                                             toast.error(error?.message || 'Failed to start chat');
@@ -288,3 +288,4 @@ export default function ApplicationHeader({ applicationId }: ApplicationHeaderPr
         </>
     );
 }
+

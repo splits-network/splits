@@ -1,7 +1,13 @@
 import { Suspense } from "react";
 import BrowseMessagesClient from "./components/browse/browse-messages-client";
 
-export default function MessagesPage() {
+type MessagesPageProps = {
+    searchParams?: {
+        conversationId?: string;
+    };
+};
+
+export default function MessagesPage({ searchParams }: MessagesPageProps) {
     return (
         <div className="container mx-auto px-4 py-8 space-y-6">
             <div>
@@ -19,7 +25,9 @@ export default function MessagesPage() {
                     </div>
                 }
             >
-                <BrowseMessagesClient />
+                <BrowseMessagesClient
+                    initialConversationId={searchParams?.conversationId ?? null}
+                />
             </Suspense>
         </div>
     );

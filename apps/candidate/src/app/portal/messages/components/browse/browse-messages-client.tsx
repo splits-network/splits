@@ -1,16 +1,28 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ListPanel from "./list-panel";
 import DetailPanel from "./detail-panel";
 
-export default function BrowseMessagesClient() {
+type BrowseMessagesClientProps = {
+    initialConversationId?: string | null;
+};
+
+export default function BrowseMessagesClient({
+    initialConversationId = null,
+}: BrowseMessagesClientProps) {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    const selectedId = searchParams.get("conversationId");
+    const [selectedId, setSelectedId] = useState<string | null>(
+        initialConversationId,
+    );
+
+    useEffect(() => {
+        setSelectedId(searchParams.get("conversationId"));
+    }, [searchParams]);
 
     const handleSelect = useCallback(
         (id: string) => {

@@ -228,7 +228,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
             const conversationId = await startChatConversation(getToken, candidate.user_id, {
                 company_id: candidate.company_id || null,
             });
-            router.push(`/portal/messages/${conversationId}`);
+            router.push(`/portal/messages?conversationId=${conversationId}`);
         } catch (err: any) {
             console.error("Failed to start chat:", err);
             toast.error(err?.message || "Failed to start chat");
@@ -684,3 +684,4 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
         </div>
     );
 }
+

@@ -400,7 +400,7 @@ export default function DashboardPage() {
                                     { application_id: app.id },
                                   );
                                 router.push(
-                                  `/portal/messages/${conversationId}`,
+                                  `/portal/messages?conversationId=${conversationId}`,
                                 );
                               } catch (err: any) {
                                 console.error(
@@ -494,3 +494,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+
