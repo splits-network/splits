@@ -1,5 +1,7 @@
 import type { MetadataRoute } from 'next';
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://applicant.network';
+
 export default function robots(): MetadataRoute.Robots {
     return {
         rules: {
@@ -14,6 +16,6 @@ export default function robots(): MetadataRoute.Robots {
                 '/sign-up',
             ],
         },
-        sitemap: 'https://applicant.network/sitemap.xml',
+        sitemap: `${baseUrl}/sitemap.xml`,
     };
 }
