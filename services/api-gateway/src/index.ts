@@ -307,6 +307,12 @@ async function main() {
             return;
         }
 
+        // Skip auth for public V2 plans endpoint (pricing page)
+        // GET /api/v2/plans - list all plans for public pricing page
+        if (request.method === 'GET' && request.url.startsWith('/api/v2/plans')) {
+            return;
+        }
+
         if (request.url.startsWith('/api/')) {
             await authMiddleware.createMiddleware()(request, reply);
         }

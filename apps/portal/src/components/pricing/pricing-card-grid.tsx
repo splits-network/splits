@@ -34,7 +34,14 @@ export function PricingCardGrid({
                                 <div className="skeleton h-4 w-full"></div>
                                 <div className="skeleton h-4 w-full"></div>
                                 <div className="skeleton h-4 w-3/4"></div>
+                                <div className="skeleton h-4 w-full"></div>
+                                <div className="skeleton h-4 w-full"></div>
+                                <div className="skeleton h-4 w-3/4"></div>
+                                <div className="skeleton h-4 w-full"></div>
+                                <div className="skeleton h-4 w-full"></div>
+                                <div className="skeleton h-4 w-3/4"></div>
                             </div>
+                            <div className="h-20 w-full mt-4"></div>
                             <div className="skeleton h-10 w-full mt-4"></div>
                         </div>
                     </div>

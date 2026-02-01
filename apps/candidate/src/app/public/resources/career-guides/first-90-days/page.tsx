@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AnimatedGuideHero } from '../components/animated-guide-hero';
 
 export const metadata: Metadata = {
     title: 'First 90 Days in a New Role',
@@ -178,30 +179,16 @@ export default function First90DaysGuidePage() {
 
     return (
         <div className="min-h-screen bg-base-200">
-            {/* Header */}
-            <div className="bg-gradient-to-br from-accent to-info text-white py-16">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-4xl mx-auto">
-                        <Link href="/resources/career-guides" className="btn btn-ghost btn-sm mb-4">
-                            <i className="fa-duotone fa-regular fa-arrow-left"></i> Back to Career Guides
-                        </Link>
-                        <div className="flex items-center gap-3 mb-4">
-                            <i className="fa-duotone fa-regular fa-rocket text-4xl"></i>
-                            <div>
-                                <div className="badge badge-neutral mb-2">Career Growth</div>
-                                <h1 className="text-4xl font-bold">First 90 Days in a New Role</h1>
-                            </div>
-                        </div>
-                        <p className="text-xl opacity-90">
-                            Set yourself up for long-term success in your new position from day one.
-                        </p>
-                        <div className="flex items-center gap-4 mt-4 text-sm opacity-80">
-                            <span><i className="fa-duotone fa-regular fa-clock"></i> 9 min read</span>
-                            <span><i className="fa-duotone fa-regular fa-user"></i> Career Coaches</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <AnimatedGuideHero
+                icon="rocket"
+                badge="Career Growth"
+                title="First 90 Days in a New Role"
+                description="Set yourself up for long-term success in your new position from day one."
+                readTime="9 min read"
+                author="Career Coaches"
+                gradientFrom="from-accent"
+                gradientTo="to-info"
+            />
 
             {/* Content */}
             <div className="container mx-auto px-4 py-12">

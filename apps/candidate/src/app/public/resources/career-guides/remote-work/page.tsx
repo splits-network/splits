@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AnimatedGuideHero } from '../components/animated-guide-hero';
 
 export const metadata: Metadata = {
     title: 'Remote Work Best Practices',
@@ -85,30 +86,16 @@ export default function RemoteWorkGuidePage() {
 
     return (
         <div className="min-h-screen bg-base-200">
-            {/* Header */}
-            <div className="bg-gradient-to-br from-info to-primary text-white py-16">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-4xl mx-auto">
-                        <Link href="/resources/career-guides" className="btn btn-ghost btn-sm mb-4">
-                            <i className="fa-duotone fa-regular fa-arrow-left"></i> Back to Career Guides
-                        </Link>
-                        <div className="flex items-center gap-3 mb-4">
-                            <i className="fa-duotone fa-regular fa-house-laptop text-4xl"></i>
-                            <div>
-                                <div className="badge badge-neutral mb-2">Remote Work</div>
-                                <h1 className="text-4xl font-bold">Remote Work Best Practices</h1>
-                            </div>
-                        </div>
-                        <p className="text-xl opacity-90">
-                            Essential tips for staying productive and maintaining work-life balance while working remotely.
-                        </p>
-                        <div className="flex items-center gap-4 mt-4 text-sm opacity-80">
-                            <span><i className="fa-duotone fa-regular fa-clock"></i> 7 min read</span>
-                            <span><i className="fa-duotone fa-regular fa-user"></i> Remote Work Experts</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <AnimatedGuideHero
+                icon="house-laptop"
+                badge="Remote Work"
+                title="Remote Work Best Practices"
+                description="Essential tips for staying productive and maintaining work-life balance while working remotely."
+                readTime="7 min read"
+                author="Remote Work Experts"
+                gradientFrom="from-info"
+                gradientTo="to-primary"
+            />
 
             {/* Content */}
             <div className="container mx-auto px-4 py-12">

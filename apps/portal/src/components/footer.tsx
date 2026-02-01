@@ -118,7 +118,15 @@ export function Footer() {
                             </li>
                             <li>
                                 <Link
-                                    href="/public/integrations"
+                                    href="/public/transparency"
+                                    className="link link-hover text-base-content/70 hover:text-base-content"
+                                >
+                                    Transparency
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    href="/public/integration-partners"
                                     className="link link-hover text-base-content/70 hover:text-base-content"
                                 >
                                     Integrations

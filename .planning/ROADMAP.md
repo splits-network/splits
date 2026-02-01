@@ -12,7 +12,7 @@ Transform the static pricing page into an animated, interactive experience that 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Animation Infrastructure** - Setup GSAP integration and reusable animation patterns
+- [x] **Phase 1: Animation Infrastructure** - Setup GSAP integration and reusable animation patterns ✓
 - [ ] **Phase 2: Visual Redesign** - Redesign all pricing page sections with scroll-triggered animations
 - [ ] **Phase 3: RTI Calculator** - Build interactive calculator with multi-role selection and payout comparison
 
@@ -26,10 +26,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Pricing page imports and uses animation utilities from landing page shared folder
   2. GSAP and ScrollTrigger are initialized on pricing page mount
   3. At least one element on pricing page animates on scroll (proof of concept)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 01-01: TBD
+- [x] 01-01-PLAN.md — Set up GSAP infrastructure and add hero scroll animation ✓
 
 ### Phase 2: Visual Redesign
 **Goal**: All pricing page sections match landing page design with scroll-triggered animations
@@ -41,10 +41,12 @@ Plans:
   3. Static prices and example numbers use animated counters (count up on appear)
   4. Feature comparison table rows reveal progressively on scroll
   5. Page feels visually cohesive with landing page (same animation timing, easing, patterns)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: TBD
+- [ ] 02-01-PLAN.md — Hero section redesign with gradient background and animated headline
+- [ ] 02-02-PLAN.md — Pricing cards stagger animation and price number counters
+- [ ] 02-03-PLAN.md — Feature comparison table row animations with Pro column highlight
 
 ### Phase 3: RTI Calculator
 **Goal**: Recruiters can input placement details, select roles, and see animated payout comparisons across tiers
@@ -58,21 +60,23 @@ Plans:
   5. Upgrade value is visually highlighted (shows dollar difference between tiers)
   6. Calculator layout adapts to mobile (stacks vertically on small screens)
   7. Calculator component is exported and reusable (could be embedded elsewhere)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md — Calculator data model, commission rates, and input components (FeeInput, RoleSelector)
+- [ ] 03-02-PLAN.md — Tier comparison display with animated payout counters and upgrade highlighting
+- [ ] 03-03-PLAN.md — RTICalculator composite component, mobile responsiveness, and pricing page integration
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3
+Phases execute in numeric order: 1 -> 2 -> 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Animation Infrastructure | 0/? | Not started | - |
-| 2. Visual Redesign | 0/? | Not started | - |
-| 3. RTI Calculator | 0/? | Not started | - |
+| 1. Animation Infrastructure | 1/1 | Complete | 2026-01-31 |
+| 2. Visual Redesign | 0/3 | Ready to execute | - |
+| 3. RTI Calculator | 0/3 | Ready to plan | - |
 
 ---
 *Roadmap created: 2026-01-31*

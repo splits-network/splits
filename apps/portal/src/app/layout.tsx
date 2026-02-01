@@ -63,6 +63,10 @@ export default async function RootLayout({
         <ClerkProvider publishableKey={publishableKey}>
             <html lang="en" suppressHydrationWarning>
                 <head>
+                    <meta
+                        name="helpninja-verification"
+                        content="b49754f5-9bd5-4f3d-895d-1ef14b050375"
+                    />
                     <script
                         dangerouslySetInnerHTML={{
                             __html: `

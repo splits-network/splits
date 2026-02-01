@@ -6,3 +6,4 @@
 export * from './types';
 export { PricingCard } from './pricing-card';
 export { PricingCardGrid } from './pricing-card-grid';
+export { DynamicPricingSection } from './dynamic-pricing-section';

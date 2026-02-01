@@ -87,3 +87,8 @@ export const apiClient = new ApiClient();
 export function createAuthenticatedClient(token: string): ApiClient {
     return new ApiClient(token);
 }
+
+// Export a factory function for creating unauthenticated clients (public API access)
+export function createUnauthenticatedClient(): ApiClient {
+    return new ApiClient();
+}
