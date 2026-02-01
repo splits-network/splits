@@ -53,6 +53,8 @@ export async function registerV2Routes(
     );
     const invitationService = new InvitationServiceV2(
         invitationRepository,
+        userRepository,
+        membershipRepository,
         eventPublisher,
         logger,
         accessResolver
