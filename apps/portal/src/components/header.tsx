@@ -1,120 +1,176 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
-import { useEffect, useState } from 'react';
-import { UserDropdown } from './user-dropdown';
-import NotificationBell from './notification-bell';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
+import { UserDropdown } from "./user-dropdown";
+import NotificationBell from "./notification-bell";
+
+const landingNavLinks = [
+    { label: "For Recruiters", href: "#for-recruiters" },
+    { label: "For Companies", href: "#for-companies" },
+    { label: "How It Works", href: "#how-it-works" },
+    { label: "Pricing", href: "#pricing" },
+];
 
 export function Header() {
     const pathname = usePathname();
     const { isSignedIn } = useAuth();
     const [isDark, setIsDark] = useState(false);
 
+    const isPortalPage = pathname?.startsWith("/portal");
+
     useEffect(() => {
-        // Sync state with pre-rendered theme from localStorage
         try {
-            const saved = localStorage.getItem('theme') || 'splits-light';
-            setIsDark(saved === 'splits-dark');
-        } catch { }
+            const saved = localStorage.getItem("theme") || "splits-light";
+            setIsDark(saved === "splits-dark");
+        } catch {}
     }, []);
 
     const handleThemeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const checked = e.currentTarget.checked;
-        const theme = checked ? 'splits-dark' : 'splits-light';
-        document.documentElement.setAttribute('data-theme', theme);
+        const theme = checked ? "splits-dark" : "splits-light";
+        document.documentElement.setAttribute("data-theme", theme);
         setIsDark(checked);
         try {
-            localStorage.setItem('theme', theme);
-        } catch { }
+            localStorage.setItem("theme", theme);
+        } catch {}
+    };
+
+    const handleSmoothScroll = (
+        e: React.MouseEvent<HTMLAnchorElement>,
+        href: string,
+    ) => {
+        if (href.startsWith("#")) {
+            e.preventDefault();
+            const element = document.querySelector(href);
+            if (element) {
+                element.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+        }
     };
 
     // Don't show header on auth pages
-    const isAuthPage = pathname?.startsWith('/sign-in') || pathname?.startsWith('/sign-up') || pathname?.startsWith('/sso-callback');
+    const isAuthPage =
+        pathname?.startsWith("/sign-in") ||
+        pathname?.startsWith("/sign-up") ||
+        pathname?.startsWith("/sso-callback");
     if (isAuthPage) return null;
 
-    // Authenticated app pages
-    const isAuthenticatedPage = pathname?.startsWith('/portal/dashboard') || pathname?.startsWith('/portal/roles') ||
-        pathname?.startsWith('/portal/candidates') || pathname?.startsWith('/portal/placements') ||
-        pathname?.startsWith('/portal/admin') || pathname?.startsWith('/portal/profile') || pathname?.startsWith('/portal/billing') ||
-        pathname?.startsWith('/portal/notifications') || pathname?.startsWith('/portal/applications') ||
-        pathname?.startsWith('/portal/proposals') || pathname?.startsWith('/teams') ||
-        pathname?.startsWith('/portal/company') || pathname?.startsWith('/integrations') ||
-        pathname?.startsWith('/portal/invitations');
-
     return (
-        <header className="navbar bg-base-100 shadow sticky top-0 z-50">
-            {/* Start: Brand + Mobile menu */}
-            <div className="navbar-start ps-4">
-                <div className="dropdown lg:hidden">
-                    <label tabIndex={0} className="btn btn-ghost">
-                        <i className="fa-duotone fa-regular fa-bars"></i>
-                    </label>
-                    <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-10 p-2 shadow bg-base-100 rounded-box w-52">
-                        {isSignedIn ? (
-                            <>
-                                <li><Link href="/portal/dashboard">Dashboard</Link></li>
-                                <li><Link href="/portal/roles">Roles</Link></li>
-                                <li><Link href="/portal/candidates">Candidates</Link></li>
-                                <li><Link href="/portal/invitations">Invitations</Link></li>
-                                <li><Link href="/portal/placements">Placements</Link></li>
-                                <li><Link href="/portal/application">Applications</Link></li>
-                                <li className="menu-title mt-2">Account</li>
-                                <li><Link href="/portal/profile">Profile</Link></li>
-                                <li><Link href="/portal/billing">Billing</Link></li>
-                            </>
-                        ) : (
-                            <>
-                                <li><a href="/public/how-it-works">How It Works</a></li>
-                                <li><a href="/public/features">Features</a></li>
-                                <li><a href="/public/pricing">Pricing</a></li>
-                            </>
-                        )}
-                    </ul>
-                </div>
-                <Link href="/" className="">
-                    <img src="/logo.svg" alt="Applicant Network" className="h-12" />
-                </Link>
-            </div>
-
-            {/* Center: Desktop marketing links */}
-            <div className="navbar-center hidden lg:flex">
-                <ul className="menu menu-horizontal px-1">
-                    <li><a href="/public/how-it-works">How It Works</a></li>
-                    <li><a href="/public/features">Features</a></li>
-                    <li><a href="/public/pricing">Pricing</a></li>
-                </ul>
-            </div>
-
-            {/* End: Actions + Theme toggle */}
-            <div className="navbar-end gap-2 items-center pe-4">
-                <label className="swap swap-rotate cursor-pointer btn btn-ghost btn-circle" title="Toggle Theme">
-                    <input
-                        type="checkbox"
-                        checked={isDark}
-                        onChange={handleThemeChange}
-                        className="theme-controller"
-                    />
-                    <i className="fa-duotone fa-regular fa-sun-bright swap-off text-xl"></i>
-                    <i className="fa-duotone fa-regular fa-moon swap-on text-xl"></i>
-                </label>
-
-                {isSignedIn ? (
-                    <>
-                        <Link href="/portal/dashboard" className="btn btn-ghost xs:btn-circle" title='Dashboard'>
-                            <i className="fa-duotone fa-regular fa-gauge text-xl"></i>
-                            <span className="hidden md:inline-block ml-2">Dashboard</span>
+        <header className="navbar bg-base-100/95 backdrop-blur-sm border-b border-base-200 sticky top-0 z-50">
+            <div className="container mx-auto px-4 flex items-center justify-between">
+                <div className="flex items-center gap-6">
+                    {/* Left: Logo */}
+                    <div className="flex-shrink-0">
+                        <Link href="/">
+                            <img
+                                src="/logo.svg"
+                                alt="Splits Network"
+                                className="h-10"
+                            />
                         </Link>
-                        <NotificationBell />
-                        <UserDropdown />
-                    </>
-                ) : (
-                    <>
-                        <Link href="/sign-in" className="btn btn-ghost">Sign In</Link>
-                        <Link href="/sign-up" className="btn btn-primary">Get Started</Link>
-                    </>
-                )}
+                    </div>
+
+                    {/* Center: Nav Links (landing page only) */}
+                    {!isPortalPage && (
+                        <nav className="hidden lg:flex items-center gap-1">
+                            {landingNavLinks.map((link) => (
+                                <a
+                                    key={link.href}
+                                    href={link.href}
+                                    onClick={(e) =>
+                                        handleSmoothScroll(e, link.href)
+                                    }
+                                    className="px-4 py-2 text-sm font-medium text-base-content/70 hover:text-base-content transition-colors rounded-lg hover:bg-base-200"
+                                >
+                                    {link.label}
+                                </a>
+                            ))}
+                        </nav>
+                    )}
+                </div>
+
+                {/* Right: Actions */}
+                <div className="flex items-center gap-3">
+                    {/* Theme toggle */}
+                    <label
+                        className="swap swap-rotate cursor-pointer btn btn-ghost btn-sm btn-circle"
+                        title="Toggle Theme"
+                    >
+                        <input
+                            type="checkbox"
+                            checked={isDark}
+                            onChange={handleThemeChange}
+                            className="theme-controller"
+                        />
+                        <i className="fa-duotone fa-regular fa-sun-bright swap-off text-lg"></i>
+                        <i className="fa-duotone fa-regular fa-moon swap-on text-lg"></i>
+                    </label>
+
+                    {isSignedIn ? (
+                        <>
+                            <Link
+                                href="/portal/dashboard"
+                                className="btn btn-ghost btn-sm"
+                                title="Dashboard"
+                            >
+                                <i className="fa-duotone fa-regular fa-gauge"></i>
+                                <span className="hidden sm:inline">
+                                    Dashboard
+                                </span>
+                            </Link>
+                            <NotificationBell />
+                            <UserDropdown />
+                        </>
+                    ) : (
+                        <>
+                            <Link
+                                href="/sign-in"
+                                className="btn btn-ghost btn-sm"
+                            >
+                                Sign In
+                            </Link>
+                            <Link
+                                href="/sign-up"
+                                className="btn btn-primary btn-sm"
+                            >
+                                Get Started
+                            </Link>
+                        </>
+                    )}
+
+                    {/* Mobile menu (landing page only) */}
+                    {!isPortalPage && (
+                        <div className="dropdown dropdown-end lg:hidden">
+                            <label
+                                tabIndex={0}
+                                className="btn btn-ghost btn-sm btn-circle"
+                            >
+                                <i className="fa-duotone fa-regular fa-bars text-lg"></i>
+                            </label>
+                            <ul
+                                tabIndex={0}
+                                className="menu menu-sm dropdown-content mt-3 z-10 p-2 shadow-lg bg-base-100 rounded-xl w-52 border border-base-200"
+                            >
+                                {landingNavLinks.map((link) => (
+                                    <li key={link.href}>
+                                        <a
+                                            href={link.href}
+                                            onClick={(e) =>
+                                                handleSmoothScroll(e, link.href)
+                                            }
+                                            className="font-medium"
+                                        >
+                                            {link.label}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
             </div>
         </header>
     );
