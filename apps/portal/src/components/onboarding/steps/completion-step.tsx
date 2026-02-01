@@ -177,6 +177,27 @@ export function CompletionStep() {
                                     </p>
                                 </div>
                             </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-sm text-base-content/70">
+                                        Billing Terms
+                                    </p>
+                                    <p className="font-medium capitalize">
+                                        {state.companyInfo.billing_terms?.replace(
+                                            "_",
+                                            " ",
+                                        ) || "net 30"}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-base-content/70">
+                                        Billing Email
+                                    </p>
+                                    <p className="font-medium">
+                                        {state.companyInfo.billing_email}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     )}
             </div>

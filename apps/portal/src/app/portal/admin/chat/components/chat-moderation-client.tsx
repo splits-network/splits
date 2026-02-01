@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { ApiClient } from "@/lib/api-client";
+import { createAuthenticatedClient } from "@/lib/api-client";
 
 type ReportRow = {
     id: string;
@@ -43,14 +43,17 @@ export default function ChatModerationClient() {
     const [error, setError] = useState<string | null>(null);
     const [reports, setReports] = useState<ReportRow[]>([]);
     const [audit, setAudit] = useState<AuditRow[]>([]);
-    const [selectedReport, setSelectedReport] = useState<ReportRow | null>(null);
+    const [selectedReport, setSelectedReport] = useState<ReportRow | null>(
+        null,
+    );
     const [evidence, setEvidence] = useState<EvidencePayload | null>(null);
     const [tab, setTab] = useState<"reports" | "audit">("reports");
 
     const fetchReports = async () => {
         const token = await getToken();
         if (!token) return;
-        const client = new ApiClient(token);
+
+        const client = createAuthenticatedClient(token);
         const response: any = await client.get("/admin/chat/reports", {
             params: { limit: 50 },
         });
@@ -60,7 +63,8 @@ export default function ChatModerationClient() {
     const fetchAudit = async () => {
         const token = await getToken();
         if (!token) return;
-        const client = new ApiClient(token);
+
+        const client = createAuthenticatedClient(token);
         const response: any = await client.get("/admin/chat/audit", {
             params: { limit: 50 },
         });
@@ -70,7 +74,8 @@ export default function ChatModerationClient() {
     const fetchEvidence = async (reportId: string) => {
         const token = await getToken();
         if (!token) return;
-        const client = new ApiClient(token);
+
+        const client = createAuthenticatedClient(token);
         const response: any = await client.get(
             `/admin/chat/reports/${reportId}/evidence`,
         );
@@ -114,7 +119,8 @@ export default function ChatModerationClient() {
     ) => {
         const token = await getToken();
         if (!token) return;
-        const client = new ApiClient(token);
+
+        const client = createAuthenticatedClient(token);
         await client.post(`/admin/chat/reports/${reportId}/action`, {
             action,
             status,
@@ -193,7 +199,9 @@ export default function ChatModerationClient() {
                                 reports.map((report) => (
                                     <button
                                         key={report.id}
-                                        onClick={() => setSelectedReport(report)}
+                                        onClick={() =>
+                                            setSelectedReport(report)
+                                        }
                                         className={`w-full text-left rounded-lg border px-3 py-3 hover:bg-base-200/70 ${
                                             selectedReport?.id === report.id
                                                 ? "border-primary bg-base-200/70"
@@ -333,7 +341,9 @@ export default function ChatModerationClient() {
                                                             className="rounded-lg border border-base-200 p-3"
                                                         >
                                                             <div className="text-xs text-base-content/50">
-                                                                {message.sender_id}{" "}
+                                                                {
+                                                                    message.sender_id
+                                                                }{" "}
                                                                 •{" "}
                                                                 {new Date(
                                                                     message.created_at,
@@ -343,9 +353,12 @@ export default function ChatModerationClient() {
                                                                 {message.body ||
                                                                     "Message removed"}
                                                             </p>
-                                                            {message.metadata?.moderation?.flagged && (
+                                                            {message.metadata
+                                                                ?.moderation
+                                                                ?.flagged && (
                                                                 <div className="badge badge-warning badge-sm mt-2">
-                                                                    Moderation Flagged
+                                                                    Moderation
+                                                                    Flagged
                                                                 </div>
                                                             )}
                                                         </div>

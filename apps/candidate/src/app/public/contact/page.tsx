@@ -2,6 +2,7 @@
 
 import type { Metadata } from 'next';
 import { useState, FormEvent } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 
 export default function ContactPage() {
     const [formData, setFormData] = useState({
@@ -125,19 +126,15 @@ export default function ContactPage() {
                                 </select>
                             </div>
 
-                            <div className="fieldset">
-                                <label className="label">Message *</label>
-                                <textarea
-                                    className="textarea w-full h-32"
-                                    value={formData.message}
-                                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                    placeholder="Tell us how we can help..."
-                                    required
-                                />
-                                <label className="label">
-                                    <span className="label-text-alt">Please provide as much detail as possible</span>
-                                </label>
-                            </div>
+                            <MarkdownEditor
+                                className="fieldset"
+                                label="Message *"
+                                value={formData.message}
+                                onChange={(value) => setFormData({ ...formData, message: value })}
+                                placeholder="Tell us how we can help..."
+                                helperText="Please provide as much detail as possible"
+                                height={200}
+                            />
 
                             <button
                                 type="submit"

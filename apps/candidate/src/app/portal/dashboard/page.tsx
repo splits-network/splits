@@ -8,6 +8,7 @@ import type { ApiResponse } from "@splits-network/shared-api-client";
 import { useRouter } from "next/navigation";
 import { startChatConversation } from "@/lib/chat-start";
 import { useToast } from "@/lib/toast-context";
+import { usePresence } from "@/hooks/use-presence";
 import {
   StatCard,
   StatCardGrid,
@@ -19,6 +20,14 @@ import {
   type ProfileCompleteness,
 } from "@/lib/utils/profile-completeness";
 import { ProfileCompletionBanner } from "@/components/profile-completion-banner";
+import { initThemeListener } from "@/components/charts/chart-options";
+import ApplicationTimelineChart from "@/components/charts/application-timeline-chart";
+import ApplicationStatusChart from "@/components/charts/application-status-chart";
+import ActivityHeatmap from "@/components/charts/activity-heatmap";
+import ApplicationListItem from "@/components/dashboard/application-list-item";
+import QuickActionsGrid from "@/components/dashboard/quick-actions-grid";
+import ResourcesHub from "@/components/dashboard/resources-hub";
+import AtAGlance from "@/components/dashboard/at-a-glance";
 
 interface DashboardStats {
   applications: number;
@@ -40,8 +49,10 @@ interface Application {
   id: string;
   stage: string;
   created_at: string;
+  updated_at?: string;
   job?: {
     title?: string;
+    status?: string;
     company?: {
       name?: string;
     };
@@ -84,6 +95,7 @@ export default function DashboardPage() {
   const [recentApplications, setRecentApplications] = useState<
     RecentApplication[]
   >([]);
+  const [allApplications, setAllApplications] = useState<Application[]>([]);
   const [profileCompletion, setProfileCompletion] =
     useState<ProfileCompleteness | null>(null);
   const [loading, setLoading] = useState(true);
@@ -92,6 +104,18 @@ export default function DashboardPage() {
   const [profileLoading, setProfileLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [startingChatId, setStartingChatId] = useState<string | null>(null);
+  const [trendPeriod, setTrendPeriod] = useState(6); // Default 6 months
+  const [unreadMessages, setUnreadMessages] = useState(0);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const [hasResume, setHasResume] = useState(false);
+  const presence = usePresence(
+    recentApplications.map((app) => app.recruiter_user_id),
+  );
+
+  // Initialize theme listener for charts
+  useEffect(() => {
+    initThemeListener();
+  }, []);
 
   // Load stats and applications data
   useEffect(() => {
@@ -135,6 +159,9 @@ export default function DashboardPage() {
         setStats(newStats);
         setStatsLoading(false);
 
+        // Store all applications for charts
+        setAllApplications(allApplications);
+
         // Get recent applications (last 5)
         const recent = allApplications
           .sort(
@@ -154,6 +181,36 @@ export default function DashboardPage() {
 
         setRecentApplications(recent);
         setApplicationsLoading(false);
+
+        // Fetch unread messages count
+        try {
+          const conversationsResponse = await client.get("/chat/conversations");
+          const conversations = conversationsResponse.data || [];
+          const totalUnread = conversations.reduce(
+            (sum: number, conv: any) => sum + (conv.unread_count || 0),
+            0
+          );
+          setUnreadMessages(totalUnread);
+        } catch (err) {
+          console.error("Failed to load messages count:", err);
+        }
+
+        // Fetch unread notifications count
+        try {
+          const notificationsResponse = await client.get("/notifications", {
+            params: {
+              filters: {
+                unread_only: true,
+              },
+              limit: 100,
+            },
+          });
+          const unreadNotifs = notificationsResponse.data || [];
+          setUnreadNotifications(unreadNotifs.length);
+        } catch (err) {
+          console.error("Failed to load notifications count:", err);
+        }
+
         setLoading(false);
       } catch (error) {
         console.error("Failed to load dashboard data:", error);
@@ -191,6 +248,12 @@ export default function DashboardPage() {
           const profile = candidates[0];
           const completion = calculateProfileCompleteness(profile);
           setProfileCompletion(completion);
+
+          // Check if user has a resume
+          const resumeExists = profile.documents?.some((doc: any) =>
+            doc.type === 'resume' || doc.name?.toLowerCase().includes('resume')
+          ) || false;
+          setHasResume(resumeExists);
         }
 
         setProfileLoading(false);
@@ -347,150 +410,146 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Applications */}
-        <ContentCard
-          title="Recent Applications"
-          icon="fa-clock-rotate-left"
-          headerActions={
-            <Link
-              href="/portal/applications"
-              className="link link-primary text-sm"
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Main Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Application Trends and Activity - Side by Side */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Application Timeline Chart */}
+            <ContentCard
+              title="Application Trends"
+              icon="fa-chart-line"
             >
-              View All
-            </Link>
-          }
-          loading={applicationsLoading}
-        >
-          {recentApplications.length > 0 ? (
-            <div className="flex flex-col gap-4">
-              {recentApplications.map((app) => {
-                const canChat = Boolean(app.recruiter_user_id);
-                const chatDisabledReason = canChat
-                  ? null
-                  : "Recruiter isn't linked to a user yet.";
-                return (
-                  <Link key={app.id} href={`/portal/applications/${app.id}`}>
-                    <div className="p-4 bg-base-100 rounded-xl hover:bg-base-200/70 transition-all cursor-pointer group">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <h3 className="font-semibold mb-1 group-hover:text-primary transition-colors">
-                            {app.job_title}
-                          </h3>
-                          <p className="text-sm text-base-content/70 mb-2">
-                            {app.company}
-                          </p>
-                        </div>
-                        <span title={chatDisabledReason || undefined}>
-                          <button
-                            className="btn btn-ghost btn-sm btn-square"
-                            disabled={!canChat || startingChatId === app.id}
-                            onClick={async (event) => {
-                              event.preventDefault();
-                              event.stopPropagation();
-                              if (!app.recruiter_user_id) {
-                                return;
-                              }
-                              try {
-                                setStartingChatId(app.id);
-                                const conversationId =
-                                  await startChatConversation(
-                                    getToken,
-                                    app.recruiter_user_id,
-                                    { application_id: app.id },
-                                  );
-                                router.push(
-                                  `/portal/messages/${conversationId}`,
-                                );
-                              } catch (err: any) {
-                                console.error(
-                                  "Failed to start chat:",
-                                  err,
-                                );
-                                toast.error(
-                                  err?.message || "Failed to start chat",
-                                );
-                              } finally {
-                                setStartingChatId(null);
-                              }
-                            }}
-                          >
-                            {startingChatId === app.id ? (
-                              <span className="loading loading-spinner loading-xs"></span>
-                            ) : (
-                              <i className="fa-duotone fa-regular fa-messages"></i>
-                            )}
-                          </button>
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="badge badge-primary badge-sm">
-                          {app.status}
-                        </span>
-                        <span className="text-xs text-base-content/70">
-                          Applied{" "}
-                          {new Date(app.applied_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          ) : (
-            <EmptyState
-              icon="fa-inbox"
-              title="No applications yet"
-              description="Start applying to jobs to see them here"
-              size="sm"
-              card={false}
-              action={
-                <Link href="/public/jobs" className="btn btn-primary btn-sm">
-                  <i className="fa-duotone fa-regular fa-search"></i>
-                  Browse Jobs
+              <ApplicationTimelineChart
+                applications={allApplications}
+                loading={applicationsLoading}
+                trendPeriod={trendPeriod}
+                onTrendPeriodChange={setTrendPeriod}
+              />
+            </ContentCard>
+
+            {/* Activity Heatmap */}
+            <ContentCard title="Your Activity" icon="fa-calendar-days">
+              <ActivityHeatmap
+                applications={allApplications}
+                loading={applicationsLoading}
+              />
+            </ContentCard>
+          </div>
+
+          {/* Application Status and Recent Applications - Side by Side */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Application Status Chart */}
+            <ContentCard
+              title="Application Status Breakdown"
+              icon="fa-chart-pie"
+            >
+              <ApplicationStatusChart
+                applications={allApplications}
+                loading={applicationsLoading}
+              />
+            </ContentCard>
+
+            {/* Recent Applications */}
+            <ContentCard
+              title="Recent Applications"
+              icon="fa-clock-rotate-left"
+              headerActions={
+                <Link
+                  href="/portal/applications"
+                  className="link link-primary text-sm"
+                >
+                  View All
                 </Link>
               }
-            />
-          )}
-        </ContentCard>
+              loading={applicationsLoading}
+            >
+              {recentApplications.length > 0 ? (
+                <div className="flex flex-col gap-4">
+                  {recentApplications.map((app) => {
+                    const presenceStatus = app.recruiter_user_id
+                      ? presence[app.recruiter_user_id]?.status
+                      : undefined;
+                    return (
+                      <ApplicationListItem
+                        key={app.id}
+                        application={app}
+                        presenceStatus={presenceStatus}
+                        startingChat={startingChatId === app.id}
+                        onChatClick={async (e) => {
+                          if (!app.recruiter_user_id) return;
+                          try {
+                            setStartingChatId(app.id);
+                            const conversationId = await startChatConversation(
+                              getToken,
+                              app.recruiter_user_id,
+                              { application_id: app.id },
+                            );
+                            router.push(
+                              `/portal/messages?conversationId=${conversationId}`,
+                            );
+                          } catch (err: any) {
+                            console.error("Failed to start chat:", err);
+                            toast.error(err?.message || "Failed to start chat");
+                          } finally {
+                            setStartingChatId(null);
+                          }
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                <EmptyState
+                  icon="fa-inbox"
+                  title="No applications yet"
+                  description="Start applying to jobs to see them here"
+                  size="sm"
+                  card={false}
+                  action={
+                    <Link href="/public/jobs" className="btn btn-primary btn-sm">
+                      <i className="fa-duotone fa-regular fa-search"></i>
+                      Browse Jobs
+                    </Link>
+                  }
+                />
+              )}
+            </ContentCard>
+          </div>
+        </div>
 
-        {/* Right Column */}
+        {/* Right Sidebar */}
         <div className="space-y-6">
-          {/* Quick Actions */}
+          {/* At a Glance */}
+          <ContentCard title="At a Glance" icon="fa-gauge">
+            <AtAGlance
+              messageCount={unreadMessages}
+              notificationCount={unreadNotifications}
+              profileCompletion={profileCompletion?.percentage || 100}
+              pendingApplications={allApplications.filter(app =>
+                ['ai_review', 'recruiter_request'].includes(app.stage)
+              ).length}
+            />
+          </ContentCard>
+
+          {/* Quick Actions Grid */}
           <ContentCard title="Quick Actions" icon="fa-bolt">
-            <div className="space-y-3">
-              <Link
-                href="/public/jobs"
-                className="btn btn-primary btn-block justify-start"
-              >
-                <i className="fa-duotone fa-regular fa-search"></i>
-                Browse Jobs
-              </Link>
-              <Link
-                href="/portal/profile"
-                className="btn btn-outline btn-block justify-start"
-              >
-                <i className="fa-duotone fa-regular fa-user"></i>
-                Update Profile
-              </Link>
-              <Link
-                href="/portal/documents"
-                className="btn btn-outline btn-block justify-start"
-              >
-                <i className="fa-duotone fa-regular fa-upload"></i>
-                Upload Resume
-              </Link>
-              <Link
-                href="/portal/applications"
-                className="btn btn-outline btn-block justify-start"
-              >
-                <i className="fa-duotone fa-regular fa-list"></i>
-                View Applications
-              </Link>
-            </div>
+            <QuickActionsGrid
+              profileCompletion={profileCompletion?.percentage || 100}
+              messageCount={unreadMessages}
+              notificationCount={unreadNotifications}
+              hasResume={hasResume}
+            />
+          </ContentCard>
+
+          {/* Resources Hub */}
+          <ContentCard title="Career Resources" icon="fa-book-open">
+            <ResourcesHub />
           </ContentCard>
         </div>
       </div>
     </div>
   );
 }
+
+

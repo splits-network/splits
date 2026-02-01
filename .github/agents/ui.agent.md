@@ -29,8 +29,9 @@ Build frontend from API contracts. Progressive loading, DaisyUI components, API 
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from "@clerk/nextjs";
 import { useRouter } from 'next/navigation';
-import { ApiClient } from '@/lib/api-client';
+import { createAuthenticatedClient } from '@/lib/api-client';
 
 export default function FeaturesPage() {
     const router = useRouter();
@@ -53,8 +54,9 @@ export default function FeaturesPage() {
 
     async function loadFeatures() {
         try {
+            const token = await useAuth();
             setLoading(true);
-            const client = new ApiClient();
+            const client = createAuthenticatedClient(token);
             const response = await client.get('/features', {
                 params: {
                     page,
@@ -237,7 +239,10 @@ export default function FeatureDetailPage() {
     async function loadFeature() {
         try {
             setLoading(true);
-            const client = new ApiClient();
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
             const response = await client.get(`/features/${featureId}`);
             setFeature(response.data);
         } catch (err) {
@@ -251,7 +256,10 @@ export default function FeatureDetailPage() {
     async function loadRelatedItems() {
         try {
             setRelatedLoading(true);
-            const client = new ApiClient();
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
             const response = await client.get('/related-items', {
                 params: { feature_id: featureId }
             });
@@ -375,7 +383,10 @@ export default function NewFeaturePage() {
             setSubmitting(true);
             setError('');
             
-            const client = new ApiClient();
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
             const response = await client.post('/features', formData);
             
             router.push(`/portal/features/${response.data.id}`);

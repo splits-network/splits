@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ats-complete-expired-guarantees
+  namespace: splits-network
+  labels:
+    app: ats-service
+    component: cron
+spec:
+  # Run hourly by default; change to "0 1 * * *" for daily runs
+  # Examples: "0 * * * *" (hourly), "0 1 * * *" (daily)
+  schedule: "45 * * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 600
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            app: ats-service
+            component: cron-job
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: ats-complete-expired-guarantees
+              image: ${ACR_SERVER}/ats-service:${IMAGE_TAG}
+              imagePullPolicy: Always
+              command: ["node"]
+              args: ["dist/jobs/complete-expired-guarantees.js"]
+              env:
+                - name: SUPABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: supabase-secrets
+                      key: supabase-url
+                - name: SUPABASE_SERVICE_ROLE_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: supabase-secrets
+                      key: supabase-service-role-key
+                - name: RABBITMQ_URL
+                  value: "amqp://splits:splits_production@rabbitmq:5672"
+                - name: SENTRY_DSN
+                  value: "https://8e881b88655d722664be86c56671b871@o4510570789732352.ingest.us.sentry.io/4510570905206784"
+                - name: NODE_ENV
+                  value: "production"
+                - name: LOG_LEVEL
+                  value: "info"

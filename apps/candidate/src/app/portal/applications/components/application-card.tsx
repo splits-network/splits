@@ -9,6 +9,8 @@ import { useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { startChatConversation } from '@/lib/chat-start';
 import { useToast } from '@/lib/toast-context';
+import { usePresence } from '@/hooks/use-presence';
+import { Presence } from '@/components/presense';
 
 interface ApplicationCardProps {
     application: {
@@ -80,6 +82,12 @@ export default function ApplicationCard({ application: app }: ApplicationCardPro
     const chatDisabledReason = recruiterUserId
         ? null
         : "Your recruiter isn't linked to a user yet.";
+    const presence = usePresence([recruiterUserId], {
+        enabled: Boolean(recruiterUserId),
+    });
+    const presenceStatus = recruiterUserId
+        ? presence[recruiterUserId]?.status
+        : undefined;
 
     return (
         <EntityCard className="group hover:shadow-lg transition-all duration-200">
@@ -245,7 +253,7 @@ export default function ApplicationCard({ application: app }: ApplicationCardPro
                                                 },
                                             );
                                         router.push(
-                                            `/portal/messages/${conversationId}`,
+                                            `/portal/messages?conversationId=${conversationId}`,
                                         );
                                     } catch (err: any) {
                                         console.error(
@@ -264,7 +272,10 @@ export default function ApplicationCard({ application: app }: ApplicationCardPro
                                 {startingChat ? (
                                     <span className="loading loading-spinner loading-xs"></span>
                                 ) : (
-                                    "Message"
+                                    <span className="inline-flex items-center gap-2">
+                                        <Presence status={presenceStatus} />
+                                        Message
+                                    </span>
                                 )}
                             </button>
                         </span>
@@ -355,3 +366,5 @@ export default function ApplicationCard({ application: app }: ApplicationCardPro
         </EntityCard>
     );
 }
+
+

@@ -219,6 +219,358 @@ function registerSubscriptionInvoicesRoute(app: FastifyInstance, services: Servi
     );
 }
 
+function registerDiscountValidationRoute(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    app.post(
+        '/api/v2/discounts/validate',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().post(
+                    '/api/v2/discounts/validate',
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to validate discount code');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to validate discount code' } });
+            }
+        }
+    );
+}
+
+function registerStripeConnectRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    app.get(
+        '/api/v2/stripe/connect/account',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().get(
+                    '/api/v2/stripe/connect/account',
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch Stripe Connect account');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch Stripe Connect account' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/stripe/connect/account',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().post(
+                    '/api/v2/stripe/connect/account',
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to create Stripe Connect account');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to create Stripe Connect account' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/stripe/connect/onboarding-link',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().post(
+                    '/api/v2/stripe/connect/onboarding-link',
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to create Stripe Connect onboarding link');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to create Stripe Connect onboarding link' } });
+            }
+        }
+    );
+}
+
+function registerPayoutTransactionRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    app.post(
+        '/api/v2/payout-transactions/:id/process',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { id } = request.params as { id: string };
+
+            try {
+                const data = await billingService().post(
+                    `/api/v2/payout-transactions/${id}/process`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to process payout transaction');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to process payout transaction' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/placements/:placementId/payout-transactions/process',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { placementId } = request.params as { placementId: string };
+
+            try {
+                const data = await billingService().post(
+                    `/api/v2/placements/${placementId}/payout-transactions/process`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to process placement payout transactions');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to process placement payout transactions' } });
+            }
+        }
+    );
+}
+
+function registerCompanyBillingProfileRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    app.get(
+        '/api/v2/company-billing-profiles',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                const data = await billingService().get(
+                    '/api/v2/company-billing-profiles',
+                    request.query as Record<string, any>,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to list company billing profiles');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to list company billing profiles' } });
+            }
+        }
+    );
+
+    app.get(
+        '/api/v2/company-billing-profiles/:companyId',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { companyId } = request.params as { companyId: string };
+
+            try {
+                const data = await billingService().get(
+                    `/api/v2/company-billing-profiles/${companyId}`,
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch company billing profile');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch company billing profile' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/company-billing-profiles/:companyId',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { companyId } = request.params as { companyId: string };
+
+            try {
+                const data = await billingService().post(
+                    `/api/v2/company-billing-profiles/${companyId}`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to upsert company billing profile');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to upsert company billing profile' } });
+            }
+        }
+    );
+
+    app.patch(
+        '/api/v2/company-billing-profiles/:companyId',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { companyId } = request.params as { companyId: string };
+
+            try {
+                const data = await billingService().patch(
+                    `/api/v2/company-billing-profiles/${companyId}`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to update company billing profile');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to update company billing profile' } });
+            }
+        }
+    );
+}
+
+function registerPlacementInvoiceRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    app.get(
+        '/api/v2/placements/:placementId/invoices',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { placementId } = request.params as { placementId: string };
+
+            try {
+                const data = await billingService().get(
+                    `/api/v2/placements/${placementId}/invoices`,
+                    undefined,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch placement invoice');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch placement invoice' } });
+            }
+        }
+    );
+
+    app.post(
+        '/api/v2/placements/:placementId/invoices',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { placementId } = request.params as { placementId: string };
+
+            try {
+                const data = await billingService().post(
+                    `/api/v2/placements/${placementId}/invoices`,
+                    request.body,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to create placement invoice');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to create placement invoice' } });
+            }
+        }
+    );
+
+    app.get(
+        '/api/v2/company-billing-profiles/:companyId/invoices',
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const { companyId } = request.params as { companyId: string };
+
+            try {
+                const data = await billingService().get(
+                    `/api/v2/company-billing-profiles/${companyId}/invoices`,
+                    request.query as Record<string, any>,
+                    correlationId,
+                    authHeaders
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch company invoices');
+                return reply
+                    .status(error.statusCode || 400)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch company invoices' } });
+            }
+        }
+    );
+}
+
 export function registerBillingRoutes(app: FastifyInstance, services: ServiceRegistry) {
     // Register specific routes FIRST (must be before generic CRUD routes)
     registerSubscriptionMeRoute(app, services);
@@ -227,6 +579,11 @@ export function registerBillingRoutes(app: FastifyInstance, services: ServiceReg
     registerSubscriptionPaymentMethodsRoute(app, services);
     registerSubscriptionUpdatePaymentMethodRoute(app, services);
     registerSubscriptionInvoicesRoute(app, services);
+    registerDiscountValidationRoute(app, services);
+    registerStripeConnectRoutes(app, services);
+    registerPayoutTransactionRoutes(app, services);
+    registerCompanyBillingProfileRoutes(app, services);
+    registerPlacementInvoiceRoutes(app, services);
 
     BILLING_RESOURCES.forEach(resource => registerResourceRoutes(app, services, resource));
 }

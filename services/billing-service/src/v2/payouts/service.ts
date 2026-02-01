@@ -1,3 +1,4 @@
+import Stripe from 'stripe';
 import { EventPublisher } from '../shared/events';
 import { buildPaginationResponse, requireBillingAdmin } from '../shared/helpers';
 import type { AccessContext } from '../shared/access';
@@ -8,16 +9,25 @@ import { PlacementSnapshot } from '../placement-snapshot/types';
 import { PlacementSplitRepository } from './placement-split-repository';
 import { PlacementPayoutTransactionRepository } from './placement-payout-transaction-repository';
 import type { PlacementSplit, PlacementPayoutTransaction, PlacementSplitInsert, PlacementPayoutTransactionInsert } from './types';
+import { RecruiterConnectRepository } from './recruiter-connect-repository';
 
 export class PayoutServiceV2 {
+    private stripe: Stripe;
+
     constructor(
         private repository: PayoutRepository,
         private snapshotRepository: PlacementSnapshotRepository,
         private splitRepository: PlacementSplitRepository,
         private transactionRepository: PlacementPayoutTransactionRepository,
+        private recruiterConnectRepository: RecruiterConnectRepository,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>,
-        private eventPublisher?: EventPublisher
-    ) { }
+        private eventPublisher?: EventPublisher,
+        stripeSecretKey?: string
+    ) {
+        this.stripe = new Stripe(stripeSecretKey || process.env.STRIPE_SECRET_KEY || '', {
+            apiVersion: '2025-11-17.clover',
+        });
+    }
 
     async getPayouts(
         filters: PayoutListFilters = {},
@@ -128,7 +138,7 @@ export class PayoutServiceV2 {
                 recruiter_id: snapshot.candidate_recruiter_id,
                 role: 'candidate_recruiter', // ✅ Explicit role from snapshot
                 split_percentage: snapshot.candidate_recruiter_rate,
-                split_amount: (snapshot.total_fee * snapshot.candidate_recruiter_rate) / 100,
+                split_amount: (snapshot.total_placement_fee * snapshot.candidate_recruiter_rate) / 100,
             });
         }
 
@@ -139,7 +149,7 @@ export class PayoutServiceV2 {
                 recruiter_id: snapshot.company_recruiter_id,
                 role: 'company_recruiter',
                 split_percentage: snapshot.company_recruiter_rate,
-                split_amount: (snapshot.total_fee * snapshot.company_recruiter_rate) / 100,
+                split_amount: (snapshot.total_placement_fee * snapshot.company_recruiter_rate) / 100,
             });
         }
 
@@ -150,7 +160,7 @@ export class PayoutServiceV2 {
                 recruiter_id: snapshot.job_owner_recruiter_id,
                 role: 'job_owner',
                 split_percentage: snapshot.job_owner_rate,
-                split_amount: (snapshot.total_fee * snapshot.job_owner_rate) / 100,
+                split_amount: (snapshot.total_placement_fee * snapshot.job_owner_rate) / 100,
             });
         }
 
@@ -161,7 +171,7 @@ export class PayoutServiceV2 {
                 recruiter_id: snapshot.candidate_sourcer_recruiter_id,
                 role: 'candidate_sourcer',
                 split_percentage: snapshot.candidate_sourcer_rate,
-                split_amount: (snapshot.total_fee * snapshot.candidate_sourcer_rate) / 100,
+                split_amount: (snapshot.total_placement_fee * snapshot.candidate_sourcer_rate) / 100,
             });
         }
 
@@ -172,7 +182,7 @@ export class PayoutServiceV2 {
                 recruiter_id: snapshot.company_sourcer_recruiter_id,
                 role: 'company_sourcer',
                 split_percentage: snapshot.company_sourcer_rate,
-                split_amount: (snapshot.total_fee * snapshot.company_sourcer_rate) / 100,
+                split_amount: (snapshot.total_placement_fee * snapshot.company_sourcer_rate) / 100,
             });
         }
 
@@ -206,10 +216,113 @@ export class PayoutServiceV2 {
             transactionCount: createdTransactions.length,
             totalPaidOut,
             platformRemainder,
-            subscriptionTier: snapshot.subscription_tier,
+            roleTiers: {
+                candidate_recruiter: snapshot.candidate_recruiter_tier,
+                company_recruiter: snapshot.company_recruiter_tier,
+                job_owner: snapshot.job_owner_tier,
+                candidate_sourcer: snapshot.candidate_sourcer_tier,
+                company_sourcer: snapshot.company_sourcer_tier,
+            },
         });
 
         return { splits: createdSplits, transactions: createdTransactions };
+    }
+
+    /**
+     * Process a single payout transaction via Stripe Connect transfer
+     */
+    async processPayoutTransaction(
+        transactionId: string,
+        clerkUserId: string
+    ): Promise<PlacementPayoutTransaction> {
+        const access = await this.resolveAccessContext(clerkUserId);
+        requireBillingAdmin(access);
+
+        const transaction = await this.transactionRepository.getById(transactionId);
+        if (!transaction) {
+            throw new Error(`Payout transaction ${transactionId} not found`);
+        }
+
+        if (transaction.status !== 'pending' && transaction.status !== 'failed') {
+            throw new Error(`Cannot process transaction in ${transaction.status} status`);
+        }
+
+        if (transaction.amount <= 0) {
+            throw new Error('Transaction amount must be positive');
+        }
+
+        const recruiterStatus = await this.recruiterConnectRepository.getStatus(transaction.recruiter_id);
+        if (!recruiterStatus?.stripe_connect_account_id) {
+            throw new Error('Recruiter does not have a Stripe Connect account');
+        }
+
+        if (!recruiterStatus.stripe_connect_onboarded) {
+            throw new Error('Recruiter Stripe Connect account is not onboarded');
+        }
+
+        const amountCents = Math.round(transaction.amount * 100);
+        if (amountCents <= 0) {
+            throw new Error('Transaction amount must be at least $0.01');
+        }
+
+        // Mark as processing
+        await this.transactionRepository.updateStatus(transaction.id, 'processing', {
+            stripe_connect_account_id: recruiterStatus.stripe_connect_account_id,
+        });
+
+        try {
+            const transfer = await this.stripe.transfers.create(
+                {
+                    amount: amountCents,
+                    currency: 'usd',
+                    destination: recruiterStatus.stripe_connect_account_id,
+                    metadata: {
+                        placement_id: transaction.placement_id,
+                        recruiter_id: transaction.recruiter_id,
+                        placement_split_id: transaction.placement_split_id,
+                        transaction_id: transaction.id,
+                    },
+                },
+                {
+                    idempotencyKey: `placement_payout_transaction_${transaction.id}`,
+                }
+            );
+
+            return await this.transactionRepository.updateStatus(transaction.id, 'paid', {
+                stripe_transfer_id: transfer.id,
+                stripe_connect_account_id: recruiterStatus.stripe_connect_account_id,
+                retry_count: transaction.retry_count || 0,
+            });
+        } catch (error: any) {
+            const retryCount = (transaction.retry_count || 0) + 1;
+            await this.transactionRepository.updateStatus(transaction.id, 'failed', {
+                failure_reason: error?.message || 'Stripe transfer failed',
+                retry_count: retryCount,
+            });
+            throw error;
+        }
+    }
+
+    /**
+     * Process all pending payout transactions for a placement
+     */
+    async processPlacementTransactions(
+        placementId: string,
+        clerkUserId: string
+    ): Promise<PlacementPayoutTransaction[]> {
+        const access = await this.resolveAccessContext(clerkUserId);
+        requireBillingAdmin(access);
+
+        const transactions = await this.transactionRepository.getByPlacementId(placementId);
+        const pending = transactions.filter(t => t.status === 'pending' || t.status === 'failed');
+
+        const results: PlacementPayoutTransaction[] = [];
+        for (const transaction of pending) {
+            const processed = await this.processPayoutTransaction(transaction.id, clerkUserId);
+            results.push(processed);
+        }
+
+        return results;
     }
 
     /**
@@ -240,7 +353,7 @@ export class PayoutServiceV2 {
         const remainderPercent = 100 - totalPaid;
 
         // Return dollar amount
-        return (snapshot.total_fee * remainderPercent) / 100;
+        return (snapshot.total_placement_fee * remainderPercent) / 100;
     }
 
     private async publishEvent(eventType: string, payload: Record<string, any>): Promise<void> {

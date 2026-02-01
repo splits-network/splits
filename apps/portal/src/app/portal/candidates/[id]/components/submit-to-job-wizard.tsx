@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { MarkdownEditor, MarkdownRenderer } from '@splits-network/shared-ui';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 
@@ -422,18 +423,15 @@ export default function SubmitToJobWizard({
                             </div>
 
                             {/* Notes */}
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Your Pitch to Candidate (Optional)</legend>
-                                <textarea
-                                    className="textarea h-48 w-full"
-                                    value={notes}
-                                    onChange={(e) => setNotes(e.target.value)}
-                                    placeholder="Why is this opportunity a great fit? This message will be included in the email notification to the candidate..."
-                                />
-                                <p className="fieldset-label">
-                                    Explain why you think {candidateName} should consider this role. Be specific about how it matches their skills and career goals.
-                                </p>
-                            </fieldset>
+                            <MarkdownEditor
+                                className="fieldset"
+                                label="Your Pitch to Candidate (Optional)"
+                                value={notes}
+                                onChange={setNotes}
+                                placeholder="Why is this opportunity a great fit? This message will be included in the email notification to the candidate..."
+                                helperText={`Explain why you think ${candidateName} should consider this role. Be specific about how it matches their skills and career goals.`}
+                                height={220}
+                            />
 
                             {/* Document Selection */}
                             <fieldset className="fieldset">
@@ -534,7 +532,7 @@ export default function SubmitToJobWizard({
                                             <i className="fa-duotone fa-regular fa-message mr-2"></i>
                                             Your Pitch
                                         </h4>
-                                        <div className="whitespace-pre-wrap text-sm">{notes}</div>
+                                        <MarkdownRenderer content={notes} className="prose prose-sm max-w-none" />
                                     </div>
                                 </div>
                             )}

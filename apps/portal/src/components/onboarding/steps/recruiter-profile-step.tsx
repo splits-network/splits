@@ -6,6 +6,7 @@
  */
 
 import { useState, FormEvent } from "react";
+import { MarkdownEditor } from "@splits-network/shared-ui";
 import { useOnboarding } from "../onboarding-provider";
 
 const INDUSTRY_OPTIONS = [
@@ -124,19 +125,15 @@ export function RecruiterProfileStep() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Bio */}
-                <fieldset className="fieldset">
-                    <legend className="fieldset-legend">Bio / About You</legend>
-                    <textarea
-                        className="textarea h-24 w-full"
-                        value={formData.bio}
-                        onChange={(e) => handleChange("bio", e.target.value)}
-                        placeholder="Share your recruiting experience, specializations, and what makes you great at finding talent..."
-                        required
-                    />
-                    <p className="fieldset-label">
-                        Help companies understand your expertise
-                    </p>
-                </fieldset>
+                <MarkdownEditor
+                    className="fieldset"
+                    label="Bio / About You"
+                    value={formData.bio}
+                    onChange={(value) => handleChange("bio", value)}
+                    placeholder="Share your recruiting experience, specializations, and what makes you great at finding talent..."
+                    helperText="Help companies understand your expertise"
+                    height={160}
+                />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Phone */}
                     <fieldset className="fieldset">

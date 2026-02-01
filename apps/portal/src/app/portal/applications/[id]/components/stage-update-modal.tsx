@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 import type { ApplicationStage } from '@splits-network/shared-types';
 
 interface StageUpdateModalProps {
@@ -97,20 +98,16 @@ export default function StageUpdateModal({
                         </div>
 
                         {/* Notes */}
-                        <div className="fieldset">
-                            <label className="label">Notes (optional)</label>
-                            <textarea
-                                className="textarea h-24 w-full"
-                                placeholder="Add any notes about this stage change..."
-                                value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
-                            />
-                            <label className="label">
-                                <span className="label-text-alt">
-                                    These notes will be visible in the application timeline
-                                </span>
-                            </label>
-                        </div>
+                        <MarkdownEditor
+                            className="fieldset"
+                            label="Notes (optional)"
+                            value={notes}
+                            onChange={setNotes}
+                            placeholder="Add any notes about this stage change..."
+                            helperText="These notes will be visible in the application timeline"
+                            height={160}
+                            preview="edit"
+                        />
 
                         {/* Warning for Terminal Stages */}
                         {(selectedStage === 'hired' || selectedStage === 'rejected') && (

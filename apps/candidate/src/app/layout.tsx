@@ -6,10 +6,14 @@ import Footer from "@/components/navigation/footer";
 import CookieConsent from "@/components/cookie-consent";
 import { ServiceStatusBanner } from "@/components/service-status-banner";
 import { ToastProvider } from "@/lib/toast-context";
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-    metadataBase: new URL("https://applicant.network"),
+    metadataBase: new URL(
+        process.env.NEXT_PUBLIC_APP_URL || "https://applicant.network",
+    ),
     title: {
         default: "Applicant Network - Find Your Next Career Opportunity",
         template: "%s | Applicant Network",
@@ -20,11 +24,11 @@ export const metadata: Metadata = {
         title: "Applicant Network - Find Your Next Career Opportunity",
         description:
             "Browse thousands of job opportunities and manage your job search on Applicant  Track applications, verify credentials, and connect with recruiters.",
-        url: "https://applicant.network",
+        url: process.env.NEXT_PUBLIC_APP_URL || "https://applicant.network",
         siteName: "Applicant Network",
         images: [
             {
-                url: "https://applicant.network/og-image.png",
+                url: `${process.env.NEXT_PUBLIC_APP_URL || "https://applicant.network"}/og-image.png`,
                 width: 1200,
                 height: 630,
                 alt: "Applicant Network - Career Opportunities",
@@ -38,7 +42,9 @@ export const metadata: Metadata = {
         title: "Applicant Network - Find Your Next Career Opportunity",
         description:
             "Browse thousands of job opportunities and manage your job search on Applicant ",
-        images: ["https://applicant.network/og-image.png"],
+        images: [
+            `${process.env.NEXT_PUBLIC_APP_URL || "https://applicant.network"}/og-image.png`,
+        ],
     },
 };
 
@@ -51,6 +57,8 @@ export default function RootLayout({
     // Backend services use Vault for secret management
     // Note: CLERK_SECRET_KEY is used automatically by Clerk SDK on the server
     const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+    const appUrl =
+        process.env.NEXT_PUBLIC_APP_URL || "https://applicant.network";
 
     if (!publishableKey) {
         throw new Error(
@@ -82,7 +90,7 @@ export default function RootLayout({
                                 "@context": "https://schema.org",
                                 "@type": "WebApplication",
                                 name: "Applicant Network",
-                                url: "https://applicant.network",
+                                url: appUrl,
                                 applicationCategory: "BusinessApplication",
                                 description:
                                     "Browse thousands of job opportunities and manage your job search. Track applications, verify credentials, and connect with recruiters.",
@@ -96,7 +104,7 @@ export default function RootLayout({
                                     "@type": "Organization",
                                     name: "Employment Networks",
                                     url: "https://employment-networks.com",
-                                    logo: "https://applicant.network/logo.png",
+                                    logo: `${appUrl}/logo.png`,
                                 },
                                 featureList: [
                                     "Job search",
@@ -116,13 +124,12 @@ export default function RootLayout({
                                 "@context": "https://schema.org",
                                 "@type": "WebSite",
                                 name: "Applicant Network",
-                                url: "https://applicant.network",
+                                url: appUrl,
                                 potentialAction: {
                                     "@type": "SearchAction",
                                     target: {
                                         "@type": "EntryPoint",
-                                        urlTemplate:
-                                            "https://applicant.network/jobs?search={search_term_string}",
+                                        urlTemplate: `${appUrl}/jobs?search={search_term_string}`,
                                     },
                                     "query-input":
                                         "required name=search_term_string",

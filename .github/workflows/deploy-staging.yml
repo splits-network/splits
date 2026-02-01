@@ -289,6 +289,12 @@ jobs:
                   for svc in $SERVICES; do
                     if [ -f "infra/k8s/$svc/deployment.yaml" ]; then
                       kubectl apply -f "infra/k8s/$svc/" --namespace=${{ env.NAMESPACE }}
+                      if [ "$svc" = "ats-service" ]; then
+                        kubectl apply -f "infra/k8s/$svc/cronjobs/" --namespace=${{ env.NAMESPACE }}
+                      fi
+                      if [ "$svc" = "billing-service" ]; then
+                        kubectl apply -f "infra/k8s/$svc/cronjobs/" --namespace=${{ env.NAMESPACE }}
+                      fi
                     fi
                   done
 
@@ -333,6 +339,8 @@ jobs:
             - name: Deploy staging ingress
               run: |
                   kubectl apply -f infra/k8s/staging-ingress.yaml --namespace=${{ env.NAMESPACE }}
+                  kubectl delete job ats-backfill-guarantee-expires --ignore-not-found --namespace=${{ env.NAMESPACE }}
+                  kubectl apply -f infra/k8s/ats-service/jobs/backfill-guarantee-expires.yaml --namespace=${{ env.NAMESPACE }}
 
             - name: Get deployment status
               run: |

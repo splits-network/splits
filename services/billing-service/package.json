@@ -9,7 +9,10 @@
         "start": "node dist/index.js",
         "clean": "rm -rf dist *.tsbuildinfo",
         "job:payout-schedules": "node dist/jobs/process-payout-schedules.js",
-        "job:escrow-releases": "node dist/jobs/process-escrow-releases.js"
+        "job:escrow-releases": "node dist/jobs/process-escrow-releases.js",
+        "job:create-placement-invoices": "node dist/jobs/create-placement-invoices.js",
+        "job:finalize-invoices": "node dist/jobs/finalize-placement-invoices.js",
+        "job:process-eligible-payouts": "node dist/jobs/process-eligible-payouts.js"
     },
     "dependencies": {
         "@fastify/swagger": "^9.5.0",

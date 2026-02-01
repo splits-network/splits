@@ -11,6 +11,8 @@ import { getApplicationStageBadge } from '@/lib/utils/badge-styles';
 import StageUpdateModal from './stage-update-modal';
 import type { ApplicationStage } from '@splits-network/shared-types';
 import { useRouter } from 'next/navigation';
+import { usePresence } from '@/hooks/use-presence';
+import { Presence } from '@/components/presense';
 
 interface ApplicationHeaderProps {
     applicationId: string;
@@ -61,6 +63,12 @@ export default function ApplicationHeader({ applicationId }: ApplicationHeaderPr
     const chatDisabledReason = canChat
         ? null
         : "Candidate isn't linked to a user yet.";
+    const presence = usePresence([application?.candidate?.user_id], {
+        enabled: canChat,
+    });
+    const presenceStatus = application?.candidate?.user_id
+        ? presence[application.candidate.user_id]?.status
+        : undefined;
 
     const canManageStage = isAdmin || isRecruiter;
 
@@ -230,7 +238,7 @@ export default function ApplicationHeader({ applicationId }: ApplicationHeaderPr
                                                             null,
                                                     },
                                                 );
-                                            router.push(`/portal/messages/${conversationId}`);
+                                            router.push(`/portal/messages?conversationId=${conversationId}`);
                                         } catch (error: any) {
                                             console.error('Failed to start chat:', error);
                                             toast.error(error?.message || 'Failed to start chat');
@@ -243,7 +251,10 @@ export default function ApplicationHeader({ applicationId }: ApplicationHeaderPr
                                     {startingChat ? (
                                         <span className="loading loading-spinner loading-xs"></span>
                                     ) : (
-                                        <i className="fa-duotone fa-regular fa-messages"></i>
+                                        <span className="inline-flex items-center gap-2">
+                                            <Presence status={presenceStatus} />
+                                            <i className="fa-duotone fa-regular fa-messages"></i>
+                                        </span>
                                     )}
                                     Message Candidate
                                 </button>
@@ -288,3 +299,5 @@ export default function ApplicationHeader({ applicationId }: ApplicationHeaderPr
         </>
     );
 }
+
+

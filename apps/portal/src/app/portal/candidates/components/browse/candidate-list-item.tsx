@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { startChatConversation } from "@/lib/chat-start";
 import { useToast } from "@/lib/toast-context";
 import { useState } from "react";
+import { usePresence } from "@/hooks/use-presence";
+import { Presence } from "@/components/presense";
 
 interface CandidateListItemProps {
     candidate: Candidate;
@@ -27,6 +29,10 @@ export default function CandidateListItem({
     const chatDisabledReason = canChat
         ? null
         : "This candidate isn't linked to a user yet.";
+    const presence = usePresence([candidate.user_id], { enabled: canChat });
+    const presenceStatus = candidate.user_id
+        ? presence[candidate.user_id]?.status
+        : undefined;
 
     return (
         <div
@@ -134,7 +140,7 @@ export default function CandidateListItem({
                     >
                         <span title={chatDisabledReason || undefined}>
                             <button
-                                className="btn btn-xs btn-square btn-ghost h-6 w-6"
+                                className="btn btn-xs btn-square btn-ghost h-6 w-6 relative"
                                 title="Message Candidate"
                                 disabled={!canChat || startingChat}
                                 onClick={async (e) => {
@@ -155,7 +161,7 @@ export default function CandidateListItem({
                                                 },
                                             );
                                         router.push(
-                                            `/portal/messages/${conversationId}`,
+                                            `/portal/messages?conversationId=${conversationId}`,
                                         );
                                     } catch (err: any) {
                                         console.error(
@@ -171,6 +177,10 @@ export default function CandidateListItem({
                                     }
                                 }}
                             >
+                                <Presence
+                                    status={presenceStatus}
+                                    className="absolute -top-1 -right-1"
+                                />
                                 <i className="fa-duotone fa-regular fa-messages text-xs"></i>
                             </button>
                         </span>
@@ -191,3 +201,5 @@ export default function CandidateListItem({
         </div>
     );
 }
+
+

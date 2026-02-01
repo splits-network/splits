@@ -2,6 +2,7 @@
 
 import { useServiceHealth, type ServiceHealth } from '@/hooks/use-service-health';
 import { FormEvent, useMemo, useState } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 
 const portalFormDefaults = {
     name: '',
@@ -318,16 +319,14 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
                                             </select>
                                         </div>
                                     </div>
-                                    <div className="fieldset">
-                                        <label className="label">Message</label>
-                                        <textarea
-                                            className="textarea h-24 w-full"
-                                            required
-                                            value={formData.message}
-                                            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                            placeholder="Include affected teams, timelines, and links."
-                                        />
-                                    </div>
+                                    <MarkdownEditor
+                                        className="fieldset"
+                                        label="Message"
+                                        value={formData.message}
+                                        onChange={(value) => setFormData({ ...formData, message: value })}
+                                        placeholder="Include affected teams, timelines, and links."
+                                        height={160}
+                                    />
                                     <button className="btn btn-primary w-full" disabled={submitting} type="submit">
                                         {submitting ? (
                                             <>

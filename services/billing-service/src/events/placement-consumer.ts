@@ -20,6 +20,15 @@ interface PlacementCreatedEvent {
     company_sourcer_recruiter_id: string | null;
 }
 
+type SubscriptionTier = 'free' | 'paid' | 'premium';
+type RoleTierMap = {
+    candidate_recruiter_tier: SubscriptionTier | null;
+    company_recruiter_tier: SubscriptionTier | null;
+    job_owner_tier: SubscriptionTier | null;
+    candidate_sourcer_tier: SubscriptionTier | null;
+    company_sourcer_tier: SubscriptionTier | null;
+};
+
 export class PlacementEventConsumer {
     private connection: Connection | null = null;
     private channel: Channel | null = null;
@@ -102,16 +111,8 @@ export class PlacementEventConsumer {
             // Calculate total fee
             const totalFee = event.salary * (event.fee_percentage / 100);
 
-            // Get subscription tier from database
-            // For Phase 5, we'll default to STANDARD tier
-            // TODO: Query from placements table or determine from recruiter subscription
-            const { data: placement } = await this.supabase
-                .from('placements')
-                .select('subscription_tier')
-                .eq('id', event.placement_id)
-                .single();
-
-            const subscriptionTier = (placement?.subscription_tier as any) || 'STANDARD';
+            // Resolve subscription tier for each role (per recruiter)
+            const roleTiers = await this.resolveRoleTiers(event);
 
             // Create immutable snapshot with all 5 role attributions
             await this.snapshotService.createSnapshot({
@@ -121,15 +122,15 @@ export class PlacementEventConsumer {
                 job_owner_recruiter_id: event.job_owner_recruiter_id,
                 candidate_sourcer_recruiter_id: event.candidate_sourcer_recruiter_id,
                 company_sourcer_recruiter_id: event.company_sourcer_recruiter_id,
-                total_fee: totalFee,
-                subscription_tier: subscriptionTier,
+                total_placement_fee: totalFee,
+                ...roleTiers,
             });
 
             this.logger.info(
                 {
                     placement_id: event.placement_id,
-                    total_fee: totalFee,
-                    subscription_tier: subscriptionTier,
+                    total_placement_fee: totalFee,
+                    role_tiers: roleTiers,
                     roles: {
                         candidate_recruiter: event.candidate_recruiter_id ? '✓' : '✗',
                         company_recruiter: event.company_recruiter_id ? '✓' : '✗',
@@ -175,6 +176,64 @@ export class PlacementEventConsumer {
                 'Failed to create placement snapshot'
             );
             throw error; // Re-throw to trigger message requeue
+        }
+    }
+
+    private async resolveRoleTiers(event: PlacementCreatedEvent): Promise<RoleTierMap> {
+        const [
+            candidate_recruiter_tier,
+            company_recruiter_tier,
+            job_owner_tier,
+            candidate_sourcer_tier,
+            company_sourcer_tier,
+        ] = await Promise.all([
+            this.resolveSubscriptionTier(event.candidate_recruiter_id),
+            this.resolveSubscriptionTier(event.company_recruiter_id),
+            this.resolveSubscriptionTier(event.job_owner_recruiter_id),
+            this.resolveSubscriptionTier(event.candidate_sourcer_recruiter_id),
+            this.resolveSubscriptionTier(event.company_sourcer_recruiter_id),
+        ]);
+
+        return {
+            candidate_recruiter_tier,
+            company_recruiter_tier,
+            job_owner_tier,
+            candidate_sourcer_tier,
+            company_sourcer_tier,
+        };
+    }
+
+    private async resolveSubscriptionTier(recruiterId: string | null): Promise<SubscriptionTier | null> {
+        if (!recruiterId) return null;
+
+        try {
+            const { data, error } = await this.supabase
+                .from('subscriptions')
+                .select('plan:plans(tier)')
+                .eq('recruiter_id', recruiterId)
+                .eq('status', 'active')
+                .limit(1)
+                .maybeSingle();
+
+            if (error) {
+                this.logger.warn({ err: error, recruiterId }, 'Failed to resolve subscription tier');
+                return 'free';
+            }
+
+            const planTier = (data as any)?.plan?.tier as string | undefined;
+            switch (planTier) {
+                case 'partner':
+                    return 'premium';
+                case 'pro':
+                    return 'paid';
+                case 'starter':
+                    return 'free';
+                default:
+                    return 'free';
+            }
+        } catch (error) {
+            this.logger.warn({ err: error, recruiterId }, 'Failed to resolve subscription tier');
+            return 'free';
         }
     }
 

@@ -71,7 +71,7 @@ function SSOCallbackInner() {
                 if (!result.success) {
                     // Log the error but don't block - onboarding will catch this
                     console.warn(
-                        "[SSOCallback] User/Candidate creation warning:",
+                        "[SSO_CALLBACK] User/Candidate creation warning:",
                         result.error,
                     );
                 }
@@ -85,21 +85,21 @@ function SSOCallbackInner() {
 
                 if (invitationId) {
                     // Redirect to invitation acceptance page
-                    router.replace(
-                        `/portal/accept-invitation?invitation_id=${invitationId}`,
-                    );
+                    const invitationRedirectUrl = `/portal/accept-invitation?invitation_id=${invitationId}`;
+                    router.replace(invitationRedirectUrl);
                 } else if (redirectUrl) {
                     // Redirect to specified URL (validate it's internal)
                     const isInternalUrl = redirectUrl.startsWith("/");
-                    router.replace(
-                        isInternalUrl ? redirectUrl : "/portal/dashboard",
-                    );
+                    const finalRedirectUrl = isInternalUrl
+                        ? redirectUrl
+                        : "/portal/dashboard";
+                    router.replace(finalRedirectUrl);
                 } else {
                     // Default redirect to dashboard
                     router.replace("/portal/dashboard");
                 }
             } catch (error: any) {
-                console.error("[SSOCallback] Error:", error);
+                console.error("[SSO_CALLBACK] Error:", error);
                 setErrorMessage(
                     error?.message || "An error occurred during sign in",
                 );

@@ -7,6 +7,8 @@ import { apiClient, createAuthenticatedClient } from '@/lib/api-client';
 import { MarketplaceProfile } from '@splits-network/shared-types';
 import Link from 'next/link';
 import { useToast } from '@/lib/toast-context';
+import { MarkdownRenderer } from '@/components/markdown-renderer';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 
 interface MarketplaceRecruiter {
     id: string;
@@ -332,25 +334,8 @@ export default function RecruiterDetailClient({
                                     <i className="fa-duotone fa-regular fa-sparkles text-primary"></i>
                                     Featured Story
                                 </h2>
-                                <div className="prose max-w-none text-base-content/90">
-                                    {/* Simple markdown rendering */}
-                                    {recruiter.marketplace_profile.bio_rich.split('\n').map((paragraph, idx) => {
-                                        // Handle bullets
-                                        if (paragraph.trim().startsWith('- ') || paragraph.trim().startsWith('* ')) {
-                                            return (
-                                                <li key={idx} className="ml-4">
-                                                    {paragraph.replace(/^[-*]\s/, '')}
-                                                </li>
-                                            );
-                                        }
-                                        // Handle bold and italic
-                                        const formatted = paragraph
-                                            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                                            .replace(/\*(.+?)\*/g, '<em>$1</em>');
-                                        return paragraph.trim() ? (
-                                            <p key={idx} dangerouslySetInnerHTML={{ __html: formatted }} />
-                                        ) : null;
-                                    })}
+                                <div className="text-base-content/90">
+                                    <MarkdownRenderer content={recruiter.marketplace_profile.bio_rich} />
                                 </div>
                             </div>
                         </div>
@@ -447,19 +432,17 @@ export default function RecruiterDetailClient({
                     <div className="modal-box">
                         <h3 className="font-bold text-lg mb-4">Connect with Recruiter</h3>
                         <form onSubmit={handleConnect}>
-                            <div className="fieldset">
-                                <label className="label">Message (Optional)</label>
-                                <textarea
-                                    className="textarea w-full h-32"
-                                    placeholder="Introduce yourself and explain why you'd like to connect..."
-                                    maxLength={1000}
-                                    value={connectionMessage}
-                                    onChange={(e) => setConnectionMessage(e.target.value)}
-                                />
-                                <label className="label">
-                                    <span className="label-text-alt">{connectionMessage.length}/1000 characters</span>
-                                </label>
-                            </div>
+                            <MarkdownEditor
+                                className="fieldset"
+                                label="Message (Optional)"
+                                value={connectionMessage}
+                                onChange={setConnectionMessage}
+                                placeholder="Introduce yourself and explain why you'd like to connect..."
+                                maxLength={1000}
+                                showCount
+                                height={160}
+                                preview="edit"
+                            />
 
                             <div className="modal-action">
                                 <button

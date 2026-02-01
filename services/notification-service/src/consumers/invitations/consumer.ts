@@ -15,6 +15,7 @@ export class InvitationsConsumer {
         private serviceRegistry: ServiceRegistry,
         private logger: Logger,
         private portalUrl: string,
+        private candidateWebsiteUrl: string,
         private dataLookup: DataLookupHelper,
         private contactLookup: ContactLookupHelper
     ) {}
@@ -23,10 +24,10 @@ export class InvitationsConsumer {
      * Handle invitation.created event
      */
     async handleInvitationCreated(event: any): Promise<void> {
-        const { invitation_id, email, organization_id, role, invited_by } = event;
+        const { invitation_id, email, organization_id, company_id, role, invited_by } = event.payload;
 
         this.logger.info(
-            { invitation_id, email, organization_id },
+            { invitation_id, email, organization_id, company_id },
             'Processing invitation.created event'
         );
 
@@ -35,6 +36,16 @@ export class InvitationsConsumer {
             const organization = await this.dataLookup.getOrganization(organization_id);
             if (!organization) {
                 throw new Error(`Organization not found: ${organization_id}`);
+            }
+
+            // Fetch company details if company_id is present
+            let organizationName = organization.name;
+            if (company_id) {
+                const company = await this.dataLookup.getCompany(company_id);
+                if (company) {
+                    organizationName = company.name;
+                    this.logger.info({ company_id, company_name: company.name }, 'Using company name for invitation');
+                }
             }
 
             // Fetch inviter contact
@@ -49,14 +60,18 @@ export class InvitationsConsumer {
                 throw new Error(`Invitation not found: ${invitation_id}`);
             }
 
-            // Build invitation link
-            const invitation_link = `${this.portalUrl}/accept-invitation/${invitation_id}`;
+            // Determine which URL to use based on the role
+            // Company/portal roles: company_admin, hiring_manager
+            // Candidate roles: everything else
+            const isPortalRole = role === 'company_admin' || role === 'hiring_manager';
+            const baseUrl = isPortalRole ? this.portalUrl : this.candidateWebsiteUrl;
+            const invitation_link = `${baseUrl}/accept-invitation/${invitation_id}`;
 
             // Send invitation email
             await this.notificationService.invitations.sendInvitation({
                 invitation_id,
                 email,
-                organization_name: organization.name,
+                organization_name: organizationName,
                 role,
                 invited_by_name: inviterContact.name,
                 invitation_link,
@@ -77,7 +92,7 @@ export class InvitationsConsumer {
      * Handle invitation.revoked event
      */
     async handleInvitationRevoked(event: any): Promise<void> {
-        const { email, organization_id } = event;
+        const { email, organization_id } = event.payload;
 
         this.logger.info({ email, organization_id }, 'Processing invitation.revoked event');
 

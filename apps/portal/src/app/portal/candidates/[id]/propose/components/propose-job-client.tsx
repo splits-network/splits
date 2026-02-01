@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, FormEvent } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
@@ -248,27 +249,22 @@ export default function ProposeJobClient({ candidateId }: ProposeJobClientProps)
                             </fieldset>
 
                             {/* Pitch (Optional) */}
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Your Pitch (Optional)</legend>
-                                <textarea
-                                    className={`textarea w-full h-32 ${validationErrors.pitch ? 'textarea-error' : ''}`}
-                                    value={pitch}
-                                    onChange={(e) => {
-                                        setPitch(e.target.value);
-                                        if (e.target.value.length <= 500) {
-                                            setValidationErrors({ ...validationErrors, pitch: '' });
-                                        }
-                                    }}
-                                    placeholder="Explain why this candidate would be a great fit for this role..."
-                                    maxLength={500}
-                                />
-                                <p className="fieldset-label">
-                                    {pitch.length}/500 characters
-                                    {validationErrors.pitch && (
-                                        <span className="text-error ml-2">{validationErrors.pitch}</span>
-                                    )}
-                                </p>
-                            </fieldset>
+                            <MarkdownEditor
+                                className="fieldset"
+                                label="Your Pitch (Optional)"
+                                value={pitch}
+                                onChange={(value) => {
+                                    setPitch(value);
+                                    if (value.length <= 500) {
+                                        setValidationErrors({ ...validationErrors, pitch: '' });
+                                    }
+                                }}
+                                placeholder="Explain why this candidate would be a great fit for this role..."
+                                maxLength={500}
+                                showCount
+                                height={180}
+                                preview="edit"
+                            />
                         </div>
 
                         {/* Form Actions */}

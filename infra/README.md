@@ -22,11 +22,14 @@ infra/
 │   ├── identity-service/
 │   │   └── deployment.yaml
 │   ├── ats-service/
-│   │   └── deployment.yaml
+│   │   ├── deployment.yaml
+│   │   ├── cronjobs/
+│   │   └── jobs/
 │   ├── network-service/
 │   │   └── deployment.yaml
 │   ├── billing-service/
-│   │   └── deployment.yaml
+│   │   ├── deployment.yaml
+│   │   └── cronjobs/
 │   ├── notification-service/
 │   │   └── deployment.yaml
 │   ├── api-gateway/

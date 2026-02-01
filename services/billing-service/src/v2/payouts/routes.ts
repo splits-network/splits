@@ -106,4 +106,40 @@ export function registerPayoutRoutes(
             return reply.code(400).send({ error: { message: error.message } });
         }
     });
+
+    /**
+     * Process a single payout transaction (Stripe transfer)
+     * POST /api/v2/payout-transactions/:id/process
+     */
+    app.post('/api/v2/payout-transactions/:id/process', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { id } = request.params as { id: string };
+
+            const processed = await config.payoutService.processPayoutTransaction(id, clerkUserId);
+            return reply.send({ data: processed });
+        } catch (error: any) {
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
+
+    /**
+     * Process all pending payout transactions for a placement
+     * POST /api/v2/placements/:placementId/payout-transactions/process
+     */
+    app.post('/api/v2/placements/:placementId/payout-transactions/process', async (request, reply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const { placementId } = request.params as { placementId: string };
+
+            const processed = await config.payoutService.processPlacementTransactions(
+                placementId,
+                clerkUserId
+            );
+
+            return reply.send({ data: processed });
+        } catch (error: any) {
+            return reply.code(400).send({ error: { message: error.message } });
+        }
+    });
 }

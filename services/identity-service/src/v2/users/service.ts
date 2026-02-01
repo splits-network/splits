@@ -145,6 +145,7 @@ export class UserServiceV2 {
             recruiter_id: accessContext.recruiterId,
             candidate_id: accessContext.candidateId,
             organization_ids: accessContext.organizationIds,
+            company_ids: accessContext.companyIds,
         };
     }
 

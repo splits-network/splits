@@ -9,10 +9,11 @@ export async function payoutScheduleRoutes(
     app: FastifyInstance,
     service: PayoutScheduleServiceV2
 ) {
+    const basePath = '/api/v2';
     // LIST - Get all payout schedules with filters
     app.get<{
         Querystring: StandardListParams & { filters?: string };
-    }>('/payout-schedules', async (request, reply) => {
+    }>(`${basePath}/payout-schedules`, async (request, reply) => {
         try {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
             if (!clerkUserId) {
@@ -43,7 +44,7 @@ export async function payoutScheduleRoutes(
     // GET BY ID - Get a single payout schedule
     app.get<{
         Params: { id: string };
-    }>('/payout-schedules/:id', async (request, reply) => {
+    }>(`${basePath}/payout-schedules/:id`, async (request, reply) => {
         try {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
             if (!clerkUserId) {
@@ -76,7 +77,7 @@ export async function payoutScheduleRoutes(
             trigger_event: string;
             status?: 'scheduled' | 'triggered' | 'cancelled' | 'pending' | 'processing' | 'processed' | 'failed';
         };
-    }>('/payout-schedules', async (request, reply) => {
+    }>(`${basePath}/payout-schedules`, async (request, reply) => {
         try {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
             if (!clerkUserId) {
@@ -118,7 +119,7 @@ export async function payoutScheduleRoutes(
             retry_count?: number;
             last_retry_at?: string;
         };
-    }>('/payout-schedules/:id', async (request, reply) => {
+    }>(`${basePath}/payout-schedules/:id`, async (request, reply) => {
         try {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
             if (!clerkUserId) {
@@ -149,7 +150,7 @@ export async function payoutScheduleRoutes(
     // DELETE - Cancel a payout schedule (admin only - soft delete)
     app.delete<{
         Params: { id: string };
-    }>('/payout-schedules/:id', async (request, reply) => {
+    }>(`${basePath}/payout-schedules/:id`, async (request, reply) => {
         try {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
             if (!clerkUserId) {
@@ -177,7 +178,7 @@ export async function payoutScheduleRoutes(
     // ADMIN ACTION - Trigger manual processing of a schedule
     app.post<{
         Params: { id: string };
-    }>('/payout-schedules/:id/trigger', async (request, reply) => {
+    }>(`${basePath}/payout-schedules/:id/trigger`, async (request, reply) => {
         try {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
             if (!clerkUserId) {
@@ -209,7 +210,7 @@ export async function payoutScheduleRoutes(
     });
 
     // ADMIN ACTION - Process all due schedules (automation endpoint)
-    app.post('/payout-schedules/process-due', async (request, reply) => {
+    app.post(`${basePath}/payout-schedules/process-due`, async (request, reply) => {
         try {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
             if (!clerkUserId) {

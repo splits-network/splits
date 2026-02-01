@@ -27,6 +27,7 @@ export function registerMembershipRoutes(
                 ...paginationParams,
                 user_id: query.user_id,
                 organization_id: query.organization_id,
+                company_id: query.company_id,
                 role: query.role,
             });
 

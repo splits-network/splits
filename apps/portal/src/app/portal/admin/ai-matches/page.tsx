@@ -1,13 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { ApiClient } from '@/lib/api-client';
-import { useToast } from '@/lib/toast-context';
+import { useState, useEffect } from "react";
+import { useToast } from "@/lib/toast-context";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
 
 export default function AIMatchesPage() {
     const [matches, setMatches] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const toast = useToast();
+    const { getToken } = useAuth();
 
     useEffect(() => {
         loadMatches();
@@ -16,37 +18,50 @@ export default function AIMatchesPage() {
     const loadMatches = async () => {
         setLoading(true);
         try {
-            const api = new ApiClient();
-            const response = await api.get<{ data: any[] }>('/automation/matches/pending');
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
+            const response = await client.get<{ data: any[] }>(
+                "/automation/matches/pending",
+            );
             setMatches(response.data || []);
         } catch (error) {
-            console.error('Failed to load matches:', error);
+            console.error("Failed to load matches:", error);
         } finally {
             setLoading(false);
         }
     };
 
     const reviewMatch = async (matchId: string, accepted: boolean) => {
-        const action = accepted ? 'accept' : 'reject';
-        if (!confirm(`${action.charAt(0).toUpperCase() + action.slice(1)} this match suggestion?`)) return;
+        const action = accepted ? "accept" : "reject";
+        if (
+            !confirm(
+                `${action.charAt(0).toUpperCase() + action.slice(1)} this match suggestion?`,
+            )
+        )
+            return;
 
         let rejectionReason = null;
         if (!accepted) {
-            rejectionReason = prompt('Rejection reason (optional):');
+            rejectionReason = prompt("Rejection reason (optional):");
         }
 
         try {
-            const api = new ApiClient();
-            await api.post(`/automation/matches/${matchId}/review`, {
-                reviewed_by: 'admin', // TODO: Get from auth
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
+            await client.post(`/automation/matches/${matchId}/review`, {
+                reviewed_by: "admin", // TODO: Get from auth
                 accepted,
                 rejection_reason: rejectionReason,
             });
             toast.success(`Match ${action}ed`);
             loadMatches();
         } catch (error) {
-            console.error('Failed to review match:', error);
-            toast.error('Failed to review match');
+            console.error("Failed to review match:", error);
+            toast.error("Failed to review match");
         }
     };
 
@@ -81,7 +96,15 @@ export default function AIMatchesPage() {
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-3 mb-3">
-                                            <div className="radial-progress text-primary" style={{ '--value': match.match_score } as any}>
+                                            <div
+                                                className="radial-progress text-primary"
+                                                style={
+                                                    {
+                                                        "--value":
+                                                            match.match_score,
+                                                    } as any
+                                                }
+                                            >
                                                 {match.match_score}%
                                             </div>
                                             <div>
@@ -89,38 +112,63 @@ export default function AIMatchesPage() {
                                                     Candidate Match
                                                 </h3>
                                                 <p className="text-sm text-base-content/60">
-                                                    Suggested {new Date(match.suggested_at).toLocaleDateString()}
+                                                    Suggested{" "}
+                                                    {new Date(
+                                                        match.suggested_at,
+                                                    ).toLocaleDateString()}
                                                 </p>
                                             </div>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4 mb-4">
                                             <div>
-                                                <span className="text-sm text-base-content/60">Candidate ID:</span>
+                                                <span className="text-sm text-base-content/60">
+                                                    Candidate ID:
+                                                </span>
                                                 <br />
                                                 <span className="font-mono text-sm">
-                                                    {match.candidate_id.substring(0, 16)}...
+                                                    {match.candidate_id.substring(
+                                                        0,
+                                                        16,
+                                                    )}
+                                                    ...
                                                 </span>
                                             </div>
                                             <div>
-                                                <span className="text-sm text-base-content/60">Job ID:</span>
+                                                <span className="text-sm text-base-content/60">
+                                                    Job ID:
+                                                </span>
                                                 <br />
                                                 <span className="font-mono text-sm">
-                                                    {match.job_id.substring(0, 16)}...
+                                                    {match.job_id.substring(
+                                                        0,
+                                                        16,
+                                                    )}
+                                                    ...
                                                 </span>
                                             </div>
                                         </div>
 
                                         {/* Match Reasons */}
                                         <div className="mb-4">
-                                            <h4 className="text-sm font-semibold mb-2">Why this match?</h4>
+                                            <h4 className="text-sm font-semibold mb-2">
+                                                Why this match?
+                                            </h4>
                                             <div className="flex flex-wrap gap-2">
-                                                {match.match_reasons.map((reason: string, idx: number) => (
-                                                    <span key={idx} className="badge badge-outline">
-                                                        <i className="fa-duotone fa-regular fa-check-circle mr-1"></i>
-                                                        {reason}
-                                                    </span>
-                                                ))}
+                                                {match.match_reasons.map(
+                                                    (
+                                                        reason: string,
+                                                        idx: number,
+                                                    ) => (
+                                                        <span
+                                                            key={idx}
+                                                            className="badge badge-outline"
+                                                        >
+                                                            <i className="fa-duotone fa-regular fa-check-circle mr-1"></i>
+                                                            {reason}
+                                                        </span>
+                                                    ),
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -128,14 +176,18 @@ export default function AIMatchesPage() {
                                     <div className="flex gap-2 ml-4">
                                         <button
                                             className="btn btn-success btn-sm"
-                                            onClick={() => reviewMatch(match.id, true)}
+                                            onClick={() =>
+                                                reviewMatch(match.id, true)
+                                            }
                                         >
                                             <i className="fa-duotone fa-regular fa-check"></i>
                                             Accept
                                         </button>
                                         <button
                                             className="btn btn-ghost btn-sm"
-                                            onClick={() => reviewMatch(match.id, false)}
+                                            onClick={() =>
+                                                reviewMatch(match.id, false)
+                                            }
                                         >
                                             <i className="fa-duotone fa-regular fa-times"></i>
                                             Reject
@@ -154,7 +206,10 @@ export default function AIMatchesPage() {
                     <div>
                         <h3 className="font-bold">AI Match Scoring</h3>
                         <div className="text-sm">
-                            Matches above 60% confidence are suggested for review. The AI considers title alignment, skills matching, experience level, and department specialization.
+                            Matches above 60% confidence are suggested for
+                            review. The AI considers title alignment, skills
+                            matching, experience level, and department
+                            specialization.
                         </div>
                     </div>
                 </div>

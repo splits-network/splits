@@ -26,7 +26,10 @@ import {
 import { ApiClient, createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
 import { ensureUserInDatabase } from "@/lib/user-registration";
-import { getCachedCurrentUserProfile, setCachedCurrentUserProfile } from "@/lib/current-user-profile";
+import {
+    getCachedCurrentUserProfile,
+    setCachedCurrentUserProfile,
+} from "@/lib/current-user-profile";
 
 type InitStatus = "loading" | "creating_account" | "ready" | "error";
 
@@ -347,6 +350,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 selectedPlan,
                 stripePaymentInfo,
             } = state;
+            const billingEmail = companyInfo?.billing_email?.trim();
 
             if (!selectedRole) {
                 setState((prev) => ({
@@ -360,6 +364,23 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 setState((prev) => ({
                     ...prev,
                     error: "Company name is required",
+                }));
+                return;
+            }
+            if (
+                selectedRole === "company_admin" &&
+                !companyInfo?.billing_terms
+            ) {
+                setState((prev) => ({
+                    ...prev,
+                    error: "Billing terms are required",
+                }));
+                return;
+            }
+            if (selectedRole === "company_admin" && !billingEmail) {
+                setState((prev) => ({
+                    ...prev,
+                    error: "Billing email is required",
                 }));
                 return;
             }
@@ -377,12 +398,12 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
             try {
                 const token = await getToken();
-                if (!token) throw new Error("No authentication token");
+                if (!token) return;
 
-                const apiClient = new ApiClient(token);
+                const client = createAuthenticatedClient(token);
 
                 // Get current user data
-                const response = await apiClient.get("/users", {
+                const response = await client.get("/users", {
                     params: { limit: 1 },
                 });
                 if (!response?.data) throw new Error("No user data found");
@@ -408,7 +429,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 if (selectedRole === "recruiter") {
                     try {
                         // Create recruiter profile
-                        const { data: recruiter } = await apiClient.post(
+                        const { data: recruiter } = await client.post(
                             "/recruiters",
                             {
                                 user_id: userData.id,
@@ -430,18 +451,28 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                                 selectedPlan.tier !== "starter" &&
                                 selectedPlan.price_monthly > 0;
 
-                            await apiClient.post("/subscriptions/activate", {
+                            const activateData: any = {
                                 plan_id: selectedPlan.id,
-                                // Only include payment info for paid plans
-                                ...(isPaidPlan && stripePaymentInfo
-                                    ? {
-                                          payment_method_id:
-                                              stripePaymentInfo.paymentMethodId,
-                                          customer_id:
-                                              stripePaymentInfo.customerId,
-                                      }
-                                    : {}),
-                            });
+                            };
+
+                            // Include payment info for paid plans
+                            if (isPaidPlan && stripePaymentInfo) {
+                                activateData.payment_method_id =
+                                    stripePaymentInfo.paymentMethodId;
+                                activateData.customer_id =
+                                    stripePaymentInfo.customerId;
+
+                                // Include promotion code if discount was applied
+                                if (stripePaymentInfo.appliedDiscount?.code) {
+                                    activateData.promotion_code =
+                                        stripePaymentInfo.appliedDiscount.code;
+                                }
+                            }
+
+                            await client.post(
+                                "/subscriptions/activate",
+                                activateData,
+                            );
                         }
                     } catch (error: any) {
                         setState((prev) => ({
@@ -465,7 +496,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                         .replace(/[^a-z0-9]+/g, "-")
                         .replace(/^-+|-+$/g, "");
 
-                    const { data: organization } = await apiClient.post(
+                    const { data: organization } = await client.post(
                         "/organizations",
                         {
                             name: organizationName,
@@ -474,23 +505,30 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                         },
                     );
 
-                    const { data: company } = await apiClient.post(
-                        "/companies",
+                    const { data: company } = await client.post("/companies", {
+                        identity_organization_id: organization.id,
+                        name: organizationName,
+                        website: companyInfo?.website || null,
+                        industry: companyInfo?.industry || null,
+                        company_size: companyInfo?.size || null,
+                        description: companyInfo?.description || null,
+                        headquarters_location:
+                            companyInfo?.headquarters_location || null,
+                        logo_url: companyInfo?.logo_url || null,
+                    });
+
+                    await client.post(
+                        `/company-billing-profiles/${company.id}`,
                         {
-                            identity_organization_id: organization.id,
-                            name: organizationName,
-                            website: companyInfo?.website || null,
-                            industry: companyInfo?.industry || null,
-                            company_size: companyInfo?.size || null,
-                            description: companyInfo?.description || null,
-                            headquarters_location:
-                                companyInfo?.headquarters_location || null,
-                            logo_url: companyInfo?.logo_url || null,
+                            billing_terms:
+                                companyInfo?.billing_terms || "net_30",
+                            billing_email: billingEmail || "",
+                            invoice_delivery_method: "email",
                         },
                     );
 
                     // Step 2: Create membership
-                    await apiClient.post("/memberships", {
+                    await client.post("/memberships", {
                         user_id: userData.id,
                         organization_id: organization.id,
                         role: selectedRole,
@@ -500,7 +538,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 }
 
                 // Step 3: Update user onboarding status
-                await apiClient.patch(`/users/${userData.id}`, {
+                await client.patch(`/users/${userData.id}`, {
                     onboarding_status: "completed",
                     onboarding_step: 4,
                     onboarding_completed_at: new Date().toISOString(),

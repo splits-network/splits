@@ -50,6 +50,7 @@ export type SubscriptionCreateInput = Partial<Omit<Subscription, 'id' | 'created
     user_id: string;
     plan_id: string;
     recruiter_id?: string | null;
+    promotion_code?: string;
 };
 export type SubscriptionUpdateInput = Partial<Omit<Subscription, 'id' | 'created_at' | 'updated_at'>>;
 
@@ -58,6 +59,7 @@ export type SubscriptionUpdateInput = Partial<Omit<Subscription, 'id' | 'created
  */
 export interface SetupIntentRequest {
     plan_id: string;
+    promotion_code?: string; // Optional Stripe promotion code
 }
 
 export interface SetupIntentResponse {
@@ -75,6 +77,7 @@ export interface ActivateSubscriptionRequest {
     customer_id: string;
     /** Billing period - monthly or annual. Defaults to monthly */
     billing_period?: BillingPeriod;
+    promotion_code?: string; // Optional Stripe promotion code
 }
 
 export interface ActivateSubscriptionResponse {

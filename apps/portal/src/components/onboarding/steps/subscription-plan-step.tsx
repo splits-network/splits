@@ -33,6 +33,7 @@ export function SubscriptionPlanStep() {
     const [clientSecret, setClientSecret] = useState<string | null>(null);
     const [customerId, setCustomerId] = useState<string | null>(null);
     const [paymentError, setPaymentError] = useState<string | null>(null);
+    const [appliedDiscount, setAppliedDiscount] = useState<any>(null);
     const [isAnnual, setIsAnnual] = useState(false);
 
     // Safety check: redirect non-recruiters if they somehow land here
@@ -147,6 +148,7 @@ export function SubscriptionPlanStep() {
         actions.setStripePaymentInfo({
             customerId,
             paymentMethodId,
+            appliedDiscount,
         });
 
         // Move to next step
@@ -340,6 +342,10 @@ export function SubscriptionPlanStep() {
                         onPaymentSuccess={handlePaymentSuccess}
                         onCancel={() => setViewState("select_plan")}
                         submitButtonText="Subscribe Now"
+                        allowDiscountCode={true}
+                        planId={selectedPlanData?.id}
+                        billingPeriod="monthly"
+                        onDiscountApplied={setAppliedDiscount}
                     />
                 </StripeProvider>
             </div>

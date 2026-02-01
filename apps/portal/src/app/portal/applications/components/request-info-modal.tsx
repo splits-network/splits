@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 
 interface RequestInfoModalProps {
     isOpen: boolean;
@@ -92,20 +93,17 @@ export default function RequestInfoModal({
                 )}
 
                 <form onSubmit={handleSubmit}>
-                    <fieldset className="fieldset mb-4">
-                        <legend className="fieldset-legend">Information Needed *</legend>
-                        <textarea
-                            className="textarea w-full h-32"
-                            value={questions}
-                            onChange={(e) => setQuestions(e.target.value)}
-                            placeholder="Please describe what additional information you need to continue the review..."
-                            disabled={submitting}
-                            required
-                        />
-                        <p className="fieldset-label">
-                            Be specific about what information you need and why it's relevant to your review.
-                        </p>
-                    </fieldset>
+                    <MarkdownEditor
+                        className="fieldset mb-4"
+                        label="Information Needed *"
+                        value={questions}
+                        onChange={setQuestions}
+                        placeholder="Please describe what additional information you need to continue the review..."
+                        helperText="Be specific about what information you need and why it's relevant to your review."
+                        height={180}
+                        preview="edit"
+                        disabled={submitting}
+                    />
 
                     <div className="flex gap-2 justify-end">
                         <button

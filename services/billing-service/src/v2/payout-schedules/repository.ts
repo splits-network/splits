@@ -268,6 +268,22 @@ export class PayoutScheduleRepository {
         return data || [];
     }
 
+    async findDueSchedulesForPlacement(placementId: string, beforeDate: Date): Promise<PayoutSchedule[]> {
+        const { data, error } = await this.supabase
+            .from('payout_schedules')
+            .select('*')
+            .eq('placement_id', placementId)
+            .eq('status', 'scheduled')
+            .lte('scheduled_date', beforeDate.toISOString())
+            .order('scheduled_date', { ascending: true });
+
+        if (error) {
+            throw new Error(`Failed to find due schedules for placement: ${error.message}`);
+        }
+
+        return data || [];
+    }
+
     /**
      * Find schedules by placement ID (for cascade operations)
      */

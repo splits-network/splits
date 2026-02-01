@@ -1,5 +1,4 @@
 export interface PlacementSnapshot {
-    id: string;
     placement_id: string;
 
     // Role IDs for all 5 commission-earning roles
@@ -17,8 +16,13 @@ export interface PlacementSnapshot {
     company_sourcer_rate: number | null;
 
     // Fee calculation
-    total_fee: number;
-    subscription_tier: string;
+    total_placement_fee: number;
+    // Per-role subscription tiers (nullable if role not present)
+    candidate_recruiter_tier: 'free' | 'paid' | 'premium' | null;
+    company_recruiter_tier: 'free' | 'paid' | 'premium' | null;
+    job_owner_tier: 'free' | 'paid' | 'premium' | null;
+    candidate_sourcer_tier: 'free' | 'paid' | 'premium' | null;
+    company_sourcer_tier: 'free' | 'paid' | 'premium' | null;
 
     // Timestamps
     created_at: string;
@@ -35,12 +39,16 @@ export interface PlacementSnapshotCreate {
     company_sourcer_recruiter_id: string | null;
 
     // Fee information
-    total_fee: number;
-    subscription_tier: 'FREE' | 'STANDARD' | 'PRO' | 'ENTERPRISE';
+    total_placement_fee: number;
+    // Per-role subscription tiers (nullable if role not present)
+    candidate_recruiter_tier: 'free' | 'paid' | 'premium' | null;
+    company_recruiter_tier: 'free' | 'paid' | 'premium' | null;
+    job_owner_tier: 'free' | 'paid' | 'premium' | null;
+    candidate_sourcer_tier: 'free' | 'paid' | 'premium' | null;
+    company_sourcer_tier: 'free' | 'paid' | 'premium' | null;
 }
 
 export interface PlacementSnapshotFilters {
     placement_id?: string;
     recruiter_id?: string;  // For filtering by any role ID
-    subscription_tier?: string;
 }

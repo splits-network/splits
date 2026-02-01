@@ -9,9 +9,11 @@ import { EventPublisher } from '../shared/events';
 import { PaginationResponse, buildPaginationResponse, validatePaginationParams } from '../shared/pagination';
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { BillingProfileRepository } from './billing-profile-repository';
 
 export class CompanyServiceV2 {
     private accessResolver: AccessContextResolver;
+    private billingProfileRepository: BillingProfileRepository;
 
     constructor(
         private repository: CompanyRepository,
@@ -19,6 +21,7 @@ export class CompanyServiceV2 {
         private eventPublisher?: EventPublisher
     ) {
         this.accessResolver = new AccessContextResolver(supabase);
+        this.billingProfileRepository = new BillingProfileRepository(supabase);
     }
 
     async getCompanies(
@@ -65,6 +68,15 @@ export class CompanyServiceV2 {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         });
+
+        if (data.billing_terms && data.billing_email) {
+            await this.billingProfileRepository.upsert({
+                company_id: company.id,
+                billing_terms: data.billing_terms,
+                billing_email: data.billing_email,
+                invoice_delivery_method: 'email',
+            });
+        }
 
         // Emit event
         if (this.eventPublisher) {

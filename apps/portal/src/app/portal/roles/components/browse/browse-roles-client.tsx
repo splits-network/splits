@@ -1,49 +1,126 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import ListPanel from "./list-panel";
+import { useAuth } from "@clerk/nextjs";
+import { useUserProfile } from "@/contexts";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { RolesBrowseClient } from "./domain-components";
+import RoleListItem from "./list-item";
 import DetailPanel from "./detail-panel";
+import RoleFilterForm from "./filter-form";
+import AddRoleWizardModal from "./role-wizard-modal";
+import { Job, JobFilters } from "./types";
 
 export default function BrowseRolesClient() {
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
+    const { getToken } = useAuth();
+    const { isCompanyUser, isRecruiter, profile } = useUserProfile();
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-    // ID from URL is our source of truth for selection
-    const selectedId = searchParams.get("roleId");
+    // Permission check for creating roles
+    // Allowed: Company Users (Admin/HM) OR Recruiters with Organization
+    const canCreateRole =
+        isCompanyUser ||
+        (isRecruiter && (profile?.organization_ids?.length || 0) > 0);
 
-    const handleSelect = useCallback(
-        (id: string) => {
-            const params = new URLSearchParams(searchParams);
-            params.set("roleId", id);
-            router.push(`${pathname}?${params.toString()}`);
+    const fetchJobs = useCallback(
+        async (params: any) => {
+            const token = await getToken();
+            if (!token) throw new Error("Not authenticated");
+
+            const client = createAuthenticatedClient(token);
+            const response = await client.get("/jobs", { params });
+
+            return {
+                data: (response.data || []) as Job[],
+                pagination: response.pagination || {
+                    total: 0,
+                    page: 1,
+                    limit: 25,
+                    total_pages: 0,
+                },
+            };
         },
-        [pathname, router, searchParams],
+        [getToken],
     );
 
-    const handleClose = useCallback(() => {
-        const params = new URLSearchParams(searchParams);
-        params.delete("roleId");
-        router.push(`${pathname}?${params.toString()}`);
-    }, [pathname, router, searchParams]);
+    const renderListItem = useCallback(
+        (job: Job, isSelected: boolean, onSelect: (id: string) => void) => (
+            <RoleListItem
+                key={job.id}
+                item={job}
+                isSelected={isSelected}
+                onSelect={onSelect}
+            />
+        ),
+        [],
+    );
+
+    const renderDetail = useCallback(
+        (id: string | null, onClose: () => void) => (
+            <DetailPanel id={id} onClose={onClose} />
+        ),
+        [],
+    );
+
+    const renderFilters = useCallback(
+        (filters: JobFilters, onChange: (filters: JobFilters) => void) => (
+            <RoleFilterForm filters={filters} onChange={onChange} />
+        ),
+        [],
+    );
 
     return (
-        <div className="h-[calc(100vh-8rem)] flex flex-col md:flex-row bg-base-200 rounded-xl overflow-hidden shadow-sm border border-base-300">
-            <ListPanel selectedId={selectedId} onSelect={handleSelect} />
-
-            <div
-                className={`
-                flex-1 flex-col bg-base-100 min-w-0
-                ${
-                    selectedId
-                        ? "fixed inset-0 z-50 flex md:static md:z-auto"
-                        : "hidden md:flex"
+        <>
+            <RolesBrowseClient
+                fetchFn={fetchJobs}
+                renderListItem={renderListItem}
+                renderDetail={renderDetail}
+                renderFilters={renderFilters}
+                defaultFilters={{ job_owner_filter: "all" }}
+                searchPlaceholder="Search roles..."
+                emptyStateIcon="fa-briefcase"
+                emptyStateMessage="Select a role to view details"
+                urlParamName="roleId"
+                tabs={[
+                    {
+                        key: "mine",
+                        label: "My Roles",
+                        filterKey: "job_owner_filter",
+                        filterValue: "assigned",
+                    },
+                    {
+                        key: "all",
+                        label: "Marketplace",
+                        filterKey: "job_owner_filter",
+                        filterValue: "all",
+                    },
+                ]}
+                defaultActiveTab="all"
+                actions={
+                    canCreateRole ? (
+                        <div
+                            className="tooltip tooltip-bottom"
+                            data-tip="Add Role"
+                        >
+                            <button
+                                onClick={() => setIsAddModalOpen(true)}
+                                className="btn btn-square btn-primary"
+                                aria-label="Add role"
+                            >
+                                <i className="fa-duotone fa-regular fa-plus text-lg"></i>
+                            </button>
+                        </div>
+                    ) : undefined
                 }
-            `}
-            >
-                <DetailPanel id={selectedId} onClose={handleClose} />
-            </div>
-        </div>
+            />
+
+            {/* Add Role Modal */}
+            {isAddModalOpen && (
+                <AddRoleWizardModal
+                    isOpen={isAddModalOpen}
+                    onClose={() => setIsAddModalOpen(false)}
+                />
+            )}
+        </>
     );
 }

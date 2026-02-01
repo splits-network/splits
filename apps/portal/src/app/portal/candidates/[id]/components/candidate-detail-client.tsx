@@ -19,6 +19,8 @@ import {
 import { getApplicationStageBadge, getRelationshipStatusBadge } from '@/lib/utils/badge-styles';
 import { getApplicationStageIcon } from '@/lib/utils/icon-styles';
 import { getApplicationStageBgColor } from '@/lib/utils/color-styles';
+import { usePresence } from '@/hooks/use-presence';
+import { Presence } from '@/components/presense';
 
 interface CandidateDetailClientProps {
     candidateId: string;
@@ -54,6 +56,10 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
     const chatDisabledReason = canChat
         ? null
         : "This candidate isn't linked to a user yet.";
+    const presence = usePresence([candidate?.user_id], { enabled: canChat });
+    const presenceStatus = candidate?.user_id
+        ? presence[candidate.user_id]?.status
+        : undefined;
 
     // Load candidate data first (fast)
     useEffect(() => {
@@ -228,7 +234,7 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
             const conversationId = await startChatConversation(getToken, candidate.user_id, {
                 company_id: candidate.company_id || null,
             });
-            router.push(`/portal/messages/${conversationId}`);
+            router.push(`/portal/messages?conversationId=${conversationId}`);
         } catch (err: any) {
             console.error("Failed to start chat:", err);
             toast.error(err?.message || "Failed to start chat");
@@ -395,7 +401,10 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
                                             {startingChat ? (
                                                 <span className="loading loading-spinner loading-xs"></span>
                                             ) : (
-                                                <i className="fa-duotone fa-regular fa-messages"></i>
+                                                <span className="inline-flex items-center gap-2">
+                                                    <Presence status={presenceStatus} />
+                                                    <i className="fa-duotone fa-regular fa-messages"></i>
+                                                </span>
                                             )}
                                             Message
                                         </button>
@@ -684,3 +693,5 @@ export default function CandidateDetailClient({ candidateId }: CandidateDetailCl
         </div>
     );
 }
+
+

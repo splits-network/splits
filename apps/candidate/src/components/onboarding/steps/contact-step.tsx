@@ -6,6 +6,7 @@
  */
 
 import { useOnboarding } from '../onboarding-provider';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 
 export function ContactStep() {
     const { state, updateProfileData } = useOnboarding();
@@ -90,19 +91,16 @@ export function ContactStep() {
                         </fieldset>
                     </div>
 
-                    <fieldset className="fieldset">
-                        <legend className="fieldset-legend">Short Bio</legend>
-                        <textarea 
-                            className="textarea w-full h-20"
-                            value={state.profileData.bio || ''}
-                            onChange={(e) => updateProfileData({ bio: e.target.value })}
-                            placeholder="A brief summary of your experience and what you're looking for..."
-                            maxLength={500}
-                        />
-                        <p className="fieldset-label">
-                            {(state.profileData.bio?.length || 0)}/500 characters
-                        </p>
-                    </fieldset>
+                    <MarkdownEditor
+                        className="fieldset"
+                        label="Short Bio"
+                        value={state.profileData.bio || ''}
+                        onChange={(value) => updateProfileData({ bio: value })}
+                        placeholder="A brief summary of your experience and what you're looking for..."
+                        maxLength={500}
+                        showCount
+                        height={160}
+                    />
                 </div>
 
                 {/* Online Presence Section */}

@@ -58,9 +58,7 @@ export class PlacementSnapshotRepository {
             query = query.eq('placement_id', filters.placement_id);
         }
 
-        if (filters.subscription_tier) {
-            query = query.eq('subscription_tier', filters.subscription_tier);
-        }
+        // subscription_tier filtering removed (tiers are per-role in snapshot)
 
         // Filter by any role ID (for recruiter commission lookup)
         if (filters.recruiter_id) {

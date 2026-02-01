@@ -7,6 +7,7 @@ import { useChatGateway } from "@/hooks/use-chat-gateway";
 import { registerChatRefresh, requestChatRefresh } from "@/lib/chat-refresh-queue";
 import { getCachedCurrentUserId } from "@/lib/current-user";
 import { getCachedUserSummary } from "@/lib/user-cache";
+import { usePresence } from "@/hooks/use-presence";
 import MessageListItem from "./list-item";
 import { ConversationRow, UserSummary } from "./types";
 
@@ -95,6 +96,10 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
             fetchUsers(otherUserIds);
         }
     }, [otherUserIds]);
+
+    const presenceMap = usePresence(otherUserIds, {
+        enabled: Boolean(currentUserId),
+    });
 
     useEffect(() => {
         const unregister = registerChatRefresh(() => fetchConversations());
@@ -205,12 +210,16 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
                             const other = otherId
                                 ? userMap[otherId]
                                 : null;
+                            const presenceStatus = otherId
+                                ? presenceMap[otherId]?.status
+                                : undefined;
                             return (
                                 <MessageListItem
                                     key={row.conversation_id}
                                     row={row}
                                     otherUser={other}
                                     isSelected={selectedId === convo.id}
+                                    presenceStatus={presenceStatus}
                                     onSelect={onSelect}
                                 />
                             );

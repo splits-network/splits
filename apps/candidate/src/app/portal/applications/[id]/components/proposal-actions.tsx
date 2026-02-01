@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
@@ -187,23 +188,21 @@ export function ProposalActions({ applicationId, jobTitle, recruiterName }: Prop
                             This helps them propose better-fitting roles in the future.
                         </p>
 
-                        <fieldset className="fieldset mb-4">
-                            <legend className="fieldset-legend">Reason for declining *</legend>
-                            <textarea
-                                className="textarea textarea-bordered w-full h-32"
-                                value={declineReason}
-                                onChange={(e) => {
-                                    setDeclineReason(e.target.value);
-                                    setError(null);
-                                }}
-                                placeholder="e.g., Location doesn't work for me, Salary is below my target, Not interested in this type of role..."
-                                maxLength={500}
-                                disabled={declining}
-                            />
-                            <p className="fieldset-label text-right">
-                                {declineReason.length}/500 characters
-                            </p>
-                        </fieldset>
+                        <MarkdownEditor
+                            className="fieldset mb-4"
+                            label="Reason for declining *"
+                            value={declineReason}
+                            onChange={(value) => {
+                                setDeclineReason(value);
+                                setError(null);
+                            }}
+                            placeholder="e.g., Location doesn't work for me, Salary is below my target, Not interested in this type of role..."
+                            maxLength={500}
+                            showCount
+                            height={180}
+                            preview="edit"
+                            disabled={declining}
+                        />
 
                         {error && (
                             <div className="alert alert-error mb-4">

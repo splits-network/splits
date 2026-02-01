@@ -1,16 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { ApiClient } from '@/lib/api-client';
-import Link from 'next/link';
-import { useToast } from '@/lib/toast-context';
+import { useState, useEffect } from "react";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import Link from "next/link";
+import { useToast } from "@/lib/toast-context";
+import { useAuth } from "@clerk/nextjs";
 
 interface AutomationRule {
     id: string;
     name: string;
     description: string;
     rule_type: string;
-    status: 'active' | 'paused' | 'disabled';
+    status: "active" | "paused" | "disabled";
     requires_human_approval: boolean;
     max_executions_per_day: number | null;
     times_triggered: number;
@@ -25,7 +26,7 @@ interface AutomationExecution {
     rule_id: string;
     entity_type: string;
     entity_id: string;
-    status: 'pending' | 'approved' | 'executed' | 'failed' | 'rejected';
+    status: "pending" | "approved" | "executed" | "failed" | "rejected";
     requires_approval: boolean;
     executed_at: string | null;
     error_message: string | null;
@@ -34,10 +35,13 @@ interface AutomationExecution {
 
 export default function AutomationControlsPage() {
     const [rules, setRules] = useState<AutomationRule[]>([]);
-    const [pendingExecutions, setPendingExecutions] = useState<AutomationExecution[]>([]);
+    const [pendingExecutions, setPendingExecutions] = useState<
+        AutomationExecution[]
+    >([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'rules' | 'executions'>('rules');
+    const [activeTab, setActiveTab] = useState<"rules" | "executions">("rules");
     const toast = useToast();
+    const { getToken } = useAuth();
 
     useEffect(() => {
         loadData();
@@ -46,77 +50,99 @@ export default function AutomationControlsPage() {
     const loadData = async () => {
         setLoading(true);
         try {
-            const api = new ApiClient();
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
 
             // Load automation rules
-            const rulesResponse = await api.get<{ data: AutomationRule[] }>('/admin/automation/rules');
+            const rulesResponse = await client.get<{ data: AutomationRule[] }>(
+                "/admin/automation/rules",
+            );
             setRules(rulesResponse.data || []);
 
             // Load pending executions requiring approval
-            const execResponse = await api.get<{ data: AutomationExecution[] }>(
-                '/admin/automation/executions',
-                { params: { status: 'pending', requires_approval: 'true' } }
-            );
+            const execResponse = await client.get<{
+                data: AutomationExecution[];
+            }>("/admin/automation/executions", {
+                params: { status: "pending", requires_approval: "true" },
+            });
             setPendingExecutions(execResponse.data || []);
         } catch (error) {
-            console.error('Failed to load automation data:', error);
+            console.error("Failed to load automation data:", error);
         } finally {
             setLoading(false);
         }
     };
 
     const toggleRuleStatus = async (ruleId: string, currentStatus: string) => {
-        const newStatus = currentStatus === 'active' ? 'paused' : 'active';
+        const newStatus = currentStatus === "active" ? "paused" : "active";
 
         try {
-            const api = new ApiClient();
-            await api.patch(`/admin/automation/rules/${ruleId}`, { status: newStatus });
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
+            await client.patch(`/admin/automation/rules/${ruleId}`, {
+                status: newStatus,
+            });
             await loadData();
         } catch (error) {
-            console.error('Failed to update rule status:', error);
-            toast.error('Failed to update rule status');
+            console.error("Failed to update rule status:", error);
+            toast.error("Failed to update rule status");
         }
     };
 
     const approveExecution = async (executionId: string) => {
-        if (!confirm('Approve this automation execution?')) return;
+        if (!confirm("Approve this automation execution?")) return;
 
         try {
-            const api = new ApiClient();
-            await api.post(`/admin/automation/executions/${executionId}/approve`);
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
+            await client.post(
+                `/admin/automation/executions/${executionId}/approve`,
+            );
             await loadData();
         } catch (error) {
-            console.error('Failed to approve execution:', error);
-            toast.error('Failed to approve execution');
+            console.error("Failed to approve execution:", error);
+            toast.error("Failed to approve execution");
         }
     };
 
     const rejectExecution = async (executionId: string) => {
-        const reason = prompt('Reason for rejection:');
+        const reason = prompt("Reason for rejection:");
         if (!reason) return;
 
         try {
-            const api = new ApiClient();
-            await api.post(`/admin/automation/executions/${executionId}/reject`, { reason });
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
+            await client.post(
+                `/admin/automation/executions/${executionId}/reject`,
+                { reason },
+            );
             await loadData();
         } catch (error) {
-            console.error('Failed to reject execution:', error);
-            toast.error('Failed to reject execution');
+            console.error("Failed to reject execution:", error);
+            toast.error("Failed to reject execution");
         }
     };
 
     const getStatusBadge = (status: string) => {
         const badges: Record<string, string> = {
-            active: 'badge-success',
-            paused: 'badge-warning',
-            disabled: 'badge-error',
-            pending: 'badge-warning',
-            approved: 'badge-info',
-            executed: 'badge-success',
-            failed: 'badge-error',
-            rejected: 'badge-error',
+            active: "badge-success",
+            paused: "badge-warning",
+            disabled: "badge-error",
+            pending: "badge-warning",
+            approved: "badge-info",
+            executed: "badge-success",
+            failed: "badge-error",
+            rejected: "badge-error",
         };
-        return badges[status] || 'badge-ghost';
+        return badges[status] || "badge-ghost";
     };
 
     return (
@@ -140,7 +166,9 @@ export default function AutomationControlsPage() {
                 <div className="alert alert-warning">
                     <i className="fa-duotone fa-regular fa-clock"></i>
                     <span>
-                        <strong>{pendingExecutions.length}</strong> automation{pendingExecutions.length !== 1 ? 's' : ''} pending approval
+                        <strong>{pendingExecutions.length}</strong> automation
+                        {pendingExecutions.length !== 1 ? "s" : ""} pending
+                        approval
                     </span>
                 </div>
             )}
@@ -148,15 +176,15 @@ export default function AutomationControlsPage() {
             {/* Tabs */}
             <div className="tabs tabs-boxed">
                 <button
-                    className={`tab ${activeTab === 'rules' ? 'tab-active' : ''}`}
-                    onClick={() => setActiveTab('rules')}
+                    className={`tab ${activeTab === "rules" ? "tab-active" : ""}`}
+                    onClick={() => setActiveTab("rules")}
                 >
                     <i className="fa-duotone fa-regular fa-gears mr-2"></i>
                     Automation Rules
                 </button>
                 <button
-                    className={`tab ${activeTab === 'executions' ? 'tab-active' : ''}`}
-                    onClick={() => setActiveTab('executions')}
+                    className={`tab ${activeTab === "executions" ? "tab-active" : ""}`}
+                    onClick={() => setActiveTab("executions")}
                 >
                     <i className="fa-duotone fa-regular fa-list-check mr-2"></i>
                     Pending Approvals
@@ -175,14 +203,16 @@ export default function AutomationControlsPage() {
             ) : (
                 <>
                     {/* Automation Rules Tab */}
-                    {activeTab === 'rules' && (
+                    {activeTab === "rules" && (
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <div className="overflow-x-auto">
                                     {rules.length === 0 ? (
                                         <div className="text-center py-8 text-base-content/70">
                                             <i className="fa-duotone fa-regular fa-inbox text-4xl mb-4"></i>
-                                            <p>No automation rules configured</p>
+                                            <p>
+                                                No automation rules configured
+                                            </p>
                                         </div>
                                     ) : (
                                         <table className="table">
@@ -202,9 +232,13 @@ export default function AutomationControlsPage() {
                                                     <tr key={rule.id}>
                                                         <td>
                                                             <div>
-                                                                <div className="font-semibold">{rule.name}</div>
+                                                                <div className="font-semibold">
+                                                                    {rule.name}
+                                                                </div>
                                                                 <div className="text-sm text-base-content/70">
-                                                                    {rule.description}
+                                                                    {
+                                                                        rule.description
+                                                                    }
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -214,7 +248,9 @@ export default function AutomationControlsPage() {
                                                             </span>
                                                         </td>
                                                         <td>
-                                                            <span className={`badge ${getStatusBadge(rule.status)}`}>
+                                                            <span
+                                                                className={`badge ${getStatusBadge(rule.status)}`}
+                                                            >
                                                                 {rule.status}
                                                             </span>
                                                         </td>
@@ -232,27 +268,53 @@ export default function AutomationControlsPage() {
                                                         </td>
                                                         <td>
                                                             <div className="text-sm">
-                                                                <div>Triggered: {rule.times_triggered}</div>
-                                                                <div>Executed: {rule.times_executed}</div>
+                                                                <div>
+                                                                    Triggered:{" "}
+                                                                    {
+                                                                        rule.times_triggered
+                                                                    }
+                                                                </div>
+                                                                <div>
+                                                                    Executed:{" "}
+                                                                    {
+                                                                        rule.times_executed
+                                                                    }
+                                                                </div>
                                                             </div>
                                                         </td>
                                                         <td>
                                                             {rule.last_executed_at ? (
                                                                 <div className="text-sm">
-                                                                    {new Date(rule.last_executed_at).toLocaleString()}
+                                                                    {new Date(
+                                                                        rule.last_executed_at,
+                                                                    ).toLocaleString()}
                                                                 </div>
                                                             ) : (
-                                                                <span className="text-base-content/50">Never</span>
+                                                                <span className="text-base-content/50">
+                                                                    Never
+                                                                </span>
                                                             )}
                                                         </td>
                                                         <td>
                                                             <div className="flex gap-2">
                                                                 <button
                                                                     className="btn btn-sm btn-ghost"
-                                                                    onClick={() => toggleRuleStatus(rule.id, rule.status)}
-                                                                    title={rule.status === 'active' ? 'Pause' : 'Activate'}
+                                                                    onClick={() =>
+                                                                        toggleRuleStatus(
+                                                                            rule.id,
+                                                                            rule.status,
+                                                                        )
+                                                                    }
+                                                                    title={
+                                                                        rule.status ===
+                                                                        "active"
+                                                                            ? "Pause"
+                                                                            : "Activate"
+                                                                    }
                                                                 >
-                                                                    <i className={`fa-duotone fa-regular fa-${rule.status === 'active' ? 'pause' : 'play'}`}></i>
+                                                                    <i
+                                                                        className={`fa-duotone fa-regular fa-${rule.status === "active" ? "pause" : "play"}`}
+                                                                    ></i>
                                                                 </button>
                                                             </div>
                                                         </td>
@@ -267,7 +329,7 @@ export default function AutomationControlsPage() {
                     )}
 
                     {/* Pending Executions Tab */}
-                    {activeTab === 'executions' && (
+                    {activeTab === "executions" && (
                         <div className="card bg-base-100 shadow">
                             <div className="card-body">
                                 <div className="overflow-x-auto">
@@ -288,51 +350,77 @@ export default function AutomationControlsPage() {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {pendingExecutions.map((execution) => (
-                                                    <tr key={execution.id}>
-                                                        <td>
-                                                            <div>
-                                                                <div className="font-semibold">{execution.entity_type}</div>
-                                                                <div className="text-sm text-base-content/70 font-mono">
-                                                                    {execution.entity_id.substring(0, 8)}
+                                                {pendingExecutions.map(
+                                                    (execution) => (
+                                                        <tr key={execution.id}>
+                                                            <td>
+                                                                <div>
+                                                                    <div className="font-semibold">
+                                                                        {
+                                                                            execution.entity_type
+                                                                        }
+                                                                    </div>
+                                                                    <div className="text-sm text-base-content/70 font-mono">
+                                                                        {execution.entity_id.substring(
+                                                                            0,
+                                                                            8,
+                                                                        )}
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div className="text-sm font-mono">
-                                                                {execution.rule_id.substring(0, 8)}
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <span className={`badge ${getStatusBadge(execution.status)}`}>
-                                                                {execution.status}
-                                                            </span>
-                                                        </td>
-                                                        <td>
-                                                            <div className="text-sm">
-                                                                {new Date(execution.created_at).toLocaleString()}
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div className="flex gap-2">
-                                                                <button
-                                                                    className="btn btn-sm btn-success"
-                                                                    onClick={() => approveExecution(execution.id)}
+                                                            </td>
+                                                            <td>
+                                                                <div className="text-sm font-mono">
+                                                                    {execution.rule_id.substring(
+                                                                        0,
+                                                                        8,
+                                                                    )}
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <span
+                                                                    className={`badge ${getStatusBadge(execution.status)}`}
                                                                 >
-                                                                    <i className="fa-duotone fa-regular fa-check"></i>
-                                                                    Approve
-                                                                </button>
-                                                                <button
-                                                                    className="btn btn-sm btn-error"
-                                                                    onClick={() => rejectExecution(execution.id)}
-                                                                >
-                                                                    <i className="fa-duotone fa-regular fa-times"></i>
-                                                                    Reject
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))}
+                                                                    {
+                                                                        execution.status
+                                                                    }
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <div className="text-sm">
+                                                                    {new Date(
+                                                                        execution.created_at,
+                                                                    ).toLocaleString()}
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div className="flex gap-2">
+                                                                    <button
+                                                                        className="btn btn-sm btn-success"
+                                                                        onClick={() =>
+                                                                            approveExecution(
+                                                                                execution.id,
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <i className="fa-duotone fa-regular fa-check"></i>
+                                                                        Approve
+                                                                    </button>
+                                                                    <button
+                                                                        className="btn btn-sm btn-error"
+                                                                        onClick={() =>
+                                                                            rejectExecution(
+                                                                                execution.id,
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        <i className="fa-duotone fa-regular fa-times"></i>
+                                                                        Reject
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ),
+                                                )}
                                             </tbody>
                                         </table>
                                     )}

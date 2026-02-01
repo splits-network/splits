@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
@@ -241,16 +242,16 @@ export default function InvitationPageClient({ token }: InvitationPageClientProp
                             Are you sure you want to decline this invitation from {recruiter?.name}?
                         </p>
 
-                        <div className="fieldset mt-4">
-                            <label className="label">Reason (Optional)</label>
-                            <textarea
-                                className="textarea h-24"
-                                placeholder="Let your recruiter know why you're declining..."
-                                value={declineReason}
-                                onChange={(e) => setDeclineReason(e.target.value)}
-                                disabled={processing}
-                            />
-                        </div>
+                        <MarkdownEditor
+                            className="fieldset mt-4"
+                            label="Reason (Optional)"
+                            value={declineReason}
+                            onChange={setDeclineReason}
+                            placeholder="Let your recruiter know why you're declining..."
+                            height={160}
+                            preview="edit"
+                            disabled={processing}
+                        />
 
                         {error && (
                             <div className="alert alert-error mt-4">

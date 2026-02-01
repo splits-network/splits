@@ -27,11 +27,62 @@ export class InvitationServiceV2 {
         return access;
     }
 
+    private async requireCompanyAdminOrPlatformAdmin(
+        clerkUserId: string,
+        organizationId: string,
+        companyId?: string | null
+    ): Promise<AccessContext> {
+        const access = await this.resolveAccessContext(clerkUserId);
+
+        // Platform admins can always proceed
+        if (access.isPlatformAdmin) {
+            return access;
+        }
+
+        // Check if user is company_admin
+        if (!access.roles.includes('company_admin')) {
+            this.logger.warn({ clerkUserId }, 'User does not have company_admin role');
+            throw new Error('You must be a company admin');
+        }
+
+        // Check organization membership
+        if (!access.organizationIds.includes(organizationId)) {
+            this.logger.warn({ clerkUserId, organizationId }, 'User is not a member of this organization');
+            throw new Error('You must be a member of this organization');
+        }
+
+        // If inviting to a specific company, verify user has access to that company
+        // (either has that company_id in their companyIds, or has an org-level membership)
+        if (companyId) {
+            const hasCompanyAccess =
+                access.companyIds.includes(companyId) ||
+                access.companyIds.length === 0; // Allow if user has org-level membership (no company_ids)
+
+            if (!hasCompanyAccess) {
+                this.logger.warn({ clerkUserId, companyId, userCompanyIds: access.companyIds }, 'User does not have access to this company');
+                throw new Error('You do not have access to this company');
+            }
+        }
+
+        return access;
+    }
+
     /**
      * Find all invitations with pagination and filters
      */
     async findInvitations(clerkUserId: string, filters: any) {
-        await this.requirePlatformAdmin(clerkUserId);
+        // Allow company admins to view invitations for their organization
+        if (filters.organization_id) {
+            await this.requireCompanyAdminOrPlatformAdmin(
+                clerkUserId,
+                filters.organization_id,
+                filters.company_id
+            );
+        } else {
+            // If no organization filter, require platform admin
+            await this.requirePlatformAdmin(clerkUserId);
+        }
+
         this.logger.info({ filters }, 'InvitationService.findInvitations');
         const result = await this.repository.findInvitations(filters);
         return result;
@@ -41,12 +92,22 @@ export class InvitationServiceV2 {
      * Find invitation by ID
      */
     async findInvitationById(clerkUserId: string, id: string) {
-        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id }, 'InvitationService.findInvitationById');
         const invitation = await this.repository.findInvitationById(id);
         if (!invitation) {
             throw new Error(`Invitation not found: ${id}`);
         }
+
+        // Verify user has access to this invitation's organization
+        const access = await this.resolveAccessContext(clerkUserId);
+        if (!access.isPlatformAdmin) {
+            // Check if user is company admin for this organization
+            if (!access.organizationIds.includes(invitation.organization_id)) {
+                this.logger.warn({ clerkUserId, invitationOrgId: invitation.organization_id }, 'User does not have access to this invitation');
+                throw new Error('You do not have access to this invitation');
+            }
+        }
+
         return invitation;
     }
 
@@ -54,15 +115,24 @@ export class InvitationServiceV2 {
      * Create a new invitation
      */
     async createInvitation(clerkUserId: string, invitationData: any) {
-        await this.requirePlatformAdmin(clerkUserId);
+        // Authorize company admin or platform admin
+        const access = await this.requireCompanyAdminOrPlatformAdmin(
+            clerkUserId,
+            invitationData.organization_id,
+            invitationData.company_id
+        );
+
         this.logger.info(
             {
                 email: invitationData.email,
                 organization_id: invitationData.organization_id,
+                company_id: invitationData.company_id,
+                role: invitationData.role,
             },
             'InvitationService.createInvitation'
         );
 
+        // Validation
         if (!invitationData.email) {
             throw new Error('Email is required');
         }
@@ -75,14 +145,28 @@ export class InvitationServiceV2 {
             throw new Error('Role is required');
         }
 
+        // Check for duplicate pending invitation
+        const existing = await this.repository.findInvitations({
+            email: invitationData.email.toLowerCase(),
+            organization_id: invitationData.organization_id,
+            company_id: invitationData.company_id || null,
+            status: 'pending',
+            page: 1,
+            limit: 1,
+        });
+
+        if (existing.data.length > 0) {
+            throw new Error('An invitation has already been sent to this email for this company');
+        }
+
         const invitation = await this.repository.createInvitation({
             id: uuidv4(),
             organization_id: invitationData.organization_id,
-            email: invitationData.email,
+            company_id: invitationData.company_id || null,
+            email: invitationData.email.toLowerCase(),
             role: invitationData.role,
             status: 'pending',
-            invited_by: invitationData.invited_by || null,
-            token: uuidv4(),
+            invited_by: access.identityUserId,
             expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -91,8 +175,10 @@ export class InvitationServiceV2 {
         await this.eventPublisher.publish('invitation.created', {
             invitation_id: invitation.id,
             organization_id: invitation.organization_id,
+            company_id: invitation.company_id,
             email: invitation.email,
             role: invitation.role,
+            invited_by: access.identityUserId,
         });
 
         this.logger.info({ id: invitation.id }, 'InvitationService.createInvitation - invitation created');
@@ -128,9 +214,9 @@ export class InvitationServiceV2 {
      * Delete invitation (soft delete)
      */
     async deleteInvitation(clerkUserId: string, id: string) {
-        await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id }, 'InvitationService.deleteInvitation');
 
+        // findInvitationById checks authorization
         await this.findInvitationById(clerkUserId, id);
         await this.repository.deleteInvitation(id);
 
@@ -139,5 +225,78 @@ export class InvitationServiceV2 {
         });
 
         this.logger.info({ id }, 'InvitationService.deleteInvitation - invitation deleted');
+    }
+
+    /**
+     * Accept an invitation and create membership
+     */
+    async acceptInvitation(invitationId: string, userId: string, userEmail: string) {
+        this.logger.info({ invitationId, userId }, 'InvitationService.acceptInvitation');
+
+        // Fetch invitation without auth (user has the invitation link)
+        const invitation = await this.repository.findInvitationById(invitationId);
+        if (!invitation) {
+            throw new Error('Invitation not found');
+        }
+
+        if (invitation.status !== 'pending') {
+            throw new Error('Invitation already used or expired');
+        }
+
+        if (new Date(invitation.expires_at) < new Date()) {
+            throw new Error('Invitation has expired');
+        }
+
+        // Verify email matches
+        if (userEmail.toLowerCase() !== invitation.email.toLowerCase()) {
+            throw new Error('Email does not match invitation');
+        }
+
+        // Update invitation status
+        await this.repository.updateInvitation(invitationId, {
+            status: 'accepted',
+            accepted_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        });
+
+        // Publish event - membership service will handle creating the membership
+        await this.eventPublisher.publish('invitation.accepted', {
+            invitation_id: invitationId,
+            user_id: userId,
+            organization_id: invitation.organization_id,
+            company_id: invitation.company_id,
+            role: invitation.role,
+        });
+
+        this.logger.info({ invitationId }, 'InvitationService.acceptInvitation - completed');
+    }
+
+    /**
+     * Resend an invitation (extends expiration and re-sends email)
+     */
+    async resendInvitation(clerkUserId: string, invitationId: string): Promise<void> {
+        const invitation = await this.findInvitationById(clerkUserId, invitationId);
+
+        if (invitation.status !== 'pending') {
+            throw new Error('Can only resend pending invitations');
+        }
+
+        // Extend expiration
+        await this.repository.updateInvitation(invitationId, {
+            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            updated_at: new Date().toISOString(),
+        });
+
+        // Re-publish event to trigger email
+        await this.eventPublisher.publish('invitation.created', {
+            invitation_id: invitation.id,
+            organization_id: invitation.organization_id,
+            company_id: invitation.company_id,
+            email: invitation.email,
+            role: invitation.role,
+            invited_by: invitation.invited_by,
+        });
+
+        this.logger.info({ invitationId }, 'InvitationService.resendInvitation - invitation resent');
     }
 }

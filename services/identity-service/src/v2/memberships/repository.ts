@@ -15,10 +15,19 @@ export class MembershipRepository {
     ): Promise<{ data: any[]; total: number }> {
         let query = this.supabase
             .from('memberships')
-            .select('*, organizations(*), users(*)', { count: 'exact' });
+            .select('*, organizations(*), companies(*), users(*)', { count: 'exact' })
+            .is('deleted_at', null);
 
         if (filters.organization_id) {
             query = query.eq('organization_id', filters.organization_id);
+        }
+
+        if (filters.company_id !== undefined) {
+            if (filters.company_id === null) {
+                query = query.is('company_id', null);
+            } else {
+                query = query.eq('company_id', filters.company_id);
+            }
         }
 
         if (filters.user_id) {
@@ -44,8 +53,9 @@ export class MembershipRepository {
     async findMembershipById(id: string): Promise<any> {
         const { data, error } = await this.supabase
             .from('memberships')
-            .select('*, organizations(*), users(*)')
+            .select('*, organizations(*), companies(*), users(*)')
             .eq('id', id)
+            .is('deleted_at', null)
             .single();
 
         if (error) throw error;
@@ -56,7 +66,7 @@ export class MembershipRepository {
         const { data: membership, error } = await this.supabase
             .from('memberships')
             .insert([data])
-            .select('*, organizations(*), users(*)')
+            .select('*, organizations(*), companies(*), users(*)')
             .single();
 
         if (error) throw error;
@@ -68,7 +78,7 @@ export class MembershipRepository {
             .from('memberships')
             .update(updates)
             .eq('id', id)
-            .select('*, organizations(*), users(*)')
+            .select('*, organizations(*), companies(*), users(*)')
             .single();
 
         if (error) throw error;

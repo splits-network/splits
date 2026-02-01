@@ -5,6 +5,7 @@ export interface AccessContext {
     candidateId: string | null;
     recruiterId: string | null;
     organizationIds: string[];
+    companyIds: string[];
     roles: string[];
     isPlatformAdmin: boolean;
     error: string;
@@ -57,6 +58,7 @@ export async function resolveAccessContext(
                 candidateId: null,
                 recruiterId: null,
                 organizationIds: [],
+                companyIds: [],
                 roles: [],
                 isPlatformAdmin: false,
                 error: 'No clerkUserId provided',
@@ -69,7 +71,7 @@ export async function resolveAccessContext(
                 id,
                 candidates!candidates_user_id_fkey ( id ),
                 recruiters!recruiters_user_id_fkey ( id, status ),
-                memberships!memberships_user_id_fkey ( organization_id, role )
+                memberships!memberships_user_id_fkey ( organization_id, company_id, role )
             `
             )
             .eq('clerk_user_id', clerkUserId)
@@ -83,6 +85,7 @@ export async function resolveAccessContext(
                 candidateId: null,
                 recruiterId: null,
                 organizationIds: [],
+                companyIds: [],
                 roles: [],
                 isPlatformAdmin: false,
                 error: 'Identity user not found',
@@ -91,6 +94,7 @@ export async function resolveAccessContext(
 
         const memberships = identityUserResult.data?.memberships || [];
         const organizationIds = memberships.map(m => m.organization_id).filter(Boolean);
+        const companyIds = memberships.map(m => m.company_id).filter(Boolean);
         const roles = memberships.map(m => m.role).filter(Boolean);
 
         // Handle both array and single object cases for recruiters (Supabase returns object for 1:1, array for 1:many)
@@ -118,6 +122,7 @@ export async function resolveAccessContext(
             candidateId,
             recruiterId: activeRecruiter?.id || null,
             organizationIds,
+            companyIds,
             roles,
             isPlatformAdmin: roles.includes('platform_admin'),
             error: '',
@@ -132,6 +137,7 @@ export async function resolveAccessContext(
             candidateId: null,
             recruiterId: null,
             organizationIds: [],
+            companyIds: [],
             roles: [],
             isPlatformAdmin: false,
         };

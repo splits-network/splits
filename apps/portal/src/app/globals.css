@@ -8,24 +8,25 @@
 
 /* Cookie Consent Banner Animation */
 @keyframes slide-up {
-  from {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .animate-slide-up {
-  animation: slide-up 0.3s ease-out;
+    animation: slide-up 0.3s ease-out;
 }
 
 /* Ensure stat descriptions wrap text properly */
 .stat-desc {
-  white-space: normal;
-  word-break: break-word;
+    white-space: normal;
+    word-break: break-word;
 }
 
 /* ============================================
@@ -34,157 +35,171 @@
 
 /* Elevation Shadow System */
 .shadow-elevation-1 {
-  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
 .shadow-elevation-2 {
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 }
 
 .shadow-elevation-3 {
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
 .shadow-elevation-4 {
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 .shadow-elevation-hover {
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
 /* Card Hover Lift Effect */
 .hover-lift {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .hover-lift:hover {
-  transform: translateY(-2px);
+    transform: translateY(-2px);
 }
 
 /* Expand/Collapse Animation */
 @keyframes expand-down {
-  from {
-    opacity: 0;
-    max-height: 0;
-  }
-  to {
-    opacity: 1;
-    max-height: 500px;
-  }
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+
+    to {
+        opacity: 1;
+        max-height: 500px;
+    }
 }
 
 @keyframes collapse-up {
-  from {
-    opacity: 1;
-    max-height: 500px;
-  }
-  to {
-    opacity: 0;
-    max-height: 0;
-  }
+    from {
+        opacity: 1;
+        max-height: 500px;
+    }
+
+    to {
+        opacity: 0;
+        max-height: 0;
+    }
 }
 
 .animate-expand {
-  animation: expand-down 0.3s ease-out forwards;
-  overflow: hidden;
+    animation: expand-down 0.3s ease-out forwards;
+    overflow: hidden;
 }
 
 .animate-collapse {
-  animation: collapse-up 0.2s ease-in forwards;
-  overflow: hidden;
+    animation: collapse-up 0.2s ease-in forwards;
+    overflow: hidden;
 }
 
 /* Fade In Animation */
 @keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .animate-fade-in {
-  animation: fade-in 0.2s ease-out;
+    animation: fade-in 0.2s ease-out;
+}
+
+/* Force markdown editor fullscreen to cover viewport */
+.w-md-editor-fullscreen {
+    height: 100vh !important;
+    width: 100vw !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 9999 !important;
 }
 
 /* Scale In Animation */
 @keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .animate-scale-in {
-  animation: scale-in 0.2s ease-out;
+    animation: scale-in 0.2s ease-out;
 }
 
 /* Sidebar Active Indicator */
 .sidebar-item-active {
-  position: relative;
+    position: relative;
 }
 
 .sidebar-item-active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: oklch(var(--color-primary));
-  border-radius: 0 2px 2px 0;
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: oklch(var(--color-primary));
+    border-radius: 0 2px 2px 0;
 }
 
 /* Gradient Text */
 .text-gradient-primary {
-  background: linear-gradient(135deg, oklch(var(--color-primary)) 0%, oklch(var(--color-secondary)) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+    background: linear-gradient(135deg, oklch(var(--color-primary)) 0%, oklch(var(--color-secondary)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 /* Badge Ribbon (for entity cards) */
 .badge-ribbon {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  box-shadow: -2px 2px 4px rgb(0 0 0 / 0.1);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    box-shadow: -2px 2px 4px rgb(0 0 0 / 0.1);
 }
 
 /* Smooth scrollbar for sidebars */
 .scrollbar-thin {
-  scrollbar-width: thin;
-  scrollbar-color: oklch(var(--color-base-300)) transparent;
+    scrollbar-width: thin;
+    scrollbar-color: oklch(var(--color-base-300)) transparent;
 }
 
 .scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
+    width: 6px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: oklch(var(--color-base-300));
-  border-radius: 3px;
+    background-color: oklch(var(--color-base-300));
+    border-radius: 3px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: oklch(var(--color-base-content) / 0.3);
+    background-color: oklch(var(--color-base-content) / 0.3);
 }
 
 /* Focus ring for accessibility */
 .focus-ring {
-  outline: none;
+    outline: none;
 }
 
 .focus-ring:focus-visible {
-  outline: 2px solid oklch(var(--color-primary));
-  outline-offset: 2px;
+    outline: 2px solid oklch(var(--color-primary));
+    outline-offset: 2px;
 }

@@ -1,7 +1,16 @@
 import { PageTitle } from "@/components/page-title";
 import BrowseMessagesClient from "./components/browse/browse-messages-client";
 
-export default function MessagesPage() {
+type MessagesSearchParams = {
+    conversationId?: string;
+};
+
+type MessagesPageProps = {
+    searchParams?: Promise<MessagesSearchParams>;
+};
+
+export default async function MessagesPage({ searchParams }: MessagesPageProps) {
+    const resolvedParams = await searchParams;
     return (
         <>
             <PageTitle
@@ -9,7 +18,11 @@ export default function MessagesPage() {
                 subtitle="Manage candidate and company conversations"
             />
             <div className="space-y-6">
-                <BrowseMessagesClient />
+                <BrowseMessagesClient
+                    initialConversationId={
+                        resolvedParams?.conversationId ?? null
+                    }
+                />
             </div>
         </>
     );

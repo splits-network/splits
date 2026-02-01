@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/nextjs';
-import Link from 'next/link';
-import { ApiClient } from '@/lib/api-client';
+import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
+import Link from "next/link";
+import { createAuthenticatedClient } from "@/lib/api-client";
 
 export default function CookieConsent() {
     const [showBanner, setShowBanner] = useState(false);
@@ -12,7 +12,7 @@ export default function CookieConsent() {
 
     useEffect(() => {
         // Check if user has already made a choice
-        const consent = localStorage.getItem('cookie-consent');
+        const consent = localStorage.getItem("cookie-consent");
         if (!consent) {
             // Delay showing banner slightly for better UX
             setTimeout(() => setShowBanner(true), 1000);
@@ -24,35 +24,31 @@ export default function CookieConsent() {
         const syncConsentToDatabase = async () => {
             if (!isSignedIn) return;
 
-            const consentStr = localStorage.getItem('cookie-consent');
+            const consentStr = localStorage.getItem("cookie-consent");
             if (!consentStr) return;
 
-            const syncedFlag = localStorage.getItem('cookie-consent-synced');
-            if (syncedFlag === 'true') return; // Already synced
+            const syncedFlag = localStorage.getItem("cookie-consent-synced");
+            if (syncedFlag === "true") return; // Already synced
 
             try {
                 const consentData = JSON.parse(consentStr);
                 const token = await getToken();
+                if (!token) return;
 
-                if (!token) {
-                    console.warn('No auth token available for syncing consent');
-                    return;
-                }
+                const client = createAuthenticatedClient(token);
 
-                const apiClient = new ApiClient(token);
-
-                await apiClient.post('/consent', {
+                await client.post("/consent", {
                     preferences: {
                         functional: consentData.functional ?? false,
                         analytics: consentData.analytics ?? false,
-                        marketing: consentData.marketing ?? false
-                    }
+                        marketing: consentData.marketing ?? false,
+                    },
                 });
 
                 // Mark as synced to avoid re-syncing
-                localStorage.setItem('cookie-consent-synced', 'true');
+                localStorage.setItem("cookie-consent-synced", "true");
             } catch (error) {
-                console.error('Error syncing consent to database:', error);
+                console.error("Error syncing consent to database:", error);
             }
         };
 
@@ -65,37 +61,33 @@ export default function CookieConsent() {
             functional: preferences.functional ?? false,
             analytics: preferences.analytics ?? false,
             marketing: preferences.marketing ?? false,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         };
 
         // Always save to localStorage
-        localStorage.setItem('cookie-consent', JSON.stringify(consentData));
+        localStorage.setItem("cookie-consent", JSON.stringify(consentData));
         // Clear synced flag so new consent gets synced when user is authenticated
-        localStorage.removeItem('cookie-consent-synced');
+        localStorage.removeItem("cookie-consent-synced");
 
         // If user is authenticated, sync to database via API Gateway
         if (isSignedIn) {
             try {
                 const token = await getToken();
+                if (!token) return;
 
-                if (!token) {
-                    console.warn('No auth token available for syncing consent immediately');
-                    return;
-                }
-
-                const apiClient = new ApiClient(token);
-                await apiClient.post('/consent', {
+                const client = createAuthenticatedClient(token);
+                await client.post("/consent", {
                     preferences: {
                         functional: consentData.functional,
                         analytics: consentData.analytics,
-                        marketing: consentData.marketing
-                    }
+                        marketing: consentData.marketing,
+                    },
                 });
 
                 // Mark as synced
-                localStorage.setItem('cookie-consent-synced', 'true');
+                localStorage.setItem("cookie-consent-synced", "true");
             } catch (error) {
-                console.error('Error syncing consent:', error);
+                console.error("Error syncing consent:", error);
             }
         }
     };
@@ -104,7 +96,7 @@ export default function CookieConsent() {
         await saveConsent({
             functional: true,
             analytics: true,
-            marketing: true
+            marketing: true,
         });
         setShowBanner(false);
         setShowPreferences(false);
@@ -115,7 +107,7 @@ export default function CookieConsent() {
         await saveConsent({
             functional: false,
             analytics: false,
-            marketing: false
+            marketing: false,
         });
         setShowBanner(false);
         setShowPreferences(false);
@@ -130,7 +122,12 @@ export default function CookieConsent() {
     if (!showBanner) return null;
 
     if (showPreferences) {
-        return <CookiePreferences onSave={handleSavePreferences} onClose={() => setShowPreferences(false)} />;
+        return (
+            <CookiePreferences
+                onSave={handleSavePreferences}
+                onClose={() => setShowPreferences(false)}
+            />
+        );
     }
 
     return (
@@ -141,12 +138,33 @@ export default function CookieConsent() {
                         <div className="flex items-start gap-3 mb-2">
                             <i className="fa-duotone fa-regular fa-cookie-bite text-3xl text-primary shrink-0 mt-1"></i>
                             <div>
-                                <h3 className="font-bold text-lg mb-1">We Value Your Privacy</h3>
+                                <h3 className="font-bold text-lg mb-1">
+                                    We Value Your Privacy
+                                </h3>
                                 <p className="text-sm text-base-content/80">
-                                    We use cookies to enhance your browsing experience, analyze site traffic, and personalize content.
-                                    By clicking "Accept All", you consent to our use of cookies. Learn more in our{' '}
-                                    <a href="https://applicant.network/cookies" className="link link-primary" target="_blank" rel="noopener noreferrer">Cookie Policy</a> and{' '}
-                                    <a href="https://applicant.network/privacy" className="link link-primary" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
+                                    We use cookies to enhance your browsing
+                                    experience, analyze site traffic, and
+                                    personalize content. By clicking "Accept
+                                    All", you consent to our use of cookies.
+                                    Learn more in our{" "}
+                                    <a
+                                        href="https://applicant.network/cookies"
+                                        className="link link-primary"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Cookie Policy
+                                    </a>{" "}
+                                    and{" "}
+                                    <a
+                                        href="https://applicant.network/privacy"
+                                        className="link link-primary"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Privacy Policy
+                                    </a>
+                                    .
                                 </p>
                             </div>
                         </div>
@@ -179,7 +197,13 @@ export default function CookieConsent() {
     );
 }
 
-function CookiePreferences({ onSave, onClose }: { onSave: (prefs: any) => void; onClose: () => void }) {
+function CookiePreferences({
+    onSave,
+    onClose,
+}: {
+    onSave: (prefs: any) => void;
+    onClose: () => void;
+}) {
     const [preferences, setPreferences] = useState({
         functional: true,
         analytics: true,
@@ -199,13 +223,18 @@ function CookiePreferences({ onSave, onClose }: { onSave: (prefs: any) => void; 
                             <i className="fa-duotone fa-regular fa-cookie-bite text-primary"></i>
                             Cookie Preferences
                         </h2>
-                        <button onClick={onClose} className="btn btn-ghost btn-sm btn-circle">
+                        <button
+                            onClick={onClose}
+                            className="btn btn-ghost btn-sm btn-circle"
+                        >
                             <i className="fa-duotone fa-regular fa-xmark text-xl"></i>
                         </button>
                     </div>
 
                     <p className="text-sm text-base-content/80 mb-6">
-                        Manage your cookie preferences below. Necessary cookies are always enabled as they are required for the website to function properly.
+                        Manage your cookie preferences below. Necessary cookies
+                        are always enabled as they are required for the website
+                        to function properly.
                     </p>
 
                     <div className="space-y-4">
@@ -216,13 +245,18 @@ function CookiePreferences({ onSave, onClose }: { onSave: (prefs: any) => void; 
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-2">
                                             <i className="fa-duotone fa-regular fa-lock text-primary"></i>
-                                            <h3 className="font-semibold">Strictly Necessary Cookies</h3>
+                                            <h3 className="font-semibold">
+                                                Strictly Necessary Cookies
+                                            </h3>
                                         </div>
                                         <p className="text-sm text-base-content/70">
-                                            Essential for the website to function. These cannot be disabled.
+                                            Essential for the website to
+                                            function. These cannot be disabled.
                                         </p>
                                     </div>
-                                    <div className="badge badge-success">Always On</div>
+                                    <div className="badge badge-success">
+                                        Always On
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -234,17 +268,26 @@ function CookiePreferences({ onSave, onClose }: { onSave: (prefs: any) => void; 
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-2">
                                             <i className="fa-duotone fa-regular fa-sliders text-secondary"></i>
-                                            <h3 className="font-semibold">Functionality Cookies</h3>
+                                            <h3 className="font-semibold">
+                                                Functionality Cookies
+                                            </h3>
                                         </div>
                                         <p className="text-sm text-base-content/70">
-                                            Remember your preferences and settings for a personalized experience.
+                                            Remember your preferences and
+                                            settings for a personalized
+                                            experience.
                                         </p>
                                     </div>
                                     <input
                                         type="checkbox"
                                         className="toggle toggle-primary"
                                         checked={preferences.functional}
-                                        onChange={(e) => setPreferences({ ...preferences, functional: e.target.checked })}
+                                        onChange={(e) =>
+                                            setPreferences({
+                                                ...preferences,
+                                                functional: e.target.checked,
+                                            })
+                                        }
                                     />
                                 </div>
                             </div>
@@ -257,17 +300,25 @@ function CookiePreferences({ onSave, onClose }: { onSave: (prefs: any) => void; 
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-2">
                                             <i className="fa-duotone fa-regular fa-chart-line text-accent"></i>
-                                            <h3 className="font-semibold">Analytics Cookies</h3>
+                                            <h3 className="font-semibold">
+                                                Analytics Cookies
+                                            </h3>
                                         </div>
                                         <p className="text-sm text-base-content/70">
-                                            Help us understand how visitors use our website to improve performance.
+                                            Help us understand how visitors use
+                                            our website to improve performance.
                                         </p>
                                     </div>
                                     <input
                                         type="checkbox"
                                         className="toggle toggle-primary"
                                         checked={preferences.analytics}
-                                        onChange={(e) => setPreferences({ ...preferences, analytics: e.target.checked })}
+                                        onChange={(e) =>
+                                            setPreferences({
+                                                ...preferences,
+                                                analytics: e.target.checked,
+                                            })
+                                        }
                                     />
                                 </div>
                             </div>
@@ -280,17 +331,26 @@ function CookiePreferences({ onSave, onClose }: { onSave: (prefs: any) => void; 
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-2">
                                             <i className="fa-duotone fa-regular fa-bullseye text-info"></i>
-                                            <h3 className="font-semibold">Marketing Cookies</h3>
+                                            <h3 className="font-semibold">
+                                                Marketing Cookies
+                                            </h3>
                                         </div>
                                         <p className="text-sm text-base-content/70">
-                                            Track your activity to deliver relevant advertising and measure effectiveness.
+                                            Track your activity to deliver
+                                            relevant advertising and measure
+                                            effectiveness.
                                         </p>
                                     </div>
                                     <input
                                         type="checkbox"
                                         className="toggle toggle-primary"
                                         checked={preferences.marketing}
-                                        onChange={(e) => setPreferences({ ...preferences, marketing: e.target.checked })}
+                                        onChange={(e) =>
+                                            setPreferences({
+                                                ...preferences,
+                                                marketing: e.target.checked,
+                                            })
+                                        }
                                     />
                                 </div>
                             </div>
@@ -301,17 +361,37 @@ function CookiePreferences({ onSave, onClose }: { onSave: (prefs: any) => void; 
                         <button onClick={onClose} className="btn btn-ghost">
                             Cancel
                         </button>
-                        <button onClick={handleSave} className="btn btn-primary">
+                        <button
+                            onClick={handleSave}
+                            className="btn btn-primary"
+                        >
                             <i className="fa-duotone fa-regular fa-check mr-2"></i>
                             Save Preferences
                         </button>
                     </div>
 
                     <p className="text-xs text-base-content/60 mt-4">
-                        For more information, read our{' '}
-                        <a href="https://applicant.network/cookies" className="link link-primary" target="_blank" rel="noopener noreferrer" onClick={onClose}>Cookie Policy</a>
-                        {' '}and{' '}
-                        <a href="https://applicant.network/privacy" className="link link-primary" target="_blank" rel="noopener noreferrer" onClick={onClose}>Privacy Policy</a>.
+                        For more information, read our{" "}
+                        <a
+                            href="https://applicant.network/cookies"
+                            className="link link-primary"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={onClose}
+                        >
+                            Cookie Policy
+                        </a>{" "}
+                        and{" "}
+                        <a
+                            href="https://applicant.network/privacy"
+                            className="link link-primary"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={onClose}
+                        >
+                            Privacy Policy
+                        </a>
+                        .
                     </p>
                 </div>
             </div>

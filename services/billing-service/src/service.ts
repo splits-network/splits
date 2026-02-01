@@ -33,7 +33,7 @@ export class BillingService {
         // TODO: Properly initialize V2 services when webhooks are migrated
         // this.plans = new PlanServiceV2(repository);
         // this.subscriptions = new SubscriptionServiceV2(repository, stripeSecretKey, logger);
-        this.webhooks = new WebhookService(logger);
+        this.webhooks = new WebhookService(repository.getClient(), logger, stripeSecretKey);
     }
 
     // ========================================================================

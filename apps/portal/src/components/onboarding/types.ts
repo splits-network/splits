@@ -24,6 +24,7 @@ export interface SelectedPlan {
 export interface StripePaymentInfo {
   customerId: string;
   paymentMethodId: string;
+  appliedDiscount?: any;
 }
 
 export interface OnboardingState {
@@ -58,6 +59,8 @@ export interface OnboardingState {
     description?: string;
     headquarters_location?: string;
     logo_url?: string;
+    billing_terms?: 'immediate' | 'net_30' | 'net_60' | 'net_90';
+    billing_email?: string;
   };
 
   // UI state

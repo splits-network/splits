@@ -1,36 +1,17 @@
-/**
- * Simple markdown renderer for displaying formatted text
- * Supports: **bold**, *italic*, and bullet points (- item)
- */
-export function renderMarkdown(text: string) {
-    if (!text) return null;
-
-    return text.split('\n').map((line, idx) => {
-        // Bold
-        line = line.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        // Italic
-        line = line.replace(/\*(.+?)\*/g, '<em>$1</em>');
-        // Bullet points
-        if (line.trim().startsWith('- ')) {
-            return <li key={idx} dangerouslySetInnerHTML={{ __html: line.replace(/^- /, '') }} />;
-        }
-        // Paragraphs
-        return line.trim() ? <p key={idx} dangerouslySetInnerHTML={{ __html: line }} /> : <br key={idx} />;
-    });
-}
+import { MarkdownRenderer as SharedMarkdownRenderer } from "@splits-network/shared-ui";
 
 interface MarkdownRendererProps {
     content: string;
     className?: string;
 }
 
-/**
- * Component wrapper for rendering markdown content
- */
-export function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
+export function MarkdownRenderer({ content, className = "" }: MarkdownRendererProps) {
+    if (!content) return null;
+
     return (
-        <div className={`prose prose-sm max-w-none ${className}`}>
-            {renderMarkdown(content)}
-        </div>
+        <SharedMarkdownRenderer
+            content={content}
+            className={`prose prose-sm max-w-none ${className}`.trim()}
+        />
     );
 }

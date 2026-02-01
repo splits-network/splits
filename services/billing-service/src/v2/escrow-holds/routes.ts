@@ -9,10 +9,11 @@ export async function escrowHoldRoutes(
     app: FastifyInstance,
     service: EscrowHoldServiceV2
 ) {
+    const basePath = '/api/v2';
     // LIST - Get all escrow holds with filters
     app.get<{
         Querystring: StandardListParams & { filters?: string };
-    }>('/escrow-holds', async (request, reply) => {
+    }>(`${basePath}/escrow-holds`, async (request, reply) => {
         try {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
             if (!clerkUserId) {
@@ -43,7 +44,7 @@ export async function escrowHoldRoutes(
     // GET BY ID - Get a single escrow hold
     app.get<{
         Params: { id: string };
-    }>('/escrow-holds/:id', async (request, reply) => {
+    }>(`${basePath}/escrow-holds/:id`, async (request, reply) => {
         try {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
             if (!clerkUserId) {
@@ -75,7 +76,7 @@ export async function escrowHoldRoutes(
             hold_reason: string;
             release_scheduled_date: string;
         };
-    }>('/escrow-holds', async (request, reply) => {
+    }>(`${basePath}/escrow-holds`, async (request, reply) => {
         try {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
             if (!clerkUserId) {
@@ -113,7 +114,7 @@ export async function escrowHoldRoutes(
             released_at?: string;
             released_by?: string;
         };
-    }>('/escrow-holds/:id', async (request, reply) => {
+    }>(`${basePath}/escrow-holds/:id`, async (request, reply) => {
         try {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
             if (!clerkUserId) {
@@ -144,7 +145,7 @@ export async function escrowHoldRoutes(
     // DELETE - Cancel an escrow hold (admin only - soft delete)
     app.delete<{
         Params: { id: string };
-    }>('/escrow-holds/:id', async (request, reply) => {
+    }>(`${basePath}/escrow-holds/:id`, async (request, reply) => {
         try {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
             if (!clerkUserId) {
@@ -172,7 +173,7 @@ export async function escrowHoldRoutes(
     // ADMIN ACTION - Release an escrow hold manually
     app.post<{
         Params: { id: string };
-    }>('/escrow-holds/:id/release', async (request, reply) => {
+    }>(`${basePath}/escrow-holds/:id/release`, async (request, reply) => {
         try {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
             if (!clerkUserId) {
@@ -206,7 +207,7 @@ export async function escrowHoldRoutes(
     // ADMIN ACTION - Cancel an escrow hold
     app.post<{
         Params: { id: string };
-    }>('/escrow-holds/:id/cancel', async (request, reply) => {
+    }>(`${basePath}/escrow-holds/:id/cancel`, async (request, reply) => {
         try {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
             if (!clerkUserId) {
@@ -238,7 +239,7 @@ export async function escrowHoldRoutes(
     });
 
     // ADMIN ACTION - Process all due releases (automation endpoint)
-    app.post('/escrow-holds/process-due', async (request, reply) => {
+    app.post(`${basePath}/escrow-holds/process-due`, async (request, reply) => {
         try {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
             if (!clerkUserId) {
@@ -261,7 +262,7 @@ export async function escrowHoldRoutes(
     // GET PLACEMENT HOLDS - Get active holds for a placement
     app.get<{
         Params: { placementId: string };
-    }>('/placements/:placementId/escrow-holds', async (request, reply) => {
+    }>(`${basePath}/placements/:placementId/escrow-holds`, async (request, reply) => {
         try {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
             if (!clerkUserId) {
@@ -282,7 +283,7 @@ export async function escrowHoldRoutes(
     // GET PLACEMENT HOLD TOTAL - Get total active hold amount for a placement
     app.get<{
         Params: { placementId: string };
-    }>('/placements/:placementId/escrow-holds/total', async (request, reply) => {
+    }>(`${basePath}/placements/:placementId/escrow-holds/total`, async (request, reply) => {
         try {
             const clerkUserId = request.headers['x-clerk-user-id'] as string;
             if (!clerkUserId) {

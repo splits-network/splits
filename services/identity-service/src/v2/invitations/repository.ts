@@ -15,10 +15,19 @@ export class InvitationRepository {
     ): Promise<{ data: any[]; total: number }> {
         let query = this.supabase
             .from('invitations')
-            .select('*, organizations(*)', { count: 'exact' });
+            .select('*, organizations(*), companies(*)', { count: 'exact' })
+            .is('deleted_at', null);
 
         if (filters.organization_id) {
             query = query.eq('organization_id', filters.organization_id);
+        }
+
+        if (filters.company_id !== undefined) {
+            if (filters.company_id === null) {
+                query = query.is('company_id', null);
+            } else {
+                query = query.eq('company_id', filters.company_id);
+            }
         }
 
         if (filters.email) {
@@ -40,8 +49,9 @@ export class InvitationRepository {
     async findInvitationById(id: string): Promise<any> {
         const { data, error } = await this.supabase
             .from('invitations')
-            .select('*, organizations(*)')
+            .select('*, organizations(*), companies(*)')
             .eq('id', id)
+            .is('deleted_at', null)
             .single();
 
         if (error) throw error;
@@ -52,7 +62,7 @@ export class InvitationRepository {
         const { data: invitation, error } = await this.supabase
             .from('invitations')
             .insert([data])
-            .select('*, organizations(*)')
+            .select('*, organizations(*), companies(*)')
             .single();
 
         if (error) throw error;
@@ -64,7 +74,7 @@ export class InvitationRepository {
             .from('invitations')
             .update(updates)
             .eq('id', id)
-            .select('*, organizations(*)')
+            .select('*, organizations(*), companies(*)')
             .single();
 
         if (error) throw error;

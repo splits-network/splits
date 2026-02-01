@@ -1,7 +1,16 @@
 import { Suspense } from "react";
 import BrowseMessagesClient from "./components/browse/browse-messages-client";
 
-export default function MessagesPage() {
+type MessagesSearchParams = {
+    conversationId?: string;
+};
+
+type MessagesPageProps = {
+    searchParams?: Promise<MessagesSearchParams>;
+};
+
+export default async function MessagesPage({ searchParams }: MessagesPageProps) {
+    const resolvedParams = await searchParams;
     return (
         <div className="container mx-auto px-4 py-8 space-y-6">
             <div>
@@ -19,7 +28,11 @@ export default function MessagesPage() {
                     </div>
                 }
             >
-                <BrowseMessagesClient />
+                <BrowseMessagesClient
+                    initialConversationId={
+                        resolvedParams?.conversationId ?? null
+                    }
+                />
             </Suspense>
         </div>
     );

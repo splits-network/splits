@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 
 interface AddNoteModalProps {
     applicationId: string;
@@ -36,22 +37,17 @@ export default function AddNoteModal({
                 </h3>
 
                 <form onSubmit={handleSubmit}>
-                    <div className="fieldset">
-                        <label className="label">Note</label>
-                        <textarea
-                            className="textarea textarea-bordered w-full h-32"
-                            placeholder="Add context, observations, or follow-up actions..."
-                            value={note}
-                            onChange={(e) => setNote(e.target.value)}
-                            disabled={loading}
-                            autoFocus
-                        />
-                        <label className="label">
-                            <span className="label-text-alt">
-                                This note will be visible to other recruiters and company users
-                            </span>
-                        </label>
-                    </div>
+                    <MarkdownEditor
+                        className="fieldset"
+                        label="Note"
+                        value={note}
+                        onChange={setNote}
+                        placeholder="Add context, observations, or follow-up actions..."
+                        helperText="This note will be visible to other recruiters and company users"
+                        height={180}
+                        preview="edit"
+                        disabled={loading}
+                    />
 
                     <div className="modal-action">
                         <button

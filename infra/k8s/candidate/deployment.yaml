@@ -73,7 +73,7 @@ spec:
                       - name: NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL
                         value: "/portal/dashboard"
                       - name: NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL
-                        value: "/onboarding"
+                        value: "/portal/dashboard"
                   resources:
                       requests:
                           cpu: 200m

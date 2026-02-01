@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import CompanyDocumentUpload, { StagedDocument } from '@/components/documents/company-document-upload';
@@ -244,19 +245,19 @@ export default function ApproveGateModal({
                         </div>
                     )}
 
-                    <fieldset className="fieldset mb-4">
-                        <legend className="fieldset-legend">{isHireTransition ? 'Notes (Optional)' : 'Approval Notes (Optional)'}</legend>
-                        <textarea
-                            className="textarea w-full h-24"
-                            value={notes}
-                            onChange={(e) => setNotes(e.target.value)}
-                            placeholder={isHireTransition ? 'Add any notes about the hire...' : 'Add any notes or feedback for the next reviewer...'}
-                            disabled={submitting}
-                        />
-                        <p className="fieldset-label">
-                            {isHireTransition ? 'These notes will be visible in the placement record.' : 'These notes will be visible to the next gate reviewer and the candidate.'}
-                        </p>
-                    </fieldset>
+                    <MarkdownEditor
+                        className="fieldset mb-4"
+                        label={isHireTransition ? 'Notes (Optional)' : 'Approval Notes (Optional)'}
+                        value={notes}
+                        onChange={setNotes}
+                        placeholder={isHireTransition ? 'Add any notes about the hire...' : 'Add any notes or feedback for the next reviewer...'}
+                        helperText={isHireTransition
+                            ? 'These notes will be visible in the placement record.'
+                            : 'These notes will be visible to the next gate reviewer and the candidate.'}
+                        height={160}
+                        preview="edit"
+                        disabled={submitting}
+                    />
 
                     <div className="flex gap-2 justify-end">
                         <button

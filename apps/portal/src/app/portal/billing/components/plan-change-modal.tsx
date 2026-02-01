@@ -308,6 +308,9 @@ export default function PlanChangeModal({
     const [creatingSetupIntent, setCreatingSetupIntent] = useState(false);
     const [paymentMethodId, setPaymentMethodId] = useState<string | null>(null);
 
+    // Discount state
+    const [appliedDiscount, setAppliedDiscount] = useState<any>(null);
+
     // Wizard step state
     type WizardStep = "select-plan" | "payment" | "confirm";
     const [currentStep, setCurrentStep] = useState<WizardStep>("select-plan");
@@ -427,10 +430,20 @@ export default function PlanChangeModal({
 
             if (currentSubscription) {
                 // Update existing subscription
-                await client.patch(`/subscriptions/${currentSubscription.id}`, {
+                const updateData: Record<string, any> = {
                     plan_id: selectedPlanId,
                     billing_period: billingPeriod,
-                });
+                };
+
+                // Add promotion code if discount was applied
+                if (appliedDiscount?.code) {
+                    updateData.promotion_code = appliedDiscount.code;
+                }
+
+                await client.patch(
+                    `/subscriptions/${currentSubscription.id}`,
+                    updateData,
+                );
             } else {
                 // Create new subscription
                 // For paid plans, include payment method and customer ID
@@ -442,6 +455,11 @@ export default function PlanChangeModal({
                 if (isPaidPlan && paymentMethodId && setupIntent?.customer_id) {
                     activateData.payment_method_id = paymentMethodId;
                     activateData.customer_id = setupIntent.customer_id;
+                }
+
+                // Add promotion code if discount was applied
+                if (appliedDiscount?.code) {
+                    activateData.promotion_code = appliedDiscount.code;
                 }
 
                 await client.post("/subscriptions/activate", activateData);
@@ -464,6 +482,7 @@ export default function PlanChangeModal({
         setNeedsPaymentCollection(false);
         setSetupIntent(null);
         setPaymentMethodId(null);
+        setAppliedDiscount(null);
         setError(null);
         setCurrentStep("select-plan");
     }, []);
@@ -741,6 +760,10 @@ export default function PlanChangeModal({
                                     onCancel={resetPaymentState}
                                     submitButtonText="Save & Continue"
                                     isProcessing={submitting}
+                                    allowDiscountCode={true}
+                                    planId={selectedPlan?.id}
+                                    billingPeriod={billingPeriod}
+                                    onDiscountApplied={setAppliedDiscount}
                                 />
                             </StripeProvider>
                         )}
@@ -811,6 +834,38 @@ export default function PlanChangeModal({
                                             <i className="fa-duotone fa-regular fa-circle-check text-success"></i>
                                         </div>
                                     )}
+
+                                {/* Discount */}
+                                {appliedDiscount && (
+                                    <div className="flex items-center justify-between py-3 border-b border-base-300">
+                                        <div>
+                                            <div className="text-sm text-base-content/70">
+                                                Discount Code
+                                            </div>
+                                            <div className="font-medium">
+                                                <i className="fa-duotone fa-regular fa-tag mr-2"></i>
+                                                {appliedDiscount.code}
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-sm text-success">
+                                                Save{" "}
+                                                {appliedDiscount.savings_amount
+                                                    ? `$${appliedDiscount.savings_amount}`
+                                                    : ""}
+                                            </div>
+                                            {appliedDiscount.savings_percentage && (
+                                                <div className="text-xs text-success">
+                                                    (
+                                                    {
+                                                        appliedDiscount.savings_percentage
+                                                    }
+                                                    % off)
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Price */}
                                 <div className="flex items-center justify-between py-3">

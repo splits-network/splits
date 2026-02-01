@@ -376,7 +376,7 @@ export class SubscriptionServiceV2 {
         }
 
         // Create Stripe subscription (charge immediately - no trial)
-        const stripeSubscription = await this.stripe.subscriptions.create({
+        const subscriptionCreateParams: Stripe.SubscriptionCreateParams = {
             customer: request.customer_id,
             items: [{ price: stripePriceId }],
             payment_settings: {
@@ -389,7 +389,14 @@ export class SubscriptionServiceV2 {
                 plan_id: request.plan_id,
                 billing_period: billingPeriod,
             },
-        });
+        };
+
+        // Apply promotion code if provided
+        if (request.promotion_code) {
+            (subscriptionCreateParams as any).promotion_code = request.promotion_code;
+        }
+
+        const stripeSubscription = await this.stripe.subscriptions.create(subscriptionCreateParams);
 
         // Calculate period end from Stripe response
         // Stripe subscription's current_period_end is a Unix timestamp

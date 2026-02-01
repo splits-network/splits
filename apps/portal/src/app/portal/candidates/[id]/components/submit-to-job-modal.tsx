@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { MarkdownEditor } from '@splits-network/shared-ui';
 
 interface SubmitToJobModalProps {
     candidateId: string;
@@ -96,18 +97,16 @@ export default function SubmitToJobModal({
                     </fieldset>
 
                     {/* Notes */}
-                    <fieldset className="fieldset">
-                        <legend className="fieldset-legend">Submission Notes</legend>
-                        <textarea
-                            className="textarea h-24"
-                            value={notes}
-                            onChange={(e) => setNotes(e.target.value)}
-                            placeholder="Add any notes about this submission..."
-                        />
-                        <p className="fieldset-label">
-                            These notes will be visible to the hiring company
-                        </p>
-                    </fieldset>
+                    <MarkdownEditor
+                        className="fieldset"
+                        label="Submission Notes"
+                        value={notes}
+                        onChange={setNotes}
+                        placeholder="Add any notes about this submission..."
+                        helperText="These notes will be visible to the hiring company"
+                        height={160}
+                        preview="edit"
+                    />
 
                     {/* Document Selection */}
                     {length > 0 && (
