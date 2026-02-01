@@ -1,14 +1,16 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { ApiClient } from '@/lib/api-client';
-import { useToast } from '@/lib/toast-context';
+import { useState, useEffect } from "react";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useToast } from "@/lib/toast-context";
+import { useAuth } from "@clerk/nextjs";
 
 export default function FraudSignalsPage() {
     const [signals, setSignals] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState<string>('active');
+    const [filter, setFilter] = useState<string>("active");
     const toast = useToast();
+    const { getToken } = useAuth();
 
     useEffect(() => {
         loadSignals();
@@ -17,45 +19,57 @@ export default function FraudSignalsPage() {
     const loadSignals = async () => {
         setLoading(true);
         try {
-            const api = new ApiClient();
-            const response = await api.get<{ data: any[] }>('/automation/fraud/signals', { params: { status: filter } });
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
+            const response = await client.get<{ data: any[] }>(
+                "/automation/fraud/signals",
+                { params: { status: filter } },
+            );
             setSignals(response.data || []);
         } catch (error) {
-            console.error('Failed to load fraud signals:', error);
+            console.error("Failed to load fraud signals:", error);
         } finally {
             setLoading(false);
         }
     };
 
-    const resolveSignal = async (signalId: string, isFalsePositive: boolean) => {
-        const action = isFalsePositive ? 'mark as false positive' : 'resolve';
+    const resolveSignal = async (
+        signalId: string,
+        isFalsePositive: boolean,
+    ) => {
+        const action = isFalsePositive ? "mark as false positive" : "resolve";
         if (!confirm(`Are you sure you want to ${action} this signal?`)) return;
 
-        const notes = prompt('Add resolution notes (optional):');
+        const notes = prompt("Add resolution notes (optional):");
 
         try {
-            const api = new ApiClient();
-            await api.post(`/automation/fraud/signals/${signalId}/resolve`, {
-                reviewed_by: 'admin', // TODO: Get from auth
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
+            await client.post(`/automation/fraud/signals/${signalId}/resolve`, {
+                reviewed_by: "admin", // TODO: Get from auth
                 is_false_positive: isFalsePositive,
                 notes,
             });
-            toast.success('Signal resolved');
+            toast.success("Signal resolved");
             loadSignals();
         } catch (error) {
-            console.error('Failed to resolve signal:', error);
-            toast.error('Failed to resolve signal');
+            console.error("Failed to resolve signal:", error);
+            toast.error("Failed to resolve signal");
         }
     };
 
     const getSeverityBadge = (severity: string) => {
         const colors: Record<string, string> = {
-            low: 'badge-info',
-            medium: 'badge-warning',
-            high: 'badge-error',
-            critical: 'badge-error',
+            low: "badge-info",
+            medium: "badge-warning",
+            high: "badge-error",
+            critical: "badge-error",
         };
-        return colors[severity] || 'badge-neutral';
+        return colors[severity] || "badge-neutral";
     };
 
     return (
@@ -68,15 +82,20 @@ export default function FraudSignalsPage() {
             <div className="card bg-base-100 shadow mb-6">
                 <div className="card-body">
                     <div className="flex gap-2">
-                        {['active', 'resolved', 'false_positive'].map((status) => (
-                            <button
-                                key={status}
-                                className={`btn btn-sm ${filter === status ? 'btn-primary' : 'btn-ghost'}`}
-                                onClick={() => setFilter(status)}
-                            >
-                                {status.replace('_', ' ').charAt(0).toUpperCase() + status.slice(1)}
-                            </button>
-                        ))}
+                        {["active", "resolved", "false_positive"].map(
+                            (status) => (
+                                <button
+                                    key={status}
+                                    className={`btn btn-sm ${filter === status ? "btn-primary" : "btn-ghost"}`}
+                                    onClick={() => setFilter(status)}
+                                >
+                                    {status
+                                        .replace("_", " ")
+                                        .charAt(0)
+                                        .toUpperCase() + status.slice(1)}
+                                </button>
+                            ),
+                        )}
                     </div>
                 </div>
             </div>
@@ -96,19 +115,25 @@ export default function FraudSignalsPage() {
                     </div>
                 ) : (
                     signals.map((signal) => (
-                        <div key={signal.id} className="card bg-base-100 shadow">
+                        <div
+                            key={signal.id}
+                            className="card bg-base-100 shadow"
+                        >
                             <div className="card-body">
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <span className={`badge ${getSeverityBadge(signal.severity)}`}>
+                                            <span
+                                                className={`badge ${getSeverityBadge(signal.severity)}`}
+                                            >
                                                 {signal.severity}
                                             </span>
                                             <span className="badge badge-outline">
                                                 {signal.signal_type}
                                             </span>
                                             <span className="text-sm text-base-content/60">
-                                                Confidence: {signal.confidence_score}%
+                                                Confidence:{" "}
+                                                {signal.confidence_score}%
                                             </span>
                                         </div>
 
@@ -119,35 +144,57 @@ export default function FraudSignalsPage() {
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                                             {signal.recruiter_id && (
                                                 <div>
-                                                    <span className="text-base-content/60">Recruiter:</span>
+                                                    <span className="text-base-content/60">
+                                                        Recruiter:
+                                                    </span>
                                                     <br />
                                                     <span className="font-mono">
-                                                        {signal.recruiter_id.substring(0, 8)}...
+                                                        {signal.recruiter_id.substring(
+                                                            0,
+                                                            8,
+                                                        )}
+                                                        ...
                                                     </span>
                                                 </div>
                                             )}
                                             {signal.job_id && (
                                                 <div>
-                                                    <span className="text-base-content/60">Job:</span>
+                                                    <span className="text-base-content/60">
+                                                        Job:
+                                                    </span>
                                                     <br />
                                                     <span className="font-mono">
-                                                        {signal.job_id.substring(0, 8)}...
+                                                        {signal.job_id.substring(
+                                                            0,
+                                                            8,
+                                                        )}
+                                                        ...
                                                     </span>
                                                 </div>
                                             )}
                                             {signal.candidate_id && (
                                                 <div>
-                                                    <span className="text-base-content/60">Candidate:</span>
+                                                    <span className="text-base-content/60">
+                                                        Candidate:
+                                                    </span>
                                                     <br />
                                                     <span className="font-mono">
-                                                        {signal.candidate_id.substring(0, 8)}...
+                                                        {signal.candidate_id.substring(
+                                                            0,
+                                                            8,
+                                                        )}
+                                                        ...
                                                     </span>
                                                 </div>
                                             )}
                                             <div>
-                                                <span className="text-base-content/60">Created:</span>
+                                                <span className="text-base-content/60">
+                                                    Created:
+                                                </span>
                                                 <br />
-                                                {new Date(signal.created_at).toLocaleString()}
+                                                {new Date(
+                                                    signal.created_at,
+                                                ).toLocaleString()}
                                             </div>
                                         </div>
 
@@ -158,24 +205,38 @@ export default function FraudSignalsPage() {
                                             </summary>
                                             <div className="collapse-content">
                                                 <pre className="text-xs overflow-auto">
-                                                    {JSON.stringify(signal.signal_data, null, 2)}
+                                                    {JSON.stringify(
+                                                        signal.signal_data,
+                                                        null,
+                                                        2,
+                                                    )}
                                                 </pre>
                                             </div>
                                         </details>
                                     </div>
 
-                                    {signal.status === 'active' && (
+                                    {signal.status === "active" && (
                                         <div className="flex gap-2 ml-4">
                                             <button
                                                 className="btn btn-success btn-sm"
-                                                onClick={() => resolveSignal(signal.id, false)}
+                                                onClick={() =>
+                                                    resolveSignal(
+                                                        signal.id,
+                                                        false,
+                                                    )
+                                                }
                                             >
                                                 <i className="fa-duotone fa-regular fa-check"></i>
                                                 Resolve
                                             </button>
                                             <button
                                                 className="btn btn-ghost btn-sm"
-                                                onClick={() => resolveSignal(signal.id, true)}
+                                                onClick={() =>
+                                                    resolveSignal(
+                                                        signal.id,
+                                                        true,
+                                                    )
+                                                }
                                             >
                                                 <i className="fa-duotone fa-regular fa-times"></i>
                                                 False Positive
@@ -195,7 +256,10 @@ export default function FraudSignalsPage() {
                     <div className="stat">
                         <div className="stat-title">Critical</div>
                         <div className="stat-value text-error">
-                            {signals.filter(s => s.severity === 'critical').length}
+                            {
+                                signals.filter((s) => s.severity === "critical")
+                                    .length
+                            }
                         </div>
                     </div>
                 </div>
@@ -203,7 +267,10 @@ export default function FraudSignalsPage() {
                     <div className="stat">
                         <div className="stat-title">High</div>
                         <div className="stat-value text-warning">
-                            {signals.filter(s => s.severity === 'high').length}
+                            {
+                                signals.filter((s) => s.severity === "high")
+                                    .length
+                            }
                         </div>
                     </div>
                 </div>
@@ -211,7 +278,10 @@ export default function FraudSignalsPage() {
                     <div className="stat">
                         <div className="stat-title">Medium</div>
                         <div className="stat-value text-info">
-                            {signals.filter(s => s.severity === 'medium').length}
+                            {
+                                signals.filter((s) => s.severity === "medium")
+                                    .length
+                            }
                         </div>
                     </div>
                 </div>
@@ -219,7 +289,7 @@ export default function FraudSignalsPage() {
                     <div className="stat">
                         <div className="stat-title">Low</div>
                         <div className="stat-value">
-                            {signals.filter(s => s.severity === 'low').length}
+                            {signals.filter((s) => s.severity === "low").length}
                         </div>
                     </div>
                 </div>

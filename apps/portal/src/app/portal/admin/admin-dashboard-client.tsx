@@ -1,9 +1,14 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useAuth } from '@clerk/nextjs';
-import { ApiClient } from '@/lib/api-client';
-import { StatCard, StatCardGrid, ActionCard, ActionCardGrid } from '@/components/ui/cards';
+import { useEffect, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import {
+    StatCard,
+    StatCardGrid,
+    ActionCard,
+    ActionCardGrid,
+} from "@/components/ui/cards";
 
 interface AdminStats {
     totalRecruiters: number;
@@ -26,18 +31,20 @@ export default function AdminDashboardClient() {
             try {
                 const token = await getToken();
                 if (!token) {
-                    setError('Unauthorized');
+                    setError("Unauthorized");
                     setLoading(false);
                     return;
                 }
 
-                const client = new ApiClient(token);
-                const response = await client.get('/stats?scope=platform&range=all');
+                const client = createAuthenticatedClient(token);
+                const response = await client.get(
+                    "/stats?scope=platform&range=all",
+                );
 
                 setStats(response.data);
             } catch (err) {
-                console.error('Failed to fetch admin stats:', err);
-                setError('Failed to load statistics');
+                console.error("Failed to fetch admin stats:", err);
+                setError("Failed to load statistics");
             } finally {
                 setLoading(false);
             }
@@ -69,23 +76,31 @@ export default function AdminDashboardClient() {
             <StatCardGrid>
                 <StatCard
                     title="Total Recruiters"
-                    value={loading ? '...' : stats?.totalRecruiters ?? 0}
+                    value={loading ? "..." : (stats?.totalRecruiters ?? 0)}
                     icon="fa-duotone fa-regular fa-users"
                     color="primary"
-                    description={loading ? undefined : `${stats?.activeRecruiters ?? 0} active, ${stats?.pendingRecruiters ?? 0} pending`}
+                    description={
+                        loading
+                            ? undefined
+                            : `${stats?.activeRecruiters ?? 0} active, ${stats?.pendingRecruiters ?? 0} pending`
+                    }
                     href="/portal/admin/recruiters"
                 />
                 <StatCard
                     title="Active Jobs"
-                    value={loading ? '...' : stats?.activeJobs ?? 0}
+                    value={loading ? "..." : (stats?.activeJobs ?? 0)}
                     icon="fa-duotone fa-regular fa-briefcase"
                     color="secondary"
-                    description={loading ? undefined : `${stats?.totalJobs ?? 0} total jobs`}
+                    description={
+                        loading
+                            ? undefined
+                            : `${stats?.totalJobs ?? 0} total jobs`
+                    }
                     href="/portal/roles"
                 />
                 <StatCard
                     title="Applications"
-                    value={loading ? '...' : stats?.totalApplications ?? 0}
+                    value={loading ? "..." : (stats?.totalApplications ?? 0)}
                     icon="fa-duotone fa-regular fa-file-lines"
                     color="accent"
                     description="All time"
@@ -93,7 +108,7 @@ export default function AdminDashboardClient() {
                 />
                 <StatCard
                     title="Placements"
-                    value={loading ? '...' : stats?.totalPlacements ?? 0}
+                    value={loading ? "..." : (stats?.totalPlacements ?? 0)}
                     icon="fa-duotone fa-regular fa-handshake"
                     color="success"
                     description="Successful hires"
@@ -103,7 +118,9 @@ export default function AdminDashboardClient() {
 
             {/* Phase 1 Management */}
             <div>
-                <h2 className="text-xl font-semibold mb-4">Phase 1 Management</h2>
+                <h2 className="text-xl font-semibold mb-4">
+                    Phase 1 Management
+                </h2>
                 <ActionCardGrid columns={3}>
                     <ActionCard
                         title="Recruiter Management"
@@ -111,12 +128,14 @@ export default function AdminDashboardClient() {
                         icon="fa-duotone fa-regular fa-user-check"
                         href="/portal/admin/recruiters"
                         color="primary"
-                        badge={!loading && stats && stats.pendingRecruiters > 0 ? (
-                            <span className="badge badge-warning gap-1.5">
-                                <i className="fa-duotone fa-regular fa-clock text-xs"></i>
-                                {stats.pendingRecruiters} pending approval
-                            </span>
-                        ) : undefined}
+                        badge={
+                            !loading && stats && stats.pendingRecruiters > 0 ? (
+                                <span className="badge badge-warning gap-1.5">
+                                    <i className="fa-duotone fa-regular fa-clock text-xs"></i>
+                                    {stats.pendingRecruiters} pending approval
+                                </span>
+                            ) : undefined
+                        }
                     />
                     <ActionCard
                         title="Role Assignments"
@@ -137,7 +156,9 @@ export default function AdminDashboardClient() {
 
             {/* Phase 2 Management */}
             <div>
-                <h2 className="text-xl font-semibold mb-4">Phase 2 Management</h2>
+                <h2 className="text-xl font-semibold mb-4">
+                    Phase 2 Management
+                </h2>
                 <ActionCardGrid columns={2}>
                     <ActionCard
                         title="Ownership Audit"
@@ -158,7 +179,9 @@ export default function AdminDashboardClient() {
 
             {/* Phase 3 Management */}
             <div>
-                <h2 className="text-xl font-semibold mb-4">Phase 3: Automation & Intelligence</h2>
+                <h2 className="text-xl font-semibold mb-4">
+                    Phase 3: Automation & Intelligence
+                </h2>
                 <ActionCardGrid columns={3}>
                     <ActionCard
                         title="Payout Management"

@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import Link from 'next/link';
-import { getSyncStatusBadge } from '@/lib/utils/badge-styles';
-import { ApiClient } from '@/lib/api-client';
-import { useToast } from '@/lib/toast-context';
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
+import { getSyncStatusBadge } from "@/lib/utils/badge-styles";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useToast } from "@/lib/toast-context";
+import { useAuth } from "@clerk/nextjs";
 
 interface ATSIntegration {
     id: string;
@@ -29,8 +30,8 @@ interface SyncLog {
     entity_type: string;
     entity_id: string | null;
     action: string;
-    direction: 'inbound' | 'outbound';
-    status: 'success' | 'failed' | 'pending' | 'conflict';
+    direction: "inbound" | "outbound";
+    status: "success" | "failed" | "pending" | "conflict";
     external_id: string | null;
     error_message: string | null;
     metadata: any;
@@ -42,10 +43,13 @@ export default function IntegrationDetailPage() {
     const router = useRouter();
     const params = useParams();
     const integrationId = params.id as string;
+    const { getToken } = useAuth();
 
     const [integration, setIntegration] = useState<ATSIntegration | null>(null);
     const [logs, setLogs] = useState<SyncLog[]>([]);
-    const [activeTab, setActiveTab] = useState<'overview' | 'settings' | 'logs'>('overview');
+    const [activeTab, setActiveTab] = useState<
+        "overview" | "settings" | "logs"
+    >("overview");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
@@ -57,7 +61,7 @@ export default function IntegrationDetailPage() {
         sync_roles: true,
         sync_candidates: true,
         sync_applications: true,
-        webhook_url: '',
+        webhook_url: "",
     });
 
     useEffect(() => {
@@ -72,7 +76,7 @@ export default function IntegrationDetailPage() {
                 sync_roles: integration.sync_roles,
                 sync_candidates: integration.sync_candidates,
                 sync_applications: integration.sync_applications,
-                webhook_url: integration.webhook_url || '',
+                webhook_url: integration.webhook_url || "",
             });
         }
     }, [integration]);
@@ -82,11 +86,14 @@ export default function IntegrationDetailPage() {
             setLoading(true);
             setError(null);
 
-            const apiClient = new ApiClient();
-            const data = await apiClient.get(`/api/integrations/${integrationId}`);
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
+            const data = await client.get(`/api/integrations/${integrationId}`);
             setIntegration(data);
         } catch (err: any) {
-            console.error('Failed to load integration:', err);
+            console.error("Failed to load integration:", err);
             setError(err.message);
         } finally {
             setLoading(false);
@@ -95,11 +102,16 @@ export default function IntegrationDetailPage() {
 
     const loadLogs = async () => {
         try {
-            const apiClient = new ApiClient();
-            const data = await apiClient.get(`/api/integrations/${integrationId}/logs?limit=100`);
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
+            const data = await client.get(
+                `/api/integrations/${integrationId}/logs?limit=100`,
+            );
             setLogs(data.logs || []);
         } catch (err: any) {
-            console.error('Failed to load logs:', err);
+            console.error("Failed to load logs:", err);
         }
     };
 
@@ -110,59 +122,84 @@ export default function IntegrationDetailPage() {
             setSaving(true);
             setError(null);
 
-            const apiClient = new ApiClient();
-            const updated = await apiClient.patch(`/api/integrations/${integrationId}`, formData);
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
+            const updated = await client.patch(
+                `/api/integrations/${integrationId}`,
+                formData,
+            );
             setIntegration(updated);
-            toast.success('Settings saved successfully');
+            toast.success("Settings saved successfully");
         } catch (err: any) {
-            console.error('Failed to save settings:', err);
+            console.error("Failed to save settings:", err);
             setError(err.message);
         } finally {
             setSaving(false);
         }
     };
 
-    const triggerSync = async (direction: 'inbound' | 'outbound') => {
+    const triggerSync = async (direction: "inbound" | "outbound") => {
         try {
-            const apiClient = new ApiClient();
-            await apiClient.post(`/api/integrations/${integrationId}/sync`, { direction });
+            const token = await getToken();
+            if (!token) return;
 
-            toast.success(`${direction === 'inbound' ? 'Import' : 'Export'} sync triggered`);
+            const client = createAuthenticatedClient(token);
+            await client.post(`/api/integrations/${integrationId}/sync`, {
+                direction,
+            });
+
+            toast.success(
+                `${direction === "inbound" ? "Import" : "Export"} sync triggered`,
+            );
             await loadLogs();
         } catch (err: any) {
-            console.error('Failed to trigger sync:', err);
+            console.error("Failed to trigger sync:", err);
             toast.error(`Error: ${err.message}`);
         }
     };
 
     const testConnection = async () => {
         try {
-            const apiClient = new ApiClient();
-            const result = await apiClient.post(`/api/integrations/${integrationId}/test`);
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
+            const result = await client.post(
+                `/api/integrations/${integrationId}/test`,
+            );
 
             if (result.success) {
-                toast.success('Connection test successful!');
+                toast.success("Connection test successful!");
             } else {
                 toast.error(`Connection test failed: ${result.error}`);
             }
         } catch (err: any) {
-            console.error('Connection test failed:', err);
+            console.error("Connection test failed:", err);
             toast.error(`Error: ${err.message}`);
         }
     };
 
     const deleteIntegration = async () => {
-        if (!confirm('Are you sure you want to delete this integration? This cannot be undone.')) {
+        if (
+            !confirm(
+                "Are you sure you want to delete this integration? This cannot be undone.",
+            )
+        ) {
             return;
         }
 
         try {
-            const apiClient = new ApiClient();
-            await apiClient.delete(`/api/integrations/${integrationId}`);
+            const token = await getToken();
+            if (!token) return;
 
-            router.push('/integrations');
+            const client = createAuthenticatedClient(token);
+            await client.delete(`/api/integrations/${integrationId}`);
+
+            router.push("/integrations");
         } catch (err: any) {
-            console.error('Failed to delete integration:', err);
+            console.error("Failed to delete integration:", err);
             toast.error(`Error: ${err.message}`);
         }
     };
@@ -196,13 +233,15 @@ export default function IntegrationDetailPage() {
                     <i className="fa-duotone fa-regular fa-arrow-left"></i>
                 </Link>
                 <div className="flex-1">
-                    <h1 className="text-3xl font-bold capitalize">{integration.platform} Integration</h1>
+                    <h1 className="text-3xl font-bold capitalize">
+                        {integration.platform} Integration
+                    </h1>
                     <p className="text-base-content/70 mt-1">
                         Manage synchronization settings and view sync history
                     </p>
                 </div>
                 <div className="badge badge-lg {integration.sync_enabled ? 'badge-success' : 'badge-neutral'}">
-                    {integration.sync_enabled ? 'Active' : 'Paused'}
+                    {integration.sync_enabled ? "Active" : "Paused"}
                 </div>
             </div>
 
@@ -217,42 +256,51 @@ export default function IntegrationDetailPage() {
             {/* Tabs */}
             <div className="tabs tabs-bordered mb-6">
                 <button
-                    className={`tab ${activeTab === 'overview' ? 'tab-active' : ''}`}
-                    onClick={() => setActiveTab('overview')}
+                    className={`tab ${activeTab === "overview" ? "tab-active" : ""}`}
+                    onClick={() => setActiveTab("overview")}
                 >
                     Overview
                 </button>
                 <button
-                    className={`tab ${activeTab === 'settings' ? 'tab-active' : ''}`}
-                    onClick={() => setActiveTab('settings')}
+                    className={`tab ${activeTab === "settings" ? "tab-active" : ""}`}
+                    onClick={() => setActiveTab("settings")}
                 >
                     Settings
                 </button>
                 <button
-                    className={`tab ${activeTab === 'logs' ? 'tab-active' : ''}`}
-                    onClick={() => setActiveTab('logs')}
+                    className={`tab ${activeTab === "logs" ? "tab-active" : ""}`}
+                    onClick={() => setActiveTab("logs")}
                 >
                     Sync Logs
                 </button>
             </div>
 
             {/* Overview Tab */}
-            {activeTab === 'overview' && (
+            {activeTab === "overview" && (
                 <div className="space-y-6">
                     {/* Quick Actions */}
                     <div className="card bg-base-100 shadow">
                         <div className="card-body">
                             <h2 className="card-title">Quick Actions</h2>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <button className="btn btn-primary" onClick={() => triggerSync('inbound')}>
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => triggerSync("inbound")}
+                                >
                                     <i className="fa-duotone fa-regular fa-download"></i>
                                     Import from {integration.platform}
                                 </button>
-                                <button className="btn btn-secondary" onClick={() => triggerSync('outbound')}>
+                                <button
+                                    className="btn btn-secondary"
+                                    onClick={() => triggerSync("outbound")}
+                                >
                                     <i className="fa-duotone fa-regular fa-upload"></i>
                                     Export to {integration.platform}
                                 </button>
-                                <button className="btn btn-ghost" onClick={testConnection}>
+                                <button
+                                    className="btn btn-ghost"
+                                    onClick={testConnection}
+                                >
                                     <i className="fa-duotone fa-regular fa-circle-check"></i>
                                     Test Connection
                                 </button>
@@ -266,31 +314,59 @@ export default function IntegrationDetailPage() {
                             <h2 className="card-title">Integration Details</h2>
                             <div className="space-y-3">
                                 <div className="flex justify-between">
-                                    <span className="text-base-content/70">Platform:</span>
-                                    <span className="font-medium capitalize">{integration.platform}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-base-content/70">Status:</span>
-                                    <span className={integration.sync_enabled ? 'text-success' : 'text-base-content/50'}>
-                                        {integration.sync_enabled ? 'Active' : 'Paused'}
+                                    <span className="text-base-content/70">
+                                        Platform:
+                                    </span>
+                                    <span className="font-medium capitalize">
+                                        {integration.platform}
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-base-content/70">Last Sync:</span>
+                                    <span className="text-base-content/70">
+                                        Status:
+                                    </span>
+                                    <span
+                                        className={
+                                            integration.sync_enabled
+                                                ? "text-success"
+                                                : "text-base-content/50"
+                                        }
+                                    >
+                                        {integration.sync_enabled
+                                            ? "Active"
+                                            : "Paused"}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-base-content/70">
+                                        Last Sync:
+                                    </span>
                                     <span>
                                         {integration.last_sync_at
-                                            ? new Date(integration.last_sync_at).toLocaleString()
-                                            : 'Never'}
+                                            ? new Date(
+                                                  integration.last_sync_at,
+                                              ).toLocaleString()
+                                            : "Never"}
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-base-content/70">Created:</span>
-                                    <span>{new Date(integration.created_at).toLocaleString()}</span>
+                                    <span className="text-base-content/70">
+                                        Created:
+                                    </span>
+                                    <span>
+                                        {new Date(
+                                            integration.created_at,
+                                        ).toLocaleString()}
+                                    </span>
                                 </div>
                                 {integration.webhook_url && (
                                     <div className="flex justify-between">
-                                        <span className="text-base-content/70">Webhook URL:</span>
-                                        <span className="font-mono text-sm truncate max-w-xs">{integration.webhook_url}</span>
+                                        <span className="text-base-content/70">
+                                            Webhook URL:
+                                        </span>
+                                        <span className="font-mono text-sm truncate max-w-xs">
+                                            {integration.webhook_url}
+                                        </span>
                                     </div>
                                 )}
                             </div>
@@ -300,7 +376,7 @@ export default function IntegrationDetailPage() {
             )}
 
             {/* Settings Tab */}
-            {activeTab === 'settings' && (
+            {activeTab === "settings" && (
                 <div className="card bg-base-100 shadow">
                     <form onSubmit={handleSubmit} className="card-body">
                         <h2 className="card-title mb-4">Sync Settings</h2>
@@ -312,11 +388,20 @@ export default function IntegrationDetailPage() {
                                     type="checkbox"
                                     className="checkbox"
                                     checked={formData.sync_enabled}
-                                    onChange={(e) => setFormData({ ...formData, sync_enabled: e.target.checked })}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            sync_enabled: e.target.checked,
+                                        })
+                                    }
                                 />
                                 <div>
-                                    <span className="label-text font-medium">Enable Synchronization</span>
-                                    <p className="text-sm text-base-content/60">Turn on/off all sync operations</p>
+                                    <span className="label-text font-medium">
+                                        Enable Synchronization
+                                    </span>
+                                    <p className="text-sm text-base-content/60">
+                                        Turn on/off all sync operations
+                                    </p>
                                 </div>
                             </label>
                         </div>
@@ -332,12 +417,22 @@ export default function IntegrationDetailPage() {
                                     type="checkbox"
                                     className="checkbox"
                                     checked={formData.sync_roles}
-                                    onChange={(e) => setFormData({ ...formData, sync_roles: e.target.checked })}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            sync_roles: e.target.checked,
+                                        })
+                                    }
                                     disabled={!formData.sync_enabled}
                                 />
                                 <div>
-                                    <span className="label-text font-medium">Job Roles</span>
-                                    <p className="text-sm text-base-content/60">Import open positions from {integration.platform}</p>
+                                    <span className="label-text font-medium">
+                                        Job Roles
+                                    </span>
+                                    <p className="text-sm text-base-content/60">
+                                        Import open positions from{" "}
+                                        {integration.platform}
+                                    </p>
                                 </div>
                             </label>
                         </div>
@@ -348,12 +443,22 @@ export default function IntegrationDetailPage() {
                                     type="checkbox"
                                     className="checkbox"
                                     checked={formData.sync_candidates}
-                                    onChange={(e) => setFormData({ ...formData, sync_candidates: e.target.checked })}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            sync_candidates: e.target.checked,
+                                        })
+                                    }
                                     disabled={!formData.sync_enabled}
                                 />
                                 <div>
-                                    <span className="label-text font-medium">Candidates</span>
-                                    <p className="text-sm text-base-content/60">Export submitted candidates to {integration.platform}</p>
+                                    <span className="label-text font-medium">
+                                        Candidates
+                                    </span>
+                                    <p className="text-sm text-base-content/60">
+                                        Export submitted candidates to{" "}
+                                        {integration.platform}
+                                    </p>
                                 </div>
                             </label>
                         </div>
@@ -364,12 +469,21 @@ export default function IntegrationDetailPage() {
                                     type="checkbox"
                                     className="checkbox"
                                     checked={formData.sync_applications}
-                                    onChange={(e) => setFormData({ ...formData, sync_applications: e.target.checked })}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            sync_applications: e.target.checked,
+                                        })
+                                    }
                                     disabled={!formData.sync_enabled}
                                 />
                                 <div>
-                                    <span className="label-text font-medium">Applications</span>
-                                    <p className="text-sm text-base-content/60">Sync application status and updates</p>
+                                    <span className="label-text font-medium">
+                                        Applications
+                                    </span>
+                                    <p className="text-sm text-base-content/60">
+                                        Sync application status and updates
+                                    </p>
                                 </div>
                             </label>
                         </div>
@@ -378,16 +492,27 @@ export default function IntegrationDetailPage() {
 
                         {/* Webhook URL */}
                         <div className="fieldset">
-                            <label className="label">Webhook URL (Optional)</label>
+                            <label className="label">
+                                Webhook URL (Optional)
+                            </label>
                             <input
                                 type="url"
                                 className="input"
                                 value={formData.webhook_url}
-                                onChange={(e) => setFormData({ ...formData, webhook_url: e.target.value })}
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        webhook_url: e.target.value,
+                                    })
+                                }
                                 placeholder={`https://api.splits.network/webhooks/${integration.platform}/${integrationId}`}
                             />
                             <label className="label">
-                                <span className="label-text-alt">Configure this URL in your {integration.platform} account to receive real-time updates</span>
+                                <span className="label-text-alt">
+                                    Configure this URL in your{" "}
+                                    {integration.platform} account to receive
+                                    real-time updates
+                                </span>
                             </label>
                         </div>
 
@@ -400,7 +525,11 @@ export default function IntegrationDetailPage() {
                             >
                                 Delete Integration
                             </button>
-                            <button type="submit" className="btn btn-primary" disabled={saving}>
+                            <button
+                                type="submit"
+                                className="btn btn-primary"
+                                disabled={saving}
+                            >
                                 {saving ? (
                                     <>
                                         <span className="loading loading-spinner loading-sm"></span>
@@ -419,7 +548,7 @@ export default function IntegrationDetailPage() {
             )}
 
             {/* Logs Tab */}
-            {activeTab === 'logs' && (
+            {activeTab === "logs" && (
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
                         <h2 className="card-title mb-4">Sync History</h2>
@@ -446,30 +575,46 @@ export default function IntegrationDetailPage() {
                                         {logs.map((log) => (
                                             <tr key={log.id}>
                                                 <td className="text-sm">
-                                                    {new Date(log.synced_at).toLocaleString()}
+                                                    {new Date(
+                                                        log.synced_at,
+                                                    ).toLocaleString()}
                                                 </td>
                                                 <td>
-                                                    <div className="badge badge-sm">{log.entity_type}</div>
+                                                    <div className="badge badge-sm">
+                                                        {log.entity_type}
+                                                    </div>
                                                 </td>
-                                                <td className="text-sm">{log.action}</td>
-                                                <td>
-                                                    <i className={`fa-duotone fa-regular ${log.direction === 'inbound' ? 'fa-download' : 'fa-upload'}`}></i>
-                                                    {' '}{log.direction}
+                                                <td className="text-sm">
+                                                    {log.action}
                                                 </td>
                                                 <td>
-                                                    <div className={`badge badge-sm ${getSyncStatusBadge(log.status)}`}>
+                                                    <i
+                                                        className={`fa-duotone fa-regular ${log.direction === "inbound" ? "fa-download" : "fa-upload"}`}
+                                                    ></i>{" "}
+                                                    {log.direction}
+                                                </td>
+                                                <td>
+                                                    <div
+                                                        className={`badge badge-sm ${getSyncStatusBadge(log.status)}`}
+                                                    >
                                                         {log.status}
                                                     </div>
                                                 </td>
                                                 <td className="text-sm">
                                                     {log.error_message && (
-                                                        <span className="text-error" title={log.error_message}>
+                                                        <span
+                                                            className="text-error"
+                                                            title={
+                                                                log.error_message
+                                                            }
+                                                        >
                                                             <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                                                         </span>
                                                     )}
                                                     {log.retry_count > 0 && (
                                                         <span className="text-warning ml-2">
-                                                            Retry {log.retry_count}
+                                                            Retry{" "}
+                                                            {log.retry_count}
                                                         </span>
                                                     )}
                                                 </td>

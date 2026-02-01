@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { MarkdownEditor } from '@splits-network/shared-ui';
-import { useRouter } from 'next/navigation';
-import { ApiClient } from '@/lib/api-client';
+import { useState } from "react";
+import { MarkdownEditor } from "@splits-network/shared-ui";
+import { useRouter } from "next/navigation";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useAuth } from "@clerk/nextjs";
 
 interface ProposeJobModalProps {
     applicationId: string;
@@ -21,15 +22,16 @@ export default function ProposeJobModal({
     onSuccess,
 }: ProposeJobModalProps) {
     const router = useRouter();
-    const [pitch, setPitch] = useState('');
+    const [pitch, setPitch] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { getToken } = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!pitch.trim()) {
-            setError('Please provide a pitch for this opportunity');
+            setError("Please provide a pitch for this opportunity");
             return;
         }
 
@@ -37,18 +39,21 @@ export default function ProposeJobModal({
             setLoading(true);
             setError(null);
 
-            const apiClient = new ApiClient();
-            await apiClient.post(`/api/applications/${applicationId}/propose`, {
+            const token = await getToken();
+            if (!token) return;
+
+            const client = createAuthenticatedClient(token);
+            await client.post(`/api/applications/${applicationId}/propose`, {
                 recruiter_pitch: pitch.trim(),
             });
 
             // Success
-            setPitch('');
+            setPitch("");
             onClose();
             onSuccess?.();
             router.refresh();
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'An error occurred');
+            setError(err instanceof Error ? err.message : "An error occurred");
         } finally {
             setLoading(false);
         }
@@ -59,7 +64,7 @@ export default function ProposeJobModal({
             <div className="modal-box max-w-lg">
                 <h3 className="font-bold text-lg mb-2">Propose Opportunity</h3>
                 <p className="text-sm text-base-content/70 mb-6">
-                    Propose <span className="font-semibold">{jobTitle}</span> to{' '}
+                    Propose <span className="font-semibold">{jobTitle}</span> to{" "}
                     <span className="font-semibold">{candidateName}</span>
                 </p>
 

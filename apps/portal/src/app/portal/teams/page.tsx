@@ -1,18 +1,26 @@
-'use client';
+"use client";
 
-import { useState, useCallback, FormEvent } from 'react';
-import Link from 'next/link';
-import { useAuth } from '@clerk/nextjs';
-import { useStandardList, PaginationControls, SearchInput, EmptyState, LoadingState, ErrorState, ViewModeToggle } from '@/hooks/use-standard-list';
-import { createAuthenticatedClient, ApiClient } from '@/lib/api-client';
-import { StatCard, StatCardGrid } from '@/components/ui/cards';
+import { useState, useCallback, FormEvent } from "react";
+import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import {
+    useStandardList,
+    PaginationControls,
+    SearchInput,
+    EmptyState,
+    LoadingState,
+    ErrorState,
+    ViewModeToggle,
+} from "@/hooks/use-standard-list";
+import { createAuthenticatedClient, ApiClient } from "@/lib/api-client";
+import { StatCard, StatCardGrid } from "@/components/ui/cards";
 
 interface Team {
     id: string;
     name: string;
     owner_user_id: string;
     billing_organization_id: string | null;
-    status: 'active' | 'suspended';
+    status: "active" | "suspended";
     member_count: number;
     active_member_count: number;
     total_placements: number;
@@ -21,15 +29,15 @@ interface Team {
 }
 
 interface TeamFilters {
-    status?: 'active' | 'suspended';
+    status?: "active" | "suspended";
 }
 
 // Team card component
 function TeamCard({ team }: { team: Team }) {
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
+        return new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
         }).format(amount);
@@ -43,10 +51,14 @@ function TeamCard({ team }: { team: Team }) {
             <div className="card-body">
                 <div className="flex items-start justify-between mb-2">
                     <h3 className="card-title text-lg">{team.name}</h3>
-                    {team.status === 'active' ? (
-                        <span className="badge badge-success badge-sm">Active</span>
+                    {team.status === "active" ? (
+                        <span className="badge badge-success badge-sm">
+                            Active
+                        </span>
                     ) : (
-                        <span className="badge badge-error badge-sm">Suspended</span>
+                        <span className="badge badge-error badge-sm">
+                            Suspended
+                        </span>
                     )}
                 </div>
 
@@ -54,10 +66,12 @@ function TeamCard({ team }: { team: Team }) {
                     <div className="flex items-center gap-2 text-base-content/70">
                         <i className="fa-duotone fa-regular fa-users w-4"></i>
                         <span>
-                            {team.active_member_count} active member{team.active_member_count !== 1 ? 's' : ''}
+                            {team.active_member_count} active member
+                            {team.active_member_count !== 1 ? "s" : ""}
                             {team.member_count !== team.active_member_count && (
                                 <span className="text-base-content/50">
-                                    {' '}({team.member_count} total)
+                                    {" "}
+                                    ({team.member_count} total)
                                 </span>
                             )}
                         </span>
@@ -65,18 +79,24 @@ function TeamCard({ team }: { team: Team }) {
 
                     <div className="flex items-center gap-2 text-base-content/70">
                         <i className="fa-duotone fa-regular fa-briefcase w-4"></i>
-                        <span>{team.total_placements} placement{team.total_placements !== 1 ? 's' : ''}</span>
+                        <span>
+                            {team.total_placements} placement
+                            {team.total_placements !== 1 ? "s" : ""}
+                        </span>
                     </div>
 
                     <div className="flex items-center gap-2 text-base-content/70">
                         <i className="fa-duotone fa-regular fa-dollar-sign w-4"></i>
-                        <span>{formatCurrency(team.total_revenue)} revenue</span>
+                        <span>
+                            {formatCurrency(team.total_revenue)} revenue
+                        </span>
                     </div>
                 </div>
 
                 <div className="card-actions justify-end mt-4">
                     <span className="text-sm text-primary">
-                        View details <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
+                        View details{" "}
+                        <i className="fa-duotone fa-regular fa-arrow-right ml-1"></i>
                     </span>
                 </div>
             </div>
@@ -87,9 +107,9 @@ function TeamCard({ team }: { team: Team }) {
 // Team table row component
 function TeamRow({ team }: { team: Team }) {
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
+        return new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
         }).format(amount);
@@ -98,15 +118,20 @@ function TeamRow({ team }: { team: Team }) {
     return (
         <tr className="hover:bg-base-200">
             <td>
-                <Link href={`/teams/${team.id}`} className="font-medium hover:text-primary">
+                <Link
+                    href={`/teams/${team.id}`}
+                    className="font-medium hover:text-primary"
+                >
                     {team.name}
                 </Link>
             </td>
             <td>
-                {team.status === 'active' ? (
+                {team.status === "active" ? (
                     <span className="badge badge-success badge-sm">Active</span>
                 ) : (
-                    <span className="badge badge-error badge-sm">Suspended</span>
+                    <span className="badge badge-error badge-sm">
+                        Suspended
+                    </span>
                 )}
             </td>
             <td>
@@ -114,7 +139,9 @@ function TeamRow({ team }: { team: Team }) {
                     <i className="fa-duotone fa-regular fa-users text-base-content/50"></i>
                     <span>{team.active_member_count}</span>
                     {team.member_count !== team.active_member_count && (
-                        <span className="text-base-content/50 text-xs">/{team.member_count}</span>
+                        <span className="text-base-content/50 text-xs">
+                            /{team.member_count}
+                        </span>
                     )}
                 </div>
             </td>
@@ -122,10 +149,15 @@ function TeamRow({ team }: { team: Team }) {
                 <span className="font-medium">{team.total_placements}</span>
             </td>
             <td>
-                <span className="font-medium">{formatCurrency(team.total_revenue)}</span>
+                <span className="font-medium">
+                    {formatCurrency(team.total_revenue)}
+                </span>
             </td>
             <td>
-                <Link href={`/teams/${team.id}`} className="btn btn-ghost btn-sm">
+                <Link
+                    href={`/teams/${team.id}`}
+                    className="btn btn-ghost btn-sm"
+                >
                     <i className="fa-duotone fa-regular fa-arrow-right"></i>
                 </Link>
             </td>
@@ -138,34 +170,41 @@ export default function TeamsPage() {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [creating, setCreating] = useState(false);
     const [createError, setCreateError] = useState<string | null>(null);
-    const [formData, setFormData] = useState({ name: '' });
+    const [formData, setFormData] = useState({ name: "" });
 
     // Fetch function for teams
-    const fetchTeams = useCallback(async (params: Record<string, any>) => {
-        const token = await getToken();
-        if (!token) throw new Error('Not authenticated');
+    const fetchTeams = useCallback(
+        async (params: Record<string, any>) => {
+            const token = await getToken();
+            if (!token) throw new Error("Not authenticated");
 
-        const client = createAuthenticatedClient(token);
-        const queryParams = new URLSearchParams();
+            const client = createAuthenticatedClient(token);
+            const queryParams = new URLSearchParams();
 
-        if (params.page) queryParams.set('page', params.page.toString());
-        if (params.limit) queryParams.set('limit', params.limit.toString());
-        if (params.search) queryParams.set('search', params.search);
-        if (params.status) queryParams.set('status', params.status);
+            if (params.page) queryParams.set("page", params.page.toString());
+            if (params.limit) queryParams.set("limit", params.limit.toString());
+            if (params.search) queryParams.set("search", params.search);
+            if (params.status) queryParams.set("status", params.status);
 
-        const response = await client.get(`/teams?${queryParams.toString()}`);
+            const response = await client.get(
+                `/teams?${queryParams.toString()}`,
+            );
 
-        // Handle response - teams endpoint may not have pagination yet
-        const data = Array.isArray(response.data) ? response.data : (response.data?.data || []);
-        const pagination = response.data?.pagination || {
-            total: data.length,
-            page: 1,
-            limit: 25,
-            total_pages: 1
-        };
+            // Handle response - teams endpoint may not have pagination yet
+            const data = Array.isArray(response.data)
+                ? response.data
+                : response.data?.data || [];
+            const pagination = response.data?.pagination || {
+                total: data.length,
+                page: 1,
+                limit: 25,
+                total_pages: 1,
+            };
 
-        return { data, pagination };
-    }, [getToken]);
+            return { data, pagination };
+        },
+        [getToken],
+    );
 
     const {
         data: teams,
@@ -178,11 +217,11 @@ export default function TeamsPage() {
         setSearchTerm,
         viewMode,
         setViewMode,
-        refetch
+        refetch,
     } = useStandardList<Team, TeamFilters>({
         fetchFn: fetchTeams,
         defaultLimit: 25,
-        syncToUrl: true
+        syncToUrl: true,
     });
 
     // Handle create team
@@ -194,12 +233,12 @@ export default function TeamsPage() {
             setCreating(true);
             setCreateError(null);
             const token = await getToken();
-            if (!token) throw new Error('Not authenticated');
+            if (!token) return;
 
-            const client = new ApiClient(token);
-            await client.post('/teams', { name: formData.name });
+            const client = createAuthenticatedClient(token);
+            await client.post("/teams", { name: formData.name });
 
-            setFormData({ name: '' });
+            setFormData({ name: "" });
             setShowCreateModal(false);
             refetch();
         } catch (err: any) {
@@ -210,14 +249,20 @@ export default function TeamsPage() {
     };
 
     // Calculate stats
-    const totalMembers = teams.reduce((sum, t) => sum + t.active_member_count, 0);
-    const totalPlacements = teams.reduce((sum, t) => sum + t.total_placements, 0);
+    const totalMembers = teams.reduce(
+        (sum, t) => sum + t.active_member_count,
+        0,
+    );
+    const totalPlacements = teams.reduce(
+        (sum, t) => sum + t.total_placements,
+        0,
+    );
     const totalRevenue = teams.reduce((sum, t) => sum + t.total_revenue, 0);
 
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
+        return new Intl.NumberFormat("en-US", {
+            style: "currency",
+            currency: "USD",
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
         }).format(amount);
@@ -286,8 +331,14 @@ export default function TeamsPage() {
                     <div className="fieldset">
                         <select
                             className="select select-sm"
-                            value={filters.status || ''}
-                            onChange={(e) => setFilters({ ...filters, status: e.target.value as any || undefined })}
+                            value={filters.status || ""}
+                            onChange={(e) =>
+                                setFilters({
+                                    ...filters,
+                                    status:
+                                        (e.target.value as any) || undefined,
+                                })
+                            }
                         >
                             <option value="">All Status</option>
                             <option value="active">Active</option>
@@ -296,7 +347,10 @@ export default function TeamsPage() {
                     </div>
 
                     {/* View Mode Toggle */}
-                    <ViewModeToggle viewMode={viewMode} setViewMode={setViewMode} />
+                    <ViewModeToggle
+                        viewMode={viewMode}
+                        setViewMode={setViewMode}
+                    />
                 </div>
             </div>
 
@@ -327,7 +381,7 @@ export default function TeamsPage() {
             {/* Teams List */}
             {!loading && !error && teams.length > 0 && (
                 <>
-                    {viewMode === 'grid' ? (
+                    {viewMode === "grid" ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {teams.map((team) => (
                                 <TeamCard key={team.id} team={team} />
@@ -369,7 +423,9 @@ export default function TeamsPage() {
             {showCreateModal && (
                 <div className="modal modal-open">
                     <div className="modal-box">
-                        <h3 className="font-bold text-lg mb-4">Create New Team</h3>
+                        <h3 className="font-bold text-lg mb-4">
+                            Create New Team
+                        </h3>
 
                         <form onSubmit={handleCreateTeam} className="space-y-4">
                             <div className="fieldset">
@@ -378,14 +434,20 @@ export default function TeamsPage() {
                                     type="text"
                                     className="input w-full"
                                     value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            name: e.target.value,
+                                        })
+                                    }
                                     placeholder="e.g., Tech Recruiters Inc."
                                     required
                                     autoFocus
                                 />
                                 <label className="label">
                                     <span className="label-text-alt">
-                                        Choose a name for your recruiting team or agency
+                                        Choose a name for your recruiting team
+                                        or agency
                                     </span>
                                 </label>
                             </div>
@@ -403,14 +465,18 @@ export default function TeamsPage() {
                                     className="btn"
                                     onClick={() => {
                                         setShowCreateModal(false);
-                                        setFormData({ name: '' });
+                                        setFormData({ name: "" });
                                         setCreateError(null);
                                     }}
                                     disabled={creating}
                                 >
                                     Cancel
                                 </button>
-                                <button type="submit" className="btn btn-primary" disabled={creating}>
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary"
+                                    disabled={creating}
+                                >
                                     {creating ? (
                                         <>
                                             <span className="loading loading-spinner loading-sm"></span>
@@ -426,7 +492,10 @@ export default function TeamsPage() {
                             </div>
                         </form>
                     </div>
-                    <div className="modal-backdrop" onClick={() => !creating && setShowCreateModal(false)}></div>
+                    <div
+                        className="modal-backdrop"
+                        onClick={() => !creating && setShowCreateModal(false)}
+                    ></div>
                 </div>
             )}
         </div>

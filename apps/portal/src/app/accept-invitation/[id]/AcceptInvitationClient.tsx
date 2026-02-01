@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
-import { ApiClient } from '@/lib/api-client';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
 
 interface Invitation {
     id: string;
@@ -28,7 +28,11 @@ interface Props {
     userEmail: string;
 }
 
-export default function AcceptInvitationClient({ invitation, userId, userEmail }: Props) {
+export default function AcceptInvitationClient({
+    invitation,
+    userId,
+    userEmail,
+}: Props) {
     const router = useRouter();
     const { getToken } = useAuth();
     const [organization, setOrganization] = useState<Organization | null>(null);
@@ -37,9 +41,9 @@ export default function AcceptInvitationClient({ invitation, userId, userEmail }
     const [error, setError] = useState<string | null>(null);
 
     const roleLabels: Record<string, string> = {
-        company_admin: 'Company Administrator',
-        hiring_manager: 'Hiring Manager',
-        recruiter: 'Recruiter',
+        company_admin: "Company Administrator",
+        hiring_manager: "Hiring Manager",
+        recruiter: "Recruiter",
     };
 
     useEffect(() => {
@@ -47,15 +51,18 @@ export default function AcceptInvitationClient({ invitation, userId, userEmail }
             try {
                 const token = await getToken();
                 if (!token) {
-                    console.error('No auth token available');
+                    console.error("No auth token available");
                     return;
                 }
-                const apiClient = new ApiClient(token);
 
-                const result = await apiClient.get(`/v1/organizations/${invitation.organization_id}`);
+                const client = createAuthenticatedClient(token);
+
+                const result = await client.get(
+                    `/v1/organizations/${invitation.organization_id}`,
+                );
                 setOrganization(result.data);
             } catch (err) {
-                console.error('Failed to fetch organization:', err);
+                console.error("Failed to fetch organization:", err);
             } finally {
                 setLoading(false);
             }
@@ -71,25 +78,29 @@ export default function AcceptInvitationClient({ invitation, userId, userEmail }
         try {
             const token = await getToken();
             if (!token) {
-                throw new Error('Authentication token not available');
+                throw new Error("Authentication token not available");
             }
-            const apiClient = new ApiClient(token);
 
-            await apiClient.post(`/v2/invitations/${invitation.id}/accept`, {
+            const client = createAuthenticatedClient(token);
+
+            await client.post(`/v2/invitations/${invitation.id}/accept`, {
                 user_id: userId,
                 user_email: userEmail,
             });
 
             // Success! Redirect to dashboard or organization page
-            router.push('/portal/dashboard');
+            router.push("/portal/dashboard");
         } catch (err: any) {
-            setError(err.message || 'An error occurred while accepting the invitation');
+            setError(
+                err.message ||
+                    "An error occurred while accepting the invitation",
+            );
             setAccepting(false);
         }
     }
 
     function handleDecline() {
-        router.push('/');
+        router.push("/");
     }
 
     if (loading) {
@@ -98,7 +109,9 @@ export default function AcceptInvitationClient({ invitation, userId, userEmail }
                 <div className="card bg-base-100 shadow max-w-md w-full">
                     <div className="card-body text-center">
                         <span className="loading loading-spinner loading-lg"></span>
-                        <p className="text-base-content/70 mt-4">Loading invitation details...</p>
+                        <p className="text-base-content/70 mt-4">
+                            Loading invitation details...
+                        </p>
                     </div>
                 </div>
             </div>
@@ -114,7 +127,9 @@ export default function AcceptInvitationClient({ invitation, userId, userEmail }
                 <div className="card-body">
                     <div className="text-center mb-6">
                         <i className="fa-duotone fa-regular fa-envelope-open-text text-5xl text-primary mb-4"></i>
-                        <h1 className="card-title text-2xl justify-center">You've Been Invited!</h1>
+                        <h1 className="card-title text-2xl justify-center">
+                            You've Been Invited!
+                        </h1>
                     </div>
 
                     {error && (
@@ -126,28 +141,37 @@ export default function AcceptInvitationClient({ invitation, userId, userEmail }
 
                     <div className="space-y-4">
                         <div>
-                            <p className="text-sm text-base-content/60 mb-1">Organization</p>
+                            <p className="text-sm text-base-content/60 mb-1">
+                                Organization
+                            </p>
                             <p className="text-lg font-semibold">
-                                {organization?.name || invitation.organization_id}
+                                {organization?.name ||
+                                    invitation.organization_id}
                             </p>
                         </div>
 
                         <div>
-                            <p className="text-sm text-base-content/60 mb-1">Your Role</p>
+                            <p className="text-sm text-base-content/60 mb-1">
+                                Your Role
+                            </p>
                             <p className="text-lg">
-                                <span className="badge badge-primary badge-lg">{roleLabel}</span>
+                                <span className="badge badge-primary badge-lg">
+                                    {roleLabel}
+                                </span>
                             </p>
                         </div>
 
                         <div>
-                            <p className="text-sm text-base-content/60 mb-1">Invitation Expires</p>
+                            <p className="text-sm text-base-content/60 mb-1">
+                                Invitation Expires
+                            </p>
                             <p className="text-base">
-                                {expiresAt.toLocaleDateString('en-US', {
-                                    month: 'long',
-                                    day: 'numeric',
-                                    year: 'numeric',
-                                    hour: 'numeric',
-                                    minute: '2-digit',
+                                {expiresAt.toLocaleDateString("en-US", {
+                                    month: "long",
+                                    day: "numeric",
+                                    year: "numeric",
+                                    hour: "numeric",
+                                    minute: "2-digit",
                                 })}
                             </p>
                         </div>
@@ -156,7 +180,8 @@ export default function AcceptInvitationClient({ invitation, userId, userEmail }
                     <div className="divider"></div>
 
                     <p className="text-sm text-base-content/70 text-center mb-4">
-                        By accepting this invitation, you will become a member of this organization with {roleLabel} privileges.
+                        By accepting this invitation, you will become a member
+                        of this organization with {roleLabel} privileges.
                     </p>
 
                     <div className="card-actions justify-center gap-3">
