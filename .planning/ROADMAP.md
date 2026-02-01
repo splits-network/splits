@@ -60,10 +60,12 @@ Plans:
   5. Upgrade value is visually highlighted (shows dollar difference between tiers)
   6. Calculator layout adapts to mobile (stacks vertically on small screens)
   7. Calculator component is exported and reusable (could be embedded elsewhere)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md — Calculator data model, commission rates, and input components (FeeInput, RoleSelector)
+- [ ] 03-02-PLAN.md — Tier comparison display with animated payout counters and upgrade highlighting
+- [ ] 03-03-PLAN.md — RTICalculator composite component, mobile responsiveness, and pricing page integration
 
 ## Progress
 
@@ -74,7 +76,7 @@ Phases execute in numeric order: 1 -> 2 -> 3
 |-------|----------------|--------|-----------|
 | 1. Animation Infrastructure | 1/1 | Complete | 2026-01-31 |
 | 2. Visual Redesign | 0/3 | Ready to execute | - |
-| 3. RTI Calculator | 0/? | Not started | - |
+| 3. RTI Calculator | 0/3 | Ready to plan | - |
 
 ---
 *Roadmap created: 2026-01-31*
