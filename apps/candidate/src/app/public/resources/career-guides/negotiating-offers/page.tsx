@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AnimatedGuideHero } from '../components/animated-guide-hero';
 
 export const metadata: Metadata = {
     title: 'Negotiating Your Job Offer',
@@ -194,30 +195,16 @@ export default function NegotiatingOffersGuidePage() {
 
     return (
         <div className="min-h-screen bg-base-200">
-            {/* Header */}
-            <div className="bg-gradient-to-br from-success to-warning text-white py-16">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-4xl mx-auto">
-                        <Link href="/resources/career-guides" className="btn btn-ghost btn-sm mb-4">
-                            <i className="fa-duotone fa-regular fa-arrow-left"></i> Back to Career Guides
-                        </Link>
-                        <div className="flex items-center gap-3 mb-4">
-                            <i className="fa-duotone fa-regular fa-handshake text-4xl"></i>
-                            <div>
-                                <div className="badge badge-neutral mb-2">Compensation</div>
-                                <h1 className="text-4xl font-bold">Negotiating Your Job Offer</h1>
-                            </div>
-                        </div>
-                        <p className="text-xl opacity-90">
-                            Master the art of salary and benefits negotiation to get the compensation you deserve.
-                        </p>
-                        <div className="flex items-center gap-4 mt-4 text-sm opacity-80">
-                            <span><i className="fa-duotone fa-regular fa-clock"></i> 10 min read</span>
-                            <span><i className="fa-duotone fa-regular fa-user"></i> Compensation Experts</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <AnimatedGuideHero
+                icon="handshake"
+                badge="Compensation"
+                title="Negotiating Your Job Offer"
+                description="Master the art of salary and benefits negotiation to get the compensation you deserve."
+                readTime="10 min read"
+                author="Compensation Experts"
+                gradientFrom="from-success"
+                gradientTo="to-warning"
+            />
 
             {/* Content */}
             <div className="container mx-auto px-4 py-12">

@@ -118,10 +118,10 @@ export function Footer() {
                             </li>
                             <li>
                                 <Link
-                                    href="/public/splits-breakdown"
+                                    href="/public/transparency"
                                     className="link link-hover text-base-content/70 hover:text-base-content"
                                 >
-                                    Splits Breakdown
+                                    Transparency
                                 </Link>
                             </li>
                             <li>

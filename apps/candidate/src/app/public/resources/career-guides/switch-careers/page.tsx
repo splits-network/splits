@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AnimatedGuideHero } from '../components/animated-guide-hero';
 
 export const metadata: Metadata = {
     title: 'How to Switch Careers Successfully',
@@ -97,30 +98,16 @@ export default function SwitchCareersGuidePage() {
 
     return (
         <div className="min-h-screen bg-base-200">
-            {/* Header */}
-            <div className="bg-gradient-to-br from-primary to-secondary text-primary-content py-16">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-4xl mx-auto">
-                        <Link href="/resources/career-guides" className="btn btn-ghost btn-sm mb-4">
-                            <i className="fa-duotone fa-regular fa-arrow-left"></i> Back to Career Guides
-                        </Link>
-                        <div className="flex items-center gap-3 mb-4">
-                            <i className="fa-duotone fa-regular fa-arrows-turn-right text-4xl"></i>
-                            <div>
-                                <div className="badge badge-neutral mb-2">Career Change</div>
-                                <h1 className="text-4xl font-bold">How to Switch Careers Successfully</h1>
-                            </div>
-                        </div>
-                        <p className="text-xl opacity-90">
-                            A comprehensive guide to transitioning into a new career path with confidence and strategic planning.
-                        </p>
-                        <div className="flex items-center gap-4 mt-4 text-sm opacity-80">
-                            <span><i className="fa-duotone fa-regular fa-clock"></i> 8 min read</span>
-                            <span><i className="fa-duotone fa-regular fa-user"></i> Career Experts</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <AnimatedGuideHero
+                icon="arrows-turn-right"
+                badge="Career Change"
+                title="How to Switch Careers Successfully"
+                description="A comprehensive guide to transitioning into a new career path with confidence and strategic planning."
+                readTime="8 min read"
+                author="Career Experts"
+                gradientFrom="from-primary"
+                gradientTo="to-secondary"
+            />
 
             {/* Content */}
             <div className="container mx-auto px-4 py-12">

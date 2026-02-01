@@ -127,7 +127,7 @@ export function AboutContent() {
         () => {
             if (!heroRef.current) return;
             const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
+                "(prefers-reduced-motion: reduce)",
             ).matches;
             if (prefersReducedMotion) return;
 
@@ -140,10 +140,10 @@ export function AboutContent() {
                     y: 0,
                     duration: duration.hero,
                     ease: easing.smooth,
-                }
+                },
             );
         },
-        { scope: heroRef }
+        { scope: heroRef },
     );
 
     // Mission & Vision section animations
@@ -151,7 +151,7 @@ export function AboutContent() {
         () => {
             if (!missionRef.current) return;
             const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
+                "(prefers-reduced-motion: reduce)",
             ).matches;
             if (prefersReducedMotion) return;
 
@@ -171,7 +171,7 @@ export function AboutContent() {
                         trigger: missionRef.current,
                         start: "top 80%",
                     },
-                }
+                },
             );
 
             // Icons pop
@@ -187,7 +187,8 @@ export function AboutContent() {
             });
 
             // Story heading fade up
-            const storyHeading = missionRef.current.querySelector(".story-heading");
+            const storyHeading =
+                missionRef.current.querySelector(".story-heading");
             if (storyHeading) {
                 gsap.fromTo(storyHeading, fadeUp.from, {
                     ...fadeUp.to,
@@ -214,10 +215,10 @@ export function AboutContent() {
                         trigger: storyParagraphs[0],
                         start: "top 85%",
                     },
-                }
+                },
             );
         },
-        { scope: missionRef }
+        { scope: missionRef },
     );
 
     // Core Values section animations
@@ -225,7 +226,7 @@ export function AboutContent() {
         () => {
             if (!valuesRef.current) return;
             const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
+                "(prefers-reduced-motion: reduce)",
             ).matches;
             if (prefersReducedMotion) return;
 
@@ -257,7 +258,7 @@ export function AboutContent() {
                         trigger: valuesRef.current,
                         start: "top 75%",
                     },
-                }
+                },
             );
 
             // Icons pop
@@ -272,7 +273,7 @@ export function AboutContent() {
                 },
             });
         },
-        { scope: valuesRef }
+        { scope: valuesRef },
     );
 
     // Why Different section animations
@@ -280,12 +281,13 @@ export function AboutContent() {
         () => {
             if (!differentRef.current) return;
             const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
+                "(prefers-reduced-motion: reduce)",
             ).matches;
             if (prefersReducedMotion) return;
 
             // Heading fade up
-            const heading = differentRef.current.querySelector(".section-heading");
+            const heading =
+                differentRef.current.querySelector(".section-heading");
             if (heading) {
                 gsap.fromTo(heading, fadeUp.from, {
                     ...fadeUp.to,
@@ -297,7 +299,8 @@ export function AboutContent() {
             }
 
             // Cards slide in from alternating sides
-            const cards = differentRef.current.querySelectorAll(".different-card");
+            const cards =
+                differentRef.current.querySelectorAll(".different-card");
             cards.forEach((card, index) => {
                 const fromX = index % 2 === 0 ? -50 : 50;
                 gsap.fromTo(
@@ -312,12 +315,13 @@ export function AboutContent() {
                             trigger: card,
                             start: "top 85%",
                         },
-                    }
+                    },
                 );
             });
 
             // Icons pop
-            const icons = differentRef.current.querySelectorAll(".different-icon");
+            const icons =
+                differentRef.current.querySelectorAll(".different-icon");
             icons.forEach((icon, index) => {
                 gsap.fromTo(icon, popIn.from, {
                     ...popIn.to,
@@ -329,7 +333,7 @@ export function AboutContent() {
                 });
             });
         },
-        { scope: differentRef }
+        { scope: differentRef },
     );
 
     // Team section animations
@@ -337,7 +341,7 @@ export function AboutContent() {
         () => {
             if (!teamRef.current) return;
             const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
+                "(prefers-reduced-motion: reduce)",
             ).matches;
             if (prefersReducedMotion) return;
 
@@ -369,7 +373,7 @@ export function AboutContent() {
                         trigger: teamRef.current,
                         start: "top 75%",
                     },
-                }
+                },
             );
 
             // Avatars pop
@@ -388,7 +392,7 @@ export function AboutContent() {
                         trigger: teamRef.current,
                         start: "top 75%",
                     },
-                }
+                },
             );
 
             // CTA button
@@ -407,11 +411,11 @@ export function AboutContent() {
                             trigger: teamRef.current,
                             start: "top 70%",
                         },
-                    }
+                    },
                 );
             }
         },
-        { scope: teamRef }
+        { scope: teamRef },
     );
 
     // CTA section animations
@@ -419,7 +423,7 @@ export function AboutContent() {
         () => {
             if (!ctaRef.current) return;
             const prefersReducedMotion = window.matchMedia(
-                "(prefers-reduced-motion: reduce)"
+                "(prefers-reduced-motion: reduce)",
             ).matches;
             if (prefersReducedMotion) return;
 
@@ -437,7 +441,7 @@ export function AboutContent() {
                             trigger: ctaRef.current,
                             start: "top 80%",
                         },
-                    }
+                    },
                 );
             }
 
@@ -457,10 +461,10 @@ export function AboutContent() {
                         trigger: ctaRef.current,
                         start: "top 80%",
                     },
-                }
+                },
             );
         },
-        { scope: ctaRef }
+        { scope: ctaRef },
     );
 
     // Hover handlers for cards
@@ -472,7 +476,7 @@ export function AboutContent() {
             ease: "power2.out",
         });
         const icon = e.currentTarget.querySelector(
-            ".value-icon, .different-icon, .mission-icon"
+            ".value-icon, .different-icon, .mission-icon",
         );
         if (icon) {
             gsap.to(icon, {
@@ -492,7 +496,7 @@ export function AboutContent() {
             ease: "power2.out",
         });
         const icon = e.currentTarget.querySelector(
-            ".value-icon, .different-icon, .mission-icon"
+            ".value-icon, .different-icon, .mission-icon",
         );
         if (icon) {
             gsap.to(icon, {
@@ -530,18 +534,24 @@ export function AboutContent() {
             >
                 <div className="hero-content text-center max-w-5xl opacity-0">
                     <div>
-                        <h1 className="text-5xl font-bold mb-6">About Splits Network</h1>
+                        <h1 className="text-5xl font-bold mb-6">
+                            About Splits Network
+                        </h1>
                         <p className="text-xl opacity-90 max-w-3xl mx-auto">
-                            We're building the future of collaborative recruiting—a
-                            platform where transparency, fair splits, and quality
-                            placements drive everything we do.
+                            We're building the future of collaborative
+                            recruiting—a platform where transparency, fair
+                            splits, and quality placements drive everything we
+                            do.
                         </p>
                     </div>
                 </div>
             </section>
 
             {/* Mission & Vision */}
-            <section ref={missionRef} className="py-20 bg-base-100 overflow-hidden">
+            <section
+                ref={missionRef}
+                className="py-20 bg-base-100 overflow-hidden"
+            >
                 <div className="container mx-auto px-4">
                     <div className="max-w-6xl mx-auto">
                         <div className="grid md:grid-cols-2 gap-12 mb-16">
@@ -556,10 +566,12 @@ export function AboutContent() {
                                         Our Mission
                                     </h2>
                                     <p className="text-lg opacity-90">
-                                        To create a transparent, fair marketplace where
-                                        specialized recruiters and companies collaborate
-                                        seamlessly on placements—eliminating the chaos of
-                                        spreadsheets, email chains, and unclear fee structures.
+                                        To create a transparent, fair
+                                        marketplace where specialized recruiters
+                                        and companies collaborate seamlessly on
+                                        placements—eliminating the chaos of
+                                        spreadsheets, email chains, and unclear
+                                        fee structures.
                                     </p>
                                 </div>
                             </div>
@@ -574,10 +586,12 @@ export function AboutContent() {
                                         Our Vision
                                     </h2>
                                     <p className="text-lg opacity-90">
-                                        A world where every specialized recruiter can build a
-                                        sustainable business through split placements, and
-                                        every company has instant access to the perfect
-                                        recruiting talent for their needs.
+                                        A world where every specialized
+                                        recruiter can build a sustainable
+                                        business through split placements, and
+                                        every company has instant access to the
+                                        perfect recruiting talent for their
+                                        needs.
                                     </p>
                                 </div>
                             </div>
@@ -589,23 +603,27 @@ export function AboutContent() {
                                 Our Story
                             </h2>
                             <p className="story-paragraph text-lg text-base-content/80 opacity-0">
-                                Splits Network was born from years of frustration with the
-                                split placement process. As recruiters ourselves, we
-                                experienced firsthand the pain of managing splits across
-                                spreadsheets, losing track of candidates, and dealing with
+                                Splits Network was born from years of
+                                frustration with the split placement process. As
+                                recruiters ourselves, we experienced firsthand
+                                the pain of managing splits across spreadsheets,
+                                losing track of candidates, and dealing with
                                 unclear fee agreements.
                             </p>
                             <p className="story-paragraph text-lg text-base-content/80 opacity-0">
-                                We saw talented recruiters avoiding split placements
-                                entirely—not because they didn't want to collaborate, but
-                                because the tools didn't exist to make it work smoothly.
-                                Companies were equally frustrated, struggling to manage
-                                multiple external recruiters without a unified system.
+                                We saw talented recruiters avoiding split
+                                placements entirely—not because they didn't want
+                                to collaborate, but because the tools didn't
+                                exist to make it work smoothly. Companies were
+                                equally frustrated, struggling to manage
+                                multiple external recruiters without a unified
+                                system.
                             </p>
                             <p className="story-paragraph text-lg text-base-content/80 opacity-0">
-                                So we built Splits Network: a platform designed specifically
-                                for split placements, not retrofitted from general-purpose
-                                ATS systems. We built it with transparency, fairness, and
+                                So we built Splits Network: a platform designed
+                                specifically for split placements, not
+                                retrofitted from general-purpose ATS systems. We
+                                built it with transparency, fairness, and
                                 simplicity at its core.
                             </p>
                         </div>
@@ -614,10 +632,15 @@ export function AboutContent() {
             </section>
 
             {/* Core Values */}
-            <section ref={valuesRef} className="py-20 bg-base-200 overflow-hidden">
+            <section
+                ref={valuesRef}
+                className="py-20 bg-base-200 overflow-hidden"
+            >
                 <div className="container mx-auto px-4">
                     <div className="section-heading text-center mb-16 opacity-0">
-                        <h2 className="text-4xl font-bold mb-4">Our Core Values</h2>
+                        <h2 className="text-4xl font-bold mb-4">
+                            Our Core Values
+                        </h2>
                         <p className="text-lg text-base-content/70">
                             The principles that guide everything we build
                         </p>
@@ -641,7 +664,9 @@ export function AboutContent() {
                                     <h3 className="card-title justify-center text-2xl mb-3">
                                         {value.title}
                                     </h3>
-                                    <p className="text-base-content/70">{value.description}</p>
+                                    <p className="text-base-content/70">
+                                        {value.description}
+                                    </p>
                                 </div>
                             </div>
                         ))}
@@ -650,7 +675,10 @@ export function AboutContent() {
             </section>
 
             {/* Why We're Different */}
-            <section ref={differentRef} className="py-20 bg-base-100 overflow-hidden">
+            <section
+                ref={differentRef}
+                className="py-20 bg-base-100 overflow-hidden"
+            >
                 <div className="container mx-auto px-4">
                     <div className="max-w-5xl mx-auto">
                         <h2 className="section-heading text-4xl font-bold text-center mb-12 opacity-0">
@@ -689,7 +717,9 @@ export function AboutContent() {
             >
                 <div className="container mx-auto px-4">
                     <div className="section-heading text-center mb-12 opacity-0">
-                        <h2 className="text-4xl font-bold mb-4">Meet the Team</h2>
+                        <h2 className="text-4xl font-bold mb-4">
+                            Meet the Team
+                        </h2>
                         <p className="text-lg opacity-80">
                             The people building the future of split placements
                         </p>
@@ -701,14 +731,18 @@ export function AboutContent() {
                                 className="team-card card bg-base-100 text-base-content shadow opacity-0"
                             >
                                 <div className="card-body text-center">
-                                    <div className="team-avatar avatar placeholder mx-auto mb-4 opacity-0">
+                                    <div className="team-avatar avatar avatar-placeholder mx-auto mb-4 opacity-0">
                                         <div
                                             className={`bg-${member.color} text-${member.color}-content rounded-full w-24`}
                                         >
-                                            <span className="text-3xl">{member.initials}</span>
+                                            <span className="text-3xl">
+                                                {member.initials}
+                                            </span>
                                         </div>
                                     </div>
-                                    <h3 className="card-title justify-center">{member.name}</h3>
+                                    <h3 className="card-title justify-center">
+                                        {member.name}
+                                    </h3>
                                     <p className="text-sm text-base-content/60 mb-2">
                                         {member.title}
                                     </p>
@@ -744,8 +778,8 @@ export function AboutContent() {
                             Ready to Join the Movement?
                         </h2>
                         <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
-                            Be part of the platform that's changing how split placements
-                            work.
+                            Be part of the platform that's changing how split
+                            placements work.
                         </p>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">

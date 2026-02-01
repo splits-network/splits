@@ -8,10 +8,9 @@ import { UserDropdown } from "./user-dropdown";
 import NotificationBell from "./notification-bell";
 
 const landingNavLinks = [
-    { label: "For Recruiters", href: "#for-recruiters" },
-    { label: "For Companies", href: "#for-companies" },
-    { label: "How It Works", href: "#how-it-works" },
-    { label: "Splits Breakdown", href: "/public/splits-breakdown" },
+    { label: "For Recruiters", href: "/public/for-recruiters" },
+    { label: "For Companies", href: "/public/for-companies" },
+    { label: "How It Works", href: "/public/how-it-works" },
     { label: "Pricing", href: "/public/pricing" },
 ];
 
@@ -77,18 +76,28 @@ export function Header() {
                     {/* Center: Nav Links (landing page only) */}
                     {!isPortalPage && (
                         <nav className="hidden lg:flex items-center gap-1">
-                            {landingNavLinks.map((link) => (
-                                <a
-                                    key={link.href}
-                                    href={link.href}
-                                    onClick={(e) =>
-                                        handleSmoothScroll(e, link.href)
-                                    }
-                                    className="px-4 py-2 font-medium text-base-content/70 hover:text-base-content transition-colors rounded-lg hover:bg-base-200"
-                                >
-                                    {link.label}
-                                </a>
-                            ))}
+                            {landingNavLinks.map((link) =>
+                                link.href.startsWith("#") ? (
+                                    <a
+                                        key={link.href}
+                                        href={link.href}
+                                        onClick={(e) =>
+                                            handleSmoothScroll(e, link.href)
+                                        }
+                                        className="px-4 py-2 font-medium text-base-content/70 hover:text-base-content transition-colors rounded-lg hover:bg-base-200"
+                                    >
+                                        {link.label}
+                                    </a>
+                                ) : (
+                                    <Link
+                                        key={link.href}
+                                        href={link.href}
+                                        className="px-4 py-2 font-medium text-base-content/70 hover:text-base-content transition-colors rounded-lg hover:bg-base-200"
+                                    >
+                                        {link.label}
+                                    </Link>
+                                ),
+                            )}
                         </nav>
                     )}
                 </div>
@@ -157,15 +166,27 @@ export function Header() {
                             >
                                 {landingNavLinks.map((link) => (
                                     <li key={link.href}>
-                                        <a
-                                            href={link.href}
-                                            onClick={(e) =>
-                                                handleSmoothScroll(e, link.href)
-                                            }
-                                            className="font-medium"
-                                        >
-                                            {link.label}
-                                        </a>
+                                        {link.href.startsWith("#") ? (
+                                            <a
+                                                href={link.href}
+                                                onClick={(e) =>
+                                                    handleSmoothScroll(
+                                                        e,
+                                                        link.href,
+                                                    )
+                                                }
+                                                className="font-medium"
+                                            >
+                                                {link.label}
+                                            </a>
+                                        ) : (
+                                            <Link
+                                                href={link.href}
+                                                className="font-medium"
+                                            >
+                                                {link.label}
+                                            </Link>
+                                        )}
                                     </li>
                                 ))}
                             </ul>

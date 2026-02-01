@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { AnimatedGuideHero } from '../components/animated-guide-hero';
 
 export const metadata: Metadata = {
     title: 'Personal Branding Essentials',
@@ -163,30 +164,16 @@ export default function PersonalBrandingGuidePage() {
 
     return (
         <div className="min-h-screen bg-base-200">
-            {/* Header */}
-            <div className="bg-gradient-to-br from-warning to-secondary text-white py-16">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-4xl mx-auto">
-                        <Link href="/resources/career-guides" className="btn btn-ghost btn-sm mb-4">
-                            <i className="fa-duotone fa-regular fa-arrow-left"></i> Back to Career Guides
-                        </Link>
-                        <div className="flex items-center gap-3 mb-4">
-                            <i className="fa-duotone fa-regular fa-badge-check text-4xl"></i>
-                            <div>
-                                <div className="badge badge-neutral mb-2">Personal Brand</div>
-                                <h1 className="text-4xl font-bold">Personal Branding Essentials</h1>
-                            </div>
-                        </div>
-                        <p className="text-xl opacity-90">
-                            Build and promote your professional brand to stand out and advance your career.
-                        </p>
-                        <div className="flex items-center gap-4 mt-4 text-sm opacity-80">
-                            <span><i className="fa-duotone fa-regular fa-clock"></i> 8 min read</span>
-                            <span><i className="fa-duotone fa-regular fa-user"></i> Brand Strategists</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <AnimatedGuideHero
+                icon="badge-check"
+                badge="Personal Brand"
+                title="Personal Branding Essentials"
+                description="Build and promote your professional brand to stand out and advance your career."
+                readTime="8 min read"
+                author="Brand Strategists"
+                gradientFrom="from-warning"
+                gradientTo="to-secondary"
+            />
 
             {/* Content */}
             <div className="container mx-auto px-4 py-12">

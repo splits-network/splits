@@ -13,6 +13,7 @@ import {
     scaleIn,
     popIn,
 } from "@/components/landing/shared/animation-utils";
+import { RTICalculator } from "@/components/calculator/rti-calculator";
 
 if (typeof window !== "undefined") {
     gsap.registerPlugin(ScrollTrigger);
@@ -57,37 +58,40 @@ const roleDefinitions = [
         role: "Candidate Recruiter",
         description:
             "The recruiter who sourced and represents the candidate throughout the process",
-        example: "You find a software engineer through your network",
+        example:
+            "You find a software engineer through your network and guide them through the hiring process",
         icon: "fa-user-tie",
     },
     {
         role: "Job Owner",
         description:
-            "The recruiter assigned to fill the specific role by the company",
-        example: "Company recruiter managing hiring for a specific position",
+            "The external recruiter assigned by the company to fill the specific role",
+        example:
+            "An independent recruiter contracted to manage hiring for a specific position",
         icon: "fa-briefcase",
     },
     {
         role: "Company Recruiter",
         description:
-            "Internal or preferred recruiter working directly with the company",
-        example: "In-house talent acquisition team member",
+            "An external recruiter with a preferred relationship or contract with the company",
+        example:
+            "A recruiting firm that regularly works with the company on multiple roles",
         icon: "fa-building",
     },
     {
         role: "Candidate Sourcer",
         description:
-            "Recruiter who identified the candidate but doesn't represent them",
+            "Recruiter who brought the candidate to the Splits Network platform originally",
         example:
-            "You found the candidate's profile but another recruiter represents them",
+            "You recruited a candidate to join the platform, and later another recruiter represents them in a placement",
         icon: "fa-search",
     },
     {
         role: "Company Sourcer",
         description:
-            "Recruiter who identified the role but doesn't own the placement",
+            "Recruiter who brought the company to the Splits Network platform originally",
         example:
-            "You found the job opening but another recruiter manages the placement",
+            "You onboarded a company to the platform, and later other recruiters fill their roles",
         icon: "fa-handshake",
     },
 ];
@@ -132,21 +136,23 @@ const processSteps = [
     },
 ];
 
-export function SplitsBreakdownContent() {
+export function TransparencyContent() {
     const containerRef = useRef<HTMLDivElement>(null);
 
     useGSAP(
         () => {
-            const sections = gsap.utils.toArray(".animate-section");
+            const sections = gsap.utils.toArray(
+                ".animate-section",
+            ) as Element[];
             sections.forEach((section) => {
                 gsap.fromTo(
-                    section,
+                    section as gsap.TweenTarget,
                     { opacity: 0, y: 50 },
                     {
                         opacity: 1,
                         y: 0,
-                        duration: duration.medium,
-                        ease: easing.out,
+                        duration: duration.normal,
+                        ease: easing.smooth,
                         scrollTrigger: {
                             trigger: section,
                             start: "top 80%",
@@ -156,17 +162,17 @@ export function SplitsBreakdownContent() {
                 );
             });
 
-            const cards = gsap.utils.toArray(".animate-card");
+            const cards = gsap.utils.toArray(".animate-card") as Element[];
             cards.forEach((card, index) => {
                 gsap.fromTo(
-                    card,
+                    card as gsap.TweenTarget,
                     { opacity: 0, y: 30, scale: 0.95 },
                     {
                         opacity: 1,
                         y: 0,
                         scale: 1,
-                        duration: duration.medium,
-                        ease: easing.out,
+                        duration: duration.normal,
+                        ease: easing.smooth,
                         delay: index * 0.1,
                         scrollTrigger: {
                             trigger: card,
@@ -188,11 +194,11 @@ export function SplitsBreakdownContent() {
                     <div className="animate-section">
                         <div className="badge badge-primary badge-lg mb-6">
                             <i className="fa-duotone fa-regular fa-chart-pie mr-2"></i>
-                            Transparent Splits
+                            Complete Transparency
                         </div>
                         <h1 className="text-5xl md:text-7xl font-bold text-base-content mb-8">
-                            How <span className="text-primary">Splits</span>{" "}
-                            Work
+                            Fee{" "}
+                            <span className="text-primary">Transparency</span>
                         </h1>
                         <p className="text-xl md:text-2xl text-base-content/80 max-w-4xl mx-auto mb-12 leading-relaxed">
                             Understanding placement fee distribution on Splits
@@ -413,6 +419,49 @@ export function SplitsBreakdownContent() {
                             </div>
                         ))}
                     </div>
+
+                    {/* Important Note */}
+                    <div className="animate-section mt-16">
+                        <div className="card bg-warning/10 border border-warning/20 max-w-4xl mx-auto">
+                            <div className="card-body">
+                                <div className="flex items-start gap-4">
+                                    <div className="text-warning text-3xl flex-shrink-0">
+                                        <i className="fa-duotone fa-regular fa-shield-exclamation"></i>
+                                    </div>
+                                    <div>
+                                        <h3 className="card-title text-xl mb-3 text-warning">
+                                            Important: External Recruiters Only
+                                        </h3>
+                                        <div className="space-y-2 text-base-content/80">
+                                            <p>
+                                                <strong>
+                                                    All payment roles must be
+                                                    filled by external
+                                                    recruiters
+                                                </strong>{" "}
+                                                - never by internal company
+                                                staff members. This includes:
+                                            </p>
+                                            <ul className="list-disc list-inside ml-4 space-y-1">
+                                                <li>Job Owner</li>
+                                                <li>Company Recruiter</li>
+                                                <li>Company Sourcer</li>
+                                            </ul>
+                                            <p>
+                                                Internal staff members paying
+                                                themselves would violate
+                                                platform integrity and could
+                                                constitute fraud. Our system
+                                                ensures all payment roles are
+                                                assigned only to legitimate
+                                                external recruiting partners.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -473,121 +522,44 @@ export function SplitsBreakdownContent() {
                 </div>
             </section>
 
-            {/* Example Calculation Section */}
+            {/* Interactive Calculator Section */}
             <section id="calculator" className="py-24 px-4 bg-base-200/50">
                 <div className="max-w-7xl mx-auto">
                     <div className="animate-section text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-bold text-base-content mb-6">
-                            Example Calculation
+                            Calculate Your Earnings
                         </h2>
                         <p className="text-xl text-base-content/80 max-w-3xl mx-auto">
-                            See how much you could earn with a real placement
-                            example.
+                            Use our interactive calculator to see how much you
+                            could earn based on your roles and subscription
+                            tier.
                         </p>
                     </div>
 
-                    <div className="card bg-base-100 shadow-lg max-w-4xl mx-auto">
-                        <div className="card-body">
-                            <div className="grid md:grid-cols-2 gap-8">
-                                <div>
-                                    <h3 className="text-2xl font-bold mb-6 text-center">
-                                        Placement Details
-                                    </h3>
-                                    <div className="space-y-4">
-                                        <div className="stat bg-base-200 rounded-lg">
-                                            <div className="stat-title">
-                                                Candidate Salary
-                                            </div>
-                                            <div className="stat-value text-primary">
-                                                $150,000
-                                            </div>
-                                        </div>
-                                        <div className="stat bg-base-200 rounded-lg">
-                                            <div className="stat-title">
-                                                Placement Fee Rate
-                                            </div>
-                                            <div className="stat-value text-secondary">
-                                                20%
-                                            </div>
-                                        </div>
-                                        <div className="stat bg-base-200 rounded-lg">
-                                            <div className="stat-title">
-                                                Total Placement Fee
-                                            </div>
-                                            <div className="stat-value text-accent">
-                                                $30,000
-                                            </div>
-                                        </div>
-                                        <div className="stat bg-base-200 rounded-lg">
-                                            <div className="stat-title">
-                                                Your Role
-                                            </div>
-                                            <div className="stat-value text-base-content text-lg">
-                                                Candidate Recruiter
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                    <div className="animate-card">
+                        <RTICalculator animate={true} />
+                    </div>
 
-                                <div>
-                                    <h3 className="text-2xl font-bold mb-6 text-center">
-                                        Your Earnings by Tier
-                                    </h3>
-                                    <div className="space-y-4">
-                                        {tierData.map((tier) => {
-                                            const earnings =
-                                                30000 *
-                                                (tier.candidateRecruiterShare /
-                                                    100);
-                                            return (
-                                                <div
-                                                    key={tier.name}
-                                                    className="stat bg-primary/5 rounded-lg"
-                                                >
-                                                    <div className="stat-title">
-                                                        {tier.name} Tier
-                                                    </div>
-                                                    <div className="stat-value text-primary">
-                                                        $
-                                                        {earnings.toLocaleString()}
-                                                    </div>
-                                                    <div className="stat-desc">
-                                                        {
-                                                            tier.candidateRecruiterShare
-                                                        }
-                                                        % of $30,000 fee
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="divider"></div>
-
-                            <div className="text-center">
-                                <p className="text-lg text-base-content/80 mb-6">
-                                    Ready to start earning? Join thousands of
-                                    recruiters making split placements.
-                                </p>
-                                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                    <Link
-                                        href="/portal/dashboard"
-                                        className="btn btn-primary btn-lg"
-                                    >
-                                        <i className="fa-duotone fa-regular fa-rocket mr-2"></i>
-                                        Start Recruiting
-                                    </Link>
-                                    <Link
-                                        href="/public/pricing"
-                                        className="btn btn-outline btn-lg"
-                                    >
-                                        <i className="fa-duotone fa-regular fa-tag mr-2"></i>
-                                        View All Pricing
-                                    </Link>
-                                </div>
-                            </div>
+                    <div className="text-center mt-12">
+                        <p className="text-lg text-base-content/80 mb-6">
+                            Ready to start earning? Join thousands of external
+                            recruiters making collaborative placements.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <Link
+                                href="/portal/dashboard"
+                                className="btn btn-primary btn-lg"
+                            >
+                                <i className="fa-duotone fa-regular fa-rocket mr-2"></i>
+                                Start Recruiting
+                            </Link>
+                            <Link
+                                href="/public/pricing"
+                                className="btn btn-outline btn-lg"
+                            >
+                                <i className="fa-duotone fa-regular fa-tag mr-2"></i>
+                                View All Pricing
+                            </Link>
                         </div>
                     </div>
                 </div>
