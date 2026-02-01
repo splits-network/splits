@@ -57,13 +57,13 @@ export function Header() {
                 <div className="flex items-center gap-3">
                     <a
                         href="https://splits.network"
-                        className="hidden md:inline-flex btn btn-ghost btn-sm font-medium"
+                        className="hidden md:inline-flex btn btn-ghost font-medium"
                     >
                         Recruiter Login
                     </a>
                     <a
                         href="https://applicant.network"
-                        className="btn btn-primary btn-sm font-medium"
+                        className="btn btn-primary font-medium"
                     >
                         <span className="hidden sm:inline">Find Jobs</span>
                         <span className="sm:hidden">Jobs</span>
