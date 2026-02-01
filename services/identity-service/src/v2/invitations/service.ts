@@ -7,12 +7,16 @@ import { Logger } from '@splits-network/shared-logging';
 import { EventPublisherV2 } from '../shared/events';
 import { InvitationUpdate } from './types';
 import { InvitationRepository } from './repository';
+import { UserRepository } from '../users/repository';
+import { MembershipRepository } from '../memberships/repository';
 import { v4 as uuidv4 } from 'uuid';
 import type { AccessContext } from '../shared/access';
 
 export class InvitationServiceV2 {
     constructor(
         private repository: InvitationRepository,
+        private userRepository: UserRepository,
+        private membershipRepository: MembershipRepository,
         private eventPublisher: EventPublisherV2,
         private logger: Logger,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>
@@ -259,7 +263,24 @@ export class InvitationServiceV2 {
             updated_at: new Date().toISOString(),
         });
 
-        // Publish event - membership service will handle creating the membership
+        // Mark user's onboarding as completed (they're joining via invitation)
+        await this.userRepository.updateUser(userId, {
+            onboarding_status: 'completed',
+            updated_at: new Date().toISOString(),
+        });
+
+        // Create membership with the role from the invitation
+        const membership = await this.membershipRepository.createMembership({
+            id: uuidv4(),
+            organization_id: invitation.organization_id,
+            company_id: invitation.company_id,
+            user_id: userId,
+            role: invitation.role,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        });
+
+        // Publish events
         await this.eventPublisher.publish('invitation.accepted', {
             invitation_id: invitationId,
             user_id: userId,
@@ -268,7 +289,18 @@ export class InvitationServiceV2 {
             role: invitation.role,
         });
 
-        this.logger.info({ invitationId }, 'InvitationService.acceptInvitation - completed');
+        await this.eventPublisher.publish('membership.created', {
+            membership_id: membership.id,
+            organization_id: membership.organization_id,
+            company_id: membership.company_id,
+            user_id: membership.user_id,
+            role: membership.role,
+        });
+
+        this.logger.info(
+            { invitationId, userId, membershipId: membership.id, role: invitation.role },
+            'InvitationService.acceptInvitation - completed, onboarding marked as completed, membership created'
+        );
     }
 
     /**
