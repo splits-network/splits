@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.5",
+    "@gsap/react": "^2.1.2",
     "@sentry/nextjs": "^10.32.1",
     "@splits-network/shared-api-client": "workspace:*",
     "@splits-network/shared-config": "workspace:*",
@@ -21,6 +22,7 @@
     "@uiw/react-markdown-preview": "^5.1.5",
     "@uiw/react-md-editor": "^4.0.0",
     "chart.js": "^4.5.1",
+    "gsap": "^3.14.2",
     "next": "^16.1.0",
     "react": "^19.2.1",
     "react-chartjs-2": "^5.3.1",
