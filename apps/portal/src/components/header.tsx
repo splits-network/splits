@@ -11,7 +11,7 @@ const landingNavLinks = [
     { label: "For Recruiters", href: "#for-recruiters" },
     { label: "For Companies", href: "#for-companies" },
     { label: "How It Works", href: "#how-it-works" },
-    { label: "Pricing", href: "#pricing" },
+    { label: "Pricing", href: "/public/pricing" },
 ];
 
 export function Header() {
@@ -83,7 +83,7 @@ export function Header() {
                                     onClick={(e) =>
                                         handleSmoothScroll(e, link.href)
                                     }
-                                    className="px-4 py-2 text-sm font-medium text-base-content/70 hover:text-base-content transition-colors rounded-lg hover:bg-base-200"
+                                    className="px-4 py-2 font-medium text-base-content/70 hover:text-base-content transition-colors rounded-lg hover:bg-base-200"
                                 >
                                     {link.label}
                                 </a>
@@ -113,7 +113,7 @@ export function Header() {
                         <>
                             <Link
                                 href="/portal/dashboard"
-                                className="btn btn-ghost btn-sm"
+                                className="btn btn-ghost"
                                 title="Dashboard"
                             >
                                 <i className="fa-duotone fa-regular fa-gauge"></i>
