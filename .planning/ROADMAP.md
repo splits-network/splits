@@ -26,10 +26,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Pricing page imports and uses animation utilities from landing page shared folder
   2. GSAP and ScrollTrigger are initialized on pricing page mount
   3. At least one element on pricing page animates on scroll (proof of concept)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 01-01: TBD
+- [ ] 01-01-PLAN.md — Set up GSAP infrastructure and add hero scroll animation
 
 ### Phase 2: Visual Redesign
 **Goal**: All pricing page sections match landing page design with scroll-triggered animations
@@ -66,11 +66,11 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3
+Phases execute in numeric order: 1 -> 2 -> 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Animation Infrastructure | 0/? | Not started | - |
+| 1. Animation Infrastructure | 0/1 | Planned | - |
 | 2. Visual Redesign | 0/? | Not started | - |
 | 3. RTI Calculator | 0/? | Not started | - |
 
