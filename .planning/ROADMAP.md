@@ -41,10 +41,12 @@ Plans:
   3. Static prices and example numbers use animated counters (count up on appear)
   4. Feature comparison table rows reveal progressively on scroll
   5. Page feels visually cohesive with landing page (same animation timing, easing, patterns)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: TBD
+- [ ] 02-01-PLAN.md — Hero section redesign with gradient background and animated headline
+- [ ] 02-02-PLAN.md — Pricing cards stagger animation and price number counters
+- [ ] 02-03-PLAN.md — Feature comparison table row animations with Pro column highlight
 
 ### Phase 3: RTI Calculator
 **Goal**: Recruiters can input placement details, select roles, and see animated payout comparisons across tiers
@@ -71,7 +73,7 @@ Phases execute in numeric order: 1 -> 2 -> 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Animation Infrastructure | 1/1 | Complete | 2026-01-31 |
-| 2. Visual Redesign | 0/? | Not started | - |
+| 2. Visual Redesign | 0/3 | Ready to execute | - |
 | 3. RTI Calculator | 0/? | Not started | - |
 
 ---
