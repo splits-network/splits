@@ -571,8 +571,40 @@ function registerPlacementInvoiceRoutes(app: FastifyInstance, services: ServiceR
     );
 }
 
+function registerPublicPlansRoute(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    // Public access to list plans for pricing page
+    app.get(
+        '/api/v2/plans',
+        // No preHandler auth - this is public
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            
+            try {
+                // Call billing service without auth headers since this is public
+                const data = await billingService().get(
+                    '/api/v2/plans',
+                    request.query as Record<string, any>,
+                    correlationId,
+                    {} // No auth headers for public access
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Failed to fetch public plans');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: { message: error.message || 'Failed to fetch plans' } });
+            }
+        }
+    );
+}
+
 export function registerBillingRoutes(app: FastifyInstance, services: ServiceRegistry) {
-    // Register specific routes FIRST (must be before generic CRUD routes)
+    // Register PUBLIC routes FIRST (must be before auth routes that conflict)
+    registerPublicPlansRoute(app, services);
+    
+    // Register specific auth-required routes
     registerSubscriptionMeRoute(app, services);
     registerSubscriptionSetupIntentRoute(app, services);
     registerSubscriptionActivateRoute(app, services);
@@ -585,5 +617,7 @@ export function registerBillingRoutes(app: FastifyInstance, services: ServiceReg
     registerCompanyBillingProfileRoutes(app, services);
     registerPlacementInvoiceRoutes(app, services);
 
-    BILLING_RESOURCES.forEach(resource => registerResourceRoutes(app, services, resource));
+    // Register other billing resources (excluding plans which is handled above)
+    BILLING_RESOURCES.filter(resource => resource.name !== 'plans')
+        .forEach(resource => registerResourceRoutes(app, services, resource));
 }

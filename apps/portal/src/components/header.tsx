@@ -11,6 +11,7 @@ const landingNavLinks = [
     { label: "For Recruiters", href: "#for-recruiters" },
     { label: "For Companies", href: "#for-companies" },
     { label: "How It Works", href: "#how-it-works" },
+    { label: "Splits Breakdown", href: "/public/splits-breakdown" },
     { label: "Pricing", href: "/public/pricing" },
 ];
 

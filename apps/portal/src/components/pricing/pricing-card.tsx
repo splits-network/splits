@@ -6,6 +6,7 @@
  */
 
 import { PricingCardProps } from "./types";
+import Link from "next/link";
 
 export function PricingCard({
     plan,
@@ -16,7 +17,27 @@ export function PricingCard({
     disabled = false,
 }: PricingCardProps) {
     const { features } = plan;
-    const isPopular = features.is_popular;
+
+    // Simple fallback features if not provided in database
+    const defaultFeatures = {
+        headline: plan.description || `Perfect for ${plan.tier} recruiting`,
+        subheadline: plan.description || "Get access to the marketplace",
+        included: [
+            "Access to open roles across the network",
+            "Unlimited candidate submissions",
+            "Full ATS workflow and application tracking",
+        ],
+        not_included: [],
+        cta: "Get Started",
+        footnote: null,
+        is_popular: false,
+        annual_price_cents: null,
+        annual_savings_text: null,
+    };
+
+    // Use features from database or fallback
+    const planFeatures = features || defaultFeatures;
+    const isPopular = planFeatures.is_popular;
     const isFree = plan.price_monthly === 0;
 
     // Calculate display price and period
@@ -49,8 +70,10 @@ export function PricingCard({
     const subtitleClass = isPopular ? "opacity-90" : "text-base-content/70";
 
     // Limit features in compact mode
-    const maxIncludedFeatures = isCompact ? 4 : features.included.length;
-    const maxNotIncludedFeatures = isCompact ? 2 : features.not_included.length;
+    const maxIncludedFeatures = isCompact ? 4 : planFeatures.included.length;
+    const maxNotIncludedFeatures = isCompact
+        ? 2
+        : planFeatures.not_included.length;
 
     const handleClick = () => {
         if (!disabled && onSelect) {
@@ -97,21 +120,21 @@ export function PricingCard({
                 {!isFree && isAnnual && annualSavings > 0 && (
                     <div className="badge badge-success badge-sm mb-2">
                         Save ${annualSavings}
-                        {features.annual_savings_text &&
-                            ` (${features.annual_savings_text.replace("Save ", "")})`}
+                        {planFeatures.annual_savings_text &&
+                            ` (${planFeatures.annual_savings_text.replace("Save ", "")})`}
                     </div>
                 )}
 
                 <div>
                     <span className={`${subtitleClass} font-bold`}>
-                        {features.headline}
+                        {planFeatures.headline}
                     </span>
                 </div>
 
                 {/* Headline/Subheadline (default variant only) */}
                 {!isCompact && (
                     <div className={`${subtitleClass} `}>
-                        {features.subheadline}
+                        {planFeatures.subheadline}
                     </div>
                 )}
 
@@ -120,9 +143,9 @@ export function PricingCard({
                 {/* Features List */}
                 <ul className={`space-y-2 ${isCompact ? "text-sm" : ""} mb-4`}>
                     {/* Included features */}
-                    {features.included
+                    {planFeatures.included
                         .slice(0, maxIncludedFeatures)
-                        .map((feature, index) => (
+                        .map((feature: string, index: number) => (
                             <li
                                 key={`included-${index}`}
                                 className="flex items-start gap-2"
@@ -136,13 +159,13 @@ export function PricingCard({
 
                     {/* Show more indicator in compact mode */}
                     {isCompact &&
-                        features.included.length > maxIncludedFeatures && (
+                        planFeatures.included.length > maxIncludedFeatures && (
                             <li className="flex items-start gap-2 opacity-70">
                                 <i
                                     className={`fa-duotone fa-regular fa-plus mt-0.5 flex-shrink-0 ${checkIconClass}`}
                                 ></i>
                                 <span>
-                                    {features.included.length -
+                                    {planFeatures.included.length -
                                         maxIncludedFeatures}{" "}
                                     more features
                                 </span>
@@ -150,9 +173,9 @@ export function PricingCard({
                         )}
 
                     {/* Not included features */}
-                    {features.not_included
+                    {planFeatures.not_included
                         .slice(0, maxNotIncludedFeatures)
-                        .map((feature, index) => (
+                        .map((feature: string, index: number) => (
                             <li
                                 key={`not-included-${index}`}
                                 className={`flex items-start gap-2 ${xIconClass}`}
@@ -161,6 +184,11 @@ export function PricingCard({
                                 <span>{feature}</span>
                             </li>
                         ))}
+                    <div className="h-2">
+                        <Link href="/pricing" className="text-xs underline">
+                            See full pricing details
+                        </Link>
+                    </div>
                 </ul>
                 <div className="mt-auto">
                     {/* Selection indicator or CTA */}
@@ -176,23 +204,23 @@ export function PricingCard({
                                     Selected
                                 </>
                             ) : (
-                                features.cta
+                                planFeatures.cta
                             )}
                         </button>
                     ) : (
                         <div
                             className={`btn ${isPopular ? "btn-secondary" : plan.tier === "partner" ? "btn-accent" : "btn-primary"} btn-block ${isCompact ? "btn-sm" : ""}`}
                         >
-                            {features.cta}
+                            {planFeatures.cta}
                         </div>
                     )}
 
                     {/* Footnote (default variant only) */}
-                    {!isCompact && features.footnote && (
+                    {!isCompact && planFeatures.footnote && (
                         <p
                             className={`text-xs ${subtitleClass} mt-2 text-center`}
                         >
-                            {features.footnote}
+                            {planFeatures.footnote}
                         </p>
                     )}
                 </div>

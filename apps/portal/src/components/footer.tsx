@@ -118,7 +118,15 @@ export function Footer() {
                             </li>
                             <li>
                                 <Link
-                                    href="/public/integrations"
+                                    href="/public/splits-breakdown"
+                                    className="link link-hover text-base-content/70 hover:text-base-content"
+                                >
+                                    Splits Breakdown
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    href="/public/integration-partners"
                                     className="link link-hover text-base-content/70 hover:text-base-content"
                                 >
                                     Integrations
