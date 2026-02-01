@@ -12,7 +12,7 @@ Transform the static pricing page into an animated, interactive experience that 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Animation Infrastructure** - Setup GSAP integration and reusable animation patterns
+- [x] **Phase 1: Animation Infrastructure** - Setup GSAP integration and reusable animation patterns ✓
 - [ ] **Phase 2: Visual Redesign** - Redesign all pricing page sections with scroll-triggered animations
 - [ ] **Phase 3: RTI Calculator** - Build interactive calculator with multi-role selection and payout comparison
 
@@ -29,7 +29,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 1 plan
 
 Plans:
-- [ ] 01-01-PLAN.md — Set up GSAP infrastructure and add hero scroll animation
+- [x] 01-01-PLAN.md — Set up GSAP infrastructure and add hero scroll animation ✓
 
 ### Phase 2: Visual Redesign
 **Goal**: All pricing page sections match landing page design with scroll-triggered animations
@@ -70,7 +70,7 @@ Phases execute in numeric order: 1 -> 2 -> 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Animation Infrastructure | 0/1 | Planned | - |
+| 1. Animation Infrastructure | 1/1 | Complete | 2026-01-31 |
 | 2. Visual Redesign | 0/? | Not started | - |
 | 3. RTI Calculator | 0/? | Not started | - |
 
