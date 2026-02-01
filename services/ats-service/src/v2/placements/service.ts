@@ -161,8 +161,13 @@ export class PlacementServiceV2 {
         // Placement creation now uses direct recruiter relationships from application data
 
         const userContext = await this.accessResolver.resolve(clerkUserId);
+        const guaranteeDays = data.guarantee_days ?? 90;
+        const guaranteeExpiresAt = this.computeGuaranteeExpiresAt(data.start_date, guaranteeDays);
+
         const placement = await this.repository.createPlacement({
             ...data,
+            guarantee_days: guaranteeDays,
+            guarantee_expires_at: guaranteeExpiresAt,
             status: data.status || 'pending',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -230,7 +235,16 @@ export class PlacementServiceV2 {
         }
 
         const userContext = await this.accessResolver.resolve(clerkUserId);
-        const updatedPlacement = await this.repository.updatePlacement(id, updates);
+        const nextGuaranteeDays = updates.guarantee_days ?? currentPlacement.guarantee_days ?? 90;
+        const nextStartDate = updates.start_date ?? currentPlacement.start_date;
+        const guaranteeExpiresAt = (updates.start_date || updates.guarantee_days)
+            ? this.computeGuaranteeExpiresAt(nextStartDate, nextGuaranteeDays)
+            : undefined;
+
+        const updatedPlacement = await this.repository.updatePlacement(id, {
+            ...updates,
+            ...(guaranteeExpiresAt ? { guarantee_expires_at: guaranteeExpiresAt } : {}),
+        });
 
         // Emit events based on what changed
         if (this.eventPublisher) {
@@ -356,6 +370,10 @@ export class PlacementServiceV2 {
         const placementFee = Math.round((salary * feePercentage) / 100);
 
         // Create placement with snapshot of all role IDs
+        const startDate = new Date();
+        const guaranteeDays = 90;
+        const guaranteeExpiresAt = this.computeGuaranteeExpiresAt(startDate, guaranteeDays);
+
         const placement = await this.repository.createPlacement({
             application_id: application.id,
             candidate_id: application.candidate_id,
@@ -375,7 +393,9 @@ export class PlacementServiceV2 {
             placement_fee: placementFee,
 
             state: 'active',
-            start_date: new Date(), // Default to current date, can be updated later
+            start_date: startDate, // Default to current date, can be updated later
+            guarantee_days: guaranteeDays,
+            guarantee_expires_at: guaranteeExpiresAt,
             created_at: new Date(),
             updated_at: new Date(),
         });
@@ -408,5 +428,13 @@ export class PlacementServiceV2 {
         }
 
         return placement;
+    }
+
+    private computeGuaranteeExpiresAt(startDate: string | Date | null | undefined, guaranteeDays: number): string | null {
+        if (!startDate || !guaranteeDays) return null;
+        const baseDate = new Date(startDate);
+        if (Number.isNaN(baseDate.getTime())) return null;
+        const expiresAt = new Date(baseDate.getTime() + guaranteeDays * 86400000);
+        return expiresAt.toISOString();
     }
 }

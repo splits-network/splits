@@ -14,6 +14,7 @@ export interface PlacementFilters extends PaginationParams, SortParams {
 export interface PlacementUpdate {
     status?: string;
     start_date?: string;
+    guarantee_days?: number;
     salary?: number;
     fee_percentage?: number;
     notes?: string;

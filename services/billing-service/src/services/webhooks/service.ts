@@ -1,6 +1,7 @@
 import Stripe from 'stripe';
 import { Logger } from '@splits-network/shared-logging';
 import { SupabaseClient } from '@supabase/supabase-js';
+import * as Sentry from '@sentry/node';
 
 /**
  * Webhook Service
@@ -8,10 +9,17 @@ import { SupabaseClient } from '@supabase/supabase-js';
  * TODO: Migrate to V2 architecture with proper event publishing
  */
 export class WebhookService {
+    private stripe: Stripe;
+
     constructor(
         private supabase: SupabaseClient,
-        private logger: Logger
-    ) {}
+        private logger: Logger,
+        stripeSecretKey?: string
+    ) {
+        this.stripe = new Stripe(stripeSecretKey || process.env.STRIPE_SECRET_KEY || '', {
+            apiVersion: '2025-11-17.clover',
+        });
+    }
 
     async handleStripeWebhook(event: Stripe.Event): Promise<void> {
         this.logger.info({ type: event.type }, 'Processing Stripe webhook');
@@ -38,6 +46,11 @@ export class WebhookService {
             case 'transfer.updated':
             case 'transfer.reversed':
                 await this.handleTransferEvent(event.type, event.data.object as Stripe.Transfer);
+                break;
+            case 'payout.paid':
+            case 'payout.failed':
+            case 'payout.canceled':
+                await this.handlePayoutEvent(event.type, event.data.object as Stripe.Payout);
                 break;
 
             case 'invoice.payment_succeeded':
@@ -85,9 +98,11 @@ export class WebhookService {
         if (!transfer.id) return;
 
         const status =
-            eventType === 'transfer.reversed'
-                ? 'reversed'
-                : 'processing';
+            eventType === 'transfer.created'
+                ? 'paid'
+                : eventType === 'transfer.reversed'
+                    ? 'reversed'
+                    : 'processing';
 
         const updates: Record<string, any> = {
             status,
@@ -98,6 +113,10 @@ export class WebhookService {
             updates.processing_started_at = new Date().toISOString();
         }
 
+        if (status === 'paid') {
+            updates.completed_at = new Date().toISOString();
+        }
+
         const { error } = await this.supabase
             .from('placement_payout_transactions')
             .update(updates)
@@ -106,6 +125,100 @@ export class WebhookService {
         if (error) {
             this.logger.error({ err: error, transfer_id: transfer.id }, 'Failed to update payout transaction from transfer');
         }
+    }
+
+    private async handlePayoutEvent(eventType: string, payout: Stripe.Payout): Promise<void> {
+        if (!payout.id) return;
+
+        const status =
+            eventType === 'payout.paid'
+                ? 'paid'
+                : eventType === 'payout.failed' || eventType === 'payout.canceled'
+                    ? 'failed'
+                    : 'processing';
+
+        const updates: Record<string, any> = {
+            status,
+            updated_at: new Date().toISOString(),
+        };
+
+        if (status === 'paid') {
+            updates.completed_at = new Date().toISOString();
+        }
+
+        if (status === 'failed') {
+            updates.failed_at = new Date().toISOString();
+            updates.failure_reason = payout.failure_message || 'Stripe payout failed';
+        }
+
+        const transferIds = await this.getTransferIdsForPayout(payout.id);
+
+        if (transferIds.length === 0) {
+            this.logger.warn(
+                { payout_id: payout.id, metric: 'stripe_payout_missing_transfers', value: 1 },
+                'No transfer IDs found for payout; attempting payout_id match'
+            );
+            if (process.env.SENTRY_DSN) {
+                Sentry.captureMessage('Stripe payout missing transfers', {
+                    level: 'warning',
+                    tags: { module: 'billing-webhooks' },
+                    extra: { payout_id: payout.id },
+                });
+            }
+            const { error } = await this.supabase
+                .from('placement_payout_transactions')
+                .update({ ...updates, stripe_payout_id: payout.id })
+                .eq('stripe_payout_id', payout.id);
+
+            if (error) {
+                this.logger.error({ err: error, payout_id: payout.id }, 'Failed to update payout transaction from payout');
+            }
+            return;
+        }
+
+        const { error } = await this.supabase
+            .from('placement_payout_transactions')
+            .update({ ...updates, stripe_payout_id: payout.id })
+            .in('stripe_transfer_id', transferIds);
+
+        if (error) {
+            this.logger.error({ err: error, payout_id: payout.id }, 'Failed to update payout transaction from payout transfers');
+        }
+    }
+
+    private async getTransferIdsForPayout(payoutId: string): Promise<string[]> {
+        const transferIds: string[] = [];
+        let startingAfter: string | undefined = undefined;
+
+        try {
+            while (true) {
+                const response: Stripe.ApiList<Stripe.BalanceTransaction> = await this.stripe.balanceTransactions.list({
+                    payout: payoutId,
+                    limit: 100,
+                    ...(startingAfter ? { starting_after: startingAfter } : {}),
+                });
+
+                for (const balanceTx of response.data) {
+                    const source = balanceTx.source;
+                    if (typeof source === 'string' && source.startsWith('tr_')) {
+                        transferIds.push(source);
+                    }
+                }
+
+                if (!response.has_more) {
+                    break;
+                }
+
+                startingAfter = response.data[response.data.length - 1]?.id;
+                if (!startingAfter) {
+                    break;
+                }
+            }
+        } catch (error) {
+            this.logger.error({ err: error, payout_id: payoutId }, 'Failed to load payout balance transactions');
+        }
+
+        return Array.from(new Set(transferIds));
     }
 
     private async handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {

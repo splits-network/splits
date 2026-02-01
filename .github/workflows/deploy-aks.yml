@@ -284,8 +284,10 @@ jobs:
               run: |
                   kubectl apply -f infra/k8s/identity-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/ats-service/ --namespace=splits-network
+                  kubectl apply -f infra/k8s/ats-service/cronjobs/ --namespace=splits-network
                   kubectl apply -f infra/k8s/network-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/billing-service/ --namespace=splits-network
+                  kubectl apply -f infra/k8s/billing-service/cronjobs/ --namespace=splits-network
                   kubectl apply -f infra/k8s/notification-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/automation-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/document-service/ --namespace=splits-network
@@ -294,6 +296,8 @@ jobs:
                   kubectl apply -f infra/k8s/analytics-service/ --namespace=splits-network
                   kubectl apply -f infra/k8s/chat-gateway/ --namespace=splits-network
                   kubectl apply -f infra/k8s/chat-service/ --namespace=splits-network
+                  kubectl delete job ats-backfill-guarantee-expires --ignore-not-found --namespace=splits-network
+                  kubectl apply -f infra/k8s/ats-service/jobs/backfill-guarantee-expires.yaml --namespace=splits-network
 
             - name: Wait for services to be ready
               run: |

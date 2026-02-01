@@ -8,8 +8,9 @@ metadata:
     component: cron
     job-type: payout-schedules
 spec:
-  # Run daily at 2am UTC (cron format: minute hour day month weekday)
-  schedule: "0 2 * * *"
+  # Run hourly by default; change to "0 2 * * *" for daily runs
+  # Examples: "0 * * * *" (hourly), "0 2 * * *" (daily)
+  schedule: "0 * * * *"
   
   # Keep last 3 successful and 3 failed jobs for debugging
   successfulJobsHistoryLimit: 3
@@ -40,7 +41,7 @@ spec:
           
           containers:
           - name: payout-schedules-processor
-            image: ghcr.io/splits-network/billing-service:latest
+            image: ${ACR_SERVER}/billing-service:${IMAGE_TAG}
             imagePullPolicy: Always
             
             # Run the job script
