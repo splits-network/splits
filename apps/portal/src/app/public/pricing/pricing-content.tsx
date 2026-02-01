@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { duration, easing } from '@/components/landing/shared/animation-utils';
+import { RTICalculator } from '@/components/calculator';
 import Link from 'next/link';
 
 if (typeof window !== 'undefined') {
@@ -448,8 +449,27 @@ export function PricingContent() {
                 </div>
             </section>
 
-            {/* Pricing Comparison Table */}
+            {/* RTI Calculator Section */}
             <section className="py-20 bg-base-100">
+                <div className="container mx-auto px-4">
+                    <div className="text-center mb-12">
+                        <h2 className="text-4xl font-bold mb-4">
+                            <i className="fa-duotone fa-regular fa-calculator text-primary"></i>{" "}
+                            Calculate Your Earnings
+                        </h2>
+                        <p className="text-lg text-base-content/70 max-w-2xl mx-auto">
+                            See exactly how much you'll earn on a placement across subscription tiers.
+                            Higher tiers mean more of the fee goes directly to you.
+                        </p>
+                    </div>
+                    <div className="max-w-6xl mx-auto">
+                        <RTICalculator animate />
+                    </div>
+                </div>
+            </section>
+
+            {/* Pricing Comparison Table */}
+            <section className="py-20 bg-base-200">
                 <div className="container mx-auto px-4">
                     <div className="text-center mb-12">
                         <h2 className="text-3xl font-bold mb-4">

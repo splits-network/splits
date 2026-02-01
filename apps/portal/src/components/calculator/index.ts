@@ -5,3 +5,4 @@ export * from './fee-input';
 export * from './role-selector';
 export * from './animated-payout';
 export * from './tier-comparison';
+export * from './rti-calculator';
