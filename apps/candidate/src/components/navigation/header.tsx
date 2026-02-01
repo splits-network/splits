@@ -139,7 +139,8 @@ export default function Header() {
                         )}
                     </ul>
                 </div>
-                <Link href="/" className="">
+
+                <Link href="/" className="flex-shrink-0">
                     <img
                         src="/logo.svg"
                         alt="Applicant Network"

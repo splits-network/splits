@@ -12,22 +12,26 @@ if (typeof window !== "undefined") {
 
 const painPoints = [
     {
-        icon: "fa-duotone fa-regular fa-circle-xmark",
+        icon: "fa-duotone fa-regular fa-circle-xmark text-secondary",
+        icon_bg: "bg-secondary/20",
         title: "Application Black Holes",
         text: "You send applications into the void. No response, no feedback, just silence.",
     },
     {
-        icon: "fa-duotone fa-regular fa-ghost",
+        icon: "fa-duotone fa-regular fa-ghost text-error",
+        icon_bg: "bg-error/20",
         title: "Ghosted by Recruiters",
         text: "Phone screens go well, then nothing. You're left wondering if you said something wrong.",
     },
     {
-        icon: "fa-duotone fa-regular fa-shuffle",
+        icon: "fa-duotone fa-regular fa-shuffle text-info",
+        icon_bg: "bg-info/20",
         title: "Endless Job Board Scrolling",
         text: "Hours spent on Indeed, LinkedIn, Glassdoor—duplicates everywhere, outdated listings.",
     },
     {
-        icon: "fa-duotone fa-regular fa-question",
+        icon: "fa-duotone fa-regular fa-question text-warning",
+        icon_bg: "bg-warning/20",
         title: "No Salary Transparency",
         text: "You invest time interviewing only to discover the pay is half your expectations.",
     },
@@ -121,8 +125,8 @@ export function ProblemSection() {
                         Sound Familiar?
                     </p>
                     <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                        Job searching shouldn&apos;t feel like{" "}
-                        <span className="text-error">this</span>
+                        Job searching shouldn&apos;t feel like&nbsp;
+                        <span className="text-error">this:</span>
                     </h2>
                     <p className="text-lg opacity-70">
                         You&apos;re qualified, motivated, and ready—but the
@@ -139,10 +143,10 @@ export function ProblemSection() {
                             key={index}
                             className="pain-card flex items-start gap-4 p-6 bg-base-100/5 rounded-xl border border-base-100/10 opacity-0"
                         >
-                            <div className="pain-icon w-12 h-12 rounded-full bg-error/20 flex items-center justify-center flex-shrink-0">
-                                <i
-                                    className={`${point.icon} text-xl text-error`}
-                                ></i>
+                            <div
+                                className={`pain-icon w-12 h-12 rounded-full ${point.icon_bg} flex items-center justify-center flex-shrink-0`}
+                            >
+                                <i className={`${point.icon} text-xl`}></i>
                             </div>
                             <div>
                                 <h3 className="font-bold text-lg mb-1">

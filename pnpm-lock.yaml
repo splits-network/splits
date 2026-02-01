@@ -96,6 +96,12 @@ importers:
 
   apps/corporate:
     dependencies:
+      '@gsap/react':
+        specifier: ^2.1.2
+        version: 2.1.2(gsap@3.14.2)(react@19.2.1)
+      gsap:
+        specifier: ^3.14.2
+        version: 3.14.2
       next:
         specifier: ^16.1.0
         version: 16.1.0(@babel/core@7.28.5)(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
