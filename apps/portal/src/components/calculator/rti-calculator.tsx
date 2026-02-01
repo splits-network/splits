@@ -30,8 +30,6 @@ export function RTICalculator({ animate = false, className = '' }: RTICalculator
     effectiveFee,
     payouts,
     upgradeValue,
-    setInputMode,
-    setPlacementFee,
     setSalary,
     setFeePercentage,
     toggleRole,
@@ -77,13 +75,9 @@ export function RTICalculator({ animate = false, className = '' }: RTICalculator
                   Calculate Your Earnings
                 </h3>
                 <FeeInput
-                  inputMode={state.inputMode}
-                  placementFee={state.placementFee}
                   salary={state.salary}
                   feePercentage={state.feePercentage}
                   effectiveFee={effectiveFee}
-                  onInputModeChange={setInputMode}
-                  onPlacementFeeChange={setPlacementFee}
                   onSalaryChange={setSalary}
                   onFeePercentageChange={setFeePercentage}
                 />

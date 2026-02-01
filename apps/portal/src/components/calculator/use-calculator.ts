@@ -7,8 +7,6 @@ import { COMMISSION_RATES, PLATFORM_TAKE, TIER_INFO } from './commission-rates';
 const TIERS: Tier[] = ['free', 'paid', 'premium'];
 
 const DEFAULT_STATE: CalculatorState = {
-  inputMode: 'fee',
-  placementFee: 20000, // Default $20k placement fee
   salary: 100000,      // Default $100k salary
   feePercentage: 20,   // Default 20% fee
   selectedRoles: ['candidate_recruiter'], // Default to most common role
@@ -20,13 +18,10 @@ export function useCalculator(initialState?: Partial<CalculatorState>) {
     ...initialState,
   });
 
-  // Calculate effective placement fee based on input mode
+  // Calculate effective placement fee from salary + percentage
   const effectiveFee = useMemo(() => {
-    if (state.inputMode === 'fee') {
-      return state.placementFee;
-    }
     return (state.salary * state.feePercentage) / 100;
-  }, [state.inputMode, state.placementFee, state.salary, state.feePercentage]);
+  }, [state.salary, state.feePercentage]);
 
   // Calculate payout for a given tier based on selected roles
   const calculateTierPayout = (tier: Tier): number => {
@@ -66,14 +61,6 @@ export function useCalculator(initialState?: Partial<CalculatorState>) {
   }, [payouts]);
 
   // State update functions
-  const setInputMode = (mode: 'fee' | 'salary') => {
-    setState(prev => ({ ...prev, inputMode: mode }));
-  };
-
-  const setPlacementFee = (fee: number) => {
-    setState(prev => ({ ...prev, placementFee: Math.max(0, fee) }));
-  };
-
   const setSalary = (salary: number) => {
     setState(prev => ({ ...prev, salary: Math.max(0, salary) }));
   };
@@ -101,8 +88,6 @@ export function useCalculator(initialState?: Partial<CalculatorState>) {
     effectiveFee,
     payouts,
     upgradeValue,
-    setInputMode,
-    setPlacementFee,
     setSalary,
     setFeePercentage,
     toggleRole,

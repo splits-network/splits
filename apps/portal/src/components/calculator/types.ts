@@ -24,11 +24,7 @@ export interface TierPayout {
 }
 
 export interface CalculatorState {
-  // Input mode
-  inputMode: 'fee' | 'salary';
-  // Direct fee input
-  placementFee: number;
-  // Salary mode inputs
+  // Salary + fee percentage inputs
   salary: number;
   feePercentage: number;
   // Selected roles
