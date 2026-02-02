@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React, { useEffect, useRef, useState } from 'react';
-import MDEditor, { commands } from '@uiw/react-md-editor';
-import type { ICommand } from '@uiw/react-md-editor';
-import type { MarkdownPreviewProps } from '@uiw/react-markdown-preview';
-import { markdownRenderConfig } from './markdown-renderer';
+import React, { useEffect, useRef, useState } from "react";
+import MDEditor, { commands } from "@uiw/react-md-editor";
+import type { ICommand } from "@uiw/react-md-editor";
+import type { MarkdownPreviewProps } from "@uiw/react-markdown-preview";
+import { markdownRenderConfig } from "./markdown-renderer";
 
 export interface MarkdownEditorProps {
     value: string;
@@ -15,7 +15,7 @@ export interface MarkdownEditorProps {
     maxLength?: number;
     showCount?: boolean;
     height?: number;
-    preview?: 'edit' | 'live' | 'preview';
+    preview?: "edit" | "live" | "preview";
     className?: string;
     toolbarCommands?: ICommand[];
     disabled?: boolean;
@@ -46,14 +46,14 @@ export function MarkdownEditor({
     maxLength,
     showCount,
     height = 240,
-    preview = 'live',
+    preview = "edit",
     className,
     toolbarCommands = markdownToolbarCommands,
     disabled = false,
     textareaProps,
 }: MarkdownEditorProps) {
     const handleChange = (nextValue?: string) => {
-        const safeValue = nextValue ?? '';
+        const safeValue = nextValue ?? "";
         if (maxLength && safeValue.length > maxLength) return;
         onChange(safeValue);
     };
@@ -62,21 +62,23 @@ export function MarkdownEditor({
         value: _ignoredValue,
         onScroll: _ignoredScroll,
         ...safeTextareaProps
-    } = (textareaProps ?? {}) as React.TextareaHTMLAttributes<HTMLTextAreaElement>;
+    } = (textareaProps ??
+        {}) as React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
     const previewOptions: MarkdownPreviewProps = {
         ...markdownRenderConfig,
     };
 
-    const [colorMode, setColorMode] = useState<'light' | 'dark'>('light');
+    const [colorMode, setColorMode] = useState<"light" | "dark">("light");
     const hostRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         const resolveTheme = () => {
-            if (typeof document === 'undefined') return;
-            const theme = document.documentElement.getAttribute('data-theme') || '';
-            const isDark = theme.includes('dark');
-            setColorMode(isDark ? 'dark' : 'light');
+            if (typeof document === "undefined") return;
+            const theme =
+                document.documentElement.getAttribute("data-theme") || "";
+            const isDark = theme.includes("dark");
+            setColorMode(isDark ? "dark" : "light");
         };
 
         resolveTheme();
@@ -84,30 +86,35 @@ export function MarkdownEditor({
         const observer = new MutationObserver(resolveTheme);
         observer.observe(document.documentElement, {
             attributes: true,
-            attributeFilter: ['data-theme'],
+            attributeFilter: ["data-theme"],
         });
 
         return () => observer.disconnect();
     }, []);
 
     useEffect(() => {
-        if (typeof document === 'undefined') return;
+        if (typeof document === "undefined") return;
 
         const host = hostRef.current;
         if (!host) return;
 
-        const editor = host.querySelector('.w-md-editor') as HTMLElement | null;
+        const editor = host.querySelector(".w-md-editor") as HTMLElement | null;
         if (!editor) return;
 
-        const placeholder = document.createElement('div');
+        const placeholder = document.createElement("div");
         const originalParent = editor.parentElement;
 
         const applyFullscreen = () => {
-            const isFullscreen = editor.classList.contains('w-md-editor-fullscreen');
+            const isFullscreen = editor.classList.contains(
+                "w-md-editor-fullscreen",
+            );
             if (isFullscreen && editor.parentElement !== document.body) {
                 originalParent?.insertBefore(placeholder, editor);
                 document.body.appendChild(editor);
-            } else if (!isFullscreen && editor.parentElement === document.body) {
+            } else if (
+                !isFullscreen &&
+                editor.parentElement === document.body
+            ) {
                 if (placeholder.parentElement) {
                     placeholder.parentElement.insertBefore(editor, placeholder);
                     placeholder.remove();
@@ -118,11 +125,17 @@ export function MarkdownEditor({
         applyFullscreen();
 
         const classObserver = new MutationObserver(applyFullscreen);
-        classObserver.observe(editor, { attributes: true, attributeFilter: ['class'] });
+        classObserver.observe(editor, {
+            attributes: true,
+            attributeFilter: ["class"],
+        });
 
         return () => {
             classObserver.disconnect();
-            if (editor.parentElement === document.body && placeholder.parentElement) {
+            if (
+                editor.parentElement === document.body &&
+                placeholder.parentElement
+            ) {
                 placeholder.parentElement.insertBefore(editor, placeholder);
                 placeholder.remove();
             }
@@ -136,7 +149,8 @@ export function MarkdownEditor({
                     {label}
                     {(showCount || maxLength) && (
                         <span className="text-base-content/60 font-normal text-sm ml-2">
-                            ({value.length}{maxLength ? `/${maxLength}` : ''} characters)
+                            ({value.length}
+                            {maxLength ? `/${maxLength}` : ""} characters)
                         </span>
                     )}
                 </legend>
