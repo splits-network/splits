@@ -30,7 +30,7 @@ export default function DetailHeader({
                             <img
                                 src={job.company.logo_url}
                                 alt={`${job.company.name} logo`}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-contain"
                                 onError={(e) => {
                                     e.currentTarget.style.display = "none";
                                 }}
