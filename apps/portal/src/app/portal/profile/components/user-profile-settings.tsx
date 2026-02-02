@@ -1,35 +1,41 @@
-'use client';
+"use client";
 
-import { useState, useEffect, FormEvent } from 'react';
-import { useAuth, useUser } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useUserProfile } from '@/contexts';
+import { useState, useEffect, FormEvent } from "react";
+import { useAuth, useUser } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useUserProfile } from "@/contexts";
+import ProfileImageUpload from "@/components/profile/ProfileImageUpload";
 
 interface UserProfileData {
     id: string;
     email: string;
     name: string;
+    profile_image_url?: string;
 }
 
 export function UserProfileSettings() {
     const { getToken } = useAuth();
     const { user: clerkUser } = useUser();
-    const { profile: contextProfile, isLoading: contextLoading, refresh: refreshContext } = useUserProfile();
+    const {
+        profile: contextProfile,
+        isLoading: contextLoading,
+        refresh: refreshContext,
+    } = useUserProfile();
 
     const [profile, setProfile] = useState<UserProfileData | null>(null);
-    const [name, setName] = useState('');
+    const [name, setName] = useState("");
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
 
     // Password change state
     const [showPasswordChange, setShowPasswordChange] = useState(false);
-    const [currentPassword, setCurrentPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [passwordError, setPasswordError] = useState('');
-    const [passwordSuccess, setPasswordSuccess] = useState('');
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+    const [passwordSuccess, setPasswordSuccess] = useState("");
     const [changingPassword, setChangingPassword] = useState(false);
 
     // Initialize from context when available
@@ -38,72 +44,81 @@ export function UserProfileSettings() {
             setProfile({
                 id: contextProfile.id,
                 email: contextProfile.email,
-                name: contextProfile.name || '',
+                name: contextProfile.name || "",
+                profile_image_url: contextProfile.profile_image_url ?? undefined,
             });
-            setName(contextProfile.name || '');
+            setName(contextProfile.name || "");
             setLoading(false);
         } else if (!contextLoading && !contextProfile) {
             // Context loaded but no profile - show error
-            setError('User profile not found');
+            setError("User profile not found");
             setLoading(false);
         }
     }, [contextProfile, contextLoading]);
 
     const resetForm = () => {
         if (contextProfile) {
-            setName(contextProfile.name || '');
+            setName(contextProfile.name || "");
         }
-        setError('');
-        setSuccess('');
+        setError("");
+        setSuccess("");
     };
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
         if (!name.trim()) {
-            setError('Name is required');
+            setError("Name is required");
             return;
         }
 
         setSubmitting(true);
-        setError('');
-        setSuccess('');
+        setError("");
+        setSuccess("");
 
         try {
             const token = await getToken();
             if (!token) {
-                setError('Please sign in to update your profile.');
+                setError("Please sign in to update your profile.");
                 setSubmitting(false);
                 return;
             }
             if (!profile?.id) {
-                setError('User profile not loaded yet. Please refresh and try again.');
+                setError(
+                    "User profile not loaded yet. Please refresh and try again.",
+                );
                 setSubmitting(false);
                 return;
             }
 
             const apiClient = createAuthenticatedClient(token);
-            const response: any = await apiClient.patch(`/users/${profile.id}`, { name: name.trim() });
+            const response: any = await apiClient.patch(
+                `/users/${profile.id}`,
+                { name: name.trim() },
+            );
             const updated = response?.data || response;
 
             if (updated) {
                 setProfile({
                     id: updated.id,
                     email: updated.email,
-                    name: updated.name || '',
+                    name: updated.name || "",
                 });
-                setName(updated.name || '');
-                setSuccess('Profile updated successfully!');
+                setName(updated.name || "");
+                setSuccess("Profile updated successfully!");
 
                 // Refresh the context so other components see the updated name
                 await refreshContext();
 
                 // Clear success message after 3 seconds
-                setTimeout(() => setSuccess(''), 3000);
+                setTimeout(() => setSuccess(""), 3000);
             }
         } catch (err: any) {
-            console.error('Failed to update profile:', err);
-            setError(err.response?.data?.error?.message || 'Failed to update profile. Please try again.');
+            console.error("Failed to update profile:", err);
+            setError(
+                err.response?.data?.error?.message ||
+                    "Failed to update profile. Please try again.",
+            );
         } finally {
             setSubmitting(false);
         }
@@ -111,27 +126,29 @@ export function UserProfileSettings() {
 
     const handlePasswordChange = async (e: FormEvent) => {
         e.preventDefault();
-        setPasswordError('');
-        setPasswordSuccess('');
+        setPasswordError("");
+        setPasswordSuccess("");
 
         // Validation
         if (!currentPassword || !newPassword || !confirmPassword) {
-            setPasswordError('All fields are required');
+            setPasswordError("All fields are required");
             return;
         }
 
         if (newPassword.length < 8) {
-            setPasswordError('New password must be at least 8 characters long');
+            setPasswordError("New password must be at least 8 characters long");
             return;
         }
 
         if (newPassword !== confirmPassword) {
-            setPasswordError('New passwords do not match');
+            setPasswordError("New passwords do not match");
             return;
         }
 
         if (currentPassword === newPassword) {
-            setPasswordError('New password must be different from current password');
+            setPasswordError(
+                "New password must be different from current password",
+            );
             return;
         }
 
@@ -140,26 +157,29 @@ export function UserProfileSettings() {
         try {
             const token = await getToken();
             if (!token) {
-                setPasswordError('Please sign in to change your password.');
+                setPasswordError("Please sign in to change your password.");
                 return;
             }
 
             const apiClient = createAuthenticatedClient(token);
-            await apiClient.post('/auth/change-password', {
+            await apiClient.post("/auth/change-password", {
                 currentPassword,
                 newPassword,
             });
 
-            setPasswordSuccess('Password changed successfully!');
-            setCurrentPassword('');
-            setNewPassword('');
-            setConfirmPassword('');
+            setPasswordSuccess("Password changed successfully!");
+            setCurrentPassword("");
+            setNewPassword("");
+            setConfirmPassword("");
             setShowPasswordChange(false);
 
-            setTimeout(() => setPasswordSuccess(''), 3000);
+            setTimeout(() => setPasswordSuccess(""), 3000);
         } catch (err: any) {
-            console.error('Failed to change password:', err);
-            setPasswordError(err.response?.data?.error?.message || 'Failed to change password. Please try again.');
+            console.error("Failed to change password:", err);
+            setPasswordError(
+                err.response?.data?.error?.message ||
+                    "Failed to change password. Please try again.",
+            );
         } finally {
             setChangingPassword(false);
         }
@@ -205,9 +225,31 @@ export function UserProfileSettings() {
                             </div>
                         )}
 
+                        {/* Profile Image Upload */}
+                        <div className="flex justify-center py-6">
+                            <ProfileImageUpload
+                                currentImageUrl={profile?.profile_image_url}
+                                onImageUpdate={(newImageUrl) => {
+                                    setProfile((prev) =>
+                                        prev
+                                            ? {
+                                                  ...prev,
+                                                  profile_image_url:
+                                                      newImageUrl,
+                                              }
+                                            : null,
+                                    );
+                                    // Refresh the context to update the nav avatar
+                                    refreshContext();
+                                }}
+                            />
+                        </div>
+
                         <div className="space-y-4 mt-4">
                             <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Full Name *</legend>
+                                <legend className="fieldset-legend">
+                                    Full Name *
+                                </legend>
                                 <input
                                     type="text"
                                     className="input w-full"
@@ -216,15 +258,19 @@ export function UserProfileSettings() {
                                     placeholder="John Doe"
                                     required
                                 />
-                                <p className="fieldset-label">Your name will be synced to your account</p>
+                                <p className="fieldset-label">
+                                    Your name will be synced to your account
+                                </p>
                             </fieldset>
 
                             <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Email Address</legend>
+                                <legend className="fieldset-legend">
+                                    Email Address
+                                </legend>
                                 <input
                                     type="email"
                                     className="input w-full"
-                                    value={profile?.email || ''}
+                                    value={profile?.email || ""}
                                     disabled
                                 />
                                 <p className="fieldset-label">
@@ -288,7 +334,9 @@ export function UserProfileSettings() {
                         <div className="flex-1">
                             <h3 className="font-medium mb-1">Password</h3>
                             <p className="text-sm text-base-content/70">
-                                {showPasswordChange ? 'Enter your current password and choose a new one' : 'Change your password to keep your account secure'}
+                                {showPasswordChange
+                                    ? "Enter your current password and choose a new one"
+                                    : "Change your password to keep your account secure"}
                             </p>
                         </div>
                         {!showPasswordChange && (
@@ -303,7 +351,10 @@ export function UserProfileSettings() {
                     </div>
 
                     {showPasswordChange && (
-                        <form onSubmit={handlePasswordChange} className="mt-4 space-y-4">
+                        <form
+                            onSubmit={handlePasswordChange}
+                            className="mt-4 space-y-4"
+                        >
                             {passwordError && (
                                 <div className="alert alert-error">
                                     <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
@@ -312,12 +363,16 @@ export function UserProfileSettings() {
                             )}
 
                             <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Current Password *</legend>
+                                <legend className="fieldset-legend">
+                                    Current Password *
+                                </legend>
                                 <input
                                     type="password"
                                     className="input w-full"
                                     value={currentPassword}
-                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    onChange={(e) =>
+                                        setCurrentPassword(e.target.value)
+                                    }
                                     placeholder="Enter current password"
                                     required
                                     disabled={changingPassword}
@@ -325,27 +380,37 @@ export function UserProfileSettings() {
                             </fieldset>
 
                             <fieldset className="fieldset">
-                                <legend className="fieldset-legend">New Password *</legend>
+                                <legend className="fieldset-legend">
+                                    New Password *
+                                </legend>
                                 <input
                                     type="password"
                                     className="input w-full"
                                     value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    onChange={(e) =>
+                                        setNewPassword(e.target.value)
+                                    }
                                     placeholder="Enter new password"
                                     required
                                     minLength={8}
                                     disabled={changingPassword}
                                 />
-                                <p className="fieldset-label">At least 8 characters</p>
+                                <p className="fieldset-label">
+                                    At least 8 characters
+                                </p>
                             </fieldset>
 
                             <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Confirm New Password *</legend>
+                                <legend className="fieldset-legend">
+                                    Confirm New Password *
+                                </legend>
                                 <input
                                     type="password"
                                     className="input w-full"
                                     value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    onChange={(e) =>
+                                        setConfirmPassword(e.target.value)
+                                    }
                                     placeholder="Confirm new password"
                                     required
                                     disabled={changingPassword}
@@ -358,10 +423,10 @@ export function UserProfileSettings() {
                                     className="btn btn-sm"
                                     onClick={() => {
                                         setShowPasswordChange(false);
-                                        setCurrentPassword('');
-                                        setNewPassword('');
-                                        setConfirmPassword('');
-                                        setPasswordError('');
+                                        setCurrentPassword("");
+                                        setNewPassword("");
+                                        setConfirmPassword("");
+                                        setPasswordError("");
                                     }}
                                     disabled={changingPassword}
                                 >
@@ -403,16 +468,20 @@ export function UserProfileSettings() {
                             </h3>
                             <p className="text-sm text-base-content/70">
                                 {clerkUser?.twoFactorEnabled
-                                    ? 'Your account is protected with two-factor authentication'
-                                    : 'Add an extra layer of security to your account'}
+                                    ? "Your account is protected with two-factor authentication"
+                                    : "Add an extra layer of security to your account"}
                             </p>
                         </div>
                         <button
                             className="btn btn-sm btn-outline bg-base-100"
-                            onClick={() => window.open('/user-profile#security', '_blank')}
+                            onClick={() =>
+                                window.open("/user-profile#security", "_blank")
+                            }
                         >
                             <i className="fa-duotone fa-regular fa-shield"></i>
-                            {clerkUser?.twoFactorEnabled ? 'Manage 2FA' : 'Enable 2FA'}
+                            {clerkUser?.twoFactorEnabled
+                                ? "Manage 2FA"
+                                : "Enable 2FA"}
                         </button>
                     </div>
                 </div>

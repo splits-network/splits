@@ -13,6 +13,7 @@ import {
     LoadingState,
     ErrorState,
 } from '@/hooks/use-standard-list';
+import { AdminPageHeader, useAdminConfirm } from '../components';
 
 interface Payout {
     id: string;
@@ -36,6 +37,7 @@ export default function PayoutsAdminPage() {
     const { getToken } = useAuth();
     const [processingId, setProcessingId] = useState<string | null>(null);
     const toast = useToast();
+    const confirm = useAdminConfirm();
     const [badgeCounts, setBadgeCounts] = useState({
         pending_schedules: 0,
         active_holds: 0,
@@ -107,7 +109,13 @@ export default function PayoutsAdminPage() {
     }, [getToken]);
 
     async function processPayout(payoutId: string) {
-        if (!confirm('Process this payout? This will initiate a Stripe transfer.')) return;
+        const confirmed = await confirm({
+            title: 'Process Payout',
+            message: 'This will initiate a Stripe transfer to the recruiter. Are you sure you want to proceed?',
+            confirmText: 'Process Payout',
+            type: 'warning',
+        });
+        if (!confirmed) return;
 
         setProcessingId(payoutId);
         try {
@@ -166,16 +174,11 @@ export default function PayoutsAdminPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div>
-                <Link href="/admin" className="text-sm text-primary hover:underline mb-2 inline-block">
-                    <i className="fa-duotone fa-regular fa-arrow-left mr-2"></i>
-                    Back to Admin Dashboard
-                </Link>
-                <h1 className="text-3xl font-bold">Payout Management</h1>
-                <p className="text-base-content/70 mt-1">
-                    Process and track recruiter payouts
-                </p>
-            </div>
+            <AdminPageHeader
+                title="Payout Management"
+                subtitle="Process and track recruiter payouts"
+                breadcrumbs={[{ label: 'Payouts' }]}
+            />
 
             {/* Automation Dashboard Links */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -374,7 +377,7 @@ export default function PayoutsAdminPage() {
                                                         </button>
                                                     )}
                                                     <Link
-                                                        href={`/admin/payouts/${payout.id}`}
+                                                        href={`/portal/admin/payouts/${payout.id}`}
                                                         className="btn btn-ghost btn-xs"
                                                     >
                                                         <i className="fa-duotone fa-regular fa-eye"></i>

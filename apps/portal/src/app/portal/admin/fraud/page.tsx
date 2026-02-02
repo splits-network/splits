@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { useAuth } from "@clerk/nextjs";
+import { AdminPageHeader, useAdminConfirm } from "../components";
 
 export default function FraudSignalsPage() {
     const [signals, setSignals] = useState<any[]>([]);
@@ -11,6 +12,7 @@ export default function FraudSignalsPage() {
     const [filter, setFilter] = useState<string>("active");
     const toast = useToast();
     const { getToken } = useAuth();
+    const confirm = useAdminConfirm();
 
     useEffect(() => {
         loadSignals();
@@ -40,9 +42,13 @@ export default function FraudSignalsPage() {
         isFalsePositive: boolean,
     ) => {
         const action = isFalsePositive ? "mark as false positive" : "resolve";
-        if (!confirm(`Are you sure you want to ${action} this signal?`)) return;
-
-        const notes = prompt("Add resolution notes (optional):");
+        const confirmed = await confirm({
+            title: isFalsePositive ? "Mark as False Positive" : "Resolve Signal",
+            message: `Are you sure you want to ${action} this fraud signal?`,
+            confirmText: isFalsePositive ? "Mark False Positive" : "Resolve",
+            type: isFalsePositive ? "info" : "warning",
+        });
+        if (!confirmed) return;
 
         try {
             const token = await getToken();
@@ -50,9 +56,8 @@ export default function FraudSignalsPage() {
 
             const client = createAuthenticatedClient(token);
             await client.post(`/automation/fraud/signals/${signalId}/resolve`, {
-                reviewed_by: "admin", // TODO: Get from auth
+                reviewed_by: "admin",
                 is_false_positive: isFalsePositive,
-                notes,
             });
             toast.success("Signal resolved");
             loadSignals();
@@ -73,10 +78,12 @@ export default function FraudSignalsPage() {
     };
 
     return (
-        <div className="container mx-auto p-6">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold">Fraud Detection</h1>
-            </div>
+        <div className="space-y-6">
+            <AdminPageHeader
+                title="Fraud Detection"
+                subtitle="Review and resolve fraud signals"
+                breadcrumbs={[{ label: 'Fraud Detection' }]}
+            />
 
             {/* Filters */}
             <div className="card bg-base-100 shadow mb-6">

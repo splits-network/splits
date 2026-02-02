@@ -14,6 +14,7 @@ import {
     ErrorState,
 } from '@/hooks/use-standard-list';
 import { ReleaseModal } from './components/release-modal';
+import { AdminPageHeader, useAdminConfirm } from '../../components';
 
 interface EscrowHold {
     id: string;
@@ -49,6 +50,7 @@ export default function EscrowHoldsPage() {
     const [stats, setStats] = useState<Stats | null>(null);
     const [loadingStats, setLoadingStats] = useState(true);
     const toast = useToast();
+    const confirm = useAdminConfirm();
 
     const defaultFilters = useMemo<HoldFilters>(() => ({ status: 'active' }), []);
 
@@ -151,7 +153,13 @@ export default function EscrowHoldsPage() {
     }
 
     async function cancelHold(holdId: string) {
-        if (!confirm('Cancel this escrow hold? This action cannot be undone.')) return;
+        const confirmed = await confirm({
+            title: 'Cancel Escrow Hold',
+            message: 'Cancel this escrow hold? This action cannot be undone.',
+            confirmText: 'Cancel Hold',
+            type: 'error',
+        });
+        if (!confirmed) return;
 
         try {
             const token = await getToken();
@@ -205,18 +213,20 @@ export default function EscrowHoldsPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold">Escrow Holds</h1>
-                    <p className="text-base-content/60 mt-1">
-                        Manage funds held in escrow during guarantee periods
-                    </p>
-                </div>
-                <Link href="/portal/admin/payouts/schedules/audit" className="btn btn-ghost">
-                    <i className="fa-duotone fa-regular fa-clock-rotate-left"></i>
-                    Audit Log
-                </Link>
-            </div>
+            <AdminPageHeader
+                title="Escrow Holds"
+                subtitle="Manage funds held in escrow during guarantee periods"
+                breadcrumbs={[
+                    { label: 'Payouts', href: '/portal/admin/payouts' },
+                    { label: 'Escrow Holds' },
+                ]}
+                actions={
+                    <Link href="/portal/admin/payouts/audit" className="btn btn-ghost">
+                        <i className="fa-duotone fa-regular fa-clock-rotate-left"></i>
+                        Audit Log
+                    </Link>
+                }
+            />
 
             {/* Stats Cards */}
             {loadingStats ? (
@@ -431,11 +441,7 @@ export default function EscrowHoldsPage() {
                                 </table>
                             </div>
 
-                            <PaginationControls
-                                page={pagination.page}
-                                totalPages={pagination.total_pages}
-                                onPageChange={setPage}
-                            />
+                            <PaginationControls pagination={pagination} setPage={setPage} />
                         </>
                     )}
                 </div>

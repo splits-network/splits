@@ -12,6 +12,7 @@ import {
     LoadingState,
     ErrorState,
 } from '@/hooks/use-standard-list';
+import { AdminPageHeader } from '../components';
 
 interface CompanyBillingProfile {
     id: string;
@@ -159,16 +160,11 @@ export default function AdminBillingProfilesPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <Link href="/admin" className="text-sm text-primary hover:underline mb-2 inline-block">
-                    <i className="fa-duotone fa-regular fa-arrow-left mr-2"></i>
-                    Back to Admin Dashboard
-                </Link>
-                <h1 className="text-3xl font-bold">Billing Profiles</h1>
-                <p className="text-base-content/70 mt-1">
-                    Review company billing terms, contacts, and invoice history
-                </p>
-            </div>
+            <AdminPageHeader
+                title="Billing Profiles"
+                subtitle="Review company billing terms, contacts, and invoice history"
+                breadcrumbs={[{ label: 'Billing Profiles' }]}
+            />
 
             <div className="grid grid-cols-1 xl:grid-cols-[1.35fr_1fr] gap-6">
                 <div className="space-y-4">

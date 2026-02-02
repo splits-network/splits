@@ -2,19 +2,24 @@
  * Document Domain Types
  */
 
-export type DocumentStatus = 'active' | 'deleted';
-export type ProcessingStatus = 'pending' | 'processing' | 'processed' | 'failed';
+export type DocumentStatus = "active" | "deleted";
+export type ProcessingStatus =
+    | "pending"
+    | "processing"
+    | "processed"
+    | "failed";
 
 export interface Document {
     id: string;
     entity_type:
-    | 'candidate'
-    | 'job'
-    | 'application'
-    | 'company'
-    | 'contract'
-    | 'placement'
-    | 'system';
+        | "candidate"
+        | "job"
+        | "application"
+        | "company"
+        | "contract"
+        | "placement"
+        | "profile_image"
+        | "system";
     entity_id: string;
     document_type?: string | null;
     file_name: string;
@@ -53,9 +58,29 @@ export interface DocumentCreateInput {
 export type DocumentUpdate = Partial<
     Omit<
         Document,
-        'id' | 'file_path' | 'storage_bucket' | 'file_size' | 'mime_type' | 'created_at' | 'download_url'
+        | "id"
+        | "file_path"
+        | "storage_bucket"
+        | "file_size"
+        | "mime_type"
+        | "created_at"
+        | "download_url"
     >
 > & {
     metadata?: Record<string, any>;
     processing_status?: ProcessingStatus;
 };
+
+export interface ProfileImageUpload {
+    file: Buffer;
+    filename: string;
+    mimetype: string;
+    size: number;
+    user_id: string;
+    crop_data?: {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    };
+}

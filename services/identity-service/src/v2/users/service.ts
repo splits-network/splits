@@ -280,6 +280,73 @@ export class UserServiceV2 {
     }
 
     /**
+     * Update user profile image
+     * Special method that also syncs back to Clerk
+     */
+    async updateProfileImage(clerkUserId: string, profileImageData: { profile_image_url: string; profile_image_path: string }) {
+        this.logger.info({ clerkUserId, profile_image_url: profileImageData.profile_image_url }, 'UserService.updateProfileImage');
+
+        // Get user by clerk ID to ensure they can only update their own profile
+        const user = await this.repository.findUserByClerkId(clerkUserId);
+        if (!user) {
+            throw new Error(`User not found for Clerk ID: ${clerkUserId}`);
+        }
+
+        const updateData = {
+            profile_image_url: profileImageData.profile_image_url,
+            profile_image_path: profileImageData.profile_image_path,
+            updated_at: new Date().toISOString(),
+        };
+
+        // Update local user record
+        const updated = await this.repository.updateUser(user.id, updateData);
+
+        // Sync back to Clerk (non-blocking)
+        this.syncProfileImageToClerk(clerkUserId, profileImageData.profile_image_url)
+            .catch((error) => {
+                this.logger.error({ error, clerkUserId }, 'Failed to sync profile image to Clerk');
+            });
+
+        // Publish event for other services
+        await this.eventPublisher.publish('user.profile_image_updated', {
+            user_id: user.id,
+            clerk_user_id: clerkUserId,
+            profile_image_url: profileImageData.profile_image_url,
+            profile_image_path: profileImageData.profile_image_path,
+        });
+
+        this.logger.info({ user_id: user.id }, 'UserService.updateProfileImage - profile image updated');
+        return updated;
+    }
+
+    /**
+     * Sync profile image to Clerk (async)
+     */
+    private async syncProfileImageToClerk(clerkUserId: string, imageUrl: string) {
+        try {
+            // Import clerk client dynamically to avoid issues
+            const { createClerkClient } = await import('@clerk/backend');
+            const secretKey = process.env.CLERK_SECRET_KEY;
+            if (!secretKey) {
+                this.logger.warn('CLERK_SECRET_KEY not configured, skipping profile image sync');
+                return;
+            }
+
+            const clerkClient = createClerkClient({ secretKey });
+            await clerkClient.users.updateUser(clerkUserId, {
+                publicMetadata: {
+                    profile_image_url: imageUrl,
+                },
+            });
+
+            this.logger.info({ clerkUserId }, 'Profile image synced to Clerk successfully');
+        } catch (error) {
+            this.logger.error({ error, clerkUserId }, 'Failed to sync profile image to Clerk');
+            // Don't throw - we have the data locally, Clerk sync is best effort
+        }
+    }
+
+    /**
      * Delete user (soft delete)
      */
     async deleteUser(clerkUserId: string, id: string) {

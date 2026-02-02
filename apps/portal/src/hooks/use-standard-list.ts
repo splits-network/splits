@@ -153,6 +153,18 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     // Support deprecated storageKey as fallback
     const effectiveViewModeKey = viewModeKey ?? storageKey;
 
+    // Store defaultFilters in a ref to ensure stable reference across renders
+    // This prevents infinite loops when callers pass {} or don't memoize properly
+    const defaultFiltersRef = useRef(defaultFilters);
+
+    // Store fetchFn and transformData in refs to ensure stable references across renders
+    // This prevents infinite loops when callers pass inline functions
+    const fetchFnRef = useRef(fetchFn);
+    const transformDataRef = useRef(transformData);
+    // Update the refs on each render so we always call the latest versions
+    fetchFnRef.current = fetchFn;
+    transformDataRef.current = transformData;
+
     // Router hooks for URL sync
     const router = useRouter();
     const pathname = usePathname();
@@ -163,6 +175,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
 
     // Initialize state from URL if syncing
     const getInitialState = useCallback(() => {
+        const stableDefaultFilters = defaultFiltersRef.current;
         if (syncToUrl && searchParams) {
             const urlPage = searchParams.get('page');
             const urlLimit = searchParams.get('limit');
@@ -171,10 +184,10 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
             const urlSortOrder = searchParams.get('sort_order');
             const urlFilters = searchParams.get('filters');
 
-            let parsedFilters = { ...defaultFilters };
+            let parsedFilters = { ...stableDefaultFilters };
             if (urlFilters) {
                 try {
-                    parsedFilters = { ...defaultFilters, ...JSON.parse(urlFilters) };
+                    parsedFilters = { ...stableDefaultFilters, ...JSON.parse(urlFilters) };
                 } catch (e) {
                     // Invalid JSON, use defaults
                 }
@@ -196,9 +209,9 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
             search: '',
             sortBy: defaultSortBy,
             sortOrder: defaultSortOrder,
-            filters: defaultFilters as F,
+            filters: stableDefaultFilters as F,
         };
-    }, [syncToUrl, searchParams, defaultFilters, defaultSortBy, defaultSortOrder, defaultLimit]);
+    }, [syncToUrl, searchParams, defaultSortBy, defaultSortOrder, defaultLimit]);
 
     // Core state
     const [data, setData] = useState<T[]>([]);
@@ -245,9 +258,9 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
     const isInitialMount = useRef(true);
 
-    // Create stable keys for callback dependencies
+    // Create stable key for callback dependencies (defaultFilters uses ref, so always stable)
     const filtersKey = useMemo(() => JSON.stringify(filters), [filters]);
-    const defaultFiltersKey = useMemo(() => JSON.stringify(defaultFilters), [defaultFilters]);
+    const defaultFiltersKey = useMemo(() => JSON.stringify(defaultFiltersRef.current), []);
 
     // Update URL when state changes
     const updateUrl = useCallback(() => {
@@ -262,13 +275,14 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         if (sortOrder !== defaultSortOrder) params.set('sort_order', sortOrder);
 
         // Only add filters if they differ from defaults
+        const stableDefaultFilters = defaultFiltersRef.current;
         const hasNonDefaultFilters = Object.keys(filters).some(
-            key => filters[key] !== undefined && filters[key] !== defaultFilters[key]
+            key => filters[key] !== undefined && filters[key] !== stableDefaultFilters[key]
         );
         if (hasNonDefaultFilters) {
             const activeFilters: Record<string, any> = {};
             Object.keys(filters).forEach(key => {
-                if (filters[key] !== undefined && filters[key] !== defaultFilters[key]) {
+                if (filters[key] !== undefined && filters[key] !== stableDefaultFilters[key]) {
                     activeFilters[key] = filters[key];
                 }
             });
@@ -309,9 +323,11 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
 
             let response: FetchResponse<T>;
 
-            if (fetchFn) {
+            // Use ref to get latest fetchFn without causing dependency changes
+            const currentFetchFn = fetchFnRef.current;
+            if (currentFetchFn) {
                 // Use custom fetch function
-                response = await fetchFn(fetchParams);
+                response = await currentFetchFn(fetchParams);
             } else if (endpoint) {
                 // Use built-in fetch with endpoint
                 const params: StandardListParams = {
@@ -352,8 +368,10 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
             }
 
             let items = response.data || [];
-            if (transformData) {
-                items = transformData(items);
+            // Use ref to get latest transformData without causing dependency changes
+            const currentTransformData = transformDataRef.current;
+            if (currentTransformData) {
+                items = currentTransformData(items);
             }
 
             setData(items);
@@ -366,7 +384,7 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
         } finally {
             setLoading(false);
         }
-    }, [getToken, endpoint, fetchFn, page, limit, searchQuery, sortBy, sortOrder, filters, include, transformData]);
+    }, [getToken, endpoint, page, limit, searchQuery, sortBy, sortOrder, filters, include]);
 
     // Debounced search
     const setSearchInput = useCallback((value: string) => {
@@ -400,9 +418,9 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     }, []);
 
     const clearFilters = useCallback(() => {
-        setFiltersState(defaultFilters as F);
+        setFiltersState(defaultFiltersRef.current as F);
         setPage(DEFAULT_PAGE);
-    }, [defaultFilters]);
+    }, []);
 
     // Sort handlers
     const handleSort = useCallback((field: string) => {
@@ -452,12 +470,12 @@ export function useStandardList<T = any, F extends Record<string, any> = Record<
     const reset = useCallback(() => {
         setSearchInputState('');
         setSearchQuery('');
-        setFiltersState(defaultFilters as F);
+        setFiltersState(defaultFiltersRef.current as F);
         setSortBy(defaultSortBy);
         setSortOrder(defaultSortOrder);
         setPage(DEFAULT_PAGE);
         setLimitState(defaultLimit);
-    }, [defaultFilters, defaultSortBy, defaultSortOrder, defaultLimit]);
+    }, [defaultSortBy, defaultSortOrder, defaultLimit]);
 
     // Cleanup timeout on unmount
     useEffect(() => {

@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { createAuthenticatedClient } from "@/lib/api-client";
-import Link from "next/link";
 import { useToast } from "@/lib/toast-context";
 import { useAuth } from "@clerk/nextjs";
+import { AdminPageHeader } from "../components";
 
 interface AutomationRule {
     id: string;
@@ -148,18 +148,11 @@ export default function AutomationControlsPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold">Automation Controls</h1>
-                    <p className="text-base-content/70 mt-1">
-                        Manage automation rules and approve pending executions
-                    </p>
-                </div>
-                <Link href="/admin" className="btn btn-ghost">
-                    <i className="fa-duotone fa-regular fa-arrow-left"></i>
-                    Back to Admin
-                </Link>
-            </div>
+            <AdminPageHeader
+                title="Automation Controls"
+                subtitle="Manage automation rules and approve pending executions"
+                breadcrumbs={[{ label: 'Automation' }]}
+            />
 
             {/* Pending Approvals Alert */}
             {pendingExecutions.length > 0 && (

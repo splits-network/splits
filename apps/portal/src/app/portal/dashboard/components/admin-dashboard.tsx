@@ -88,34 +88,12 @@ export default function AdminDashboard() {
                 null;
             setStats(platformStats);
 
-            // Load marketplace health from V2 analytics endpoint
-            const healthResponse: any = await api.get('/marketplace-metrics', {
-                params: {
-                    limit: 1,
-                    sort_by: 'date',
-                    sort_order: 'desc'
-                }
-            });
-            // Extract latest health metrics
-            const healthData = healthResponse?.data?.data?.[0] || healthResponse?.data?.[0] || null;
-            if (healthData) {
-                // Map analytics metrics to dashboard health format
-                setHealth({
-                    recruiter_satisfaction: 0, // TODO: Add to analytics
-                    company_satisfaction: 0, // TODO: Add to analytics
-                    avg_time_to_first_candidate_days: 0, // TODO: Add to analytics
-                    avg_time_to_placement_days: healthData.avg_time_to_hire_days || 0,
-                    fill_rate_percentage: healthData.hire_rate * 100 || 0,
-                });
-            }
+            // TODO: Marketplace health metrics - endpoint not yet implemented
+            // When /marketplace-metrics endpoint is available, fetch health data here
 
-            // Load recent activity
-            const activityResponse = await api.get<{ data: RecentActivity[] }>('/admin/portal/dashboard/activity');
-            setRecentActivity(activityResponse.data || []);
-
-            // Load alerts
-            const alertsResponse = await api.get<{ data: Alert[] }>('/admin/portal/dashboard/alerts');
-            setAlerts(alertsResponse.data || []);
+            // TODO: Activity and alerts endpoints not yet implemented
+            // Load recent activity (endpoint: /admin/portal/dashboard/activity)
+            // Load alerts (endpoint: /admin/portal/dashboard/alerts)
         } catch (error) {
             console.error('Failed to load dashboard data:', error);
         } finally {

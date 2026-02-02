@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useToast } from '@/lib/toast-context';
@@ -14,6 +13,7 @@ import {
     LoadingState,
     ErrorState,
 } from '@/hooks/use-standard-list';
+import { AdminPageHeader } from '../components';
 
 interface Recruiter {
     id: string;
@@ -23,6 +23,13 @@ interface Recruiter {
     name?: string;
     email?: string;
     created_at: string;
+    // Joined user data when include=user
+    users?: {
+        id: string;
+        name?: string;
+        email?: string;
+        created_at: string;
+    };
 }
 
 interface RecruiterFilters {
@@ -59,6 +66,7 @@ export default function RecruiterManagementPage() {
             const queryParams = new URLSearchParams();
             queryParams.set('page', String(params.page));
             queryParams.set('limit', String(params.limit));
+            queryParams.set('include', 'user');
             if (params.search) queryParams.set('search', params.search);
             if (params.filters?.status) queryParams.set('status', params.filters.status);
             if (params.sort_by) queryParams.set('sort_by', params.sort_by);
@@ -186,19 +194,24 @@ export default function RecruiterManagementPage() {
         return null;
     }
 
+    // Helper to get display name and email (from recruiter or joined user)
+    function getDisplayInfo(recruiter: Recruiter) {
+        return {
+            name: recruiter.name || recruiter.users?.name || 'Unknown',
+            email: recruiter.email || recruiter.users?.email || recruiter.id.slice(0, 8),
+        };
+    }
+
     // Recruiter card component for grid view
     function RecruiterCard({ recruiter }: { recruiter: Recruiter }) {
+        const { name, email } = getDisplayInfo(recruiter);
         return (
             <div className="card bg-base-100 shadow hover:shadow-md transition-shadow">
                 <div className="card-body">
                     <div className="flex justify-between items-start">
                         <div>
-                            <h3 className="font-semibold">
-                                {recruiter.name || 'Unknown'}
-                            </h3>
-                            <p className="text-sm text-base-content/60">
-                                {recruiter.email || recruiter.id.slice(0, 8)}
-                            </p>
+                            <h3 className="font-semibold">{name}</h3>
+                            <p className="text-sm text-base-content/60">{email}</p>
                         </div>
                         <StatusBadge status={recruiter.status} />
                     </div>
@@ -220,14 +233,13 @@ export default function RecruiterManagementPage() {
 
     // Recruiter row component for table view
     function RecruiterRow({ recruiter }: { recruiter: Recruiter }) {
+        const { name, email } = getDisplayInfo(recruiter);
         return (
             <tr>
                 <td>
                     <div>
-                        <div className="font-medium">{recruiter.name || 'Unknown'}</div>
-                        <div className="text-xs text-base-content/60">
-                            {recruiter.email || recruiter.id.slice(0, 8)}
-                        </div>
+                        <div className="font-medium">{name}</div>
+                        <div className="text-xs text-base-content/60">{email}</div>
                     </div>
                 </td>
                 <td>
@@ -251,18 +263,11 @@ export default function RecruiterManagementPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <Link href="/admin" className="text-sm text-primary hover:underline mb-2 inline-block">
-                        <i className="fa-duotone fa-regular fa-arrow-left mr-2"></i>
-                        Back to Admin Dashboard
-                    </Link>
-                    <h1 className="text-3xl font-bold">Recruiter Management</h1>
-                    <p className="text-base-content/70 mt-1">
-                        Approve and manage platform recruiters
-                    </p>
-                </div>
-            </div>
+            <AdminPageHeader
+                title="Recruiter Management"
+                subtitle="Approve and manage platform recruiters"
+                breadcrumbs={[{ label: 'Recruiters' }]}
+            />
 
             {/* Filters Row */}
             <div className="flex flex-wrap gap-4 items-center justify-between">

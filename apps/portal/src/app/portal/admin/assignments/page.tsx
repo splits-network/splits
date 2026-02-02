@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { useToast } from '@/lib/toast-context';
+import { AdminPageHeader, useAdminConfirm } from '../components';
 
 interface Job {
     id: string;
@@ -36,6 +36,7 @@ export default function RoleAssignmentsPage() {
     const [loading, setLoading] = useState(true);
     const [assigning, setAssigning] = useState(false);
     const toast = useToast();
+    const confirm = useAdminConfirm();
 
     useEffect(() => {
         loadData();
@@ -121,9 +122,13 @@ export default function RoleAssignmentsPage() {
     }
 
     async function unassignRecruiter(jobId: string, recruiterId: string) {
-        if (!confirm('Are you sure you want to remove this assignment?')) {
-            return;
-        }
+        const confirmed = await confirm({
+            title: 'Remove Assignment',
+            message: 'Are you sure you want to remove this recruiter from this job assignment?',
+            confirmText: 'Remove',
+            type: 'warning',
+        });
+        if (!confirmed) return;
 
         try {
             const token = await getToken();
@@ -164,16 +169,11 @@ export default function RoleAssignmentsPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div>
-                <Link href="/admin" className="text-sm text-primary hover:underline mb-2 inline-block">
-                    <i className="fa-duotone fa-regular fa-arrow-left mr-2"></i>
-                    Back to Admin Dashboard
-                </Link>
-                <h1 className="text-3xl font-bold">Role Assignments</h1>
-                <p className="text-base-content/70 mt-1">
-                    Assign recruiters to active job roles
-                </p>
-            </div>
+            <AdminPageHeader
+                title="Role Assignments"
+                subtitle="Assign recruiters to active job roles"
+                breadcrumbs={[{ label: 'Assignments' }]}
+            />
 
             {/* Assignment Form */}
             <div className="card bg-base-100 shadow">

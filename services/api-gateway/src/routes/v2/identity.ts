@@ -35,6 +35,7 @@ export function registerIdentityRoutes(app: FastifyInstance, services: ServiceRe
     // Register /me route BEFORE generic CRUD routes so it takes precedence over /:id
     registerUserMeRoute(app, services);
     registerUserRegistrationRoute(app, services);
+    registerProfileImageRoute(app, services); // Add profile image route
 
     // Register generic CRUD routes for users
     IDENTITY_RESOURCES.forEach(resource => registerResourceRoutes(app, services, resource));
@@ -141,6 +142,32 @@ function registerUserRegistrationRoute(app: FastifyInstance, services: ServiceRe
                 authHeaders
             );
             return reply.status(201).send(data);
+        }
+    );
+}
+
+/**
+ * PATCH /api/v2/users/profile-image - Update user profile image
+ * Proxies to identity service to update profile image URL and path
+ */
+function registerProfileImageRoute(app: FastifyInstance, services: ServiceRegistry) {
+    const identityService = () => services.get('identity');
+
+    app.patch(
+        '/api/v2/users/profile-image',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const data = await identityService().patch(
+                '/api/v2/users/profile-image',
+                request.body,
+                correlationId,
+                authHeaders
+            );
+            return reply.send(data);
         }
     );
 }

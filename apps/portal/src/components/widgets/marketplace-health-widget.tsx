@@ -59,8 +59,9 @@ export default function MarketplaceHealthWidget({ limit = 7 }: MarketplaceHealth
             const data = response?.data || response;
             setMetrics(Array.isArray(data) ? data : []);
         } catch (err: any) {
-            console.error('Failed to load marketplace metrics:', err);
-            setError(err.message || 'Failed to load marketplace metrics');
+            // Endpoint may not exist yet - show empty state instead of error
+            console.debug('Marketplace metrics endpoint not available:', err.message);
+            setMetrics([]);
         } finally {
             setLoading(false);
         }
@@ -86,9 +87,9 @@ export default function MarketplaceHealthWidget({ limit = 7 }: MarketplaceHealth
             <div className="card bg-base-100">
                 <div className="card-body">
                     <h3 className="card-title text-lg mb-4">Marketplace Health</h3>
-                    <div className="alert alert-error">
-                        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-                        <span>{error || 'No marketplace data available'}</span>
+                    <div className="flex flex-col items-center justify-center h-48 text-base-content/50">
+                        <i className="fa-duotone fa-regular fa-chart-line text-4xl mb-3 opacity-30"></i>
+                        <p className="text-sm">Marketplace metrics not available</p>
                     </div>
                 </div>
             </div>

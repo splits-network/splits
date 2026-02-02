@@ -13,6 +13,7 @@ import {
     LoadingState,
     ErrorState,
 } from '@/hooks/use-standard-list';
+import { AdminPageHeader } from '../components';
 
 interface Placement {
     id: string;
@@ -162,16 +163,11 @@ export default function PlacementAdminPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div>
-                <Link href="/portal/admin" className="text-sm text-primary hover:underline mb-2 inline-block">
-                    <i className="fa-duotone fa-regular fa-arrow-left mr-2"></i>
-                    Back to Admin Dashboard
-                </Link>
-                <h1 className="text-3xl font-bold">Placement Management</h1>
-                <p className="text-base-content/70 mt-1">
-                    Review placements, invoices, and billing status
-                </p>
-            </div>
+            <AdminPageHeader
+                title="Placement Management"
+                subtitle="Review placements, invoices, and billing status"
+                breadcrumbs={[{ label: 'Placements' }]}
+            />
 
             {/* Summary Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
