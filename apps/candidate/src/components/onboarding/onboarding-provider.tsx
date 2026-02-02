@@ -29,26 +29,6 @@ import {
     type CandidateData,
 } from "@/lib/user-registration";
 
-/**
- * Parse desired_job_type from database (stored as comma-separated string) to string array
- */
-function parseJobTypes(value: string | null | undefined): string[] {
-    if (!value) return [];
-    // Split by comma and trim whitespace
-    return value
-        .split(",")
-        .map((v) => v.trim())
-        .filter((v) => v.length > 0);
-}
-
-/**
- * Serialize desired_job_type array to comma-separated string for database
- */
-function serializeJobTypes(types: string[] | undefined): string | undefined {
-    if (!types || types.length === 0) return undefined;
-    return types.join(", ");
-}
-
 type InitStatus = "loading" | "creating_account" | "ready" | "error";
 
 const OnboardingContext = createContext<CandidateOnboardingContextType | null>(
@@ -185,9 +165,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                     github_url: candidateData.github_url || "",
                     portfolio_url: candidateData.portfolio_url || "",
                     // Job preferences
-                    desired_job_type: parseJobTypes(
-                        candidateData.desired_job_type,
-                    ),
+                    desired_job_type: candidateData.desired_job_type || "",
                     availability: candidateData.availability || "",
                     open_to_remote: candidateData.open_to_remote || false,
                     open_to_relocation:
@@ -360,12 +338,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 updatePayload.portfolio_url = profileData.portfolio_url;
             }
 
-            // Job preferences - serialize array to comma-separated string for database
-            const serializedJobTypes = serializeJobTypes(
-                profileData.desired_job_type,
-            );
-            if (serializedJobTypes) {
-                updatePayload.desired_job_type = serializedJobTypes;
+            // Job preferences
+            if (profileData.desired_job_type) {
+                updatePayload.desired_job_type = profileData.desired_job_type;
             }
             if (profileData.availability) {
                 updatePayload.availability = profileData.availability;

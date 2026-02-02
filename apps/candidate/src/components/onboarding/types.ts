@@ -10,28 +10,28 @@ export type OnboardingStatus = 'pending' | 'in_progress' | 'completed' | 'skippe
 export interface CandidateProfileData {
     // Basic Info (Step 1)
     full_name?: string;
-    
+
     // Contact Info (Step 2)
     phone?: string;
     location?: string;
-    
+
     // Resume (Step 3)
     resumeFile?: File | null;
     resumeUploaded?: boolean;
     resumeDocumentId?: string;
-    
+
     // Professional Info (Step 4 - expanded)
     current_title?: string;
     current_company?: string;
     bio?: string;
-    
+
     // Social/Portfolio Links (Step 4)
     linkedin_url?: string;
     github_url?: string;
     portfolio_url?: string;
-    
+
     // Job Preferences (Step 4)
-    desired_job_type?: string[];
+    desired_job_type?: string;
     open_to_remote?: boolean;
     open_to_relocation?: boolean;
     desired_salary_min?: number;
