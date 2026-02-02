@@ -45,12 +45,12 @@ export function UserProfileSettings() {
                 id: contextProfile.id,
                 email: contextProfile.email,
                 name: contextProfile.name || "",
-                profile_image_url: contextProfile.profile_image_url ?? undefined,
+                profile_image_url:
+                    contextProfile.profile_image_url ?? undefined,
             });
             setName(contextProfile.name || "");
             setLoading(false);
         } else if (!contextLoading && !contextProfile) {
-            // Context loaded but no profile - show error
             setError("User profile not found");
             setLoading(false);
         }
@@ -106,11 +106,7 @@ export function UserProfileSettings() {
                 });
                 setName(updated.name || "");
                 setSuccess("Profile updated successfully!");
-
-                // Refresh the context so other components see the updated name
                 await refreshContext();
-
-                // Clear success message after 3 seconds
                 setTimeout(() => setSuccess(""), 3000);
             }
         } catch (err: any) {
@@ -129,7 +125,6 @@ export function UserProfileSettings() {
         setPasswordError("");
         setPasswordSuccess("");
 
-        // Validation
         if (!currentPassword || !newPassword || !confirmPassword) {
             setPasswordError("All fields are required");
             return;
@@ -187,9 +182,9 @@ export function UserProfileSettings() {
 
     if (loading) {
         return (
-            <div className="card bg-base-200 shadow">
+            <div className="card bg-base-100 shadow border border-base-200">
                 <div className="card-body">
-                    <div className="flex items-center justify-center py-8">
+                    <div className="flex items-center justify-center py-12">
                         <span className="loading loading-spinner loading-lg"></span>
                     </div>
                 </div>
@@ -198,35 +193,32 @@ export function UserProfileSettings() {
     }
 
     return (
-        <>
-            {/* Profile Information Card */}
-            <div className="card bg-base-200 shadow">
+        <div className="space-y-6">
+            {/* Profile Card */}
+            <div className="card bg-base-200 shadow border border-base-200">
                 <form onSubmit={handleSubmit}>
                     <div className="card-body">
                         <h2 className="card-title">
                             <i className="fa-duotone fa-regular fa-user"></i>
-                            Profile & Account
+                            Profile
                         </h2>
-                        <p className="text-sm text-base-content/70">
-                            Manage your personal information
-                        </p>
 
                         {error && (
-                            <div className="alert alert-error mt-4">
+                            <div className="alert alert-error">
                                 <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                                 <span>{error}</span>
                             </div>
                         )}
 
                         {success && (
-                            <div className="alert alert-success mt-4">
+                            <div className="alert alert-success">
                                 <i className="fa-duotone fa-regular fa-circle-check"></i>
                                 <span>{success}</span>
                             </div>
                         )}
 
-                        {/* Profile Image Upload */}
-                        <div className="flex justify-center py-6">
+                        {/* Avatar */}
+                        <div className="flex justify-center py-4">
                             <ProfileImageUpload
                                 currentImageUrl={profile?.profile_image_url}
                                 onImageUpdate={(newImageUrl) => {
@@ -235,32 +227,29 @@ export function UserProfileSettings() {
                                             ? {
                                                   ...prev,
                                                   profile_image_url:
-                                                      newImageUrl,
+                                                      newImageUrl ?? undefined,
                                               }
                                             : null,
                                     );
-                                    // Refresh the context to update the nav avatar
                                     refreshContext();
                                 }}
                             />
                         </div>
 
-                        <div className="space-y-4 mt-4">
+                        {/* Form Fields */}
+                        <div className="space-y-4">
                             <fieldset className="fieldset">
                                 <legend className="fieldset-legend">
-                                    Full Name *
+                                    Full Name
                                 </legend>
                                 <input
                                     type="text"
                                     className="input w-full"
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    placeholder="John Doe"
+                                    placeholder="Enter your full name"
                                     required
                                 />
-                                <p className="fieldset-label">
-                                    Your name will be synced to your account
-                                </p>
                             </fieldset>
 
                             <fieldset className="fieldset">
@@ -274,15 +263,15 @@ export function UserProfileSettings() {
                                     disabled
                                 />
                                 <p className="fieldset-label">
-                                    Contact support to change your email address
+                                    Contact support to change your email
                                 </p>
                             </fieldset>
                         </div>
 
-                        <div className="card-actions justify-end mt-6">
+                        <div className="card-actions justify-end mt-4">
                             <button
                                 type="button"
-                                className="btn"
+                                className="btn btn-ghost"
                                 onClick={resetForm}
                                 disabled={submitting}
                             >
@@ -299,10 +288,7 @@ export function UserProfileSettings() {
                                         Saving...
                                     </>
                                 ) : (
-                                    <>
-                                        <i className="fa-duotone fa-regular fa-save"></i>
-                                        Save Changes
-                                    </>
+                                    "Save Changes"
                                 )}
                             </button>
                         </div>
@@ -310,16 +296,13 @@ export function UserProfileSettings() {
                 </form>
             </div>
 
-            {/* Security Settings Section */}
-            <div className="card bg-base-200 shadow">
+            {/* Security Card */}
+            <div className="card bg-base-100 shadow border border-base-200">
                 <div className="card-body">
                     <h2 className="card-title">
                         <i className="fa-duotone fa-regular fa-shield-halved"></i>
                         Security
                     </h2>
-                    <p className="text-sm text-base-content/70 mb-4">
-                        Manage your password and two-factor authentication
-                    </p>
 
                     {passwordSuccess && (
                         <div className="alert alert-success">
@@ -329,23 +312,21 @@ export function UserProfileSettings() {
                     )}
 
                     {/* Password Section */}
-                    <div className="divider"></div>
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                            <h3 className="font-medium mb-1">Password</h3>
-                            <p className="text-sm text-base-content/70">
+                    <div className="flex items-center justify-between py-2">
+                        <div>
+                            <div className="font-medium">Password</div>
+                            <div className="text-sm text-base-content/60">
                                 {showPasswordChange
                                     ? "Enter your current password and choose a new one"
-                                    : "Change your password to keep your account secure"}
-                            </p>
+                                    : "Change your password"}
+                            </div>
                         </div>
                         {!showPasswordChange && (
                             <button
-                                className="btn btn-sm btn-outline bg-base-100"
+                                className="btn btn-sm btn-outline"
                                 onClick={() => setShowPasswordChange(true)}
                             >
-                                <i className="fa-duotone fa-regular fa-key"></i>
-                                Change Password
+                                Change
                             </button>
                         )}
                     </div>
@@ -353,7 +334,7 @@ export function UserProfileSettings() {
                     {showPasswordChange && (
                         <form
                             onSubmit={handlePasswordChange}
-                            className="mt-4 space-y-4"
+                            className="space-y-4 mt-2"
                         >
                             {passwordError && (
                                 <div className="alert alert-error">
@@ -364,7 +345,7 @@ export function UserProfileSettings() {
 
                             <fieldset className="fieldset">
                                 <legend className="fieldset-legend">
-                                    Current Password *
+                                    Current Password
                                 </legend>
                                 <input
                                     type="password"
@@ -379,48 +360,50 @@ export function UserProfileSettings() {
                                 />
                             </fieldset>
 
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">
-                                    New Password *
-                                </legend>
-                                <input
-                                    type="password"
-                                    className="input w-full"
-                                    value={newPassword}
-                                    onChange={(e) =>
-                                        setNewPassword(e.target.value)
-                                    }
-                                    placeholder="Enter new password"
-                                    required
-                                    minLength={8}
-                                    disabled={changingPassword}
-                                />
-                                <p className="fieldset-label">
-                                    At least 8 characters
-                                </p>
-                            </fieldset>
+                            <div className="grid sm:grid-cols-2 gap-4">
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">
+                                        New Password
+                                    </legend>
+                                    <input
+                                        type="password"
+                                        className="input w-full"
+                                        value={newPassword}
+                                        onChange={(e) =>
+                                            setNewPassword(e.target.value)
+                                        }
+                                        placeholder="Enter new password"
+                                        required
+                                        minLength={8}
+                                        disabled={changingPassword}
+                                    />
+                                    <p className="fieldset-label">
+                                        At least 8 characters
+                                    </p>
+                                </fieldset>
 
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">
-                                    Confirm New Password *
-                                </legend>
-                                <input
-                                    type="password"
-                                    className="input w-full"
-                                    value={confirmPassword}
-                                    onChange={(e) =>
-                                        setConfirmPassword(e.target.value)
-                                    }
-                                    placeholder="Confirm new password"
-                                    required
-                                    disabled={changingPassword}
-                                />
-                            </fieldset>
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">
+                                        Confirm Password
+                                    </legend>
+                                    <input
+                                        type="password"
+                                        className="input w-full"
+                                        value={confirmPassword}
+                                        onChange={(e) =>
+                                            setConfirmPassword(e.target.value)
+                                        }
+                                        placeholder="Confirm new password"
+                                        required
+                                        disabled={changingPassword}
+                                    />
+                                </fieldset>
+                            </div>
 
                             <div className="flex gap-2 justify-end">
                                 <button
                                     type="button"
-                                    className="btn btn-sm"
+                                    className="btn btn-ghost btn-sm"
                                     onClick={() => {
                                         setShowPasswordChange(false);
                                         setCurrentPassword("");
@@ -434,58 +417,52 @@ export function UserProfileSettings() {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="btn btn-sm btn-primary"
+                                    className="btn btn-primary btn-sm"
                                     disabled={changingPassword}
                                 >
                                     {changingPassword ? (
                                         <>
                                             <span className="loading loading-spinner loading-xs"></span>
-                                            Changing...
+                                            Updating...
                                         </>
                                     ) : (
-                                        <>
-                                            <i className="fa-duotone fa-regular fa-check"></i>
-                                            Update Password
-                                        </>
+                                        "Update Password"
                                     )}
                                 </button>
                             </div>
                         </form>
                     )}
 
+                    <div className="divider my-2"></div>
+
                     {/* Two-Factor Authentication Section */}
-                    <div className="divider"></div>
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                            <h3 className="font-medium mb-1 flex items-center gap-2">
+                    <div className="flex items-center justify-between py-2">
+                        <div>
+                            <div className="font-medium flex items-center gap-2">
                                 Two-Factor Authentication
                                 {clerkUser?.twoFactorEnabled && (
                                     <span className="badge badge-success badge-sm">
-                                        <i className="fa-duotone fa-regular fa-check mr-1"></i>
                                         Enabled
                                     </span>
                                 )}
-                            </h3>
-                            <p className="text-sm text-base-content/70">
+                            </div>
+                            <div className="text-sm text-base-content/60">
                                 {clerkUser?.twoFactorEnabled
-                                    ? "Your account is protected with two-factor authentication"
-                                    : "Add an extra layer of security to your account"}
-                            </p>
+                                    ? "Your account is protected with 2FA"
+                                    : "Add extra security to your account"}
+                            </div>
                         </div>
                         <button
-                            className="btn btn-sm btn-outline bg-base-100"
+                            className="btn btn-sm btn-outline"
                             onClick={() =>
                                 window.open("/user-profile#security", "_blank")
                             }
                         >
-                            <i className="fa-duotone fa-regular fa-shield"></i>
-                            {clerkUser?.twoFactorEnabled
-                                ? "Manage 2FA"
-                                : "Enable 2FA"}
+                            {clerkUser?.twoFactorEnabled ? "Manage" : "Enable"}
                         </button>
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 }

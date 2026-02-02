@@ -234,6 +234,24 @@ export class DocumentServiceV2 {
         // Get user context
         const userContext = await this.accessResolver.resolve(clerkUserId);
 
+        if (!userContext.identityUserId) {
+            throw new Error('User not found in identity system');
+        }
+
+        // Delete old profile image if it exists (clean up storage)
+        try {
+            const existingImage = await this.repository.findProfileImageByUserId(userContext.identityUserId);
+            if (existingImage) {
+                // Delete from Supabase Storage
+                await this.storage.deleteProfileImage(existingImage.file_path);
+                // Soft-delete the document record
+                await this.repository.softDeleteDocumentInternal(existingImage.id);
+            }
+        } catch (error) {
+            // Log but don't fail - cleanup is best effort
+            console.error('Failed to cleanup old profile image:', error);
+        }
+
         // Generate storage path: profile-images/{userId}/{timestamp}-{filename}
         const timestamp = Date.now();
         const sanitizedName = this.sanitizeFilename(originalFileName);
@@ -251,9 +269,6 @@ export class DocumentServiceV2 {
             await this.storage.getProfileImagePublicUrl(storagePath);
 
         // Create document record
-        if (!userContext.identityUserId) {
-            throw new Error('User not found in identity system');
-        }
         const document = await this.repository.createDocument(clerkUserId, {
             entity_type: "profile_image",
             entity_id: userContext.identityUserId,

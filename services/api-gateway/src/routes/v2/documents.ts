@@ -192,20 +192,22 @@ export function registerDocumentRoutes(app: FastifyInstance, services: ServiceRe
             const authHeaders = buildAuthHeaders(request);
 
             try {
-                const documentServiceUrl = services.get('document').baseURL;
-                
+                // Use same pattern as working /api/v2/documents route
+                const documentServiceUrl = process.env.DOCUMENT_SERVICE_URL || 'http://localhost:3006';
+
                 request.log.info({
                     correlationId,
                     documentServiceUrl,
-                    contentType: request.headers['content-type']
+                    contentType: request.headers['content-type'],
+                    contentLength: request.headers['content-length'],
                 }, 'Proxying profile image upload to document service');
 
                 // For multipart uploads, we need to proxy the raw body stream
                 const proxyHeaders = {
                     ...authHeaders,
+                    'x-correlation-id': correlationId,
                     'content-type': request.headers['content-type'],
                     'content-length': request.headers['content-length'],
-                    'correlation-id': correlationId,
                 };
 
                 const response = await fetch(`${documentServiceUrl}/api/v2/documents/profile-image`, {

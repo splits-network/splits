@@ -210,7 +210,7 @@ export class StorageClient {
             .upload(path, file, {
                 contentType,
                 cacheControl: "3600",
-                upsert: false,
+                upsert: true,
             });
 
         if (error) {

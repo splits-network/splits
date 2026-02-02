@@ -299,6 +299,46 @@ export class DocumentRepositoryV2 {
         }
     }
 
+    /**
+     * Find existing profile image document for a user
+     * Used to clean up old images when uploading a new one
+     */
+    async findProfileImageByUserId(userId: string): Promise<Document | null> {
+        const { data, error } = await this.supabase
+            .from('documents')
+            .select('*')
+            .eq('entity_type', 'profile_image')
+            .eq('entity_id', userId)
+            .is('deleted_at', null)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+        if (error) {
+            throw error;
+        }
+
+        return data ? this.mapRow(data as DocumentRow) : null;
+    }
+
+    /**
+     * Soft delete a document by ID (internal use, no access check)
+     * Used for cleaning up old profile images
+     */
+    async softDeleteDocumentInternal(id: string): Promise<void> {
+        const { error } = await this.supabase
+            .from('documents')
+            .update({
+                deleted_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', id);
+
+        if (error) {
+            throw error;
+        }
+    }
+
     private async canAccessEntity(entityType: string, entityId: string, context: AccessContext): Promise<boolean> {
         if (context.isPlatformAdmin) {
             return true;
@@ -476,6 +516,12 @@ export class DocumentRepositoryV2 {
         // Debug logging for authorization checks
 
         if (context.isPlatformAdmin) {
+            return true;
+        }
+
+        // Users can upload their own profile images
+        // entityId is the user's identityUserId for profile_image entity type
+        if (entityType === 'profile_image' && context.identityUserId && entityId === context.identityUserId) {
             return true;
         }
 

@@ -25,8 +25,8 @@ export default function ProfileForm({
     });
     const [saving, setSaving] = useState(false);
 
-    const handleImageUpdate = (newImageUrl: string) => {
-        setFormData((prev) => ({ ...prev, profile_image_url: newImageUrl }));
+    const handleImageUpdate = (newImageUrl: string | null) => {
+        setFormData((prev) => ({ ...prev, profile_image_url: newImageUrl ?? "" }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {

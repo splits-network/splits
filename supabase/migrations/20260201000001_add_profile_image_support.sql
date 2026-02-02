@@ -1,6 +1,12 @@
 -- Add profile image support to users table
 -- Migration: 20260201000001_add_profile_image_support
 
+-- Add 'profile_image' to document_type enum
+ALTER TYPE public.document_type ADD VALUE IF NOT EXISTS 'profile_image';
+
+-- Add 'profile_image' to entity_type enum
+ALTER TYPE public.entity_type ADD VALUE IF NOT EXISTS 'profile_image';
+
 -- Add profile image fields to users table
 ALTER TABLE public.users 
 ADD COLUMN profile_image_url TEXT,

@@ -158,4 +158,16 @@ export function registerUserRoutes(
             reply.code(400).send({ error: { message: (error as Error).message } });
         }
     });
+
+    // Profile Image Delete Route
+    app.delete('/api/v2/users/profile-image', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const user = await userService.deleteProfileImage(clerkUserId);
+            reply.send({ data: user });
+        } catch (error) {
+            logError('DELETE /api/v2/users/profile-image failed', error);
+            reply.code(400).send({ error: { message: (error as Error).message } });
+        }
+    });
 }
