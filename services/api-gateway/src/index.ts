@@ -48,8 +48,8 @@ async function main() {
             origin: allowedOrigins,
             credentials: true,
         },
-        // Disable built-in Fastify request logging in production to use our custom logging
-        disableRequestLogging: baseConfig.nodeEnv === 'production',
+        // Disable built-in Fastify request logging to reduce health check noise
+        disableRequestLogging: true,
     });
 
     app.setErrorHandler(errorHandler);

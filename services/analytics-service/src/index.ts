@@ -1,33 +1,33 @@
-import Fastify from 'fastify';
-import cors from '@fastify/cors';
-import swagger from '@fastify/swagger';
-import swaggerUi from '@fastify/swagger-ui';
-import { createClient } from '@supabase/supabase-js';
-import { loadConfig } from '@splits-network/shared-config';
-import { createLogger } from '@splits-network/shared-logging';
-import { CacheManager } from './cache/cache-manager';
-import { CacheInvalidator } from './cache/invalidation';
-import { registerV2Routes } from './v2/routes';
-import { DomainEventConsumer } from './consumers/domain-consumer';
-import { startBackgroundJobs } from './jobs';
+import Fastify from "fastify";
+import cors from "@fastify/cors";
+import swagger from "@fastify/swagger";
+import swaggerUi from "@fastify/swagger-ui";
+import { createClient } from "@supabase/supabase-js";
+import { loadConfig } from "@splits-network/shared-config";
+import { createLogger } from "@splits-network/shared-logging";
+import { CacheManager } from "./cache/cache-manager";
+import { CacheInvalidator } from "./cache/invalidation";
+import { registerV2Routes } from "./v2/routes";
+import { DomainEventConsumer } from "./consumers/domain-consumer";
+import { startBackgroundJobs } from "./jobs";
 
-const logger = createLogger('AnalyticsService');
+const logger = createLogger("AnalyticsService");
 
 // Load configuration
 const config = loadConfig();
 
 // Initialize Supabase client (using public schema - access analytics via RPC)
 const supabase: any = createClient(
-    process.env.SUPABASE_URL || '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+    process.env.SUPABASE_URL || "",
+    process.env.SUPABASE_SERVICE_ROLE_KEY || "",
     {
         auth: { persistSession: false },
-    }
+    },
 );
 
 // Initialize Redis cache
 const cache = new CacheManager({
-    host: process.env.REDIS_HOST || 'localhost',
+    host: process.env.REDIS_HOST || "localhost",
     port: Number(process.env.REDIS_PORT) || 6379,
     password: process.env.REDIS_PASSWORD,
 });
@@ -38,7 +38,7 @@ const cacheInvalidator = new CacheInvalidator(cache);
 // Initialize Fastify server
 const app = Fastify({
     logger: true,
-    requestIdHeader: 'x-request-id',
+    requestIdHeader: "x-request-id",
 });
 
 // Register CORS
@@ -51,38 +51,54 @@ app.register(cors, {
 app.register(swagger, {
     swagger: {
         info: {
-            title: 'Analytics Service API',
-            description: 'Event-driven analytics, metrics, and chart data endpoints',
-            version: '1.0.0',
+            title: "Analytics Service API",
+            description:
+                "Event-driven analytics, metrics, and chart data endpoints",
+            version: "1.0.0",
         },
-        host: config.apiUrl || 'localhost:3007',
-        schemes: ['http', 'https'],
-        consumes: ['application/json'],
-        produces: ['application/json'],
+        host: config.apiUrl || "localhost:3007",
+        schemes: ["http", "https"],
+        consumes: ["application/json"],
+        produces: ["application/json"],
         tags: [
-            { name: 'metrics', description: 'User/company stats endpoints' },
-            { name: 'charts', description: 'Chart data endpoints' },
-            { name: 'marketplace-health', description: 'Platform health metrics' },
-            { name: 'admin', description: 'Admin endpoints' },
+            { name: "metrics", description: "User/company stats endpoints" },
+            { name: "charts", description: "Chart data endpoints" },
+            {
+                name: "marketplace-health",
+                description: "Platform health metrics",
+            },
+            { name: "admin", description: "Admin endpoints" },
         ],
     },
 });
 
 app.register(swaggerUi, {
-    routePrefix: '/docs',
+    routePrefix: "/docs",
     uiConfig: {
-        docExpansion: 'list',
+        docExpansion: "list",
         deepLinking: false,
     },
 });
 
+// Skip request logging for health checks and docs to reduce noise
+app.addHook("onRequest", async (request, reply) => {
+    if (request.url === "/health" || request.url.includes("/docs")) {
+        request.log = {
+            ...request.log,
+            info: () => {},
+            debug: () => {},
+            trace: () => {},
+        } as any;
+    }
+});
+
 // Health check endpoint
-app.get('/health', async (request, reply) => {
+app.get("/health", async (request, reply) => {
     return reply.send({
-        status: 'healthy',
-        service: 'analytics-service',
+        status: "healthy",
+        service: "analytics-service",
         timestamp: new Date().toISOString(),
-        version: '1.0.0',
+        version: "1.0.0",
     });
 });
 
@@ -100,58 +116,58 @@ async function startServer() {
     try {
         // Start Fastify server
         const port = Number(process.env.PORT || 3010);
-        await app.listen({ port, host: '0.0.0.0' });
+        await app.listen({ port, host: "0.0.0.0" });
         logger.info(`Analytics service started on port ${port}`);
 
         // Start event consumer
         eventConsumer = new DomainEventConsumer(
-            process.env.RABBITMQ_URL || 'amqp://localhost',
+            process.env.RABBITMQ_URL || "amqp://localhost",
             supabase,
             cache,
-            cacheInvalidator
+            cacheInvalidator,
         );
         await eventConsumer.connect();
         await eventConsumer.start();
-        logger.info('Event consumer started and listening for domain events');
+        logger.info("Event consumer started and listening for domain events");
 
         // Start background jobs
         startBackgroundJobs(supabase, cache);
-        logger.info('Background aggregation jobs started');
+        logger.info("Background aggregation jobs started");
     } catch (error) {
-        logger.error({ error }, 'Failed to start analytics service');
+        logger.error({ error }, "Failed to start analytics service");
         process.exit(1);
     }
 }
 
 // Graceful shutdown
 async function shutdown() {
-    logger.info('Shutting down analytics service...');
+    logger.info("Shutting down analytics service...");
 
     try {
         // Close event consumer
         if (eventConsumer) {
             await eventConsumer.close();
-            logger.info('Event consumer closed');
+            logger.info("Event consumer closed");
         }
 
         // Close Redis connection
         await cache.close();
-        logger.info('Redis connection closed');
+        logger.info("Redis connection closed");
 
         // Close Fastify server
         await app.close();
-        logger.info('Fastify server closed');
+        logger.info("Fastify server closed");
 
         process.exit(0);
     } catch (error) {
-        logger.error({ error }, 'Error during shutdown');
+        logger.error({ error }, "Error during shutdown");
         process.exit(1);
     }
 }
 
 // Handle shutdown signals
-process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown);
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
 
 // Start the server
 startServer();

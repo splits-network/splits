@@ -1,15 +1,14 @@
-'use client';
+"use client";
 
-import { useServiceHealth, type ServiceHealth } from '@/hooks/useServiceHealth';
-import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { MarkdownEditor } from '@splits-network/shared-ui';
+import { useServiceHealth, type ServiceHealth } from "@/hooks/useServiceHealth";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 const initialFormState = {
-    name: '',
-    email: '',
-    topic: 'technical',
-    urgency: 'normal',
-    message: '',
+    name: "",
+    email: "",
+    topic: "technical",
+    urgency: "normal",
+    message: "",
 };
 
 interface StatusPageClientProps {
@@ -17,7 +16,10 @@ interface StatusPageClientProps {
     initialCheckedAt?: string;
 }
 
-export default function StatusPageClient({ initialStatuses, initialCheckedAt }: StatusPageClientProps) {
+export default function StatusPageClient({
+    initialStatuses,
+    initialCheckedAt,
+}: StatusPageClientProps) {
     const {
         serviceStatuses,
         lastChecked,
@@ -27,62 +29,72 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
         someUnhealthy,
         isLoading,
         unhealthyServices,
-    } = useServiceHealth({ autoRefresh: true, initialStatuses, initialCheckedAt });
+    } = useServiceHealth({
+        autoRefresh: true,
+        initialStatuses,
+        initialCheckedAt,
+    });
 
     const [formData, setFormData] = useState(initialFormState);
-    const [formFeedback, setFormFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    const [formFeedback, setFormFeedback] = useState<{
+        type: "success" | "error";
+        message: string;
+    } | null>(null);
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         document.title = allHealthy
-            ? 'All Systems Operational - Applicant Network'
-            : 'Service Status - Applicant Network';
+            ? "All Systems Operational - Applicant Network"
+            : "Service Status - Applicant Network";
     }, [allHealthy]);
 
     const overallState = useMemo(() => {
         if (isLoading) {
             return {
-                title: 'Checking every service.',
-                color: 'bg-base-300 text-base-content',
-                message: 'Hang tight while we run the latest health checks.',
-                icon: 'fa-duotone fa-regular fa-stethoscope',
+                title: "Checking every service.",
+                color: "bg-base-300 text-base-content",
+                message: "Hang tight while we run the latest health checks.",
+                icon: "fa-duotone fa-regular fa-stethoscope",
             };
         }
 
         if (allHealthy) {
             return {
-                title: 'All Systems Operational',
-                color: 'bg-success text-success-content',
-                message: 'Realtime updates confirm recruiters, automation, and AI reviews are all online.',
-                icon: 'fa-duotone fa-regular fa-circle-check',
+                title: "All Systems Operational",
+                color: "bg-success text-success-content",
+                message:
+                    "Realtime updates confirm recruiters, automation, and AI reviews are all online.",
+                icon: "fa-duotone fa-regular fa-circle-check",
             };
         }
 
         if (someUnhealthy) {
             return {
-                title: 'Degraded Performance',
-                color: 'bg-error text-error-content',
-                message: 'We detected a hiccup and our on-call team is investigating.',
-                icon: 'fa-duotone fa-regular fa-triangle-exclamation',
+                title: "Degraded Performance",
+                color: "bg-error text-error-content",
+                message:
+                    "We detected a hiccup and our on-call team is investigating.",
+                icon: "fa-duotone fa-regular fa-triangle-exclamation",
             };
         }
 
         return {
-            title: 'Monitoring in Progress',
-            color: 'bg-warning text-warning-content',
-            message: 'One or more services are warming up. We will update this card in a moment.',
-            icon: 'fa-duotone fa-regular fa-wave-square',
+            title: "Monitoring in Progress",
+            color: "bg-warning text-warning-content",
+            message:
+                "One or more services are warming up. We will update this card in a moment.",
+            icon: "fa-duotone fa-regular fa-wave-square",
         };
     }, [allHealthy, someUnhealthy, isLoading]);
 
     const statusBadge = (status: string) => {
         switch (status) {
-            case 'healthy':
-                return 'badge badge-success';
-            case 'unhealthy':
-                return 'badge badge-error';
+            case "healthy":
+                return "badge badge-success";
+            case "unhealthy":
+                return "badge badge-error";
             default:
-                return 'badge badge-warning';
+                return "badge badge-warning";
         }
     };
 
@@ -92,30 +104,33 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
         setFormFeedback(null);
 
         try {
-            const response = await fetch('/api/v2/status-contact', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+            const response = await fetch("/api/v2/status-contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
             });
 
             const responseBody = await response.json().catch(() => ({}));
 
             if (!response.ok) {
-                throw new Error(responseBody.error || 'We could not save your note.');
+                throw new Error(
+                    responseBody.error || "We could not save your note.",
+                );
             }
 
             setFormFeedback({
-                type: 'success',
-                message: 'Thanks for the update! Our support engineers will reply within one business day.',
+                type: "success",
+                message:
+                    "Thanks for the update! Our support engineers will reply within one business day.",
             });
             setFormData(initialFormState);
         } catch (error) {
             setFormFeedback({
-                type: 'error',
+                type: "error",
                 message:
                     error instanceof Error
                         ? error.message
-                        : 'We could not save your note. Please email help@applicant.',
+                        : "We could not save your note. Please email help@applicant.",
             });
         } finally {
             setSubmitting(false);
@@ -127,16 +142,22 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
             <div className="container mx-auto px-4">
                 <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                        <p className="text-sm font-semibold uppercase text-primary">Applicant Network Live Status</p>
-                        <h1 className="text-4xl font-bold mt-2">Stay ahead of every status change</h1>
+                        <p className="text-sm font-semibold uppercase text-primary">
+                            Applicant Network Live Status
+                        </p>
+                        <h1 className="text-4xl font-bold mt-2">
+                            Stay ahead of every status change
+                        </h1>
                         <p className="text-base-content/70 mt-2 max-w-2xl">
-                            We monitor the gateway, recruiter tools, AI review pipeline, and document processing stack
-                            so candidates always know what to expect.
+                            We monitor the gateway, recruiter tools, AI review
+                            pipeline, and document processing stack so
+                            candidates always know what to expect.
                         </p>
                     </div>
                     <div className="text-sm text-base-content/70 flex flex-col items-start gap-2">
                         <span className="text-xs" suppressHydrationWarning>
-                            Last checked {lastChecked.toLocaleTimeString()} &nbsp; Auto-refresh every 30s
+                            Last checked {lastChecked.toLocaleTimeString()}{" "}
+                            &nbsp; Auto-refresh every 30s
                         </span>
                     </div>
                 </div>
@@ -147,23 +168,38 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
                             <div className="card-body">
                                 <div className="flex flex-col gap-6 md:flex-row md:justify-between">
                                     <div>
-                                        <p className="text-sm uppercase tracking-wide">Live health summary</p>
+                                        <p className="text-sm uppercase tracking-wide">
+                                            Live health summary
+                                        </p>
                                         <h2 className="text-3xl font-bold flex items-center gap-3 mt-2">
-                                            <i className={`${overallState.icon} text-2xl`} />
+                                            <i
+                                                className={`${overallState.icon} text-2xl`}
+                                            />
                                             {overallState.title}
                                         </h2>
-                                        <p className="mt-2 opacity-90">{overallState.message}</p>
+                                        <p className="mt-2 opacity-90">
+                                            {overallState.message}
+                                        </p>
                                     </div>
                                     <div className="grid gap-3 text-sm">
                                         <div className="bg-base-100/20 rounded-xl p-3">
-                                            <p className="font-semibold text-lg">{healthyCount}/{totalCount}</p>
-                                            <p className="opacity-80">Services healthy</p>
+                                            <p className="font-semibold text-lg">
+                                                {healthyCount}/{totalCount}
+                                            </p>
+                                            <p className="opacity-80">
+                                                Services healthy
+                                            </p>
                                         </div>
                                         <div className="bg-base-100/20 rounded-xl p-3">
                                             <p className="font-semibold text-lg">
-                                                {someUnhealthy ? 'Investigating' : 'All clear'}
+                                                {someUnhealthy
+                                                    ? "Investigating"
+                                                    : "All clear"}
                                             </p>
-                                            <p className="opacity-80">AI, automation, billing, and docs monitored</p>
+                                            <p className="opacity-80">
+                                                AI, automation, billing, and
+                                                docs monitored
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -178,11 +214,13 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
                                         Response insights
                                     </h3>
                                     <p className="text-base-content/70 text-sm">
-                                        We track round-trip response times for every health ping and surface slowdowns
+                                        We track round-trip response times for
+                                        every health ping and surface slowdowns
                                         before they impact candidate dashboards.
                                     </p>
                                     <p className="text-xs text-base-content/60 mt-4">
-                                        Need deeper telemetry? Contact support for a raw health snapshot.
+                                        Need deeper telemetry? Contact support
+                                        for a raw health snapshot.
                                     </p>
                                 </div>
                             </div>
@@ -193,8 +231,10 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
                                         Incident comms
                                     </h3>
                                     <p className="text-base-content/70 text-sm">
-                                        During a disruption we post updates here, send proactive notifications, and keep
-                                        recruiter + candidate emails flowing via the notification service.
+                                        During a disruption we post updates
+                                        here, send proactive notifications, and
+                                        keep recruiter + candidate emails
+                                        flowing via the notification service.
                                     </p>
                                 </div>
                             </div>
@@ -208,7 +248,8 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
                                         Service-by-service detail
                                     </h2>
                                     <span className="text-xs text-base-content/60">
-                                        Sorted alphabetically &nbsp; click refresh for real-time data
+                                        Sorted alphabetically &nbsp; click
+                                        refresh for real-time data
                                     </span>
                                 </div>
                                 <div className="space-y-3 mt-4">
@@ -218,11 +259,13 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
                                             className="flex flex-col gap-3 rounded-xl border border-base-200 p-4 md:flex-row md:items-center md:justify-between"
                                         >
                                             <div>
-                                                <p className="font-semibold">{service.name}</p>
+                                                <p className="font-semibold">
+                                                    {service.name}
+                                                </p>
                                                 <p className="text-xs text-base-content/60">
                                                     {service.responseTime
                                                         ? `Response ${service.responseTime}ms`
-                                                        : 'Awaiting heartbeat'}
+                                                        : "Awaiting heartbeat"}
                                                 </p>
                                                 {service.error && (
                                                     <p className="mt-1 text-xs text-error">
@@ -233,16 +276,27 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
                                             </div>
                                             <div className="flex items-center gap-3">
                                                 {service.timestamp && (
-                                                    <span className="text-xs text-base-content/50" suppressHydrationWarning>
-                                                        {new Date(service.timestamp).toLocaleTimeString()}
+                                                    <span
+                                                        className="text-xs text-base-content/50"
+                                                        suppressHydrationWarning
+                                                    >
+                                                        {new Date(
+                                                            service.timestamp,
+                                                        ).toLocaleTimeString()}
                                                     </span>
                                                 )}
-                                                <span className={statusBadge(service.status)}>
-                                                    {service.status === 'healthy'
-                                                        ? 'Operational'
-                                                        : service.status === 'unhealthy'
-                                                            ? 'Investigating'
-                                                            : 'Checking'}
+                                                <span
+                                                    className={statusBadge(
+                                                        service.status,
+                                                    )}
+                                                >
+                                                    {service.status ===
+                                                    "healthy"
+                                                        ? "Operational"
+                                                        : service.status ===
+                                                            "unhealthy"
+                                                          ? "Investigating"
+                                                          : "Checking"}
                                                 </span>
                                             </div>
                                         </div>
@@ -260,13 +314,18 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
                                 {unhealthyServices.length > 0 ? (
                                     <div className="mt-4 space-y-4">
                                         {unhealthyServices.map((service) => (
-                                            <div key={service.name} className="alert alert-error">
+                                            <div
+                                                key={service.name}
+                                                className="alert alert-error"
+                                            >
                                                 <i className="fa-duotone fa-regular fa-circle-exclamation" />
                                                 <div>
-                                                    <p className="font-semibold">{service.name}</p>
+                                                    <p className="font-semibold">
+                                                        {service.name}
+                                                    </p>
                                                     <p className="text-sm">
                                                         {service.error ||
-                                                            'Our engineers are investigating and will share updates soon.'}
+                                                            "Our engineers are investigating and will share updates soon."}
                                                     </p>
                                                 </div>
                                             </div>
@@ -274,12 +333,14 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
                                     </div>
                                 ) : (
                                     <p className="text-base-content/70 mt-4">
-                                        No active incidents. Our AI review service, automation flows, billing, and
+                                        No active incidents. Our AI review
+                                        service, automation flows, billing, and
                                         document stack are operating normally.
                                     </p>
                                 )}
                                 <p className="text-xs text-base-content/50 mt-6">
-                                    We post maintenance windows at least 24 hours in advance and update this feed first
+                                    We post maintenance windows at least 24
+                                    hours in advance and update this feed first
                                     whenever something changes.
                                 </p>
                             </div>
@@ -294,27 +355,41 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
                                     Talk with support
                                 </h2>
                                 <p className="text-sm text-base-content/70">
-                                    Send us context from right inside the status page and we&apos;ll loop you into the
+                                    Send us context from right inside the status
+                                    page and we&apos;ll loop you into the
                                     incident channel.
                                 </p>
 
                                 {formFeedback && (
                                     <div
-                                        className={`alert ${formFeedback.type === 'success' ? 'alert-success' : 'alert-error'
-                                            } mt-4`}
+                                        className={`alert ${
+                                            formFeedback.type === "success"
+                                                ? "alert-success"
+                                                : "alert-error"
+                                        } mt-4`}
                                     >
                                         <span>{formFeedback.message}</span>
                                     </div>
                                 )}
 
-                                <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
+                                <form
+                                    className="mt-4 space-y-4"
+                                    onSubmit={handleSubmit}
+                                >
                                     <div className="fieldset">
-                                        <label className="label">Full name</label>
+                                        <label className="label">
+                                            Full name
+                                        </label>
                                         <input
                                             className="input w-full"
                                             required
                                             value={formData.name}
-                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    name: e.target.value,
+                                                })
+                                            }
                                             placeholder="Taylor Candidate"
                                         />
                                     </div>
@@ -325,47 +400,93 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
                                             type="email"
                                             required
                                             value={formData.email}
-                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    email: e.target.value,
+                                                })
+                                            }
                                             placeholder="you@applicant.network"
                                         />
                                     </div>
                                     <div className="grid gap-4 md:grid-cols-2">
                                         <div className="fieldset">
-                                            <label className="label">Topic</label>
+                                            <label className="label">
+                                                Topic
+                                            </label>
                                             <select
                                                 className="select w-full"
                                                 value={formData.topic}
-                                                onChange={(e) => setFormData({ ...formData, topic: e.target.value })}
+                                                onChange={(e) =>
+                                                    setFormData({
+                                                        ...formData,
+                                                        topic: e.target.value,
+                                                    })
+                                                }
                                             >
-                                                <option value="technical">Technical issue</option>
-                                                <option value="ai">AI review question</option>
-                                                <option value="documents">Document upload</option>
-                                                <option value="notifications">Notifications</option>
-                                                <option value="other">Other</option>
+                                                <option value="technical">
+                                                    Technical issue
+                                                </option>
+                                                <option value="ai">
+                                                    AI review question
+                                                </option>
+                                                <option value="documents">
+                                                    Document upload
+                                                </option>
+                                                <option value="notifications">
+                                                    Notifications
+                                                </option>
+                                                <option value="other">
+                                                    Other
+                                                </option>
                                             </select>
                                         </div>
                                         <div className="fieldset">
-                                            <label className="label">Urgency</label>
+                                            <label className="label">
+                                                Urgency
+                                            </label>
                                             <select
                                                 className="select w-full"
                                                 value={formData.urgency}
-                                                onChange={(e) => setFormData({ ...formData, urgency: e.target.value })}
+                                                onChange={(e) =>
+                                                    setFormData({
+                                                        ...formData,
+                                                        urgency: e.target.value,
+                                                    })
+                                                }
                                             >
-                                                <option value="normal">Normal</option>
-                                                <option value="high">High - blocking applications</option>
-                                                <option value="low">Low - FYI</option>
+                                                <option value="normal">
+                                                    Normal
+                                                </option>
+                                                <option value="high">
+                                                    High - blocking applications
+                                                </option>
+                                                <option value="low">
+                                                    Low - FYI
+                                                </option>
                                             </select>
                                         </div>
                                     </div>
-                                    <MarkdownEditor
-                                        className="fieldset"
-                                        label="Message"
-                                        value={formData.message}
-                                        onChange={(value) => setFormData({ ...formData, message: value })}
-                                        placeholder="Share any impact to your applications or recruiter convos."
-                                        height={160}
-                                    />
-                                    <button className="btn btn-primary w-full" disabled={submitting} type="submit">
+                                    <div className="fieldset">
+                                        <label className="label">Message</label>
+                                        <textarea
+                                            className="textarea h-24 w-full"
+                                            required
+                                            value={formData.message}
+                                            onChange={(e) =>
+                                                setFormData({
+                                                    ...formData,
+                                                    message: e.target.value,
+                                                })
+                                            }
+                                            placeholder="Share any impact to your applications or recruiter convos."
+                                        />
+                                    </div>
+                                    <button
+                                        className="btn btn-primary w-full"
+                                        disabled={submitting}
+                                        type="submit"
+                                    >
                                         {submitting ? (
                                             <>
                                                 <span className="loading loading-spinner loading-sm mr-2" />
@@ -380,8 +501,11 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
                                     </button>
                                 </form>
                                 <p className="text-xs text-base-content/60 mt-4">
-                                    Prefer email?{' '}
-                                    <a className="link link-primary" href="mailto:help@applicant.network">
+                                    Prefer email?{" "}
+                                    <a
+                                        className="link link-primary"
+                                        href="mailto:help@applicant.network"
+                                    >
                                         help@applicant.network
                                     </a>
                                 </p>
@@ -397,11 +521,13 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
                                 <ul className="text-sm text-base-content/70 space-y-1 mt-2">
                                     <li>Monday-Friday: 9am - 6pm ET</li>
                                     <li>Saturday: 10am - 4pm ET</li>
-                                    <li>Sunday: On-call coverage for incidents</li>
+                                    <li>
+                                        Sunday: On-call coverage for incidents
+                                    </li>
                                 </ul>
                                 <p className="text-xs text-base-content/60 mt-3">
-                                    For urgent issues, mention "status page" in your note so we can prioritize the
-                                    thread.
+                                    For urgent issues, mention "status page" in
+                                    your note so we can prioritize the thread.
                                 </p>
                             </div>
                         </div>
@@ -415,7 +541,10 @@ export default function StatusPageClient({ initialStatuses, initialCheckedAt }: 
                                 <ul className="text-sm text-base-content/70 space-y-2">
                                     <li>- Help Center: /help</li>
                                     <li>- Candidate community: /marketplace</li>
-                                    <li>- Instant notifications: enable push + email under Settings</li>
+                                    <li>
+                                        - Instant notifications: enable push +
+                                        email under Settings
+                                    </li>
                                 </ul>
                             </div>
                         </div>

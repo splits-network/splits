@@ -24,8 +24,8 @@ async function main() {
             origin: true,
             credentials: true,
         },
-        // Disable built-in Fastify request logging in production to reduce health check noise
-        disableRequestLogging: baseConfig.nodeEnv === 'production',
+        // Disable built-in Fastify request logging to reduce health check noise
+        disableRequestLogging: true,
     });
 
     // Set error handler
