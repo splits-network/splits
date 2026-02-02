@@ -10,7 +10,7 @@ import {
     registerChatRefresh,
     requestChatRefresh,
 } from "@/lib/chat-refresh-queue";
-import { getCachedCurrentUserId } from "@/lib/current-user";
+import { getCachedCurrentUserId } from "@/lib/current-user-profile";
 import { useState, useEffect, useMemo, useCallback } from "react";
 
 interface NavItem {

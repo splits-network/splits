@@ -99,3 +99,40 @@ export interface MessageQueryParams {
     after?: string;
     limit?: number;
 }
+
+// NEW: Participant details from users table
+export interface ParticipantDetails {
+    id: string;
+    name: string | null;
+    email: string;
+    profile_image_url?: string | null;
+}
+
+// NEW: Conversation with participant names included (prevents unauthorized user lookups)
+export interface ChatConversationWithParticipants {
+    id: string;
+    participant_a_id: string;
+    participant_b_id: string;
+    application_id?: string | null;
+    job_id?: string | null;
+    company_id?: string | null;
+    created_at: string;
+    updated_at: string;
+    last_message_at?: string | null;
+    last_message_id?: string | null;
+    participant_a: ParticipantDetails;
+    participant_b: ParticipantDetails;
+}
+
+// NEW: List item with enriched participant data
+export interface ChatConversationListItemWithParticipants {
+    conversation: ChatConversationWithParticipants;
+    participant: ChatParticipantState;
+}
+
+// NEW: Resync response with enriched participant data
+export interface ResyncResponseWithParticipants {
+    conversation: ChatConversationWithParticipants;
+    participant: ChatParticipantState;
+    messages: ChatMessage[];
+}

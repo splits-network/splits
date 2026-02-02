@@ -43,3 +43,14 @@ export function setCachedCurrentUserProfile(profile: UserProfile | null) {
 export function clearCachedCurrentUserProfile() {
     cachedProfile = null;
 }
+
+/**
+ * Get just the current user's ID from the cached profile.
+ * Replaces the deprecated current-user.ts file.
+ */
+export async function getCachedCurrentUserId(
+    getToken: () => Promise<string | null>,
+): Promise<string | null> {
+    const profile = await getCachedCurrentUserProfile(getToken);
+    return profile?.id ?? null;
+}

@@ -1,5 +1,15 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { ChatAttachment, ChatConversation, ChatMessage, ChatParticipantState, ChatModerationAudit, ChatReport } from './types';
+import {
+    ChatAttachment,
+    ChatConversation,
+    ChatMessage,
+    ChatParticipantState,
+    ChatModerationAudit,
+    ChatReport,
+    ChatConversationWithParticipants,
+    ChatConversationListItemWithParticipants,
+    ParticipantDetails,
+} from './types';
 
 export class ChatRepository {
     private supabase: SupabaseClient;
@@ -194,6 +204,145 @@ export class ChatRepository {
         return {
             data: (data || []) as ChatParticipantState[],
             total: count || 0,
+        };
+    }
+
+    /**
+     * NEW: List conversations with participant details (names, emails) included inline.
+     * This prevents the need for separate unauthorized /users/:id lookups on the frontend.
+     * SECURITY: Frontend no longer needs to call GET /users/:id which has no authorization.
+     */
+    async listConversationsWithParticipants(
+        userId: string,
+        filter: 'inbox' | 'requests' | 'archived',
+        limit: number,
+        cursor?: string
+    ): Promise<{ data: ChatConversationListItemWithParticipants[]; total: number }> {
+        // First, get the conversations
+        const { data: participantRows, total } = await this.listConversations(userId, filter, limit, cursor);
+
+        if (!participantRows || participantRows.length === 0) {
+            return { data: [], total: 0 };
+        }
+
+        // Extract all unique user IDs from conversations
+        const userIds = new Set<string>();
+        participantRows.forEach((row: any) => {
+            if (row.chat_conversations) {
+                userIds.add(row.chat_conversations.participant_a_id);
+                userIds.add(row.chat_conversations.participant_b_id);
+            }
+        });
+
+        // Fetch all participant details in one query
+        const { data: users, error: usersError } = await this.supabase
+            .from('users')
+            .select('id, name, email, profile_image_url')
+            .in('id', Array.from(userIds));
+
+        if (usersError) {
+            throw usersError;
+        }
+
+        // Create a map for quick lookup
+        const userMap = new Map<string, ParticipantDetails>();
+        (users || []).forEach((user: any) => {
+            userMap.set(user.id, {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                profile_image_url: user.profile_image_url,
+            });
+        });
+
+        // Enrich conversations with participant details
+        const enriched: ChatConversationListItemWithParticipants[] = participantRows.map((row: any) => {
+            const conv = row.chat_conversations;
+            const participantA = userMap.get(conv.participant_a_id) || {
+                id: conv.participant_a_id,
+                name: null,
+                email: 'Unknown',
+                profile_image_url: null,
+            };
+            const participantB = userMap.get(conv.participant_b_id) || {
+                id: conv.participant_b_id,
+                name: null,
+                email: 'Unknown',
+                profile_image_url: null,
+            };
+
+            return {
+                conversation: {
+                    ...conv,
+                    participant_a: participantA,
+                    participant_b: participantB,
+                },
+                participant: {
+                    conversation_id: row.conversation_id,
+                    user_id: row.user_id,
+                    muted_at: row.muted_at,
+                    archived_at: row.archived_at,
+                    request_state: row.request_state,
+                    last_read_at: row.last_read_at,
+                    last_read_message_id: row.last_read_message_id,
+                    unread_count: row.unread_count,
+                },
+            };
+        });
+
+        return {
+            data: enriched,
+            total,
+        };
+    }
+
+    /**
+     * NEW: Get a single conversation with participant details included.
+     * SECURITY: Prevents unauthorized /users/:id lookups.
+     */
+    async getConversationWithParticipants(conversationId: string): Promise<ChatConversationWithParticipants | null> {
+        const conversation = await this.getConversation(conversationId);
+        if (!conversation) {
+            return null;
+        }
+
+        // Fetch both participants' details
+        const { data: users, error } = await this.supabase
+            .from('users')
+            .select('id, name, email, profile_image_url')
+            .in('id', [conversation.participant_a_id, conversation.participant_b_id]);
+
+        if (error) {
+            throw error;
+        }
+
+        const userMap = new Map<string, ParticipantDetails>();
+        (users || []).forEach((user: any) => {
+            userMap.set(user.id, {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                profile_image_url: user.profile_image_url,
+            });
+        });
+
+        const participantA = userMap.get(conversation.participant_a_id) || {
+            id: conversation.participant_a_id,
+            name: null,
+            email: 'Unknown',
+            profile_image_url: null,
+        };
+        const participantB = userMap.get(conversation.participant_b_id) || {
+            id: conversation.participant_b_id,
+            name: null,
+            email: 'Unknown',
+            profile_image_url: null,
+        };
+
+        return {
+            ...conversation,
+            participant_a: participantA,
+            participant_b: participantB,
         };
     }
 
