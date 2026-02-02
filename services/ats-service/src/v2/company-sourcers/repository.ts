@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AccessContext, resolveAccessContext } from '@splits-network/shared-access-context';
-import { CompanySourcer, CompanySourcerCreate, CompanySourcerFilters, CompanySourcerUpdate } from './types';
+import { RecruiterCompany, CompanySourcerCreate, CompanySourcerFilters, CompanySourcerUpdate } from './types';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 
 export class CompanySourcerRepository {
@@ -9,7 +9,7 @@ export class CompanySourcerRepository {
     async list(
         clerkUserId: string,
         params: StandardListParams & CompanySourcerFilters
-    ): Promise<StandardListResponse<CompanySourcer>> {
+    ): Promise<StandardListResponse<RecruiterCompany>> {
         const context = await resolveAccessContext(this.supabase, clerkUserId);
         const { page = 1, limit = 25, search, filters = {}, sort_by = 'sourced_at', sort_order = 'desc' } = params;
         const offset = (page - 1) * limit;
@@ -70,7 +70,7 @@ export class CompanySourcerRepository {
         };
     }
 
-    async findById(id: string, clerkUserId: string): Promise<CompanySourcer | null> {
+    async findById(id: string, clerkUserId: string): Promise<RecruiterCompany | null> {
         const context = await resolveAccessContext(this.supabase, clerkUserId);
 
         let query = this.supabase
@@ -99,7 +99,7 @@ export class CompanySourcerRepository {
         return data;
     }
 
-    async findByCompany(company_id: string): Promise<CompanySourcer | null> {
+    async findByCompany(company_id: string): Promise<RecruiterCompany | null> {
         const { data, error } = await this.supabase
             .from('company_sourcers')
             .select('*')
@@ -114,7 +114,7 @@ export class CompanySourcerRepository {
         return data;
     }
 
-    async create(sourcerData: CompanySourcerCreate): Promise<CompanySourcer> {
+    async create(sourcerData: CompanySourcerCreate): Promise<RecruiterCompany> {
         const { data, error } = await this.supabase
             .from('company_sourcers')
             .insert({
@@ -136,7 +136,7 @@ export class CompanySourcerRepository {
         return data;
     }
 
-    async update(id: string, clerkUserId: string, updates: CompanySourcerUpdate): Promise<CompanySourcer> {
+    async update(id: string, clerkUserId: string, updates: CompanySourcerUpdate): Promise<RecruiterCompany> {
         const context = await resolveAccessContext(this.supabase, clerkUserId);
 
         // Build update query with role-based filtering
@@ -201,15 +201,15 @@ export class CompanySourcerRepository {
         // Permanent attribution - always protected if sourcer exists
         return {
             has_protection: true,
-            sourcer_recruiter_id: sourcer.sourcer_recruiter_id,
-            sourced_at: new Date(sourcer.sourced_at),
+            sourcer_recruiter_id: sourcer.recruiter_id,
+            sourced_at: new Date(sourcer.relationship_start_date),
         };
     }
 
     /**
      * Get sourcer by company ID (alias for findByCompany for clarity)
      */
-    async getByCompanyId(company_id: string): Promise<CompanySourcer | null> {
+    async getByCompanyId(company_id: string): Promise<RecruiterCompany | null> {
         return this.findByCompany(company_id);
     }
 
@@ -224,7 +224,7 @@ export class CompanySourcerRepository {
         const { data: recruiter, error } = await this.supabase
             .from('recruiters')
             .select('status')
-            .eq('id', sourcer.sourcer_recruiter_id)
+            .eq('id', sourcer.recruiter_id)
             .single();
 
         if (error || !recruiter) return false;

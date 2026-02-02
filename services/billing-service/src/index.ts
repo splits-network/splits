@@ -32,8 +32,8 @@ async function main() {
             origin: true,
             credentials: true,
         },
-        // Disable built-in Fastify request logging in production to reduce health check noise
-        disableRequestLogging: baseConfig.nodeEnv === 'production',
+        // Disable built-in Fastify request logging to reduce health check noise
+        disableRequestLogging: true,
     });
 
     app.setErrorHandler(errorHandler);
@@ -150,11 +150,16 @@ async function main() {
         logger
     );
 
+    // Track consumer connection status for health checks
+    let placementConsumerConnected = false;
+
     try {
         await placementConsumer.connect();
+        placementConsumerConnected = true;
         logger.info('Placement event consumer connected and listening');
     } catch (error) {
-        logger.warn({ err: error }, 'Failed to connect placement event consumer - continuing without events');
+        placementConsumerConnected = false;
+        logger.error({ err: error }, 'CRITICAL: Placement event consumer failed to connect - commission processing DISABLED');
     }
 
     // Register webhook routes (V1 - TODO: migrate to V2)
@@ -166,9 +171,10 @@ async function main() {
             // Check database connectivity
             await repository.healthCheck();
             return reply.status(200).send({
-                status: 'healthy',
+                status: placementConsumerConnected ? 'healthy' : 'degraded',
                 service: 'billing-service',
                 timestamp: new Date().toISOString(),
+                event_consumer: placementConsumerConnected ? 'connected' : 'disconnected',
             });
         } catch (error) {
             logger.error({ err: error }, 'Health check failed');
@@ -177,6 +183,7 @@ async function main() {
                 service: 'billing-service',
                 timestamp: new Date().toISOString(),
                 error: error instanceof Error ? error.message : 'Unknown error',
+                event_consumer: placementConsumerConnected ? 'connected' : 'disconnected',
             });
         }
     });

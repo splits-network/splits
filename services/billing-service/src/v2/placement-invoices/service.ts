@@ -95,6 +95,7 @@ export class PlacementInvoiceService {
             collection_method,
             days_until_due,
             auto_advance: true,
+            pending_invoice_items_behavior: 'include',
             metadata: {
                 placement_id: placement.id,
                 company_id: placement.company_id,

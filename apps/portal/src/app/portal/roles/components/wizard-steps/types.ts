@@ -24,7 +24,7 @@ export interface FormData {
     salary_max: string;
     show_salary_range: boolean;
     fee_percentage: number;
-    splits_fee_percentage: number;
+    guarantee_days: number;
     employment_type: 'full_time' | 'contract' | 'temporary';
     open_to_relocation: boolean;
 

@@ -123,7 +123,7 @@ export class PlacementServiceV2 {
                     ? candidateSourcer.sourcer_recruiter_id
                     : null,
             company_sourcer_recruiter_id:
-                companySourcerActive && companySourcer ? companySourcer.sourcer_recruiter_id : null,
+                companySourcerActive && companySourcer ? companySourcer.recruiter_id : null,
         };
     }
 
@@ -336,7 +336,7 @@ export class PlacementServiceV2 {
         // Get job data with company_id and job owner
         const { data: job } = await this.supabase
             .from('jobs')
-            .select('id, company_id, company_recruiter_id, job_owner_recruiter_id, fee_percentage')
+            .select('id, company_id, company_recruiter_id, job_owner_recruiter_id, fee_percentage, guarantee_days')
             .eq('id', application.job_id)
             .single();
 
@@ -362,7 +362,7 @@ export class PlacementServiceV2 {
         const candidateSourcerRecruiterId = candidateSourcerActive ?
             candidateSourcer?.sourcer_recruiter_id : null;
         const companySourcerRecruiterId = companySourcerActive ?
-            companySourcer?.sourcer_recruiter_id : null;
+            companySourcer?.recruiter_id : null;
 
         // Calculate placement fee
         const salary = application.salary || 0;
@@ -371,7 +371,7 @@ export class PlacementServiceV2 {
 
         // Create placement with snapshot of all role IDs
         const startDate = new Date();
-        const guaranteeDays = 90;
+        const guaranteeDays = job.guarantee_days ?? 90;
         const guaranteeExpiresAt = this.computeGuaranteeExpiresAt(startDate, guaranteeDays);
 
         const placement = await this.repository.createPlacement({
@@ -422,6 +422,9 @@ export class PlacementServiceV2 {
                 job_owner_recruiter_id: jobOwnerRecruiterId,
                 candidate_sourcer_recruiter_id: candidateSourcerRecruiterId,
                 company_sourcer_recruiter_id: companySourcerRecruiterId,
+                // Include all fee-related fields for consumer flexibility
+                salary: salary,
+                fee_percentage: feePercentage,
                 placement_fee: placementFee,
                 created_by: 'system', // Created automatically when application hired
             });

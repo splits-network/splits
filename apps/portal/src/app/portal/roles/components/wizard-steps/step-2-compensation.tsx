@@ -68,19 +68,18 @@ export default function Step2Compensation({
                 </fieldset>
 
                 <fieldset className="fieldset">
-                    <legend className="fieldset-legend">Splits Fee Percentage *</legend>
+                    <legend className="fieldset-legend">Guarantee Period (Days) *</legend>
                     <input
                         type="number"
                         className="input w-full"
-                        value={formData.splits_fee_percentage}
-                        onChange={(e) => setFormData(prev => ({ ...prev, splits_fee_percentage: parseFloat(e.target.value) || 0 }))}
-                        placeholder="50"
-                        min="0"
-                        max="100"
-                        step="0.1"
+                        value={formData.guarantee_days}
+                        onChange={(e) => setFormData(prev => ({ ...prev, guarantee_days: parseInt(e.target.value) || 90 }))}
+                        placeholder="90"
+                        min="1"
+                        max="365"
                         required
                     />
-                    <p className="fieldset-label">Platform fee (0-100%)</p>
+                    <p className="fieldset-label">Placement guarantee period (1-365 days)</p>
                 </fieldset>
             </div>
 

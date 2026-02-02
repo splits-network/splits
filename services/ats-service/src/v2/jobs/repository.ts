@@ -244,7 +244,43 @@ export class JobRepository {
         return data;
     }
 
-    async createJob(job: any): Promise<any> {
+    async createJob(job: any, clerkUserId: string): Promise<any> {
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+        
+        // Authorize company access
+        if (!accessContext.isPlatformAdmin) {
+            if (accessContext.recruiterId && accessContext.roles.includes('recruiter')) {
+                // Recruiters can only create jobs for companies they have active relationships with
+                const { data: relationships } = await this.supabase
+                    
+                    .from('recruiter_companies')
+                    .select('company_id')
+                    .eq('recruiter_id', accessContext.recruiterId)
+                    .eq('status', 'active')
+                    .eq('can_manage_company_jobs', true);
+                
+                const allowedCompanyIds = relationships?.map(r => r.company_id) || [];
+                
+                if (!allowedCompanyIds.includes(job.company_id)) {
+                    throw new Error('Forbidden: No active relationship with permission to create jobs for this company');
+                }
+            } else if (accessContext.organizationIds.length > 0) {
+                // Company users can create jobs for their organization
+                const { data: company } = await this.supabase
+                    
+                    .from('companies')
+                    .select('identity_organization_id')
+                    .eq('id', job.company_id)
+                    .single();
+                
+                if (!company || !accessContext.organizationIds.includes(company.identity_organization_id)) {
+                    throw new Error('Forbidden: Cannot create jobs for companies outside your organization');
+                }
+            } else {
+                throw new Error('Forbidden: Insufficient permissions to create job');
+            }
+        }
+        
         const { data, error } = await this.supabase
             .from('jobs')
             .insert(job)
@@ -255,27 +291,107 @@ export class JobRepository {
         return data;
     }
 
-    async updateJob(id: string, updates: JobUpdate): Promise<any> {
-        const { data, error } = await this.supabase
-
+    async updateJob(id: string, clerkUserId: string, updates: JobUpdate): Promise<any> {
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+        
+        let query = this.supabase
+            
             .from('jobs')
             .update({ ...updates, updated_at: new Date().toISOString() })
-            .eq('id', id)
-            .select()
+            .eq('id', id);
+
+        // Apply authorization filters
+        if (!accessContext.isPlatformAdmin) {
+            if (accessContext.recruiterId && accessContext.roles.includes('recruiter')) {
+                // Recruiters can only edit jobs if they have active company relationship with can_manage_company_jobs=true
+                const { data: relationships } = await this.supabase
+                    
+                    .from('recruiter_companies')
+                    .select('company_id')
+                    .eq('recruiter_id', accessContext.recruiterId)
+                    .eq('status', 'active')
+                    .eq('can_manage_company_jobs', true);
+                
+                const allowedCompanyIds = relationships?.map(r => r.company_id) || [];
+                
+                if (allowedCompanyIds.length === 0) {
+                    throw new Error('Forbidden: No active company relationships with job management permissions');
+                }
+                
+                query = query.in('company_id', allowedCompanyIds);
+            } else if (accessContext.organizationIds.length > 0) {
+                // Company users can edit their organization's jobs
+                query = query.in('company.identity_organization_id', accessContext.organizationIds);
+            } else {
+                throw new Error('Forbidden: Insufficient permissions to update job');
+            }
+        }
+        
+        const { data, error } = await query
+            .select(`
+                *,
+                company:companies!inner(id, name, identity_organization_id)
+            `)
             .single();
 
-        if (error) throw error;
+        if (error) {
+            if (error.code === 'PGRST116') {
+                throw new Error('Job not found or access denied');
+            }
+            throw error;
+        }
         return data;
     }
 
-    async deleteJob(id: string): Promise<void> {
-        // Soft delete by default
-        const { error } = await this.supabase
-
+    async deleteJob(id: string, clerkUserId: string): Promise<void> {
+        const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
+        
+        let query = this.supabase
+            
             .from('jobs')
             .update({ deleted_at: new Date().toISOString() })
             .eq('id', id);
 
+        // Apply authorization filters
+        if (!accessContext.isPlatformAdmin) {
+            if (accessContext.recruiterId && accessContext.roles.includes('recruiter')) {
+                // Recruiters can only delete jobs if they have active company relationship with can_manage_company_jobs=true
+                const { data: relationships } = await this.supabase
+                    
+                    .from('recruiter_companies')
+                    .select('company_id')
+                    .eq('recruiter_id', accessContext.recruiterId)
+                    .eq('status', 'active')
+                    .eq('can_manage_company_jobs', true);
+                
+                const allowedCompanyIds = relationships?.map(r => r.company_id) || [];
+                
+                if (allowedCompanyIds.length === 0) {
+                    throw new Error('Forbidden: No active company relationships with job management permissions');
+                }
+                
+                query = query.in('company_id', allowedCompanyIds);
+            } else if (accessContext.organizationIds.length > 0) {
+                // Company users can delete their organization's jobs
+                const { data: companies } = await this.supabase
+                    
+                    .from('companies')
+                    .select('id')
+                    .in('identity_organization_id', accessContext.organizationIds);
+                
+                const allowedCompanyIds = companies?.map(c => c.id) || [];
+                
+                if (allowedCompanyIds.length === 0) {
+                    throw new Error('Forbidden: No companies found for your organization');
+                }
+                
+                query = query.in('company_id', allowedCompanyIds);
+            } else {
+                throw new Error('Forbidden: Insufficient permissions to delete job');
+            }
+        }
+
+        const { error } = await query;
         if (error) throw error;
     }
 }

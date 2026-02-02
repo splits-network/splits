@@ -1,4 +1,4 @@
-import { CompanySourcer } from '@splits-network/shared-types';
+import { RecruiterCompany } from '@splits-network/shared-types';
 
 export interface CompanySourcerFilters {
     company_id?: string;
@@ -23,4 +23,4 @@ export interface CompanySourcerUpdate {
     protection_expires_at?: Date;
 }
 
-export { CompanySourcer };
+export { RecruiterCompany };

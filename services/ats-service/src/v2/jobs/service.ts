@@ -61,7 +61,7 @@ export class JobServiceV2 {
     /**
      * Create new job
      */
-    async createJob(data: any, clerkUserId?: string): Promise<any> {
+    async createJob(data: any, clerkUserId: string): Promise<any> {
         // Validation
         if (!data.title) {
             throw new Error('Job title is required');
@@ -78,7 +78,7 @@ export class JobServiceV2 {
             status: data.status || 'draft',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-        });
+        }, clerkUserId);
 
         // Emit event
         if (this.eventPublisher) {
@@ -100,7 +100,7 @@ export class JobServiceV2 {
     async updateJob(
         id: string,
         updates: JobUpdate,
-        clerkUserId?: string,
+        clerkUserId: string,
         userRole?: string
     ): Promise<any> {
         // 1. Get current job state
@@ -147,7 +147,7 @@ export class JobServiceV2 {
 
         const userContext = await this.accessResolver.resolve(clerkUserId);
         // 3. Apply updates
-        const updatedJob = await this.repository.updateJob(id, updates);
+        const updatedJob = await this.repository.updateJob(id, clerkUserId, updates);
 
         // 4. Emit events based on what changed
         if (this.eventPublisher) {
@@ -174,14 +174,14 @@ export class JobServiceV2 {
     /**
      * Delete job (soft delete)
      */
-    async deleteJob(id: string, clerkUserId?: string): Promise<void> {
+    async deleteJob(id: string, clerkUserId: string): Promise<void> {
         const job = await this.repository.findJob(id, clerkUserId);
         if (!job) {
             throw new Error(`Job ${id} not found`);
         }
 
         const userContext = await this.accessResolver.resolve(clerkUserId);
-        await this.repository.deleteJob(id);
+        await this.repository.deleteJob(id, clerkUserId);
 
         if (this.eventPublisher) {
             await this.eventPublisher.publish('job.deleted', {

@@ -749,15 +749,15 @@ export default function DetailPanel({ id, onClose }: DetailPanelProps) {
                             </div>
 
                             <div className="alert alert-info bg-info/10 text-base-content border-info/20">
-                                <i className="fa-duotone fa-circle-info text-info" />
+                                <i className="fa-duotone fa-shield-check text-info" />
                                 <div>
                                     <h4 className="font-bold">
-                                        Fee Split Policy
+                                        Placement Guarantee
                                     </h4>
                                     <p className="text-sm">
-                                        This role is subject to the standard
-                                        platform split of{" "}
-                                        {job.splits_fee_percentage || 50}%.
+                                        This role has a{" "}
+                                        {job.guarantee_days || 90} day
+                                        guarantee period.
                                     </p>
                                 </div>
                             </div>

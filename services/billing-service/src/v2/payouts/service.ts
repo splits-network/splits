@@ -229,6 +229,127 @@ export class PayoutServiceV2 {
     }
 
     /**
+     * INTERNAL: Create splits and transactions for placement - used by event consumers
+     * Bypasses permission checks for automated system processing
+     */
+    async createSplitsAndTransactionsForPlacementInternal(
+        placementId: string
+    ): Promise<{ splits: PlacementSplit[], transactions: PlacementPayoutTransaction[] }> {
+        // Check if splits already exist (idempotency)
+        const existingSplits = await this.splitRepository.getByPlacementId(placementId);
+        if (existingSplits.length > 0) {
+            // Splits exist - return existing data
+            const existingTransactions = await this.transactionRepository.getByPlacementId(placementId);
+            return { splits: existingSplits, transactions: existingTransactions };
+        }
+
+        // Get immutable snapshot (source of truth for commission attribution)
+        const snapshot = await this.snapshotRepository.getByPlacementId(placementId);
+        if (!snapshot) {
+            throw new Error(`Placement snapshot not found for placement ${placementId}`);
+        }
+
+        // === STEP 1: Create placement_splits (attribution layer) ===
+        const splitsToCreate: PlacementSplitInsert[] = [];
+
+        // Role 1: candidate_recruiter (Closer)
+        if (snapshot.candidate_recruiter_id && snapshot.candidate_recruiter_rate) {
+            splitsToCreate.push({
+                placement_id: placementId,
+                recruiter_id: snapshot.candidate_recruiter_id,
+                role: 'candidate_recruiter', // ✅ Explicit role from snapshot
+                split_percentage: snapshot.candidate_recruiter_rate,
+                split_amount: (snapshot.total_placement_fee * snapshot.candidate_recruiter_rate) / 100,
+            });
+        }
+
+        // Role 2: company_recruiter (Client/Hiring Facilitator)
+        if (snapshot.company_recruiter_id && snapshot.company_recruiter_rate) {
+            splitsToCreate.push({
+                placement_id: placementId,
+                recruiter_id: snapshot.company_recruiter_id,
+                role: 'company_recruiter',
+                split_percentage: snapshot.company_recruiter_rate,
+                split_amount: (snapshot.total_placement_fee * snapshot.company_recruiter_rate) / 100,
+            });
+        }
+
+        // Role 3: job_owner (Specs Owner)
+        if (snapshot.job_owner_recruiter_id && snapshot.job_owner_rate) {
+            splitsToCreate.push({
+                placement_id: placementId,
+                recruiter_id: snapshot.job_owner_recruiter_id,
+                role: 'job_owner',
+                split_percentage: snapshot.job_owner_rate,
+                split_amount: (snapshot.total_placement_fee * snapshot.job_owner_rate) / 100,
+            });
+        }
+
+        // Role 4: candidate_sourcer (Sourcer)
+        if (snapshot.candidate_sourcer_recruiter_id && snapshot.candidate_sourcer_rate) {
+            splitsToCreate.push({
+                placement_id: placementId,
+                recruiter_id: snapshot.candidate_sourcer_recruiter_id,
+                role: 'candidate_sourcer',
+                split_percentage: snapshot.candidate_sourcer_rate,
+                split_amount: (snapshot.total_placement_fee * snapshot.candidate_sourcer_rate) / 100,
+            });
+        }
+
+        // Role 5: company_sourcer (Business Developer)
+        if (snapshot.company_sourcer_recruiter_id && snapshot.company_sourcer_rate) {
+            splitsToCreate.push({
+                placement_id: placementId,
+                recruiter_id: snapshot.company_sourcer_recruiter_id,
+                role: 'company_sourcer',
+                split_percentage: snapshot.company_sourcer_rate,
+                split_amount: (snapshot.total_placement_fee * snapshot.company_sourcer_rate) / 100,
+            });
+        }
+
+        if (splitsToCreate.length === 0) {
+            throw new Error(`No valid commission roles found in snapshot for placement ${placementId}`);
+        }
+
+        // Create splits in database
+        const createdSplits = await this.splitRepository.createBatch(splitsToCreate);
+
+        // === STEP 2: Create placement_payout_transactions (execution layer) ===
+        // Each split gets a corresponding payout transaction for Stripe processing
+        const transactionsToCreate: PlacementPayoutTransactionInsert[] = createdSplits.map(split => ({
+            placement_split_id: split.id,
+            placement_id: split.placement_id,
+            recruiter_id: split.recruiter_id,
+            amount: split.split_amount || 0,
+            status: 'pending', // Initial status
+        }));
+
+        const createdTransactions = await this.transactionRepository.createBatch(transactionsToCreate);
+
+        // Calculate platform remainder for reporting
+        const platformRemainder = this.calculatePlatformRemainder(snapshot);
+        const totalPaidOut = createdSplits.reduce((sum, s) => sum + (s.split_amount || 0), 0);
+
+        // Publish event with summary
+        await this.publishEvent('placement.splits_created', {
+            placementId,
+            splitCount: createdSplits.length,
+            transactionCount: createdTransactions.length,
+            totalPaidOut,
+            platformRemainder,
+            roleTiers: {
+                candidate_recruiter: snapshot.candidate_recruiter_tier,
+                company_recruiter: snapshot.company_recruiter_tier,
+                job_owner: snapshot.job_owner_tier,
+                candidate_sourcer: snapshot.candidate_sourcer_tier,
+                company_sourcer: snapshot.company_sourcer_tier,
+            },
+        });
+
+        return { splits: createdSplits, transactions: createdTransactions };
+    }
+
+    /**
      * Process a single payout transaction via Stripe Connect transfer
      */
     async processPayoutTransaction(
