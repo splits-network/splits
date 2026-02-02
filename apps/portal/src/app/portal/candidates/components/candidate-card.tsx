@@ -182,21 +182,23 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
                         </div>
                         <div className="flex items-center gap-2 ml-4">
                             {/* Verification status badge */}
-                            {candidate.verification_status && (
-                                <div
-                                    className={`badge ${
-                                        candidate.verification_status.toLowerCase() ===
-                                        "verified"
-                                            ? "badge-success"
-                                            : candidate.verification_status.toLowerCase() ===
-                                                "pending"
-                                              ? "badge-warning"
-                                              : "badge-error"
-                                    } shrink-0`}
-                                >
-                                    {candidate.verification_status}
-                                </div>
-                            )}
+                            {candidate.verification_status &&
+                                candidate.verification_status ===
+                                    "verified" && (
+                                    <div
+                                        className={`badge ${
+                                            candidate.verification_status.toLowerCase() ===
+                                            "verified"
+                                                ? "badge-success"
+                                                : candidate.verification_status.toLowerCase() ===
+                                                    "pending"
+                                                  ? "badge-warning"
+                                                  : "badge-error"
+                                        } shrink-0`}
+                                    >
+                                        {candidate.verification_status}
+                                    </div>
+                                )}
                         </div>
                     </div>
                 </div>
@@ -381,5 +383,3 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
         </EntityCard>
     );
 }
-
-

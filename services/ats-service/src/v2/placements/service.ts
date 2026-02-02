@@ -422,6 +422,9 @@ export class PlacementServiceV2 {
                 job_owner_recruiter_id: jobOwnerRecruiterId,
                 candidate_sourcer_recruiter_id: candidateSourcerRecruiterId,
                 company_sourcer_recruiter_id: companySourcerRecruiterId,
+                // Include all fee-related fields for consumer flexibility
+                salary: salary,
+                fee_percentage: feePercentage,
                 placement_fee: placementFee,
                 created_by: 'system', // Created automatically when application hired
             });

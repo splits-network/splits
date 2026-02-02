@@ -461,7 +461,7 @@ export default function ApplicationDetailClient({
                                 <div className="flex items-start gap-4">
                                     <i className="fa-duotone fa-regular fa-users fa-2xl text-primary mr-2 pt-6"></i>
                                     <div>
-                                        <h2 className="text-4xl font-bold mb-2">
+                                        <h2 className="text-2xl font-bold mb-2">
                                             {candidate?.full_name}
                                         </h2>
                                         <div className="flex flex-wrap gap-3 text-sm">
@@ -598,7 +598,7 @@ export default function ApplicationDetailClient({
                                 <div className="flex items-start gap-4">
                                     <i className="fa-duotone fa-regular fa-buildings fa-2xl text-primary mr-2 pt-6"></i>
                                     <div>
-                                        <h2 className="text-4xl font-bold mb-2">
+                                        <h2 className="text-2xl font-bold mb-2">
                                             {job.title}
                                         </h2>
 

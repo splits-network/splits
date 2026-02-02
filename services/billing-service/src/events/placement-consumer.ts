@@ -9,8 +9,11 @@ interface PlacementCreatedEvent {
     candidate_id: string;
     job_id: string;
     application_id: string;
-    salary: number;
-    fee_percentage: number;
+
+    // Fee information - support both formats for backwards compatibility
+    salary?: number;
+    fee_percentage?: number;
+    placement_fee?: number;  // Pre-calculated total fee
 
     // 5 role IDs for commission attribution
     candidate_recruiter_id: string | null;
@@ -18,6 +21,8 @@ interface PlacementCreatedEvent {
     job_owner_recruiter_id: string | null;
     candidate_sourcer_recruiter_id: string | null;
     company_sourcer_recruiter_id: string | null;
+
+    created_by?: string;
 }
 
 type SubscriptionTier = 'free' | 'paid' | 'premium';
@@ -53,6 +58,9 @@ export class PlacementEventConsumer {
             this.channel = await (this.connection as any).createChannel();
 
             if (!this.channel) throw new Error('Failed to create channel');
+
+            // Declare topic exchange (must be done before binding)
+            await this.channel.assertExchange(this.exchange, 'topic', { durable: true });
             await this.channel.assertQueue(this.queue, { durable: true });
 
             // Bind to placement.created events
@@ -86,7 +94,7 @@ export class PlacementEventConsumer {
 
             // Route to appropriate handler
             if (routingKey === 'placement.created') {
-                await this.handlePlacementCreated(content);
+                await this.handlePlacementCreated(content.payload);
             }
 
             // Acknowledge message
@@ -108,8 +116,19 @@ export class PlacementEventConsumer {
         this.logger.info({ placement_id: event.placement_id }, 'Processing placement.created event');
 
         try {
-            // Calculate total fee
-            const totalFee = event.salary * (event.fee_percentage / 100);
+            // Calculate total fee - prefer pre-calculated placement_fee, fall back to calculation
+            let totalFee: number;
+            if (event.placement_fee !== undefined && event.placement_fee > 0) {
+                totalFee = event.placement_fee;
+            } else if (event.salary !== undefined && event.fee_percentage !== undefined) {
+                totalFee = event.salary * (event.fee_percentage / 100);
+            } else {
+                this.logger.error(
+                    { placement_id: event.placement_id, event },
+                    'Cannot calculate total fee - missing salary/fee_percentage and placement_fee'
+                );
+                throw new Error('Missing fee information in placement.created event');
+            }
 
             // Resolve subscription tier for each role (per recruiter)
             const roleTiers = await this.resolveRoleTiers(event);
@@ -144,9 +163,8 @@ export class PlacementEventConsumer {
 
             // Phase 6: Automatically create splits and transactions for all commission roles
             try {
-                const { splits, transactions } = await this.payoutService.createSplitsAndTransactionsForPlacement(
-                    event.placement_id,
-                    this.systemUserId
+                const { splits, transactions } = await this.payoutService.createSplitsAndTransactionsForPlacementInternal(
+                    event.placement_id
                 );
 
                 this.logger.info(
