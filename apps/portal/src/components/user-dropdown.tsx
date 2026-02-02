@@ -1,13 +1,14 @@
 'use client';
 
-import { useUser, useClerk } from '@clerk/nextjs';
+import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
+import { useUserProfile } from '@/contexts/user-profile-context';
 
 export function UserDropdown() {
     const { user } = useUser();
-    const { signOut } = useClerk();
+    const { logout } = useUserProfile();
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -30,11 +31,9 @@ export function UserDropdown() {
 
     const handleSignOut = async () => {
         setIsOpen(false);
-        await signOut(() => {
-            router.refresh();
-            router.push('/');
-
-        });
+        await logout();
+        router.refresh();
+        router.push('/');
     };
 
     if (!user) return null;

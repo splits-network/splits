@@ -15,7 +15,7 @@ import {
     useEffect,
     ReactNode,
 } from "react";
-import { useUser, useAuth, useClerk } from "@clerk/nextjs";
+import { useUser, useAuth } from "@clerk/nextjs";
 import {
     OnboardingState,
     OnboardingContextType,
@@ -38,8 +38,7 @@ const OnboardingContext = createContext<OnboardingContextType | null>(null);
 export function OnboardingProvider({ children }: { children: ReactNode }) {
     const { user } = useUser();
     const { getToken } = useAuth();
-    const { signOut } = useClerk();
-    const { isAdmin, isLoading: profileLoading } = useUserProfile();
+    const { isAdmin, isLoading: profileLoading, logout } = useUserProfile();
 
     // Initialization state
     const [initStatus, setInitStatus] = useState<InitStatus>("loading");
@@ -309,7 +308,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     };
 
     const handleSignOut = async () => {
-        await signOut();
+        await logout();
     };
 
     const actions = {

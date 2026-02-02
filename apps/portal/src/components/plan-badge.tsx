@@ -13,8 +13,7 @@
  */
 
 import Link from "next/link";
-import { useSubscription, PlanTier } from "@/contexts/subscription-context";
-import { useUserProfile } from "@/contexts";
+import { useUserProfile, PlanTier } from "@/contexts";
 
 interface PlanBadgeConfig {
     icon: string;
@@ -41,8 +40,7 @@ const PLAN_CONFIGS: Record<PlanTier, PlanBadgeConfig> = {
 };
 
 export function PlanBadge() {
-    const { isRecruiter } = useUserProfile();
-    const { planTier, planName, isLoading, isActive } = useSubscription();
+    const { isRecruiter, planTier, planName, isSubscriptionLoading, isSubscriptionActive } = useUserProfile();
 
     // Only show for recruiters
     if (!isRecruiter) {
@@ -50,7 +48,7 @@ export function PlanBadge() {
     }
 
     // Show skeleton while loading
-    if (isLoading) {
+    if (isSubscriptionLoading) {
         return <div className="skeleton h-6 w-16 rounded-full"></div>;
     }
 
@@ -65,7 +63,7 @@ export function PlanBadge() {
         >
             <i className={`${config.icon} text-xs`}></i>
             <span className="text-xs font-medium">{displayName}</span>
-            {!isActive && planTier !== "starter" && (
+            {!isSubscriptionActive && planTier !== "starter" && (
                 <span className="badge badge-warning badge-xs ml-1">!</span>
             )}
         </Link>

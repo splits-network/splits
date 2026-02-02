@@ -9,10 +9,16 @@ import {
     registerChatRefresh,
     requestChatRefresh,
 } from "@/lib/chat-refresh-queue";
-import { getCachedUserSummary } from "@/lib/user-cache";
 import { useToast } from "@/lib/toast-context";
 import { MarkdownEditor } from "@splits-network/shared-ui";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
+
+type ParticipantDetails = {
+    id: string;
+    name: string | null;
+    email: string;
+    profile_image_url?: string | null;
+};
 
 type ResyncData = {
     conversation: {
@@ -23,6 +29,8 @@ type ResyncData = {
         job_id: string | null;
         company_id: string | null;
         last_message_at: string | null;
+        participant_a: ParticipantDetails;
+        participant_b: ParticipantDetails;
     };
     participant: {
         user_id: string;
@@ -39,11 +47,7 @@ type ResyncData = {
     }>;
 };
 
-type UserSummary = {
-    id: string;
-    name: string | null;
-    email: string;
-};
+type UserSummary = ParticipantDetails;
 
 interface ThreadPanelProps {
     conversationId: string;
@@ -61,7 +65,6 @@ export default function ThreadPanel({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [data, setData] = useState<ResyncData | null>(null);
-    const [otherUser, setOtherUser] = useState<UserSummary | null>(null);
     const [applicationTitle, setApplicationTitle] = useState<string | null>(
         null,
     );
@@ -129,12 +132,6 @@ export default function ThreadPanel({
         }
     };
 
-    const fetchOtherUser = async (otherId: string) => {
-        const user = await getCachedUserSummary(getToken, otherId);
-        if (user) {
-            setOtherUser(user);
-        }
-    };
 
     const markRead = async (lastReadMessageId: string) => {
         const token = await getToken();
@@ -180,11 +177,12 @@ export default function ThreadPanel({
             : data.conversation.participant_a_id;
     }, [data]);
 
-    useEffect(() => {
-        if (otherUserId) {
-            fetchOtherUser(otherUserId);
-        }
-    }, [otherUserId]);
+    const otherUser = useMemo(() => {
+        if (!data || !otherUserId) return null;
+        return otherUserId === data.conversation.participant_a_id
+            ? data.conversation.participant_a
+            : data.conversation.participant_b;
+    }, [data, otherUserId]);
 
     useEffect(() => {
         if (data?.conversation) {

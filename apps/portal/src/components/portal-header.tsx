@@ -6,12 +6,11 @@ import { useUserProfile } from "@/contexts";
 import { usePageTitle } from "@/contexts/page-title-context";
 import NotificationBell from "@/components/notification-bell";
 import { PlanBadge } from "@/components/plan-badge";
-import { useClerk, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 
 export function PortalHeader() {
     const { user } = useUser();
-    const { signOut } = useClerk();
-    const { isAdmin, isRecruiter, isCompanyUser } = useUserProfile();
+    const { isAdmin, isRecruiter, isCompanyUser, logout } = useUserProfile();
     const { title, subtitle, children: titleChildren } = usePageTitle();
     const [isDark, setIsDark] = useState(false);
 
@@ -177,7 +176,7 @@ export function PortalHeader() {
                         <li>
                             <button
                                 type="button"
-                                onClick={() => signOut()}
+                                onClick={logout}
                                 className="text-error"
                             >
                                 <span className="flex items-center gap-2">

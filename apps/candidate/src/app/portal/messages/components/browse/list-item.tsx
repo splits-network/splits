@@ -18,7 +18,7 @@ export default function MessageListItem({
     presenceStatus,
     onSelect,
 }: MessageListItemProps) {
-    const convo = row.chat_conversations;
+    const convo = row.conversation;
     const name = otherUser?.name || otherUser?.email || "Unknown user";
 
     return (
@@ -39,12 +39,12 @@ export default function MessageListItem({
                 <div className="flex-1">
                     <div className="flex items-center justify-between gap-2 mb-2">
                         <span className="font-semibold">{name}</span>
-                        {row.request_state === "pending" && (
+                        {row.participant.request_state === "pending" && (
                             <span className="badge badge-warning badge-sm">
                                 Request
                             </span>
                         )}
-                        {row.archived_at && (
+                        {row.participant.archived_at && (
                             <span className="badge badge-ghost badge-sm">
                                 Archived
                             </span>
@@ -61,9 +61,9 @@ export default function MessageListItem({
                             : "No messages yet"}
                     </div>
                 </div>
-                {row.unread_count > 0 && (
+                {row.participant.unread_count > 0 && (
                     <span className="badge badge-primary">
-                        {row.unread_count}
+                        {row.participant.unread_count}
                     </span>
                 )}
             </div>

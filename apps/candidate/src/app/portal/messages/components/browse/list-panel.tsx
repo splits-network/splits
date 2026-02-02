@@ -5,8 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useChatGateway } from "@/hooks/use-chat-gateway";
 import { registerChatRefresh, requestChatRefresh } from "@/lib/chat-refresh-queue";
-import { getCachedCurrentUserId } from "@/lib/current-user";
-import { getCachedUserSummary } from "@/lib/user-cache";
+import { getCachedCurrentUserId } from "@/lib/current-user-profile";
 import { usePresence } from "@/hooks/use-presence";
 import MessageListItem from "./list-item";
 import { ConversationRow, UserSummary } from "./types";
@@ -24,7 +23,6 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [rows, setRows] = useState<ConversationRow[]>([]);
-    const [userMap, setUserMap] = useState<Record<string, UserSummary>>({});
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [searchInput, setSearchInput] = useState("");
 
@@ -38,22 +36,6 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
         setRows((response?.data || []) as ConversationRow[]);
     }, [filter, getToken]);
 
-    const fetchUsers = async (ids: string[]) => {
-        if (ids.length === 0) return;
-        const updates: Record<string, UserSummary> = {};
-        await Promise.all(
-            ids.map(async (id) => {
-                try {
-                    const user = await getCachedUserSummary(getToken, id);
-                    if (!user) throw new Error("missing");
-                    updates[id] = user;
-                } catch {
-                    updates[id] = { id, name: null, email: "Unknown" };
-                }
-            }),
-        );
-        setUserMap((prev) => ({ ...prev, ...updates }));
-    };
 
     useEffect(() => {
         let mounted = true;
@@ -81,21 +63,15 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
         if (!currentUserId) return [];
         const ids = new Set<string>();
         rows.forEach((row) => {
-            const convo = row.chat_conversations;
+            const convo = row.conversation;
             const otherId =
                 convo.participant_a_id === currentUserId
                     ? convo.participant_b_id
                     : convo.participant_a_id;
-            if (otherId && !userMap[otherId]) ids.add(otherId);
+            if (otherId) ids.add(otherId);
         });
         return Array.from(ids);
-    }, [rows, currentUserId, userMap]);
-
-    useEffect(() => {
-        if (otherUserIds.length > 0) {
-            fetchUsers(otherUserIds);
-        }
-    }, [otherUserIds]);
+    }, [rows, currentUserId]);
 
     const presenceMap = usePresence(otherUserIds, {
         enabled: Boolean(currentUserId),
@@ -135,12 +111,15 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
         if (!searchInput.trim()) return rows;
         const query = searchInput.toLowerCase();
         return rows.filter((row) => {
-            const convo = row.chat_conversations;
+            const convo = row.conversation;
             const otherId =
                 currentUserId && convo.participant_a_id === currentUserId
                     ? convo.participant_b_id
                     : convo.participant_a_id;
-            const other = otherId ? userMap[otherId] : null;
+            const other =
+                otherId === convo.participant_a_id
+                    ? convo.participant_a
+                    : convo.participant_b;
             const name = other?.name || "";
             const email = other?.email || "";
             return (
@@ -148,7 +127,7 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
                 email.toLowerCase().includes(query)
             );
         });
-    }, [rows, searchInput, currentUserId, userMap]);
+    }, [rows, searchInput, currentUserId]);
 
     return (
         <div
@@ -201,19 +180,22 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
                 ) : (
                     <div className="divide-y divide-base-300">
                         {filteredRows.map((row) => {
-                            const convo = row.chat_conversations;
+                            const convo = row.conversation;
                             const otherId =
                                 currentUserId &&
                                 convo.participant_a_id === currentUserId
                                     ? convo.participant_b_id
                                     : convo.participant_a_id;
-                            const other = otherId ? userMap[otherId] : null;
+                            const other =
+                                otherId === convo.participant_a_id
+                                    ? convo.participant_a
+                                    : convo.participant_b;
                             const presenceStatus = otherId
                                 ? presenceMap[otherId]?.status
                                 : undefined;
                             return (
                                 <MessageListItem
-                                    key={row.conversation_id}
+                                    key={row.participant.conversation_id}
                                     row={row}
                                     otherUser={other}
                                     isSelected={selectedId === convo.id}

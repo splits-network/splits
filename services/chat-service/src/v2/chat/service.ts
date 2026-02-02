@@ -1,6 +1,17 @@
 import { AccessContextResolver } from '@splits-network/shared-access-context';
 import { ChatRepository } from './repository';
-import { ChatAttachment, ChatConversation, ChatMessage, ChatModerationAudit, ChatParticipantState, ChatReport, CreateConversationInput, SendMessageInput } from './types';
+import {
+    ChatAttachment,
+    ChatConversation,
+    ChatMessage,
+    ChatModerationAudit,
+    ChatParticipantState,
+    ChatReport,
+    CreateConversationInput,
+    SendMessageInput,
+    ChatConversationListItemWithParticipants,
+    ResyncResponseWithParticipants,
+} from './types';
 import { ChatEventPublisher } from './events';
 import { EventPublisher } from '../shared/events';
 
@@ -84,6 +95,20 @@ export class ChatServiceV2 {
         return this.repository.listConversations(context.identityUserId, filter, limit, cursor);
     }
 
+    /**
+     * NEW: List conversations with participant details (names, emails) included inline.
+     * SECURITY: Prevents frontend from calling unauthorized GET /users/:id endpoint.
+     */
+    async listConversationsWithParticipants(
+        clerkUserId: string,
+        filter: 'inbox' | 'requests' | 'archived',
+        limit: number,
+        cursor?: string
+    ): Promise<{ data: ChatConversationListItemWithParticipants[]; total: number }> {
+        const context = await this.requireIdentity(clerkUserId);
+        return this.repository.listConversationsWithParticipants(context.identityUserId, filter, limit, cursor);
+    }
+
     async listMessages(
         clerkUserId: string,
         conversationId: string,
@@ -110,6 +135,32 @@ export class ChatServiceV2 {
         const context = await this.requireIdentity(clerkUserId);
         const participant = await this.ensureParticipant(conversationId, context.identityUserId);
         const conversation = await this.repository.getConversation(conversationId);
+        if (!conversation) {
+            throw new Error('Conversation not found');
+        }
+        const messages = await this.repository.listMessages(conversationId, after, before, limit);
+
+        return {
+            conversation,
+            participant,
+            messages,
+        };
+    }
+
+    /**
+     * NEW: Resync conversation with participant details (names, emails) included inline.
+     * SECURITY: Prevents frontend from calling unauthorized GET /users/:id endpoint.
+     */
+    async resyncConversationWithParticipants(
+        clerkUserId: string,
+        conversationId: string,
+        after?: string,
+        before?: string,
+        limit: number = 50
+    ): Promise<ResyncResponseWithParticipants> {
+        const context = await this.requireIdentity(clerkUserId);
+        const participant = await this.ensureParticipant(conversationId, context.identityUserId);
+        const conversation = await this.repository.getConversationWithParticipants(conversationId);
         if (!conversation) {
             throw new Error('Conversation not found');
         }

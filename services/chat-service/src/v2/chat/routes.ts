@@ -110,7 +110,9 @@ export async function registerChatRoutes(app: FastifyInstance, config: RegisterC
             const filter = (query.filter || 'inbox') as 'inbox' | 'requests' | 'archived';
             const limit = Math.min(parseInt(query.limit || '25', 10), 100);
             const cursor = query.cursor as string | undefined;
-            const result = await service.listConversations(clerkUserId, filter, limit, cursor);
+            // NEW: Use enriched version that includes participant names inline
+            // SECURITY: Prevents frontend from calling unauthorized GET /users/:id
+            const result = await service.listConversationsWithParticipants(clerkUserId, filter, limit, cursor);
             return reply.send({
                 data: result.data,
                 pagination: {
@@ -147,7 +149,9 @@ export async function registerChatRoutes(app: FastifyInstance, config: RegisterC
             const after = query.after as string | undefined;
             const before = query.before as string | undefined;
             const limit = Math.min(parseInt(query.limit || '50', 10), 100);
-            const result = await service.resyncConversation(clerkUserId, id, after, before, limit);
+            // NEW: Use enriched version that includes participant names inline
+            // SECURITY: Prevents frontend from calling unauthorized GET /users/:id
+            const result = await service.resyncConversationWithParticipants(clerkUserId, id, after, before, limit);
             return reply.send({ data: result });
         } catch (error: any) {
             return reply.code(error.statusCode || 400).send({ error: error.message });
