@@ -98,18 +98,6 @@ async function main() {
         eventPublisher,
     });
 
-    // Skip request logging for health checks to reduce noise
-    app.addHook("onRequest", async (request, reply) => {
-        if (request.url === "/health") {
-            request.log = {
-                ...request.log,
-                info: () => {},
-                debug: () => {},
-                trace: () => {},
-            } as any;
-        }
-    });
-
     app.get("/health", async (request, reply) => {
         return reply.status(200).send({
             status: "healthy",
