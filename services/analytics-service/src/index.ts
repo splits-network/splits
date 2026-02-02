@@ -39,6 +39,7 @@ const cacheInvalidator = new CacheInvalidator(cache);
 const app = Fastify({
     logger: true,
     requestIdHeader: "x-request-id",
+    disableRequestLogging: true, // Eliminate health check noise
 });
 
 // Register CORS
