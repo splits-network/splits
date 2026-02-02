@@ -756,8 +756,8 @@ export default function DetailPanel({ id, onClose }: DetailPanelProps) {
                                     </h4>
                                     <p className="text-sm">
                                         This role has a{" "}
-                                        {job.guarantee_days || 90} day
-                                        guarantee period.
+                                        {job.guarantee_days || 90} day guarantee
+                                        period.
                                     </p>
                                 </div>
                             </div>
@@ -945,7 +945,7 @@ export default function DetailPanel({ id, onClose }: DetailPanelProps) {
                                                             job.company.logo_url
                                                         }
                                                         alt={`${job.company.name} logo`}
-                                                        className="w-full h-full object-cover"
+                                                        className="w-full h-full object-contain"
                                                         onError={(e) => {
                                                             e.currentTarget.style.display =
                                                                 "none";
