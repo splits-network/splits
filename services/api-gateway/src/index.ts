@@ -54,6 +54,24 @@ async function main() {
 
     app.setErrorHandler(errorHandler);
 
+    // Add raw body for Stripe webhook proxy
+    // Store the raw buffer on the request for signature verification
+    app.addContentTypeParser(
+        'application/json',
+        { parseAs: 'buffer' },
+        (req, body, done) => {
+            try {
+                // Store raw body for webhook signature verification
+                (req as any).rawBody = body;
+                const json = JSON.parse(body.toString());
+                done(null, json);
+            } catch (err: any) {
+                err.statusCode = 400;
+                done(err, undefined);
+            }
+        }
+    );
+
     // Initialize Sentry if DSN is provided
     const sentryDsn = process.env.SENTRY_DSN;
     if (sentryDsn) {

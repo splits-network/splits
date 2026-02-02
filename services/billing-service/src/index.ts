@@ -87,11 +87,14 @@ async function main() {
     });
 
     // Add raw body for Stripe webhooks
+    // Store the raw buffer on the request for signature verification
     app.addContentTypeParser(
         'application/json',
         { parseAs: 'buffer' },
         (req, body, done) => {
             try {
+                // Store raw body for Stripe webhook signature verification
+                (req as any).rawBody = body;
                 const json = JSON.parse(body.toString());
                 done(null, json);
             } catch (err: any) {

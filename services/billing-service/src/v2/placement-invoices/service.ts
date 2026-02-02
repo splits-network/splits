@@ -106,6 +106,11 @@ export class PlacementInvoiceService {
             ? await this.stripe.invoices.finalizeInvoice(invoice.id)
             : invoice;
 
+        // Send the invoice email for send_invoice collection method
+        if (collection_method === 'send_invoice' && finalized.status === 'open') {
+            await this.stripe.invoices.sendInvoice(finalized.id);
+        }
+
         return this.invoiceRepository.create({
             placement_id: placement.id,
             company_id: placement.company_id,
