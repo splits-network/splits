@@ -19,7 +19,7 @@ export function CompletionStep() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 max-w-3xl w-xl mx-auto">
             <div className="text-center">
                 <h2 className="text-2xl font-bold">Review & Complete</h2>
                 <p className="text-base-content/70 mt-2">
