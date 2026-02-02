@@ -49,7 +49,7 @@ export default function AddRoleWizardModal({
         salary_max: "",
         show_salary_range: true,
         fee_percentage: 20,
-        splits_fee_percentage: 50,
+        guarantee_days: 90,
         employment_type: "full_time",
         open_to_relocation: false,
 
@@ -114,7 +114,7 @@ export default function AddRoleWizardModal({
                     salary_max: job.salary_max?.toString() || "",
                     show_salary_range: job.show_salary_range ?? true,
                     fee_percentage: job.fee_percentage || 20,
-                    splits_fee_percentage: job.splits_fee_percentage || 50,
+                    guarantee_days: job.guarantee_days || 90,
                     employment_type: job.employment_type || "full_time",
                     open_to_relocation: job.open_to_relocation || false,
                     recruiter_description: job.recruiter_description || "",
@@ -238,7 +238,7 @@ export default function AddRoleWizardModal({
                 salary_max: "",
                 show_salary_range: true,
                 fee_percentage: 20,
-                splits_fee_percentage: 50,
+                guarantee_days: 90,
                 employment_type: "full_time",
                 open_to_relocation: false,
                 recruiter_description: "",
@@ -298,7 +298,7 @@ export default function AddRoleWizardModal({
                 employment_type: formData.employment_type,
                 open_to_relocation: formData.open_to_relocation,
                 show_salary_range: formData.show_salary_range,
-                splits_fee_percentage: formData.splits_fee_percentage,
+                guarantee_days: formData.guarantee_days,
             };
 
             if (formData.location) payload.location = formData.location;

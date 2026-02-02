@@ -2,7 +2,7 @@ import { CompanySourcerRepository } from './repository';
 import { EventPublisher } from '../shared/events';
 import { resolveAccessContext } from '@splits-network/shared-access-context';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { CompanySourcer, CompanySourcerCreate, CompanySourcerFilters, CompanySourcerUpdate } from './types';
+import { RecruiterCompany, CompanySourcerCreate, CompanySourcerFilters, CompanySourcerUpdate } from './types';
 import { StandardListParams, StandardListResponse } from '@splits-network/shared-types';
 
 export class CompanySourcerServiceV2 {
@@ -15,11 +15,11 @@ export class CompanySourcerServiceV2 {
     async list(
         clerkUserId: string,
         params: StandardListParams & CompanySourcerFilters
-    ): Promise<StandardListResponse<CompanySourcer>> {
+    ): Promise<StandardListResponse<RecruiterCompany>> {
         return this.repository.list(clerkUserId, params);
     }
 
-    async get(id: string, clerkUserId: string): Promise<CompanySourcer> {
+    async get(id: string, clerkUserId: string): Promise<RecruiterCompany> {
         const sourcer = await this.repository.findById(id, clerkUserId);
         if (!sourcer) {
             throw new Error('Company sourcer not found');
@@ -27,7 +27,7 @@ export class CompanySourcerServiceV2 {
         return sourcer;
     }
 
-    async create(clerkUserId: string, data: CompanySourcerCreate): Promise<CompanySourcer> {
+    async create(clerkUserId: string, data: CompanySourcerCreate): Promise<RecruiterCompany> {
         const context = await resolveAccessContext(this.supabase, clerkUserId);
 
         // Validate inputs
@@ -59,15 +59,15 @@ export class CompanySourcerServiceV2 {
         // Publish event
         await this.eventPublisher.publish('company.sourced', {
             company_id: sourcer.company_id,
-            sourcer_recruiter_id: sourcer.sourcer_recruiter_id,
-            sourced_at: sourcer.sourced_at,
+            sourcer_recruiter_id: sourcer.recruiter_id,
+            sourced_at: sourcer.relationship_start_date,
             created_by: context.identityUserId,
         });
 
         return sourcer;
     }
 
-    async update(id: string, clerkUserId: string, updates: CompanySourcerUpdate): Promise<CompanySourcer> {
+    async update(id: string, clerkUserId: string, updates: CompanySourcerUpdate): Promise<RecruiterCompany> {
         const context = await resolveAccessContext(this.supabase, clerkUserId);
 
         // Validate that sourcer exists and user has access
@@ -105,7 +105,7 @@ export class CompanySourcerServiceV2 {
         await this.eventPublisher.publish('company.sourcer_removed', {
             sourcer_id: id,
             company_id: sourcer.company_id,
-            sourcer_recruiter_id: sourcer.sourcer_recruiter_id,
+            sourcer_recruiter_id: sourcer.recruiter_id,
             deleted_by: context.identityUserId,
         });
     }

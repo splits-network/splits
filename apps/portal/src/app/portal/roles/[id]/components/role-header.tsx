@@ -198,8 +198,8 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                                         {job.fee_percentage}% fee
                                     </span>
                                     <span className="flex items-center gap-2">
-                                        <i className="fa-duotone fa-regular fa-handshake"></i>
-                                        {job.splits_fee_percentage}% recruiter split
+                                        <i className="fa-duotone fa-regular fa-shield-check"></i>
+                                        {(job as any).guarantee_days ?? 90} day guarantee
                                     </span>
                                 </div>
                             </div>

@@ -84,8 +84,8 @@ export default function JobDetailModal({ job, isOpen, onClose }: JobDetailModalP
                                 <span className="font-semibold">{job.fee_percentage}%</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-base-content/70">Splits Fee</span>
-                                <span className="font-semibold">{job.splits_fee_percentage}%</span>
+                                <span className="text-base-content/70">Guarantee Period</span>
+                                <span className="font-semibold">{(job as any).guarantee_days ?? 90} days</span>
                             </div>
                         </div>
                     </div>
