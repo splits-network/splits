@@ -517,6 +517,14 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                         logo_url: companyInfo?.logo_url || null,
                     });
 
+                    // Step 2: Create membership BEFORE billing profile
+                    // This ensures the user has company_admin role for billing operations
+                    await client.post("/memberships", {
+                        user_id: userData.id,
+                        organization_id: organization.id,
+                        role: selectedRole,
+                    });
+
                     await client.post(
                         `/company-billing-profiles/${company.id}`,
                         {
@@ -526,13 +534,6 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                             invoice_delivery_method: "email",
                         },
                     );
-
-                    // Step 2: Create membership
-                    await client.post("/memberships", {
-                        user_id: userData.id,
-                        organization_id: organization.id,
-                        role: selectedRole,
-                    });
                 } else {
                     throw new Error("Invalid role");
                 }
