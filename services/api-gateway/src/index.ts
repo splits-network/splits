@@ -4,7 +4,6 @@ import { buildServer, errorHandler } from '@splits-network/shared-fastify';
 import rateLimit from '@fastify/rate-limit';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
-import multipart from '@fastify/multipart';
 import Redis from 'ioredis';
 import { randomUUID } from 'crypto';
 import { AuthMiddleware } from './auth';
@@ -53,6 +52,31 @@ async function main() {
     });
 
     app.setErrorHandler(errorHandler);
+
+    // Add raw body for Stripe webhook proxy
+    // Store the raw buffer on the request for signature verification
+    app.addContentTypeParser(
+        'application/json',
+        { parseAs: 'buffer' },
+        (req, body, done) => {
+            try {
+                // Store raw body for webhook signature verification
+                (req as any).rawBody = body;
+                const json = JSON.parse(body.toString());
+                done(null, json);
+            } catch (err: any) {
+                err.statusCode = 400;
+                done(err, undefined);
+            }
+        }
+    );
+
+    // Allow multipart/form-data requests to pass through without parsing
+    // This is needed for proxying file uploads to downstream services (document-service)
+    // The downstream services have their own multipart parsing configured
+    app.addContentTypeParser('multipart/form-data', (req, payload, done) => {
+        done(null); // Don't parse - let proxy routes forward the raw stream
+    });
 
     // Initialize Sentry if DSN is provided
     const sentryDsn = process.env.SENTRY_DSN;
@@ -158,12 +182,9 @@ async function main() {
         },
     });
 
-    // Register multipart support for file uploads
-    await app.register(multipart as any, {
-        limits: {
-            fileSize: 10 * 1024 * 1024, // 10MB max file size
-        },
-    });
+    // NOTE: Multipart plugin removed - API gateway passes through multipart requests
+    // to downstream services without parsing. The document-service handles multipart parsing.
+    // File size limits are enforced at the document-service level.
 
     // Add correlation ID and request logging middleware
     app.addHook('onRequest', async (request, reply) => {

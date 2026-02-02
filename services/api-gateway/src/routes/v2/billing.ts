@@ -492,6 +492,45 @@ function registerCompanyBillingProfileRoutes(app: FastifyInstance, services: Ser
     );
 }
 
+function registerStripeWebhookProxy(app: FastifyInstance, services: ServiceRegistry) {
+    const billingService = () => services.get('billing');
+
+    // Proxy Stripe webhook to billing service
+    // No auth required - verified by Stripe signature
+    // Pass raw body for signature verification
+    app.post(
+        '/webhooks/stripe',
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const stripeSignature = request.headers['stripe-signature'];
+            const rawBody = (request as any).rawBody as Buffer;
+
+            if (!rawBody) {
+                request.log.error({ correlationId }, 'Missing raw body for webhook');
+                return reply.status(400).send({ error: { message: 'Missing raw body' } });
+            }
+
+            try {
+                const data = await billingService().post(
+                    '/webhooks/stripe',
+                    rawBody,
+                    correlationId,
+                    {
+                        'stripe-signature': stripeSignature as string,
+                        'content-type': 'application/json',
+                    }
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                request.log.error({ error, correlationId }, 'Stripe webhook proxy failed');
+                return reply
+                    .status(error.statusCode || 500)
+                    .send(error.jsonBody || { error: { message: error.message || 'Webhook processing failed' } });
+            }
+        }
+    );
+}
+
 function registerPlacementInvoiceRoutes(app: FastifyInstance, services: ServiceRegistry) {
     const billingService = () => services.get('billing');
 
@@ -601,9 +640,12 @@ function registerPublicPlansRoute(app: FastifyInstance, services: ServiceRegistr
 }
 
 export function registerBillingRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    // Register webhook proxy (no auth - verified by Stripe signature)
+    registerStripeWebhookProxy(app, services);
+
     // Register PUBLIC routes FIRST (must be before auth routes that conflict)
     registerPublicPlansRoute(app, services);
-    
+
     // Register specific auth-required routes
     registerSubscriptionMeRoute(app, services);
     registerSubscriptionSetupIntentRoute(app, services);

@@ -22,6 +22,7 @@ export interface UserProfile {
     clerk_user_id: string;
     email: string;
     name: string | null;
+    profile_image_url?: string | null;
     onboarding_status: string;
     created_at: string;
     updated_at: string;

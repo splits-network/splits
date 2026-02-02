@@ -69,6 +69,10 @@ export class WebhookService {
                 await this.handleInvoiceMarkedUncollectible(event.data.object as Stripe.Invoice);
                 break;
 
+            case 'invoice.voided':
+                await this.handleInvoiceVoided(event.data.object as Stripe.Invoice);
+                break;
+
             default:
                 this.logger.debug({ type: event.type }, 'Unhandled webhook event type');
         }
@@ -307,6 +311,27 @@ export class WebhookService {
 
         if (error) {
             this.logger.error({ err: error, invoice_id: invoice.id }, 'Failed to update placement invoice to uncollectible');
+        }
+    }
+
+    private async handleInvoiceVoided(invoice: Stripe.Invoice): Promise<void> {
+        if (!invoice.id) return;
+
+        const updates: Record<string, any> = {
+            invoice_status: 'void',
+            voided_at: invoice.status_transitions?.voided_at
+                ? new Date(invoice.status_transitions.voided_at * 1000).toISOString()
+                : new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+        };
+
+        const { error } = await this.supabase
+            .from('placement_invoices')
+            .update(updates)
+            .eq('stripe_invoice_id', invoice.id);
+
+        if (error) {
+            this.logger.error({ err: error, invoice_id: invoice.id }, 'Failed to update placement invoice to voided');
         }
     }
 

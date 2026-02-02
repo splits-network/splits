@@ -11,6 +11,13 @@ async function main() {
     const baseConfig = loadBaseConfig('identity-service');
     const dbConfig = loadDatabaseConfig();
     const rabbitConfig = loadRabbitMQConfig();
+    
+    // Check Clerk configuration for syncing user data back to Clerk
+    if (process.env.CLERK_SECRET_KEY) {
+        console.log('✅ Clerk configuration available - user sync to Clerk enabled');
+    } else {
+        console.warn('⚠️ CLERK_SECRET_KEY not configured - user sync to Clerk will be disabled');
+    }
 
     const logger = createLogger({
         serviceName: baseConfig.serviceName,

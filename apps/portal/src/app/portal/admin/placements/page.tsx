@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { useToast } from '@/lib/toast-context';
 import {
     useStandardList,
     PaginationControls,
@@ -12,33 +13,49 @@ import {
     LoadingState,
     ErrorState,
 } from '@/hooks/use-standard-list';
+import { AdminPageHeader } from '../components';
 
 interface Placement {
     id: string;
     job_id: string;
     candidate_id: string;
-    recruiter_id: string;
+    company_id: string;
+    state: string;
     salary: number;
     fee_percentage: number;
-    fee_amount: number;
-    recruiter_share_amount: number;
+    placement_fee: number;
     start_date: string;
+    guarantee_days: number;
+    guarantee_expires_at: string;
     created_at: string;
     // Enriched data
     job_title?: string;
     candidate_name?: string;
-    recruiter_name?: string;
+    company_name?: string;
+}
+
+interface PlacementInvoice {
+    id: string;
+    placement_id: string;
+    stripe_invoice_id: string;
+    invoice_status: string;
+    amount_due: number;
+    hosted_invoice_url?: string;
 }
 
 interface PlacementFilters {
+    state?: string;
     date_from?: string;
     date_to?: string;
 }
 
-export default function PlacementAuditPage() {
+export default function PlacementAdminPage() {
     const { getToken } = useAuth();
+    const toast = useToast();
+    const [invoiceCache, setInvoiceCache] = useState<Record<string, PlacementInvoice | null>>({});
+    const [loadingInvoice, setLoadingInvoice] = useState<string | null>(null);
+    const [creatingInvoice, setCreatingInvoice] = useState<string | null>(null);
 
-    // Memoize defaultFilters to prevent infinite re-renders in useStandardList
     const defaultFilters = useMemo<PlacementFilters>(() => ({}), []);
 
     const {
@@ -62,6 +79,7 @@ export default function PlacementAuditPage() {
             queryParams.set('page', String(params.page));
             queryParams.set('limit', String(params.limit));
             if (params.search) queryParams.set('search', params.search);
+            if (params.filters?.state) queryParams.set('state', params.filters.state);
             if (params.filters?.date_from) queryParams.set('date_from', params.filters.date_from);
             if (params.filters?.date_to) queryParams.set('date_to', params.filters.date_to);
             if (params.sort_by) queryParams.set('sort_by', params.sort_by);
@@ -74,24 +92,82 @@ export default function PlacementAuditPage() {
         syncToUrl: true,
     });
 
-    // Calculate summary stats from loaded data
+    const fetchInvoice = async (placementId: string) => {
+        if (invoiceCache[placementId] !== undefined) return;
+
+        setLoadingInvoice(placementId);
+        try {
+            const token = await getToken();
+            if (!token) return;
+            const apiClient = createAuthenticatedClient(token);
+            const response = await apiClient.get(`/placements/${placementId}/invoices`);
+            setInvoiceCache(prev => ({ ...prev, [placementId]: response.data || null }));
+        } catch {
+            setInvoiceCache(prev => ({ ...prev, [placementId]: null }));
+        } finally {
+            setLoadingInvoice(null);
+        }
+    };
+
+    const createInvoice = async (placementId: string) => {
+        setCreatingInvoice(placementId);
+        try {
+            const token = await getToken();
+            if (!token) throw new Error('No auth token');
+            const apiClient = createAuthenticatedClient(token);
+            const response = await apiClient.post(`/placements/${placementId}/invoices`, {});
+            setInvoiceCache(prev => ({ ...prev, [placementId]: response.data }));
+            toast.success('Invoice created successfully');
+        } catch (err: any) {
+            toast.error(err.message || 'Failed to create invoice');
+        } finally {
+            setCreatingInvoice(null);
+        }
+    };
+
+    const getStateBadge = (state: string) => {
+        switch (state) {
+            case 'active':
+                return <span className="badge badge-info badge-sm">Active</span>;
+            case 'completed':
+                return <span className="badge badge-success badge-sm">Completed</span>;
+            case 'failed':
+                return <span className="badge badge-error badge-sm">Failed</span>;
+            case 'hired':
+                return <span className="badge badge-warning badge-sm">Hired</span>;
+            default:
+                return <span className="badge badge-ghost badge-sm">{state}</span>;
+        }
+    };
+
+    const getInvoiceStatusBadge = (status: string) => {
+        switch (status) {
+            case 'paid':
+                return <span className="badge badge-success badge-sm">Paid</span>;
+            case 'open':
+                return <span className="badge badge-warning badge-sm">Open</span>;
+            case 'draft':
+                return <span className="badge badge-ghost badge-sm">Draft</span>;
+            case 'void':
+                return <span className="badge badge-error badge-sm">Void</span>;
+            case 'uncollectible':
+                return <span className="badge badge-error badge-sm">Uncollectible</span>;
+            default:
+                return <span className="badge badge-ghost badge-sm">{status}</span>;
+        }
+    };
+
     const totalValue = placements.reduce((sum, p) => sum + (p.salary || 0), 0);
-    const totalFees = placements.reduce((sum, p) => sum + (p.fee_amount || 0), 0);
-    const totalRecruiterPayout = placements.reduce((sum, p) => sum + (p.recruiter_share_amount || 0), 0);
+    const totalFees = placements.reduce((sum, p) => sum + (p.placement_fee || 0), 0);
 
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div>
-                <Link href="/admin" className="text-sm text-primary hover:underline mb-2 inline-block">
-                    <i className="fa-duotone fa-regular fa-arrow-left mr-2"></i>
-                    Back to Admin Dashboard
-                </Link>
-                <h1 className="text-3xl font-bold">Placement Audit</h1>
-                <p className="text-base-content/70 mt-1">
-                    Review all successful placements and payouts
-                </p>
-            </div>
+            <AdminPageHeader
+                title="Placement Management"
+                subtitle="Review placements, invoices, and billing status"
+                breadcrumbs={[{ label: 'Placements' }]}
+            />
 
             {/* Summary Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -103,11 +179,10 @@ export default function PlacementAuditPage() {
                 </div>
 
                 <div className="stat bg-base-100 shadow rounded-lg">
-                    <div className="stat-title">Page Value</div>
+                    <div className="stat-title">Page Salaries</div>
                     <div className="stat-value text-2xl">
                         {loading ? '...' : `$${(totalValue / 1000).toFixed(0)}k`}
                     </div>
-                    <div className="stat-desc">Combined salaries (this page)</div>
                 </div>
 
                 <div className="stat bg-base-100 shadow rounded-lg">
@@ -115,15 +190,20 @@ export default function PlacementAuditPage() {
                     <div className="stat-value text-2xl text-success">
                         {loading ? '...' : `$${(totalFees / 1000).toFixed(0)}k`}
                     </div>
-                    <div className="stat-desc">Platform revenue (this page)</div>
                 </div>
 
                 <div className="stat bg-base-100 shadow rounded-lg">
-                    <div className="stat-title">Recruiter Payouts</div>
-                    <div className="stat-value text-2xl text-warning">
-                        {loading ? '...' : `$${(totalRecruiterPayout / 1000).toFixed(0)}k`}
+                    <div className="stat-title">Actions</div>
+                    <div className="stat-value text-2xl">
+                        <button
+                            className="btn btn-sm btn-primary"
+                            onClick={refresh}
+                            disabled={loading}
+                        >
+                            <i className="fa-duotone fa-regular fa-refresh"></i>
+                            Refresh
+                        </button>
                     </div>
-                    <div className="stat-desc">Total owed (this page)</div>
                 </div>
             </div>
 
@@ -134,6 +214,17 @@ export default function PlacementAuditPage() {
                     onChange={setSearch}
                     placeholder="Search placements..."
                 />
+                <select
+                    className="select select-sm"
+                    value={filters.state || ''}
+                    onChange={(e) => setFilters({ ...filters, state: e.target.value || undefined })}
+                >
+                    <option value="">All States</option>
+                    <option value="hired">Hired</option>
+                    <option value="active">Active</option>
+                    <option value="completed">Completed</option>
+                    <option value="failed">Failed</option>
+                </select>
                 <div className="flex items-center gap-2">
                     <label className="text-sm text-base-content/70">From:</label>
                     <input
@@ -164,8 +255,8 @@ export default function PlacementAuditPage() {
                     icon="fa-duotone fa-regular fa-trophy"
                     title="No placements found"
                     description={
-                        search || filters.date_from || filters.date_to
-                            ? 'Try adjusting your search or date filters'
+                        search || filters.state || filters.date_from || filters.date_to
+                            ? 'Try adjusting your search or filters'
                             : 'Placements will appear here once candidates are hired'
                     }
                 />
@@ -176,45 +267,108 @@ export default function PlacementAuditPage() {
                             <table className="table table-zebra">
                                 <thead>
                                     <tr>
-                                        <th>Placement ID</th>
-                                        <th>Start Date</th>
+                                        <th>ID</th>
+                                        <th>State</th>
+                                        <th>Candidate</th>
                                         <th>Salary</th>
-                                        <th>Fee %</th>
-                                        <th>Total Fee</th>
-                                        <th>Recruiter Share</th>
-                                        <th>Platform Share</th>
-                                        <th>Created</th>
+                                        <th>Fee</th>
+                                        <th>Guarantee</th>
+                                        <th>Invoice</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {placements.map((placement) => {
-                                        const platformShare = (placement.fee_amount || 0) - (placement.recruiter_share_amount || 0);
+                                        const invoice = invoiceCache[placement.id];
+                                        const isLoadingInvoice = loadingInvoice === placement.id;
+                                        const isCreating = creatingInvoice === placement.id;
+                                        const guaranteeExpired = placement.guarantee_expires_at &&
+                                            new Date(placement.guarantee_expires_at) <= new Date();
+
                                         return (
                                             <tr key={placement.id}>
                                                 <td>
                                                     <div className="font-mono text-xs">{placement.id.slice(0, 8)}</div>
                                                 </td>
+                                                <td>{getStateBadge(placement.state)}</td>
                                                 <td>
-                                                    {placement.start_date
-                                                        ? new Date(placement.start_date).toLocaleDateString()
-                                                        : '-'
-                                                    }
+                                                    <div className="font-medium">{placement.candidate_name || 'N/A'}</div>
+                                                    <div className="text-xs text-base-content/60">{placement.job_title || 'N/A'}</div>
                                                 </td>
                                                 <td className="font-semibold">
                                                     ${(placement.salary || 0).toLocaleString()}
                                                 </td>
-                                                <td>{placement.fee_percentage || 0}%</td>
-                                                <td className="text-success font-semibold">
-                                                    ${(placement.fee_amount || 0).toLocaleString()}
+                                                <td>
+                                                    <div className="text-success font-semibold">
+                                                        ${(placement.placement_fee || 0).toLocaleString()}
+                                                    </div>
+                                                    <div className="text-xs text-base-content/60">
+                                                        {placement.fee_percentage}%
+                                                    </div>
                                                 </td>
-                                                <td className="text-warning">
-                                                    ${(placement.recruiter_share_amount || 0).toLocaleString()}
+                                                <td>
+                                                    <div className="text-xs">
+                                                        {placement.guarantee_days} days
+                                                    </div>
+                                                    {placement.guarantee_expires_at && (
+                                                        <div className={`text-xs ${guaranteeExpired ? 'text-success' : 'text-warning'}`}>
+                                                            {guaranteeExpired ? 'Expired' : 'Active'}
+                                                        </div>
+                                                    )}
                                                 </td>
-                                                <td className="text-info">
-                                                    ${platformShare.toLocaleString()}
+                                                <td>
+                                                    {invoice === undefined ? (
+                                                        <button
+                                                            className="btn btn-xs btn-ghost"
+                                                            onClick={() => fetchInvoice(placement.id)}
+                                                            disabled={isLoadingInvoice}
+                                                        >
+                                                            {isLoadingInvoice ? (
+                                                                <span className="loading loading-spinner loading-xs"></span>
+                                                            ) : (
+                                                                'Check'
+                                                            )}
+                                                        </button>
+                                                    ) : invoice === null ? (
+                                                        <span className="text-xs text-base-content/50">None</span>
+                                                    ) : (
+                                                        <div>
+                                                            {getInvoiceStatusBadge(invoice.invoice_status)}
+                                                            <div className="text-xs text-base-content/60">
+                                                                ${invoice.amount_due?.toLocaleString()}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </td>
-                                                <td className="text-xs text-base-content/70">
-                                                    {new Date(placement.created_at).toLocaleDateString()}
+                                                <td>
+                                                    <div className="flex gap-1">
+                                                        {invoice === null && guaranteeExpired && (
+                                                            <button
+                                                                className="btn btn-xs btn-primary"
+                                                                onClick={() => createInvoice(placement.id)}
+                                                                disabled={isCreating}
+                                                            >
+                                                                {isCreating ? (
+                                                                    <span className="loading loading-spinner loading-xs"></span>
+                                                                ) : (
+                                                                    <>
+                                                                        <i className="fa-duotone fa-regular fa-file-invoice-dollar"></i>
+                                                                        Invoice
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        )}
+                                                        {invoice?.hosted_invoice_url && (
+                                                            <a
+                                                                href={invoice.hosted_invoice_url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="btn btn-xs btn-ghost"
+                                                            >
+                                                                <i className="fa-duotone fa-regular fa-external-link"></i>
+                                                            </a>
+                                                        )}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         );
@@ -233,18 +387,6 @@ export default function PlacementAuditPage() {
                     setPage={setPage}
                 />
             )}
-
-            {/* Export & Actions */}
-            <div className="flex justify-end gap-2">
-                <button className="btn btn-outline" disabled>
-                    <i className="fa-duotone fa-regular fa-download"></i>
-                    Export CSV
-                </button>
-                <button className="btn btn-outline" disabled>
-                    <i className="fa-duotone fa-regular fa-file-pdf"></i>
-                    Export PDF
-                </button>
-            </div>
         </div>
     );
 }

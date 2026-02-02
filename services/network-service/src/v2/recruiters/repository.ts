@@ -39,7 +39,10 @@ export class RecruiterRepository {
         if (clerkUserId) {
             const context = await resolveAccessContext(this.supabase, clerkUserId);
 
-            if (context.recruiterId) {
+            // Platform admins see all recruiters (no filter)
+            if (context.isPlatformAdmin) {
+                // No filter applied - admin sees all
+            } else if (context.recruiterId) {
                 // Recruiters can only see their own profile
                 query = query.eq('user_id', context.identityUserId);
             } else if (context.organizationIds.length > 0) {
@@ -47,7 +50,6 @@ export class RecruiterRepository {
                 // For now, no access to recruiter profiles
                 return { data: [], total: 0 };
             }
-            // Platform admins see all recruiters (no filter)
         }
         // Unauthenticated users see all active recruiters (public marketplace)
 

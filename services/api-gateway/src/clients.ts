@@ -7,6 +7,11 @@ export class ServiceClient {
         private logger: Logger
     ) { }
 
+    /** Get the base URL for this service */
+    get baseURL(): string {
+        return this.baseUrl;
+    }
+
     private async request<T>(
         method: string,
         path: string,

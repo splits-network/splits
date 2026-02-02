@@ -134,4 +134,40 @@ export function registerUserRoutes(
             reply.code(400).send({ error: { message: (error as Error).message } });
         }
     });
+
+    // Profile Image Update Route
+    app.patch('/api/v2/users/profile-image', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const body = request.body as { profile_image_url: string; profile_image_path: string };
+
+            if (!body.profile_image_url || !body.profile_image_path) {
+                return reply.code(400).send({
+                    error: { message: 'profile_image_url and profile_image_path are required' }
+                });
+            }
+
+            const user = await userService.updateProfileImage(clerkUserId, {
+                profile_image_url: body.profile_image_url,
+                profile_image_path: body.profile_image_path,
+            });
+
+            reply.send({ data: user });
+        } catch (error) {
+            logError('PATCH /api/v2/users/profile-image failed', error);
+            reply.code(400).send({ error: { message: (error as Error).message } });
+        }
+    });
+
+    // Profile Image Delete Route
+    app.delete('/api/v2/users/profile-image', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            const { clerkUserId } = requireUserContext(request);
+            const user = await userService.deleteProfileImage(clerkUserId);
+            reply.send({ data: user });
+        } catch (error) {
+            logError('DELETE /api/v2/users/profile-image failed', error);
+            reply.code(400).send({ error: { message: (error as Error).message } });
+        }
+    });
 }

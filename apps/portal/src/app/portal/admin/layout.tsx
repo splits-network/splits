@@ -1,6 +1,8 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { AdminSidebar } from './components/admin-sidebar';
+import { AdminLayoutClient } from './components/admin-layout-client';
 
 export default async function AdminLayout({
     children,
@@ -14,23 +16,31 @@ export default async function AdminLayout({
     }
 
     // Get the user's profile to check if they're an admin
-    try {
-        const token = await getToken();
-        if (!token) {
-            redirect('/sign-in');
-        }
+    const token = await getToken();
+    if (!token) {
+        redirect('/sign-in');
+    }
 
+    let isAdmin = false;
+    try {
         const apiClient = createAuthenticatedClient(token);
         const profileResponse: any = await apiClient.get('/users/me');
-
-        if (!profileResponse.data?.is_platform_admin) {
-            // Not an admin, redirect to dashboard
-            redirect('/portal/dashboard');
-        }
+        isAdmin = profileResponse.data?.is_platform_admin === true;
     } catch (error) {
+        // Log but don't throw - we'll redirect below if not admin
         console.error('Failed to check admin access:', error);
+    }
+
+    if (!isAdmin) {
         redirect('/portal/dashboard');
     }
 
-    return <>{children}</>;
+    return (
+        <div className="flex min-h-[calc(100vh-4rem)]">
+            <AdminSidebar />
+            <main className="flex-1 p-6 overflow-auto bg-base-100">
+                <AdminLayoutClient>{children}</AdminLayoutClient>
+            </main>
+        </div>
+    );
 }

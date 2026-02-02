@@ -180,4 +180,74 @@ export function registerDocumentRoutes(app: FastifyInstance, services: ServiceRe
             }
         }
     );
+
+    // Profile Image Upload Route
+    app.post(
+        '/api/v2/documents/profile-image',
+        {
+            // No schema needed for Fastify 5.x
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+
+            try {
+                // Use same pattern as working /api/v2/documents route
+                const documentServiceUrl = process.env.DOCUMENT_SERVICE_URL || 'http://localhost:3006';
+
+                request.log.info({
+                    correlationId,
+                    documentServiceUrl,
+                    contentType: request.headers['content-type'],
+                    contentLength: request.headers['content-length'],
+                }, 'Proxying profile image upload to document service');
+
+                // For multipart uploads, we need to proxy the raw body stream
+                const proxyHeaders = {
+                    ...authHeaders,
+                    'x-correlation-id': correlationId,
+                    'content-type': request.headers['content-type'],
+                    'content-length': request.headers['content-length'],
+                };
+
+                const response = await fetch(`${documentServiceUrl}/api/v2/documents/profile-image`, {
+                    method: 'POST',
+                    body: request.raw,
+                    headers: proxyHeaders,
+                    duplex: 'half',
+                } as RequestInit);
+
+                const responseText = await response.text();
+                
+                if (!response.ok) {
+                    request.log.error(
+                        { correlationId, status: response.status, error: responseText },
+                        'Profile image upload failed'
+                    );
+                    try {
+                        const errorJson = JSON.parse(responseText);
+                        return reply.status(response.status).send(errorJson);
+                    } catch {
+                        return reply.status(response.status).send({ error: { message: 'Profile image upload failed' } });
+                    }
+                }
+
+                try {
+                    const result = JSON.parse(responseText) as DocumentUploadResponse;
+                    request.log.info({
+                        correlationId,
+                        documentId: result.data?.id
+                    }, 'Profile image upload successful');
+                    
+                    return reply.status(201).send(result);
+                } catch (parseError) {
+                    request.log.error({ correlationId, parseError, responseText }, 'Failed to parse successful response');
+                    return reply.status(500).send({ error: { message: 'Invalid response from document service' } });
+                }
+            } catch (error: any) {
+                request.log.error({ error: error.message, correlationId }, 'Failed to upload profile image');
+                return reply.status(500).send({ error: { message: 'Profile image upload failed' } });
+            }
+        }
+    );
 }

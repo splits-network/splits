@@ -52,6 +52,17 @@ export class AuthMiddleware {
     async verifyToken(request: FastifyRequest): Promise<AuthContext> {
         const authHeader = request.headers.authorization;
 
+        // Debug logging for profile image uploads
+        if (request.url?.includes('profile-image')) {
+            request.log.info({
+                url: request.url,
+                method: request.method,
+                hasAuthHeader: !!authHeader,
+                authHeaderStart: authHeader?.substring(0, 20) + '...',
+                contentType: request.headers['content-type']
+            }, 'Profile image auth debug');
+        }
+
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             throw new UnauthorizedError('Missing or invalid authorization header');
         }

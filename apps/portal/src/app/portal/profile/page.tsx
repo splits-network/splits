@@ -33,24 +33,6 @@ export default function SettingsPage() {
                     <div className="basis-2/3 space-y-4">
                         {/* Marketplace Settings (Recruiters Only) */}
                         {isRecruiter && <MarketplaceSettings />}
-                        {/* Company Settings - Future (Company Admins & Hiring Managers) */}
-                        {(isCompanyAdmin || isHiringManager) && (
-                            <div className="card bg-base-100 shadow opacity-60">
-                                <div className="card-body">
-                                    <h2 className="card-title">
-                                        <i className="fa-duotone fa-regular fa-building"></i>
-                                        Company Settings
-                                        <div className="badge badge-sm">
-                                            Coming Soon
-                                        </div>
-                                    </h2>
-                                    <p className="text-sm text-base-content/70">
-                                        Manage company profile, branding, and
-                                        hiring preferences
-                                    </p>
-                                </div>
-                            </div>
-                        )}
 
                         {/* Platform Administration (Platform Admins Only) */}
                         {isPlatformAdmin && (

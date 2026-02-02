@@ -50,6 +50,8 @@ services:
       SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
       RABBITMQ_URL: amqp://splits:splits_local_dev@rabbitmq:5672
+      # Portal app (splits.network) Clerk credentials - for syncing user data back to Clerk
+      CLERK_SECRET_KEY: ${SPLITS_CLERK_SECRET_KEY}
     volumes:
       - ./services/identity-service/src:/app/services/identity-service/src
       - ./packages:/app/packages

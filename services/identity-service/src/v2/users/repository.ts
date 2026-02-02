@@ -24,30 +24,25 @@ export class UserRepository {
 
         filters = typeof params.filters === 'string' ? parseFilters(params.filters) : (params.filters || {});
 
-        let query = this.supabase.from('users').select('*', { count: 'exact' }).eq('clerk_user_id', clerkUserId);
+        let query = this.supabase.from('users').select('*', { count: 'exact' });
 
+        // Platform admins see all users, others only see themselves
+        if (!accessContext.isPlatformAdmin) {
+            query = query.eq('id', accessContext.identityUserId as string);
+        }
+
+        // Apply search filter
+        if (params.search) {
+            query = query.or(`email.ilike.%${params.search}%,first_name.ilike.%${params.search}%,last_name.ilike.%${params.search}%`);
+        }
+
+        // Apply equality filters
         for (const key of Object.keys(filters)) {
             const value = filters[key];
-            if (value !== undefined && value !== null) {
+            if (value !== undefined && value !== null && value !== '') {
                 query = query.eq(key, value);
             }
         }
-
-        // if (params.search) {
-        //     query = query.or(`email.ilike.%${params.search}%,name.ilike.%${params.search}%`);
-        // }
-
-        // const equalityFilterFields = ['status', 'clerk_user_id', 'email', 'id'];
-        // for (const key of equalityFilterFields) {
-        //     const value = filters[key];
-        //     if (value !== undefined && value !== null && value !== '') {
-        //         query = query.eq(key, value);
-        //     }
-        // }
-
-        // if (!accessContext.isPlatformAdmin) {
-        //     query = query.eq('id', accessContext.identityUserId as string);
-        // }
 
         const sortBy = params.sort_by || 'created_at';
         const ascending = params.sort_order?.toLowerCase() === 'asc';

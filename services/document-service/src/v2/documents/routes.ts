@@ -1,11 +1,14 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import multipart from '@fastify/multipart';
-import { DocumentServiceV2 } from './service';
-import { requireUserContext, validatePaginationParams } from '../shared/helpers';
-import { DocumentRepositoryV2 } from './repository';
-import { DocumentUpdate } from './types';
-import { StorageClient } from '../../storage';
-import { EventPublisher } from '../shared/events';
+import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import multipart from "@fastify/multipart";
+import { DocumentServiceV2 } from "./service";
+import {
+    requireUserContext,
+    validatePaginationParams,
+} from "../shared/helpers";
+import { DocumentRepositoryV2 } from "./repository";
+import { DocumentUpdate } from "./types";
+import { StorageClient } from "../../storage";
+import { EventPublisher } from "../shared/events";
 
 interface RegisterDocumentRoutesConfig {
     supabaseUrl: string;
@@ -16,9 +19,9 @@ interface RegisterDocumentRoutesConfig {
 
 export async function registerDocumentRoutes(
     app: FastifyInstance,
-    config: RegisterDocumentRoutesConfig
+    config: RegisterDocumentRoutesConfig,
 ) {
-    if (!app.hasContentTypeParser('multipart/form-data')) {
+    if (!app.hasContentTypeParser("multipart/form-data")) {
         await app.register(multipart as any, {
             limits: {
                 fileSize: 10 * 1024 * 1024,
@@ -26,10 +29,18 @@ export async function registerDocumentRoutes(
         });
     }
 
-    const repository = new DocumentRepositoryV2(config.supabaseUrl, config.supabaseKey);
-    const service = new DocumentServiceV2(repository.getSupabase(), repository, config.storage, config.eventPublisher);
+    const repository = new DocumentRepositoryV2(
+        config.supabaseUrl,
+        config.supabaseKey,
+    );
+    const service = new DocumentServiceV2(
+        repository.getSupabase(),
+        repository,
+        config.storage,
+        config.eventPublisher,
+    );
 
-    app.get('/api/v2/documents', async (request, reply) => {
+    app.get("/api/v2/documents", async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const query = request.query as Record<string, any>;
@@ -39,11 +50,12 @@ export async function registerDocumentRoutes(
             let parsedFilters: Record<string, any> = {};
             if (query.filters) {
                 try {
-                    parsedFilters = typeof query.filters === 'string'
-                        ? JSON.parse(query.filters)
-                        : query.filters;
+                    parsedFilters =
+                        typeof query.filters === "string"
+                            ? JSON.parse(query.filters)
+                            : query.filters;
                 } catch (e) {
-                    console.error('Failed to parse filters:', e);
+                    console.error("Failed to parse filters:", e);
                 }
             }
 
@@ -62,12 +74,12 @@ export async function registerDocumentRoutes(
             return reply.send(result);
         } catch (error: any) {
             return reply.code(400).send({
-                error: { message: error.message || 'Failed to list documents' },
+                error: { message: error.message || "Failed to list documents" },
             });
         }
     });
 
-    app.get('/api/v2/documents/:id', async (request, reply) => {
+    app.get("/api/v2/documents/:id", async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -75,92 +87,116 @@ export async function registerDocumentRoutes(
             return reply.send({ data: document });
         } catch (error: any) {
             return reply.code(404).send({
-                error: { message: error.message || 'Document not found' },
+                error: { message: error.message || "Document not found" },
             });
         }
     });
 
-    app.post('/api/v2/documents', async (request: FastifyRequest, reply: FastifyReply) => {
-        try {
-            const { clerkUserId } = requireUserContext(request);
+    app.post(
+        "/api/v2/documents",
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { clerkUserId } = requireUserContext(request);
 
-            if (!(request as any).isMultipart || !(request as any).isMultipart()) {
-                return reply.code(400).send({
-                    error: { message: 'multipart/form-data is required' },
-                });
-            }
-
-            let fileBuffer: Buffer | null = null;
-            let fileName: string | undefined;
-            const fields: Record<string, any> = {};
-
-            for await (const part of (request as any).parts()) {
-                if (part.type === 'file') {
-                    fileBuffer = await part.toBuffer();
-                    fileName = part.filename;
-                } else if (part.type === 'field') {
-                    fields[part.fieldname] = (part as any).value;
-                }
-            }
-
-            if (!fileBuffer || !fileName) {
-                return reply.code(400).send({
-                    error: { message: 'File is required' },
-                });
-            }
-
-            const { entity_type, entity_id, document_type, metadata } = fields;
-
-            if (!entity_type || !entity_id || !document_type) {
-                return reply.code(400).send({
-                    error: { message: 'entity_type, entity_id, and document_type are required' },
-                });
-            }
-
-            let parsedMetadata: Record<string, any> | undefined;
-            if (metadata) {
-                try {
-                    parsedMetadata = typeof metadata === 'string' ? JSON.parse(metadata) : metadata;
-                } catch {
+                if (
+                    !(request as any).isMultipart ||
+                    !(request as any).isMultipart()
+                ) {
                     return reply.code(400).send({
-                        error: { message: 'metadata must be valid JSON' },
+                        error: { message: "multipart/form-data is required" },
                     });
                 }
+
+                let fileBuffer: Buffer | null = null;
+                let fileName: string | undefined;
+                const fields: Record<string, any> = {};
+
+                for await (const part of (request as any).parts()) {
+                    if (part.type === "file") {
+                        fileBuffer = await part.toBuffer();
+                        fileName = part.filename;
+                    } else if (part.type === "field") {
+                        fields[part.fieldname] = (part as any).value;
+                    }
+                }
+
+                if (!fileBuffer || !fileName) {
+                    return reply.code(400).send({
+                        error: { message: "File is required" },
+                    });
+                }
+
+                const { entity_type, entity_id, document_type, metadata } =
+                    fields;
+
+                if (!entity_type || !entity_id || !document_type) {
+                    return reply.code(400).send({
+                        error: {
+                            message:
+                                "entity_type, entity_id, and document_type are required",
+                        },
+                    });
+                }
+
+                let parsedMetadata: Record<string, any> | undefined;
+                if (metadata) {
+                    try {
+                        parsedMetadata =
+                            typeof metadata === "string"
+                                ? JSON.parse(metadata)
+                                : metadata;
+                    } catch {
+                        return reply.code(400).send({
+                            error: { message: "metadata must be valid JSON" },
+                        });
+                    }
+                }
+
+                const document = await service.createDocument(clerkUserId, {
+                    file: fileBuffer,
+                    originalFileName: fileName,
+                    entity_type,
+                    entity_id,
+                    document_type,
+                    metadata: parsedMetadata,
+                });
+
+                return reply.code(201).send({ data: document });
+            } catch (error: any) {
+                request.log.error(
+                    { error: error.message, stack: error.stack },
+                    "Document upload failed",
+                );
+                return reply.code(400).send({
+                    error: {
+                        message: error.message || "Failed to upload document",
+                    },
+                });
             }
+        },
+    );
 
-            const document = await service.createDocument(clerkUserId, {
-                file: fileBuffer,
-                originalFileName: fileName,
-                entity_type,
-                entity_id,
-                document_type,
-                metadata: parsedMetadata,
-            });
-
-            return reply.code(201).send({ data: document });
-        } catch (error: any) {
-            request.log.error({ error: error.message, stack: error.stack }, 'Document upload failed');
-            return reply.code(400).send({
-                error: { message: error.message || 'Failed to upload document' },
-            });
-        }
-    });
-
-    app.patch('/api/v2/documents/:id', async (request, reply) => {
+    app.patch("/api/v2/documents/:id", async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
             const body = request.body as DocumentUpdate;
-            const document = await service.updateDocument(id, body, clerkUserId);
+            const document = await service.updateDocument(
+                id,
+                body,
+                clerkUserId,
+            );
             return reply.send({ data: document });
         } catch (error: any) {
             return reply.code(400).send({
-                error: { message: error.message || 'Failed to update document' },
+                error: {
+                    message: error.message || "Failed to update document",
+                },
             });
         }
     });
 
-    app.delete('/api/v2/documents/:id', async (request, reply) => {
+    app.delete("/api/v2/documents/:id", async (request, reply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
@@ -168,8 +204,84 @@ export async function registerDocumentRoutes(
             return reply.code(204).send();
         } catch (error: any) {
             return reply.code(400).send({
-                error: { message: error.message || 'Failed to delete document' },
+                error: {
+                    message: error.message || "Failed to delete document",
+                },
             });
         }
     });
+
+    // Profile Image Upload Route
+    app.post(
+        "/api/v2/documents/profile-image",
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                request.log.info("Profile image upload request received");
+                const { clerkUserId } = requireUserContext(request);
+                request.log.info(`User context resolved: ${clerkUserId}`);
+
+                if (
+                    !(request as any).isMultipart ||
+                    !(request as any).isMultipart()
+                ) {
+                    request.log.error("Request is not multipart/form-data");
+                    return reply.code(400).send({
+                        error: { message: "multipart/form-data is required" },
+                    });
+                }
+
+                let fileBuffer: Buffer | null = null;
+                let fileName: string | undefined;
+
+                request.log.info("Processing multipart data...");
+                for await (const part of (request as any).parts()) {
+                    request.log.info(
+                        `Processing part: ${part.type}, fieldname: ${part.fieldname}`,
+                    );
+                    if (part.type === "file") {
+                        fileBuffer = await part.toBuffer();
+                        fileName = part.filename;
+                        request.log.info(
+                            `File received: ${fileName}, size: ${fileBuffer!.length}`,
+                        );
+                        break; // Only accept one file
+                    }
+                }
+
+                if (!fileBuffer || !fileName) {
+                    request.log.error(
+                        `Missing file data: fileBuffer=${!!fileBuffer}, fileName=${fileName}`,
+                    );
+                    return reply.code(400).send({
+                        error: { message: "Image file is required" },
+                    });
+                }
+
+                request.log.info(
+                    `Calling service.uploadProfileImage with file ${fileName}`,
+                );
+                const document = await service.uploadProfileImage(
+                    clerkUserId,
+                    fileBuffer,
+                    fileName,
+                );
+
+                request.log.info(
+                    `Profile image upload successful: ${document.id}`,
+                );
+                return reply.code(201).send({ data: document });
+            } catch (error: any) {
+                request.log.error(
+                    { error: error.message, stack: error.stack },
+                    "Profile image upload failed",
+                );
+                return reply.code(400).send({
+                    error: {
+                        message:
+                            error.message || "Failed to upload profile image",
+                    },
+                });
+            }
+        },
+    );
 }
