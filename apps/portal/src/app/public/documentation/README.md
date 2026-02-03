@@ -131,7 +131,7 @@ Each documentation page should follow this order and reuse section labels exactl
 - What Happens Next (system behavior and expected outcomes)
 - Tips (optional)
 - Troubleshooting (3-6 symptom-based bullets)
-- Related Pages (2-5 links)
+- Related Pages (2-5 links, include the external-link icon and spacing for consistency)
 - Reference (optional mini-glossary or key definitions for this page)
 
 ## Writing And UX Rules

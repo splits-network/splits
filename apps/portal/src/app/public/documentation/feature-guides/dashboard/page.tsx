@@ -1,17 +1,17 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
 
-export default function NavigationOverviewPage() {
+export default function DashboardGuidePage() {
     return (
         <div className="space-y-10">
             <DocPageHeader
-                title="Navigation Overview"
-                description="Learn how the sidebar and mobile dock map to your daily tasks so you can move between roles, candidates, and applications quickly."
+                title="Dashboard"
+                description="Quick view of roles, invitations, and activity based on your role."
                 roles={["Recruiter", "Hiring Manager", "Company Admin"]}
                 breadcrumbs={[
                     { label: "Documentation", href: "/public/documentation" },
-                    { label: "Getting Started", href: "/public/documentation/getting-started" },
-                    { label: "Navigation Overview" },
+                    { label: "Feature Guides", href: "/public/documentation/feature-guides" },
+                    { label: "Dashboard" },
                 ]}
                 lastUpdated="February 3, 2026"
             />
@@ -19,8 +19,8 @@ export default function NavigationOverviewPage() {
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    The portal navigation changes based on your role. This guide shows
-                    where to find common workflows and how to switch between views.
+                    The dashboard highlights recent activity, performance trends, and
+                    action items tailored to your role.
                 </p>
             </section>
 
@@ -37,44 +37,33 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Prerequisites</h2>
                 <div className="space-y-2 text-base text-base-content/70">
                     <div>Signed in to the portal.</div>
-                    <div>Assigned to at least one role in your organization.</div>
+                    <div>At least one role or application in the system.</div>
                 </div>
             </section>
 
             <section className="space-y-4">
-                <h2 className="text-xl font-semibold">Steps</h2>
-                <ol className="list-decimal list-inside space-y-2 text-base text-base-content/70">
-                    <li>Use the sidebar to move between Management and Settings.</li>
-                    <li>Open Roles to create or manage job opportunities.</li>
-                    <li>Open Candidates or Applications to track submissions.</li>
-                    <li>Use Messages for recruiter and company conversations.</li>
-                    <li>Check Notifications for updates and required actions.</li>
-                </ol>
-            </section>
-
-            <section className="space-y-4">
-                <h2 className="text-xl font-semibold">What Happens Next</h2>
-                <p className="text-base text-base-content/70">
-                    Your navigation updates automatically when your role or
-                    organization changes. Some items may appear or disappear based on
-                    permissions.
-                </p>
+                <h2 className="text-xl font-semibold">Key Areas</h2>
+                <ul className="list-disc list-inside space-y-2 text-base text-base-content/70">
+                    <li>Role and application trends.</li>
+                    <li>Recent messages and notifications.</li>
+                    <li>Quick actions for common tasks.</li>
+                </ul>
             </section>
 
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Screenshot Placeholders</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <ScreenshotPlaceholder
-                        title="Sidebar navigation"
-                        description="Desktop view showing Management and Settings sections."
+                        title="Dashboard overview"
+                        description="Dashboard widgets and quick action panel."
                         variant="desktop"
-                        filename="docs-navigation-sidebar-desktop.png"
+                        filename="docs-dashboard-overview-desktop.png"
                     />
                     <ScreenshotPlaceholder
-                        title="Mobile dock navigation"
-                        description="Mobile dock with Roles, Candidates, Applications, Messages."
+                        title="Dashboard overview"
+                        description="Mobile dashboard with quick actions."
                         variant="mobile"
-                        filename="docs-navigation-dock-mobile.png"
+                        filename="docs-dashboard-overview-mobile.png"
                     />
                 </div>
             </section>
@@ -82,8 +71,8 @@ export default function NavigationOverviewPage() {
             <section className="space-y-3">
                 <h2 className="text-xl font-semibold">Tips</h2>
                 <div className="space-y-2 text-base text-base-content/70">
-                    <div>Use view toggles inside list pages to switch layouts.</div>
-                    <div>Unread message counts appear next to Messages in the sidebar.</div>
+                    <div>Use widgets to jump directly to high-priority work.</div>
+                    <div>Check notifications to stay ahead of pending actions.</div>
                 </div>
             </section>
 
@@ -91,18 +80,18 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Troubleshooting</h2>
                 <div className="space-y-3 text-base text-base-content/70">
                     <div>
-                        <strong>Symptom:</strong> A menu item is missing.
+                        <strong>Symptom:</strong> Dashboard shows empty data.
                         <br />
-                        <strong>Likely cause:</strong> Your role does not have access.
+                        <strong>Likely cause:</strong> No roles or applications exist yet.
                         <br />
-                        <strong>Fix:</strong> Ask a company admin to update your permissions.
+                        <strong>Fix:</strong> Create a role or submit a candidate to populate metrics.
                     </div>
                     <div>
-                        <strong>Symptom:</strong> The page opens but has no data.
+                        <strong>Symptom:</strong> Widgets seem inaccurate.
                         <br />
-                        <strong>Likely cause:</strong> Filters or permissions are limiting results.
+                        <strong>Likely cause:</strong> Filters or time ranges are applied.
                         <br />
-                        <strong>Fix:</strong> Clear filters or confirm you belong to the right organization.
+                        <strong>Fix:</strong> Adjust time period filters or refresh the page.
                     </div>
                 </div>
             </section>
@@ -111,17 +100,17 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Related Pages</h2>
                 <div className="space-y-2 space-x-4">
                     <a
-                        href="/public/documentation/getting-started/first-time-setup"
+                        href="/public/documentation/feature-guides/roles"
                         className="link link-hover"
                     >
-                        First-Time Setup
+                        Roles{" "}
                         <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-info" />
                     </a>
                     <a
-                        href="/public/documentation/getting-started/what-is-splits-network"
+                        href="/public/documentation/feature-guides/applications"
                         className="link link-hover"
                     >
-                        What Is Splits Network
+                        Applications{" "}
                         <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-info" />
                     </a>
                 </div>
@@ -131,16 +120,10 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Reference</h2>
                 <div className="space-y-2 text-base text-base-content/70">
                     <div>
-                        <strong>Management:</strong> The section that holds Roles,
-                        Candidates, Applications, and Messages.
-                    </div>
-                    <div>
-                        <strong>Settings:</strong> The section for Profile, Billing, and
-                        Company Settings.
+                        <strong>Widget:</strong> A dashboard panel that summarizes a specific metric or action.
                     </div>
                 </div>
             </section>
         </div>
     );
 }
-

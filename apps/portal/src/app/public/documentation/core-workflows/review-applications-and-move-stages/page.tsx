@@ -1,17 +1,17 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
 
-export default function NavigationOverviewPage() {
+export default function ReviewApplicationsAndMoveStagesPage() {
     return (
         <div className="space-y-10">
             <DocPageHeader
-                title="Navigation Overview"
-                description="Learn how the sidebar and mobile dock map to your daily tasks so you can move between roles, candidates, and applications quickly."
+                title="Review Applications And Move Stages"
+                description="Review applications, add notes, and move candidates through the hiring stages."
                 roles={["Recruiter", "Hiring Manager", "Company Admin"]}
                 breadcrumbs={[
                     { label: "Documentation", href: "/public/documentation" },
-                    { label: "Getting Started", href: "/public/documentation/getting-started" },
-                    { label: "Navigation Overview" },
+                    { label: "Core Workflows", href: "/public/documentation/core-workflows" },
+                    { label: "Review Applications And Move Stages" },
                 ]}
                 lastUpdated="February 3, 2026"
             />
@@ -19,8 +19,8 @@ export default function NavigationOverviewPage() {
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    The portal navigation changes based on your role. This guide shows
-                    where to find common workflows and how to switch between views.
+                    Applications track each candidate’s progress. Stage changes signal
+                    what needs to happen next and who owns the action.
                 </p>
             </section>
 
@@ -36,28 +36,26 @@ export default function NavigationOverviewPage() {
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Prerequisites</h2>
                 <div className="space-y-2 text-base text-base-content/70">
-                    <div>Signed in to the portal.</div>
-                    <div>Assigned to at least one role in your organization.</div>
+                    <div>Access to Applications and an assigned role or candidate.</div>
+                    <div>Required feedback or notes ready for the next stage.</div>
                 </div>
             </section>
 
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Steps</h2>
                 <ol className="list-decimal list-inside space-y-2 text-base text-base-content/70">
-                    <li>Use the sidebar to move between Management and Settings.</li>
-                    <li>Open Roles to create or manage job opportunities.</li>
-                    <li>Open Candidates or Applications to track submissions.</li>
-                    <li>Use Messages for recruiter and company conversations.</li>
-                    <li>Check Notifications for updates and required actions.</li>
+                    <li>Open <strong>Applications</strong> and select a candidate.</li>
+                    <li>Review the application timeline, notes, and documents.</li>
+                    <li>Add feedback or upload required documents.</li>
+                    <li>Use stage actions to move the candidate forward or decline.</li>
                 </ol>
             </section>
 
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold">What Happens Next</h2>
                 <p className="text-base text-base-content/70">
-                    Your navigation updates automatically when your role or
-                    organization changes. Some items may appear or disappear based on
-                    permissions.
+                    Stage changes update the timeline and notify collaborators. Some
+                    stages unlock additional candidate details or actions.
                 </p>
             </section>
 
@@ -65,16 +63,16 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Screenshot Placeholders</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <ScreenshotPlaceholder
-                        title="Sidebar navigation"
-                        description="Desktop view showing Management and Settings sections."
+                        title="Application detail"
+                        description="Application detail view with stage actions and notes."
                         variant="desktop"
-                        filename="docs-navigation-sidebar-desktop.png"
+                        filename="docs-review-application-detail-desktop.png"
                     />
                     <ScreenshotPlaceholder
-                        title="Mobile dock navigation"
-                        description="Mobile dock with Roles, Candidates, Applications, Messages."
-                        variant="mobile"
-                        filename="docs-navigation-dock-mobile.png"
+                        title="Application timeline"
+                        description="Timeline panel showing stage history."
+                        variant="desktop"
+                        filename="docs-review-application-timeline-desktop.png"
                     />
                 </div>
             </section>
@@ -82,8 +80,8 @@ export default function NavigationOverviewPage() {
             <section className="space-y-3">
                 <h2 className="text-xl font-semibold">Tips</h2>
                 <div className="space-y-2 text-base text-base-content/70">
-                    <div>Use view toggles inside list pages to switch layouts.</div>
-                    <div>Unread message counts appear next to Messages in the sidebar.</div>
+                    <div>Use notes to document decisions and next steps.</div>
+                    <div>Confirm stage ownership before advancing.</div>
                 </div>
             </section>
 
@@ -91,18 +89,18 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Troubleshooting</h2>
                 <div className="space-y-3 text-base text-base-content/70">
                     <div>
-                        <strong>Symptom:</strong> A menu item is missing.
+                        <strong>Symptom:</strong> I cannot move a stage.
                         <br />
-                        <strong>Likely cause:</strong> Your role does not have access.
+                        <strong>Likely cause:</strong> Stage actions are restricted or required data is missing.
                         <br />
-                        <strong>Fix:</strong> Ask a company admin to update your permissions.
+                        <strong>Fix:</strong> Add required notes or ask an admin to move the stage.
                     </div>
                     <div>
-                        <strong>Symptom:</strong> The page opens but has no data.
+                        <strong>Symptom:</strong> Candidate details are hidden.
                         <br />
-                        <strong>Likely cause:</strong> Filters or permissions are limiting results.
+                        <strong>Likely cause:</strong> The application has not reached the required stage.
                         <br />
-                        <strong>Fix:</strong> Clear filters or confirm you belong to the right organization.
+                        <strong>Fix:</strong> Move to the correct review stage or request access.
                     </div>
                 </div>
             </section>
@@ -111,17 +109,17 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Related Pages</h2>
                 <div className="space-y-2 space-x-4">
                     <a
-                        href="/public/documentation/getting-started/first-time-setup"
+                        href="/public/documentation/core-workflows/mark-a-hire-and-track-placements"
                         className="link link-hover"
                     >
-                        First-Time Setup
+                        Mark A Hire And Track Placements{" "}
                         <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-info" />
                     </a>
                     <a
-                        href="/public/documentation/getting-started/what-is-splits-network"
+                        href="/public/documentation/core-workflows/submit-a-candidate"
                         className="link link-hover"
                     >
-                        What Is Splits Network
+                        Submit A Candidate{" "}
                         <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-info" />
                     </a>
                 </div>
@@ -131,16 +129,10 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Reference</h2>
                 <div className="space-y-2 text-base text-base-content/70">
                     <div>
-                        <strong>Management:</strong> The section that holds Roles,
-                        Candidates, Applications, and Messages.
-                    </div>
-                    <div>
-                        <strong>Settings:</strong> The section for Profile, Billing, and
-                        Company Settings.
+                        <strong>Stage:</strong> The step in the application workflow (screen, interview, offer, hired).
                     </div>
                 </div>
             </section>
         </div>
     );
 }
-

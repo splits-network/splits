@@ -64,7 +64,42 @@ export default function DocumentationIndexPage() {
 
             <section className="space-y-3">
                 <h2 className="text-xl font-semibold">Feature Guides</h2>
-                <div className="card bg-base-200 border border-base-300">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Link
+                        href="/public/documentation/feature-guides"
+                        className="card bg-base-200 shadow hover:shadow-lg transition-shadow"
+                    >
+                        <div className="card-body">
+                            <h3 className="card-title">Feature Guides</h3>
+                            <p className="text-sm text-base-content/70">
+                                Explore every core feature area in the portal.
+                            </p>
+                        </div>
+                    </Link>
+                    <Link
+                        href="/public/documentation/feature-guides/roles"
+                        className="card bg-base-200 shadow hover:shadow-lg transition-shadow"
+                    >
+                        <div className="card-body">
+                            <h3 className="card-title">Roles</h3>
+                            <p className="text-sm text-base-content/70">
+                                Create, manage, and track role status.
+                            </p>
+                        </div>
+                    </Link>
+                    <Link
+                        href="/public/documentation/feature-guides/applications"
+                        className="card bg-base-200 shadow hover:shadow-lg transition-shadow"
+                    >
+                        <div className="card-body">
+                            <h3 className="card-title">Applications</h3>
+                            <p className="text-sm text-base-content/70">
+                                Review applications and stage progress.
+                            </p>
+                        </div>
+                    </Link>
+                </div>
+                <div className="card bg-base-200 border border-base-300 mt-4">
                     <div className="card-body">
                         <div className="flex items-center justify-between">
                             <div>

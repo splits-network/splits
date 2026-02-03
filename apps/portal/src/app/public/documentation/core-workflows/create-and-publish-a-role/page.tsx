@@ -1,17 +1,17 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
 
-export default function NavigationOverviewPage() {
+export default function CreateAndPublishRolePage() {
     return (
         <div className="space-y-10">
             <DocPageHeader
-                title="Navigation Overview"
-                description="Learn how the sidebar and mobile dock map to your daily tasks so you can move between roles, candidates, and applications quickly."
-                roles={["Recruiter", "Hiring Manager", "Company Admin"]}
+                title="Create And Publish A Role"
+                description="Set up a role with compensation, requirements, and visibility so recruiters can submit candidates."
+                roles={["Recruiter", "Company Admin", "Hiring Manager"]}
                 breadcrumbs={[
                     { label: "Documentation", href: "/public/documentation" },
-                    { label: "Getting Started", href: "/public/documentation/getting-started" },
-                    { label: "Navigation Overview" },
+                    { label: "Core Workflows", href: "/public/documentation/core-workflows" },
+                    { label: "Create And Publish A Role" },
                 ]}
                 lastUpdated="February 3, 2026"
             />
@@ -19,8 +19,8 @@ export default function NavigationOverviewPage() {
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    The portal navigation changes based on your role. This guide shows
-                    where to find common workflows and how to switch between views.
+                    Roles define the job opportunity, compensation, and submission rules.
+                    Publishing a role makes it available for candidate submissions.
                 </p>
             </section>
 
@@ -36,28 +36,27 @@ export default function NavigationOverviewPage() {
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Prerequisites</h2>
                 <div className="space-y-2 text-base text-base-content/70">
-                    <div>Signed in to the portal.</div>
-                    <div>Assigned to at least one role in your organization.</div>
+                    <div>Access to Roles with create permissions.</div>
+                    <div>Compensation details and requirements from the hiring team.</div>
                 </div>
             </section>
 
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Steps</h2>
                 <ol className="list-decimal list-inside space-y-2 text-base text-base-content/70">
-                    <li>Use the sidebar to move between Management and Settings.</li>
-                    <li>Open Roles to create or manage job opportunities.</li>
-                    <li>Open Candidates or Applications to track submissions.</li>
-                    <li>Use Messages for recruiter and company conversations.</li>
-                    <li>Check Notifications for updates and required actions.</li>
+                    <li>Open <strong>Roles</strong> and select <strong>Add Role</strong>.</li>
+                    <li>Enter the role title, location, and key requirements.</li>
+                    <li>Complete compensation details (salary range, fee percentage, guarantee period).</li>
+                    <li>Choose employment type and visibility options.</li>
+                    <li>Save the role and confirm it appears as <strong>Active</strong>.</li>
                 </ol>
             </section>
 
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold">What Happens Next</h2>
                 <p className="text-base text-base-content/70">
-                    Your navigation updates automatically when your role or
-                    organization changes. Some items may appear or disappear based on
-                    permissions.
+                    The role becomes visible to eligible recruiters. Candidates can be
+                    submitted, and applications start tracking against the role.
                 </p>
             </section>
 
@@ -65,16 +64,16 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Screenshot Placeholders</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <ScreenshotPlaceholder
-                        title="Sidebar navigation"
-                        description="Desktop view showing Management and Settings sections."
+                        title="Add role modal"
+                        description="Role wizard step showing compensation details."
                         variant="desktop"
-                        filename="docs-navigation-sidebar-desktop.png"
+                        filename="docs-create-role-compensation-desktop.png"
                     />
                     <ScreenshotPlaceholder
-                        title="Mobile dock navigation"
-                        description="Mobile dock with Roles, Candidates, Applications, Messages."
-                        variant="mobile"
-                        filename="docs-navigation-dock-mobile.png"
+                        title="Role list"
+                        description="Roles page showing Active status and actions."
+                        variant="desktop"
+                        filename="docs-create-role-list-desktop.png"
                     />
                 </div>
             </section>
@@ -82,8 +81,8 @@ export default function NavigationOverviewPage() {
             <section className="space-y-3">
                 <h2 className="text-xl font-semibold">Tips</h2>
                 <div className="space-y-2 text-base text-base-content/70">
-                    <div>Use view toggles inside list pages to switch layouts.</div>
-                    <div>Unread message counts appear next to Messages in the sidebar.</div>
+                    <div>Use clear salary ranges to improve candidate matching.</div>
+                    <div>Confirm fee percentage and guarantee period with finance teams.</div>
                 </div>
             </section>
 
@@ -91,18 +90,18 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Troubleshooting</h2>
                 <div className="space-y-3 text-base text-base-content/70">
                     <div>
-                        <strong>Symptom:</strong> A menu item is missing.
+                        <strong>Symptom:</strong> I cannot create a role.
                         <br />
-                        <strong>Likely cause:</strong> Your role does not have access.
+                        <strong>Likely cause:</strong> Your role lacks permission or no organization is linked.
                         <br />
-                        <strong>Fix:</strong> Ask a company admin to update your permissions.
+                        <strong>Fix:</strong> Ask a company admin to grant access or confirm organization setup.
                     </div>
                     <div>
-                        <strong>Symptom:</strong> The page opens but has no data.
+                        <strong>Symptom:</strong> The role is not visible to recruiters.
                         <br />
-                        <strong>Likely cause:</strong> Filters or permissions are limiting results.
+                        <strong>Likely cause:</strong> The role is paused or missing required fields.
                         <br />
-                        <strong>Fix:</strong> Clear filters or confirm you belong to the right organization.
+                        <strong>Fix:</strong> Verify status is Active and required fields are complete.
                     </div>
                 </div>
             </section>
@@ -111,17 +110,17 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Related Pages</h2>
                 <div className="space-y-2 space-x-4">
                     <a
-                        href="/public/documentation/getting-started/first-time-setup"
+                        href="/public/documentation/core-workflows/submit-a-candidate"
                         className="link link-hover"
                     >
-                        First-Time Setup
+                        Submit A Candidate{" "}
                         <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-info" />
                     </a>
                     <a
-                        href="/public/documentation/getting-started/what-is-splits-network"
+                        href="/public/documentation/core-workflows/review-applications-and-move-stages"
                         className="link link-hover"
                     >
-                        What Is Splits Network
+                        Review Applications And Move Stages{" "}
                         <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-info" />
                     </a>
                 </div>
@@ -131,16 +130,13 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Reference</h2>
                 <div className="space-y-2 text-base text-base-content/70">
                     <div>
-                        <strong>Management:</strong> The section that holds Roles,
-                        Candidates, Applications, and Messages.
+                        <strong>Guarantee period:</strong> The number of days a placement is covered after hire.
                     </div>
                     <div>
-                        <strong>Settings:</strong> The section for Profile, Billing, and
-                        Company Settings.
+                        <strong>Fee percentage:</strong> The percentage applied to salary to calculate the placement fee.
                     </div>
                 </div>
             </section>
         </div>
     );
 }
-

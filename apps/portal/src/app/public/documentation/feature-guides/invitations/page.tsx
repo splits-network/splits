@@ -1,17 +1,17 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
 
-export default function NavigationOverviewPage() {
+export default function InvitationsGuidePage() {
     return (
         <div className="space-y-10">
             <DocPageHeader
-                title="Navigation Overview"
-                description="Learn how the sidebar and mobile dock map to your daily tasks so you can move between roles, candidates, and applications quickly."
+                title="Invitations"
+                description="Invite teammates and track invitation status."
                 roles={["Recruiter", "Hiring Manager", "Company Admin"]}
                 breadcrumbs={[
                     { label: "Documentation", href: "/public/documentation" },
-                    { label: "Getting Started", href: "/public/documentation/getting-started" },
-                    { label: "Navigation Overview" },
+                    { label: "Feature Guides", href: "/public/documentation/feature-guides" },
+                    { label: "Invitations" },
                 ]}
                 lastUpdated="February 3, 2026"
             />
@@ -19,8 +19,7 @@ export default function NavigationOverviewPage() {
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    The portal navigation changes based on your role. This guide shows
-                    where to find common workflows and how to switch between views.
+                    Invitations manage access to your organization and roles.
                 </p>
             </section>
 
@@ -36,45 +35,34 @@ export default function NavigationOverviewPage() {
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Prerequisites</h2>
                 <div className="space-y-2 text-base text-base-content/70">
-                    <div>Signed in to the portal.</div>
-                    <div>Assigned to at least one role in your organization.</div>
+                    <div>Access to Invitations or Team.</div>
+                    <div>Email addresses for invitees.</div>
                 </div>
             </section>
 
             <section className="space-y-4">
-                <h2 className="text-xl font-semibold">Steps</h2>
-                <ol className="list-decimal list-inside space-y-2 text-base text-base-content/70">
-                    <li>Use the sidebar to move between Management and Settings.</li>
-                    <li>Open Roles to create or manage job opportunities.</li>
-                    <li>Open Candidates or Applications to track submissions.</li>
-                    <li>Use Messages for recruiter and company conversations.</li>
-                    <li>Check Notifications for updates and required actions.</li>
-                </ol>
-            </section>
-
-            <section className="space-y-4">
-                <h2 className="text-xl font-semibold">What Happens Next</h2>
-                <p className="text-base text-base-content/70">
-                    Your navigation updates automatically when your role or
-                    organization changes. Some items may appear or disappear based on
-                    permissions.
-                </p>
+                <h2 className="text-xl font-semibold">Key Areas</h2>
+                <ul className="list-disc list-inside space-y-2 text-base text-base-content/70">
+                    <li>Invitation list with status tracking.</li>
+                    <li>Resend or revoke invitation actions.</li>
+                    <li>Role assignment at invite time.</li>
+                </ul>
             </section>
 
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Screenshot Placeholders</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <ScreenshotPlaceholder
-                        title="Sidebar navigation"
-                        description="Desktop view showing Management and Settings sections."
+                        title="Invitations list"
+                        description="Invitation list with status and actions."
                         variant="desktop"
-                        filename="docs-navigation-sidebar-desktop.png"
+                        filename="docs-invitations-list-desktop.png"
                     />
                     <ScreenshotPlaceholder
-                        title="Mobile dock navigation"
-                        description="Mobile dock with Roles, Candidates, Applications, Messages."
-                        variant="mobile"
-                        filename="docs-navigation-dock-mobile.png"
+                        title="Invite modal"
+                        description="Invite teammate form with role selection."
+                        variant="desktop"
+                        filename="docs-invitations-modal-desktop.png"
                     />
                 </div>
             </section>
@@ -82,8 +70,8 @@ export default function NavigationOverviewPage() {
             <section className="space-y-3">
                 <h2 className="text-xl font-semibold">Tips</h2>
                 <div className="space-y-2 text-base text-base-content/70">
-                    <div>Use view toggles inside list pages to switch layouts.</div>
-                    <div>Unread message counts appear next to Messages in the sidebar.</div>
+                    <div>Assign the correct role during invitation.</div>
+                    <div>Resend invites if they expire.</div>
                 </div>
             </section>
 
@@ -91,18 +79,18 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Troubleshooting</h2>
                 <div className="space-y-3 text-base text-base-content/70">
                     <div>
-                        <strong>Symptom:</strong> A menu item is missing.
+                        <strong>Symptom:</strong> An invite shows pending for too long.
                         <br />
-                        <strong>Likely cause:</strong> Your role does not have access.
+                        <strong>Likely cause:</strong> The invitee has not accepted.
                         <br />
-                        <strong>Fix:</strong> Ask a company admin to update your permissions.
+                        <strong>Fix:</strong> Resend the invitation or confirm their email.
                     </div>
                     <div>
-                        <strong>Symptom:</strong> The page opens but has no data.
+                        <strong>Symptom:</strong> I cannot send invites.
                         <br />
-                        <strong>Likely cause:</strong> Filters or permissions are limiting results.
+                        <strong>Likely cause:</strong> Your role lacks permission.
                         <br />
-                        <strong>Fix:</strong> Clear filters or confirm you belong to the right organization.
+                        <strong>Fix:</strong> Ask a company admin to grant access.
                     </div>
                 </div>
             </section>
@@ -111,17 +99,17 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Related Pages</h2>
                 <div className="space-y-2 space-x-4">
                     <a
-                        href="/public/documentation/getting-started/first-time-setup"
+                        href="/public/documentation/core-workflows/invite-recruiters-or-teammates"
                         className="link link-hover"
                     >
-                        First-Time Setup
+                        Invite Recruiters Or Teammates{" "}
                         <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-info" />
                     </a>
                     <a
-                        href="/public/documentation/getting-started/what-is-splits-network"
+                        href="/public/documentation/roles-and-permissions/role-based-access"
                         className="link link-hover"
                     >
-                        What Is Splits Network
+                        Role-Based Access{" "}
                         <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-info" />
                     </a>
                 </div>
@@ -131,16 +119,10 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Reference</h2>
                 <div className="space-y-2 text-base text-base-content/70">
                     <div>
-                        <strong>Management:</strong> The section that holds Roles,
-                        Candidates, Applications, and Messages.
-                    </div>
-                    <div>
-                        <strong>Settings:</strong> The section for Profile, Billing, and
-                        Company Settings.
+                        <strong>Invitation status:</strong> Pending, accepted, declined, or expired.
                     </div>
                 </div>
             </section>
         </div>
     );
 }
-

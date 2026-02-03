@@ -1,17 +1,17 @@
 import { DocPageHeader } from "../../components/doc-page-header";
 import { ScreenshotPlaceholder } from "../../components/screenshot-placeholder";
 
-export default function NavigationOverviewPage() {
+export default function CommunicateWithRecruitersAndCandidatesPage() {
     return (
         <div className="space-y-10">
             <DocPageHeader
-                title="Navigation Overview"
-                description="Learn how the sidebar and mobile dock map to your daily tasks so you can move between roles, candidates, and applications quickly."
+                title="Communicate With Recruiters And Candidates"
+                description="Use Messages and Notifications to coordinate feedback, updates, and next steps."
                 roles={["Recruiter", "Hiring Manager", "Company Admin"]}
                 breadcrumbs={[
                     { label: "Documentation", href: "/public/documentation" },
-                    { label: "Getting Started", href: "/public/documentation/getting-started" },
-                    { label: "Navigation Overview" },
+                    { label: "Core Workflows", href: "/public/documentation/core-workflows" },
+                    { label: "Communicate With Recruiters And Candidates" },
                 ]}
                 lastUpdated="February 3, 2026"
             />
@@ -19,8 +19,8 @@ export default function NavigationOverviewPage() {
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    The portal navigation changes based on your role. This guide shows
-                    where to find common workflows and how to switch between views.
+                    Messages keep recruiters and company teams aligned. Notifications
+                    highlight changes and required actions.
                 </p>
             </section>
 
@@ -36,28 +36,27 @@ export default function NavigationOverviewPage() {
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Prerequisites</h2>
                 <div className="space-y-2 text-base text-base-content/70">
-                    <div>Signed in to the portal.</div>
-                    <div>Assigned to at least one role in your organization.</div>
+                    <div>Access to Messages and Notifications.</div>
+                    <div>Active roles or applications to discuss.</div>
                 </div>
             </section>
 
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Steps</h2>
                 <ol className="list-decimal list-inside space-y-2 text-base text-base-content/70">
-                    <li>Use the sidebar to move between Management and Settings.</li>
-                    <li>Open Roles to create or manage job opportunities.</li>
-                    <li>Open Candidates or Applications to track submissions.</li>
-                    <li>Use Messages for recruiter and company conversations.</li>
-                    <li>Check Notifications for updates and required actions.</li>
+                    <li>Open <strong>Messages</strong> from the sidebar.</li>
+                    <li>Select a conversation or start a new one if available.</li>
+                    <li>Share updates, questions, or next steps with collaborators.</li>
+                    <li>Use notifications to track required actions.</li>
                 </ol>
             </section>
 
             <section className="space-y-4">
                 <h2 className="text-xl font-semibold">What Happens Next</h2>
                 <p className="text-base text-base-content/70">
-                    Your navigation updates automatically when your role or
-                    organization changes. Some items may appear or disappear based on
-                    permissions.
+                    Messages update in real time and unread counts appear in the
+                    sidebar. Notifications can link directly to the item that needs
+                    attention.
                 </p>
             </section>
 
@@ -65,16 +64,16 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Screenshot Placeholders</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <ScreenshotPlaceholder
-                        title="Sidebar navigation"
-                        description="Desktop view showing Management and Settings sections."
+                        title="Messages inbox"
+                        description="Messages view showing conversation list and detail panel."
                         variant="desktop"
-                        filename="docs-navigation-sidebar-desktop.png"
+                        filename="docs-messages-inbox-desktop.png"
                     />
                     <ScreenshotPlaceholder
-                        title="Mobile dock navigation"
-                        description="Mobile dock with Roles, Candidates, Applications, Messages."
-                        variant="mobile"
-                        filename="docs-navigation-dock-mobile.png"
+                        title="Notifications"
+                        description="Notification panel with unread items and actions."
+                        variant="desktop"
+                        filename="docs-notifications-panel-desktop.png"
                     />
                 </div>
             </section>
@@ -82,8 +81,8 @@ export default function NavigationOverviewPage() {
             <section className="space-y-3">
                 <h2 className="text-xl font-semibold">Tips</h2>
                 <div className="space-y-2 text-base text-base-content/70">
-                    <div>Use view toggles inside list pages to switch layouts.</div>
-                    <div>Unread message counts appear next to Messages in the sidebar.</div>
+                    <div>Keep key decisions documented in application notes.</div>
+                    <div>Use messages for coordination and timing updates.</div>
                 </div>
             </section>
 
@@ -91,18 +90,18 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Troubleshooting</h2>
                 <div className="space-y-3 text-base text-base-content/70">
                     <div>
-                        <strong>Symptom:</strong> A menu item is missing.
+                        <strong>Symptom:</strong> Messages are not updating.
                         <br />
-                        <strong>Likely cause:</strong> Your role does not have access.
+                        <strong>Likely cause:</strong> Connection or refresh issue.
                         <br />
-                        <strong>Fix:</strong> Ask a company admin to update your permissions.
+                        <strong>Fix:</strong> Refresh the page and check unread counts.
                     </div>
                     <div>
-                        <strong>Symptom:</strong> The page opens but has no data.
+                        <strong>Symptom:</strong> I do not see a conversation.
                         <br />
-                        <strong>Likely cause:</strong> Filters or permissions are limiting results.
+                        <strong>Likely cause:</strong> You are not added to that application or role.
                         <br />
-                        <strong>Fix:</strong> Clear filters or confirm you belong to the right organization.
+                        <strong>Fix:</strong> Ask a teammate to add you or share access.
                     </div>
                 </div>
             </section>
@@ -111,17 +110,17 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Related Pages</h2>
                 <div className="space-y-2 space-x-4">
                     <a
-                        href="/public/documentation/getting-started/first-time-setup"
+                        href="/public/documentation/core-workflows/review-applications-and-move-stages"
                         className="link link-hover"
                     >
-                        First-Time Setup
+                        Review Applications And Move Stages{" "}
                         <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-info" />
                     </a>
                     <a
-                        href="/public/documentation/getting-started/what-is-splits-network"
+                        href="/public/documentation/roles-and-permissions/hiring-manager"
                         className="link link-hover"
                     >
-                        What Is Splits Network
+                        Hiring Manager Capabilities{" "}
                         <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-info" />
                     </a>
                 </div>
@@ -131,16 +130,10 @@ export default function NavigationOverviewPage() {
                 <h2 className="text-xl font-semibold">Reference</h2>
                 <div className="space-y-2 text-base text-base-content/70">
                     <div>
-                        <strong>Management:</strong> The section that holds Roles,
-                        Candidates, Applications, and Messages.
-                    </div>
-                    <div>
-                        <strong>Settings:</strong> The section for Profile, Billing, and
-                        Company Settings.
+                        <strong>Notification:</strong> An in-app alert that links to an action or update.
                     </div>
                 </div>
             </section>
         </div>
     );
 }
-

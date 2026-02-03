@@ -128,18 +128,20 @@ export default function FirstTimeSetupPage() {
 
             <section className="space-y-3">
                 <h2 className="text-xl font-semibold">Related Pages</h2>
-                <div className="space-y-2">
+                <div className="space-y-2 space-x-4">
                     <a
                         href="/public/documentation/getting-started/navigation-overview"
                         className="link link-hover"
                     >
                         Navigation Overview
+                        <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-info" />
                     </a>
                     <a
                         href="/public/documentation/getting-started/what-is-splits-network"
                         className="link link-hover"
                     >
                         What Is Splits Network
+                        <i className="fa-duotone fa-regular fa-arrow-up-right-from-square text-info" />
                     </a>
                 </div>
             </section>
