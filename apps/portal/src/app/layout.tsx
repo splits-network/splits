@@ -9,6 +9,7 @@ import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
 import "./globals.css";
 import { UserProfileProvider } from "@/contexts";
+import { Header } from "@/components/header";
 
 export const metadata: Metadata = {
     metadataBase: new URL("https://splits.network"),
