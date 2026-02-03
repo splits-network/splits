@@ -57,7 +57,7 @@ Use a tooltip inside the `fieldset-legend` when inline clarification is needed:
     <legend className="fieldset-legend flex justify-between w-full">
         <span>Fee Percentage *</span>
         <div
-            className="tooltip tooltip-info"
+            className="tooltip tooltip-info tooltip-left"
             data-tip="The percentage fee charged on the annual salary for successful placements."
         >
             <i className="fa-duotone fa-regular fa-circle-info fa-lg text-info" />

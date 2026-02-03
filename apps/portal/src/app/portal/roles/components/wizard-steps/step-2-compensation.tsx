@@ -76,8 +76,8 @@ export default function Step2Compensation({
                     <legend className="fieldset-legend flex justify-between w-full">
                         <span>Fee Percentage *</span>
                         <div
-                            className="tooltip tooltip-info"
-                            data-tip="The percentage fee charged on the annual salary for successful placements."
+                            className="tooltip tooltip-info tooltip-left"
+                            data-tip="Percentage of the candidate’s annual base salary used to calculate the placement fee. Set this based on your company’s standard fee policy and role difficulty so recruiters and hiring teams align on expectations. Learn more in Documentation."
                         >
                             <i className="fa-duotone fa-regular fa-circle-info fa-lg text-info" />
                         </div>
@@ -98,14 +98,17 @@ export default function Step2Compensation({
                         step="0.1"
                         required
                     />
-                    <p className="fieldset-label">
-                        Percentage of annual salary (0-100%)
-                    </p>
                 </fieldset>
 
                 <fieldset className="fieldset">
-                    <legend className="fieldset-legend">
-                        Guarantee Period (Days) *
+                    <legend className="fieldset-legend flex justify-between w-full">
+                        <span>Guarantee Period (Days) *</span>
+                        <div
+                            className="tooltip tooltip-info tooltip-left"
+                            data-tip="Time window for replacement or refund if a hire doesn’t work out. Choose a duration that matches your company’s policy and the seniority of the role. Learn more in Documentation."
+                        >
+                            <i className="fa-duotone fa-regular fa-circle-info fa-lg text-info" />
+                        </div>
                     </legend>
                     <select
                         className="select w-full"
@@ -125,9 +128,6 @@ export default function Step2Compensation({
                         <option value={60}>60 days</option>
                         <option value={90}>90 days</option>
                     </select>
-                    <p className="fieldset-label">
-                        Placement guarantee period (0 to 90 days)
-                    </p>
                 </fieldset>
             </div>
 
