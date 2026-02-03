@@ -19,7 +19,7 @@ Use semantic HTML `<fieldset>` and `<legend>` elements with DaisyUI classes:
 ```tsx
 <fieldset className="fieldset">
     <legend className="fieldset-legend">Field Label</legend>
-    <input 
+    <input
         type="text"
         className="input w-full"
         value={value}
@@ -37,7 +37,7 @@ Use `<p className="fieldset-label">` for helper text:
 ```tsx
 <fieldset className="fieldset">
     <legend className="fieldset-legend">Annual Salary (USD) *</legend>
-    <input 
+    <input
         type="number"
         className="input w-full"
         value={salary}
@@ -48,15 +48,47 @@ Use `<p className="fieldset-label">` for helper text:
 </fieldset>
 ```
 
+### With Tooltip for Additional Context
+
+Use a tooltip inside the `fieldset-legend` when inline clarification is needed:
+
+```tsx
+<fieldset className="fieldset">
+    <legend className="fieldset-legend flex justify-between w-full">
+        <span>Fee Percentage *</span>
+        <div
+            className="tooltip tooltip-info"
+            data-tip="The percentage fee charged on the annual salary for successful placements."
+        >
+            <i className="fa-duotone fa-regular fa-circle-info fa-lg text-info" />
+        </div>
+    </legend>
+    <input
+        type="number"
+        className="input w-full"
+        value={feePercentage}
+        onChange={(e) => setFeePercentage(e.target.value)}
+        placeholder="20"
+        min="0"
+        max="100"
+        step="0.1"
+        required
+    />
+    <p className="fieldset-label">Percentage of annual salary (0-100%)</p>
+</fieldset>
+```
+
 ### ❌ Incorrect (Legacy v4 Pattern - Causes Mobile Cursor Issues)
 
 Do NOT use `<div>` with `<label className="label">` - this causes cursor misalignment on mobile:
 
 ```tsx
-{/* WRONG - Do not use this pattern - causes mobile issues */}
+{
+    /* WRONG - Do not use this pattern - causes mobile issues */
+}
 <div className="fieldset">
     <label className="label">Field Label</label>
-    <input 
+    <input
         type="text"
         className="input w-full"
         value={value}
@@ -65,19 +97,19 @@ Do NOT use `<div>` with `<label className="label">` - this causes cursor misalig
     <label className="label">
         <span className="label-text-alt">Helper text</span>
     </label>
-</div>
+</div>;
 ```
 
 ---
 
 ## Key Differences (v4 → v5 Migration)
 
-| Aspect | ❌ Old v4 Pattern | ✅ New v5 Pattern |
-|--------|-------------------|-------------------|
-| Wrapper element | `<div className="fieldset">` | `<fieldset className="fieldset">` |
-| Label element | `<label className="label">Text</label>` | `<legend className="fieldset-legend">Text</legend>` |
-| Helper text | `<label className="label"><span className="label-text-alt">...</span></label>` | `<p className="fieldset-label">...</p>` |
-| Input classes | `input` or `input w-full` | `input w-full` (unchanged) |
+| Aspect          | ❌ Old v4 Pattern                                                              | ✅ New v5 Pattern                                   |
+| --------------- | ------------------------------------------------------------------------------ | --------------------------------------------------- |
+| Wrapper element | `<div className="fieldset">`                                                   | `<fieldset className="fieldset">`                   |
+| Label element   | `<label className="label">Text</label>`                                        | `<legend className="fieldset-legend">Text</legend>` |
+| Helper text     | `<label className="label"><span className="label-text-alt">...</span></label>` | `<p className="fieldset-label">...</p>`             |
+| Input classes   | `input` or `input w-full`                                                      | `input w-full` (unchanged)                          |
 
 **Why This Matters**: The v4 `<label className="label">` pattern causes cursor misalignment on mobile devices. The v5 semantic pattern with `<fieldset>` and `<legend>` is both more accessible and works correctly on all devices.
 
@@ -90,7 +122,7 @@ Do NOT use `<div>` with `<label className="label">` - this causes cursor misalig
 ```tsx
 <fieldset className="fieldset">
     <legend className="fieldset-legend">Company Name *</legend>
-    <input 
+    <input
         type="text"
         className="input w-full"
         value={companyName}
@@ -106,7 +138,7 @@ Do NOT use `<div>` with `<label className="label">` - this causes cursor misalig
 ```tsx
 <fieldset className="fieldset">
     <legend className="fieldset-legend">Email *</legend>
-    <input 
+    <input
         type="email"
         className="input w-full"
         value={email}
@@ -122,7 +154,7 @@ Do NOT use `<div>` with `<label className="label">` - this causes cursor misalig
 ```tsx
 <fieldset className="fieldset">
     <legend className="fieldset-legend">Status</legend>
-    <select 
+    <select
         className="select w-full"
         value={status}
         onChange={(e) => setStatus(e.target.value)}
@@ -154,7 +186,7 @@ Do NOT use `<div>` with `<label className="label">` - this causes cursor misalig
 ```tsx
 <fieldset className="fieldset">
     <legend className="fieldset-legend">Salary (USD) *</legend>
-    <input 
+    <input
         type="number"
         className="input w-full"
         value={salary}
@@ -173,7 +205,7 @@ Do NOT use `<div>` with `<label className="label">` - this causes cursor misalig
 ```tsx
 <fieldset className="fieldset">
     <legend className="fieldset-legend">Start Date</legend>
-    <input 
+    <input
         type="date"
         className="input w-full"
         value={startDate}
@@ -213,7 +245,7 @@ For side-by-side fields:
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
     <fieldset className="fieldset">
         <legend className="fieldset-legend">First Name</legend>
-        <input 
+        <input
             type="text"
             className="input w-full"
             value={firstName}
@@ -222,7 +254,7 @@ For side-by-side fields:
     </fieldset>
     <fieldset className="fieldset">
         <legend className="fieldset-legend">Last Name</legend>
-        <input 
+        <input
             type="text"
             className="input w-full"
             value={lastName}
@@ -237,25 +269,25 @@ For side-by-side fields:
 ## Complete Form Example
 
 ```tsx
-'use client';
+"use client";
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent } from "react";
 
 export default function ExampleForm() {
     const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        role: '',
-        notes: '',
+        name: "",
+        email: "",
+        role: "",
+        notes: "",
     });
     const [submitting, setSubmitting] = useState(false);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
-        
+
         // Submit logic here
-        
+
         setSubmitting(false);
     };
 
@@ -263,32 +295,38 @@ export default function ExampleForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
             <fieldset className="fieldset">
                 <legend className="fieldset-legend">Name *</legend>
-                <input 
+                <input
                     type="text"
                     className="input w-full"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                    }
                     required
                 />
             </fieldset>
 
             <fieldset className="fieldset">
                 <legend className="fieldset-legend">Email *</legend>
-                <input 
+                <input
                     type="email"
                     className="input w-full"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                    }
                     required
                 />
             </fieldset>
 
             <fieldset className="fieldset">
                 <legend className="fieldset-legend">Role</legend>
-                <select 
+                <select
                     className="select w-full"
                     value={formData.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    onChange={(e) =>
+                        setFormData({ ...formData, role: e.target.value })
+                    }
                 >
                     <option value="">Select...</option>
                     <option value="recruiter">Recruiter</option>
@@ -301,7 +339,9 @@ export default function ExampleForm() {
                 <textarea
                     className="textarea w-full h-24"
                     value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    onChange={(e) =>
+                        setFormData({ ...formData, notes: e.target.value })
+                    }
                     placeholder="Additional information..."
                 />
             </fieldset>
@@ -310,14 +350,18 @@ export default function ExampleForm() {
                 <button type="button" className="btn">
                     Cancel
                 </button>
-                <button type="submit" className="btn btn-primary" disabled={submitting}>
+                <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={submitting}
+                >
                     {submitting ? (
                         <>
                             <span className="loading loading-spinner loading-sm"></span>
                             Submitting...
                         </>
                     ) : (
-                        'Submit'
+                        "Submit"
                     )}
                 </button>
             </div>
@@ -333,22 +377,24 @@ export default function ExampleForm() {
 For error states, use alerts above the form:
 
 ```tsx
-{error && (
-    <div className="alert alert-error mb-4">
-        <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
-        <span>{error}</span>
-    </div>
-)}
+{
+    error && (
+        <div className="alert alert-error mb-4">
+            <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
+            <span>{error}</span>
+        </div>
+    );
+}
 
 <fieldset className="fieldset">
     <legend className="fieldset-legend">Field Label</legend>
-    <input 
+    <input
         type="text"
         className="input w-full"
         value={value}
         onChange={(e) => setValue(e.target.value)}
     />
-</fieldset>
+</fieldset>;
 ```
 
 ---
@@ -362,12 +408,7 @@ Use `disabled` prop:
 ```tsx
 <fieldset className="fieldset">
     <legend className="fieldset-legend">Company ID</legend>
-    <input 
-        type="text"
-        className="input w-full"
-        value={companyId}
-        disabled
-    />
+    <input type="text" className="input w-full" value={companyId} disabled />
     <p className="fieldset-label">Company cannot be changed</p>
 </fieldset>
 ```
@@ -377,7 +418,7 @@ Use `disabled` prop:
 ```tsx
 <fieldset className="fieldset">
     <legend className="fieldset-legend">Verification Code</legend>
-    <input 
+    <input
         type="text"
         className="input w-full text-center text-2xl tracking-widest"
         value={code}
