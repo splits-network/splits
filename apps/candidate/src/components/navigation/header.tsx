@@ -142,9 +142,14 @@ export default function Header() {
 
                 <Link href="/" className="flex-shrink-0">
                     <img
-                        src="/logo.svg"
+                        src="/icon.png"
                         alt="Applicant Network"
-                        className="h-12"
+                        className="h-14 lg:hidden"
+                    />
+                    <img
+                        src="/logo.png"
+                        alt="Applicant Network"
+                        className="h-12 hidden lg:block"
                     />
                 </Link>
 
