@@ -50,7 +50,12 @@ export function UserDropdown() {
         user.fullName || user.emailAddresses[0]?.emailAddress || "User";
     const userName =
         rawUserName.length > 20 ? `${rawUserName.slice(0, 20)}…` : rawUserName;
-    const userEmail = user.emailAddresses[0]?.emailAddress;
+    const rawUserEmail = user.emailAddresses[0]?.emailAddress;
+    const userEmail = rawUserEmail
+        ? rawUserEmail.length > 20
+            ? `${rawUserEmail.slice(0, 20)}…`
+            : rawUserEmail
+        : undefined;
 
     return (
         <div className="relative" ref={dropdownRef}>
