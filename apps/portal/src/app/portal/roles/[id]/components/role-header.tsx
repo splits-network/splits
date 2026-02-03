@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useToast } from '@/lib/toast-context';
-import { useUserProfile } from '@/contexts';
-import SubmitCandidateWizard from './submit-candidate-wizard';
-import AddRoleWizardModal from '../../components/add-role-wizard-modal';
-import { getJobStatusBadge } from '@/lib/utils/badge-styles';
-import { getRoleBadges } from '@/lib/utils/role-badges';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useToast } from "@/lib/toast-context";
+import { useUserProfile } from "@/contexts";
+import SubmitCandidateWizard from "./submit-candidate-wizard";
+import RoleWizardModal from "../../components/role-wizard-modal";
+import { getJobStatusBadge } from "@/lib/utils/badge-styles";
+import { getRoleBadges } from "@/lib/utils/role-badges";
 
 interface Job {
     id: string;
@@ -24,7 +24,7 @@ interface Job {
     salary_min?: number;
     salary_max?: number;
     department?: string;
-    employment_type?: 'full_time' | 'contract' | 'temporary';
+    employment_type?: "full_time" | "contract" | "temporary";
     open_to_relocation: boolean;
     show_salary_range: boolean;
     splits_fee_percentage: number;
@@ -41,7 +41,6 @@ interface Badge {
     animated?: boolean;
 }
 
-
 interface RoleHeaderProps {
     roleId: string;
 }
@@ -57,7 +56,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
     const [showEditModal, setShowEditModal] = useState(false);
 
     // Check if user is company admin or platform admin
-    const canManageRole = isAdmin || profile?.roles?.includes('company_admin');
+    const canManageRole = isAdmin || profile?.roles?.includes("company_admin");
 
     useEffect(() => {
         fetchJob();
@@ -68,7 +67,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
         try {
             const token = await getToken();
             if (!token) {
-                console.error('No auth token available');
+                console.error("No auth token available");
                 setLoading(false);
                 return;
             }
@@ -77,14 +76,18 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
             const response: any = await client.get(`/jobs/${roleId}`);
             setJob(response.data);
         } catch (error) {
-            console.error('Failed to fetch job:', error);
+            console.error("Failed to fetch job:", error);
         } finally {
             setLoading(false);
         }
     };
 
     const handleStatusChange = async (newStatus: string) => {
-        if (!confirm(`Are you sure you want to change the status to ${newStatus}?`)) {
+        if (
+            !confirm(
+                `Are you sure you want to change the status to ${newStatus}?`,
+            )
+        ) {
             return;
         }
 
@@ -92,7 +95,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
         try {
             const token = await getToken();
             if (!token) {
-                throw new Error('No auth token');
+                throw new Error("No auth token");
             }
 
             const client = createAuthenticatedClient(token);
@@ -100,9 +103,9 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
 
             // Refresh the job data
             await fetchJob();
-            toast.success('Status updated successfully!');
+            toast.success("Status updated successfully!");
         } catch (error: any) {
-            console.error('Failed to update status:', error);
+            console.error("Failed to update status:", error);
             toast.error(`Failed to update status: ${error.message}`);
         } finally {
             setUpdating(false);
@@ -142,20 +145,30 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                         <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                             <div className="flex-1">
                                 <div className="flex items-top md:items-center gap-3 flex-wrap">
-                                    <h1 className="text-3xl font-bold">{job.title}</h1>
-                                    <div className={`badge ${getJobStatusBadge(job.status)}`}>
+                                    <h1 className="text-3xl font-bold">
+                                        {job.title}
+                                    </h1>
+                                    <div
+                                        className={`badge ${getJobStatusBadge(job.status)}`}
+                                    >
                                         {job.status}
                                     </div>
-                                    {getRoleBadges(job, [job]).map((badge: Badge, idx: number) => (
-                                        <div
-                                            key={idx}
-                                            className={`badge ${badge.class} gap-1 ${badge.animated ? 'animate-pulse' : ''} ${badge.tooltip ? 'tooltip tooltip-bottom' : ''}`}
-                                            data-tip={badge.tooltip}
-                                        >
-                                            <i className={`fa-duotone fa-regular ${badge.icon}`}></i>
-                                            {badge.text && <span>{badge.text}</span>}
-                                        </div>
-                                    ))}
+                                    {getRoleBadges(job, [job]).map(
+                                        (badge: Badge, idx: number) => (
+                                            <div
+                                                key={idx}
+                                                className={`badge ${badge.class} gap-1 ${badge.animated ? "animate-pulse" : ""} ${badge.tooltip ? "tooltip tooltip-bottom" : ""}`}
+                                                data-tip={badge.tooltip}
+                                            >
+                                                <i
+                                                    className={`fa-duotone fa-regular ${badge.icon}`}
+                                                ></i>
+                                                {badge.text && (
+                                                    <span>{badge.text}</span>
+                                                )}
+                                            </div>
+                                        ),
+                                    )}
                                 </div>
                                 <div className="flex flex-wrap items-center gap-4 mt-3 text-base-content/70">
                                     <span className="flex items-center gap-2">
@@ -177,8 +190,12 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                                     {job.employment_type && (
                                         <span className="flex items-center gap-2">
                                             <i className="fa-duotone fa-regular fa-clock"></i>
-                                            {job.employment_type === 'full_time' ? 'Full-Time' :
-                                                job.employment_type === 'contract' ? 'Contract' : 'Temporary'}
+                                            {job.employment_type === "full_time"
+                                                ? "Full-Time"
+                                                : job.employment_type ===
+                                                    "contract"
+                                                  ? "Contract"
+                                                  : "Temporary"}
                                         </span>
                                     )}
                                     {job.open_to_relocation && (
@@ -187,39 +204,55 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                                             Open to Relocation
                                         </span>
                                     )}
-                                    {job.show_salary_range && job.salary_min && job.salary_max && (
-                                        <span className="flex items-center gap-2">
-                                            <i className="fa-duotone fa-regular fa-dollar-sign"></i>
-                                            ${(job.salary_min / 1000).toFixed(0)}k - ${(job.salary_max / 1000).toFixed(0)}k
-                                        </span>
-                                    )}
+                                    {job.show_salary_range &&
+                                        job.salary_min &&
+                                        job.salary_max && (
+                                            <span className="flex items-center gap-2">
+                                                <i className="fa-duotone fa-regular fa-dollar-sign"></i>
+                                                $
+                                                {(
+                                                    job.salary_min / 1000
+                                                ).toFixed(0)}
+                                                k - $
+                                                {(
+                                                    job.salary_max / 1000
+                                                ).toFixed(0)}
+                                                k
+                                            </span>
+                                        )}
                                     <span className="flex items-center gap-2">
                                         <i className="fa-duotone fa-regular fa-percent"></i>
                                         {job.fee_percentage}% fee
                                     </span>
                                     <span className="flex items-center gap-2">
                                         <i className="fa-duotone fa-regular fa-shield-check"></i>
-                                        {(job as any).guarantee_days ?? 90} day guarantee
+                                        {(job as any).guarantee_days ?? 90} day
+                                        guarantee
                                     </span>
                                 </div>
                             </div>
 
                             {/* Actions */}
                             <div className="flex flex-col gap-2">
-                                {isRecruiter || isAdmin && (
-                                    <button
-                                        className="btn btn-primary gap-2"
-                                        onClick={() => setShowSubmitModal(true)}
-                                    >
-                                        <i className="fa-duotone fa-regular fa-user-plus"></i>
-                                        Send Proposal
-                                    </button>
-                                )}
+                                {isRecruiter ||
+                                    (isAdmin && (
+                                        <button
+                                            className="btn btn-primary gap-2"
+                                            onClick={() =>
+                                                setShowSubmitModal(true)
+                                            }
+                                        >
+                                            <i className="fa-duotone fa-regular fa-user-plus"></i>
+                                            Send Proposal
+                                        </button>
+                                    ))}
 
                                 {canManageRole && (
                                     <>
                                         <button
-                                            onClick={() => setShowEditModal(true)}
+                                            onClick={() =>
+                                                setShowEditModal(true)
+                                            }
                                             className="btn btn-ghost gap-2"
                                         >
                                             <i className="fa-duotone fa-regular fa-pen"></i>
@@ -240,34 +273,61 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
                                                 )}
                                                 Status Actions
                                             </button>
-                                            <ul tabIndex={0} className="dropdown-content z-1 menu p-2 shadow bg-base-100 rounded-box w-52">
-                                                {job.status !== 'active' && (
+                                            <ul
+                                                tabIndex={0}
+                                                className="dropdown-content z-1 menu p-2 shadow bg-base-100 rounded-box w-52"
+                                            >
+                                                {job.status !== "active" && (
                                                     <li>
-                                                        <button onClick={() => handleStatusChange('active')}>
+                                                        <button
+                                                            onClick={() =>
+                                                                handleStatusChange(
+                                                                    "active",
+                                                                )
+                                                            }
+                                                        >
                                                             <i className="fa-duotone fa-regular fa-play"></i>
                                                             Activate
                                                         </button>
                                                     </li>
                                                 )}
-                                                {job.status === 'active' && (
+                                                {job.status === "active" && (
                                                     <li>
-                                                        <button onClick={() => handleStatusChange('paused')}>
+                                                        <button
+                                                            onClick={() =>
+                                                                handleStatusChange(
+                                                                    "paused",
+                                                                )
+                                                            }
+                                                        >
                                                             <i className="fa-duotone fa-regular fa-pause"></i>
                                                             Pause
                                                         </button>
                                                     </li>
                                                 )}
-                                                {job.status !== 'filled' && (
+                                                {job.status !== "filled" && (
                                                     <li>
-                                                        <button onClick={() => handleStatusChange('filled')}>
+                                                        <button
+                                                            onClick={() =>
+                                                                handleStatusChange(
+                                                                    "filled",
+                                                                )
+                                                            }
+                                                        >
                                                             <i className="fa-duotone fa-regular fa-check"></i>
                                                             Mark as Filled
                                                         </button>
                                                     </li>
                                                 )}
-                                                {job.status !== 'closed' && (
+                                                {job.status !== "closed" && (
                                                     <li>
-                                                        <button onClick={() => handleStatusChange('closed')}>
+                                                        <button
+                                                            onClick={() =>
+                                                                handleStatusChange(
+                                                                    "closed",
+                                                                )
+                                                            }
+                                                        >
                                                             <i className="fa-duotone fa-regular fa-xmark"></i>
                                                             Close Role
                                                         </button>
@@ -293,7 +353,7 @@ export default function RoleHeader({ roleId }: RoleHeaderProps) {
             )}
 
             {showEditModal && (
-                <AddRoleWizardModal
+                <RoleWizardModal
                     isOpen={showEditModal}
                     jobId={roleId}
                     mode="edit"

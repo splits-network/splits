@@ -9,10 +9,7 @@ import {
     OnboardingProvider,
     OnboardingWizardModal,
 } from "@/components/onboarding";
-import {
-    UserProfileProvider,
-    PageTitleProvider,
-} from "@/contexts";
+import { UserProfileProvider, PageTitleProvider } from "@/contexts";
 
 export function AuthenticatedLayoutClient({
     children,
@@ -20,13 +17,11 @@ export function AuthenticatedLayoutClient({
     children: React.ReactNode;
 }) {
     return (
-        <UserProfileProvider>
-            <PageTitleProvider>
-                <OnboardingProvider>
-                    {children}
-                    <OnboardingWizardModal />
-                </OnboardingProvider>
-            </PageTitleProvider>
-        </UserProfileProvider>
+        <PageTitleProvider>
+            <OnboardingProvider>
+                {children}
+                <OnboardingWizardModal />
+            </OnboardingProvider>
+        </PageTitleProvider>
     );
 }

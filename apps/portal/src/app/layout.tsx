@@ -8,6 +8,7 @@ import { ServiceStatusBanner } from "@/components/service-status-banner";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
 import "./globals.css";
+import { UserProfileProvider } from "@/contexts";
 
 export const metadata: Metadata = {
     metadataBase: new URL("https://splits.network"),
@@ -130,12 +131,14 @@ export default async function RootLayout({
                     />
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-300">
-                    <ThemeInitializer />
-                    <ServiceStatusBanner />
-                    <ToastProvider>
-                        <main className="grow">{children}</main>
-                        <CookieConsent />
-                    </ToastProvider>
+                    <UserProfileProvider>
+                        <ThemeInitializer />
+                        <ServiceStatusBanner />
+                        <ToastProvider>
+                            <main className="grow">{children}</main>
+                            <CookieConsent />
+                        </ToastProvider>
+                    </UserProfileProvider>
 
                     {/* Analytics scripts loaded after page becomes interactive */}
                     <Script

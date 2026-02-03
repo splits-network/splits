@@ -1,26 +1,32 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useUserProfile } from '@/contexts';
-import { useToast } from '@/lib/toast-context';
-import { FormData, Company } from './wizard-steps/types';
-import Step1BasicInfo from './wizard-steps/step-1-basic-info';
-import Step2Compensation from './wizard-steps/step-2-compensation';
-import Step3Descriptions from './wizard-steps/step-3-descriptions';
-import Step4Requirements from './wizard-steps/step-4-requirements';
-import Step5PreScreenQuestions from './wizard-steps/step-5-pre-screen-questions';
+import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useUserProfile } from "@/contexts";
+import { useToast } from "@/lib/toast-context";
+import { FormData, Company } from "./wizard-steps/types";
+import Step1BasicInfo from "./wizard-steps/step-1-basic-info";
+import Step2Compensation from "./wizard-steps/step-2-compensation";
+import Step3Descriptions from "./wizard-steps/step-3-descriptions";
+import Step4Requirements from "./wizard-steps/step-4-requirements";
+import Step5PreScreenQuestions from "./wizard-steps/step-5-pre-screen-questions";
 
-interface AddRoleWizardModalProps {
+interface RoleWizardModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess?: () => void;
     jobId?: string; // For edit mode
-    mode?: 'create' | 'edit';
+    mode?: "create" | "edit";
 }
 
-export default function AddRoleWizardModal({ isOpen, onClose, onSuccess, jobId, mode = 'create' }: AddRoleWizardModalProps) {
+export default function RoleWizardModal({
+    isOpen,
+    onClose,
+    onSuccess,
+    jobId,
+    mode = "create",
+}: RoleWizardModalProps) {
     const { getToken } = useAuth();
     const toast = useToast();
     const { profile, isAdmin, isLoading: profileLoading } = useUserProfile();
@@ -32,24 +38,24 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess, jobId, 
 
     const [formData, setFormData] = useState<FormData>({
         // Step 1
-        title: '',
-        company_id: '',
-        location: '',
-        department: '',
-        status: 'active',
+        title: "",
+        company_id: "",
+        location: "",
+        department: "",
+        status: "active",
 
         // Step 2
-        salary_min: '',
-        salary_max: '',
+        salary_min: "",
+        salary_max: "",
         show_salary_range: true,
         fee_percentage: 20,
         guarantee_days: 90,
-        employment_type: 'full_time',
+        employment_type: "full_time",
         open_to_relocation: false,
 
         // Step 3
-        recruiter_description: '',
-        candidate_description: '',
+        recruiter_description: "",
+        candidate_description: "",
 
         // Step 4
         mandatory_requirements: [],
@@ -62,56 +68,80 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess, jobId, 
     const totalSteps = 5;
 
     const steps = [
-        { number: 1, title: 'Basic Info', description: 'Job title and details' },
-        { number: 2, title: 'Compensation', description: 'Salary and fees' },
-        { number: 3, title: 'Descriptions', description: 'Job descriptions' },
-        { number: 4, title: 'Requirements', description: 'Qualifications needed' },
-        { number: 5, title: 'Pre-Screen', description: 'Screening questions' },
+        {
+            number: 1,
+            title: "Basic Info",
+            description: "Job title and details",
+        },
+        { number: 2, title: "Compensation", description: "Salary and fees" },
+        { number: 3, title: "Descriptions", description: "Job descriptions" },
+        {
+            number: 4,
+            title: "Requirements",
+            description: "Qualifications needed",
+        },
+        { number: 5, title: "Pre-Screen", description: "Screening questions" },
     ];
 
     // Load existing job data when in edit mode
     useEffect(() => {
-        if (!isOpen || !jobId || mode !== 'edit') return;
+        if (!isOpen || !jobId || mode !== "edit") return;
 
         async function loadJobData() {
             setLoading(true);
             try {
                 const token = await getToken();
-                if (!token) throw new Error('Authentication required');
+                if (!token) throw new Error("Authentication required");
 
                 const client = createAuthenticatedClient(token);
-                const response = await client.get<{ data: any }>(`/jobs/${jobId}`, {
-                    params: { include: 'requirements,pre_screen_questions' }
-                });
+                const response = await client.get<{ data: any }>(
+                    `/jobs/${jobId}`,
+                    {
+                        params: {
+                            include: "requirements,pre_screen_questions",
+                        },
+                    },
+                );
                 const job = response.data;
                 // Populate form with existing data
                 setFormData({
-                    title: job.title || '',
-                    company_id: job.company_id || '',
-                    location: job.location || '',
-                    department: job.department || '',
-                    status: job.status || 'active',
-                    salary_min: job.salary_min?.toString() || '',
-                    salary_max: job.salary_max?.toString() || '',
+                    title: job.title || "",
+                    company_id: job.company_id || "",
+                    location: job.location || "",
+                    department: job.department || "",
+                    status: job.status || "active",
+                    salary_min: job.salary_min?.toString() || "",
+                    salary_max: job.salary_max?.toString() || "",
                     show_salary_range: job.show_salary_range ?? true,
                     fee_percentage: job.fee_percentage || 20,
                     guarantee_days: job.guarantee_days || 90,
-                    employment_type: job.employment_type || 'full_time',
+                    employment_type: job.employment_type || "full_time",
                     open_to_relocation: job.open_to_relocation || false,
-                    recruiter_description: job.recruiter_description || '',
-                    candidate_description: job.candidate_description || '',
-                    mandatory_requirements: job.requirements?.filter((r: any) => r.requirement_type === 'mandatory').map((r: any) => r.description) || [],
-                    preferred_requirements: job.requirements?.filter((r: any) => r.requirement_type === 'preferred').map((r: any) => r.description) || [],
-                    pre_screen_questions: job.pre_screen_questions?.map((q: any) => ({
-                        question: q.question,
-                        question_type: q.question_type,
-                        is_required: q.is_required,
-                        options: q.options
-                    })) || [],
+                    recruiter_description: job.recruiter_description || "",
+                    candidate_description: job.candidate_description || "",
+                    mandatory_requirements:
+                        job.requirements
+                            ?.filter(
+                                (r: any) => r.requirement_type === "mandatory",
+                            )
+                            .map((r: any) => r.description) || [],
+                    preferred_requirements:
+                        job.requirements
+                            ?.filter(
+                                (r: any) => r.requirement_type === "preferred",
+                            )
+                            .map((r: any) => r.description) || [],
+                    pre_screen_questions:
+                        job.pre_screen_questions?.map((q: any) => ({
+                            question: q.question,
+                            question_type: q.question_type,
+                            is_required: q.is_required,
+                            options: q.options,
+                        })) || [],
                 });
             } catch (err: any) {
-                console.error('Failed to load job:', err);
-                setError('Failed to load job data. Please try again.');
+                console.error("Failed to load job:", err);
+                setError("Failed to load job data. Please try again.");
             } finally {
                 setLoading(false);
             }
@@ -131,46 +161,60 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess, jobId, 
             try {
                 const token = await getToken();
                 if (!token) {
-                    throw new Error('Authentication required');
+                    throw new Error("Authentication required");
                 }
 
                 const client = createAuthenticatedClient(token);
 
                 if (isAdmin) {
                     // Platform admin: fetch all companies
-                    const companiesResponse = await client.get<{ data: Company[]; pagination: any }>('/companies');
+                    const companiesResponse = await client.get<{
+                        data: Company[];
+                        pagination: any;
+                    }>("/companies");
                     setCompanies(companiesResponse.data || []);
                 } else {
                     // Company admin: auto-populate from their organization
                     const organizationId = profile?.organization_ids?.[0];
                     if (organizationId) {
                         try {
-                            const companyResponse = await client.get<{ data: Company[]; pagination: any }>(`/companies`, {
+                            const companyResponse = await client.get<{
+                                data: Company[];
+                                pagination: any;
+                            }>(`/companies`, {
                                 params: {
                                     filters: {
-                                        organizationId: organizationId
+                                        organizationId: organizationId,
                                     },
-                                    limit: 1
-                                }
+                                    limit: 1,
+                                },
                             });
                             const companies = companyResponse.data || [];
                             setCompanies(companies);
 
                             if (companies.length > 0) {
-                                setFormData(prev => ({ ...prev, company_id: companies[0].id }));
+                                setFormData((prev) => ({
+                                    ...prev,
+                                    company_id: companies[0].id,
+                                }));
                             }
                         } catch (err: any) {
-                            if (err.message?.includes('404') || err.message?.includes('not found')) {
-                                setError('No company found for your organization. Please ask your admin to create one first.');
+                            if (
+                                err.message?.includes("404") ||
+                                err.message?.includes("not found")
+                            ) {
+                                setError(
+                                    "No company found for your organization. Please ask your admin to create one first.",
+                                );
                             } else {
-                                setError('Error loading company information.');
+                                setError("Error loading company information.");
                             }
                         }
                     }
                 }
             } catch (err: any) {
-                console.error('Failed to load companies:', err);
-                setError(err.message || 'Failed to load companies');
+                console.error("Failed to load companies:", err);
+                setError(err.message || "Failed to load companies");
             } finally {
                 setLoading(false);
             }
@@ -185,20 +229,20 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess, jobId, 
             setCurrentStep(1);
             setError(null);
             setFormData({
-                title: '',
-                company_id: '',
-                location: '',
-                department: '',
-                status: 'active',
-                salary_min: '',
-                salary_max: '',
+                title: "",
+                company_id: "",
+                location: "",
+                department: "",
+                status: "active",
+                salary_min: "",
+                salary_max: "",
                 show_salary_range: true,
                 fee_percentage: 20,
                 guarantee_days: 90,
-                employment_type: 'full_time',
+                employment_type: "full_time",
                 open_to_relocation: false,
-                recruiter_description: '',
-                candidate_description: '',
+                recruiter_description: "",
+                candidate_description: "",
                 mandatory_requirements: [],
                 preferred_requirements: [],
                 pre_screen_questions: [],
@@ -215,22 +259,22 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess, jobId, 
         // Validate current step before proceeding
         if (currentStep === 1) {
             if (!formData.title.trim()) {
-                setError('Job title is required');
+                setError("Job title is required");
                 return;
             }
             if (!formData.company_id) {
-                setError('Please select a company');
+                setError("Please select a company");
                 return;
             }
         }
 
         setError(null);
-        setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+        setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
     };
 
     const handleBack = () => {
         setError(null);
-        setCurrentStep(prev => Math.max(prev - 1, 1));
+        setCurrentStep((prev) => Math.max(prev - 1, 1));
     };
 
     const handleSubmit = async () => {
@@ -240,7 +284,7 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess, jobId, 
         try {
             const token = await getToken();
             if (!token) {
-                throw new Error('Authentication required');
+                throw new Error("Authentication required");
             }
 
             const client = createAuthenticatedClient(token);
@@ -259,51 +303,62 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess, jobId, 
 
             if (formData.location) payload.location = formData.location;
             if (formData.department) payload.department = formData.department;
-            if (formData.recruiter_description) payload.recruiter_description = formData.recruiter_description;
-            if (formData.candidate_description) payload.candidate_description = formData.candidate_description;
-            if (formData.salary_min) payload.salary_min = parseInt(formData.salary_min);
-            if (formData.salary_max) payload.salary_max = parseInt(formData.salary_max);
+            if (formData.recruiter_description)
+                payload.recruiter_description = formData.recruiter_description;
+            if (formData.candidate_description)
+                payload.candidate_description = formData.candidate_description;
+            if (formData.salary_min)
+                payload.salary_min = parseInt(formData.salary_min);
+            if (formData.salary_max)
+                payload.salary_max = parseInt(formData.salary_max);
 
             let targetJobId: string;
 
-            if (mode === 'edit' && jobId) {
+            if (mode === "edit" && jobId) {
                 // Update existing job
                 await client.patch(`/jobs/${jobId}`, payload);
                 targetJobId = jobId;
-                toast.success('Role updated successfully!');
+                toast.success("Role updated successfully!");
             } else {
                 // Create new job
-                const response = await client.post<{ data: { id: string } }>('/jobs', payload);
+                const response = await client.post<{ data: { id: string } }>(
+                    "/jobs",
+                    payload,
+                );
                 targetJobId = response.data.id;
-                toast.success('Role created successfully!');
+                toast.success("Role created successfully!");
             }
 
             // Note: Requirements and pre-screen questions management for edit mode
             // would require additional logic to handle updates/deletes
             // For now, only handle creation mode for these
-            if (mode === 'create') {
+            if (mode === "create") {
                 // Build requirements array
                 const requirements = [
-                    ...formData.mandatory_requirements.filter(r => r.trim()).map(description => ({
-                        type: 'mandatory' as const,
-                        description
-                    })),
-                    ...formData.preferred_requirements.filter(r => r.trim()).map(description => ({
-                        type: 'preferred' as const,
-                        description
-                    }))
+                    ...formData.mandatory_requirements
+                        .filter((r) => r.trim())
+                        .map((description) => ({
+                            type: "mandatory" as const,
+                            description,
+                        })),
+                    ...formData.preferred_requirements
+                        .filter((r) => r.trim())
+                        .map((description) => ({
+                            type: "preferred" as const,
+                            description,
+                        })),
                 ];
 
                 // Add requirements if any
                 if (requirements.length > 0) {
                     await Promise.all(
-                        requirements.map(req =>
-                            client.post('/job-requirements', {
+                        requirements.map((req) =>
+                            client.post("/job-requirements", {
                                 job_id: targetJobId,
                                 requirement_type: req.type,
                                 description: req.description,
-                            })
-                        )
+                            }),
+                        ),
                     );
                 }
 
@@ -311,16 +366,16 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess, jobId, 
                 if (formData.pre_screen_questions.length > 0) {
                     await Promise.all(
                         formData.pre_screen_questions
-                            .filter(q => q.question.trim())
-                            .map(q =>
-                                client.post('/job-pre-screen-questions', {
+                            .filter((q) => q.question.trim())
+                            .map((q) =>
+                                client.post("/job-pre-screen-questions", {
                                     job_id: targetJobId,
                                     question: q.question,
                                     question_type: q.question_type,
                                     is_required: q.is_required,
                                     options: q.options || null,
-                                })
-                            )
+                                }),
+                            ),
                     );
                 }
             }
@@ -328,8 +383,8 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess, jobId, 
             onClose();
             if (onSuccess) onSuccess();
         } catch (err: any) {
-            console.error('Failed to create role:', err);
-            setError(err.message || 'Failed to create role. Please try again.');
+            console.error("Failed to create role:", err);
+            setError(err.message || "Failed to create role. Please try again.");
         } finally {
             setSubmitting(false);
         }
@@ -343,7 +398,9 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess, jobId, 
                 {/* Header */}
                 <div className="flex justify-between items-start mb-6">
                     <div>
-                        <h3 className="font-bold text-2xl">{mode === 'edit' ? 'Edit Role' : 'Create New Role'}</h3>
+                        <h3 className="font-bold text-2xl">
+                            {mode === "edit" ? "Edit Role" : "Create New Role"}
+                        </h3>
                         <p className="text-base-content/70 mt-1">
                             {steps[currentStep - 1].description}
                         </p>
@@ -363,10 +420,16 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess, jobId, 
                         {steps.map((step) => (
                             <li
                                 key={step.number}
-                                className={`step ${currentStep >= step.number ? 'step-primary' : ''}`}
-                                data-content={currentStep > step.number ? '✓' : step.number}
+                                className={`step ${currentStep >= step.number ? "step-primary" : ""}`}
+                                data-content={
+                                    currentStep > step.number
+                                        ? "✓"
+                                        : step.number
+                                }
                             >
-                                <span className="hidden sm:inline">{step.title}</span>
+                                <span className="hidden sm:inline">
+                                    {step.title}
+                                </span>
                             </li>
                         ))}
                     </ul>
@@ -431,7 +494,7 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess, jobId, 
                         onClick={currentStep === 1 ? handleClose : handleBack}
                         disabled={submitting}
                     >
-                        {currentStep === 1 ? 'Cancel' : 'Back'}
+                        {currentStep === 1 ? "Cancel" : "Back"}
                     </button>
 
                     <div className="text-sm text-base-content/60">
@@ -456,19 +519,22 @@ export default function AddRoleWizardModal({ isOpen, onClose, onSuccess, jobId, 
                             {submitting ? (
                                 <>
                                     <span className="loading loading-spinner loading-sm"></span>
-                                    {mode === 'edit' ? 'Updating...' : 'Creating...'}
+                                    {mode === "edit"
+                                        ? "Updating..."
+                                        : "Creating..."}
                                 </>
                             ) : (
                                 <>
                                     <i className="fa-duotone fa-regular fa-check mr-2"></i>
-                                    {mode === 'edit' ? 'Update Role' : 'Create Role'}
+                                    {mode === "edit"
+                                        ? "Update Role"
+                                        : "Create Role"}
                                 </>
                             )}
                         </button>
                     )}
                 </div>
             </div>
-            <div className="modal-backdrop" onClick={handleClose}></div>
         </div>
     );
 }

@@ -8,7 +8,7 @@ import { RolesBrowseClient } from "./domain-components";
 import RoleListItem from "./list-item";
 import DetailPanel from "./detail-panel";
 import RoleFilterForm from "./filter-form";
-import AddRoleWizardModal from "./role-wizard-modal";
+import RoleWizardModal from "../role-wizard-modal";
 import { Job, JobFilters } from "./types";
 
 export default function BrowseRolesClient() {
@@ -116,7 +116,7 @@ export default function BrowseRolesClient() {
 
             {/* Add Role Modal */}
             {isAddModalOpen && (
-                <AddRoleWizardModal
+                <RoleWizardModal
                     isOpen={isAddModalOpen}
                     onClose={() => setIsAddModalOpen(false)}
                 />
