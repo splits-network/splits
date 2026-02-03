@@ -1,10 +1,15 @@
-import { useRouter } from 'next/navigation';
-import { EntityCard, DataRow, VerticalDataRow, DataList } from '@/components/ui/cards';
-import { formatSalary, formatRelativeTime } from '@/lib/utils';
+import { useRouter } from "next/navigation";
+import {
+    EntityCard,
+    DataRow,
+    VerticalDataRow,
+    DataList,
+} from "@/components/ui/cards";
+import { formatSalary, formatRelativeTime } from "@/lib/utils";
 
 interface JobRequirement {
     id: string;
-    requirement_type: 'mandatory' | 'preferred';
+    requirement_type: "mandatory" | "preferred";
     description: string;
     sort_order: number;
 }
@@ -34,17 +39,22 @@ interface Job {
 }
 
 // Compute job freshness badge
-function getJobFreshnessBadge(postedAt?: string | Date, createdAt?: string | Date) {
+function getJobFreshnessBadge(
+    postedAt?: string | Date,
+    createdAt?: string | Date,
+) {
     const date = postedAt || createdAt;
     if (!date) return null;
 
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    const daysOld = Math.floor((Date.now() - dateObj.getTime()) / (1000 * 60 * 60 * 24));
+    const dateObj = typeof date === "string" ? new Date(date) : date;
+    const daysOld = Math.floor(
+        (Date.now() - dateObj.getTime()) / (1000 * 60 * 60 * 24),
+    );
 
     if (daysOld <= 3) {
-        return { label: 'New', color: 'badge-success', icon: 'fa-sparkles' };
+        return { label: "New", color: "badge-success", icon: "fa-sparkles" };
     } else if (daysOld <= 7) {
-        return { label: 'Recent', color: 'badge-secondary', icon: 'fa-clock' };
+        return { label: "Recent", color: "badge-secondary", icon: "fa-clock" };
     }
     return null; // Don't show badge for older jobs
 }
@@ -59,10 +69,10 @@ export default function JobCard({ job }: JobCardProps) {
 
     // Compute company initials for avatar fallback
     const companyInitials = (() => {
-        const name = job.company?.name || 'Company';
-        const words = name.split(' ');
-        const firstInitial = words[0]?.[0]?.toUpperCase() || '';
-        const lastInitial = words[words.length - 1]?.[0]?.toUpperCase() || '';
+        const name = job.company?.name || "Company";
+        const words = name.split(" ");
+        const firstInitial = words[0]?.[0]?.toUpperCase() || "";
+        const lastInitial = words[words.length - 1]?.[0]?.toUpperCase() || "";
         return words.length > 1 ? firstInitial + lastInitial : firstInitial;
     })();
 
@@ -72,29 +82,37 @@ export default function JobCard({ job }: JobCardProps) {
 
     // Format employment type for display
     const formatEmploymentType = (type?: string) => {
-        if (!type) return 'Not specified';
-        return type.split('_').map(word =>
-            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        ).join(' ');
+        if (!type) return "Not specified";
+        return type
+            .split("_")
+            .map(
+                (word) =>
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+            )
+            .join(" ");
     };
 
     // Get truncated description
     const getDescription = () => {
         const desc = job.candidate_description || job.description;
-        if (!desc) return 'No description provided';
-        return desc.length > 150 ? desc.substring(0, 150) + '...' : desc;
+        if (!desc) return "No description provided";
+        return desc.length > 150 ? desc.substring(0, 150) + "..." : desc;
     };
 
     return (
-        <EntityCard className='group hover:shadow-lg transition-all duration-200'>
+        <EntityCard className="group hover:shadow-lg transition-all duration-200">
             <EntityCard.Header>
-                <div className='flex items-center justify-between gap-3 min-w-0'>
-                    <div className='flex items-center gap-3 min-w-0'>
+                <div className="flex items-center justify-between gap-3 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0">
                         {/* Company Logo/Avatar */}
                         <div className="avatar avatar-placeholder">
                             <div className="bg-base-200 text-base-content rounded-lg w-10 h-10">
                                 {job.company?.logo_url ? (
-                                    <img src={job.company.logo_url} alt={job.company.name} className='object-contain w-full h-full' />
+                                    <img
+                                        src={job.company.logo_url}
+                                        alt={job.company.name}
+                                        className="object-contain w-full h-full"
+                                    />
                                 ) : (
                                     <span className="text-lg">
                                         {companyInitials}
@@ -102,19 +120,28 @@ export default function JobCard({ job }: JobCardProps) {
                                 )}
                             </div>
                         </div>
-                        <div className='flex flex-col min-w-0'>
-                            <h3 className="font-semibold text-md truncate flex items-center gap-2">
+                        <div className="flex flex-col min-w-0">
+                            <h3
+                                className="font-semibold text-md flex items-center gap-2 overflow-hidden whitespace-nowrap text-ellipsis"
+                                title={job.title}
+                            >
                                 {job.title}
                             </h3>
                             <div className="text-sm text-base-content/70 truncate">
-                                {job.company?.name || 'Company'}
+                                {job.company?.name || "Company"}
                             </div>
                         </div>
                     </div>
                     {freshnessBadge && (
-                        <span className={`badge ${freshnessBadge.color} badge-sm gap-1 whitespace-nowrap`}>
-                            <i className={`fa-duotone fa-regular ${freshnessBadge.icon} text-xs`}></i>
-                            <span className="hidden sm:inline">{freshnessBadge.label}</span>
+                        <span
+                            className={`badge ${freshnessBadge.color} badge-sm gap-1 whitespace-nowrap`}
+                        >
+                            <i
+                                className={`fa-duotone fa-regular ${freshnessBadge.icon} text-xs`}
+                            ></i>
+                            <span className="hidden sm:inline">
+                                {freshnessBadge.label}
+                            </span>
                         </span>
                     )}
                 </div>
@@ -122,38 +149,43 @@ export default function JobCard({ job }: JobCardProps) {
 
             <EntityCard.Body>
                 <DataList>
-                    <VerticalDataRow label="Description" icon='fa-file-lines'>
+                    <VerticalDataRow label="Description" icon="fa-file-lines">
                         <span className="w-full text-sm text-base-content/80 line-clamp-3">
                             {getDescription()}
                         </span>
                     </VerticalDataRow>
                     <DataRow
                         label="Location"
-                        icon='fa-location-dot'
-                        value={job.location || 'Not specified'}
+                        icon="fa-location-dot"
+                        value={job.location || "Not specified"}
                     />
                     <DataRow
                         label="Employment Type"
-                        icon='fa-briefcase'
-                        value={formatEmploymentType(job.employment_type ?? undefined)}
+                        icon="fa-briefcase"
+                        value={formatEmploymentType(
+                            job.employment_type ?? undefined,
+                        )}
                     />
                     {(job.salary_min || job.salary_max) && (
                         <DataRow
                             label="Salary Range"
-                            icon='fa-dollar-sign'
-                            value={formatSalary(job.salary_min ?? 0, job.salary_max ?? 0)}
+                            icon="fa-dollar-sign"
+                            value={formatSalary(
+                                job.salary_min ?? 0,
+                                job.salary_max ?? 0,
+                            )}
                         />
                     )}
                     {job.department && (
                         <DataRow
                             label="Department"
-                            icon='fa-building'
+                            icon="fa-building"
                             value={job.department}
                         />
                     )}
                     {job.company?.industry && (
-                        <VerticalDataRow label="Industry" icon='fa-industry'>
-                            <div className='w-full'>
+                        <VerticalDataRow label="Industry" icon="fa-industry">
+                            <div className="w-full">
                                 <span className="badge badge-sm">
                                     {job.company.industry}
                                 </span>
@@ -163,7 +195,7 @@ export default function JobCard({ job }: JobCardProps) {
                 </DataList>
             </EntityCard.Body>
             <EntityCard.Footer>
-                <div className='flex justify-between items-center'>
+                <div className="flex justify-between items-center">
                     <div>
                         {job.open_to_relocation && (
                             <span className="badge badge-outline badge-sm gap-1 mb-1">
@@ -172,7 +204,12 @@ export default function JobCard({ job }: JobCardProps) {
                             </span>
                         )}
                         <div className="text-xs text-base-content/50">
-                            Posted: {formatRelativeTime(job.updated_at || job.created_at || new Date().toISOString())}
+                            Posted:{" "}
+                            {formatRelativeTime(
+                                job.updated_at ||
+                                    job.created_at ||
+                                    new Date().toISOString(),
+                            )}
                         </div>
                     </div>
                     <button
