@@ -1740,7 +1740,7 @@ CREATE TABLE IF NOT EXISTS "public"."jobs" (
     "company_headquarters_location" "text",
     "job_owner_recruiter_id" "uuid",
     "company_recruiter_id" "uuid",
-    CONSTRAINT "jobs_employment_type_check" CHECK (("employment_type" = ANY (ARRAY['full_time'::"text", 'contract'::"text", 'temporary'::"text"]))),
+    CONSTRAINT "jobs_employment_type_check" CHECK (("employment_type" = ANY (ARRAY['full_time'::"text", 'part_time'::"text", 'contract'::"text", 'temporary'::"text"]))),
     CONSTRAINT "jobs_fee_percentage_check" CHECK ((("fee_percentage" >= (0)::numeric) AND ("fee_percentage" <= (100)::numeric))),
     CONSTRAINT "jobs_splits_fee_percentage_check" CHECK ((("splits_fee_percentage" >= (0)::numeric) AND ("splits_fee_percentage" <= (100)::numeric))),
     CONSTRAINT "jobs_status_check" CHECK (("status" = ANY (ARRAY['active'::"text", 'paused'::"text", 'filled'::"text", 'closed'::"text"])))

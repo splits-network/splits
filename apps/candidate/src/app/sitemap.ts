@@ -12,6 +12,8 @@ const routes = [
     '/public/help',
     '/public/how-it-works',
     '/public/jobs',
+    '/public/jobs/rss.xml',
+    '/public/jobs/atom.xml',
     '/public/marketplace',
     '/public/privacy',
     '/public/privacy-policy',

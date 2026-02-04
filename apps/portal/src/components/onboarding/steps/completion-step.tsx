@@ -193,7 +193,7 @@ export function CompletionStep() {
                                     <p className="text-sm text-base-content/70">
                                         Billing Email
                                     </p>
-                                    <p className="font-medium">
+                                    <p className="font-medium text-ellipsis overflow-hidden">
                                         {state.companyInfo.billing_email}
                                     </p>
                                 </div>

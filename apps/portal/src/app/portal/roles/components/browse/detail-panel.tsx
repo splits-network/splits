@@ -5,7 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { Job } from "./types";
 import DetailHeader from "./detail-header";
-import AddRoleWizardModal from "./role-wizard-modal";
+import RoleWizardModal from "../role-wizard-modal";
 
 interface DetailPanelProps {
     id: string | null;
@@ -1131,7 +1131,7 @@ export default function DetailPanel({ id, onClose }: DetailPanelProps) {
 
             {/* Edit Role Modal */}
             {job && (
-                <AddRoleWizardModal
+                <RoleWizardModal
                     isOpen={isEditModalOpen}
                     onClose={() => setIsEditModalOpen(false)}
                     onSuccess={handleEditSuccess}

@@ -1,0 +1,5 @@
+# security.txt
+Contact: mailto:hello@splits.network
+Expires: 2026-12-31
+Preferred-Languages: en
+Policy: https://splits.network/public/terms-of-service

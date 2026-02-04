@@ -19,7 +19,7 @@ import {
     TIME_PERIODS,
     calculateStatTrends,
 } from "../../../../components/charts/roles-trends-chart";
-import AddRoleWizardModal from "./add-role-wizard-modal";
+import RoleWizardModal from "./role-wizard-modal";
 import Link from "next/link";
 import { ViewMode } from "@/hooks/use-view-mode";
 
@@ -389,7 +389,7 @@ export default function RolesList({ view }: RolesListProps) {
 
                 {/* Add Role Modal */}
                 {showAddModal && (
-                    <AddRoleWizardModal
+                    <RoleWizardModal
                         isOpen={showAddModal}
                         onClose={() => setShowAddModal(false)}
                         onSuccess={() => {
@@ -401,7 +401,7 @@ export default function RolesList({ view }: RolesListProps) {
 
                 {/* Edit Role Modal */}
                 {editingJobId && (
-                    <AddRoleWizardModal
+                    <RoleWizardModal
                         isOpen={true}
                         jobId={editingJobId}
                         mode="edit"

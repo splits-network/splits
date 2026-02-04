@@ -1,0 +1,12 @@
+# ai.txt
+# Policy for AI crawlers and model trainers
+User-agent: *
+Allow: /
+Disallow: /api
+Disallow: /api/
+Disallow: /portal
+Disallow: /portal/
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /accept-invitation
+Disallow: /accept-invitation/

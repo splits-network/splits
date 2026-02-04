@@ -7,6 +7,7 @@ import { usePageTitle } from "@/contexts/page-title-context";
 import NotificationBell from "@/components/notification-bell";
 import { PlanBadge } from "@/components/plan-badge";
 import { useUser } from "@clerk/nextjs";
+import { UserDropdown } from "./user-dropdown";
 
 export function PortalHeader() {
     const { user } = useUser();
@@ -118,75 +119,7 @@ export function PortalHeader() {
                 </label>
 
                 <NotificationBell />
-
-                {/* User menu */}
-                <div className="dropdown dropdown-end">
-                    <div
-                        tabIndex={0}
-                        role="button"
-                        className="btn btn-ghost btn-circle avatar avatar-placeholder"
-                    >
-                        <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-medium">
-                            {user?.imageUrl ? (
-                                <img
-                                    src={user.imageUrl}
-                                    alt=""
-                                    className="rounded-full"
-                                />
-                            ) : (
-                                userInitials
-                            )}
-                        </div>
-                    </div>
-                    <ul className="dropdown-content menu bg-base-100 rounded-box shadow-lg p-2 w-56 mt-2 z-50">
-                        <li className="menu-title px-4 py-2">
-                            <span className="text-sm font-medium text-base-content truncate">
-                                {user?.fullName ||
-                                    user?.primaryEmailAddress?.emailAddress ||
-                                    "User"}
-                            </span>
-                            <span className="text-xs text-base-content/50">
-                                {roleDisplay}
-                            </span>
-                        </li>
-                        <div className="divider my-1"></div>
-                        <li>
-                            <Link
-                                href="/portal/profile"
-                                className="justify-between"
-                            >
-                                <span className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-user text-base-content/70"></i>
-                                    Profile
-                                </span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                href="/portal/billing"
-                                className="justify-between"
-                            >
-                                <span className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-credit-card text-base-content/70"></i>
-                                    Billing
-                                </span>
-                            </Link>
-                        </li>
-                        <div className="divider my-1"></div>
-                        <li>
-                            <button
-                                type="button"
-                                onClick={logout}
-                                className="text-error"
-                            >
-                                <span className="flex items-center gap-2">
-                                    <i className="fa-duotone fa-regular fa-arrow-right-from-bracket"></i>
-                                    Sign out
-                                </span>
-                            </button>
-                        </li>
-                    </ul>
-                </div>
+                <UserDropdown />
             </div>
         </header>
     );

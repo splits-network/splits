@@ -149,7 +149,7 @@ export class ApplicationRepository {
         query = query.range(offset, offset + limit - 1);
 
         const { data, error, count } = await query;
-        console.log('findApplications data: ', data, error, count);
+
         if (error) {
             throw error;
         }

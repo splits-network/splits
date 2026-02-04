@@ -1,0 +1,5 @@
+# security.txt
+Contact: mailto:hello@employment-networks.com
+Expires: 2026-12-31
+Preferred-Languages: en
+Policy: https://employment-networks.com/terms-of-service

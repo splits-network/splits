@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useStandardList } from '@/hooks/use-standard-list';
-import type { PaginationResponse } from '@splits-network/shared-types';
+import { useStandardList } from "@/hooks/use-standard-list";
+import type { PaginationResponse } from "@splits-network/shared-types";
 import {
     PaginationControls,
     LoadingState,
     ErrorState,
-    EmptyState
-} from '@/components/standard-lists';
-import { DataTable, type TableColumn } from '@/components/ui/tables';
-import { JobTableRow } from './job-table-row';
-import JobsFilters from './jobs-filters';
-import JobCard from './job-card';
-import { StatCard, StatCardGrid } from '@/components/ui';
+    EmptyState,
+} from "@/components/standard-lists";
+import { DataTable, type TableColumn } from "@/components/ui/tables";
+import { JobTableRow } from "./job-table-row";
+import JobsFilters from "./jobs-filters";
+import JobCard from "./job-card";
+import { StatCard, StatCardGrid } from "@/components/ui";
 
 interface Job {
     id: string;
@@ -39,7 +39,7 @@ interface Job {
     };
     requirements?: Array<{
         id: string;
-        requirement_type: 'mandatory' | 'preferred';
+        requirement_type: "mandatory" | "preferred";
         description: string;
         sort_order: number;
     }>;
@@ -58,29 +58,35 @@ interface JobStats {
 
 // Define table columns
 const jobColumns: TableColumn[] = [
-    { key: 'title', label: 'Job Title', sortable: true },
-    { key: 'company.name', label: 'Company', sortable: true },
-    { key: 'location', label: 'Location', sortable: true },
-    { key: 'salary_min', label: 'Salary', sortable: true },
-    { key: 'updated_at', label: 'Posted', sortable: true },
-    { key: 'actions', label: 'Actions', align: 'right' },
+    { key: "title", label: "Job Title", sortable: true },
+    { key: "company.name", label: "Company", sortable: true },
+    { key: "location", label: "Location", sortable: true },
+    { key: "salary_min", label: "Salary", sortable: true },
+    { key: "updated_at", label: "Posted", sortable: true },
+    { key: "actions", label: "Actions", align: "right" },
 ];
 
 function buildStats(jobs: Job[], totalJobs: number): JobStats {
-    const remoteFriendly = jobs.filter(j => j.open_to_relocation).length;
+    const remoteFriendly = jobs.filter((j) => j.open_to_relocation).length;
 
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    const newThisWeek = jobs.filter(j => {
+    const newThisWeek = jobs.filter((j) => {
         if (!j.updated_at) return false;
         const posted = new Date(j.updated_at);
         return posted >= oneWeekAgo;
     }).length;
 
-    const jobsWithSalary = jobs.filter(j => j.salary_min && j.salary_max);
-    const avgSalary = jobsWithSalary.length > 0
-        ? Math.round(jobsWithSalary.reduce((sum, j) => sum + ((j.salary_min! + j.salary_max!) / 2), 0) / jobsWithSalary.length)
-        : null;
+    const jobsWithSalary = jobs.filter((j) => j.salary_min && j.salary_max);
+    const avgSalary =
+        jobsWithSalary.length > 0
+            ? Math.round(
+                  jobsWithSalary.reduce(
+                      (sum, j) => sum + (j.salary_min! + j.salary_max!) / 2,
+                      0,
+                  ) / jobsWithSalary.length,
+              )
+            : null;
 
     return { totalJobs, remoteFriendly, newThisWeek, avgSalary };
 }
@@ -90,7 +96,10 @@ interface JobsListProps {
     initialPagination?: PaginationResponse;
 }
 
-export default function JobsList({ initialData, initialPagination }: JobsListProps) {
+export default function JobsList({
+    initialData,
+    initialPagination,
+}: JobsListProps) {
     const {
         data: jobs,
         pagination,
@@ -112,57 +121,68 @@ export default function JobsList({ initialData, initialPagination }: JobsListPro
         total,
         refresh,
     } = useStandardList<Job, JobFilters>({
-        endpoint: '/jobs',
+        endpoint: "/jobs",
         defaultLimit: 24,
-        defaultSortBy: 'updated_at',
-        defaultSortOrder: 'desc',
+        defaultSortBy: "updated_at",
+        defaultSortOrder: "desc",
         syncToUrl: true,
-        viewModeKey: 'jobsViewMode',
+        viewModeKey: "jobsViewMode",
         autoFetch: true,
         requireAuth: false,
         initialData,
         initialPagination,
     });
 
-    const stats = jobs.length > 0 ? buildStats(jobs, pagination?.total || 0) : null;
+    const stats =
+        jobs.length > 0 ? buildStats(jobs, pagination?.total || 0) : null;
 
     return (
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div className='w-full md-flex-1 md-mr-4 space-y-6'>
-                <div className='card bg-base-200'>
-                    <StatCardGrid className='m-2 shadow-lg'>
+        <div className="flex flex-col lg:flex-row md:items-start md:justify-between gap-4">
+            <div className="w-full md-flex-1 md-mr-4 space-y-6 order-2 lg:order-1">
+                <div className="card bg-base-200">
+                    <StatCardGrid className="m-2 shadow-lg">
                         <StatCard
                             title="Total Jobs"
-                            value={stats ? stats.totalJobs.toLocaleString() : '—'}
+                            value={
+                                stats ? stats.totalJobs.toLocaleString() : "—"
+                            }
                             loading={loading && !jobs.length}
                             icon="fa-briefcase"
-                            color='accent'
+                            color="accent"
                         />
                         <StatCard
                             title="Remote Friendly"
-                            value={stats ? stats.remoteFriendly.toLocaleString() : '—'}
+                            value={
+                                stats
+                                    ? stats.remoteFriendly.toLocaleString()
+                                    : "—"
+                            }
                             loading={loading && !jobs.length}
                             icon="fa-house-laptop"
-                            color='secondary'
+                            color="secondary"
                         />
                         <StatCard
                             title="New This Week"
-                            value={stats ? stats.newThisWeek.toLocaleString() : '—'}
+                            value={
+                                stats ? stats.newThisWeek.toLocaleString() : "—"
+                            }
                             loading={loading && !jobs.length}
                             icon="fa-calendar-plus"
-                            color='info'
+                            color="info"
                         />
                         <StatCard
                             title="Avg. Salary"
-                            value={stats && stats.avgSalary ? `$${stats.avgSalary.toLocaleString()}` : '—'}
+                            value={
+                                stats && stats.avgSalary
+                                    ? `$${stats.avgSalary.toLocaleString()}`
+                                    : "—"
+                            }
                             loading={loading && !jobs.length}
                             icon="fa-dollar-sign"
-                            color='success'
+                            color="success"
                         />
                     </StatCardGrid>
-
                 </div>
-
 
                 {/* Error State */}
                 {error && <ErrorState message={error} onRetry={refresh} />}
@@ -177,22 +197,22 @@ export default function JobsList({ initialData, initialPagination }: JobsListPro
                         title="No Jobs Found"
                         description={
                             searchInput
-                                ? 'Try different search terms or clear your search.'
-                                : 'Check back soon for new opportunities.'
+                                ? "Try different search terms or clear your search."
+                                : "Check back soon for new opportunities."
                         }
                         action={
                             searchInput
                                 ? {
-                                    label: 'Clear search',
-                                    onClick: clearSearch,
-                                }
+                                      label: "Clear search",
+                                      onClick: clearSearch,
+                                  }
                                 : undefined
                         }
                     />
                 )}
 
                 {/* Grid View */}
-                {!loading && viewMode === 'grid' && jobs.length > 0 && (
+                {!loading && viewMode === "grid" && jobs.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
                         {jobs.map((job) => (
                             <JobCard key={job.id} job={job} />
@@ -201,7 +221,7 @@ export default function JobsList({ initialData, initialPagination }: JobsListPro
                 )}
 
                 {/* Table View */}
-                {!loading && viewMode === 'table' && jobs.length > 0 && (
+                {!loading && viewMode === "table" && jobs.length > 0 && (
                     <DataTable
                         columns={jobColumns}
                         sortBy={sortBy}
@@ -228,10 +248,8 @@ export default function JobsList({ initialData, initialPagination }: JobsListPro
                         onLimitChange={setLimit}
                     />
                 )}
-
             </div>
-            <div className="w-full md:w-64 lg:w-72 xl:w-80 shrink-0 mt-6 md:mt-0 space-y-6">
-
+            <div className="w-full lg:w-72 xl:w-80 shrink-0 mt-6 md:mt-0 space-y-6 order-1 lg:order-3">
                 {/* Search and View Toggle */}
                 <JobsFilters
                     searchInput={searchInput}
@@ -245,9 +263,7 @@ export default function JobsList({ initialData, initialPagination }: JobsListPro
                     <div className="mb-4 text-sm text-base-content/70">
                         Showing {jobs.length} of {total} jobs
                         {searchInput && (
-                            <span className="ml-2">
-                                • Sorted by relevance
-                            </span>
+                            <span className="ml-2">• Sorted by relevance</span>
                         )}
                     </div>
                 )}

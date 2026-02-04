@@ -212,7 +212,7 @@ export function Footer() {
                             </li>
                             <li>
                                 <a
-                                    href="#"
+                                    href="/public/documentation"
                                     className="link link-hover text-base-content/70 hover:text-base-content"
                                 >
                                     Documentation

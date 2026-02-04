@@ -1,0 +1,6 @@
+# ai.txt
+# Policy for AI crawlers and model trainers
+User-agent: *
+Allow: /
+Disallow: /api
+Disallow: /api/

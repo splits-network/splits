@@ -1,31 +1,35 @@
-'use client';
+"use client";
 
-import { useUser } from '@clerk/nextjs';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState, useRef, useEffect } from 'react';
-import { useUserProfile } from '@/contexts/user-profile-context';
+import { useUser } from "@clerk/nextjs";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, useRef, useEffect } from "react";
+import { useUserProfile } from "@/contexts/user-profile-context";
 
 export function UserDropdown() {
     const { user } = useUser();
-    const { logout } = useUserProfile();
+    const { logout, isAdmin, isRecruiter, isCompanyUser, isCandidate } =
+        useUserProfile();
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target as Node)
+            ) {
                 setIsOpen(false);
             }
         };
 
         if (isOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
+            document.addEventListener("mousedown", handleClickOutside);
         }
 
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [isOpen]);
 
@@ -33,24 +37,55 @@ export function UserDropdown() {
         setIsOpen(false);
         await logout();
         router.refresh();
-        router.push('/');
+        router.push("/");
     };
 
     if (!user) return null;
 
-    const userInitials = user.firstName && user.lastName
-        ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
-        : user.emailAddresses[0]?.emailAddress[0].toUpperCase() || '?';
+    const userInitials =
+        user.firstName && user.lastName
+            ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+            : user.emailAddresses[0]?.emailAddress[0].toUpperCase() || "?";
 
-    const userName = user.fullName || user.emailAddresses[0]?.emailAddress || 'User';
-    const userEmail = user.emailAddresses[0]?.emailAddress;
+    const rawUserName =
+        user.fullName || user.emailAddresses[0]?.emailAddress || "User";
+    const userName =
+        rawUserName.length > 30 ? `${rawUserName.slice(0, 30)}…` : rawUserName;
+    const rawUserEmail = user.emailAddresses[0]?.emailAddress;
+    const userEmail = rawUserEmail
+        ? rawUserEmail.length > 30
+            ? `${rawUserEmail.slice(0, 30)}…`
+            : rawUserEmail
+        : undefined;
+
+    const roleDisplay = isAdmin
+        ? "Administrator"
+        : isRecruiter && isCompanyUser
+          ? "Recruiter & Company"
+          : isRecruiter
+            ? "Recruiter"
+            : isCompanyUser
+              ? "Company User"
+              : isCandidate
+                ? "Candidate"
+                : "User";
 
     return (
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                className="flex items-center gap-2 hover:border-base-200 border-3 border-base-100 transition-colors p-2 rounded-lg"
             >
+                {userName && (
+                    <div className="hidden md:flex flex-col leading-tight text-left pl-2">
+                        <span className="text-sm font-medium text-base-content">
+                            {userName}
+                        </span>
+                        <span className="text-xs text-base-content/60">
+                            {roleDisplay}
+                        </span>
+                    </div>
+                )}
                 {user.imageUrl ? (
                     <img
                         src={user.imageUrl}
@@ -67,9 +102,16 @@ export function UserDropdown() {
             {isOpen && (
                 <div className="absolute right-0 mt-2 w-72 bg-base-100 rounded-lg shadow border border-base-200 overflow-hidden z-[100]">
                     <div className="px-4 py-4 border-b border-base-200">
-                        <div className="font-semibold text-sm text-base-content">{userName}</div>
+                        <div className="font-semibold text-sm text-base-content">
+                            {userName}
+                        </div>
+                        <div className="text-xs text-base-content/60 mt-0.5">
+                            {roleDisplay}
+                        </div>
                         {userEmail && (
-                            <div className="text-sm text-base-content/60 mt-0.5">{userEmail}</div>
+                            <div className="text-sm text-base-content/60 mt-0.5">
+                                {userEmail}
+                            </div>
                         )}
                     </div>
 
