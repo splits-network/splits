@@ -1,0 +1,5 @@
+# security.txt
+Contact: mailto:hello@applicant.network
+Expires: 2026-12-31
+Preferred-Languages: en
+Policy: https://applicant.network/public/terms-of-service

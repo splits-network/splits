@@ -1,0 +1,16 @@
+# llms.txt
+# Applicant Network public index for AI systems
+
+Site: https://applicant.network
+Contact: hello@applicant.network
+
+Key pages:
+- /public/jobs
+- /public/how-it-works
+- /public/help
+- /public/resources
+- /public/resources/career-guides
+- /public/resources/interview-prep
+- /public/resources/resume-tips
+- /public/resources/salary-insights
+- /public/status

@@ -1,0 +1,12 @@
+# llms.txt
+# Employment Networks public index for AI systems
+
+Site: https://employment-networks.com
+Contact: hello@employment-networks.com
+
+Key pages:
+- /
+- /privacy-policy
+- /terms-of-service
+- /cookie-policy
+- /status
