@@ -139,7 +139,7 @@ export default function Step2Compensation({
                     onChange={(e) =>
                         setFormData((prev) => ({
                             ...prev,
-                            employment_type: e.target.value as any,
+                            employment_type: e.target.value as FormData["employment_type"],
                         }))
                     }
                     required
