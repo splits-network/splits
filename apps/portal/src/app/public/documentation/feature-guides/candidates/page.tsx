@@ -16,11 +16,16 @@ export default function CandidatesGuidePage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Candidates are the source of submissions. This page explains
-                    profile management, verification, and visibility.
+                    Candidate profiles capture sourcing details, verification status, and notes that support submissions. Clean data improves hiring decisions and reduces friction.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide explains how to work with candidate lists and detail views, including marketplace visibility where applicable. It also clarifies how verification status impacts submission readiness.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this page when updating candidate information, preparing submissions, or troubleshooting missing or masked data.
                 </p>
             </section>
 
@@ -126,3 +131,4 @@ export default function CandidatesGuidePage() {
         </div>
     );
 }
+

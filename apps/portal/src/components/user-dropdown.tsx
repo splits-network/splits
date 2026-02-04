@@ -8,7 +8,8 @@ import { useUserProfile } from "@/contexts/user-profile-context";
 
 export function UserDropdown() {
     const { user } = useUser();
-    const { logout } = useUserProfile();
+    const { logout, isAdmin, isRecruiter, isCompanyUser, isCandidate } =
+        useUserProfile();
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -49,24 +50,41 @@ export function UserDropdown() {
     const rawUserName =
         user.fullName || user.emailAddresses[0]?.emailAddress || "User";
     const userName =
-        rawUserName.length > 20 ? `${rawUserName.slice(0, 20)}…` : rawUserName;
+        rawUserName.length > 30 ? `${rawUserName.slice(0, 30)}…` : rawUserName;
     const rawUserEmail = user.emailAddresses[0]?.emailAddress;
     const userEmail = rawUserEmail
-        ? rawUserEmail.length > 20
-            ? `${rawUserEmail.slice(0, 20)}…`
+        ? rawUserEmail.length > 30
+            ? `${rawUserEmail.slice(0, 30)}…`
             : rawUserEmail
         : undefined;
+
+    const roleDisplay = isAdmin
+        ? "Administrator"
+        : isRecruiter && isCompanyUser
+          ? "Recruiter & Company"
+          : isRecruiter
+            ? "Recruiter"
+            : isCompanyUser
+              ? "Company User"
+              : isCandidate
+                ? "Candidate"
+                : "User";
 
     return (
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                className="flex items-center gap-2 hover:border-base-200 border-3 border-base-100 transition-colors p-2 rounded-lg"
             >
                 {userName && (
-                    <span className="hidden md:inline text-sm font-medium text-base-content">
-                        {userName}
-                    </span>
+                    <div className="hidden md:flex flex-col leading-tight text-left pl-2">
+                        <span className="text-sm font-medium text-base-content">
+                            {userName}
+                        </span>
+                        <span className="text-xs text-base-content/60">
+                            {roleDisplay}
+                        </span>
+                    </div>
                 )}
                 {user.imageUrl ? (
                     <img
@@ -86,6 +104,9 @@ export function UserDropdown() {
                     <div className="px-4 py-4 border-b border-base-200">
                         <div className="font-semibold text-sm text-base-content">
                             {userName}
+                        </div>
+                        <div className="text-xs text-base-content/60 mt-0.5">
+                            {roleDisplay}
                         </div>
                         {userEmail && (
                             <div className="text-sm text-base-content/60 mt-0.5">

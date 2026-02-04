@@ -16,11 +16,16 @@ export default function TeamManagementGuidePage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Team Management keeps user access aligned with your hiring
-                    workflows.
+                    Team Management controls who has access to your organization and what they can do. It is where permissions are set and maintained.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide describes the team list, role assignments, and common management actions like invites or updates. It helps you avoid misaligned access that can block workflows.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this page when adding new team members, adjusting roles, or auditing existing permissions.
                 </p>
             </section>
 
@@ -126,3 +131,4 @@ export default function TeamManagementGuidePage() {
         </div>
     );
 }
+

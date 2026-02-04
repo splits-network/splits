@@ -16,12 +16,16 @@ export default function FirstTimeSetupPage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    This guide helps you confirm account access, link to the right
-                    organization, and finish onboarding so your dashboard and workflow
-                    pages load correctly.
+                    First-time setup ensures your account is linked to the correct organization and role. Without that, the portal cannot load the right navigation or data for you.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide walks through the minimum steps to get access, complete onboarding, and verify that your dashboard and core pages load correctly. It also clarifies what information you may need from your company or recruiting team.
+                </p>
+                <p className="text-base text-base-content/70">
+                    If anything is missing after setup, this page helps you diagnose whether the issue is permissions, organization linkage, or incomplete onboarding steps.
                 </p>
             </section>
 
@@ -162,4 +166,5 @@ export default function FirstTimeSetupPage() {
         </div>
     );
 }
+
 

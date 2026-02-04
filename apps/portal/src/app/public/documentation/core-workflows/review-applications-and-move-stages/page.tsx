@@ -16,11 +16,16 @@ export default function ReviewApplicationsAndMoveStagesPage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Applications track each candidate’s progress. Stage changes signal
-                    what needs to happen next and who owns the action.
+                    Applications track the candidate's journey from submission to hire or decline. Stage changes coordinate who needs to act next and what data becomes visible.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide explains how to review application details, add notes, and move stages responsibly. It also clarifies what information is required before advancing or rejecting.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this page when you are reviewing candidates, coordinating interviews, or documenting decisions.
                 </p>
             </section>
 
@@ -136,3 +141,4 @@ export default function ReviewApplicationsAndMoveStagesPage() {
         </div>
     );
 }
+

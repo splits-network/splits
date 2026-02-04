@@ -16,11 +16,16 @@ export default function AddOrImportCandidatesPage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Candidate profiles are the source of truth for submissions,
-                    communication, and verification status.
+                    Candidate profiles are the source of truth for submissions, notes, and verification status. Accurate profiles improve decision quality and reduce back-and-forth.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide explains how to add candidates, capture sourcing context, and ensure required fields are complete. It also calls out what information is useful before submitting.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this workflow whenever you source a new candidate or need to update an existing profile before submission.
                 </p>
             </section>
 
@@ -134,3 +139,4 @@ export default function AddOrImportCandidatesPage() {
         </div>
     );
 }
+

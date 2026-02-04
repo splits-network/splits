@@ -19,13 +19,16 @@ export default function WhatIsSplitsNetworkPage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                                    <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Splits Network provides a shared workflow for recruiting
-                    teams and company stakeholders to manage roles, candidates,
-                    applications, and placements with clear ownership and
-                    transparent fee handling.
+                    Splits Network is built to align recruiters, hiring managers, and company admins around the same hiring workflow. It keeps role details, submissions, and decisions in one place so handoffs are clear.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This page explains the platform at a high level so you can understand why each feature exists and how it connects to your daily work. It is the best starting point if you are new or need a fast refresher.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use the links below to move into setup and navigation, then dive into the workflows that match your responsibilities. The goal is to help you move from context to action without guessing.
                 </p>
             </section>
 
@@ -169,3 +172,5 @@ export default function WhatIsSplitsNetworkPage() {
         </div>
     );
 }
+
+

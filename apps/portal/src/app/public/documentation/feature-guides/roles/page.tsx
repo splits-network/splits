@@ -16,11 +16,16 @@ export default function RolesGuidePage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Roles are the core unit of work. They define compensation,
-                    requirements, and status for hiring workflows.
+                    Roles define the hiring objectives, compensation structure, and submission rules that power the rest of the workflow. Keeping role data accurate keeps the pipeline healthy.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide details how to navigate the roles list, review role details, and manage status changes. It also explains how role ownership affects who can edit or publish updates.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this page when you need to manage role data, troubleshoot visibility issues, or review performance trends.
                 </p>
             </section>
 
@@ -127,3 +132,4 @@ export default function RolesGuidePage() {
         </div>
     );
 }
+

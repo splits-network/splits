@@ -16,11 +16,16 @@ export default function InviteRecruitersOrTeammatesPage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Invitations control who can access your organization and which
-                    areas they can manage.
+                    Invitations control who can access your organization and what they can manage. This workflow protects sensitive hiring data while enabling collaboration.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide explains how to send invites, assign the correct role, and verify that access is granted. It also clarifies what to do when invites are pending or expired.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this page when onboarding new recruiters or internal teammates to keep access consistent and auditable.
                 </p>
             </section>
 
@@ -136,3 +141,4 @@ export default function InviteRecruitersOrTeammatesPage() {
         </div>
     );
 }
+

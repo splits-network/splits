@@ -16,11 +16,16 @@ export default function ProfileGuidePage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Your profile controls your contact info, notification preferences,
-                    and marketplace visibility.
+                    The profile page stores your personal information, preferences, and visibility settings. Keeping it current improves collaboration and notifications.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide explains which fields affect contact details, marketplace visibility, and notification preferences. It also clarifies what is required versus optional.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this page when updating contact info, adjusting visibility, or troubleshooting missing preferences.
                 </p>
             </section>
 
@@ -127,3 +132,4 @@ export default function ProfileGuidePage() {
         </div>
     );
 }
+

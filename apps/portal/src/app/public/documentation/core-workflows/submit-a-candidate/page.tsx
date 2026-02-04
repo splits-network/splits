@@ -16,11 +16,16 @@ export default function SubmitCandidatePage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Submitting a candidate creates an application and starts the
-                    review workflow.
+                    Submitting a candidate creates an application and starts the formal review process. It signals to company teams that a candidate is ready for evaluation.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide walks through the submission steps and highlights the information that improves review outcomes, such as notes and salary expectations. It also explains where the application appears after submission.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this page when you are preparing to move a candidate into the pipeline or troubleshooting submission issues.
                 </p>
             </section>
 
@@ -134,3 +139,4 @@ export default function SubmitCandidatePage() {
         </div>
     );
 }
+

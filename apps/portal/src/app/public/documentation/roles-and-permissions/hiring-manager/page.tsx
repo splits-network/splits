@@ -16,12 +16,16 @@ export default function HiringManagerCapabilitiesPage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Hiring managers focus on reviewing candidates, giving feedback, and
-                    keeping roles moving through the pipeline. This page clarifies
-                    access points and responsibilities.
+                    Hiring managers focus on reviewing candidates and making decisions. This page explains the tools they can access and how those tools support evaluation and feedback.
+                </p>
+                <p className="text-base text-base-content/70">
+                    It highlights where applications live, how stages are updated, and how to communicate with recruiters without duplicating effort. The goal is to keep hiring decisions documented and visible.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this guide when onboarding hiring managers or troubleshooting access questions about applications and messages.
                 </p>
             </section>
 
@@ -130,3 +134,4 @@ export default function HiringManagerCapabilitiesPage() {
         </div>
     );
 }
+

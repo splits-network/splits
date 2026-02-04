@@ -16,10 +16,16 @@ export default function InvitationsGuidePage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Invitations manage access to your organization and roles.
+                    Invitations are how new teammates and collaborators gain access to your organization. They govern roles, permissions, and visibility.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide outlines the invitations list, status tracking, and resend or revoke actions. It helps you ensure the right people have the right access.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this page when onboarding new users or resolving access delays caused by pending invites.
                 </p>
             </section>
 
@@ -126,3 +132,4 @@ export default function InvitationsGuidePage() {
         </div>
     );
 }
+

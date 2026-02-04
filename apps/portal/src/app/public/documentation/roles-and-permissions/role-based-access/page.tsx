@@ -75,12 +75,16 @@ export default function RoleBasedAccessPage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Navigation and access are controlled by your assigned role and
-                    organization. This page outlines common access patterns to help
-                    you understand what to expect.
+                    Role-based access controls what each user can see and do in the portal. This page explains why navigation changes and how permissions map to workflows.
+                </p>
+                <p className="text-base text-base-content/70">
+                    It provides a practical access matrix so you can quickly identify which role owns a task or page. This reduces confusion when teams collaborate across recruiting and hiring functions.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this guide when assigning roles or troubleshooting missing pages to avoid unnecessary delays.
                 </p>
             </section>
 
@@ -197,3 +201,4 @@ export default function RoleBasedAccessPage() {
         </div>
     );
 }
+

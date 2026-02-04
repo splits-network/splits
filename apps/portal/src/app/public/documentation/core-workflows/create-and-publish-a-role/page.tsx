@@ -16,11 +16,16 @@ export default function CreateAndPublishRolePage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Roles define the job opportunity, compensation, and submission rules.
-                    Publishing a role makes it available for candidate submissions.
+                    Creating a role establishes the hiring objective, compensation structure, and expectations for submissions. It is the foundation for every downstream workflow in the platform.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide explains how to enter role details in a way that supports recruiter alignment and candidate quality. It also clarifies which fields control visibility, fees, and guarantees.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this page when opening a new role, updating an existing role, or troubleshooting why a role is not visible to recruiters.
                 </p>
             </section>
 
@@ -140,3 +145,4 @@ export default function CreateAndPublishRolePage() {
         </div>
     );
 }
+

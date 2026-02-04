@@ -16,10 +16,16 @@ export default function MessagesGuidePage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Messages keep recruiter and company communication in one place.
+                    Messages provide a shared space for recruiter and company communication. They keep decisions and timing aligned across teams.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide explains how to navigate conversations, interpret unread indicators, and connect messages to roles and applications. It also clarifies when to use messages versus notes.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this page to manage collaboration, track conversation history, or troubleshoot missing threads.
                 </p>
             </section>
 
@@ -126,3 +132,4 @@ export default function MessagesGuidePage() {
         </div>
     );
 }
+

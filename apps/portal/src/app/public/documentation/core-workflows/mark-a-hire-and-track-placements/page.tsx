@@ -16,11 +16,16 @@ export default function MarkHireAndTrackPlacementsPage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Marking a hire completes the application workflow and creates a
-                    placement record that tracks fees and recruiter earnings.
+                    Marking a hire closes the application workflow and creates a placement record. This record powers fee calculations, recruiter earnings, and guarantee tracking.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide explains when to mark a hire, what data is captured, and how the placement appears in reporting. It also clarifies how salary and fee details affect downstream calculations.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this page when a hire is confirmed and you need to finalize the placement record accurately.
                 </p>
             </section>
 
@@ -135,3 +140,4 @@ export default function MarkHireAndTrackPlacementsPage() {
         </div>
     );
 }
+

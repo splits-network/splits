@@ -16,11 +16,16 @@ export default function NotificationsGuidePage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Notifications highlight new activity and link directly to the
-                    relevant work.
+                    Notifications surface activity that requires attention, such as new messages or stage updates. They help you stay informed without constantly checking every page.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide explains how notifications are organized, what priority indicators mean, and how to jump directly to the related item. It also clarifies why some alerts may not appear.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this page to interpret alerts, reduce noise, and ensure you do not miss critical updates.
                 </p>
             </section>
 
@@ -127,3 +132,4 @@ export default function NotificationsGuidePage() {
         </div>
     );
 }
+

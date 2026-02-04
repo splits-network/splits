@@ -16,11 +16,16 @@ export default function ApplicationsGuidePage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Applications are created when candidates are submitted. They
-                    capture stage changes, notes, and documents.
+                    Applications are the operational record of candidate submissions and decisions. They capture stage history, notes, and documents in one place.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide explains how to interpret the applications list, review detail panels, and understand stage requirements. It also highlights where collaboration and approvals happen.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this page to navigate application data, coordinate reviews, or resolve stage-related issues.
                 </p>
             </section>
 
@@ -127,3 +132,4 @@ export default function ApplicationsGuidePage() {
         </div>
     );
 }
+

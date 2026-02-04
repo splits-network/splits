@@ -16,12 +16,16 @@ export default function CompanyAdminCapabilitiesPage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Company admins manage organization settings, team access, and
-                    operational workflows. This page summarizes what is available and
-                    where to configure it.
+                    Company admins manage the organization's access, settings, and billing. This page summarizes the controls that keep teams aligned and compliant.
+                </p>
+                <p className="text-base text-base-content/70">
+                    It outlines what admins can configure, how they assign roles, and where to resolve team access issues. If you are responsible for enabling others, this is your reference.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this guide to ensure the right people have the right permissions before roles go live or hiring decisions begin.
                 </p>
             </section>
 
@@ -130,3 +134,4 @@ export default function CompanyAdminCapabilitiesPage() {
         </div>
     );
 }
+

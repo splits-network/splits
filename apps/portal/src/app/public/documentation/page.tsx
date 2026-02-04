@@ -72,7 +72,8 @@ export default function DocumentationIndexPage() {
                         <div className="card-body">
                             <h3 className="card-title">Feature Guides</h3>
                             <p className="text-sm text-base-content/70">
-                                Explore every core feature area in the portal.
+                                Explore every core feature area in the portal with
+                                role-based guidance and troubleshooting.
                             </p>
                         </div>
                     </Link>
@@ -83,7 +84,8 @@ export default function DocumentationIndexPage() {
                         <div className="card-body">
                             <h3 className="card-title">Roles</h3>
                             <p className="text-sm text-base-content/70">
-                                Create, manage, and track role status.
+                                Create roles, manage requirements, and control
+                                status changes across the pipeline.
                             </p>
                         </div>
                     </Link>
@@ -94,7 +96,101 @@ export default function DocumentationIndexPage() {
                         <div className="card-body">
                             <h3 className="card-title">Applications</h3>
                             <p className="text-sm text-base-content/70">
-                                Review applications and stage progress.
+                                Review submissions, manage stages, and track
+                                decision history with notes and documents.
+                            </p>
+                        </div>
+                    </Link>
+                    <Link
+                        href="/public/documentation/feature-guides/candidates"
+                        className="card bg-base-200 shadow hover:shadow-lg transition-shadow"
+                    >
+                        <div className="card-body">
+                            <h3 className="card-title">Candidates</h3>
+                            <p className="text-sm text-base-content/70">
+                                Maintain candidate profiles, verification status,
+                                and sourcing context.
+                            </p>
+                        </div>
+                    </Link>
+                    <Link
+                        href="/public/documentation/feature-guides/messages"
+                        className="card bg-base-200 shadow hover:shadow-lg transition-shadow"
+                    >
+                        <div className="card-body">
+                            <h3 className="card-title">Messages</h3>
+                            <p className="text-sm text-base-content/70">
+                                Coordinate with recruiters and company teams in
+                                one conversation hub.
+                            </p>
+                        </div>
+                    </Link>
+                    <Link
+                        href="/public/documentation/feature-guides/placements"
+                        className="card bg-base-200 shadow hover:shadow-lg transition-shadow"
+                    >
+                        <div className="card-body">
+                            <h3 className="card-title">Placements</h3>
+                            <p className="text-sm text-base-content/70">
+                                Track successful hires, fees, and recruiter
+                                earnings details.
+                            </p>
+                        </div>
+                    </Link>
+                    <Link
+                        href="/public/documentation/feature-guides/profile"
+                        className="card bg-base-200 shadow hover:shadow-lg transition-shadow"
+                    >
+                        <div className="card-body">
+                            <h3 className="card-title">Profile</h3>
+                            <p className="text-sm text-base-content/70">
+                                Manage personal info, preferences, and visibility
+                                settings.
+                            </p>
+                        </div>
+                    </Link>
+                    <Link
+                        href="/public/documentation/feature-guides/billing"
+                        className="card bg-base-200 shadow hover:shadow-lg transition-shadow"
+                    >
+                        <div className="card-body">
+                            <h3 className="card-title">Billing</h3>
+                            <p className="text-sm text-base-content/70">
+                                Review subscription plans, invoices, and payment
+                                methods.
+                            </p>
+                        </div>
+                    </Link>
+                    <Link
+                        href="/public/documentation/feature-guides/company-settings"
+                        className="card bg-base-200 shadow hover:shadow-lg transition-shadow"
+                    >
+                        <div className="card-body">
+                            <h3 className="card-title">Company Settings</h3>
+                            <p className="text-sm text-base-content/70">
+                                Update organization profile and shared defaults.
+                            </p>
+                        </div>
+                    </Link>
+                    <Link
+                        href="/public/documentation/feature-guides/team-management"
+                        className="card bg-base-200 shadow hover:shadow-lg transition-shadow"
+                    >
+                        <div className="card-body">
+                            <h3 className="card-title">Team Management</h3>
+                            <p className="text-sm text-base-content/70">
+                                Assign roles, manage access, and invite teammates.
+                            </p>
+                        </div>
+                    </Link>
+                    <Link
+                        href="/public/documentation/feature-guides/notifications"
+                        className="card bg-base-200 shadow hover:shadow-lg transition-shadow"
+                    >
+                        <div className="card-body">
+                            <h3 className="card-title">Notifications</h3>
+                            <p className="text-sm text-base-content/70">
+                                Track alerts, action items, and activity updates.
                             </p>
                         </div>
                     </Link>

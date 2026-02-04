@@ -16,11 +16,16 @@ export default function CommunicateWithRecruitersAndCandidatesPage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Messages keep recruiters and company teams aligned. Notifications
-                    highlight changes and required actions.
+                    Communication keeps recruiting and hiring teams aligned on timing, feedback, and decisions. Messages and notifications are the primary tools for that coordination.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide clarifies when to use messages versus notes, where to find conversation history, and how notifications link to actions. It helps reduce missed updates and duplicated effort.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this workflow when coordinating interviews, feedback, or changes to role requirements.
                 </p>
             </section>
 
@@ -137,3 +142,4 @@ export default function CommunicateWithRecruitersAndCandidatesPage() {
         </div>
     );
 }
+

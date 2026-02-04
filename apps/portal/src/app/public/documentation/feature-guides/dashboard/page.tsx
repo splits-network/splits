@@ -16,11 +16,16 @@ export default function DashboardGuidePage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    The dashboard highlights recent activity, performance trends, and
-                    action items tailored to your role.
+                    The dashboard provides a role-based snapshot of your hiring activity. It helps you prioritize work without drilling into every page.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide explains what the main widgets represent and how they connect to roles, applications, and placements. It also highlights quick actions that save time.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this page to interpret dashboard metrics, troubleshoot missing data, or onboard new users to the portal's overview view.
                 </p>
             </section>
 
@@ -127,3 +132,4 @@ export default function DashboardGuidePage() {
         </div>
     );
 }
+

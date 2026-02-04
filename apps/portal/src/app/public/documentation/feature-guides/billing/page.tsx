@@ -16,10 +16,16 @@ export default function BillingGuidePage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Billing controls subscription status, invoices, and payment methods.
+                    Billing centralizes subscription status, invoices, and payment methods. It is the source of truth for plan details and renewal timing.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide explains where to view plan information, update payment methods, and download invoices. It also clarifies common issues that can block billing updates.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this page when managing subscriptions, reconciling invoices, or troubleshooting payment problems.
                 </p>
             </section>
 
@@ -126,3 +132,4 @@ export default function BillingGuidePage() {
         </div>
     );
 }
+

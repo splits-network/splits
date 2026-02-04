@@ -16,11 +16,16 @@ export default function CompanySettingsGuidePage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Company Settings control organization details that appear across
-                    roles and applications.
+                    Company Settings store the organization profile and shared defaults that appear across roles and applications. Accurate settings help maintain consistent branding and data.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide explains where to update company information, what fields are used elsewhere in the platform, and how changes affect role listings. It also notes typical permission limits.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this page when updating company details or troubleshooting why roles show outdated information.
                 </p>
             </section>
 
@@ -126,3 +131,4 @@ export default function CompanySettingsGuidePage() {
         </div>
     );
 }
+

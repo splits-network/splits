@@ -16,10 +16,16 @@ export default function PlacementsGuidePage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Placements summarize successful hires and fee distribution.
+                    Placements represent successful hires and capture fee and earnings data. They connect hiring outcomes to financial tracking.
+                </p>
+                <p className="text-base text-base-content/70">
+                    This guide explains how placement lists are structured, what the key fields mean, and how guarantee periods are tracked. It also highlights where to verify fee calculations.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this page when reconciling earnings, reviewing hire outcomes, or investigating placement discrepancies.
                 </p>
             </section>
 
@@ -125,3 +131,4 @@ export default function PlacementsGuidePage() {
         </div>
     );
 }
+

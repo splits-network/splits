@@ -16,11 +16,16 @@ export default function NavigationOverviewPage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    The portal navigation changes based on your role. This guide shows
-                    where to find common workflows and how to switch between views.
+                    The portal navigation is role-aware, so different users see different tools. This page explains the structure of the sidebar and mobile dock so you can find work quickly.
+                </p>
+                <p className="text-base text-base-content/70">
+                    You will learn which sections hold core hiring workflows, where settings live, and how to interpret missing or disabled items. This reduces confusion when you move between recruiter and company workflows.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this guide anytime your permissions change or you switch organizations so you can re-orient without losing momentum.
                 </p>
             </section>
 
@@ -143,4 +148,5 @@ export default function NavigationOverviewPage() {
         </div>
     );
 }
+
 

@@ -16,11 +16,16 @@ export default function RecruiterCapabilitiesPage() {
                 lastUpdated="February 3, 2026"
             />
 
-            <section className="space-y-4">
+                        <section className="space-y-4">
                 <h2 className="text-xl font-semibold">Purpose</h2>
                 <p className="text-base text-base-content/70">
-                    Recruiters manage sourcing, submissions, and collaboration. This
-                    page outlines where recruiters can act and what data is visible.
+                    Recruiters drive sourcing and submissions, so their view of the platform centers on candidates, roles, and applications. This page outlines what recruiters can access and why.
+                </p>
+                <p className="text-base text-base-content/70">
+                    It clarifies which pages are available, what actions are expected, and how recruiter work connects to company review stages. If you are onboarding new recruiters, this is the best reference to set expectations.
+                </p>
+                <p className="text-base text-base-content/70">
+                    Use this guide to confirm permissions, understand limitations, and avoid workflow gaps when collaborating with company teams.
                 </p>
             </section>
 
@@ -130,3 +135,4 @@ export default function RecruiterCapabilitiesPage() {
         </div>
     );
 }
+
