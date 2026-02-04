@@ -4,12 +4,13 @@ import { ClerkProvider } from "@clerk/nextjs";
 import CookieConsent from "@/components/cookie-consent";
 import { ToastProvider } from "@/lib/toast-context";
 import { ThemeInitializer } from "./theme-initializer";
-import { ServiceStatusBanner } from "@/components/service-status-banner";
+import { ServiceStatusBanner } from "@splits-network/shared-ui";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
 import "./globals.css";
 import { UserProfileProvider } from "@/contexts";
 import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 export const metadata: Metadata = {
     metadataBase: new URL("https://splits.network"),
@@ -134,12 +135,13 @@ export default async function RootLayout({
                 <body className="flex flex-col min-h-screen bg-base-300">
                     <UserProfileProvider>
                         <ThemeInitializer />
-                        <ServiceStatusBanner />
+                        <ServiceStatusBanner statusHref="/public/status" />
                         <ToastProvider>
                             <main className="grow">{children}</main>
                             <CookieConsent />
                         </ToastProvider>
                     </UserProfileProvider>
+                    <Footer />
 
                     {/* Analytics scripts loaded after page becomes interactive */}
                     <Script
