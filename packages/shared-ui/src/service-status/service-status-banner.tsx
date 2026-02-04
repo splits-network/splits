@@ -82,7 +82,7 @@ export function ServiceStatusBanner({
                 <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <i className="fa-duotone fa-regular fa-bug fa-beat text-xl"></i>
-                        <span>
+                        <div>
                             <h3 className="font-bold">
                                 Service Degradation Detected
                             </h3>
@@ -91,7 +91,7 @@ export function ServiceStatusBanner({
                                 {moreText} {unhealthyCount === 1 ? "is" : "are"}{" "}
                                 currently experiencing issues.
                             </div>
-                        </span>
+                        </div>
                     </div>
                     <div>
                         <Link
