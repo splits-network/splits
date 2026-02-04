@@ -1,8 +1,26 @@
 import Link from "next/link";
+import { JsonLd } from "@splits-network/shared-ui";
 
 export default function DocumentationIndexPage() {
+    const docsIndexJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: "Splits Network Documentation",
+        url: "https://splits.network/public/documentation",
+        hasPart: [
+            "https://splits.network/public/documentation/getting-started",
+            "https://splits.network/public/documentation/roles-and-permissions",
+            "https://splits.network/public/documentation/core-workflows",
+            "https://splits.network/public/documentation/feature-guides",
+        ].map((url) => ({
+            "@type": "WebPage",
+            url,
+        })),
+    };
+
     return (
         <div className="space-y-10">
+            <JsonLd data={docsIndexJsonLd} id="docs-index-jsonld" />
             <section className="space-y-3">
                 <h1 className="text-3xl font-semibold">Documentation</h1>
                 <p className="text-base text-base-content/70 max-w-3xl">

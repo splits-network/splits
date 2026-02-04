@@ -1,0 +1,7 @@
+# humans.txt
+# Splits Network (Portal)
+Team: Splits Network
+Contact: hello@splits.network
+Website: https://splits.network
+Last-Updated: 2026-02-04
+
