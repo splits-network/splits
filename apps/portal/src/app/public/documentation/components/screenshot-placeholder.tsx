@@ -31,7 +31,9 @@ export function ScreenshotPlaceholder({
                     {variant === "desktop" ? (
                         <>
                             <div className="mockup-browser-toolbar">
-                                <div className="input">splits.network</div>
+                                <div className="input">
+                                    https://splits.network
+                                </div>
                             </div>
                             <div className="bg-base-200 flex justify-center">
                                 <img
@@ -59,7 +61,7 @@ export function ScreenshotPlaceholder({
                                 </div>
                                 <div className="mockup-browser-toolbar px-6 py-4 bg-base-100 m-0">
                                     <div className="input input-lg">
-                                        splits.network
+                                        https://splits.network
                                     </div>
                                 </div>
                             </div>
