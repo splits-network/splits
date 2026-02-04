@@ -7,12 +7,15 @@ WORKDIR /app
 FROM base AS dependencies
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY tsconfig.base.json ./
+COPY packages/shared-types/package.json ./packages/shared-types/
+COPY packages/shared-ui/package.json ./packages/shared-ui/
 COPY apps/corporate/package.json ./apps/corporate/
 RUN pnpm install --frozen-lockfile
 
 # Development stage
 FROM base AS development
 COPY --from=dependencies /app ./
+COPY packages ./packages
 COPY apps/corporate ./apps/corporate
 EXPOSE 3102
 CMD ["pnpm", "--filter", "@splits-network/corporate", "dev"]
@@ -22,7 +25,12 @@ FROM base AS build
 ARG NEXT_PUBLIC_APP_URL
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 COPY --from=dependencies /app ./
+COPY packages/shared-types ./packages/shared-types
+COPY packages/shared-ui ./packages/shared-ui
 COPY apps/corporate ./apps/corporate
+# Build shared packages first
+RUN pnpm --filter @splits-network/shared-types build
+RUN pnpm --filter @splits-network/shared-ui build
 # Build corporate site
 RUN pnpm --filter @splits-network/corporate build
 
@@ -34,6 +42,8 @@ ENV NODE_ENV=production
 
 # Copy package files for production install
 COPY --from=build /app/package.json /app/pnpm-lock.yaml /app/pnpm-workspace.yaml ./
+COPY --from=build /app/packages/shared-types/package.json ./packages/shared-types/
+COPY --from=build /app/packages/shared-ui/package.json ./packages/shared-ui/
 COPY --from=build /app/apps/corporate/package.json ./apps/corporate/
 COPY --from=build /app/apps/corporate/next.config.mjs ./apps/corporate/
 
@@ -41,6 +51,8 @@ COPY --from=build /app/apps/corporate/next.config.mjs ./apps/corporate/
 RUN pnpm install --prod --frozen-lockfile
 
 # Copy built application
+COPY --from=build /app/packages/shared-types/dist ./packages/shared-types/dist
+COPY --from=build /app/packages/shared-ui/dist ./packages/shared-ui/dist
 COPY --from=build /app/apps/corporate/.next ./apps/corporate/.next
 COPY --from=build /app/apps/corporate/public ./apps/corporate/public
 
