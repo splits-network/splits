@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export interface ServiceHealth {
     name: string;
@@ -34,7 +34,9 @@ const checkServiceHealth = async (
             signal: AbortSignal.timeout(5000),
         });
         const responseTime = Date.now() - startTime;
-        const data = await response.json();
+        
+        // Guard against non-JSON responses (e.g., HTML error pages)
+        const data = await response.json().catch(() => ({}));
 
         if (response.ok && data.status === "healthy") {
             return {
@@ -48,7 +50,7 @@ const checkServiceHealth = async (
         return {
             ...service,
             status: "unhealthy",
-            error: data.error || "Service returned unhealthy status",
+            error: data.error || response.statusText || "Service returned unhealthy status",
             timestamp: data.timestamp,
             responseTime,
         };
@@ -92,12 +94,12 @@ export function useServiceHealth(options?: {
     );
     const [isLoading, setIsLoading] = useState(!hasInitialStatuses);
 
-    const checkAllServices = async () => {
+    const checkAllServices = useCallback(async () => {
         const results = await Promise.all(services.map(checkServiceHealth));
         setServiceStatuses(results);
         setLastChecked(new Date());
         setIsLoading(false);
-    };
+    }, []);
 
     useEffect(() => {
         if (!hasInitialStatuses) {
@@ -108,8 +110,7 @@ export function useServiceHealth(options?: {
             const interval = setInterval(checkAllServices, refreshInterval);
             return () => clearInterval(interval);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [hasInitialStatuses, autoRefresh, refreshInterval, checkAllServices]);
 
     const healthyCount = serviceStatuses.filter(
         (service) => service.status === "healthy",
