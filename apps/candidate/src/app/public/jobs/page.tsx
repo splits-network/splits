@@ -7,6 +7,12 @@ import { apiClient } from '@/lib/api-client';
 export const metadata: Metadata = {
     title: 'Browse Jobs',
     description: 'Search thousands of open roles and apply with one click on Applicant Network.',
+    alternates: {
+        types: {
+            'application/rss+xml': '/public/jobs/rss.xml',
+            'application/atom+xml': '/public/jobs/atom.xml',
+        },
+    },
 };
 
 export const revalidate = 60;
