@@ -45,16 +45,23 @@ export function ScreenshotPlaceholder({
                             </div>
                         </>
                     ) : (
-                        <div className="mockup-browser w-full h-full overflow-hidden">
-                            <div className="bg-base-200 w-full h-full flex justify-center rounded-2xl">
-                                <img
-                                    src={
-                                        imageSrc ||
-                                        "https://placehold.co/600x1200?text=Mobile+Screenshot+Placeholder"
-                                    }
-                                    alt={`${title} placeholder`}
-                                    className="object-cover"
-                                />
+                        <div className="mockup-phone-display">
+                            <div className="mockup-browser">
+                                <div className="bg-base-200 flex justify-center">
+                                    <img
+                                        src={
+                                            imageSrc ||
+                                            "https://placehold.co/600x1200?text=Mobile+Screenshot+Placeholder"
+                                        }
+                                        alt={`${title} placeholder`}
+                                        className="object-cover w-full h-full"
+                                    />
+                                </div>
+                                <div className="mockup-browser-toolbar px-6 py-4 bg-base-100 m-0">
+                                    <div className="input input-lg">
+                                        splits.network
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     )}
