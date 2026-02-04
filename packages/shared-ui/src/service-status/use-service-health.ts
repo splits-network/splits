@@ -35,7 +35,7 @@ const checkServiceHealth = async (
         });
         const responseTime = Date.now() - startTime;
         
-        // Guard against non-JSON responses (e.g., HTML error pages)
+        // Guard against non-JSON responses (e.g., proxy error pages, HTML responses)
         const data = await response.json().catch(() => ({}));
 
         if (response.ok && data.status === "healthy") {
