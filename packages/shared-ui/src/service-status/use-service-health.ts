@@ -34,7 +34,9 @@ const checkServiceHealth = async (
             signal: AbortSignal.timeout(5000),
         });
         const responseTime = Date.now() - startTime;
-        const data = await response.json();
+        
+        // Guard against non-JSON responses (e.g., proxy error pages, HTML responses)
+        const data = await response.json().catch(() => ({}));
 
         if (response.ok && data.status === "healthy") {
             return {
@@ -48,7 +50,7 @@ const checkServiceHealth = async (
         return {
             ...service,
             status: "unhealthy",
-            error: data.error || "Service returned unhealthy status",
+            error: data.error || response.statusText || "Service returned unhealthy status",
             timestamp: data.timestamp,
             responseTime,
         };
