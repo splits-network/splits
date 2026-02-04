@@ -3,10 +3,17 @@ import type { StandardListParams, StandardListResponse } from '@splits-network/s
 import { Suspense } from 'react';
 import JobsList from './components/jobs-list';
 import { apiClient } from '@/lib/api-client';
+import { JsonLd } from '@splits-network/shared-ui';
 
 export const metadata: Metadata = {
     title: 'Browse Jobs',
     description: 'Search thousands of open roles and apply with one click on Applicant Network.',
+    alternates: {
+        types: {
+            'application/rss+xml': '/public/jobs/rss.xml',
+            'application/atom+xml': '/public/jobs/atom.xml',
+        },
+    },
 };
 
 export const revalidate = 60;
@@ -66,8 +73,38 @@ export default async function JobsPage({ searchParams }: JobsPageProps) {
         initialPagination = undefined;
     }
 
+    const jobListJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: "Applicant Network Jobs",
+        url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://applicant.network'}/public/jobs`,
+        itemListElement: (initialData || []).slice(0, 20).map((job, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://applicant.network'}/public/jobs/${job?.id}`,
+            item: {
+                "@type": "JobPosting",
+                title: job?.title || "Untitled role",
+                datePosted: job?.created_at || job?.updated_at,
+                hiringOrganization: job?.company?.name
+                    ? {
+                          "@type": "Organization",
+                          name: job.company.name,
+                      }
+                    : undefined,
+                jobLocation: job?.location
+                    ? {
+                          "@type": "Place",
+                          address: job.location,
+                      }
+                    : undefined,
+            },
+        })),
+    };
+
     return (
         <div className="container mx-auto px-4 py-10 space-y-8">
+            <JsonLd data={jobListJsonLd} id="jobs-jsonld" />
             <Suspense fallback={
                 <div className="flex items-center justify-center py-12">
                     <span className="loading loading-spinner loading-lg"></span>

@@ -1,0 +1,15 @@
+# llms.txt
+# Splits Network public index for AI systems
+
+Site: https://splits.network
+Contact: hello@splits.network
+
+Key pages:
+- /public/documentation
+- /public/features
+- /public/pricing
+- /public/for-companies
+- /public/for-recruiters
+- /public/how-it-works
+- /public/updates
+- /public/blog

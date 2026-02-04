@@ -13,6 +13,7 @@ import { MoneyFlowSection } from '@/components/landing/sections/money-flow-secti
 import { ProblemSection } from '@/components/landing/sections/problem-section';
 import { SolutionBridgeSection } from '@/components/landing/sections/solution-bridge-section';
 import type { Metadata } from 'next';
+import { JsonLd } from '@splits-network/shared-ui';
 
 export const metadata: Metadata = {
     title: 'Recruiting Marketplace for Split Placements',
@@ -20,9 +21,23 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
+    const homeJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        name: "Splits Network - Recruiting Marketplace",
+        url: "https://splits.network",
+        description:
+            "Collaborate with recruiters, share roles, and split fees on Splits Network.",
+        isPartOf: {
+            "@type": "WebSite",
+            name: "Splits Network",
+            url: "https://splits.network",
+        },
+    };
 
     return (
         <>
+            <JsonLd data={homeJsonLd} id="splits-home-jsonld" />
             <Header />
             <HeroSection />
             <ProblemSection />

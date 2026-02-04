@@ -1,6 +1,16 @@
 import type { Metadata } from "next";
 import { DocsSidebar } from "./components/docs-sidebar";
 import { DocsMobileNav } from "./components/docs-mobile-nav";
+import { JsonLd } from "@splits-network/shared-ui";
+
+const docsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Splits Network Documentation",
+    description:
+        "Public documentation for recruiters, hiring managers, and company admins using Splits Network.",
+    url: "https://splits.network/public/documentation",
+};
 
 export const metadata: Metadata = {
     title: "Splits Network Documentation",
@@ -22,7 +32,10 @@ export default function DocumentationLayout({
                         <aside className="hidden lg:block">
                             <DocsSidebar />
                         </aside>
-                        <main className="min-w-0">{children}</main>
+                        <main className="min-w-0">
+                            <JsonLd data={docsJsonLd} id="docs-jsonld" />
+                            {children}
+                        </main>
                     </div>
                 </div>
             </div>

@@ -1,6 +1,9 @@
 "use client";
 
-import { useServiceHealth, type ServiceHealth } from "@/hooks/useServiceHealth";
+import {
+    useServiceHealth,
+    type ServiceHealth,
+} from "@splits-network/shared-ui";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 const corporateFormDefaults = {

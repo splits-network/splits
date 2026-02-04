@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
-import { ServiceStatusBanner } from "@/components/service-status-banner";
+import { ServiceStatusBanner } from "@splits-network/shared-ui";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
@@ -132,7 +132,7 @@ export default function RootLayout({
                 />
             </head>
             <body className="antialiased flex flex-col min-h-screen">
-                <ServiceStatusBanner />
+                <ServiceStatusBanner statusHref="/status" />
                 <Header />
                 <main className="flex-grow">{children}</main>
                 <Footer />

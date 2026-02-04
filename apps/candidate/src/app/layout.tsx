@@ -4,7 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import Header from "@/components/navigation/header";
 import Footer from "@/components/navigation/footer";
 import CookieConsent from "@/components/cookie-consent";
-import { ServiceStatusBanner } from "@/components/service-status-banner";
+import { ServiceStatusBanner } from "@splits-network/shared-ui";
 import { ToastProvider } from "@/lib/toast-context";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
@@ -145,7 +145,7 @@ export default function RootLayout({
                     />
                 </head>
                 <body className="flex flex-col min-h-screen bg-base-300">
-                    <ServiceStatusBanner />
+                    <ServiceStatusBanner statusHref="/status" />
                     <ToastProvider>
                         <Header />
                         <main className="flex-1">{children}</main>
