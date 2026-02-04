@@ -9,7 +9,7 @@ import {
     OnboardingProvider,
     OnboardingWizardModal,
 } from "@/components/onboarding";
-import { UserProfileProvider, PageTitleProvider } from "@/contexts";
+import { PageTitleProvider } from "@/contexts";
 
 export function AuthenticatedLayoutClient({
     children,
