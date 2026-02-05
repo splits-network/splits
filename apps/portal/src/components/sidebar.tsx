@@ -45,9 +45,25 @@ const navItems: NavItem[] = [
 
     // Management section (recruiter/company focused)
     {
+        href: "/portal/marketplace/recruiters",
+        label: "Find Recruiters",
+        icon: "fa-users-viewfinder",
+        roles: ["company_admin", "hiring_manager"],
+        section: "management",
+        mobileDock: false,
+    },
+    {
         href: "/portal/invitations",
         label: "Invitations",
         icon: "fa-envelope",
+        roles: ["recruiter"],
+        section: "management",
+        mobileDock: false,
+    },
+    {
+        href: "/portal/company-invitations",
+        label: "Company Invitations",
+        icon: "fa-building-user",
         roles: ["recruiter"],
         section: "management",
         mobileDock: false,

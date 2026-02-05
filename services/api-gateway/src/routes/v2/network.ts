@@ -78,6 +78,7 @@ export function registerNetworkRoutes(app: FastifyInstance, services: ServiceReg
     // Register custom routes FIRST before generic CRUD routes
     registerRecruiterCandidateInvitationRoutes(app, services);
     registerTeamRoutes(app, services);
+    registerRecruiterCompanyRoutes(app, services);
     registerPublicRecruitersListRoute(app, services);
 
     // Register generic CRUD routes LAST (skip recruiters as we have custom routes)
@@ -333,6 +334,213 @@ function registerTeamRoutes(app: FastifyInstance, services: ServiceRegistry) {
                 return reply.status(204).send();
             } catch (error: any) {
                 return handleNetworkError(request, reply, error, 'Failed to remove member');
+            }
+        }
+    );
+}
+
+/**
+ * Register recruiter-company relationship routes
+ * Enables companies to invite recruiters and recruiters to manage company relationships
+ */
+function registerRecruiterCompanyRoutes(app: FastifyInstance, services: ServiceRegistry) {
+    const networkService = () => services.get('network');
+
+    const routeOptions = () => ({
+        preHandler: requireAuth(),
+    });
+
+    const handleNetworkError = (
+        request: FastifyRequest,
+        reply: FastifyReply,
+        error: any,
+        message: string
+    ) => {
+        request.log.error({ error, message }, 'Recruiter-company route failed');
+        return reply.status(error?.statusCode || 500).send(error?.jsonBody || { error: message });
+    };
+
+    // LIST relationships
+    app.get(
+        '/api/v2/recruiter-companies',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    '/v2/recruiter-companies',
+                    request.query as Record<string, any>,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to list recruiter-company relationships');
+            }
+        }
+    );
+
+    // GET relationship by ID
+    app.get(
+        '/api/v2/recruiter-companies/:id',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { id } = request.params as { id: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    `/v2/recruiter-companies/${id}`,
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to fetch recruiter-company relationship');
+            }
+        }
+    );
+
+    // GET manageable companies for current recruiter
+    app.get(
+        '/api/v2/recruiter-companies/manageable-companies',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    '/v2/recruiter-companies/manageable-companies',
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to fetch manageable companies');
+            }
+        }
+    );
+
+    // GET check if recruiter can manage company jobs
+    app.get(
+        '/api/v2/recruiter-companies/can-manage/:companyId',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { companyId } = request.params as { companyId: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    `/v2/recruiter-companies/can-manage/${companyId}`,
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to check company management permission');
+            }
+        }
+    );
+
+    // INVITE recruiter to company
+    app.post(
+        '/api/v2/recruiter-companies/invite',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().post(
+                    '/v2/recruiter-companies/invite',
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.code(201).send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to invite recruiter');
+            }
+        }
+    );
+
+    // RESPOND to invitation (accept/decline)
+    app.patch(
+        '/api/v2/recruiter-companies/:id/respond',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { id } = request.params as { id: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().patch(
+                    `/v2/recruiter-companies/${id}/respond`,
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to respond to invitation');
+            }
+        }
+    );
+
+    // UPDATE relationship
+    app.patch(
+        '/api/v2/recruiter-companies/:id',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { id } = request.params as { id: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().patch(
+                    `/v2/recruiter-companies/${id}`,
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to update recruiter-company relationship');
+            }
+        }
+    );
+
+    // TERMINATE relationship
+    app.patch(
+        '/api/v2/recruiter-companies/:id/terminate',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { id } = request.params as { id: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().patch(
+                    `/v2/recruiter-companies/${id}/terminate`,
+                    request.body,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to terminate relationship');
+            }
+        }
+    );
+
+    // DELETE relationship
+    app.delete(
+        '/api/v2/recruiter-companies/:id',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const { id } = request.params as { id: string };
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().delete(
+                    `/v2/recruiter-companies/${id}`,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to delete recruiter-company relationship');
             }
         }
     );
