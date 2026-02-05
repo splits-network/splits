@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import type { AIReview } from '@splits-network/shared-types';
 import { StatCard, StatCardGrid } from '@/components/ui';
@@ -9,19 +10,25 @@ interface AIReviewDisplayProps {
     applicationId: string;
     isRecruiter: boolean;
     isCompanyUser: boolean;
-    token: string | null;
+    token?: string | null; // Optional - will fetch fresh token if not provided
 }
 
-export default function AIReviewDisplay({ applicationId, isRecruiter, isCompanyUser, token }: AIReviewDisplayProps) {
+export default function AIReviewDisplay({ applicationId, isRecruiter, isCompanyUser, token: providedToken }: AIReviewDisplayProps) {
+    const { getToken } = useAuth();
     const [aiReview, setAIReview] = useState<AIReview | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchAIReview() {
-            if (!token) return;
-
             try {
-                const client = createAuthenticatedClient(token);
+                // Always get a fresh token to avoid stale token issues
+                const freshToken = await getToken();
+                if (!freshToken) {
+                    setLoading(false);
+                    return;
+                }
+
+                const client = createAuthenticatedClient(freshToken);
                 const response = await client.get<{ data: AIReview[] }>('/ai-reviews', {
                     params: { application_id: applicationId }
                 });
@@ -38,7 +45,7 @@ export default function AIReviewDisplay({ applicationId, isRecruiter, isCompanyU
         }
 
         fetchAIReview();
-    }, [applicationId, token]);
+    }, [applicationId, getToken]);
 
     if (loading) {
         return (

@@ -1,11 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { formatRelativeTime } from "@/lib/utils";
-import {
-    getApplicationStageBadge,
-    getApplicationStageClass,
-} from "@/lib/utils/badge-styles";
+import { getApplicationStageClass } from "@/lib/utils/badge-styles";
 import {
     ExpandableTableRow,
     ExpandedDetailGrid,
@@ -20,6 +16,7 @@ import { useToast } from "@/lib/toast-context";
 import { useState } from "react";
 import { usePresence } from "@/hooks/use-presence";
 import { Presence } from "@/components/presense";
+import ApplicationActionsToolbar from "./application-actions-toolbar";
 
 // ===== TYPES =====
 
@@ -36,6 +33,8 @@ interface ApplicationTableRowProps {
     canAccept?: boolean;
     isAccepting?: boolean;
     onAccept?: () => void;
+    onViewDetails?: (applicationId: string) => void;
+    onRefresh?: () => void;
     getStageColor?: (stage: string) => string;
     formatDate: (date: string | Date) => string;
     isSelected?: boolean;
@@ -67,6 +66,8 @@ export function ApplicationTableRow({
     canAccept = false,
     isAccepting = false,
     onAccept,
+    onViewDetails,
+    onRefresh,
     getStageColor = getApplicationStageClass,
     formatDate,
     isSelected = false,
@@ -207,9 +208,10 @@ export function ApplicationTableRow({
             </td>
             <td onClick={(e) => e.stopPropagation()}>
                 <div className="flex gap-1 justify-end">
+                    {/* Message button - specific to applications */}
                     <span title={chatDisabledReason || undefined}>
                         <button
-                            className="btn btn-outline btn-sm relative"
+                            className="btn btn-ghost btn-sm btn-square relative"
                             title="Message Candidate"
                             disabled={!canChat || startingChat}
                             onClick={async (e) => {
@@ -256,6 +258,7 @@ export function ApplicationTableRow({
                             <i className="fa-duotone fa-regular fa-messages text-xs"></i>
                         </button>
                     </span>
+                    {/* Accept button - specific to company users */}
                     {canAccept && isCompanyUser && onAccept && (
                         <button
                             onClick={onAccept}
@@ -266,17 +269,25 @@ export function ApplicationTableRow({
                             {isAccepting ? (
                                 <span className="loading loading-spinner loading-xs"></span>
                             ) : (
-                                <i className="fa-duotone fa-regular fa-check text-xs"></i>
+                                <i className="fa-duotone fa-regular fa-check text-success text-xs"></i>
                             )}
                         </button>
                     )}
-                    <Link
-                        href={`/portal/applications/${application.id}`}
-                        className="btn btn-primary btn-sm"
-                        title="View Details"
-                    >
-                        View
-                    </Link>
+                    {/* Unified Actions Toolbar */}
+                    <ApplicationActionsToolbar
+                        application={application as any}
+                        variant="icon-only"
+                        layout="horizontal"
+                        size="sm"
+                        onViewDetails={onViewDetails}
+                        onRefresh={onRefresh}
+                        showActions={{
+                            viewDetails: true,
+                            addNote: isRecruiter || isCompanyUser,
+                            advanceStage: true,
+                            reject: true,
+                        }}
+                    />
                 </div>
             </td>
         </>
@@ -389,14 +400,7 @@ export function ApplicationTableRow({
 
             {/* Action Buttons */}
             <div className="flex items-center gap-2 pt-2 border-t border-base-300">
-                <Link
-                    href={`/portal/applications/${application.id}`}
-                    className="btn btn-primary btn-sm gap-2"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <i className="fa-duotone fa-regular fa-eye"></i>
-                    View Details
-                </Link>
+                {/* Message button - specific to applications */}
                 <span title={chatDisabledReason || undefined}>
                     <button
                         className="btn btn-outline btn-sm gap-2"
@@ -447,14 +451,7 @@ export function ApplicationTableRow({
                         Message
                     </button>
                 </span>
-                <Link
-                    href={`/portal/applications/${application.id}?tab=timeline`}
-                    className="btn btn-outline btn-sm gap-2"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <i className="fa-duotone fa-regular fa-clock-rotate-left"></i>
-                    View Timeline
-                </Link>
+                {/* Accept button - specific to company users */}
                 {canAccept &&
                     isCompanyUser &&
                     onAccept &&
@@ -475,11 +472,26 @@ export function ApplicationTableRow({
                             ) : (
                                 <>
                                     <i className="fa-duotone fa-regular fa-check"></i>
-                                    Accept Application
+                                    Accept
                                 </>
                             )}
                         </button>
                     )}
+                {/* Unified Actions Toolbar */}
+                <ApplicationActionsToolbar
+                    application={application as any}
+                    variant="descriptive"
+                    layout="horizontal"
+                    size="sm"
+                    onViewDetails={onViewDetails}
+                    onRefresh={onRefresh}
+                    showActions={{
+                        viewDetails: true,
+                        addNote: isRecruiter || isCompanyUser,
+                        advanceStage: true,
+                        reject: true,
+                    }}
+                />
             </div>
         </div>
     );

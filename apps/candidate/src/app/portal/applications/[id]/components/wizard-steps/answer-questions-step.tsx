@@ -1,12 +1,11 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { MarkdownEditor } from '@splits-network/shared-ui';
+import React, { useState } from "react";
 
 interface Question {
     id: string;
     question: string;
-    question_type: 'text' | 'yes_no' | 'multiple_choice';
+    question_type: "text" | "yes_no" | "multiple_choice";
     is_required: boolean;
     options?: string[];
 }
@@ -41,7 +40,9 @@ export function AnswerQuestionsStep({
         if (questions.length === 0) return true;
 
         const unansweredRequired = questions.filter(
-            (q) => q.is_required && (!answers[q.id] || answers[q.id].trim() === '')
+            (q) =>
+                q.is_required &&
+                (!answers[q.id] || answers[q.id].trim() === ""),
         );
 
         return unansweredRequired.length === 0;
@@ -52,11 +53,15 @@ export function AnswerQuestionsStep({
 
         // Validate required questions are answered
         const unansweredRequired = questions.filter(
-            (q) => q.is_required && (!answers[q.id] || answers[q.id].trim() === '')
+            (q) =>
+                q.is_required &&
+                (!answers[q.id] || answers[q.id].trim() === ""),
         );
 
         if (unansweredRequired.length > 0) {
-            setError(`Please answer all required questions (${unansweredRequired.length} remaining)`);
+            setError(
+                `Please answer all required questions (${unansweredRequired.length} remaining)`,
+            );
             return;
         }
 
@@ -64,24 +69,28 @@ export function AnswerQuestionsStep({
     };
 
     const renderQuestion = (question: Question) => {
-        const answer = answers[question.id] || '';
+        const answer = answers[question.id] || "";
 
         switch (question.question_type) {
-            case 'yes_no':
+            case "yes_no":
                 return (
                     <div className="flex gap-3">
                         <button
                             type="button"
-                            onClick={() => handleAnswerChange(question.id, 'Yes')}
-                            className={`btn flex-1 ${answer === 'Yes' ? 'btn-primary' : 'btn-outline'}`}
+                            onClick={() =>
+                                handleAnswerChange(question.id, "Yes")
+                            }
+                            className={`btn flex-1 ${answer === "Yes" ? "btn-primary" : "btn-outline"}`}
                         >
                             <i className="fa-duotone fa-regular fa-check"></i>
                             Yes
                         </button>
                         <button
                             type="button"
-                            onClick={() => handleAnswerChange(question.id, 'No')}
-                            className={`btn flex-1 ${answer === 'No' ? 'btn-primary' : 'btn-outline'}`}
+                            onClick={() =>
+                                handleAnswerChange(question.id, "No")
+                            }
+                            className={`btn flex-1 ${answer === "No" ? "btn-primary" : "btn-outline"}`}
                         >
                             <i className="fa-duotone fa-regular fa-times"></i>
                             No
@@ -89,17 +98,25 @@ export function AnswerQuestionsStep({
                     </div>
                 );
 
-            case 'multiple_choice':
+            case "multiple_choice":
                 return (
                     <div className="space-y-2">
                         {question.options?.map((option) => (
-                            <label key={option} className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-base-200 transition-colors">
+                            <label
+                                key={option}
+                                className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-base-200 transition-colors"
+                            >
                                 <input
                                     type="radio"
                                     name={question.id}
                                     value={option}
                                     checked={answer === option}
-                                    onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                                    onChange={(e) =>
+                                        handleAnswerChange(
+                                            question.id,
+                                            e.target.value,
+                                        )
+                                    }
                                     className="radio radio-primary"
                                 />
                                 <span>{option}</span>
@@ -108,16 +125,17 @@ export function AnswerQuestionsStep({
                     </div>
                 );
 
-            case 'text':
+            case "text":
             default:
                 return (
-                    <MarkdownEditor
-                        className="fieldset"
+                    <textarea
+                        className="textarea textarea-bordered w-full"
                         value={answer}
-                        onChange={(value) => handleAnswerChange(question.id, value)}
+                        onChange={(e) =>
+                            handleAnswerChange(question.id, e.target.value)
+                        }
                         placeholder="Type your answer here..."
-                        height={160}
-                        preview="edit"
+                        rows={4}
                     />
                 );
         }
@@ -127,13 +145,13 @@ export function AnswerQuestionsStep({
         <div className="space-y-6">
             <div>
                 <h4 className="text-lg font-semibold mb-2">
-                    <i className="fa-duotone fa-regular fa-clipboard-question"></i>
-                    {' '}Pre-screening Questions
+                    <i className="fa-duotone fa-regular fa-clipboard-question"></i>{" "}
+                    Pre-screening Questions
                 </h4>
                 <p className="text-base-content/70 text-sm">
                     {questions.length === 0
-                        ? 'No pre-screening questions for this position.'
-                        : `Answer the following ${questions.length} question${questions.length !== 1 ? 's' : ''} from the employer.`}
+                        ? "No pre-screening questions for this position."
+                        : `Answer the following ${questions.length} question${questions.length !== 1 ? "s" : ""} from the employer.`}
                 </p>
             </div>
 
@@ -147,22 +165,34 @@ export function AnswerQuestionsStep({
             {questions.length === 0 ? (
                 <div className="alert alert-info">
                     <i className="fa-duotone fa-regular fa-info-circle"></i>
-                    <span>No pre-screening questions required. Click Next to continue.</span>
+                    <span>
+                        No pre-screening questions required. Click Next to
+                        continue.
+                    </span>
                 </div>
             ) : (
                 <div className="space-y-6">
                     {questions.map((question, index) => (
-                        <div key={question.id} className="card bg-base-100 shadow">
+                        <div
+                            key={question.id}
+                            className="card bg-base-100 shadow"
+                        >
                             <div className="card-body">
                                 <div className="flex items-start justify-between gap-4 mb-3">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <span className="badge badge-neutral">Question {index + 1}</span>
+                                            <span className="badge badge-neutral">
+                                                Question {index + 1}
+                                            </span>
                                             {question.is_required && (
-                                                <span className="badge badge-error badge-sm">Required</span>
+                                                <span className="badge badge-error badge-sm">
+                                                    Required
+                                                </span>
                                             )}
                                         </div>
-                                        <h5 className="font-semibold text-base">{question.question}</h5>
+                                        <h5 className="font-semibold text-base">
+                                            {question.question}
+                                        </h5>
                                     </div>
                                 </div>
                                 {renderQuestion(question)}
@@ -173,7 +203,11 @@ export function AnswerQuestionsStep({
             )}
 
             <div className="flex justify-between">
-                <button type="button" onClick={onBack} className="btn btn-outline">
+                <button
+                    type="button"
+                    onClick={onBack}
+                    className="btn btn-outline"
+                >
                     <i className="fa-duotone fa-regular fa-arrow-left"></i>
                     Back
                 </button>

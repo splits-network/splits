@@ -134,7 +134,7 @@ export class ApplicationServiceV2 {
         }
 
         // Extract document-related fields that shouldn't be persisted to applications table
-        const { document_ids, primary_resume_id, pre_screen_answers, ...applicationData } = data;
+        const { document_ids, pre_screen_answers, ...applicationData } = data;
 
         // Determine initial stage:
         // - recruiter_proposed: Recruiter submitted on behalf of candidate
@@ -158,7 +158,7 @@ export class ApplicationServiceV2 {
                     this.repository.linkDocumentToApplication(
                         docId,
                         application.id,
-                        docId === primary_resume_id
+                        false // No primary resume tracking at application level
                     )
                 )
             );

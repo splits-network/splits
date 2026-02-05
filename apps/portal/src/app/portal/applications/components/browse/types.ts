@@ -6,12 +6,21 @@ export interface Application extends BaseApplication {
     job?: Job & { company?: Company };
     recruiter?: {
         id: string;
-        name: string;
-        email: string;
+        name?: string;
+        email?: string;
+        // Nested user data from API (recruiters join with users table)
+        user?: {
+            name?: string;
+            email?: string;
+        };
+        bio?: string;
+        status?: string;
     };
     ai_review?: AIReview;
     documents?: any[]; // TODO: Add Document type when available
     timeline?: any[]; // TODO: Add Timeline type when available
+    pre_screen_answers?: any[]; // TODO: Add PreScreenAnswer type when available
+    audit_log?: any[]; // TODO: Add AuditLog type when available
 }
 
 export interface ApplicationFilters {

@@ -27,8 +27,10 @@ import ApplicationsTrendsChart, {
     calculateApplicationTrends,
 } from "@/components/charts/applications-trends-chart";
 import BulkActionModal from "./bulk-action-modal";
+import ApplicationDetailSidebar from "./application-detail-sidebar";
 import type { ApplicationStage } from "@splits-network/shared-types";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ViewMode } from "@/hooks/use-view-mode";
 
 // ===== TYPES =====
@@ -97,6 +99,7 @@ const applicationColumns: TableColumn[] = [
 export default function ApplicationsList({ view }: ApplicationsListProps) {
     const { getToken } = useAuth();
     const toast = useToast();
+    const searchParams = useSearchParams();
     const {
         profile,
         isLoading: profileLoading,
@@ -125,6 +128,25 @@ export default function ApplicationsList({ view }: ApplicationsListProps) {
 
     // Time period state for trends
     const [trendPeriod, setTrendPeriod] = useState(6);
+
+    // Sidebar state - check URL param for initial selection
+    const urlApplicationId = searchParams.get("applicationId");
+    const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(urlApplicationId);
+
+    // Sync sidebar state with URL param changes
+    useEffect(() => {
+        if (urlApplicationId) {
+            setSelectedApplicationId(urlApplicationId);
+        }
+    }, [urlApplicationId]);
+
+    const handleViewDetails = useCallback((applicationId: string) => {
+        setSelectedApplicationId(applicationId);
+    }, []);
+
+    const handleCloseSidebar = useCallback(() => {
+        setSelectedApplicationId(null);
+    }, []);
 
     // Resolve companyId from organization
     const resolveCompanyFromOrg = useCallback(
@@ -485,7 +507,11 @@ export default function ApplicationsList({ view }: ApplicationsListProps) {
                                 onAccept={() =>
                                     handleAcceptApplication(application.id)
                                 }
+                                onViewDetails={handleViewDetails}
+                                onRefresh={refresh}
                                 formatDate={formatDate}
+                                isRecruiter={isRecruiter}
+                                isCompanyUser={isCompanyUser}
                             />
                         ))}
                     </div>
@@ -518,6 +544,8 @@ export default function ApplicationsList({ view }: ApplicationsListProps) {
                                 onAccept={() =>
                                     handleAcceptApplication(application.id)
                                 }
+                                onViewDetails={handleViewDetails}
+                                onRefresh={refresh}
                                 getStageColor={getApplicationStageClass}
                                 formatDate={formatDate}
                                 isRecruiter={isRecruiter}
@@ -562,6 +590,12 @@ export default function ApplicationsList({ view }: ApplicationsListProps) {
                     loading={bulkLoading}
                 />
             )}
+
+            {/* Application Detail Sidebar */}
+            <ApplicationDetailSidebar
+                applicationId={selectedApplicationId}
+                onClose={handleCloseSidebar}
+            />
         </div>
     );
 }

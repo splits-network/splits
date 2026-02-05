@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useRef } from 'react';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
+import { useState, useRef } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
 
 interface UploadDocumentModalProps {
     entityType: string;
@@ -15,7 +15,7 @@ interface UploadDocumentModalProps {
 export default function UploadDocumentModal({
     entityType,
     entityId,
-    documentType = 'other',
+    documentType = "other",
     onClose,
     onSuccess,
 }: UploadDocumentModalProps) {
@@ -23,6 +23,7 @@ export default function UploadDocumentModal({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [file, setFile] = useState<File | null>(null);
     const [selectedDocType, setSelectedDocType] = useState(documentType);
+    const [setAsPrimary, setSetAsPrimary] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -31,19 +32,19 @@ export default function UploadDocumentModal({
         if (selectedFile) {
             // Validate file type
             const allowedTypes = [
-                'application/pdf',
-                'application/msword',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'text/plain',
-                'application/rtf',
+                "application/pdf",
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "text/plain",
+                "application/rtf",
             ];
             if (!allowedTypes.includes(selectedFile.type)) {
-                setError('Please upload a PDF, DOC, DOCX, TXT, or RTF file');
+                setError("Please upload a PDF, DOC, DOCX, TXT, or RTF file");
                 return;
             }
             // Validate file size (10MB)
             if (selectedFile.size > 10 * 1024 * 1024) {
-                setError('File size must be less than 10MB');
+                setError("File size must be less than 10MB");
                 return;
             }
             setFile(selectedFile);
@@ -54,7 +55,7 @@ export default function UploadDocumentModal({
     const handleUpload = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!file) {
-            setError('Please select a file');
+            setError("Please select a file");
             return;
         }
 
@@ -62,30 +63,56 @@ export default function UploadDocumentModal({
         setUploading(true);
 
         try {
-
             const token = await getToken();
             if (!token) {
-                throw new Error('No auth token available');
+                throw new Error("No auth token available");
             }
 
             const formData = new FormData();
-            formData.append('file', file);
-            formData.append('entity_type', entityType);
-            formData.append('entity_id', entityId);
-            formData.append('document_type', selectedDocType);
+            formData.append("file", file);
+            formData.append("entity_type", entityType);
+            formData.append("entity_id", entityId);
+            formData.append("document_type", selectedDocType);
 
             const client = createAuthenticatedClient(token);
-            await client.post('/documents', formData);
+            const response = await client.post("/documents", formData);
+
+            // If this is a resume and set as primary is selected, set it as primary
+            if (
+                selectedDocType === "resume" &&
+                setAsPrimary &&
+                response.data?.id
+            ) {
+                try {
+                    await client.patch(
+                        `/candidates/${entityId}/primary-resume`,
+                        {
+                            resume_id: response.data.id,
+                        },
+                    );
+                } catch (primaryErr: any) {
+                    console.error(
+                        "Failed to set as primary resume:",
+                        primaryErr,
+                    );
+                    // Don't fail the upload if primary setting fails
+                }
+            }
+
             onSuccess();
         } catch (err: any) {
-            console.error('Upload error:', err);
-            console.error('Error details:', {
+            console.error("Upload error:", err);
+            console.error("Error details:", {
                 message: err.message,
                 response: err.response,
                 status: err.status,
-                stack: err.stack
+                stack: err.stack,
             });
-            setError(err.response?.data?.error?.message || err.message || 'Upload failed');
+            setError(
+                err.response?.data?.error?.message ||
+                    err.message ||
+                    "Upload failed",
+            );
         } finally {
             setUploading(false);
         }
@@ -105,7 +132,9 @@ export default function UploadDocumentModal({
 
                 <form onSubmit={handleUpload} className="space-y-4">
                     <fieldset className="fieldset">
-                        <legend className="fieldset-legend">Document Type</legend>
+                        <legend className="fieldset-legend">
+                            Document Type
+                        </legend>
                         <select
                             className="select w-full"
                             value={selectedDocType}
@@ -138,7 +167,8 @@ export default function UploadDocumentModal({
                                 <i className="fa-duotone fa-regular fa-file text-primary"></i>
                                 <span className="text-sm">{file.name}</span>
                                 <span className="text-xs text-base-content/60">
-                                    ({(file.size / (1024 * 1024)).toFixed(2)} MB)
+                                    ({(file.size / (1024 * 1024)).toFixed(2)}{" "}
+                                    MB)
                                 </span>
                                 <button
                                     type="button"
@@ -146,7 +176,7 @@ export default function UploadDocumentModal({
                                     onClick={() => {
                                         setFile(null);
                                         if (fileInputRef.current) {
-                                            fileInputRef.current.value = '';
+                                            fileInputRef.current.value = "";
                                         }
                                     }}
                                 >
@@ -155,6 +185,29 @@ export default function UploadDocumentModal({
                             </div>
                         )}
                     </fieldset>
+
+                    {selectedDocType === "resume" && (
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">
+                                Primary Resume
+                            </legend>
+                            <label className="cursor-pointer flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    className="checkbox"
+                                    checked={setAsPrimary}
+                                    onChange={(e) =>
+                                        setSetAsPrimary(e.target.checked)
+                                    }
+                                />
+                                <span>Set as primary resume</span>
+                            </label>
+                            <p className="fieldset-label">
+                                Your primary resume will be used by default in
+                                applications
+                            </p>
+                        </fieldset>
+                    )}
 
                     <div className="modal-action">
                         <button

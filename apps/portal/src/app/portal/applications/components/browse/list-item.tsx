@@ -53,11 +53,11 @@ export default function ApplicationListItem({
                             </span>
                         </div>
                     )}
-                    {item.ai_review?.fit_score && (
+                    {item.ai_review?.fit_score != null && (
                         <div className="flex items-center gap-1">
                             <i className="fa-duotone fa-brain" />
                             <span>
-                                {Math.round(item.ai_review.fit_score * 100)}%
+                                {Math.round(item.ai_review.fit_score)}%
                                 fit
                             </span>
                         </div>

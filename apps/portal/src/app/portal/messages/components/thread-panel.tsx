@@ -569,7 +569,7 @@ export default function ThreadPanel({
                             {data.conversation.application_id && (
                                 <Link
                                     className="link link-hover"
-                                    href={`/portal/applications/${data.conversation.application_id}`}
+                                    href={`/portal/applications?applicationId=${data.conversation.application_id}`}
                                 >
                                     Application:{" "}
                                     {applicationTitle ||

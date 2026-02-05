@@ -1,17 +1,23 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { DataRow, DataList, KeyMetric, MetricCard, VerticalDataRow } from '@/components/ui/cards';
-import { formatRelativeTime } from '@/lib/utils';
-import { getApplicationStageBadge } from '@/lib/utils/badge-styles';
-import type { ApplicationStage } from '@splits-network/shared-types';
-import { useAuth } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
-import { startChatConversation } from '@/lib/chat-start';
-import { useToast } from '@/lib/toast-context';
-import { useState } from 'react';
-import { usePresence } from '@/hooks/use-presence';
-import { Presence } from '@/components/presense';
+import {
+    DataRow,
+    DataList,
+    KeyMetric,
+    MetricCard,
+    VerticalDataRow,
+} from "@/components/ui/cards";
+import { formatRelativeTime } from "@/lib/utils";
+import { getApplicationStageBadge } from "@/lib/utils/badge-styles";
+import type { ApplicationStage } from "@splits-network/shared-types";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { startChatConversation } from "@/lib/chat-start";
+import { useToast } from "@/lib/toast-context";
+import { useState } from "react";
+import { usePresence } from "@/hooks/use-presence";
+import { Presence } from "@/components/presense";
+import ApplicationActionsToolbar from "./application-actions-toolbar";
 
 // ===== TYPES =====
 
@@ -51,7 +57,7 @@ export interface Application {
     };
     ai_review?: {
         fit_score: number;
-        recommendation: 'strong_fit' | 'good_fit' | 'fair_fit' | 'poor_fit';
+        recommendation: "strong_fit" | "good_fit" | "fair_fit" | "poor_fit";
     };
 }
 
@@ -70,30 +76,34 @@ interface ApplicationCardProps {
     canAccept?: boolean;
     isAccepting?: boolean;
     onAccept?: () => void;
+    onViewDetails?: (applicationId: string) => void;
+    onRefresh?: () => void;
     formatDate: (date: string | Date) => string;
+    isRecruiter?: boolean;
+    isCompanyUser?: boolean;
 }
 
 // Get AI score color
 function getAIScoreColor(score: number): string {
-    if (score >= 80) return 'text-success';
-    if (score >= 60) return 'text-info';
-    if (score >= 40) return 'text-warning';
-    return 'text-error';
+    if (score >= 80) return "text-success";
+    if (score >= 60) return "text-info";
+    if (score >= 40) return "text-warning";
+    return "text-error";
 }
 
 // Get AI recommendation badge
 function getAIRecommendationBadge(recommendation: string): string {
     switch (recommendation) {
-        case 'strong_fit':
-            return 'badge-success';
-        case 'good_fit':
-            return 'badge-info';
-        case 'fair_fit':
-            return 'badge-warning';
-        case 'poor_fit':
-            return 'badge-error';
+        case "strong_fit":
+            return "badge-success";
+        case "good_fit":
+            return "badge-info";
+        case "fair_fit":
+            return "badge-warning";
+        case "poor_fit":
+            return "badge-error";
         default:
-            return 'badge-ghost';
+            return "badge-ghost";
     }
 }
 
@@ -102,13 +112,20 @@ export function ApplicationCard({
     canAccept = false,
     isAccepting = false,
     onAccept,
+    onViewDetails,
+    onRefresh,
     formatDate,
+    isRecruiter = false,
+    isCompanyUser = false,
 }: ApplicationCardProps) {
     const { getToken } = useAuth();
     const router = useRouter();
     const toast = useToast();
     const [startingChat, setStartingChat] = useState(false);
-    const companyName = application.company_name || application.job?.company?.name || 'Unknown Company';
+    const companyName =
+        application.company_name ||
+        application.job?.company?.name ||
+        "Unknown Company";
     const hasAIReview = application.ai_reviewed && application.ai_review;
     const isMasked = application.candidate._masked;
     const canChat = Boolean(application.candidate.user_id);
@@ -127,38 +144,40 @@ export function ApplicationCard({
 
     if (application.accepted_by_company) {
         badges.push({
-            class: 'badge-success',
-            icon: 'fa-check-circle',
-            text: 'Accepted',
-            tooltip: 'Accepted by company',
+            class: "badge-success",
+            icon: "fa-check-circle",
+            text: "Accepted",
+            tooltip: "Accepted by company",
         });
     }
 
     if (hasAIReview) {
         badges.push({
-            class: getAIRecommendationBadge(application.ai_review!.recommendation),
-            icon: 'fa-robot',
+            class: getAIRecommendationBadge(
+                application.ai_review!.recommendation,
+            ),
+            icon: "fa-robot",
             text: `AI: ${application.ai_review!.fit_score}%`,
-            tooltip: `AI Fit Score: ${application.ai_review!.recommendation.replace('_', ' ')}`,
+            tooltip: `AI Fit Score: ${application.ai_review!.recommendation.replace("_", " ")}`,
         });
     }
 
-    if (application.stage === 'screen') {
+    if (application.stage === "screen") {
         badges.push({
-            class: 'badge-warning',
-            icon: 'fa-clock',
-            text: 'Awaiting Review',
-            tooltip: 'Pending company review',
+            class: "badge-warning",
+            icon: "fa-clock",
+            text: "Awaiting Review",
+            tooltip: "Pending company review",
             animated: true,
         });
     }
 
     if (isMasked) {
         badges.push({
-            class: 'badge-warning',
-            icon: 'fa-eye-slash',
-            text: 'Anonymous',
-            tooltip: 'Anonymous candidate',
+            class: "badge-warning",
+            icon: "fa-eye-slash",
+            text: "Anonymous",
+            tooltip: "Anonymous candidate",
         });
     }
 
@@ -189,7 +208,9 @@ export function ApplicationCard({
                         </div>
                         <div className="flex items-center gap-2 ml-4">
                             {/* Stage Badge */}
-                            <div className={`badge ${getApplicationStageBadge(application.stage)} shrink-0`}>
+                            <div
+                                className={`badge ${getApplicationStageBadge(application.stage)} shrink-0`}
+                            >
                                 {application.stage}
                             </div>
                         </div>
@@ -200,10 +221,18 @@ export function ApplicationCard({
                 {/* Key Metric */}
                 <KeyMetric
                     label="AI Fit Score"
-                    value={hasAIReview ? `${application.ai_review!.fit_score}%` : '—'}
-                    valueColor={hasAIReview ? getAIScoreColor(application.ai_review!.fit_score) : 'text-base-content/50'}
-                    progress={hasAIReview ? application.ai_review!.fit_score : undefined}
-                    progressColor={hasAIReview && application.ai_review!.fit_score >= 70 ? 'success' : hasAIReview && application.ai_review!.fit_score >= 50 ? 'info' : 'warning'}
+                    value={
+                        hasAIReview
+                            ? `${application.ai_review!.fit_score}%`
+                            : "—"
+                    }
+                    valueColor={
+                        hasAIReview
+                            ? getAIScoreColor(application.ai_review!.fit_score)
+                            : "text-base-content/50"
+                    }
+                    //progress={hasAIReview ? application.ai_review!.fit_score : undefined}
+                    //progressColor={hasAIReview && application.ai_review!.fit_score >= 70 ? 'success' : hasAIReview && application.ai_review!.fit_score >= 50 ? 'info' : 'warning'}
                 />
                 {/* Data Rows */}
                 <DataList compact>
@@ -238,10 +267,12 @@ export function ApplicationCard({
                         {badges.map((badge: Badge, idx: number) => (
                             <span
                                 key={idx}
-                                className={`badge badge-sm ${badge.class} gap-1 ${badge.animated ? 'animate-pulse' : ''}`}
+                                className={`badge badge-sm ${badge.class} gap-1 ${badge.animated ? "animate-pulse" : ""}`}
                                 title={badge.tooltip}
                             >
-                                <i className={`fa-duotone fa-regular ${badge.icon}`}></i>
+                                <i
+                                    className={`fa-duotone fa-regular ${badge.icon}`}
+                                ></i>
                                 {badge.text}
                             </span>
                         ))}
@@ -254,10 +285,12 @@ export function ApplicationCard({
                         Submitted {formatRelativeTime(application.created_at)}
                     </span>
                     <div className="flex items-center gap-2">
+                        {/* Message button - specific to applications */}
                         <span title={chatDisabledReason || undefined}>
                             <button
-                                className="btn btn-outline btn-sm"
+                                className="btn btn-ghost btn-sm btn-square"
                                 disabled={!canChat || startingChat}
+                                title="Message Candidate"
                                 onClick={async (e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
@@ -273,11 +306,10 @@ export function ApplicationCard({
                                                 {
                                                     application_id:
                                                         application.id,
-                                                    job_id:
-                                                        application.job.id,
+                                                    job_id: application.job.id,
                                                     company_id:
-                                                        application.job.company?.id ??
-                                                        null,
+                                                        application.job.company
+                                                            ?.id ?? null,
                                                 },
                                             );
                                         router.push(
@@ -300,45 +332,49 @@ export function ApplicationCard({
                                 {startingChat ? (
                                     <span className="loading loading-spinner loading-xs"></span>
                                 ) : (
-                                    <span className="inline-flex items-center gap-2">
+                                    <span className="inline-flex items-center gap-1">
                                         <Presence status={presenceStatus} />
-                                        Message
+                                        <i className="fa-duotone fa-regular fa-messages"></i>
                                     </span>
                                 )}
                             </button>
                         </span>
+                        {/* Accept button - specific to company users */}
                         {canAccept && onAccept && (
-                            <span
+                            <button
                                 onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
                                     onAccept();
                                 }}
-                                className="btn btn-sm btn-success btn-outline"
+                                className="btn btn-sm btn-success btn-square"
+                                title="Accept Application"
                             >
                                 {isAccepting ? (
-                                    <>
-                                        <span className="loading loading-spinner loading-xs"></span>
-                                        Accepting...
-                                    </>
+                                    <span className="loading loading-spinner loading-xs"></span>
                                 ) : (
-                                    <>
-                                        <i className="fa-duotone fa-regular fa-check"></i>
-                                        Accept
-                                    </>
+                                    <i className="fa-duotone fa-regular fa-check"></i>
                                 )}
-                            </span>
+                            </button>
                         )}
-                        <span className="text-primary text-sm font-medium group-hover:underline">
-                            <Link href={`/portal/applications/${application.id}`} className='btn btn-primary btn-sm'>
-                                View Details →
-                            </Link>
-                        </span>
+                        {/* Unified Actions Toolbar */}
+                        <ApplicationActionsToolbar
+                            application={application as any}
+                            variant="icon-only"
+                            layout="horizontal"
+                            size="xs"
+                            onViewDetails={onViewDetails}
+                            onRefresh={onRefresh}
+                            showActions={{
+                                viewDetails: true,
+                                addNote: isRecruiter || isCompanyUser,
+                                advanceStage: true,
+                                reject: true,
+                            }}
+                        />
                     </div>
                 </div>
             </MetricCard.Footer>
         </MetricCard>
     );
 }
-
-

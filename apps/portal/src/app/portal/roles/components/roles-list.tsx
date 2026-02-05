@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
     useStandardList,
     PaginationControls,
@@ -52,6 +53,7 @@ const roleColumns: TableColumn[] = [
 // ===== COMPONENT =====
 
 export default function RolesList({ view }: RolesListProps) {
+    const searchParams = useSearchParams();
     const {
         profile,
         isAdmin,
@@ -119,8 +121,16 @@ export default function RolesList({ view }: RolesListProps) {
     const [showAddModal, setShowAddModal] = useState(false);
     const [editingJobId, setEditingJobId] = useState<string | null>(null);
 
-    // Sidebar state for viewing role details
-    const [sidebarRoleId, setSidebarRoleId] = useState<string | null>(null);
+    // Sidebar state for viewing role details - check URL param for initial selection
+    const urlJobId = searchParams.get("jobId");
+    const [sidebarRoleId, setSidebarRoleId] = useState<string | null>(urlJobId);
+
+    // Sync sidebar state with URL param changes
+    useEffect(() => {
+        if (urlJobId) {
+            setSidebarRoleId(urlJobId);
+        }
+    }, [urlJobId]);
 
     // Pipeline sidebar state for viewing applications
     const [pipelineRoleId, setPipelineRoleId] = useState<string | null>(null);
