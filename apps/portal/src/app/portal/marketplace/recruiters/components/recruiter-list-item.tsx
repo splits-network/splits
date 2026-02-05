@@ -2,8 +2,17 @@
 
 import { MarketplaceRecruiterDTO } from "@splits-network/shared-types";
 
+// Extended type to include joined user data from Supabase
+interface RecruiterWithUser extends MarketplaceRecruiterDTO {
+    users?: {
+        id: string;
+        name: string;
+        email: string;
+    };
+}
+
 interface RecruiterListItemProps {
-    recruiter: MarketplaceRecruiterDTO;
+    recruiter: RecruiterWithUser;
     isSelected: boolean;
     onSelect: () => void;
 }
@@ -13,10 +22,18 @@ export function RecruiterListItem({
     isSelected,
     onSelect,
 }: RecruiterListItemProps) {
-    // Get initials for avatar
-    const getInitials = (name: string) => {
-        const parts = name.split(" ");
-        if (parts.length >= 2) {
+    // Get name from joined users table or fallback to recruiter.name or email
+    const displayName =
+        recruiter.users?.name ||
+        recruiter.name ||
+        recruiter.users?.email ||
+        "Unknown Recruiter";
+
+    // Get initials for avatar (defensive)
+    const getInitials = (name: string | undefined | null) => {
+        if (!name) return "??";
+        const parts = name.trim().split(" ");
+        if (parts.length >= 2 && parts[0] && parts[1]) {
             return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
         }
         return name.slice(0, 2).toUpperCase();
@@ -37,9 +54,11 @@ export function RecruiterListItem({
         >
             <div className="flex items-start gap-3">
                 {/* Avatar */}
-                <div className="avatar placeholder shrink-0">
+                <div className="avatar avatar-placeholder shrink-0">
                     <div className="bg-primary text-primary-content rounded-full w-10 h-10">
-                        <span className="text-sm">{getInitials(recruiter.name)}</span>
+                        <span className="text-sm">
+                            {getInitials(displayName)}
+                        </span>
                     </div>
                 </div>
 
@@ -47,13 +66,15 @@ export function RecruiterListItem({
                 <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-1">
                         <h3 className="truncate text-sm font-medium text-base-content/90">
-                            {recruiter.name}
+                            {displayName}
                         </h3>
                     </div>
 
                     {/* Tagline or Location */}
                     <div className="text-xs text-base-content/60 truncate mb-1.5">
-                        {recruiter.marketplace_tagline || recruiter.marketplace_location || "Recruiter"}
+                        {recruiter.marketplace_tagline ||
+                            recruiter.marketplace_location ||
+                            "Recruiter"}
                     </div>
 
                     {/* Badges */}
@@ -65,19 +86,21 @@ export function RecruiterListItem({
                             </span>
                         )}
 
-                        {recruiter.total_placements !== undefined && recruiter.total_placements > 0 && (
-                            <span className="badge badge-xs badge-success badge-soft gap-1 border-0">
-                                <i className="fa-duotone fa-regular fa-trophy text-[10px]"></i>
-                                {recruiter.total_placements} placements
-                            </span>
-                        )}
+                        {recruiter.total_placements !== undefined &&
+                            recruiter.total_placements > 0 && (
+                                <span className="badge badge-xs badge-success badge-soft gap-1 border-0">
+                                    <i className="fa-duotone fa-regular fa-trophy text-[10px]"></i>
+                                    {recruiter.total_placements} placements
+                                </span>
+                            )}
 
-                        {recruiter.reputation_score !== undefined && recruiter.reputation_score >= 80 && (
-                            <span className="badge badge-xs badge-warning badge-soft gap-1 border-0">
-                                <i className="fa-duotone fa-regular fa-star text-[10px]"></i>
-                                Top Rated
-                            </span>
-                        )}
+                        {recruiter.reputation_score !== undefined &&
+                            recruiter.reputation_score >= 80 && (
+                                <span className="badge badge-xs badge-warning badge-soft gap-1 border-0">
+                                    <i className="fa-duotone fa-regular fa-star text-[10px]"></i>
+                                    Top Rated
+                                </span>
+                            )}
                     </div>
                 </div>
 

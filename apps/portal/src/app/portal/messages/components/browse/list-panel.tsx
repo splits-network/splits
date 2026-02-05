@@ -28,6 +28,7 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
     const [rows, setRows] = useState<ConversationRow[]>([]);
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [searchInput, setSearchInput] = useState("");
+    const [requestCount, setRequestCount] = useState(0);
 
     const fetchConversations = useCallback(async () => {
         const token = await getToken();
@@ -64,6 +65,40 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
         setRows(normalizedRows as ConversationRow[]);
     }, [filter, getToken]);
 
+    const fetchRequestCount = useCallback(async () => {
+        const token = await getToken();
+        if (!token) return;
+        const client = createAuthenticatedClient(token);
+        try {
+            const response: any = await client.get("/chat/conversations", {
+                params: { filter: "requests", limit: 100 },
+            });
+
+            const data = response?.data || [];
+            const normalizedRows = data.map((row: any) => {
+                // Handle both old and new API response formats
+                if (row.conversation && row.participant) {
+                    return row;
+                }
+                return {
+                    conversation: row.chat_conversations,
+                    participant: {
+                        request_state: row.request_state,
+                    },
+                };
+            });
+
+            // Count how many are actually pending requests
+            const count = normalizedRows.filter(
+                (row: any) => row.participant?.request_state === "pending",
+            ).length;
+
+            setRequestCount(count);
+        } catch (error) {
+            console.error("Failed to fetch request count:", error);
+        }
+    }, [getToken]);
+
     useEffect(() => {
         let mounted = true;
         const load = async () => {
@@ -85,6 +120,23 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
             mounted = false;
         };
     }, [filter, fetchConversations, getToken]);
+
+    // Fetch request count for badge display
+    useEffect(() => {
+        fetchRequestCount();
+    }, [fetchRequestCount]);
+
+    // Register for chat refresh events to update request count
+    useEffect(() => {
+        const unregister = registerChatRefresh(() => {
+            fetchRequestCount();
+            // Also refresh current conversations if we're viewing requests
+            if (filter === "requests") {
+                fetchConversations();
+            }
+        });
+        return unregister;
+    }, [fetchRequestCount, fetchConversations, filter]);
 
     const otherUserIds = useMemo(() => {
         if (!currentUserId) return [];
@@ -174,7 +226,16 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
                             }`}
                             onClick={() => setFilter(tab)}
                         >
-                            {tab[0].toUpperCase() + tab.slice(1)}
+                            <span className="flex items-center gap-2">
+                                {tab[0].toUpperCase() + tab.slice(1)}
+                                {tab === "requests" && requestCount > 0 && (
+                                    <span className="badge badge-primary badge-sm">
+                                        {requestCount > 99
+                                            ? "99+"
+                                            : requestCount}
+                                    </span>
+                                )}
+                            </span>
                         </a>
                     ))}
                 </div>
@@ -227,7 +288,10 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
 
                             return (
                                 <MessageListItem
-                                    key={row.participant?.conversation_id || convo.id}
+                                    key={
+                                        row.participant?.conversation_id ||
+                                        convo.id
+                                    }
                                     row={row}
                                     otherUser={other}
                                     isSelected={selectedId === convo.id}

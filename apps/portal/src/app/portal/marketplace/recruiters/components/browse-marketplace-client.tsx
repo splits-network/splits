@@ -43,11 +43,11 @@ export function BrowseMarketplaceClient() {
     const [companies, setCompanies] = useState<Company[]>([]);
     const [loadingCompanies, setLoadingCompanies] = useState(false);
 
-    // Memoize defaultFilters
+    // Memoize defaultFilters - show all active recruiters by default
+    // marketplace_enabled filter is optional since not all recruiters may have opted in yet
     const defaultFilters = useMemo<MarketplaceFilters>(
         () => ({
             status: "active",
-            marketplace_enabled: true,
         }),
         [],
     );
@@ -71,6 +71,7 @@ export function BrowseMarketplaceClient() {
         refresh,
     } = useStandardList<MarketplaceRecruiterDTO, MarketplaceFilters>({
         endpoint: "/recruiters",
+        include: "user", // Join with users table to get name and email
         defaultFilters,
         defaultSortBy: "created_at",
         defaultSortOrder: "desc",

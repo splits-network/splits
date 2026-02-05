@@ -43,15 +43,15 @@ export class RecruiterRepository {
             if (context.isPlatformAdmin) {
                 // No filter applied - admin sees all
             } else if (context.recruiterId) {
-                // Recruiters can only see their own profile
-                query = query.eq('user_id', context.identityUserId);
+                // Recruiters can only see their own profile when viewing specific recruiter details
+                // But can browse all active recruiters in marketplace (same as unauthenticated)
+                // Note: The /me endpoint handles viewing own profile separately
             } else if (context.organizationIds.length > 0) {
-                // Company users can see recruiters working on their jobs (future enhancement)
-                // For now, no access to recruiter profiles
-                return { data: [], total: 0 };
+                // Company users can browse all active recruiters in the marketplace
+                // They need this access to discover and invite recruiters
             }
         }
-        // Unauthenticated users see all active recruiters (public marketplace)
+        // All users (authenticated or not) can browse active recruiters in the marketplace
 
         // Apply filters with multi-criteria search parsing
         let useRelevanceSort = false;

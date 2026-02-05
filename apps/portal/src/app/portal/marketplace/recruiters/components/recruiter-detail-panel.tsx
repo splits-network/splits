@@ -3,8 +3,17 @@
 import React from "react";
 import { MarketplaceRecruiterDTO } from "@splits-network/shared-types";
 
+// Extended type to include joined user data from Supabase
+interface RecruiterWithUser extends MarketplaceRecruiterDTO {
+    users?: {
+        id: string;
+        name: string;
+        email: string;
+    };
+}
+
 interface RecruiterDetailPanelProps {
-    recruiter: MarketplaceRecruiterDTO | null;
+    recruiter: RecruiterWithUser | null;
     onClose: () => void;
     onInvite?: () => void;
 }
@@ -20,18 +29,30 @@ export function RecruiterDetailPanel({
                 <div className="bg-base-200 p-6 rounded-full mb-4">
                     <i className="fa-duotone fa-regular fa-user-magnifying-glass text-4xl"></i>
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Select a Recruiter</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                    Select a Recruiter
+                </h3>
                 <p className="max-w-xs">
-                    Browse the marketplace to find recruiters for your hiring needs.
+                    Browse the marketplace to find recruiters for your hiring
+                    needs.
                 </p>
             </div>
         );
     }
 
-    // Get initials for avatar
-    const getInitials = (name: string) => {
-        const parts = name.split(" ");
-        if (parts.length >= 2) {
+    // Get name from joined users table or fallback
+    const displayName =
+        recruiter.users?.name ||
+        recruiter.name ||
+        recruiter.users?.email ||
+        "Unknown Recruiter";
+    const displayEmail = recruiter.users?.email || recruiter.email;
+
+    // Get initials for avatar (defensive)
+    const getInitials = (name: string | undefined | null) => {
+        if (!name) return "??";
+        const parts = name.trim().split(" ");
+        if (parts.length >= 2 && parts[0] && parts[1]) {
             return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
         }
         return name.slice(0, 2).toUpperCase();
@@ -51,20 +72,26 @@ export function RecruiterDetailPanel({
                 >
                     <i className="fa-duotone fa-regular fa-arrow-left"></i>
                 </button>
-                <h3 className="text-lg font-semibold flex-1">Recruiter Profile</h3>
+                <h3 className="text-lg font-semibold flex-1">
+                    Recruiter Profile
+                </h3>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 md:p-6">
                 <div className="space-y-6">
                     {/* Header */}
                     <div className="flex items-start gap-4">
-                        <div className="avatar placeholder">
+                        <div className="avatar avatar-placeholder">
                             <div className="bg-primary text-primary-content rounded-full w-16 h-16">
-                                <span className="text-xl">{getInitials(recruiter.name)}</span>
+                                <span className="text-xl">
+                                    {getInitials(displayName)}
+                                </span>
                             </div>
                         </div>
                         <div className="flex-1 min-w-0">
-                            <h3 className="text-2xl font-bold truncate">{recruiter.name}</h3>
+                            <h3 className="text-2xl font-bold truncate">
+                                {displayName}
+                            </h3>
                             {recruiter.marketplace_tagline && (
                                 <p className="text-base-content/70 mt-1">
                                     {recruiter.marketplace_tagline}
@@ -86,7 +113,9 @@ export function RecruiterDetailPanel({
                         <div className="grid grid-cols-3 gap-3">
                             {recruiter.total_placements !== undefined && (
                                 <div className="stat bg-base-200 rounded-lg p-3">
-                                    <div className="stat-title text-xs">Placements</div>
+                                    <div className="stat-title text-xs">
+                                        Placements
+                                    </div>
                                     <div className="stat-value text-lg text-primary">
                                         {recruiter.total_placements}
                                     </div>
@@ -94,7 +123,9 @@ export function RecruiterDetailPanel({
                             )}
                             {recruiter.success_rate !== undefined && (
                                 <div className="stat bg-base-200 rounded-lg p-3">
-                                    <div className="stat-title text-xs">Success Rate</div>
+                                    <div className="stat-title text-xs">
+                                        Success Rate
+                                    </div>
                                     <div className="stat-value text-lg text-success">
                                         {Math.round(recruiter.success_rate)}%
                                     </div>
@@ -102,7 +133,9 @@ export function RecruiterDetailPanel({
                             )}
                             {recruiter.reputation_score !== undefined && (
                                 <div className="stat bg-base-200 rounded-lg p-3">
-                                    <div className="stat-title text-xs">Reputation</div>
+                                    <div className="stat-title text-xs">
+                                        Reputation
+                                    </div>
                                     <div className="stat-value text-lg text-warning">
                                         {recruiter.reputation_score}
                                     </div>
@@ -136,7 +169,10 @@ export function RecruiterDetailPanel({
                                 </h4>
                                 <div className="flex flex-wrap gap-2">
                                     {specialties.map((specialty, index) => (
-                                        <span key={index} className="badge badge-primary badge-soft">
+                                        <span
+                                            key={index}
+                                            className="badge badge-primary badge-soft"
+                                        >
                                             {specialty}
                                         </span>
                                     ))}
@@ -155,7 +191,10 @@ export function RecruiterDetailPanel({
                                 </h4>
                                 <div className="flex flex-wrap gap-2">
                                     {industries.map((industry, index) => (
-                                        <span key={index} className="badge badge-secondary badge-soft">
+                                        <span
+                                            key={index}
+                                            className="badge badge-secondary badge-soft"
+                                        >
                                             {industry}
                                         </span>
                                     ))}
@@ -173,14 +212,15 @@ export function RecruiterDetailPanel({
                                     Experience
                                 </h4>
                                 <p className="text-base-content/80">
-                                    {recruiter.marketplace_years_experience}+ years in recruitment
+                                    {recruiter.marketplace_years_experience}+
+                                    years in recruitment
                                 </p>
                             </div>
                         </div>
                     )}
 
                     {/* Contact Info */}
-                    {(recruiter.email || recruiter.phone) && (
+                    {(displayEmail || recruiter.phone) && (
                         <div className="card bg-base-200">
                             <div className="card-body">
                                 <h4 className="card-title text-lg">
@@ -188,10 +228,10 @@ export function RecruiterDetailPanel({
                                     Contact
                                 </h4>
                                 <div className="space-y-2">
-                                    {recruiter.email && (
+                                    {displayEmail && (
                                         <div className="flex items-center gap-2">
                                             <i className="fa-duotone fa-regular fa-envelope text-base-content/50"></i>
-                                            <span>{recruiter.email}</span>
+                                            <span>{displayEmail}</span>
                                         </div>
                                     )}
                                     {recruiter.phone && (

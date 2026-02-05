@@ -7,6 +7,15 @@ import { useToast } from "@/lib/toast-context";
 import { MarketplaceRecruiterDTO } from "@splits-network/shared-types";
 import { ButtonLoading } from "@splits-network/shared-ui";
 
+// Extended type to include joined user data from Supabase
+interface RecruiterWithUser extends MarketplaceRecruiterDTO {
+    users?: {
+        id: string;
+        name: string;
+        email: string;
+    };
+}
+
 interface Company {
     id: string;
     name: string;
@@ -17,7 +26,7 @@ interface InviteRecruiterModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
-    recruiter: MarketplaceRecruiterDTO;
+    recruiter: RecruiterWithUser;
     companies: Company[];
 }
 
@@ -30,6 +39,10 @@ export function InviteRecruiterModal({
 }: InviteRecruiterModalProps) {
     const { getToken } = useAuth();
     const toast = useToast();
+
+    // Get name and email from joined users table or fallback
+    const displayName = recruiter.users?.name || recruiter.name || "Unknown Recruiter";
+    const displayEmail = recruiter.users?.email || recruiter.email;
 
     const [selectedCompanyId, setSelectedCompanyId] = useState(
         companies.length === 1 ? companies[0].id : "",
@@ -46,7 +59,7 @@ export function InviteRecruiterModal({
             return;
         }
 
-        if (!recruiter.email) {
+        if (!displayEmail) {
             toast.error("Recruiter email is not available");
             return;
         }
@@ -63,7 +76,7 @@ export function InviteRecruiterModal({
             const client = createAuthenticatedClient(token);
             await client.post("/recruiter-companies/invite", {
                 company_id: selectedCompanyId,
-                recruiter_email: recruiter.email,
+                recruiter_email: displayEmail,
                 can_manage_company_jobs: canManageJobs,
                 message: message.trim() || undefined,
             });
@@ -108,8 +121,8 @@ export function InviteRecruiterModal({
                     <div className="alert mb-4">
                         <i className="fa-duotone fa-regular fa-user"></i>
                         <div>
-                            <div className="font-semibold">{recruiter.name}</div>
-                            <div className="text-sm opacity-70">{recruiter.email}</div>
+                            <div className="font-semibold">{displayName}</div>
+                            <div className="text-sm opacity-70">{displayEmail}</div>
                         </div>
                     </div>
 
