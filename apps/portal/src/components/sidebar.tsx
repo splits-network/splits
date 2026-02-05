@@ -82,7 +82,12 @@ const navItems: NavItem[] = [
         href: "/portal/placements",
         label: "Placements",
         icon: "fa-trophy",
-        roles: ["recruiter", "platform_admin"],
+        roles: [
+            "recruiter",
+            "company_admin",
+            "hiring_manager",
+            "platform_admin",
+        ],
         section: "management",
         mobileDock: false,
     },

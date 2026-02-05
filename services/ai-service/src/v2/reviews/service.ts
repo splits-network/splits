@@ -19,7 +19,7 @@ export class AIReviewServiceV2 {
         private logger: Logger
     ) {
         this.openaiApiKey = process.env.OPENAI_API_KEY || '';
-        this.modelVersion = process.env.OPENAI_MODEL || 'gpt-4-turbo-2024-04-09';
+        this.modelVersion = process.env.OPENAI_MODEL || 'gpt-4o-mini';
         this.atsServiceUrl = process.env.ATS_SERVICE_URL || 'http://ats-service:3003';
 
         if (!this.openaiApiKey) {
