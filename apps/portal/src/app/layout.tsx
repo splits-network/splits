@@ -70,10 +70,6 @@ export default async function RootLayout({
                         name="helpninja-verification"
                         content="b49754f5-9bd5-4f3d-895d-1ef14b050375"
                     />
-                    <script
-                        async
-                        src="https://helpninja.app/api/widget?t=hn_pk_sGLps5fACfWmzntqum9f6dmR&s=45c1a756-0984-41c2-9b84-17ea5b558938&k=b49754f5-9bd5-4f3d-895d-1ef14b050375&voice=friendly"
-                    ></script>
 
                     <script
                         dangerouslySetInnerHTML={{
@@ -142,6 +138,12 @@ export default async function RootLayout({
                         </ToastProvider>
                     </UserProfileProvider>
                     <Footer />
+
+                    {/* HelpNinja widget loaded after page becomes interactive */}
+                    <Script
+                        src="https://helpninja.app/api/widget?t=hn_pk_sGLps5fACfWmzntqum9f6dmR&s=45c1a756-0984-41c2-9b84-17ea5b558938&k=b49754f5-9bd5-4f3d-895d-1ef14b050375&voice=friendly"
+                        strategy="afterInteractive"
+                    />
 
                     {/* Analytics scripts loaded after page becomes interactive */}
                     <Script
