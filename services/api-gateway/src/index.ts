@@ -156,6 +156,7 @@ async function main() {
                 { name: 'dashboards', description: 'Dashboard stats and insights' },
                 { name: 'admin', description: 'Platform admin and automation' },
                 { name: 'automation', description: 'Automation rules, matches, fraud signals, marketplace metrics' },
+                { name: 'presence', description: 'User presence and activity tracking' },
                 { name: 'status', description: 'System status and support contact' },
             ],
         },
@@ -199,7 +200,7 @@ async function main() {
         reply.header('x-correlation-id', correlationId);
 
         // Skip logging for noisy endpoints to reduce log spam
-        if (request.url === '/health' || 
+        if (request.url === '/health' ||
             request.url.includes('/docs') ||
             request.url.includes('/notifications/unread-count') ||
             request.url.includes('/notifications?') ||
@@ -223,7 +224,7 @@ async function main() {
     // Add response logging middleware
     app.addHook('onResponse', async (request, reply) => {
         // Skip logging for noisy endpoints to reduce log spam
-        if (request.url === '/health' || 
+        if (request.url === '/health' ||
             request.url.includes('/docs') ||
             request.url.includes('/notifications/unread-count') ||
             request.url.includes('/notifications?') ||

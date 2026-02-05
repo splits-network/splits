@@ -9,6 +9,7 @@ import { registerNotificationRoutes } from './notification';
 import { registerDocumentRoutes } from './documents';
 import { registerAutomationRoutes } from './automation';
 import { registerChatRoutes } from './chat';
+import { registerPresenceRoutes } from './presence';
 import { registerStatusRoutes } from './status';
 import { EventPublisher } from '../../events/event-publisher';
 
@@ -26,5 +27,6 @@ export function registerV2GatewayRoutes(
     registerIdentityRoutes(app, services);
     registerNetworkRoutes(app, services);
     registerNotificationRoutes(app, services);
+    registerPresenceRoutes(app, services);
     registerStatusRoutes(app, options?.eventPublisher || null);
 }

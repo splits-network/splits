@@ -13,12 +13,19 @@ interface CandidateListItemProps {
     candidate: Candidate;
     isSelected: boolean;
     onSelect: (id: string) => void;
+    onMessage?: (
+        conversationId: string,
+        candidateName: string,
+        candidateUserId: string,
+        context?: any,
+    ) => void;
 }
 
 export default function CandidateListItem({
     candidate,
     isSelected,
     onSelect,
+    onMessage,
 }: CandidateListItemProps) {
     const { getToken } = useAuth();
     const router = useRouter();
@@ -160,9 +167,25 @@ export default function CandidateListItem({
                                                         null,
                                                 },
                                             );
-                                        router.push(
-                                            `/portal/messages?conversationId=${conversationId}`,
-                                        );
+
+                                        // Use sidebar callback if provided, otherwise navigate to messages page
+                                        if (onMessage) {
+                                            onMessage(
+                                                conversationId,
+                                                candidate.full_name ||
+                                                    "Unknown",
+                                                candidate.user_id,
+                                                {
+                                                    company_id:
+                                                        candidate.company_id ||
+                                                        null,
+                                                },
+                                            );
+                                        } else {
+                                            router.push(
+                                                `/portal/messages?conversationId=${conversationId}`,
+                                            );
+                                        }
                                     } catch (err: any) {
                                         console.error(
                                             "Failed to start chat:",
@@ -201,5 +224,3 @@ export default function CandidateListItem({
         </div>
     );
 }
-
-

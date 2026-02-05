@@ -172,6 +172,7 @@ export function CandidateTableRow({
                         layout="horizontal"
                         size="sm"
                         onViewDetails={onViewDetails}
+                        onMessage={onMessage}
                         showActions={{
                             edit: false,
                             verify: false,

@@ -60,7 +60,7 @@ export default function MessageSidebar({
                     aria-label="Close message sidebar"
                 />
 
-                <div className="bg-base-100 min-h-full w-full md:w-2/3 lg:w-1/2 xl:w-1/2 flex flex-col">
+                <div className="bg-base-100 h-screen w-full md:w-2/3 lg:w-1/2 xl:w-1/2 flex flex-col">
                     {/* Header */}
                     <div className="sticky top-0 z-10 bg-base-100 border-b border-base-300 p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3 min-w-0">
@@ -100,7 +100,7 @@ export default function MessageSidebar({
                     </div>
 
                     {/* Message Thread */}
-                    <div className="flex-1 overflow-hidden">
+                    <div className="flex-1 min-h-0 overflow-hidden">
                         <ThreadPanel
                             conversationId={conversationId}
                             onClose={onClose}

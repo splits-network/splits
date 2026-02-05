@@ -2,6 +2,8 @@
 
 import { Suspense, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import MessageSidebar from "@/components/sidebar/MessageSidebar";
+import { useMessageSidebar } from "@/hooks/use-message-sidebar";
 // Placeholder imports - we will create these next
 import CandidateListPanel from "./candidate-list-panel";
 import CandidateDetailPanel from "./candidate-detail-panel";
@@ -12,6 +14,16 @@ function CandidateBrowseContent() {
     const searchParams = useSearchParams();
     const selectedCandidateId = searchParams.get("candidateId");
 
+    // Message sidebar state
+    const {
+        conversationId,
+        candidateName,
+        isOpen: isMessageSidebarOpen,
+        openSidebar: openMessageSidebar,
+        closeSidebar: closeMessageSidebar,
+        resetSidebar: resetMessageSidebar,
+    } = useMessageSidebar();
+
     const handleSelectCandidate = (id: string | null) => {
         const params = new URLSearchParams(searchParams.toString());
         if (id) {
@@ -20,6 +32,23 @@ function CandidateBrowseContent() {
             params.delete("candidateId");
         }
         router.replace(`${pathname}?${params.toString()}`);
+
+        // Reset message sidebar when switching candidates
+        resetMessageSidebar();
+    };
+
+    const handleMessage = (
+        conversationId: string,
+        candidateName: string,
+        candidateUserId: string,
+        context?: any,
+    ) => {
+        openMessageSidebar(
+            conversationId,
+            candidateName,
+            candidateUserId,
+            context,
+        );
     };
 
     return (
@@ -35,6 +64,7 @@ function CandidateBrowseContent() {
                     <CandidateListPanel
                         selectedId={selectedCandidateId}
                         onSelect={handleSelectCandidate}
+                        onMessage={handleMessage}
                     />
                 </div>
 
@@ -51,6 +81,13 @@ function CandidateBrowseContent() {
                     />
                 </div>
             </div>
+
+            {/* Message Sidebar */}
+            <MessageSidebar
+                conversationId={conversationId}
+                candidateName={candidateName}
+                onClose={closeMessageSidebar}
+            />
         </div>
     );
 }

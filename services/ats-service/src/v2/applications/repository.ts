@@ -134,7 +134,6 @@ export class ApplicationRepository {
 
         if (filters.job_id) {
             query = query.eq('job_id', filters.job_id);
-            console.log('filtering by job_id: ', filters.job_id);
         }
         if (filters.candidate_id) {
             query = query.eq('candidate_id', filters.candidate_id);

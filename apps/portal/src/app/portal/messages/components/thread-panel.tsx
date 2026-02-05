@@ -559,7 +559,7 @@ export default function ThreadPanel({
                 </div>
             )}
 
-            <div className="flex-1 min-h-0 flex flex-col gap-4 p-4 bg-base-200">
+            <div className="flex-1 min-h-0 flex flex-col gap-4 p-4">
                 {(data.conversation.application_id ||
                     data.conversation.job_id ||
                     data.conversation.company_id) && (
@@ -604,8 +604,14 @@ export default function ThreadPanel({
                         </div>
                     )}
                     {data.messages.length === 0 ? (
-                        <div className="text-center text-base-content/50">
-                            No messages yet.
+                        <div className="flex items-center justify-center h-full text-center text-base-content/50">
+                            <div>
+                                <i className="fa-duotone fa-regular fa-messages text-4xl mb-3 opacity-30"></i>
+                                <p>No messages yet.</p>
+                                <p className="text-sm mt-1 opacity-60">
+                                    Start the conversation!
+                                </p>
+                            </div>
                         </div>
                     ) : (
                         data.messages.map((msg) => {
@@ -673,7 +679,7 @@ export default function ThreadPanel({
                 </div>
             </div>
 
-            <div className="bg-base-200 border-t border-base-300 bg-base-100/80 backdrop-blur-sm p-4">
+            <div className="border-t border-base-300 bg-base-100 p-4 mt-auto">
                 <div className="flex gap-2 items-start">
                     <div className="flex-1 space-y-2 relative">
                         {useMarkdownEditor ? (
