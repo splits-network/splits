@@ -29,7 +29,7 @@ spec:
                       - name: NEXT_PUBLIC_SENTRY_DSN
                         value: "https://66e448471d1c3e0f79dd58c2a80ff15a@o4510570789732352.ingest.us.sentry.io/4510570904485888"
                       - name: NEXT_PUBLIC_API_URL
-                        value: "${API_BASE_URL}/api"
+                        value: "${API_BASE_URL}"
                       - name: NEXT_PUBLIC_API_GATEWAY_URL
                         value: "${API_BASE_URL}"
                       - name: NEXT_PUBLIC_CHAT_GATEWAY_URL
