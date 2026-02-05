@@ -18,8 +18,9 @@ export default function SignInPage() {
     const [errorType, setErrorType] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Check for invitation parameters
-    const invitationId = searchParams.get("invitation_id");
+    // Get redirect URL from search params (Clerk preserves this)
+    const redirectUrl = searchParams.get("redirect_url");
+    const isFromInvitation = redirectUrl?.includes('/accept-invitation/');
 
     const handleSignOut = async () => {
         setIsLoading(true);
@@ -44,12 +45,8 @@ export default function SignInPage() {
             if (signInAttempt.status === "complete") {
                 await setActive({ session: signInAttempt.createdSessionId });
 
-                // If user signed in via invitation, redirect to acceptance page
-                if (invitationId) {
-                    router.push(`/accept-invitation/${invitationId}`);
-                } else {
-                    router.push("/portal/dashboard");
-                }
+                // Redirect to the URL Clerk preserved
+                router.push(redirectUrl || "/portal/dashboard");
             } else {
                 // Handle incomplete sign-in with specific error types
                 switch (signInAttempt.status) {
@@ -104,11 +101,7 @@ export default function SignInPage() {
                         setErrorType("already_signed_in");
                         setError("You are already signed in. Redirecting...");
                         setTimeout(() => {
-                            router.push(
-                                invitationId
-                                    ? `/accept-invitation/${invitationId}`
-                                    : "/portal/dashboard",
-                            );
+                            router.push(redirectUrl || "/portal/dashboard");
                         }, 1500);
                         break;
                     case "too_many_requests":
@@ -123,11 +116,7 @@ export default function SignInPage() {
                             "Already signed in with this account. Redirecting...",
                         );
                         setTimeout(() => {
-                            router.push(
-                                invitationId
-                                    ? `/accept-invitation/${invitationId}`
-                                    : "/portal/dashboard",
-                            );
+                            router.push(redirectUrl || "/portal/dashboard");
                         }, 1500);
                         break;
                     default:
@@ -152,16 +141,10 @@ export default function SignInPage() {
     ) => {
         if (!isLoaded) return;
 
-        // Build redirect URL with invitation params if present
-        const redirectUrl = "/sso-callback";
-        const redirectUrlComplete = invitationId
-            ? `/accept-invitation/${invitationId}`
-            : "/portal/dashboard";
-
         signIn.authenticateWithRedirect({
             strategy: provider,
-            redirectUrl,
-            redirectUrlComplete,
+            redirectUrl: "/sso-callback",
+            redirectUrlComplete: redirectUrl || "/portal/dashboard",
         });
     };
 
@@ -275,8 +258,8 @@ export default function SignInPage() {
                                 <p>
                                     <Link
                                         href={
-                                            invitationId
-                                                ? `/sign-up?invitation_id=${invitationId}`
+                                            redirectUrl
+                                                ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`
                                                 : "/sign-up"
                                         }
                                         className="link link-primary"
@@ -411,7 +394,10 @@ export default function SignInPage() {
 
                     <p className="text-center text-sm mt-4">
                         Don't have an account?{" "}
-                        <Link href="/sign-up" className="link link-primary">
+                        <Link
+                            href={redirectUrl ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}` : '/sign-up'}
+                            className="link link-primary"
+                        >
                             Sign up
                         </Link>
                     </p>

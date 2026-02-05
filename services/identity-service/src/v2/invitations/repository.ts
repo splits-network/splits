@@ -52,9 +52,12 @@ export class InvitationRepository {
             .select('*, organizations(*), companies(*)')
             .eq('id', id)
             .is('deleted_at', null)
-            .single();
+            .maybeSingle();
 
         if (error) throw error;
+        if (!data) {
+            throw new Error(`Invitation not found with id: ${id}`);
+        }
         return data;
     }
 

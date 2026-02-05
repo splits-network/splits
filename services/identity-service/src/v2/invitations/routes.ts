@@ -50,7 +50,10 @@ export function registerInvitationRoutes(
             const { clerkUserId } = requireUserContext(request);
             const { id } = request.params as { id: string };
 
-            const invite = await invitationService.findInvitationById(clerkUserId, id);
+            // Get user email from query params (optional, for invited user access)
+            const { email } = request.query as { email?: string };
+
+            const invite = await invitationService.findInvitationById(clerkUserId, id, email);
             reply.send({ data: invite });
         } catch (error) {
             logError('GET /api/v2/invitations/:id failed', error);
@@ -104,14 +107,15 @@ export function registerInvitationRoutes(
             try {
                 const { clerkUserId } = requireUserContext(request);
                 const { id } = request.params as { id: string };
-                const body = request.body as { user_id: string; user_email: string };
+                const body = request.body as { user_email: string };
 
-                if (!body.user_id || !body.user_email) {
-                    reply.code(400).send({ error: { message: 'user_id and user_email are required' } });
+                if (!body.user_email) {
+                    reply.code(400).send({ error: { message: 'user_email is required' } });
                     return;
                 }
 
-                await invitationService.acceptInvitation(id, body.user_id, body.user_email);
+                await invitationService.acceptInvitation(id, clerkUserId, body.user_email);
+
                 reply.send({ success: true });
             } catch (error) {
                 logError('POST /api/v2/invitations/:id/accept failed', error);

@@ -9,7 +9,7 @@ Successfully configured OPENAI_API_KEY environment variable across all deploymen
 ### 1. Docker Compose (Local Development)
 **File:** `docker-compose.yml`
 - Added `OPENAI_API_KEY: ${OPENAI_API_KEY}` to `ats-service` environment variables
-- Added `OPENAI_MODEL: ${OPENAI_MODEL:-gpt-3.5-turbo}` for model selection (defaults to cheaper model for testing)
+- Added `OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}` for model selection (defaults to cheaper model for testing)
 - Value will be read from `.env` file in project root (already configured by user)
 
 ### 2. Kubernetes Deployment (Production)
@@ -22,14 +22,14 @@ Successfully configured OPENAI_API_KEY environment variable across all deploymen
         name: openai-secrets
         key: api-key
   - name: OPENAI_MODEL
-    value: "gpt-3.5-turbo"  # Change to gpt-4-turbo for production
+    value: "gpt-4o-mini"  # Change if you want a different model
   ```
 
 ### 3. AI Review Service
 **File:** `services/ats-service/src/services/ai-review/service.ts`
 - Model selection now configurable via `OPENAI_MODEL` environment variable
-- Defaults to `gpt-3.5-turbo` (cheaper for testing, ~10x less expensive than GPT-4)
-- Can be changed to `gpt-4-turbo` or `gpt-4-turbo-2024-04-09` for production
+- Defaults to `gpt-4o-mini` (cheaper for testing)
+- Can be changed to `gpt-4o` or another supported model for production
 **File:** `.github/workflows/deploy-aks.yml`
 - Added step to create `openai-secrets` Kubernetes secret from GitHub repository secret
 - Secret automatically created/updated on every deployment
@@ -82,33 +82,22 @@ kubectl exec -n splits-network deployment/ats-service -- env | grep OPENAI_API_K
 
 ## Cost Monitoring
 
-### Model Pricing (as of December 2024)
+### Model Pricing
 
-**GPT-3.5-Turbo (Testing/Development)**
-- Input: $0.0005 per 1K tokens (~$0.001 per review)
-- Output: $0.0015 per 1K tokens (~$0.003 per review)
-- **Total per review: ~$0.004 (less than 1 cent)**
-- ~10x cheaper than GPT-4
-
-**GPT-4-Turbo (Production)**
-- Input: $0.01 per 1K tokens (~$0.02 per review)
-- Output: $0.03 per 1K tokens (~$0.06 per review)  
-- **Total per review: ~$0.08**
+- Refer to the OpenAI pricing page for current rates before changing defaults.
 
 ### Configuration
 
 **For Testing/Development (Default):**
 ```bash
 # In .env file
-OPENAI_MODEL=gpt-3.5-turbo
+OPENAI_MODEL=gpt-4o-mini
 ```
 
 **For Production:**
 ```bash
 # In .env file or Kubernetes deployment
-OPENAI_MODEL=gpt-4-turbo
-# or
-OPENAI_MODEL=gpt-4-turbo-2024-04-09
+OPENAI_MODEL=gpt-4o
 ```
 
 ### Monitoring

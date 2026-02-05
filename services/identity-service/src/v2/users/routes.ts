@@ -9,13 +9,14 @@ import { StandardListParams } from '@splits-network/shared-types';
 interface RegisterUserRoutesConfig {
     userService: UserServiceV2;
     logError: (message: string, error: unknown) => void;
+    logInfo: (message: string) => void;
 }
 
 export function registerUserRoutes(
     app: FastifyInstance,
     config: RegisterUserRoutesConfig
 ) {
-    const { userService, logError } = config;
+    const { userService, logError, logInfo } = config;
 
     app.get('/api/v2/users', async (request: FastifyRequest, reply: FastifyReply) => {
         try {
@@ -72,6 +73,22 @@ export function registerUserRoutes(
             } else {
                 reply.code(500).send({ error: { message: 'Failed to fetch current user' } });
             }
+        }
+    });
+
+    app.patch('/api/v2/users/me', async (request: FastifyRequest, reply: FastifyReply) => {
+        try {
+            logInfo('PATCH /api/v2/users/me called');
+            const { clerkUserId } = requireUserContext(request);
+            const body = request.body as any;
+
+            // Get current user to find their UUID
+            const currentUser = await userService.findUserByClerkId(clerkUserId);
+            const user = await userService.updateUser(clerkUserId, currentUser.id, body);
+            reply.send({ data: user });
+        } catch (error) {
+            logError('PATCH /api/v2/users/me failed', error);
+            reply.code(400).send({ error: { message: (error as Error).message } });
         }
     });
 

@@ -62,8 +62,9 @@ export async function registerV2Routes(
     const consentService = new ConsentServiceV2(consentRepository, accessResolver);
     const webhookService = new WebhooksServiceV2(webhookRepository, eventPublisher);
     const logError = (message: string, error: unknown) => logger.error({ err: error }, message);
+    const logInfo = (message: string) => logger.info(message);
 
-    registerUserRoutes(app, { userService, logError });
+    registerUserRoutes(app, { userService, logError, logInfo });
     registerOrganizationRoutes(app, { organizationService: orgService, logError });
     registerMembershipRoutes(app, { membershipService, logError });
     registerInvitationRoutes(app, { invitationService, logError });

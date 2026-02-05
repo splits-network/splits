@@ -1,18 +1,29 @@
-'use client';
+"use client";
 
 /**
  * User Profile Context
- * 
+ *
  * Provides centralized access to user profile data and role information
  * throughout the authenticated portion of the application.
- * 
+ *
  * Usage:
  *   const { profile, isAdmin, isRecruiter, isCompanyUser, isLoading } = useUserProfile();
  */
 
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
-import { useAuth, useClerk } from '@clerk/nextjs';
-import { getCachedCurrentUserProfile, getCachedSubscription, clearCachedCurrentUserProfile } from '@/lib/current-user-profile';
+import {
+    createContext,
+    useContext,
+    useEffect,
+    useState,
+    ReactNode,
+    useCallback,
+} from "react";
+import { useAuth, useClerk } from "@clerk/nextjs";
+import {
+    getCurrentUserProfile,
+    getCachedSubscription,
+    clearCachedCurrentUserProfile,
+} from "@/lib/current-user-profile";
 
 /**
  * Plan tier types
@@ -149,7 +160,7 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
     const [subscription, setSubscription] = useState<Subscription | null>(null);
     const [isSubscriptionLoading, setIsSubscriptionLoading] = useState(false);
 
-    const fetchProfile = useCallback(async (force = false) => {
+    const fetchProfile = useCallback(async () => {
         if (!isAuthLoaded) return;
 
         try {
@@ -163,13 +174,13 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
                 return;
             }
 
-            const profileData = await getCachedCurrentUserProfile(getToken, {
-                force,
-            });
+            const profileData = await getCurrentUserProfile(getToken);
             setProfile(profileData as UserProfile | null);
         } catch (err) {
-            console.error('Failed to fetch user profile:', err);
-            setError(err instanceof Error ? err.message : 'Failed to load profile');
+            console.error("Failed to fetch user profile:", err);
+            setError(
+                err instanceof Error ? err.message : "Failed to load profile",
+            );
             setProfile(null);
         } finally {
             setIsLoading(false);
@@ -180,7 +191,7 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
         fetchProfile();
     }, [fetchProfile]);
 
-    const fetchSubscription = useCallback(async (force = false) => {
+    const fetchSubscription = useCallback(async () => {
         // Only fetch for recruiters
         if (!profile?.recruiter_id) {
             setSubscription(null);
@@ -190,10 +201,10 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
 
         try {
             setIsSubscriptionLoading(true);
-            const subscriptionData = await getCachedSubscription(getToken, { force });
+            const subscriptionData = await getCachedSubscription(getToken);
             setSubscription(subscriptionData as Subscription | null);
         } catch (err) {
-            console.error('Failed to fetch subscription:', err);
+            console.error("Failed to fetch subscription:", err);
             setSubscription(null);
         } finally {
             setIsSubscriptionLoading(false);
@@ -209,28 +220,40 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
 
     // Derived role checks
     const roles = profile?.roles || [];
-    const isAdmin = Boolean(profile?.is_platform_admin || roles.includes('platform_admin'));
+    const isAdmin = Boolean(
+        profile?.is_platform_admin || roles.includes("platform_admin"),
+    );
     const isRecruiter = Boolean(profile?.recruiter_id);
-    const isCompanyUser = roles.some(role => role === 'company_admin' || role === 'hiring_manager');
+    const isCompanyUser = roles.some(
+        (role) => role === "company_admin" || role === "hiring_manager",
+    );
     const isCandidate = Boolean(profile?.candidate_id);
 
     // Subscription derived values
     const plan = subscription?.plan || null;
-    const planTier: PlanTier = plan?.tier || 'starter';
-    const planName = plan?.name || 'Starter';
-    const isPaidPlan = planTier !== 'starter' && (plan?.price_monthly ?? 0) > 0;
-    const isSubscriptionActive = subscription?.status === 'active' || subscription?.status === 'trialing';
+    const planTier: PlanTier = plan?.tier || "starter";
+    const planName = plan?.name || "Starter";
+    const isPaidPlan = planTier !== "starter" && (plan?.price_monthly ?? 0) > 0;
+    const isSubscriptionActive =
+        subscription?.status === "active" ||
+        subscription?.status === "trialing";
 
-    const hasRole = useCallback((role: string) => {
-        if (isAdmin) return true; // Admins have all roles
-        return roles.includes(role);
-    }, [roles, isAdmin]);
+    const hasRole = useCallback(
+        (role: string) => {
+            if (isAdmin) return true; // Admins have all roles
+            return roles.includes(role);
+        },
+        [roles, isAdmin],
+    );
 
-    const hasAnyRole = useCallback((checkRoles: string[]) => {
-        if (isAdmin) return true; // Admins have all roles
-        if (checkRoles.includes('all')) return true;
-        return checkRoles.some(role => roles.includes(role));
-    }, [roles, isAdmin]);
+    const hasAnyRole = useCallback(
+        (checkRoles: string[]) => {
+            if (isAdmin) return true; // Admins have all roles
+            if (checkRoles.includes("all")) return true;
+            return checkRoles.some((role) => roles.includes(role));
+        },
+        [roles, isAdmin],
+    );
 
     const logout = useCallback(async () => {
         // Clear all caches
@@ -239,16 +262,14 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
         // The chat API now includes participant names inline, eliminating the need for client-side user caching
 
         // Clear localStorage (preserve theme preference)
-        const theme = localStorage.getItem('theme');
+        const theme = localStorage.getItem("theme");
         localStorage.clear();
         if (theme) {
-            localStorage.setItem('theme', theme);
+            localStorage.setItem("theme", theme);
         }
 
         // Clear sessionStorage
         sessionStorage.clear();
-
-        console.log('[Auth] User session cleaned');
 
         // Sign out from Clerk
         await signOut();
@@ -264,7 +285,7 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
         isCandidate,
         hasRole,
         hasAnyRole,
-        refresh: () => fetchProfile(true),
+        refresh: () => fetchProfile(),
         logout,
         // Subscription fields
         subscription,
@@ -274,7 +295,7 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
         isPaidPlan,
         isSubscriptionActive,
         isSubscriptionLoading,
-        refreshSubscription: () => fetchSubscription(true),
+        refreshSubscription: () => fetchSubscription(),
     };
 
     return (
@@ -286,15 +307,15 @@ export function UserProfileProvider({ children }: UserProfileProviderProps) {
 
 /**
  * Hook to access user profile and role information
- * 
+ *
  * @example
  * ```tsx
  * function MyComponent() {
  *     const { profile, isAdmin, isRecruiter, isLoading } = useUserProfile();
- *     
+ *
  *     if (isLoading) return <Loading />;
  *     if (!profile) return <NotAuthenticated />;
- *     
+ *
  *     return (
  *         <div>
  *             <p>Hello, {profile.name || profile.email}</p>
@@ -309,7 +330,9 @@ export function useUserProfile(): UserProfileContextValue {
     const context = useContext(UserProfileContext);
 
     if (!context) {
-        throw new Error('useUserProfile must be used within a UserProfileProvider');
+        throw new Error(
+            "useUserProfile must be used within a UserProfileProvider",
+        );
     }
 
     return context;

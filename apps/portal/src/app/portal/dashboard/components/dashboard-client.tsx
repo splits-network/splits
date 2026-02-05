@@ -30,7 +30,8 @@ export default function DashboardClient() {
             </div>
         );
     }
-
+    console.log("User profile in DashboardClient:", profile);
+    console.log("Role checks:", { isAdmin, isRecruiter, isCompanyUser, roles: profile?.roles });
     // Route to appropriate dashboard based on role
     if (isAdmin) {
         return <AdminDashboard />;
