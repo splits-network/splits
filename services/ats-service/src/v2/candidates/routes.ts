@@ -110,39 +110,4 @@ export function registerCandidateRoutes(
             }
         }
     );
-
-    // Resume management endpoints
-    app.get('/api/v2/candidates/:id/resumes', async (request: FastifyRequest, reply: FastifyReply) => {
-        try {
-            let clerkUserId: string | undefined;
-            try {
-                const userContext = requireUserContext(request);
-                clerkUserId = userContext.clerkUserId;
-            } catch {
-                // No user context available
-                clerkUserId = undefined;
-            }
-            const { id } = request.params as any;
-            const resumes = await config.candidateService.getCandidateResumes(id, clerkUserId);
-            return reply.send({ data: resumes });
-        } catch (error: any) {
-            return reply.code(400).send({ error: { message: error.message } });
-        }
-    });
-
-    app.patch('/api/v2/candidates/:id/primary-resume', async (request: FastifyRequest, reply: FastifyReply) => {
-        try {
-            const { clerkUserId } = requireUserContext(request);
-            const { id } = request.params as any;
-            const { resume_id } = request.body as { resume_id: string | null };
-
-            const candidate = resume_id
-                ? await config.candidateService.setPrimaryResume(id, resume_id, clerkUserId)
-                : await config.candidateService.clearPrimaryResume(id, clerkUserId);
-
-            return reply.send({ data: candidate });
-        } catch (error: any) {
-            return reply.code(400).send({ error: { message: error.message } });
-        }
-    });
 }

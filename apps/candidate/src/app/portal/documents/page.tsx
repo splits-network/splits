@@ -201,8 +201,10 @@ function DocumentsContent() {
             }
 
             const client = createAuthenticatedClient(token);
-            await client.patch(`/candidates/${id}/primary-resume`, {
-                resume_id: documentId,
+            await client.patch(`/documents/${documentId}`, {
+                metadata: {
+                    is_primary_for_candidate: true,
+                },
             });
             refresh();
         } catch (err: any) {

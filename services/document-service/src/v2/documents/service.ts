@@ -187,6 +187,18 @@ export class DocumentServiceV2 {
         updates: DocumentUpdate,
         clerkUserId: string,
     ) {
+        // Handle primary resume logic
+        if (updates.metadata?.is_primary_for_candidate === true) {
+            // Get the document to check if it's a resume
+            const document = await this.repository.findDocument(
+                id,
+                clerkUserId,
+            );
+            if (document && document.document_type === "resume") {
+                await this.clearOtherPrimaryResumes(id, clerkUserId);
+            }
+        }
+
         const updated = await this.repository.updateDocument(
             id,
             clerkUserId,
@@ -202,7 +214,50 @@ export class DocumentServiceV2 {
 
         return updated;
     }
+    private async clearOtherPrimaryResumes(
+        documentId: string,
+        clerkUserId: string,
+    ) {
+        const accessContext = await this.accessResolver.resolve(clerkUserId);
+        if (!accessContext.identityUserId) {
+            throw new Error(
+                "User context required for primary resume management",
+            );
+        }
 
+        // Get candidate ID from the document being updated
+        const document = await this.repository.findDocument(
+            documentId,
+            clerkUserId,
+        );
+        if (!document || document.entity_type !== "candidate") {
+            throw new Error("Document not found or not a candidate document");
+        }
+
+        // Clear primary flag from all other resumes for this candidate
+        const candidateResumes = await this.repository.findDocuments(
+            clerkUserId,
+            {
+                entity_type: "candidate",
+                entity_id: document.entity_id,
+                document_type: "resume",
+            },
+        );
+
+        for (const resume of candidateResumes.data) {
+            if (
+                resume.id !== documentId &&
+                resume.metadata?.is_primary_for_candidate
+            ) {
+                const clearedMetadata = { ...resume.metadata };
+                delete clearedMetadata.is_primary_for_candidate;
+
+                await this.repository.updateDocument(resume.id, clerkUserId, {
+                    metadata: clearedMetadata,
+                });
+            }
+        }
+    }
     async deleteDocument(id: string, clerkUserId: string) {
         const existing = await this.repository.findDocument(id, clerkUserId);
         if (!existing) {
@@ -235,21 +290,26 @@ export class DocumentServiceV2 {
         const userContext = await this.accessResolver.resolve(clerkUserId);
 
         if (!userContext.identityUserId) {
-            throw new Error('User not found in identity system');
+            throw new Error("User not found in identity system");
         }
 
         // Delete old profile image if it exists (clean up storage)
         try {
-            const existingImage = await this.repository.findProfileImageByUserId(userContext.identityUserId);
+            const existingImage =
+                await this.repository.findProfileImageByUserId(
+                    userContext.identityUserId,
+                );
             if (existingImage) {
                 // Delete from Supabase Storage
                 await this.storage.deleteProfileImage(existingImage.file_path);
                 // Soft-delete the document record
-                await this.repository.softDeleteDocumentInternal(existingImage.id);
+                await this.repository.softDeleteDocumentInternal(
+                    existingImage.id,
+                );
             }
         } catch (error) {
             // Log but don't fail - cleanup is best effort
-            console.error('Failed to cleanup old profile image:', error);
+            console.error("Failed to cleanup old profile image:", error);
         }
 
         // Generate storage path: profile-images/{userId}/{timestamp}-{filename}

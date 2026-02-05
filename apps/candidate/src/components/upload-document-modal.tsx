@@ -84,12 +84,11 @@ export default function UploadDocumentModal({
                 response.data?.id
             ) {
                 try {
-                    await client.patch(
-                        `/candidates/${entityId}/primary-resume`,
-                        {
-                            resume_id: response.data.id,
+                    await client.patch(`/documents/${response.data.id}`, {
+                        metadata: {
+                            is_primary_for_candidate: true,
                         },
-                    );
+                    });
                 } catch (primaryErr: any) {
                     console.error(
                         "Failed to set as primary resume:",
