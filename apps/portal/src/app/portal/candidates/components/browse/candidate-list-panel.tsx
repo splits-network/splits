@@ -229,10 +229,6 @@ export default function CandidateListPanel({
                 )}
 
                 {candidates.map((candidate) => {
-                    console.log(
-                        "CandidateListPanel: Rendering candidate, onMessage type:",
-                        typeof onMessage,
-                    );
                     return (
                         <CandidateListItem
                             key={candidate.id}

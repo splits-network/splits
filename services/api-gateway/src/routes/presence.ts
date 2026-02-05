@@ -48,7 +48,7 @@ export async function registerPresenceRoutes(
 
             try {
                 // Forward to chat service for Redis presence update
-                const response = await services.get('chat').post("/presence/ping", undefined, getCorrelationId(request), {
+                const response = await services.get('chat').post("/api/v2/chat/presence/ping", undefined, getCorrelationId(request), {
                     "x-clerk-user-id": clerkUserId,
                 });
 
@@ -99,7 +99,7 @@ export async function registerPresenceRoutes(
 
             try {
                 // Forward to chat service for Redis presence update
-                const response = await services.get('chat').post("/presence/offline", undefined, getCorrelationId(request), {
+                const response = await services.get('chat').post("/api/v2/chat/presence/offline", undefined, getCorrelationId(request), {
                     "x-clerk-user-id": clerkUserId,
                 });
 
@@ -172,7 +172,7 @@ export async function registerPresenceRoutes(
 
             try {
                 // Forward to chat service for batch Redis presence update
-                const response: any = await services.get('chat').post("/presence/batch", request.body, getCorrelationId(request), {
+                const response: any = await services.get('chat').post("/api/v2/chat/presence/batch", request.body, getCorrelationId(request), {
                     "x-clerk-user-id": clerkUserId,
                 });
 
