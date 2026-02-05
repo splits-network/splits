@@ -8,6 +8,7 @@ import { getPlatformBadge } from "@/lib/utils/badge-styles";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { useAuth } from "@clerk/nextjs";
+import { LoadingState } from "@splits-network/shared-ui";
 
 interface ATSIntegration {
     id: string;
@@ -103,13 +104,7 @@ export default function IntegrationsPage() {
     };
 
     if (loading) {
-        return (
-            <div className="container mx-auto p-6">
-                <div className="flex items-center justify-center h-64">
-                    <span className="loading loading-spinner loading-lg"></span>
-                </div>
-            </div>
-        );
+        return <LoadingState message="Loading integrations..." />;
     }
 
     return (

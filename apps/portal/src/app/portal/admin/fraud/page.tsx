@@ -5,6 +5,7 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { useAuth } from "@clerk/nextjs";
 import { AdminPageHeader, useAdminConfirm } from "../components";
+import { LoadingState } from "@splits-network/shared-ui";
 
 export default function FraudSignalsPage() {
     const [signals, setSignals] = useState<any[]>([]);
@@ -110,9 +111,7 @@ export default function FraudSignalsPage() {
             {/* Signals List */}
             <div className="space-y-4">
                 {loading ? (
-                    <div className="flex justify-center p-8">
-                        <span className="loading loading-spinner loading-lg"></span>
-                    </div>
+                    <LoadingState message="Loading fraud signals..." />
                 ) : signals.length === 0 ? (
                     <div className="card bg-base-100 shadow">
                         <div className="card-body text-center text-base-content/60">

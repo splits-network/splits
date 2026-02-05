@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useDebouncedCallback } from '@/hooks/use-debounce';
-import { MarketplaceProfile } from '@splits-network/shared-types';
+import { useState, useEffect, useMemo, useRef } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useDebouncedCallback } from "@/hooks/use-debounce";
+import { MarketplaceProfile } from "@splits-network/shared-types";
 import {
     calculateProfileCompleteness,
     getCompletionTierBadge,
     getTopPriorityFields,
-    getCompletionIncentives
-} from '@/lib/utils/profile-completeness';
+    getCompletionIncentives,
+} from "@/lib/utils/profile-completeness";
 import { MarkdownEditor } from "@splits-network/shared-ui";
 
 interface MarketplaceSettings {
     marketplace_enabled: boolean;
-    marketplace_visibility: 'public' | 'limited' | 'hidden';
+    marketplace_visibility: "public" | "limited" | "hidden";
     industries: string[];
     specialties: string[];
     location: string;
@@ -28,42 +28,52 @@ interface MarketplaceSettings {
 }
 
 const INDUSTRY_OPTIONS = [
-    'Technology',
-    'Healthcare',
-    'Finance',
-    'Manufacturing',
-    'Retail',
-    'Education',
-    'Consulting',
-    'Professional Services',
-    'Real Estate',
-    'Recruitment',
-    'Hospitality',
-    'Construction',
-    'Energy',
-    'Telecommunications',
-    'Media & Entertainment',
-    'Transportation',
-    'Other',
+    "Technology",
+    "Healthcare",
+    "Finance",
+    "Manufacturing",
+    "Retail",
+    "Education",
+    "Consulting",
+    "Professional Services",
+    "Real Estate",
+    "Recruitment",
+    "Hospitality",
+    "Construction",
+    "Energy",
+    "Telecommunications",
+    "Media & Entertainment",
+    "Transportation",
+    "Other",
 ];
 
 const SPECIALTY_OPTIONS = [
-    'Executive', 'Engineering', 'Product Management', 'Design',
-    'Data Science', 'Marketing', 'Sales', 'Operations', 'Finance',
-    'Legal', 'Human Resources', 'Customer Success', 'Administrative',
+    "Executive",
+    "Engineering",
+    "Product Management",
+    "Design",
+    "Data Science",
+    "Marketing",
+    "Sales",
+    "Operations",
+    "Finance",
+    "Legal",
+    "Human Resources",
+    "Customer Success",
+    "Administrative",
 ];
 
 export function MarketplaceSettings() {
     const { getToken } = useAuth();
     const [settings, setSettings] = useState<MarketplaceSettings>({
         marketplace_enabled: false,
-        marketplace_visibility: 'public',
+        marketplace_visibility: "public",
         industries: [],
         specialties: [],
-        location: '',
-        tagline: '',
+        location: "",
+        tagline: "",
         years_experience: 0,
-        bio: '',
+        bio: "",
         marketplace_profile: {},
         show_success_metrics: false,
         show_contact_info: true,
@@ -71,7 +81,7 @@ export function MarketplaceSettings() {
     const [recruiterId, setRecruiterId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [error, setError] = useState('');
+    const [error, setError] = useState("");
     const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
     // Accumulate changes for batch saving
@@ -86,7 +96,7 @@ export function MarketplaceSettings() {
             setLoading(true);
             const token = await getToken();
             if (!token) {
-                setError('Please sign in to manage marketplace settings.');
+                setError("Please sign in to manage marketplace settings.");
                 setLoading(false);
                 return;
             }
@@ -100,20 +110,20 @@ export function MarketplaceSettings() {
             setRecruiterId(data.id);
             setSettings({
                 marketplace_enabled: data.marketplace_enabled ?? false,
-                marketplace_visibility: data.marketplace_visibility || 'public',
+                marketplace_visibility: data.marketplace_visibility || "public",
                 industries: data.industries || [],
                 specialties: data.specialties || [],
-                location: data.location || '',
-                tagline: data.tagline || '',
+                location: data.location || "",
+                tagline: data.tagline || "",
                 years_experience: data.years_experience || 0,
-                bio: data.bio || '',
+                bio: data.bio || "",
                 marketplace_profile: data.marketplace_profile || {},
                 show_success_metrics: data.show_success_metrics ?? false,
                 show_contact_info: data.show_contact_info !== false,
             });
         } catch (err) {
-            console.error('Failed to load marketplace settings:', err);
-            setError('Failed to load settings. Please try again.');
+            console.error("Failed to load marketplace settings:", err);
+            setError("Failed to load settings. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -122,15 +132,17 @@ export function MarketplaceSettings() {
     const saveSettings = async (updatedSettings: MarketplaceSettings) => {
         try {
             setSaving(true);
-            setError('');
+            setError("");
             const token = await getToken();
             if (!token) {
-                setError('Please sign in to update marketplace settings.');
+                setError("Please sign in to update marketplace settings.");
                 return;
             }
 
             if (!recruiterId) {
-                setError('Recruiter profile not loaded. Please refresh and try again.');
+                setError(
+                    "Recruiter profile not loaded. Please refresh and try again.",
+                );
                 return;
             }
 
@@ -151,8 +163,8 @@ export function MarketplaceSettings() {
             await client.patch(`/recruiters/${recruiterId}`, payload);
             setLastSaved(new Date());
         } catch (err) {
-            console.error('Failed to update marketplace settings:', err);
-            setError('Failed to auto-save. Please try again.');
+            console.error("Failed to update marketplace settings:", err);
+            setError("Failed to auto-save. Please try again.");
         } finally {
             setSaving(false);
         }
@@ -166,12 +178,14 @@ export function MarketplaceSettings() {
         try {
             const token = await getToken();
             if (!token) {
-                setError('Please sign in to update marketplace settings.');
+                setError("Please sign in to update marketplace settings.");
                 return;
             }
 
             if (!recruiterId) {
-                setError('Recruiter profile not loaded. Please refresh and try again.');
+                setError(
+                    "Recruiter profile not loaded. Please refresh and try again.",
+                );
                 return;
             }
 
@@ -182,24 +196,35 @@ export function MarketplaceSettings() {
             pendingChangesRef.current = {};
 
             const payload = {
-                marketplace_enabled: changesToSave.marketplace_enabled ?? settings.marketplace_enabled,
-                marketplace_visibility: changesToSave.marketplace_visibility ?? settings.marketplace_visibility,
+                marketplace_enabled:
+                    changesToSave.marketplace_enabled ??
+                    settings.marketplace_enabled,
+                marketplace_visibility:
+                    changesToSave.marketplace_visibility ??
+                    settings.marketplace_visibility,
                 industries: changesToSave.industries ?? settings.industries,
                 specialties: changesToSave.specialties ?? settings.specialties,
                 location: changesToSave.location ?? settings.location,
                 tagline: changesToSave.tagline ?? settings.tagline,
-                years_experience: changesToSave.years_experience ?? settings.years_experience,
+                years_experience:
+                    changesToSave.years_experience ?? settings.years_experience,
                 bio: changesToSave.bio ?? settings.bio,
-                marketplace_profile: changesToSave.marketplace_profile ?? settings.marketplace_profile,
-                show_success_metrics: changesToSave.show_success_metrics ?? settings.show_success_metrics,
-                show_contact_info: changesToSave.show_contact_info ?? settings.show_contact_info,
+                marketplace_profile:
+                    changesToSave.marketplace_profile ??
+                    settings.marketplace_profile,
+                show_success_metrics:
+                    changesToSave.show_success_metrics ??
+                    settings.show_success_metrics,
+                show_contact_info:
+                    changesToSave.show_contact_info ??
+                    settings.show_contact_info,
             };
             await client.patch(`/recruiters/${recruiterId}`, payload);
             setLastSaved(new Date());
-            setError('');
+            setError("");
         } catch (err) {
-            console.error('Failed to update marketplace settings:', err);
-            setError('Failed to auto-save. Please try again.');
+            console.error("Failed to update marketplace settings:", err);
+            setError("Failed to auto-save. Please try again.");
         } finally {
             setSaving(false);
         }
@@ -210,20 +235,23 @@ export function MarketplaceSettings() {
         setSettings(newSettings);
 
         // Accumulate changes for batch saving
-        pendingChangesRef.current = { ...pendingChangesRef.current, ...updates };
+        pendingChangesRef.current = {
+            ...pendingChangesRef.current,
+            ...updates,
+        };
         debouncedSave();
     };
 
     const toggleIndustry = (industry: string) => {
         const newIndustries = settings.industries.includes(industry)
-            ? settings.industries.filter(i => i !== industry)
+            ? settings.industries.filter((i) => i !== industry)
             : [...settings.industries, industry];
         updateSettings({ industries: newIndustries });
     };
 
     const toggleSpecialty = (specialty: string) => {
         const newSpecialties = settings.specialties.includes(specialty)
-            ? settings.specialties.filter(s => s !== specialty)
+            ? settings.specialties.filter((s) => s !== specialty)
             : [...settings.specialties, specialty];
         updateSettings({ specialties: newSpecialties });
     };
@@ -269,11 +297,21 @@ export function MarketplaceSettings() {
                         <div className="shrink-0">
                             <div
                                 className="radial-progress text-primary"
-                                style={{ "--value": completeness.percentage, "--size": "6rem", "--thickness": "0.5rem" } as any}
+                                style={
+                                    {
+                                        "--value": completeness.percentage,
+                                        "--size": "6rem",
+                                        "--thickness": "0.5rem",
+                                    } as any
+                                }
                             >
                                 <div className="text-center">
-                                    <div className="text-2xl font-bold">{completeness.percentage}%</div>
-                                    <div className="text-xs text-base-content/70">Complete</div>
+                                    <div className="text-2xl font-bold">
+                                        {completeness.percentage}%
+                                    </div>
+                                    <div className="text-xs text-base-content/70">
+                                        Complete
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -281,9 +319,15 @@ export function MarketplaceSettings() {
                         {/* Completeness Info */}
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                                <h3 className="text-xl font-bold">Profile Strength</h3>
-                                <span className={`badge ${tierBadge.color} gap-1`}>
-                                    <i className={`fa-duotone fa-regular ${tierBadge.icon}`}></i>
+                                <h3 className="text-xl font-bold">
+                                    Profile Strength
+                                </h3>
+                                <span
+                                    className={`badge ${tierBadge.color} gap-1`}
+                                >
+                                    <i
+                                        className={`fa-duotone fa-regular ${tierBadge.icon}`}
+                                    ></i>
                                     {tierBadge.label}
                                 </span>
                             </div>
@@ -291,26 +335,47 @@ export function MarketplaceSettings() {
                             {/* Category Breakdown */}
                             <div className="grid grid-cols-3 gap-2 mb-3">
                                 <div className="text-center">
-                                    <div className="text-xs text-base-content/70">Basic</div>
-                                    <div className="text-sm font-semibold">{completeness.categoryScores.basic}%</div>
+                                    <div className="text-xs text-base-content/70">
+                                        Basic
+                                    </div>
+                                    <div className="text-sm font-semibold">
+                                        {completeness.categoryScores.basic}%
+                                    </div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-xs text-base-content/70">Marketplace</div>
-                                    <div className="text-sm font-semibold">{completeness.categoryScores.marketplace}%</div>
+                                    <div className="text-xs text-base-content/70">
+                                        Marketplace
+                                    </div>
+                                    <div className="text-sm font-semibold">
+                                        {
+                                            completeness.categoryScores
+                                                .marketplace
+                                        }
+                                        %
+                                    </div>
                                 </div>
                                 <div className="text-center">
-                                    <div className="text-xs text-base-content/70">Metrics</div>
-                                    <div className="text-sm font-semibold">{completeness.categoryScores.metrics}%</div>
+                                    <div className="text-xs text-base-content/70">
+                                        Metrics
+                                    </div>
+                                    <div className="text-sm font-semibold">
+                                        {completeness.categoryScores.metrics}%
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Top Priorities */}
                             {topPriorities.length > 0 && (
                                 <div className="mb-2">
-                                    <div className="text-xs font-semibold text-base-content/70 mb-1">Top Priorities:</div>
+                                    <div className="text-xs font-semibold text-base-content/70 mb-1">
+                                        Top Priorities:
+                                    </div>
                                     <div className="flex flex-wrap gap-1">
-                                        {topPriorities.map(field => (
-                                            <span key={field.name} className="badge badge-sm badge-outline gap-1">
+                                        {topPriorities.map((field) => (
+                                            <span
+                                                key={field.name}
+                                                className="badge badge-sm badge-outline gap-1"
+                                            >
                                                 <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
                                                 {field.label}
                                             </span>
@@ -322,8 +387,13 @@ export function MarketplaceSettings() {
                             {/* Incentives */}
                             <div className="text-xs text-base-content/70">
                                 {incentives.map((incentive, idx) => (
-                                    <div key={idx} className="flex items-start gap-1">
-                                        <i className={`fa-duotone fa-regular ${completeness.tier === 'complete' ? 'fa-check' : 'fa-star'} text-xs mt-0.5`}></i>
+                                    <div
+                                        key={idx}
+                                        className="flex items-start gap-1"
+                                    >
+                                        <i
+                                            className={`fa-duotone fa-regular ${completeness.tier === "complete" ? "fa-check" : "fa-star"} text-xs mt-0.5`}
+                                        ></i>
                                         <span>{incentive}</span>
                                     </div>
                                 ))}
@@ -339,7 +409,9 @@ export function MarketplaceSettings() {
                     {saving && (
                         <>
                             <span className="loading loading-spinner loading-xs"></span>
-                            <span className="text-base-content/70">Saving...</span>
+                            <span className="text-base-content/70">
+                                Saving...
+                            </span>
                         </>
                     )}
                     {!saving && lastSaved && (
@@ -367,32 +439,52 @@ export function MarketplaceSettings() {
 
                     <div className="form-control">
                         <label className="label cursor-pointer">
-                            <span className="label-text">Enable marketplace profile</span>
+                            <span className="label-text">
+                                Enable marketplace profile
+                            </span>
                             <input
                                 type="checkbox"
                                 className="toggle toggle-primary"
                                 checked={settings.marketplace_enabled}
-                                onChange={(e) => updateSettings({ marketplace_enabled: e.target.checked })}
+                                onChange={(e) =>
+                                    updateSettings({
+                                        marketplace_enabled: e.target.checked,
+                                    })
+                                }
                             />
                         </label>
-                        <label className="label">
-                            <span className="label-text-alt">Allow candidates to discover and connect with you</span>
-                        </label>
+                        <p className="fieldset-label">
+                            Allow candidates to discover and connect with you
+                        </p>
                     </div>
 
                     {settings.marketplace_enabled && (
-                        <div className="fieldset mt-4">
-                            <label className="label">Visibility</label>
+                        <fieldset className="fieldset mt-4">
+                            <legend className="fieldset-legend">
+                                Visibility
+                            </legend>
                             <select
                                 className="select w-full"
                                 value={settings.marketplace_visibility}
-                                onChange={(e) => updateSettings({ marketplace_visibility: e.target.value as any })}
+                                onChange={(e) =>
+                                    updateSettings({
+                                        marketplace_visibility: e.target
+                                            .value as any,
+                                    })
+                                }
                             >
-                                <option value="public">Public - Visible to all candidates</option>
-                                <option value="limited">Limited - Visible to verified candidates only</option>
-                                <option value="hidden">Hidden - Not visible in marketplace</option>
+                                <option value="public">
+                                    Public - Visible to all candidates
+                                </option>
+                                <option value="limited">
+                                    Limited - Visible to verified candidates
+                                    only
+                                </option>
+                                <option value="hidden">
+                                    Hidden - Not visible in marketplace
+                                </option>
                             </select>
-                        </div>
+                        </fieldset>
                     )}
                 </div>
             </div>
@@ -404,48 +496,69 @@ export function MarketplaceSettings() {
                         <div className="card-body">
                             <h2 className="card-title">Profile Information</h2>
 
-                            <div className="fieldset">
-                                <label className="label">Tagline</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">
+                                    Tagline
+                                </legend>
                                 <input
                                     type="text"
                                     className="input w-full"
                                     placeholder="e.g., Specialized in Tech Executive Placements"
                                     maxLength={255}
                                     value={settings.tagline}
-                                    onChange={(e) => updateSettings({ tagline: e.target.value })}
+                                    onChange={(e) =>
+                                        updateSettings({
+                                            tagline: e.target.value,
+                                        })
+                                    }
                                 />
-                                <label className="label">
-                                    <span className="label-text-alt">Short description shown in search results</span>
-                                </label>
-                            </div>
+                                <p className="fieldset-label">
+                                    Short description shown in search results
+                                </p>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label">Location</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">
+                                    Location
+                                </legend>
                                 <input
                                     type="text"
                                     className="input w-full"
                                     placeholder="e.g., New York, NY"
                                     value={settings.location}
-                                    onChange={(e) => updateSettings({ location: e.target.value })}
+                                    onChange={(e) =>
+                                        updateSettings({
+                                            location: e.target.value,
+                                        })
+                                    }
                                 />
-                            </div>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label">Years of Experience</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">
+                                    Years of Experience
+                                </legend>
                                 <input
                                     type="number"
                                     className="input w-full"
                                     min="0"
                                     value={settings.years_experience}
-                                    onChange={(e) => updateSettings({ years_experience: parseInt(e.target.value) || 0 })}
+                                    onChange={(e) =>
+                                        updateSettings({
+                                            years_experience:
+                                                parseInt(e.target.value) || 0,
+                                        })
+                                    }
                                 />
-                            </div>
+                            </fieldset>
 
                             <MarkdownEditor
                                 className="fieldset"
                                 label="Profile Summary (Card Preview)"
                                 value={settings.bio}
-                                onChange={(value) => updateSettings({ bio: value })}
+                                onChange={(value) =>
+                                    updateSettings({ bio: value })
+                                }
                                 placeholder="Brief overview of your recruiting expertise and approach (shows on marketplace cards)"
                                 maxLength={500}
                                 showCount
@@ -463,14 +576,17 @@ export function MarketplaceSettings() {
                             </p>
 
                             <div className="flex flex-wrap gap-2">
-                                {INDUSTRY_OPTIONS.map(industry => (
+                                {INDUSTRY_OPTIONS.map((industry) => (
                                     <button
                                         key={industry}
                                         type="button"
-                                        className={`btn btn-sm ${settings.industries.includes(industry)
-                                            ? 'btn-primary'
-                                            : 'btn-outline'
-                                            }`}
+                                        className={`btn btn-sm ${
+                                            settings.industries.includes(
+                                                industry,
+                                            )
+                                                ? "btn-primary"
+                                                : "btn-outline"
+                                        }`}
                                         onClick={() => toggleIndustry(industry)}
                                     >
                                         {industry}
@@ -489,15 +605,20 @@ export function MarketplaceSettings() {
                             </p>
 
                             <div className="flex flex-wrap gap-2">
-                                {SPECIALTY_OPTIONS.map(specialty => (
+                                {SPECIALTY_OPTIONS.map((specialty) => (
                                     <button
                                         key={specialty}
                                         type="button"
-                                        className={`btn btn-sm ${settings.specialties.includes(specialty)
-                                            ? 'btn-primary'
-                                            : 'btn-outline'
-                                            }`}
-                                        onClick={() => toggleSpecialty(specialty)}
+                                        className={`btn btn-sm ${
+                                            settings.specialties.includes(
+                                                specialty,
+                                            )
+                                                ? "btn-primary"
+                                                : "btn-outline"
+                                        }`}
+                                        onClick={() =>
+                                            toggleSpecialty(specialty)
+                                        }
                                     >
                                         {specialty}
                                     </button>
@@ -517,14 +638,17 @@ export function MarketplaceSettings() {
                                 </span>
                             </div>
                             <p className="text-sm text-base-content/70 mb-4">
-                                Share your story, achievements, and what makes you unique. Supports Markdown formatting.
+                                Share your story, achievements, and what makes
+                                you unique. Supports Markdown formatting.
                             </p>
 
                             <MarkdownEditor
                                 className="fieldset"
                                 label="Your Story"
                                 showCount
-                                value={settings.marketplace_profile?.bio_rich || ''}
+                                value={
+                                    settings.marketplace_profile?.bio_rich || ""
+                                }
                                 onChange={updateBioRich}
                                 placeholder={`Tell candidates about yourself...\n\nExample:\n- **15+ years** in tech recruitment\n- Specialized in C-level placements\n- Former software engineer, understands technical roles deeply\n- Track record: 50+ successful placements at top startups\n\nUse **bold**, *italic*, and bullet points to make it engaging!`}
                                 helperText="Tip: Use Markdown for formatting (**, *, bullets). This will appear prominently on your marketplace profile."
@@ -541,14 +665,24 @@ export function MarketplaceSettings() {
                             <div className="form-control">
                                 <label className="label cursor-pointer">
                                     <div>
-                                        <span className="label-text font-medium">Show success metrics</span>
-                                        <p className="text-sm text-base-content/70">Display placement count and success rate</p>
+                                        <span className="label-text font-medium">
+                                            Show success metrics
+                                        </span>
+                                        <p className="text-sm text-base-content/70">
+                                            Display placement count and success
+                                            rate
+                                        </p>
                                     </div>
                                     <input
                                         type="checkbox"
                                         className="toggle toggle-primary"
                                         checked={settings.show_success_metrics}
-                                        onChange={(e) => updateSettings({ show_success_metrics: e.target.checked })}
+                                        onChange={(e) =>
+                                            updateSettings({
+                                                show_success_metrics:
+                                                    e.target.checked,
+                                            })
+                                        }
                                     />
                                 </label>
                             </div>
@@ -558,14 +692,24 @@ export function MarketplaceSettings() {
                             <div className="form-control">
                                 <label className="label cursor-pointer">
                                     <div>
-                                        <span className="label-text font-medium">Show contact information</span>
-                                        <p className="text-sm text-base-content/70">Display email and phone to candidates</p>
+                                        <span className="label-text font-medium">
+                                            Show contact information
+                                        </span>
+                                        <p className="text-sm text-base-content/70">
+                                            Display email and phone to
+                                            candidates
+                                        </p>
                                     </div>
                                     <input
                                         type="checkbox"
                                         className="toggle toggle-primary"
                                         checked={settings.show_contact_info}
-                                        onChange={(e) => updateSettings({ show_contact_info: e.target.checked })}
+                                        onChange={(e) =>
+                                            updateSettings({
+                                                show_contact_info:
+                                                    e.target.checked,
+                                            })
+                                        }
                                     />
                                 </label>
                             </div>

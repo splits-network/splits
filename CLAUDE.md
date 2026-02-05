@@ -58,6 +58,7 @@ packages/                 # Shared code (NOT directly deployable)
 ├─ shared-clients/        # Typed HTTP/SDK clients
 ├─ shared-access-context/ # V2 RBAC - resolveAccessContext()
 ├─ shared-api-client/     # Frontend API client
+├─ shared-ui/             # Standardized UI components (loading, browse, markdown, etc.)
 └─ shared-job-queue/      # Job queue abstraction (RabbitMQ)
 ```
 
@@ -114,6 +115,8 @@ Key standards in `docs/guidance/`:
 - `form-controls.md` - Use `fieldset` wrapper, no `-bordered` suffixes
 - `pagination.md` - StandardListParams/StandardListResponse
 - `user-identification-standard.md` - Always use `clerkUserId`, never set headers from frontend
+- `loading-patterns-usage-guide.md` - Standardized loading components (use `@splits-network/shared-ui`)
+- `loading-states-patterns.md` - Comprehensive loading patterns audit and analysis
 
 ## Naming Conventions
 
@@ -150,3 +153,61 @@ reply.send({ data: items, pagination: { total, page, limit, total_pages } });
 - Frontend: Send only Authorization Bearer token (Clerk JWT)
 - API Gateway: Extract from JWT, set `x-clerk-user-id` header
 - Backend: Read `request.headers['x-clerk-user-id']`
+
+### Loading States (Standardized)
+
+**ALWAYS use components from `@splits-network/shared-ui` for loading states.**
+
+```tsx
+import {
+    LoadingState,           // Full page/section loading
+    LoadingSpinner,         // Core spinner component
+    SkeletonLoader,         // Content placeholders
+    ButtonLoading,          // Button loading states
+    ModalLoadingOverlay,    // Modal loading
+    ChartLoadingState,      // Chart/analytics loading
+} from '@splits-network/shared-ui';
+```
+
+**Common Patterns:**
+
+```tsx
+// Full page loading
+if (loading) {
+    return <LoadingState message="Loading candidates..." />;
+}
+
+// Form button
+<button disabled={submitting} className="btn btn-primary">
+    <ButtonLoading loading={submitting} text="Save" loadingText="Saving..." />
+</button>
+
+// Modal loading
+<dialog open={isOpen} className="modal">
+    <div className="modal-box">
+        <ModalLoadingOverlay loading={loading}>
+            <FormContent />
+        </ModalLoadingOverlay>
+    </div>
+</dialog>
+
+// Chart loading
+if (loading) {
+    return <ChartLoadingState height={300} />;
+}
+
+// List skeleton (predictable layout)
+if (loading) {
+    return <SkeletonList count={10} variant="text-block" gap="gap-4" />;
+}
+```
+
+**Size Guidelines:**
+- `xs` - Inline actions, icon buttons
+- `sm` - Form buttons, submissions
+- `md` - Charts, content areas, modals
+- `lg` - Full page loading
+
+**Never manually create loading spinners.** Use standardized components for consistency.
+
+See [docs/guidance/loading-patterns-usage-guide.md](./docs/guidance/loading-patterns-usage-guide.md) for complete documentation.

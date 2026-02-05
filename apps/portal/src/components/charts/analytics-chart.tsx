@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { TrendPeriodSelector, TIME_PERIODS } from './trend-period-selector';
+import { ChartLoadingState } from '@splits-network/shared-ui';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -161,9 +162,7 @@ export function AnalyticsChart({
                         />
                     )}
                 </div>
-                <div className="flex items-center justify-center" style={{ height }}>
-                    <span className="loading loading-spinner loading-lg text-primary"></span>
-                </div>
+                <ChartLoadingState height={height} />
             </div>
         );
     }

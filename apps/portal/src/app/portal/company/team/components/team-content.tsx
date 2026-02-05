@@ -150,10 +150,7 @@ export default function TeamManagementContent({
         }
     };
 
-    const handleRevokeInvitation = (
-        invitationId: string,
-        email: string,
-    ) => {
+    const handleRevokeInvitation = (invitationId: string, email: string) => {
         setConfirmModal({
             show: true,
             title: "Revoke Invitation",
@@ -178,10 +175,7 @@ export default function TeamManagementContent({
         });
     };
 
-    const handleRemoveMember = (
-        membershipId: string,
-        memberName: string,
-    ) => {
+    const handleRemoveMember = (membershipId: string, memberName: string) => {
         setConfirmModal({
             show: true,
             title: "Remove Team Member",
@@ -198,7 +192,9 @@ export default function TeamManagementContent({
                     fetchTeamMembers();
                 } catch (error: any) {
                     console.error("Failed to remove member:", error);
-                    toast.error(error.message || "Failed to remove team member");
+                    toast.error(
+                        error.message || "Failed to remove team member",
+                    );
                 } finally {
                     setConfirmModal(null);
                 }
@@ -248,8 +244,10 @@ export default function TeamManagementContent({
 
                     <form onSubmit={handleInvite} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="fieldset">
-                                <label className="label">Email Address</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">
+                                    Email Address
+                                </legend>
                                 <input
                                     type="email"
                                     className="input w-full"
@@ -261,10 +259,12 @@ export default function TeamManagementContent({
                                     required
                                     disabled={inviting}
                                 />
-                            </div>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label">Role</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">
+                                    Role
+                                </legend>
                                 <select
                                     className="select w-full"
                                     value={inviteRole}
@@ -278,10 +278,12 @@ export default function TeamManagementContent({
                                     </option>
                                     <option value="company_admin">Admin</option>
                                 </select>
-                            </div>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label">Access Scope</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">
+                                    Access Scope
+                                </legend>
                                 <select
                                     className="select w-full"
                                     value={inviteScope}
@@ -299,14 +301,12 @@ export default function TeamManagementContent({
                                         Entire Organization
                                     </option>
                                 </select>
-                                <label className="label">
-                                    <span className="label-text-alt text-base-content/60">
-                                        {inviteScope === "company"
-                                            ? "User will only see this company's data"
-                                            : "User will see all companies in the organization"}
-                                    </span>
-                                </label>
-                            </div>
+                                <p className="fieldset-label text-base-content/60">
+                                    {inviteScope === "company"
+                                        ? "User will only see this company's data"
+                                        : "User will see all companies in the organization"}
+                                </p>
+                            </fieldset>
                         </div>
 
                         <div className="flex gap-2 justify-end">
@@ -578,7 +578,9 @@ export default function TeamManagementContent({
             {confirmModal && (
                 <div className="modal modal-open">
                     <div className="modal-box">
-                        <h3 className="font-bold text-lg">{confirmModal.title}</h3>
+                        <h3 className="font-bold text-lg">
+                            {confirmModal.title}
+                        </h3>
                         <p className="py-4">{confirmModal.message}</p>
                         <div className="modal-action">
                             <button

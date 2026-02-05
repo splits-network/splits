@@ -385,7 +385,10 @@ export default function NotificationsPage() {
                         </div>
 
                         {/* Category Filter */}
-                        <div className="fieldset">
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">
+                                Category Filter
+                            </legend>
                             <select
                                 className="select select-sm"
                                 value={filters.category || ""}
@@ -402,7 +405,7 @@ export default function NotificationsPage() {
                                     </option>
                                 ))}
                             </select>
-                        </div>
+                        </fieldset>
 
                         {/* Unread Only Toggle */}
                         <label className="flex items-center gap-2 cursor-pointer">

@@ -1,10 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useToast } from '@/lib/toast-context';
-import { AdminPageHeader, useAdminConfirm } from '../components';
+import { useEffect, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import { useToast } from "@/lib/toast-context";
+import { AdminPageHeader, useAdminConfirm } from "../components";
+import { LoadingState } from "@splits-network/shared-ui";
 
 interface Job {
     id: string;
@@ -30,9 +31,11 @@ export default function RoleAssignmentsPage() {
     const { getToken } = useAuth();
     const [jobs, setJobs] = useState<Job[]>([]);
     const [recruiters, setRecruiters] = useState<Recruiter[]>([]);
-    const [selectedJob, setSelectedJob] = useState<string>('');
-    const [selectedRecruiter, setSelectedRecruiter] = useState<string>('');
-    const [assignments, setAssignments] = useState<Map<string, string[]>>(new Map());
+    const [selectedJob, setSelectedJob] = useState<string>("");
+    const [selectedRecruiter, setSelectedRecruiter] = useState<string>("");
+    const [assignments, setAssignments] = useState<Map<string, string[]>>(
+        new Map(),
+    );
     const [loading, setLoading] = useState(true);
     const [assigning, setAssigning] = useState(false);
     const toast = useToast();
@@ -46,36 +49,43 @@ export default function RoleAssignmentsPage() {
         try {
             const token = await getToken();
             if (!token) {
-                throw new Error('No auth token');
+                throw new Error("No auth token");
             }
             const apiClient = createAuthenticatedClient(token);
 
             const [jobsResponse, recruitersResponse] = await Promise.all([
-                apiClient.get('/jobs?status=active'),
-                apiClient.get('/recruiters'),
+                apiClient.get("/jobs?status=active"),
+                apiClient.get("/recruiters"),
             ]);
 
             const jobsList = jobsResponse.data || [];
             const recruitersList = recruitersResponse.data || [];
 
             setJobs(jobsList);
-            setRecruiters(recruitersList.filter((r: Recruiter) => r.status === 'active'));
+            setRecruiters(
+                recruitersList.filter((r: Recruiter) => r.status === "active"),
+            );
 
             // Load assignments for each job
             const assignmentsMap = new Map<string, string[]>();
             await Promise.all(
                 jobsList.map(async (job: Job) => {
                     try {
-                        const response = await apiClient.get(`/jobs/${job.id}/recruiters`);
+                        const response = await apiClient.get(
+                            `/jobs/${job.id}/recruiters`,
+                        );
                         assignmentsMap.set(job.id, response.data || []);
                     } catch (error) {
-                        console.error(`Failed to load recruiters for job ${job.id}:`, error);
+                        console.error(
+                            `Failed to load recruiters for job ${job.id}:`,
+                            error,
+                        );
                     }
-                })
+                }),
             );
             setAssignments(assignmentsMap);
         } catch (error) {
-            console.error('Failed to load data:', error);
+            console.error("Failed to load data:", error);
         } finally {
             setLoading(false);
         }
@@ -83,7 +93,7 @@ export default function RoleAssignmentsPage() {
 
     async function assignRecruiter() {
         if (!selectedJob || !selectedRecruiter) {
-            toast.error('Please select both a job and a recruiter');
+            toast.error("Please select both a job and a recruiter");
             return;
         }
 
@@ -91,17 +101,17 @@ export default function RoleAssignmentsPage() {
         try {
             const token = await getToken();
             if (!token) {
-                throw new Error('No auth token');
+                throw new Error("No auth token");
             }
             const apiClient = createAuthenticatedClient(token);
 
-            await apiClient.post('/assignments', {
+            await apiClient.post("/assignments", {
                 job_id: selectedJob,
                 recruiter_id: selectedRecruiter,
             });
 
             // Update local state
-            setAssignments(prev => {
+            setAssignments((prev) => {
                 const newMap = new Map(prev);
                 const existing = newMap.get(selectedJob) || [];
                 if (!existing.includes(selectedRecruiter)) {
@@ -111,11 +121,11 @@ export default function RoleAssignmentsPage() {
             });
 
             // Reset selection
-            setSelectedRecruiter('');
-            toast.success('Recruiter assigned successfully!');
+            setSelectedRecruiter("");
+            toast.success("Recruiter assigned successfully!");
         } catch (error) {
-            console.error('Failed to assign recruiter:', error);
-            toast.error('Failed to assign recruiter');
+            console.error("Failed to assign recruiter:", error);
+            toast.error("Failed to assign recruiter");
         } finally {
             setAssigning(false);
         }
@@ -123,47 +133,51 @@ export default function RoleAssignmentsPage() {
 
     async function unassignRecruiter(jobId: string, recruiterId: string) {
         const confirmed = await confirm({
-            title: 'Remove Assignment',
-            message: 'Are you sure you want to remove this recruiter from this job assignment?',
-            confirmText: 'Remove',
-            type: 'warning',
+            title: "Remove Assignment",
+            message:
+                "Are you sure you want to remove this recruiter from this job assignment?",
+            confirmText: "Remove",
+            type: "warning",
         });
         if (!confirmed) return;
 
         try {
             const token = await getToken();
             if (!token) {
-                throw new Error('No auth token');
+                throw new Error("No auth token");
             }
             const apiClient = createAuthenticatedClient(token);
 
             await apiClient.delete(`/assignments/${jobId}/${recruiterId}`);
 
             // Update local state
-            setAssignments(prev => {
+            setAssignments((prev) => {
                 const newMap = new Map(prev);
                 const existing = newMap.get(jobId) || [];
-                newMap.set(jobId, existing.filter(id => id !== recruiterId));
+                newMap.set(
+                    jobId,
+                    existing.filter((id) => id !== recruiterId),
+                );
                 return newMap;
             });
 
-            toast.success('Assignment removed successfully!');
+            toast.success("Assignment removed successfully!");
         } catch (error) {
-            console.error('Failed to remove assignment:', error);
-            toast.error('Failed to remove assignment');
+            console.error("Failed to remove assignment:", error);
+            toast.error("Failed to remove assignment");
         }
     }
 
-    const selectedJobData = jobs.find(j => j.id === selectedJob);
-    const assignedRecruiterIds = selectedJob ? (assignments.get(selectedJob) || []) : [];
-    const availableRecruiters = recruiters.filter(r => !assignedRecruiterIds.includes(r.id));
+    const selectedJobData = jobs.find((j) => j.id === selectedJob);
+    const assignedRecruiterIds = selectedJob
+        ? assignments.get(selectedJob) || []
+        : [];
+    const availableRecruiters = recruiters.filter(
+        (r) => !assignedRecruiterIds.includes(r.id),
+    );
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <span className="loading loading-spinner loading-lg"></span>
-            </div>
-        );
+        return <LoadingState message="Loading assignments..." />;
     }
 
     return (
@@ -172,7 +186,7 @@ export default function RoleAssignmentsPage() {
             <AdminPageHeader
                 title="Role Assignments"
                 subtitle="Assign recruiters to active job roles"
-                breadcrumbs={[{ label: 'Assignments' }]}
+                breadcrumbs={[{ label: "Assignments" }]}
             />
 
             {/* Assignment Form */}
@@ -181,55 +195,68 @@ export default function RoleAssignmentsPage() {
                     <h2 className="card-title">Assign Recruiter to Role</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                         {/* Job Selection */}
-                        <div className="fieldset">
-                            <label className="label">Select Job</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">
+                                Select Job
+                            </legend>
                             <select
                                 className="select w-full"
                                 value={selectedJob}
                                 onChange={(e) => {
                                     setSelectedJob(e.target.value);
-                                    setSelectedRecruiter('');
+                                    setSelectedRecruiter("");
                                 }}
                             >
                                 <option value="">Choose a job...</option>
                                 {jobs.map((job) => (
                                     <option key={job.id} value={job.id}>
-                                        {job.title} - {job.company.name} ({job.location || 'Remote'})
+                                        {job.title} - {job.company.name} (
+                                        {job.location || "Remote"})
                                     </option>
                                 ))}
                             </select>
-                        </div>
+                        </fieldset>
 
                         {/* Recruiter Selection */}
-                        <div className="fieldset">
-                            <label className="label">Select Recruiter</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">
+                                Select Recruiter
+                            </legend>
                             <select
                                 className="select w-full"
                                 value={selectedRecruiter}
-                                onChange={(e) => setSelectedRecruiter(e.target.value)}
+                                onChange={(e) =>
+                                    setSelectedRecruiter(e.target.value)
+                                }
                                 disabled={!selectedJob}
                             >
                                 <option value="">Choose a recruiter...</option>
                                 {availableRecruiters.map((recruiter) => (
-                                    <option key={recruiter.id} value={recruiter.id}>
-                                        {recruiter.id} ({recruiter.user_id.slice(0, 8)}...)
+                                    <option
+                                        key={recruiter.id}
+                                        value={recruiter.id}
+                                    >
+                                        {recruiter.id} (
+                                        {recruiter.user_id.slice(0, 8)}...)
                                     </option>
                                 ))}
                             </select>
-                            {selectedJob && availableRecruiters.length === 0 && (
-                                <label className="label">
-                                    <span className="label-text-alt text-warning">
-                                        All active recruiters are already assigned to this job
-                                    </span>
-                                </label>
-                            )}
-                        </div>
+                            {selectedJob &&
+                                availableRecruiters.length === 0 && (
+                                    <p className="fieldset-label text-warning">
+                                        All active recruiters are already
+                                        assigned to this job
+                                    </p>
+                                )}
+                        </fieldset>
                     </div>
 
                     <div className="card-actions justify-end mt-4">
                         <button
                             onClick={assignRecruiter}
-                            disabled={!selectedJob || !selectedRecruiter || assigning}
+                            disabled={
+                                !selectedJob || !selectedRecruiter || assigning
+                            }
                             className="btn btn-primary"
                         >
                             {assigning ? (
@@ -267,30 +294,48 @@ export default function RoleAssignmentsPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {assignedRecruiterIds.map((recruiterId) => {
-                                            const recruiter = recruiters.find(r => r.id === recruiterId);
-                                            return (
-                                                <tr key={recruiterId}>
-                                                    <td className="font-mono text-sm">{recruiterId}</td>
-                                                    <td>
-                                                        {recruiter ? (
-                                                            <span className="badge badge-success">Active</span>
-                                                        ) : (
-                                                            <span className="badge badge-ghost">Unknown</span>
-                                                        )}
-                                                    </td>
-                                                    <td>
-                                                        <button
-                                                            onClick={() => unassignRecruiter(selectedJob, recruiterId)}
-                                                            className="btn btn-xs btn-error"
-                                                        >
-                                                            <i className="fa-duotone fa-regular fa-unlink"></i>
-                                                            Remove
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
+                                        {assignedRecruiterIds.map(
+                                            (recruiterId) => {
+                                                const recruiter =
+                                                    recruiters.find(
+                                                        (r) =>
+                                                            r.id ===
+                                                            recruiterId,
+                                                    );
+                                                return (
+                                                    <tr key={recruiterId}>
+                                                        <td className="font-mono text-sm">
+                                                            {recruiterId}
+                                                        </td>
+                                                        <td>
+                                                            {recruiter ? (
+                                                                <span className="badge badge-success">
+                                                                    Active
+                                                                </span>
+                                                            ) : (
+                                                                <span className="badge badge-ghost">
+                                                                    Unknown
+                                                                </span>
+                                                            )}
+                                                        </td>
+                                                        <td>
+                                                            <button
+                                                                onClick={() =>
+                                                                    unassignRecruiter(
+                                                                        selectedJob,
+                                                                        recruiterId,
+                                                                    )
+                                                                }
+                                                                className="btn btn-xs btn-error"
+                                                            >
+                                                                <i className="fa-duotone fa-regular fa-unlink"></i>
+                                                                Remove
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            },
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
@@ -315,17 +360,25 @@ export default function RoleAssignmentsPage() {
                             </thead>
                             <tbody>
                                 {jobs.map((job) => {
-                                    const count = assignments.get(job.id)?.length || 0;
+                                    const count =
+                                        assignments.get(job.id)?.length || 0;
                                     return (
                                         <tr key={job.id}>
                                             <td>{job.title}</td>
                                             <td>{job.company.name}</td>
-                                            <td>{job.location || 'Remote'}</td>
+                                            <td>{job.location || "Remote"}</td>
                                             <td>
                                                 <div className="flex items-center gap-2">
-                                                    <span className="badge badge-neutral">{count} recruiter{count !== 1 ? 's' : ''}</span>
+                                                    <span className="badge badge-neutral">
+                                                        {count} recruiter
+                                                        {count !== 1 ? "s" : ""}
+                                                    </span>
                                                     <button
-                                                        onClick={() => setSelectedJob(job.id)}
+                                                        onClick={() =>
+                                                            setSelectedJob(
+                                                                job.id,
+                                                            )
+                                                        }
                                                         className="btn btn-xs btn-ghost"
                                                     >
                                                         View

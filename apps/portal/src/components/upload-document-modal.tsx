@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
+import { ButtonLoading } from '@splits-network/shared-ui';
 
 interface UploadDocumentModalProps {
     entityType: string;
@@ -165,17 +166,12 @@ export default function UploadDocumentModal({
                             className="btn btn-primary"
                             disabled={uploading || !file}
                         >
-                            {uploading ? (
-                                <>
-                                    <span className="loading loading-spinner loading-sm"></span>
-                                    Uploading...
-                                </>
-                            ) : (
-                                <>
-                                    <i className="fa-duotone fa-regular fa-upload"></i>
-                                    Upload
-                                </>
-                            )}
+                            <ButtonLoading
+                                loading={uploading}
+                                icon="fa-duotone fa-regular fa-upload"
+                                text="Upload"
+                                loadingText="Uploading..."
+                            />
                         </button>
                     </div>
                 </form>

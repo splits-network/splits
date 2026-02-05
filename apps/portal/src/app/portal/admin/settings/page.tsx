@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { AdminPageHeader } from '../components';
+import { LoadingState } from '@splits-network/shared-ui';
 
 interface PlatformSettings {
     platform: {
@@ -148,18 +149,7 @@ export default function SettingsPage() {
     }
 
     if (loading) {
-        return (
-            <div className="space-y-6">
-                <AdminPageHeader
-                    title="Platform Settings"
-                    subtitle="View platform configuration and integrations"
-                    breadcrumbs={[{ label: 'Settings' }]}
-                />
-                <div className="flex justify-center py-12">
-                    <span className="loading loading-spinner loading-lg text-primary"></span>
-                </div>
-            </div>
-        );
+        return <LoadingState message="Loading settings..." />;
     }
 
     return (

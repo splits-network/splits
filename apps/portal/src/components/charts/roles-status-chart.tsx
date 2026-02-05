@@ -5,6 +5,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, type TooltipItem } from 
 import { Doughnut } from 'react-chartjs-2';
 import { registerChart } from './chart-options';
 import type { Job } from '../../app/portal/roles/components/role-card';
+import { ChartLoadingState } from '@splits-network/shared-ui';
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -122,11 +123,7 @@ export function RolesStatusChart({ jobs, loading }: RolesStatusChartProps) {
 
     // Loading state
     if (loading) {
-        return (
-            <div className="flex items-center justify-center h-48">
-                <span className="loading loading-spinner loading-lg text-primary"></span>
-            </div>
-        );
+        return <ChartLoadingState height="12rem" />;
     }
 
     // Empty state

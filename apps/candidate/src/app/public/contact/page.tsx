@@ -1,34 +1,39 @@
-'use client';
+"use client";
 
-import type { Metadata } from 'next';
-import { useState, FormEvent } from 'react';
-import { MarkdownEditor } from '@splits-network/shared-ui';
+import type { Metadata } from "next";
+import { useState, FormEvent } from "react";
+import { MarkdownEditor } from "@splits-network/shared-ui";
 
 export default function ContactPage() {
     const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        subject: 'general',
-        message: '',
+        name: "",
+        email: "",
+        subject: "general",
+        message: "",
     });
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
-    const [error, setError] = useState('');
+    const [error, setError] = useState("");
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
-        setError('');
+        setError("");
 
         try {
             // TODO: Implement actual API call to send contact form
             // For now, simulate submission
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise((resolve) => setTimeout(resolve, 1000));
 
             setSubmitted(true);
-            setFormData({ name: '', email: '', subject: 'general', message: '' });
+            setFormData({
+                name: "",
+                email: "",
+                subject: "general",
+                message: "",
+            });
         } catch (err) {
-            setError('Failed to send message. Please try again.');
+            setError("Failed to send message. Please try again.");
         } finally {
             setSubmitting(false);
         }
@@ -42,9 +47,12 @@ export default function ContactPage() {
                         <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
                             <i className="fa-duotone fa-regular fa-check-circle text-5xl text-success"></i>
                         </div>
-                        <h2 className="card-title justify-center text-3xl">Message Sent!</h2>
+                        <h2 className="card-title justify-center text-3xl">
+                            Message Sent!
+                        </h2>
                         <p className="text-base-content/80 mb-6">
-                            Thank you for contacting us. We've received your message and will respond within 1-2 business days.
+                            Thank you for contacting us. We've received your
+                            message and will respond within 1-2 business days.
                         </p>
                         <button
                             onClick={() => setSubmitted(false)}
@@ -63,10 +71,14 @@ export default function ContactPage() {
             {/* Hero Section */}
             <section className="text-center mb-12">
                 <h1 className="text-5xl md:text-6xl font-bold mb-6">
-                    Get in <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Touch</span>
+                    Get in{" "}
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
+                        Touch
+                    </span>
                 </h1>
                 <p className="text-xl md:text-2xl text-base-content/80 max-w-3xl mx-auto">
-                    Have a question or need help? We're here for you. Send us a message and we'll respond as soon as possible.
+                    Have a question or need help? We're here for you. Send us a
+                    message and we'll respond as soon as possible.
                 </p>
             </section>
 
@@ -74,7 +86,9 @@ export default function ContactPage() {
                 {/* Contact Form */}
                 <div className="card bg-base-100 shadow">
                     <div className="card-body">
-                        <h2 className="card-title text-2xl mb-4">Send us a Message</h2>
+                        <h2 className="card-title text-2xl mb-4">
+                            Send us a Message
+                        </h2>
 
                         {error && (
                             <div className="alert alert-error mb-4">
@@ -84,53 +98,86 @@ export default function ContactPage() {
                         )}
 
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            <div className="fieldset">
-                                <label className="label">Name *</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">
+                                    Name *
+                                </legend>
                                 <input
                                     type="text"
                                     className="input w-full"
                                     value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            name: e.target.value,
+                                        })
+                                    }
                                     placeholder="Your full name"
                                     required
                                 />
-                            </div>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label">Email *</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">
+                                    Email *
+                                </legend>
                                 <input
                                     type="email"
                                     className="input w-full"
                                     value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            email: e.target.value,
+                                        })
+                                    }
                                     placeholder="your@email.com"
                                     required
                                 />
-                            </div>
+                            </fieldset>
 
-                            <div className="fieldset">
-                                <label className="label">Subject *</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">
+                                    Subject *
+                                </legend>
                                 <select
                                     className="select w-full"
                                     value={formData.subject}
-                                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            subject: e.target.value,
+                                        })
+                                    }
                                     required
                                 >
-                                    <option value="general">General Inquiry</option>
-                                    <option value="support">Technical Support</option>
-                                    <option value="recruiter">Recruiter Questions</option>
-                                    <option value="candidate">Candidate Questions</option>
-                                    <option value="partnership">Partnership Opportunities</option>
+                                    <option value="general">
+                                        General Inquiry
+                                    </option>
+                                    <option value="support">
+                                        Technical Support
+                                    </option>
+                                    <option value="recruiter">
+                                        Recruiter Questions
+                                    </option>
+                                    <option value="candidate">
+                                        Candidate Questions
+                                    </option>
+                                    <option value="partnership">
+                                        Partnership Opportunities
+                                    </option>
                                     <option value="press">Press & Media</option>
                                     <option value="other">Other</option>
                                 </select>
-                            </div>
+                            </fieldset>
 
                             <MarkdownEditor
                                 className="fieldset"
                                 label="Message *"
                                 value={formData.message}
-                                onChange={(value) => setFormData({ ...formData, message: value })}
+                                onChange={(value) =>
+                                    setFormData({ ...formData, message: value })
+                                }
                                 placeholder="Tell us how we can help..."
                                 helperText="Please provide as much detail as possible"
                                 height={200}
@@ -167,13 +214,31 @@ export default function ContactPage() {
                             </h3>
                             <div className="space-y-2">
                                 <p className="text-base-content/80">
-                                    <strong>General:</strong> <a href="mailto:hello@applicant.network" className="link link-primary">hello@applicant.network</a>
+                                    <strong>General:</strong>{" "}
+                                    <a
+                                        href="mailto:hello@applicant.network"
+                                        className="link link-primary"
+                                    >
+                                        hello@applicant.network
+                                    </a>
                                 </p>
                                 <p className="text-base-content/80">
-                                    <strong>Support:</strong> <a href="mailto:help@applicant.network" className="link link-primary">help@applicant.network</a>
+                                    <strong>Support:</strong>{" "}
+                                    <a
+                                        href="mailto:help@applicant.network"
+                                        className="link link-primary"
+                                    >
+                                        help@applicant.network
+                                    </a>
                                 </p>
                                 <p className="text-base-content/80">
-                                    <strong>Recruiters:</strong> <a href="mailto:hello@splits.network" className="link link-primary">hello@splits.network</a>
+                                    <strong>Recruiters:</strong>{" "}
+                                    <a
+                                        href="mailto:hello@splits.network"
+                                        className="link link-primary"
+                                    >
+                                        hello@splits.network
+                                    </a>
                                 </p>
                             </div>
                         </div>
@@ -186,11 +251,21 @@ export default function ContactPage() {
                                 Support Hours
                             </h3>
                             <div className="space-y-2 text-base-content/80">
-                                <p><strong>Monday - Friday:</strong> 9:00 AM - 6:00 PM EST</p>
-                                <p><strong>Saturday:</strong> 10:00 AM - 4:00 PM EST</p>
-                                <p><strong>Sunday:</strong> Closed</p>
+                                <p>
+                                    <strong>Monday - Friday:</strong> 9:00 AM -
+                                    6:00 PM EST
+                                </p>
+                                <p>
+                                    <strong>Saturday:</strong> 10:00 AM - 4:00
+                                    PM EST
+                                </p>
+                                <p>
+                                    <strong>Sunday:</strong> Closed
+                                </p>
                                 <p className="text-sm mt-4">
-                                    We typically respond within 1-2 business days. For urgent issues, please mark your inquiry as "Technical Support."
+                                    We typically respond within 1-2 business
+                                    days. For urgent issues, please mark your
+                                    inquiry as "Technical Support."
                                 </p>
                             </div>
                         </div>
@@ -203,9 +278,12 @@ export default function ContactPage() {
                                 Office Location
                             </h3>
                             <p className="text-base-content/80">
-                                Splits Network, Inc.<br />
-                                [Street Address]<br />
-                                [City, State ZIP]<br />
+                                Splits Network, Inc.
+                                <br />
+                                [Street Address]
+                                <br />
+                                [City, State ZIP]
+                                <br />
                                 United States
                             </p>
                         </div>
@@ -264,7 +342,8 @@ export default function ContactPage() {
             <section className="bg-base-200 rounded-2xl p-8 text-center">
                 <h2 className="text-3xl font-bold mb-4">Need Quick Answers?</h2>
                 <p className="text-lg text-base-content/80 mb-6">
-                    Check out our Help Center for answers to frequently asked questions.
+                    Check out our Help Center for answers to frequently asked
+                    questions.
                 </p>
                 <a href="/help" className="btn btn-primary btn-lg">
                     <i className="fa-duotone fa-regular fa-circle-question mr-2"></i>

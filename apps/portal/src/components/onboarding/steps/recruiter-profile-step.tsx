@@ -6,7 +6,7 @@
  */
 
 import { useState, FormEvent } from "react";
-import { MarkdownEditor } from "@splits-network/shared-ui";
+import { MarkdownEditor, ButtonLoading } from "@splits-network/shared-ui";
 import { useOnboarding } from "../onboarding-provider";
 
 const INDUSTRY_OPTIONS = [
@@ -300,10 +300,11 @@ export function RecruiterProfileStep() {
                         disabled={state.submitting}
                     >
                         {state.submitting ? (
-                            <>
-                                <span className="loading loading-spinner loading-sm"></span>
-                                Saving...
-                            </>
+                            <ButtonLoading
+                                loading={state.submitting}
+                                text="Continue"
+                                loadingText="Saving..."
+                            />
                         ) : (
                             <>
                                 Continue

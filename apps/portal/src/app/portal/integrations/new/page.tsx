@@ -326,15 +326,15 @@ export default function NewIntegrationPage() {
                         {/* Form Fields */}
                         <div className="space-y-6">
                             {platformConfig.fields.map((field) => (
-                                <div key={field.name} className="fieldset">
-                                    <label className="label">
+                                <fieldset key={field.name} className="fieldset">
+                                    <legend className="fieldset-legend">
                                         {field.label}{" "}
                                         {field.required && (
                                             <span className="text-error">
                                                 *
                                             </span>
                                         )}
-                                    </label>
+                                    </legend>
 
                                     {field.type === "select" &&
                                     field.name === "environment" ? (
@@ -376,72 +376,64 @@ export default function NewIntegrationPage() {
                                     )}
 
                                     {field.helpText && (
-                                        <label className="label">
-                                            <span className="label-text-alt">
-                                                {field.helpText}
-                                            </span>
-                                        </label>
+                                        <p className="fieldset-label">
+                                            {field.helpText}
+                                        </p>
                                     )}
-                                </div>
+                                </fieldset>
                             ))}
 
                             {/* Sync Options */}
                             <div className="divider">Default Sync Settings</div>
 
                             <div className="space-y-3">
-                                <div className="fieldset">
-                                    <label className="label cursor-pointer justify-start gap-4">
-                                        <input
-                                            type="checkbox"
-                                            className="checkbox"
-                                            defaultChecked
-                                        />
-                                        <div>
-                                            <span className="label-text font-medium">
-                                                Sync Jobs
-                                            </span>
-                                            <p className="text-sm text-base-content/60">
-                                                Import open positions
-                                            </p>
-                                        </div>
-                                    </label>
-                                </div>
+                                <label className="label cursor-pointer justify-start gap-4">
+                                    <input
+                                        type="checkbox"
+                                        className="checkbox"
+                                        defaultChecked
+                                    />
+                                    <div>
+                                        <span className="label-text font-medium">
+                                            Sync Jobs
+                                        </span>
+                                        <p className="text-sm text-base-content/60">
+                                            Import open positions
+                                        </p>
+                                    </div>
+                                </label>
 
-                                <div className="fieldset">
-                                    <label className="label cursor-pointer justify-start gap-4">
-                                        <input
-                                            type="checkbox"
-                                            className="checkbox"
-                                            defaultChecked
-                                        />
-                                        <div>
-                                            <span className="label-text font-medium">
-                                                Sync Candidates
-                                            </span>
-                                            <p className="text-sm text-base-content/60">
-                                                Export submitted candidates
-                                            </p>
-                                        </div>
-                                    </label>
-                                </div>
+                                <label className="label cursor-pointer justify-start gap-4">
+                                    <input
+                                        type="checkbox"
+                                        className="checkbox"
+                                        defaultChecked
+                                    />
+                                    <div>
+                                        <span className="label-text font-medium">
+                                            Sync Candidates
+                                        </span>
+                                        <p className="text-sm text-base-content/60">
+                                            Export submitted candidates
+                                        </p>
+                                    </div>
+                                </label>
 
-                                <div className="fieldset">
-                                    <label className="label cursor-pointer justify-start gap-4">
-                                        <input
-                                            type="checkbox"
-                                            className="checkbox"
-                                            defaultChecked
-                                        />
-                                        <div>
-                                            <span className="label-text font-medium">
-                                                Sync Applications
-                                            </span>
-                                            <p className="text-sm text-base-content/60">
-                                                Keep application status in sync
-                                            </p>
-                                        </div>
-                                    </label>
-                                </div>
+                                <label className="label cursor-pointer justify-start gap-4">
+                                    <input
+                                        type="checkbox"
+                                        className="checkbox"
+                                        defaultChecked
+                                    />
+                                    <div>
+                                        <span className="label-text font-medium">
+                                            Sync Applications
+                                        </span>
+                                        <p className="text-sm text-base-content/60">
+                                            Keep application status in sync
+                                        </p>
+                                    </div>
+                                </label>
                             </div>
                         </div>
 

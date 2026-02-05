@@ -7,8 +7,9 @@
 ## Current State Analysis
 
 ### What Already Exists ✅
+
 - `candidate-header.tsx` (58 lines) – Title, description, CTA button
-- `candidate-card.tsx` (278 lines) – Grid view card with badges and links  
+- `candidate-card.tsx` (278 lines) – Grid view card with badges and links
 - `candidate-table-row.tsx` – Table view with expandable detail
 - `candidates-list-client.tsx` (280 lines) – Main client component with hooks + state
 - `add-candidate-modal.tsx` – Modal for creating candidates
@@ -17,6 +18,7 @@
 - `useStandardList` hook – Data fetching and pagination
 
 ### What Needs to Change 🔄
+
 1. **Page layout** – From two-column (content + sidebar) to ListPageShell structure
 2. **Header integration** – Move CandidateHeader into page.tsx
 3. **Stats section** – Use ListPageShell.Stats consistently
@@ -26,6 +28,7 @@
 7. **Sidebar removal** – Move "Add Candidate" button to header action
 
 ### What Stays the Same ✅
+
 - All existing components (card, row, modal)
 - useStandardList hook usage
 - Data fetching logic
@@ -36,6 +39,7 @@
 ## Migration Steps
 
 ### Step 1: Update page.tsx (Uncomment and wrap with ListPageLayout)
+
 ```tsx
 // BEFORE
 <div className='space-y-6'>
@@ -51,6 +55,7 @@
 ```
 
 ### Step 2: Refactor candidates-list-client.tsx → candidates-list.tsx
+
 - Rename file for clarity
 - Wrap entire content in `<ListPageShell>`
 - Move stats into `<ListPageShell.Stats>`
@@ -61,11 +66,13 @@
 - Keep all logic intact
 
 ### Step 3: Update candidate-header.tsx
+
 - Remove modal state management (move to page or list)
 - Keep title, description, action button
 - Action button should trigger modal in parent or via context
 
 ### Step 4: Extract "Add Candidate" into separate context/state management
+
 - Move `AddCandidateModal` state up to page or create custom hook
 - Pass modal handlers as props to header
 
@@ -90,14 +97,15 @@ apps/portal/src/app/portal/candidates/
 ## Code Changes (Detailed)
 
 ### Change 1: page.tsx
+
 ```tsx
 // CURRENT
-import CandidatesListClient from './components/candidates-list-client';
-import CandidateHeader from './components/candidate-header';
+import CandidatesListClient from "./components/candidates-list-client";
+import CandidateHeader from "./components/candidate-header";
 
 export default function CandidatesPage() {
     return (
-        <div className='space-y-6'>
+        <div className="space-y-6">
             {/* <CandidateHeader /> */}
             <CandidatesListClient />
         </div>
@@ -105,14 +113,14 @@ export default function CandidatesPage() {
 }
 
 // AFTER
-'use client';
+("use client");
 
-import { useState } from 'react';
-import { ListPageLayout } from '@/components/list-page';
-import CandidateHeader from './components/candidate-header';
-import CandidatesList from './components/candidates-list';
-import AddCandidateModal from './components/add-candidate-modal';
-import { useToast } from '@/lib/toast-context';
+import { useState } from "react";
+import { ListPageLayout } from "@/components/list-page";
+import CandidateHeader from "./components/candidate-header";
+import CandidatesList from "./components/candidates-list";
+import AddCandidateModal from "./components/add-candidate-modal";
+import { useToast } from "@/lib/toast-context";
 
 interface Candidate {
     id: string;
@@ -127,7 +135,7 @@ export default function CandidatesPage() {
 
     const handleAddCandidateSuccess = (newCandidate: Candidate) => {
         setShowAddModal(false);
-        toast.success('Invitation sent to candidate successfully!');
+        toast.success("Invitation sent to candidate successfully!");
         // Trigger refetch in CandidatesList via callback
         // (Use ref or state callback)
     };
@@ -135,12 +143,8 @@ export default function CandidatesPage() {
     return (
         <>
             <ListPageLayout>
-                <CandidateHeader 
-                    onCreateClick={() => setShowAddModal(true)} 
-                />
-                <CandidatesList 
-                    onAddSuccess={handleAddCandidateSuccess}
-                />
+                <CandidateHeader onCreateClick={() => setShowAddModal(true)} />
+                <CandidatesList onAddSuccess={handleAddCandidateSuccess} />
             </ListPageLayout>
 
             <AddCandidateModal
@@ -154,20 +158,23 @@ export default function CandidatesPage() {
 ```
 
 ### Change 2: candidate-header.tsx
+
 ```tsx
 // SIMPLIFIED - Remove modal state
-'use client';
+"use client";
 
-import { useUserProfile } from '@/contexts';
+import { useUserProfile } from "@/contexts";
 
 interface CandidateHeaderProps {
     onCreateClick?: () => void;
 }
 
-export default function CandidateHeader({ onCreateClick }: CandidateHeaderProps) {
+export default function CandidateHeader({
+    onCreateClick,
+}: CandidateHeaderProps) {
     const { isAdmin, profile } = useUserProfile();
 
-    const canCreateCandidate = isAdmin || profile?.roles?.includes('recruiter');
+    const canCreateCandidate = isAdmin || profile?.roles?.includes("recruiter");
 
     return (
         <div className="flex justify-between items-center">
@@ -192,37 +199,51 @@ export default function CandidateHeader({ onCreateClick }: CandidateHeaderProps)
 ```
 
 ### Change 3: candidates-list.tsx (Refactored from candidates-list-client.tsx)
+
 **Key changes:**
+
 - Remove two-column flex layout
 - Wrap in `<ListPageShell>`
 - Use semantic sections
 - Remove sidebar card styling
 
 ```tsx
-'use client';
+"use client";
 
-import { useState, useCallback, useMemo } from 'react';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import { useStandardList, LoadingState, SearchInput, ViewModeToggle, PaginationControls, EmptyState, ErrorState } from '@/hooks/use-standard-list';
-import { useUserProfile } from '@/contexts';
-import { ListPageShell, TrendChart } from '@/components/list-page';
-import { StatCard } from '@/components/ui';
-import { DataTable, type TableColumn } from '@/components/ui/tables';
-import CandidateCard, { type Candidate } from './candidate-card';
-import { CandidateTableRow } from './candidate-table-row';
-import { CandidatesTrendsChart, TIME_PERIODS, calculateCandidateStatTrends } from '@/components/charts/candidates-trends-chart';
+import { useState, useCallback, useMemo } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import {
+    useStandardList,
+    LoadingState,
+    SearchInput,
+    ViewModeToggle,
+    PaginationControls,
+    EmptyState,
+    ErrorState,
+} from "@/hooks/use-standard-list";
+import { useUserProfile } from "@/contexts";
+import { ListPageShell, TrendChart } from "@/components/list-page";
+import { StatCard } from "@/components/ui";
+import { DataTable, type TableColumn } from "@/components/ui/tables";
+import CandidateCard, { type Candidate } from "./candidate-card";
+import { CandidateTableRow } from "./candidate-table-row";
+import {
+    CandidatesTrendsChart,
+    TIME_PERIODS,
+    calculateCandidateStatTrends,
+} from "@/components/charts/candidates-trends-chart";
 
 interface CandidateFilters {
-    scope: 'mine' | 'all';
+    scope: "mine" | "all";
 }
 
 const candidateColumns: TableColumn[] = [
-    { key: 'full_name', label: 'Candidate', sortable: true },
-    { key: 'verification_status', label: 'Status', sortable: true },
-    { key: 'links', label: 'Links' },
-    { key: 'created_at', label: 'Added', sortable: true },
-    { key: 'actions', label: 'Actions', align: 'right' },
+    { key: "full_name", label: "Candidate", sortable: true },
+    { key: "verification_status", label: "Status", sortable: true },
+    { key: "links", label: "Links" },
+    { key: "created_at", label: "Added", sortable: true },
+    { key: "actions", label: "Actions", align: "right" },
 ];
 
 interface CandidatesListProps {
@@ -234,20 +255,31 @@ export default function CandidatesList({ onAddSuccess }: CandidatesListProps) {
     const { isRecruiter } = useUserProfile();
     const [trendPeriod, setTrendPeriod] = useState(6);
 
-    const fetchCandidates = useCallback(async (params: Record<string, any>) => {
-        const token = await getToken();
-        if (!token) throw new Error('Not authenticated');
+    const fetchCandidates = useCallback(
+        async (params: Record<string, any>) => {
+            const token = await getToken();
+            if (!token) throw new Error("Not authenticated");
 
-        const client = createAuthenticatedClient(token);
-        const response = await client.get('/candidates', { params });
+            const client = createAuthenticatedClient(token);
+            const response = await client.get("/candidates", { params });
 
-        return {
-            data: (response.data || []) as Candidate[],
-            pagination: response.pagination || { total: 0, page: 1, limit: 25, total_pages: 0 }
-        };
-    }, [getToken]);
+            return {
+                data: (response.data || []) as Candidate[],
+                pagination: response.pagination || {
+                    total: 0,
+                    page: 1,
+                    limit: 25,
+                    total_pages: 0,
+                },
+            };
+        },
+        [getToken],
+    );
 
-    const defaultFilters = useMemo<CandidateFilters>(() => ({ scope: 'mine' }), []);
+    const defaultFilters = useMemo<CandidateFilters>(
+        () => ({ scope: "mine" }),
+        [],
+    );
 
     const {
         data: candidates,
@@ -266,37 +298,38 @@ export default function CandidatesList({ onAddSuccess }: CandidatesListProps) {
         handleSort,
         setViewMode,
         setLimit,
-        refetch
+        refetch,
     } = useStandardList<Candidate, CandidateFilters>({
         fetchFn: fetchCandidates,
         defaultFilters,
-        defaultSortBy: 'created_at',
-        defaultSortOrder: 'desc',
-        storageKey: 'candidatesViewMode'
+        defaultSortBy: "created_at",
+        defaultSortOrder: "desc",
+        storageKey: "candidatesViewMode",
     });
 
     // Calculate stat trends
-    const statTrends = useMemo(() =>
-        calculateCandidateStatTrends(candidates, trendPeriod),
-        [candidates, trendPeriod]
+    const statTrends = useMemo(
+        () => calculateCandidateStatTrends(candidates, trendPeriod),
+        [candidates, trendPeriod],
     );
 
     const getSortIcon = (field: string) => {
-        if (sortBy !== field) return 'fa-sort';
-        return sortOrder === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
+        if (sortBy !== field) return "fa-sort";
+        return sortOrder === "asc" ? "fa-sort-up" : "fa-sort-down";
     };
 
     if (loading && candidates.length === 0) {
-        return <ListPageShell><ListPageShell.LoadingState message="Loading candidates..." /></ListPageShell>;
+        return (
+            <ListPageShell>
+                <ListPageShell.LoadingState message="Loading candidates..." />
+            </ListPageShell>
+        );
     }
 
     if (error) {
         return (
             <ListPageShell>
-                <ListPageShell.ErrorState 
-                    message={error} 
-                    onRetry={refetch} 
-                />
+                <ListPageShell.ErrorState message={error} onRetry={refetch} />
             </ListPageShell>
         );
     }
@@ -307,32 +340,49 @@ export default function CandidatesList({ onAddSuccess }: CandidatesListProps) {
             <ListPageShell.Stats>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <StatCard
-                        label='Total Candidates'
+                        label="Total Candidates"
                         icon="fa-users"
                         value={pagination.total}
                         trend={statTrends.total}
-                        trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
+                        trendLabel={
+                            TIME_PERIODS.find((p) => p.value === trendPeriod)
+                                ?.label
+                        }
                     />
                     <StatCard
-                        label='New Candidates'
+                        label="New Candidates"
                         icon="fa-user-plus"
-                        value={candidates.filter(c => c.is_new).length}
+                        value={candidates.filter((c) => c.is_new).length}
                         trend={statTrends.total}
-                        trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
+                        trendLabel={
+                            TIME_PERIODS.find((p) => p.value === trendPeriod)
+                                ?.label
+                        }
                     />
                     {isRecruiter && (
                         <>
                             <StatCard
-                                label='Sourced by You'
+                                label="Sourced by You"
                                 icon="fa-user-astronaut"
-                                value={candidates.filter(c => c.is_sourcer).length}
+                                value={
+                                    candidates.filter((c) => c.is_sourcer)
+                                        .length
+                                }
                             />
                             <StatCard
-                                label='With Active Relationships'
+                                label="With Active Relationships"
                                 icon="fa-handshake"
-                                value={candidates.filter(c => c.has_active_relationship).length}
+                                value={
+                                    candidates.filter(
+                                        (c) => c.has_active_relationship,
+                                    ).length
+                                }
                                 trend={statTrends.withRelationships}
-                                trendLabel={TIME_PERIODS.find(p => p.value === trendPeriod)?.label}
+                                trendLabel={
+                                    TIME_PERIODS.find(
+                                        (p) => p.value === trendPeriod,
+                                    )?.label
+                                }
                             />
                         </>
                     )}
@@ -352,16 +402,20 @@ export default function CandidatesList({ onAddSuccess }: CandidatesListProps) {
             {/* Controls */}
             <ListPageShell.Controls>
                 {isRecruiter && (
-                    <div className="fieldset">
+                    <fieldset className="fieldset">
                         <select
                             className="select"
                             value={filters.scope}
-                            onChange={(e) => setFilters({ scope: e.target.value as 'mine' | 'all' })}
+                            onChange={(e) =>
+                                setFilters({
+                                    scope: e.target.value as "mine" | "all",
+                                })
+                            }
                         >
                             <option value="mine">My Candidates</option>
                             <option value="all">All Candidates</option>
                         </select>
-                    </div>
+                    </fieldset>
                 )}
 
                 <SearchInput
@@ -372,22 +426,30 @@ export default function CandidatesList({ onAddSuccess }: CandidatesListProps) {
                     loading={loading}
                 />
 
-                <ViewModeToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+                <ViewModeToggle
+                    viewMode={viewMode}
+                    onViewModeChange={setViewMode}
+                />
             </ListPageShell.Controls>
 
             {/* Content */}
-            <ListPageShell.Content isEmpty={!loading && candidates.length === 0}>
+            <ListPageShell.Content
+                isEmpty={!loading && candidates.length === 0}
+            >
                 {loading && candidates.length > 0 && <LoadingState />}
 
-                {viewMode === 'grid' && candidates.length > 0 && (
+                {viewMode === "grid" && candidates.length > 0 && (
                     <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
                         {candidates.map((candidate) => (
-                            <CandidateCard candidate={candidate} key={candidate.id} />
+                            <CandidateCard
+                                candidate={candidate}
+                                key={candidate.id}
+                            />
                         ))}
                     </div>
                 )}
 
-                {viewMode === 'table' && candidates.length > 0 && (
+                {viewMode === "table" && candidates.length > 0 && (
                     <DataTable
                         columns={candidateColumns}
                         sortBy={sortBy}
@@ -411,8 +473,8 @@ export default function CandidatesList({ onAddSuccess }: CandidatesListProps) {
                         title="No Candidates Found"
                         description={
                             searchInput
-                                ? 'Try adjusting your search or filters'
-                                : 'Submit candidates to roles to see them appear here'
+                                ? "Try adjusting your search or filters"
+                                : "Submit candidates to roles to see them appear here"
                         }
                     />
                 )}
@@ -468,4 +530,3 @@ export default function CandidatesList({ onAddSuccess }: CandidatesListProps) {
 ---
 
 **Next:** After Candidates is migrated and tested, proceed with Applications (Phase 2.2)
-

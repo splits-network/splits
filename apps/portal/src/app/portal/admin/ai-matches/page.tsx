@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/lib/toast-context";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { LoadingState } from "@splits-network/shared-ui";
 
 export default function AIMatchesPage() {
     const [matches, setMatches] = useState<any[]>([]);
@@ -79,9 +80,7 @@ export default function AIMatchesPage() {
             {/* Matches List */}
             <div className="space-y-4">
                 {loading ? (
-                    <div className="flex justify-center p-8">
-                        <span className="loading loading-spinner loading-lg"></span>
-                    </div>
+                    <LoadingState message="Loading AI matches..." />
                 ) : matches.length === 0 ? (
                     <div className="card bg-base-100 shadow">
                         <div className="card-body text-center text-base-content/60">

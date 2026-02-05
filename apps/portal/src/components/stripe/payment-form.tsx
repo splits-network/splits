@@ -13,6 +13,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
+import { ButtonLoading } from "@splits-network/shared-ui";
 
 interface DiscountInfo {
     id: string;
@@ -291,17 +292,12 @@ export function PaymentForm({
                     className={`btn btn-primary ${onCancel ? "" : "btn-block"}`}
                     disabled={!stripe || !elements || !ready || isSubmitting}
                 >
-                    {isSubmitting ? (
-                        <>
-                            <span className="loading loading-spinner loading-sm"></span>
-                            Processing...
-                        </>
-                    ) : (
-                        <>
-                            <i className="fa-duotone fa-regular fa-credit-card"></i>
-                            {submitButtonText}
-                        </>
-                    )}
+                    <ButtonLoading
+                        loading={isSubmitting}
+                        text={submitButtonText}
+                        loadingText="Processing..."
+                        icon="fa-duotone fa-regular fa-credit-card"
+                    />
                 </button>
             </div>
         </form>

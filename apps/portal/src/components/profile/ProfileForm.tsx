@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import ProfileImageUpload from "./ProfileImageUpload";
+import { ButtonLoading } from "@splits-network/shared-ui";
 
 interface ProfileFormProps {
     userId: string;
@@ -101,14 +102,11 @@ export default function ProfileForm({
                     className="btn btn-primary"
                     disabled={saving}
                 >
-                    {saving ? (
-                        <>
-                            <span className="loading loading-spinner loading-sm"></span>
-                            Saving...
-                        </>
-                    ) : (
-                        "Save Changes"
-                    )}
+                    <ButtonLoading
+                        loading={saving}
+                        text="Save Changes"
+                        loadingText="Saving..."
+                    />
                 </button>
             </div>
         </form>

@@ -5,6 +5,7 @@ import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { useAuth } from "@clerk/nextjs";
 import { AdminPageHeader } from "../components";
+import { LoadingState } from "@splits-network/shared-ui";
 
 interface AutomationRule {
     id: string;
@@ -190,9 +191,7 @@ export default function AutomationControlsPage() {
             </div>
 
             {loading ? (
-                <div className="flex justify-center py-12">
-                    <span className="loading loading-spinner loading-lg"></span>
-                </div>
+                <LoadingState message="Loading automation rules..." />
             ) : (
                 <>
                     {/* Automation Rules Tab */}

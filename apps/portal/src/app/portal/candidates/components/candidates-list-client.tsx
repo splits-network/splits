@@ -229,7 +229,7 @@ export default function CandidatesListClient({
                         <div className="flex flex-wrap gap-4 items-center">
                             {/* Scope Filter - Only show for recruiters */}
                             {isRecruiter && (
-                                <div className="fieldset w-full">
+                                <fieldset className="fieldset w-full">
                                     <select
                                         name="scope-filter"
                                         className="select w-full"
@@ -249,7 +249,7 @@ export default function CandidatesListClient({
                                             All Candidates
                                         </option>
                                     </select>
-                                </div>
+                                </fieldset>
                             )}
 
                             {/* Search */}

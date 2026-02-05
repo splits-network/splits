@@ -13,24 +13,28 @@ This document outlines the standard pattern for implementing multi-step wizards 
 ## Core Principles
 
 ### 1. Progressive Data Loading
+
 - **Load minimal data upfront**: Only load what's needed for the current step
 - **Lazy load subsequent steps**: Fetch data when user navigates to that step
 - **Independent loading states**: Each step has its own loading/error states
 - **No blocking**: User sees progress immediately, even if some data is still loading
 
 ### 2. Server-Side Operations
+
 - **Never filter/sort/paginate client-side**: All list operations happen on the server
 - **Debounced search**: Use 300ms delay to avoid excessive API calls
 - **Enriched endpoints**: Backend returns JOINed data (no N+1 queries)
 - **Pagination controls**: Server returns `{ data: [], pagination: { total, page, limit, total_pages } }`
 
 ### 3. Clear User Feedback
+
 - **Progress indicator**: Visual steps showing current position in workflow
 - **Validation**: Prevent navigation if required fields are missing
 - **Confirmation**: Review step before final submission
 - **Error handling**: Clear error messages with retry options
 
 ### 4. Accessible & Responsive
+
 - **Keyboard navigation**: Tab through form fields, Enter to submit
 - **Screen reader support**: Proper ARIA labels and roles
 - **Mobile-friendly**: Responsive layout that works on all screen sizes
@@ -67,16 +71,16 @@ const [error, setError] = useState<string | null>(null);
 const [items, setItems] = useState<Item[]>([]);
 const [itemsLoading, setItemsLoading] = useState(false);
 const [selectedItem, setSelectedItem] = useState<Item | null>(null);
-const [searchQuery, setSearchQuery] = useState('');
-const [debouncedSearch, setDebouncedSearch] = useState('');
-const [statusFilter, setStatusFilter] = useState('all');
+const [searchQuery, setSearchQuery] = useState("");
+const [debouncedSearch, setDebouncedSearch] = useState("");
+const [statusFilter, setStatusFilter] = useState("all");
 const [page, setPage] = useState(1);
 const [totalPages, setTotalPages] = useState(1);
 const [totalCount, setTotalCount] = useState(0);
 const limit = 25;
 
 // Step 2: Details state
-const [notes, setNotes] = useState('');
+const [notes, setNotes] = useState("");
 const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 const [additionalData, setAdditionalData] = useState<any[]>([]);
 const [additionalDataLoading, setAdditionalDataLoading] = useState(false);
@@ -100,20 +104,29 @@ return (
                         Step {currentStep} of 3 • Brief context message
                     </p>
                 </div>
-                <button onClick={onClose} className="btn btn-sm btn-circle btn-ghost">
+                <button
+                    onClick={onClose}
+                    className="btn btn-sm btn-circle btn-ghost"
+                >
                     <i className="fa-duotone fa-regular fa-xmark"></i>
                 </button>
             </div>
 
             {/* Progress Steps */}
             <ul className="steps steps-horizontal w-full mb-6">
-                <li className={`step ${currentStep >= 1 ? 'step-primary' : ''}`}>
+                <li
+                    className={`step ${currentStep >= 1 ? "step-primary" : ""}`}
+                >
                     Step 1 Label
                 </li>
-                <li className={`step ${currentStep >= 2 ? 'step-primary' : ''}`}>
+                <li
+                    className={`step ${currentStep >= 2 ? "step-primary" : ""}`}
+                >
                     Step 2 Label
                 </li>
-                <li className={`step ${currentStep >= 3 ? 'step-primary' : ''}`}>
+                <li
+                    className={`step ${currentStep >= 3 ? "step-primary" : ""}`}
+                >
                     Step 3 Label
                 </li>
             </ul>
@@ -138,6 +151,7 @@ return (
 ```
 
 **Key Points**:
+
 - `modal modal-open` class makes modal visible
 - `max-w-5xl` sets width (adjust as needed)
 - `max-h-[90vh] overflow-hidden flex flex-col` enables scrollable content area
@@ -189,13 +203,13 @@ useEffect(() => {
             const params = {
                 page,
                 limit,
-                status: statusFilter === 'all' ? undefined : statusFilter,
+                status: statusFilter === "all" ? undefined : statusFilter,
                 search: debouncedSearch || undefined,
-                sort_by: 'created_at',
-                sort_order: 'desc',
+                sort_by: "created_at",
+                sort_order: "desc",
             };
 
-            const response = await client.get('/items', { params });
+            const response = await client.get("/items", { params });
 
             if (response.data?.data) {
                 setItems(response.data);
@@ -214,8 +228,8 @@ useEffect(() => {
                 setTotalCount(0);
             }
         } catch (err: any) {
-            console.error('Failed to load items:', err);
-            setError('Failed to load items. Please try again.');
+            console.error("Failed to load items:", err);
+            setError("Failed to load items. Please try again.");
         } finally {
             setItemsLoading(false);
         }
@@ -228,149 +242,174 @@ useEffect(() => {
 #### Search & Filter UI
 
 ```tsx
-{currentStep === 1 && (
-    <div className="space-y-4">
-        {/* Search and Filter */}
-        <div className="card bg-base-200">
-            <div className="card-body py-4">
-                <div className="flex gap-4 items-end">
-                    <div className="fieldset flex-1">
-                        <label className="label">Search Items</label>
-                        <input
-                            type="text"
-                            placeholder="Search by name, description..."
-                            className="input w-full"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                        <label className="label">
-                            <span className="label-text-alt text-base-content/50">
-                                {itemsLoading && debouncedSearch ? (
-                                    <>
-                                        <span className="loading loading-spinner loading-xs mr-1"></span>
-                                        Searching...
-                                    </>
-                                ) : (
-                                    'Search updates as you type'
-                                )}
-                            </span>
-                        </label>
-                    </div>
-                    <div className="fieldset">
-                        <label className="label">Status</label>
-                        <select
-                            className="select w-full"
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                        >
-                            <option value="all">All Statuses</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
+{
+    currentStep === 1 && (
+        <div className="space-y-4">
+            {/* Search and Filter */}
+            <div className="card bg-base-200">
+                <div className="card-body py-4">
+                    <div className="flex gap-4 items-end">
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">
+                                Search Items
+                            </legend>
+                            <input
+                                type="text"
+                                placeholder="Search by name, description..."
+                                className="input w-full"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                            <label className="label">
+                                <span className="label-text-alt text-base-content/50">
+                                    {itemsLoading && debouncedSearch ? (
+                                        <>
+                                            <span className="loading loading-spinner loading-xs mr-1"></span>
+                                            Searching...
+                                        </>
+                                    ) : (
+                                        "Search updates as you type"
+                                    )}
+                                </span>
+                            </label>
+                        </fieldset>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">Status</legend>
+                            <select
+                                className="select w-full"
+                                value={statusFilter}
+                                onChange={(e) =>
+                                    setStatusFilter(e.target.value)
+                                }
+                            >
+                                <option value="all">All Statuses</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </fieldset>
                     </div>
                 </div>
             </div>
-        </div>
 
-        {/* Items Table or Grid */}
-        {itemsLoading ? (
-            <div className="flex justify-center py-12">
-                <span className="loading loading-spinner loading-lg"></span>
-            </div>
-        ) : items.length === 0 ? (
-            <div className="alert">
-                <i className="fa-duotone fa-regular fa-info-circle"></i>
-                <span>
-                    {debouncedSearch
-                        ? `No items found matching "${debouncedSearch}". Try a different search term.`
-                        : 'No items found. Try adjusting your filters.'}
-                </span>
-            </div>
-        ) : (
-            <>
-                {debouncedSearch && (
-                    <div className="text-sm text-base-content/70 mb-2">
-                        Found {totalCount} item{totalCount !== 1 ? 's' : ''} matching "{debouncedSearch}"
-                    </div>
-                )}
-                <div className="overflow-x-auto border border-base-300 rounded-lg">
-                    <table className="table table-zebra">
-                        <thead>
-                            <tr>
-                                <th>Select</th>
-                                <th>Name</th>
-                                <th>Details</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {items.map((item) => (
-                                <tr
-                                    key={item.id}
-                                    className={`cursor-pointer hover:bg-base-200 ${
-                                        selectedItem?.id === item.id ? 'bg-primary/10' : ''
-                                    }`}
-                                    onClick={() => setSelectedItem(item)}
-                                >
-                                    <td>
-                                        <input
-                                            type="radio"
-                                            className="radio radio-primary"
-                                            checked={selectedItem?.id === item.id}
-                                            onChange={() => setSelectedItem(item)}
-                                        />
-                                    </td>
-                                    <td>
-                                        <div className="font-semibold">{item.name}</div>
-                                    </td>
-                                    <td>{item.details}</td>
-                                    <td>
-                                        <div className={`badge badge-sm ${
-                                            item.status === 'active' ? 'badge-success' : 'badge-neutral'
-                                        }`}>
-                                            {item.status}
-                                        </div>
-                                    </td>
+            {/* Items Table or Grid */}
+            {itemsLoading ? (
+                <div className="flex justify-center py-12">
+                    <span className="loading loading-spinner loading-lg"></span>
+                </div>
+            ) : items.length === 0 ? (
+                <div className="alert">
+                    <i className="fa-duotone fa-regular fa-info-circle"></i>
+                    <span>
+                        {debouncedSearch
+                            ? `No items found matching "${debouncedSearch}". Try a different search term.`
+                            : "No items found. Try adjusting your filters."}
+                    </span>
+                </div>
+            ) : (
+                <>
+                    {debouncedSearch && (
+                        <div className="text-sm text-base-content/70 mb-2">
+                            Found {totalCount} item{totalCount !== 1 ? "s" : ""}{" "}
+                            matching "{debouncedSearch}"
+                        </div>
+                    )}
+                    <div className="overflow-x-auto border border-base-300 rounded-lg">
+                        <table className="table table-zebra">
+                            <thead>
+                                <tr>
+                                    <th>Select</th>
+                                    <th>Name</th>
+                                    <th>Details</th>
+                                    <th>Status</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Pagination Controls */}
-                {totalPages > 1 && (
-                    <div className="flex justify-between items-center mt-4">
-                        <div className="text-sm text-base-content/70">
-                            Showing page {page} of {totalPages} ({totalCount} total items)
-                        </div>
-                        <div className="join">
-                            <button
-                                className="join-item btn btn-sm"
-                                onClick={() => setPage(Math.max(1, page - 1))}
-                                disabled={page === 1}
-                            >
-                                <i className="fa-duotone fa-regular fa-chevron-left"></i>
-                            </button>
-                            <button className="join-item btn btn-sm">
-                                Page {page}
-                            </button>
-                            <button
-                                className="join-item btn btn-sm"
-                                onClick={() => setPage(Math.min(totalPages, page + 1))}
-                                disabled={page === totalPages}
-                            >
-                                <i className="fa-duotone fa-regular fa-chevron-right"></i>
-                            </button>
-                        </div>
+                            </thead>
+                            <tbody>
+                                {items.map((item) => (
+                                    <tr
+                                        key={item.id}
+                                        className={`cursor-pointer hover:bg-base-200 ${
+                                            selectedItem?.id === item.id
+                                                ? "bg-primary/10"
+                                                : ""
+                                        }`}
+                                        onClick={() => setSelectedItem(item)}
+                                    >
+                                        <td>
+                                            <input
+                                                type="radio"
+                                                className="radio radio-primary"
+                                                checked={
+                                                    selectedItem?.id === item.id
+                                                }
+                                                onChange={() =>
+                                                    setSelectedItem(item)
+                                                }
+                                            />
+                                        </td>
+                                        <td>
+                                            <div className="font-semibold">
+                                                {item.name}
+                                            </div>
+                                        </td>
+                                        <td>{item.details}</td>
+                                        <td>
+                                            <div
+                                                className={`badge badge-sm ${
+                                                    item.status === "active"
+                                                        ? "badge-success"
+                                                        : "badge-neutral"
+                                                }`}
+                                            >
+                                                {item.status}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
-                )}
-            </>
-        )}
-    </div>
-)}
+
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                        <div className="flex justify-between items-center mt-4">
+                            <div className="text-sm text-base-content/70">
+                                Showing page {page} of {totalPages} (
+                                {totalCount} total items)
+                            </div>
+                            <div className="join">
+                                <button
+                                    className="join-item btn btn-sm"
+                                    onClick={() =>
+                                        setPage(Math.max(1, page - 1))
+                                    }
+                                    disabled={page === 1}
+                                >
+                                    <i className="fa-duotone fa-regular fa-chevron-left"></i>
+                                </button>
+                                <button className="join-item btn btn-sm">
+                                    Page {page}
+                                </button>
+                                <button
+                                    className="join-item btn btn-sm"
+                                    onClick={() =>
+                                        setPage(Math.min(totalPages, page + 1))
+                                    }
+                                    disabled={page === totalPages}
+                                >
+                                    <i className="fa-duotone fa-regular fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </>
+            )}
+        </div>
+    );
+}
 ```
 
 **Key Points**:
+
 - Search input updates `searchQuery` state immediately for instant UI feedback
 - Debouncing (300ms) prevents excessive API calls
 - Loading spinner shows during search
@@ -402,12 +441,14 @@ useEffect(() => {
 
             const client = createAuthenticatedClient(token);
 
-            const response = await client.get(`/entity/${entityId}/related-items`);
+            const response = await client.get(
+                `/entity/${entityId}/related-items`,
+            );
             if (response.data) {
                 setAdditionalData(response.data);
             }
         } catch (err) {
-            console.error('Failed to load additional data:', err);
+            console.error("Failed to load additional data:", err);
         } finally {
             setAdditionalDataLoading(false);
         }
@@ -434,73 +475,83 @@ const toggleItem = (itemId: string) => {
 #### Details UI
 
 ```tsx
-{currentStep === 2 && selectedItem && (
-    <div className="space-y-6">
-        {/* Selected Item Summary */}
-        <div className="alert alert-info">
-            <i className="fa-duotone fa-regular fa-check-circle"></i>
-            <div>
-                <div className="font-semibold">{selectedItem.name}</div>
-                <div className="text-sm">{selectedItem.details}</div>
+{
+    currentStep === 2 && selectedItem && (
+        <div className="space-y-6">
+            {/* Selected Item Summary */}
+            <div className="alert alert-info">
+                <i className="fa-duotone fa-regular fa-check-circle"></i>
+                <div>
+                    <div className="font-semibold">{selectedItem.name}</div>
+                    <div className="text-sm">{selectedItem.details}</div>
+                </div>
             </div>
-        </div>
 
-        {/* Text Input */}
-        <div className="fieldset">
-            <label className="label">Additional Notes (Optional)</label>
-            <textarea
-                className="textarea h-48 w-full"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Enter any additional information..."
-            />
-            <label className="label">
-                <span className="label-text-alt">
-                    Provide context or special instructions for this submission.
-                </span>
-            </label>
-        </div>
+            {/* Text Input */}
+            <fieldset className="fieldset">
+                <legend className="fieldset-legend">
+                    Additional Notes (Optional)
+                </legend>
+                <textarea
+                    className="textarea h-48 w-full"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Enter any additional information..."
+                />
+                <label className="label">
+                    <span className="label-text-alt">
+                        Provide context or special instructions for this
+                        submission.
+                    </span>
+                </label>
+            </fieldset>
 
-        {/* Multi-Select List */}
-        <div className="fieldset">
-            <label className="label">Select Related Items (Optional)</label>
-            {additionalDataLoading ? (
-                <div className="flex justify-center py-8">
-                    <span className="loading loading-spinner"></span>
-                </div>
-            ) : additionalData.length === 0 ? (
-                <div className="alert">
-                    <i className="fa-duotone fa-regular fa-info-circle"></i>
-                    <span>No related items available.</span>
-                </div>
-            ) : (
-                <div className="space-y-2 max-h-64 overflow-y-auto border border-base-300 rounded-lg p-3">
-                    {additionalData.map((item) => (
-                        <label
-                            key={item.id}
-                            className="flex items-center gap-2 cursor-pointer hover:bg-base-200 p-2 rounded"
-                        >
-                            <input
-                                type="checkbox"
-                                className="checkbox checkbox-sm"
-                                checked={selectedIds.has(item.id)}
-                                onChange={() => toggleItem(item.id)}
-                            />
-                            <i className="fa-duotone fa-regular fa-file"></i>
-                            <span className="text-sm">{item.name}</span>
-                        </label>
-                    ))}
-                </div>
-            )}
-            <label className="label">
-                <span className="label-text-alt">{selectedIds.size} item(s) selected</span>
-            </label>
+            {/* Multi-Select List */}
+            <fieldset className="fieldset">
+                <legend className="fieldset-legend">
+                    Select Related Items (Optional)
+                </legend>
+                {additionalDataLoading ? (
+                    <div className="flex justify-center py-8">
+                        <span className="loading loading-spinner"></span>
+                    </div>
+                ) : additionalData.length === 0 ? (
+                    <div className="alert">
+                        <i className="fa-duotone fa-regular fa-info-circle"></i>
+                        <span>No related items available.</span>
+                    </div>
+                ) : (
+                    <div className="space-y-2 max-h-64 overflow-y-auto border border-base-300 rounded-lg p-3">
+                        {additionalData.map((item) => (
+                            <label
+                                key={item.id}
+                                className="flex items-center gap-2 cursor-pointer hover:bg-base-200 p-2 rounded"
+                            >
+                                <input
+                                    type="checkbox"
+                                    className="checkbox checkbox-sm"
+                                    checked={selectedIds.has(item.id)}
+                                    onChange={() => toggleItem(item.id)}
+                                />
+                                <i className="fa-duotone fa-regular fa-file"></i>
+                                <span className="text-sm">{item.name}</span>
+                            </label>
+                        ))}
+                    </div>
+                )}
+                <label className="label">
+                    <span className="label-text-alt">
+                        {selectedIds.size} item(s) selected
+                    </span>
+                </label>
+            </fieldset>
         </div>
-    </div>
-)}
+    );
+}
 ```
 
 **Key Points**:
+
 - Summary of selection from previous step
 - Large textarea for detailed input (48 rows = `h-48`)
 - Helper text explaining purpose of each field
@@ -516,66 +567,78 @@ const toggleItem = (itemId: string) => {
 Final step to review all selections before submission.
 
 ```tsx
-{currentStep === 3 && selectedItem && (
-    <div className="space-y-6">
-        <div className="alert alert-info">
-            <i className="fa-duotone fa-regular fa-info-circle"></i>
-            <span>Review the details below before submitting.</span>
-        </div>
-
-        {/* Selected Item Summary */}
-        <div className="card bg-base-200">
-            <div className="card-body">
-                <h4 className="font-semibold mb-2">
-                    <i className="fa-duotone fa-regular fa-check-circle mr-2"></i>
-                    Selected Item
-                </h4>
-                <div className="space-y-2">
-                    <div className="text-lg font-semibold">{selectedItem.name}</div>
-                    <div className="text-sm text-base-content/70">{selectedItem.details}</div>
-                </div>
+{
+    currentStep === 3 && selectedItem && (
+        <div className="space-y-6">
+            <div className="alert alert-info">
+                <i className="fa-duotone fa-regular fa-info-circle"></i>
+                <span>Review the details below before submitting.</span>
             </div>
-        </div>
 
-        {/* Notes */}
-        {notes && (
+            {/* Selected Item Summary */}
             <div className="card bg-base-200">
                 <div className="card-body">
                     <h4 className="font-semibold mb-2">
-                        <i className="fa-duotone fa-regular fa-message mr-2"></i>
-                        Additional Notes
+                        <i className="fa-duotone fa-regular fa-check-circle mr-2"></i>
+                        Selected Item
                     </h4>
-                    <div className="whitespace-pre-wrap text-sm">{notes}</div>
+                    <div className="space-y-2">
+                        <div className="text-lg font-semibold">
+                            {selectedItem.name}
+                        </div>
+                        <div className="text-sm text-base-content/70">
+                            {selectedItem.details}
+                        </div>
+                    </div>
                 </div>
             </div>
-        )}
 
-        {/* Selected Related Items */}
-        {selectedIds.size > 0 && (
-            <div className="card bg-base-200">
-                <div className="card-body">
-                    <h4 className="font-semibold mb-2">
-                        <i className="fa-duotone fa-regular fa-paperclip mr-2"></i>
-                        Selected Items ({selectedIds.size})
-                    </h4>
-                    <ul className="space-y-1">
-                        {additionalData
-                            .filter((item) => selectedIds.has(item.id))
-                            .map((item) => (
-                                <li key={item.id} className="flex items-center gap-2 text-sm">
-                                    <i className="fa-duotone fa-regular fa-file"></i>
-                                    {item.name}
-                                </li>
-                            ))}
-                    </ul>
+            {/* Notes */}
+            {notes && (
+                <div className="card bg-base-200">
+                    <div className="card-body">
+                        <h4 className="font-semibold mb-2">
+                            <i className="fa-duotone fa-regular fa-message mr-2"></i>
+                            Additional Notes
+                        </h4>
+                        <div className="whitespace-pre-wrap text-sm">
+                            {notes}
+                        </div>
+                    </div>
                 </div>
-            </div>
-        )}
-    </div>
-)}
+            )}
+
+            {/* Selected Related Items */}
+            {selectedIds.size > 0 && (
+                <div className="card bg-base-200">
+                    <div className="card-body">
+                        <h4 className="font-semibold mb-2">
+                            <i className="fa-duotone fa-regular fa-paperclip mr-2"></i>
+                            Selected Items ({selectedIds.size})
+                        </h4>
+                        <ul className="space-y-1">
+                            {additionalData
+                                .filter((item) => selectedIds.has(item.id))
+                                .map((item) => (
+                                    <li
+                                        key={item.id}
+                                        className="flex items-center gap-2 text-sm"
+                                    >
+                                        <i className="fa-duotone fa-regular fa-file"></i>
+                                        {item.name}
+                                    </li>
+                                ))}
+                        </ul>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
 ```
 
 **Key Points**:
+
 - Informational alert at top explaining what to do
 - All selections displayed in cards with icons
 - Conditional rendering (only show sections with data)
@@ -587,7 +650,9 @@ Final step to review all selections before submission.
 ### Step 5: Navigation Buttons
 
 ```tsx
-{/* Navigation Buttons */}
+{
+    /* Navigation Buttons */
+}
 <div className="flex justify-between items-center pt-4 mt-4 border-t border-base-300">
     <button onClick={onClose} className="btn btn-ghost">
         Cancel
@@ -600,18 +665,18 @@ Final step to review all selections before submission.
             </button>
         )}
         {currentStep < 3 ? (
-            <button 
-                onClick={handleNext} 
-                className="btn btn-primary" 
+            <button
+                onClick={handleNext}
+                className="btn btn-primary"
                 disabled={!selectedItem}
             >
                 Next
                 <i className="fa-duotone fa-regular fa-chevron-right"></i>
             </button>
         ) : (
-            <button 
-                onClick={handleSubmit} 
-                className="btn btn-primary" 
+            <button
+                onClick={handleSubmit}
+                className="btn btn-primary"
                 disabled={submitting}
             >
                 {submitting ? (
@@ -628,7 +693,7 @@ Final step to review all selections before submission.
             </button>
         )}
     </div>
-</div>
+</div>;
 ```
 
 #### Navigation Handlers
@@ -636,7 +701,7 @@ Final step to review all selections before submission.
 ```tsx
 const handleNext = () => {
     if (currentStep === 1 && !selectedItem) {
-        setError('Please select an item to continue');
+        setError("Please select an item to continue");
         return;
     }
     setError(null);
@@ -657,13 +722,14 @@ const handleSubmit = async () => {
         await onSubmit(selectedItem.id, notes, Array.from(selectedIds));
         // Success handled by parent component
     } catch (err: any) {
-        setError(err.message || 'Failed to submit');
+        setError(err.message || "Failed to submit");
         setSubmitting(false);
     }
 };
 ```
 
 **Key Points**:
+
 - Cancel button always visible on left
 - Back button only shows after first step
 - Next button disabled until required selection made
@@ -681,17 +747,17 @@ const handleSubmit = async () => {
 const [showWizard, setShowWizard] = useState(false);
 
 const handleWizardSubmit = async (
-    itemId: string, 
-    notes: string, 
-    relatedIds: string[]
+    itemId: string,
+    notes: string,
+    relatedIds: string[],
 ) => {
     try {
         const token = await getToken();
-        if (!token) throw new Error('Not authenticated');
+        if (!token) throw new Error("Not authenticated");
 
         const client = createAuthenticatedClient(token);
 
-        const response = await client.post('/endpoint', {
+        const response = await client.post("/endpoint", {
             item_id: itemId,
             notes: notes,
             related_ids: relatedIds,
@@ -700,7 +766,7 @@ const handleWizardSubmit = async (
         const resultId = response.data?.data?.id || response.data?.id;
 
         // Show success message
-        alert('Success! Your submission has been processed.');
+        alert("Success! Your submission has been processed.");
 
         // Close wizard
         setShowWizard(false);
@@ -712,32 +778,32 @@ const handleWizardSubmit = async (
             window.location.reload();
         }
     } catch (err: any) {
-        console.error('Failed to submit:', err);
-        throw new Error(err.message || 'Failed to complete submission');
+        console.error("Failed to submit:", err);
+        throw new Error(err.message || "Failed to complete submission");
     }
 };
 
 // Render wizard conditionally
-{showWizard && (
-    <WizardComponent
-        entityId={entityId}
-        entityName={entityName}
-        onClose={() => setShowWizard(false)}
-        onSubmit={handleWizardSubmit}
-    />
-)}
+{
+    showWizard && (
+        <WizardComponent
+            entityId={entityId}
+            entityName={entityName}
+            onClose={() => setShowWizard(false)}
+            onSubmit={handleWizardSubmit}
+        />
+    );
+}
 
 // Button to open wizard
-<button
-    onClick={() => setShowWizard(true)}
-    className="btn btn-primary gap-2"
->
+<button onClick={() => setShowWizard(true)} className="btn btn-primary gap-2">
     <i className="fa-duotone fa-regular fa-plus"></i>
     Open Wizard
-</button>
+</button>;
 ```
 
 **Key Points**:
+
 - Wizard shown conditionally with `showWizard` state
 - `onSubmit` prop handles actual API call in parent
 - Parent manages navigation after success
@@ -788,6 +854,7 @@ Use SQL JOINs or Supabase `.select('*, related_table(*)')` syntax.
 ### 3. Fast Search
 
 Backend should use:
+
 - Database text search (PostgreSQL `tsvector`/`tsquery`)
 - Proper indexes on searchable columns
 - ILIKE for case-insensitive matching (acceptable for small datasets)
@@ -827,11 +894,9 @@ Backend should use:
 ```tsx
 // WRONG - Loads everything before showing wizard
 useEffect(() => {
-    Promise.all([
-        loadItems(),
-        loadRelatedData(),
-        loadAdditionalData()
-    ]).then(() => setLoading(false));
+    Promise.all([loadItems(), loadRelatedData(), loadAdditionalData()]).then(
+        () => setLoading(false),
+    );
 }, []);
 ```
 
@@ -843,8 +908,8 @@ useEffect(() => {
 
 ```tsx
 // WRONG - Filters 1000 items on every keystroke
-const filteredItems = items.filter(item => 
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+const filteredItems = items.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()),
 );
 ```
 
@@ -857,7 +922,7 @@ const filteredItems = items.filter(item =>
 ```tsx
 // WRONG - Makes N additional API calls
 const itemsWithDetails = await Promise.all(
-    items.map(item => client.get(`/items/${item.id}/details`))
+    items.map((item) => client.get(`/items/${item.id}/details`)),
 );
 ```
 
@@ -882,7 +947,9 @@ const handleNext = () => {
 
 ```tsx
 // WRONG - Disables entire modal during submit
-{submitting && <LoadingOverlay />}
+{
+    submitting && <LoadingOverlay />;
+}
 ```
 
 **Why it's bad**: User can't read what they submitted. Feels frozen.
@@ -896,6 +963,7 @@ const handleNext = () => {
 See `apps/portal/src/app/portal/candidates/[id]/components/submit-to-job-wizard.tsx` for a production-ready implementation following all these patterns.
 
 **Features demonstrated**:
+
 - 3-step wizard (Select Job → Enter Details → Review)
 - Server-side search, filtering, sorting, pagination
 - Debounced search (300ms)
@@ -917,17 +985,17 @@ When creating a new wizard:
 2. **Update step count** if more/fewer than 3 steps needed
 3. **Customize step content** to match your data model
 4. **Maintain the patterns**:
-   - Server-side operations
-   - Progressive loading
-   - Independent states
-   - Validation before navigation
+    - Server-side operations
+    - Progressive loading
+    - Independent states
+    - Validation before navigation
 5. **Test thoroughly**:
-   - Empty states
-   - Error states
-   - Long lists (pagination)
-   - Slow network (loading states)
-   - Mobile devices (responsive)
-   - Keyboard navigation (accessibility)
+    - Empty states
+    - Error states
+    - Long lists (pagination)
+    - Slow network (loading states)
+    - Mobile devices (responsive)
+    - Keyboard navigation (accessibility)
 
 ---
 

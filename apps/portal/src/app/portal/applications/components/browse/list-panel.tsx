@@ -157,6 +157,7 @@ export default function ListPanel({ selectedId, onSelect }: ListPanelProps) {
             <PaginationControls
                 pagination={pagination}
                 onPageChange={goToPage}
+                compact={true}
             />
         </div>
     );

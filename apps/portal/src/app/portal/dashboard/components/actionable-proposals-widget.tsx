@@ -5,6 +5,7 @@ import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
 import { createAuthenticatedClient } from '@/lib/api-client';
 import { ContentCard } from '@/components/ui';
+import { LoadingState } from '@splits-network/shared-ui';
 
 interface ActionableProposalsWidgetProps {
     compact?: boolean;
@@ -68,11 +69,7 @@ export default function ActionableProposalsWidget({ compact = true }: Actionable
     };
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center py-12">
-                <span className="loading loading-spinner loading-lg"></span>
-            </div>
-        );
+        return <LoadingState size="md" fullHeight={false} />;
     }
 
     if (error) {

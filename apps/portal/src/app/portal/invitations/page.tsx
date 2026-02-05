@@ -5,6 +5,7 @@ import { BrowseInvitationsClient } from "./components/browse/browse-invitations-
 import { PageTitle } from "@/components/page-title";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { useViewMode } from "@/hooks/use-view-mode";
+import { LoadingState } from "@splits-network/shared-ui";
 
 export default function InvitationsPage() {
     const { viewMode, setViewMode, isLoaded } = useViewMode(
@@ -13,19 +14,7 @@ export default function InvitationsPage() {
 
     // Prevent hydration mismatch by not rendering until loaded
     if (!isLoaded) {
-        return (
-            <>
-                <PageTitle
-                    title="Invitations"
-                    subtitle="Track and manage your candidate invitations"
-                />
-                <div className="space-y-6">
-                    <div className="flex justify-center p-8">
-                        <span className="loading loading-spinner loading-lg"></span>
-                    </div>
-                </div>
-            </>
-        );
+        return <LoadingState message="Loading invitations..." />;
     }
 
     const getSubtitle = () => {

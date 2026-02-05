@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { useRef, useState, useEffect } from 'react';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
-import type { Document } from '@/lib/document-utils';
+import React, { useRef, useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
+import type { Document } from "@/lib/document-utils";
 
 interface UploadDocumentsStepProps {
     documents: File[];
@@ -14,15 +14,15 @@ interface UploadDocumentsStepProps {
         documents: File[],
         existingDocumentIds: string[],
         primaryResumeIndex: number | null,
-        primaryExistingDocId: string | null
+        primaryExistingDocId: string | null,
     ) => void;
     onNext: () => void;
 }
 
 const ALLOWED_TYPES = [
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -54,11 +54,11 @@ export function UploadDocumentsStep({
             }
 
             const client = createAuthenticatedClient(token);
-            const response = await client.get('/documents');
+            const response = await client.get("/documents");
             const docs = response.data || response;
             setExistingDocs(docs);
         } catch (err) {
-            console.error('Failed to load existing documents:', err);
+            console.error("Failed to load existing documents:", err);
         } finally {
             setLoadingDocs(false);
         }
@@ -71,11 +71,15 @@ export function UploadDocumentsStep({
         // Validate files
         for (const file of files) {
             if (!ALLOWED_TYPES.includes(file.type)) {
-                setError(`${file.name} is not a supported file type. Please upload PDF or Word `);
+                setError(
+                    `${file.name} is not a supported file type. Please upload PDF or Word `,
+                );
                 return;
             }
             if (file.size > MAX_FILE_SIZE) {
-                setError(`${file.name} is too large. Maximum file size is 5MB.`);
+                setError(
+                    `${file.name} is too large. Maximum file size is 5MB.`,
+                );
                 return;
             }
         }
@@ -86,15 +90,24 @@ export function UploadDocumentsStep({
         // If this is the first document being added and no primary is set, set it as primary
         let newPrimaryIndex = primaryResumeIndex;
         let newPrimaryExistingDocId = primaryExistingDocId;
-        if (newPrimaryIndex === null && newPrimaryExistingDocId === null && newDocuments.length > 0) {
+        if (
+            newPrimaryIndex === null &&
+            newPrimaryExistingDocId === null &&
+            newDocuments.length > 0
+        ) {
             newPrimaryIndex = 0;
         }
 
-        onUpdate(newDocuments, existingDocumentIds, newPrimaryIndex, newPrimaryExistingDocId);
+        onUpdate(
+            newDocuments,
+            existingDocumentIds,
+            newPrimaryIndex,
+            newPrimaryExistingDocId,
+        );
 
         // Reset file input
         if (fileInputRef.current) {
-            fileInputRef.current.value = '';
+            fileInputRef.current.value = "";
         }
     };
 
@@ -111,11 +124,20 @@ export function UploadDocumentsStep({
         }
 
         // If this is the first document and no primary is set, set it as primary
-        if (!isSelected && primaryResumeIndex === null && primaryExistingDocId === null) {
+        if (
+            !isSelected &&
+            primaryResumeIndex === null &&
+            primaryExistingDocId === null
+        ) {
             newPrimaryExistingDocId = docId;
         }
 
-        onUpdate(documents, newExistingIds, primaryResumeIndex, newPrimaryExistingDocId);
+        onUpdate(
+            documents,
+            newExistingIds,
+            primaryResumeIndex,
+            newPrimaryExistingDocId,
+        );
     };
 
     const handleRemoveNewDocument = (index: number) => {
@@ -129,7 +151,12 @@ export function UploadDocumentsStep({
             newPrimaryIndex = primaryResumeIndex - 1;
         }
 
-        onUpdate(newDocuments, existingDocumentIds, newPrimaryIndex, primaryExistingDocId);
+        onUpdate(
+            newDocuments,
+            existingDocumentIds,
+            newPrimaryIndex,
+            primaryExistingDocId,
+        );
     };
 
     const handleSetPrimaryNewDoc = (index: number) => {
@@ -148,11 +175,13 @@ export function UploadDocumentsStep({
     const handleNext = () => {
         const totalDocCount = length + existingDocumentIds.length;
         if (totalDocCount === 0) {
-            setError('Please upload at least one document or select from your existing ');
+            setError(
+                "Please upload at least one document or select from your existing ",
+            );
             return;
         }
         if (primaryResumeIndex === null && primaryExistingDocId === null) {
-            setError('Please select a primary resume.');
+            setError("Please select a primary resume.");
             return;
         }
         setError(null);
@@ -160,17 +189,19 @@ export function UploadDocumentsStep({
     };
 
     const totalDocCount = length + existingDocumentIds.length;
-    const hasPrimary = primaryResumeIndex !== null || primaryExistingDocId !== null;
+    const hasPrimary =
+        primaryResumeIndex !== null || primaryExistingDocId !== null;
 
     return (
         <div className="space-y-6">
             <div>
                 <h4 className="text-lg font-semibold mb-2">
-                    <i className="fa-duotone fa-regular fa-file-upload"></i>
-                    {' '}Select or Upload Documents
+                    <i className="fa-duotone fa-regular fa-file-upload"></i>{" "}
+                    Select or Upload Documents
                 </h4>
                 <p className="text-base-content/70 text-sm">
-                    Select from your existing documents or upload new ones. At least one resume is required.
+                    Select from your existing documents or upload new ones. At
+                    least one resume is required.
                 </p>
             </div>
 
@@ -191,37 +222,56 @@ export function UploadDocumentsStep({
                     <h5 className="font-semibold">Your Existing Documents</h5>
                     <div className="space-y-2">
                         {existingDocs.map((doc) => {
-                            const isSelected = existingDocumentIds.includes(doc.id);
+                            const isSelected = existingDocumentIds.includes(
+                                doc.id,
+                            );
                             const isPrimary = primaryExistingDocId === doc.id;
 
                             return (
                                 <div
                                     key={doc.id}
-                                    className={`flex items-center justify-between p-4 rounded-lg transition-colors ${isSelected ? 'bg-primary/10 border-2 border-primary' : 'bg-base-200'
-                                        }`}
+                                    className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
+                                        isSelected
+                                            ? "bg-primary/10 border-2 border-primary"
+                                            : "bg-base-200"
+                                    }`}
                                 >
                                     <div className="flex items-center gap-3 flex-1 min-w-0">
                                         <input
                                             type="checkbox"
                                             checked={isSelected}
-                                            onChange={() => handleToggleExistingDoc(doc.id)}
+                                            onChange={() =>
+                                                handleToggleExistingDoc(doc.id)
+                                            }
                                             className="checkbox checkbox-primary"
                                         />
                                         <i className="fa-duotone fa-regular fa-file text-primary"></i>
                                         <div className="flex-1 min-w-0">
-                                            <div className="font-medium truncate">{doc.file_name}</div>
+                                            <div className="font-medium truncate">
+                                                {doc.file_name}
+                                            </div>
                                             <div className="text-sm text-base-content/60">
-                                                {doc.document_type} • {(doc.file_size / 1024).toFixed(1)} KB
+                                                {doc.document_type} •{" "}
+                                                {(doc.file_size / 1024).toFixed(
+                                                    1,
+                                                )}{" "}
+                                                KB
                                             </div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         {isPrimary ? (
-                                            <span className="badge badge-primary">Primary Resume</span>
+                                            <span className="badge badge-primary">
+                                                Primary Resume
+                                            </span>
                                         ) : isSelected ? (
                                             <button
                                                 type="button"
-                                                onClick={() => handleSetPrimaryExistingDoc(doc.id)}
+                                                onClick={() =>
+                                                    handleSetPrimaryExistingDoc(
+                                                        doc.id,
+                                                    )
+                                                }
                                                 className="btn btn-xs btn-ghost"
                                             >
                                                 Set as Primary
@@ -236,13 +286,18 @@ export function UploadDocumentsStep({
             ) : (
                 <div className="alert">
                     <i className="fa-duotone fa-regular fa-info-circle"></i>
-                    <span>You don't have any existing  Upload your first documents below.</span>
+                    <span>
+                        You don't have any existing Upload your first documents
+                        below.
+                    </span>
                 </div>
             )}
 
             {/* Upload New Documents */}
-            <div className="fieldset">
-                <label className="label">Or Upload New Documents</label>
+            <fieldset className="fieldset">
+                <legend className="fieldset-legend">
+                    Or Upload New Documents
+                </legend>
                 <input
                     ref={fileInputRef}
                     type="file"
@@ -251,17 +306,18 @@ export function UploadDocumentsStep({
                     accept=".pdf,.doc,.docx"
                     className="file-input file-input-primary w-full"
                 />
-                <label className="label">
-                    <span className="label-text-alt">
-                        Accepted formats: PDF, DOC, DOCX • Maximum size: 5MB per file
-                    </span>
-                </label>
-            </div>
+                <p className="fieldset-label">
+                    Accepted formats: PDF, DOC, DOCX • Maximum size: 5MB per
+                    file
+                </p>
+            </fieldset>
 
             {/* Newly Uploaded Documents */}
             {length > 0 && (
                 <div className="space-y-3">
-                    <h5 className="font-semibold">Newly Uploaded Documents ({length})</h5>
+                    <h5 className="font-semibold">
+                        Newly Uploaded Documents ({length})
+                    </h5>
                     <div className="space-y-2">
                         {documents.map((doc, index) => {
                             const isPrimary = primaryResumeIndex === index;
@@ -269,25 +325,37 @@ export function UploadDocumentsStep({
                             return (
                                 <div
                                     key={index}
-                                    className={`flex items-center justify-between p-4 rounded-lg ${isPrimary ? 'bg-primary/10 border-2 border-primary' : 'bg-base-200'
-                                        }`}
+                                    className={`flex items-center justify-between p-4 rounded-lg ${
+                                        isPrimary
+                                            ? "bg-primary/10 border-2 border-primary"
+                                            : "bg-base-200"
+                                    }`}
                                 >
                                     <div className="flex items-center gap-3 flex-1 min-w-0">
                                         <i className="fa-duotone fa-regular fa-file text-success"></i>
                                         <div className="flex-1 min-w-0">
-                                            <div className="font-medium truncate">{doc.name}</div>
+                                            <div className="font-medium truncate">
+                                                {doc.name}
+                                            </div>
                                             <div className="text-sm text-base-content/60">
-                                                {(doc.size / 1024).toFixed(1)} KB • New upload
+                                                {(doc.size / 1024).toFixed(1)}{" "}
+                                                KB • New upload
                                             </div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         {isPrimary ? (
-                                            <span className="badge badge-primary">Primary Resume</span>
+                                            <span className="badge badge-primary">
+                                                Primary Resume
+                                            </span>
                                         ) : (
                                             <button
                                                 type="button"
-                                                onClick={() => handleSetPrimaryNewDoc(index)}
+                                                onClick={() =>
+                                                    handleSetPrimaryNewDoc(
+                                                        index,
+                                                    )
+                                                }
                                                 className="btn btn-xs btn-ghost"
                                             >
                                                 Set as Primary
@@ -295,7 +363,9 @@ export function UploadDocumentsStep({
                                         )}
                                         <button
                                             type="button"
-                                            onClick={() => handleRemoveNewDocument(index)}
+                                            onClick={() =>
+                                                handleRemoveNewDocument(index)
+                                            }
                                             className="btn btn-xs btn-ghost btn-circle text-error"
                                         >
                                             <i className="fa-duotone fa-regular fa-times"></i>
@@ -314,7 +384,9 @@ export function UploadDocumentsStep({
                     <div>
                         <div className="font-semibold">Ready to Continue</div>
                         <div className="text-sm">
-                            {totalDocCount} document{totalDocCount > 1 ? 's' : ''} selected with primary resume set.
+                            {totalDocCount} document
+                            {totalDocCount > 1 ? "s" : ""} selected with primary
+                            resume set.
                         </div>
                     </div>
                 </div>

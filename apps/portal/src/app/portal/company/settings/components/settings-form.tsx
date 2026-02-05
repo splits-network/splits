@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { MarkdownEditor } from '@splits-network/shared-ui';
-import { useAuth } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
-import { createAuthenticatedClient } from '@/lib/api-client';
+import { useState, useEffect } from "react";
+import { MarkdownEditor, ButtonLoading } from "@splits-network/shared-ui";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { createAuthenticatedClient } from "@/lib/api-client";
 
 interface Company {
     id: string;
@@ -25,25 +25,28 @@ interface CompanySettingsFormProps {
     organizationId: string;
 }
 
-export default function CompanySettingsForm({ company: initialCompany, organizationId }: CompanySettingsFormProps) {
+export default function CompanySettingsForm({
+    company: initialCompany,
+    organizationId,
+}: CompanySettingsFormProps) {
     const { getToken } = useAuth();
     const router = useRouter();
     const [billingLoaded, setBillingLoaded] = useState(false);
 
     const [formData, setFormData] = useState({
-        name: initialCompany?.name || '',
-        website: initialCompany?.website || '',
-        industry: initialCompany?.industry || '',
-        company_size: initialCompany?.company_size || '',
-        headquarters_location: initialCompany?.headquarters_location || '',
-        description: initialCompany?.description || '',
-        logo_url: initialCompany?.logo_url || '',
-        billing_terms: 'net_30',
-        billing_email: '',
+        name: initialCompany?.name || "",
+        website: initialCompany?.website || "",
+        industry: initialCompany?.industry || "",
+        company_size: initialCompany?.company_size || "",
+        headquarters_location: initialCompany?.headquarters_location || "",
+        description: initialCompany?.description || "",
+        logo_url: initialCompany?.logo_url || "",
+        billing_terms: "net_30",
+        billing_email: "",
     });
 
     const [saving, setSaving] = useState(false);
-    const [error, setError] = useState('');
+    const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
 
     useEffect(() => {
@@ -53,18 +56,20 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
                 const token = await getToken();
                 if (!token) return;
                 const client = createAuthenticatedClient(token);
-                const response = await client.get(`/company-billing-profiles/${initialCompany.id}`);
+                const response = await client.get(
+                    `/company-billing-profiles/${initialCompany.id}`,
+                );
                 const profile = response?.data;
                 if (profile) {
                     setFormData((prev) => ({
                         ...prev,
-                        billing_terms: profile.billing_terms || 'net_30',
-                        billing_email: profile.billing_email || '',
+                        billing_terms: profile.billing_terms || "net_30",
+                        billing_email: profile.billing_email || "",
                     }));
                 }
                 setBillingLoaded(true);
             } catch (loadError: any) {
-                console.error('Failed to load billing profile:', loadError);
+                console.error("Failed to load billing profile:", loadError);
                 setBillingLoaded(true);
             }
         };
@@ -72,7 +77,11 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
         loadBillingProfile();
     }, [initialCompany?.id, getToken, billingLoaded]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const handleChange = (
+        e: React.ChangeEvent<
+            HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+        >,
+    ) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value,
@@ -82,20 +91,20 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
+        setError("");
         setSaving(true);
 
         try {
             const billingEmail = formData.billing_email.trim();
             if (!billingEmail) {
-                setError('Billing email is required');
+                setError("Billing email is required");
                 setSaving(false);
                 return;
             }
 
             const token = await getToken();
             if (!token) {
-                setError('Authentication required');
+                setError("Authentication required");
                 setSaving(false);
                 return;
             }
@@ -104,72 +113,87 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
 
             if (initialCompany) {
                 // Update existing company
-                const { billing_terms, billing_email, ...companyPayload } = formData;
-                await client.patch(`/companies/${initialCompany.id}`, companyPayload);
-                await client.post(`/company-billing-profiles/${initialCompany.id}`, {
-                    billing_terms,
-                    billing_email: billingEmail,
-                    invoice_delivery_method: 'email',
-                });
+                const { billing_terms, billing_email, ...companyPayload } =
+                    formData;
+                await client.patch(
+                    `/companies/${initialCompany.id}`,
+                    companyPayload,
+                );
+                await client.post(
+                    `/company-billing-profiles/${initialCompany.id}`,
+                    {
+                        billing_terms,
+                        billing_email: billingEmail,
+                        invoice_delivery_method: "email",
+                    },
+                );
             } else {
                 // Create new company
-                const { billing_terms, billing_email, ...companyPayload } = formData;
-                const companyResponse = await client.post('/companies', {
+                const { billing_terms, billing_email, ...companyPayload } =
+                    formData;
+                const companyResponse = await client.post("/companies", {
                     ...companyPayload,
                     identity_organization_id: organizationId,
                 });
 
                 const companyId = companyResponse?.data?.id;
                 if (companyId) {
-                    await client.post(`/company-billing-profiles/${companyId}`, {
-                        billing_terms,
-                        billing_email: billingEmail,
-                        invoice_delivery_method: 'email',
-                    });
+                    await client.post(
+                        `/company-billing-profiles/${companyId}`,
+                        {
+                            billing_terms,
+                            billing_email: billingEmail,
+                            invoice_delivery_method: "email",
+                        },
+                    );
                 }
             }
 
             setSuccess(true);
             router.refresh();
         } catch (error: any) {
-            console.error('Failed to save company:', error);
-            setError(error.message || 'Failed to save company settings');
+            console.error("Failed to save company:", error);
+            setError(error.message || "Failed to save company settings");
         } finally {
             setSaving(false);
         }
     };
 
     const companySizes = [
-        '1-10',
-        '11-50',
-        '51-200',
-        '201-500',
-        '501-1000',
-        '1000+',
+        "1-10",
+        "11-50",
+        "51-200",
+        "201-500",
+        "501-1000",
+        "1000+",
     ];
 
     const industries = [
-        'Technology',
-        'Healthcare',
-        'Finance',
-        'Manufacturing',
-        'Retail',
-        'Education',
-        'Consulting',
-        'Professional Services',
-        'Real Estate',
-        'Recruitment',
-        'Hospitality',
-        'Construction',
-        'Energy',
-        'Telecommunications',
-        'Media & Entertainment',
-        'Transportation',
-        'Other',
+        "Technology",
+        "Healthcare",
+        "Finance",
+        "Manufacturing",
+        "Retail",
+        "Education",
+        "Consulting",
+        "Professional Services",
+        "Real Estate",
+        "Recruitment",
+        "Hospitality",
+        "Construction",
+        "Energy",
+        "Telecommunications",
+        "Media & Entertainment",
+        "Transportation",
+        "Other",
     ];
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6" id="company-settings-form">
+        <form
+            onSubmit={handleSubmit}
+            className="space-y-6"
+            id="company-settings-form"
+        >
             {error && (
                 <div className="alert alert-error">
                     <i className="fa-duotone fa-regular fa-circle-exclamation"></i>
@@ -192,8 +216,10 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
                     </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="fieldset md:col-span-2">
-                            <label className="label">Company Name *</label>
+                        <fieldset className="fieldset md:col-span-2">
+                            <legend className="fieldset-legend">
+                                Company Name *
+                            </legend>
                             <input
                                 type="text"
                                 name="name"
@@ -203,10 +229,10 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
                                 placeholder="Acme Corporation"
                                 required
                             />
-                        </div>
+                        </fieldset>
 
-                        <div className="fieldset">
-                            <label className="label">Website</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">Website</legend>
                             <input
                                 type="url"
                                 name="website"
@@ -215,10 +241,12 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
                                 onChange={handleChange}
                                 placeholder="https://example.com"
                             />
-                        </div>
+                        </fieldset>
 
-                        <div className="fieldset">
-                            <label className="label">Industry</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">
+                                Industry
+                            </legend>
                             <select
                                 name="industry"
                                 className="select w-full"
@@ -232,10 +260,12 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
                                     </option>
                                 ))}
                             </select>
-                        </div>
+                        </fieldset>
 
-                        <div className="fieldset">
-                            <label className="label">Company Size</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">
+                                Company Size
+                            </legend>
                             <select
                                 name="company_size"
                                 className="select w-full"
@@ -249,10 +279,12 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
                                     </option>
                                 ))}
                             </select>
-                        </div>
+                        </fieldset>
 
-                        <div className="fieldset">
-                            <label className="label">Headquarters Location</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">
+                                Headquarters Location
+                            </legend>
                             <input
                                 type="text"
                                 name="headquarters_location"
@@ -261,22 +293,27 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
                                 onChange={handleChange}
                                 placeholder="San Francisco, CA"
                             />
-                        </div>
+                        </fieldset>
 
                         <MarkdownEditor
                             className="fieldset md:col-span-2"
                             label="Company Description"
                             value={formData.description}
                             onChange={(value) =>
-                                setFormData((prev) => ({ ...prev, description: value }))
+                                setFormData((prev) => ({
+                                    ...prev,
+                                    description: value,
+                                }))
                             }
                             placeholder="Tell us about your company, culture, and what makes you unique..."
                             helperText="This description will be visible to recruiters"
                             height={200}
                         />
 
-                        <div className="fieldset md:col-span-2">
-                            <label className="label">Logo URL (Optional)</label>
+                        <fieldset className="fieldset md:col-span-2">
+                            <legend className="fieldset-legend">
+                                Logo URL (Optional)
+                            </legend>
                             <input
                                 type="url"
                                 name="logo_url"
@@ -285,12 +322,10 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
                                 onChange={handleChange}
                                 placeholder="https://example.com/logo.png"
                             />
-                            <label className="label">
-                                <span className="label-text-alt">
-                                    Enter a direct link to your company logo image
-                                </span>
-                            </label>
-                        </div>
+                            <p className="fieldset-label">
+                                Enter a direct link to your company logo image
+                            </p>
+                        </fieldset>
                     </div>
                 </div>
             </div>
@@ -302,12 +337,15 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
                         Billing Terms
                     </h2>
                     <p className="text-sm text-base-content/70">
-                        Configure when your company is billed after guarantee completion.
+                        Configure when your company is billed after guarantee
+                        completion.
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        <div className="fieldset">
-                            <label className="label">Payment Terms *</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">
+                                Payment Terms *
+                            </legend>
                             <select
                                 name="billing_terms"
                                 className="select w-full"
@@ -315,15 +353,19 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
                                 onChange={handleChange}
                                 required
                             >
-                                <option value="immediate">Immediate (Charge on completion)</option>
+                                <option value="immediate">
+                                    Immediate (Charge on completion)
+                                </option>
                                 <option value="net_30">Net 30</option>
                                 <option value="net_60">Net 60</option>
                                 <option value="net_90">Net 90</option>
                             </select>
-                        </div>
+                        </fieldset>
 
-                        <div className="fieldset">
-                            <label className="label">Billing Email *</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">
+                                Billing Email *
+                            </legend>
                             <input
                                 type="email"
                                 name="billing_email"
@@ -333,7 +375,7 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
                                 placeholder="billing@company.com"
                                 required
                             />
-                        </div>
+                        </fieldset>
                     </div>
                 </div>
             </div>
@@ -364,17 +406,12 @@ export default function CompanySettingsForm({ company: initialCompany, organizat
                     className="btn btn-primary"
                     disabled={saving || !formData.name.trim()}
                 >
-                    {saving ? (
-                        <>
-                            <span className="loading loading-spinner loading-sm"></span>
-                            Saving...
-                        </>
-                    ) : (
-                        <>
-                            <i className="fa-duotone fa-regular fa-save"></i>
-                            Save Settings
-                        </>
-                    )}
+                    <ButtonLoading
+                        loading={saving}
+                        text="Save Settings"
+                        loadingText="Saving..."
+                        icon="fa-duotone fa-regular fa-save"
+                    />
                 </button>
             </div>
         </form>

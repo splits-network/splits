@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
+import { ButtonLoading } from "@splits-network/shared-ui";
 
 interface ProfileImageUploadProps {
     currentImageUrl?: string;
@@ -161,7 +162,11 @@ export default function ProfileImageUpload({
                             disabled={isLoading}
                             className="btn btn-xs btn-error"
                         >
-                            Yes
+                            <ButtonLoading
+                                loading={deleting}
+                                text="Yes"
+                                loadingText="Removing..."
+                            />
                         </button>
                         <button
                             type="button"

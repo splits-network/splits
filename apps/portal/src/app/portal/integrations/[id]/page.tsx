@@ -7,6 +7,7 @@ import { getSyncStatusBadge } from "@/lib/utils/badge-styles";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useToast } from "@/lib/toast-context";
 import { useAuth } from "@clerk/nextjs";
+import { LoadingState } from "@splits-network/shared-ui";
 
 interface ATSIntegration {
     id: string;
@@ -205,13 +206,7 @@ export default function IntegrationDetailPage() {
     };
 
     if (loading) {
-        return (
-            <div className="container mx-auto p-6">
-                <div className="flex items-center justify-center h-64">
-                    <span className="loading loading-spinner loading-lg"></span>
-                </div>
-            </div>
-        );
+        return <LoadingState message="Loading integration..." />;
     }
 
     if (!integration) {
@@ -382,7 +377,7 @@ export default function IntegrationDetailPage() {
                         <h2 className="card-title mb-4">Sync Settings</h2>
 
                         {/* Sync Enabled */}
-                        <div className="fieldset">
+                        <fieldset className="fieldset">
                             <label className="label cursor-pointer justify-start gap-4">
                                 <input
                                     type="checkbox"
@@ -404,14 +399,14 @@ export default function IntegrationDetailPage() {
                                     </p>
                                 </div>
                             </label>
-                        </div>
+                        </fieldset>
 
                         <div className="divider"></div>
 
                         {/* Sync Options */}
                         <h3 className="font-semibold mb-2">What to Sync</h3>
 
-                        <div className="fieldset">
+                        <fieldset className="fieldset">
                             <label className="label cursor-pointer justify-start gap-4">
                                 <input
                                     type="checkbox"
@@ -435,9 +430,9 @@ export default function IntegrationDetailPage() {
                                     </p>
                                 </div>
                             </label>
-                        </div>
+                        </fieldset>
 
-                        <div className="fieldset">
+                        <fieldset className="fieldset">
                             <label className="label cursor-pointer justify-start gap-4">
                                 <input
                                     type="checkbox"
@@ -461,9 +456,9 @@ export default function IntegrationDetailPage() {
                                     </p>
                                 </div>
                             </label>
-                        </div>
+                        </fieldset>
 
-                        <div className="fieldset">
+                        <fieldset className="fieldset">
                             <label className="label cursor-pointer justify-start gap-4">
                                 <input
                                     type="checkbox"
@@ -486,18 +481,18 @@ export default function IntegrationDetailPage() {
                                     </p>
                                 </div>
                             </label>
-                        </div>
+                        </fieldset>
 
                         <div className="divider"></div>
 
                         {/* Webhook URL */}
-                        <div className="fieldset">
-                            <label className="label">
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">
                                 Webhook URL (Optional)
-                            </label>
+                            </legend>
                             <input
                                 type="url"
-                                className="input"
+                                className="input w-full"
                                 value={formData.webhook_url}
                                 onChange={(e) =>
                                     setFormData({
@@ -507,14 +502,12 @@ export default function IntegrationDetailPage() {
                                 }
                                 placeholder={`https://api.splits.network/webhooks/${integration.platform}/${integrationId}`}
                             />
-                            <label className="label">
-                                <span className="label-text-alt">
-                                    Configure this URL in your{" "}
-                                    {integration.platform} account to receive
-                                    real-time updates
-                                </span>
-                            </label>
-                        </div>
+                            <p className="fieldset-label">
+                                Configure this URL in your{" "}
+                                {integration.platform} account to receive
+                                real-time updates
+                            </p>
+                        </fieldset>
 
                         {/* Actions */}
                         <div className="card-actions justify-between mt-6">

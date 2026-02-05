@@ -5,6 +5,7 @@ import CandidateBrowseClient from "./components/browse/candidate-browse-client";
 import { PageTitle } from "@/components/page-title";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { useViewMode } from "@/hooks/use-view-mode";
+import { LoadingState } from "@splits-network/shared-ui";
 
 export default function CandidatesPage() {
     const { viewMode, setViewMode, isLoaded } =
@@ -12,19 +13,7 @@ export default function CandidatesPage() {
 
     // Prevent hydration mismatch by not rendering until loaded
     if (!isLoaded) {
-        return (
-            <>
-                <PageTitle
-                    title="Candidates"
-                    subtitle="Manage your candidate pipeline"
-                />
-                <div className="space-y-6">
-                    <div className="flex justify-center p-8">
-                        <span className="loading loading-spinner loading-lg"></span>
-                    </div>
-                </div>
-            </>
-        );
+        return <LoadingState message="Loading candidates..." />;
     }
 
     return (
