@@ -74,16 +74,16 @@ export function PortalHeader() {
             </div>
 
             {/* Page title & subtitle */}
-            <div className="flex-1 ml-40 min-w-0 px-2">
-                <div className="flex items-center justify-between">
+            <div className="flex-1 ml-0 lg:ml-40 min-w-0 px-2">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 lg:gap-0">
                     <div className="min-w-0 flex-1">
                         {title && (
                             <div className="flex flex-col items-start gap-0">
-                                <h1 className="text-lg font-semibold truncate">
+                                <h1 className="text-base lg:text-lg font-semibold truncate w-full">
                                     {title}
                                 </h1>
                                 {subtitle && (
-                                    <span className="text-sm text-base-content/60 truncate hidden sm:inline">
+                                    <span className="text-xs lg:text-sm text-base-content/60 truncate w-full">
                                         {subtitle}
                                     </span>
                                 )}
@@ -91,7 +91,7 @@ export function PortalHeader() {
                         )}
                     </div>
                     {titleChildren && (
-                        <div className="flex items-center gap-4 ml-4">
+                        <div className="flex items-center gap-2 lg:gap-4 lg:ml-4 flex-shrink-0">
                             {titleChildren}
                         </div>
                     )}

@@ -1,16 +1,17 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { formatRelativeTime } from '@/lib/utils';
-import { getRoleBadges } from '@/lib/utils/role-badges';
-import { getJobStatusBadge } from '@/lib/utils/badge-styles';
+import Link from "next/link";
+import { formatRelativeTime } from "@/lib/utils";
+import { getRoleBadges } from "@/lib/utils/role-badges";
+import { getJobStatusBadge } from "@/lib/utils/badge-styles";
 import {
     ExpandableTableRow,
     ExpandedDetailGrid,
     ExpandedDetailItem,
     ExpandedDetailSection,
-} from '@/components/ui/tables';
-import type { Job } from './role-card';
+} from "@/components/ui/tables";
+import type { Job } from "./role-card";
+import RoleActionsToolbar from "./role-actions-toolbar";
 
 // ===== TYPES =====
 
@@ -27,21 +28,35 @@ interface RoleTableRowProps {
     allJobs: Job[];
     canManageRole: boolean | undefined;
     onEditRole?: (jobId: string) => void;
+    onViewDetails?: (jobId: string) => void;
+    onViewPipeline?: (jobId: string) => void;
 }
 
 // ===== COMPONENT =====
 
-export function RoleTableRow({ job, allJobs, canManageRole, onEditRole }: RoleTableRowProps) {
+export function RoleTableRow({
+    job,
+    allJobs,
+    canManageRole,
+    onEditRole,
+    onViewDetails,
+    onViewPipeline,
+}: RoleTableRowProps) {
     const badges = getRoleBadges(job, allJobs);
-    const maxPayout = job.salary_max ? Math.round(job.fee_percentage * job.salary_max / 100) : null;
-    const minPayout = job.salary_min ? Math.round(job.fee_percentage * job.salary_min / 100) : null;
+    const maxPayout = job.salary_max
+        ? Math.round((job.fee_percentage * job.salary_max) / 100)
+        : null;
+    const minPayout = job.salary_min
+        ? Math.round((job.fee_percentage * job.salary_min) / 100)
+        : null;
 
     // Calculate commission range for display
-    const commissionRange = minPayout && maxPayout
-        ? `$${minPayout.toLocaleString()} – $${maxPayout.toLocaleString()}`
-        : maxPayout
-            ? `Up to $${maxPayout.toLocaleString()}`
-            : '—';
+    const commissionRange =
+        minPayout && maxPayout
+            ? `$${minPayout.toLocaleString()} – $${maxPayout.toLocaleString()}`
+            : maxPayout
+              ? `Up to $${maxPayout.toLocaleString()}`
+              : "—";
 
     // Main row cells
     const cells = (
@@ -57,16 +72,19 @@ export function RoleTableRow({ job, allJobs, canManageRole, onEditRole }: RoleTa
                                     alt={job.company.name}
                                     className="w-full h-full object-contain rounded-lg"
                                     onError={(e) => {
-                                        e.currentTarget.style.display = 'none';
+                                        e.currentTarget.style.display = "none";
                                     }}
                                 />
                             ) : (
-                                (job.company?.name || 'C')[0].toUpperCase()
+                                (job.company?.name || "C")[0].toUpperCase()
                             )}
                         </div>
                     </div>
                     <div className="text-sm min-w-0">
-                        <span className="font-semibold whitespace-pre-line" title={job.title}>
+                        <span
+                            className="font-semibold whitespace-pre-line"
+                            title={job.title}
+                        >
                             {job.title}
                         </span>
                         <div className="text-sm text-base-content/60">
@@ -85,46 +103,48 @@ export function RoleTableRow({ job, allJobs, canManageRole, onEditRole }: RoleTa
             <td>
                 {job.salary_min && job.salary_max ? (
                     <span className="text-sm tabular-nums">
-                        ${(job.salary_min / 1000).toFixed(0)}k – ${(job.salary_max / 1000).toFixed(0)}k
+                        ${(job.salary_min / 1000).toFixed(0)}k – $
+                        {(job.salary_max / 1000).toFixed(0)}k
                     </span>
                 ) : (
                     <span className="text-base-content/30">—</span>
                 )}
             </td>
             <td>
-                <span className="font-medium tabular-nums">{job.fee_percentage}%</span>
-            </td>
-            <td>
-                <span className="font-semibold text-success tabular-nums">
-                    {maxPayout ? `$${maxPayout.toLocaleString()}` : '—'}
+                <span className="font-medium tabular-nums">
+                    {job.fee_percentage}%
                 </span>
             </td>
             <td>
-                <div className={`badge badge-sm ${getJobStatusBadge(job.status)}`}>
+                <span className="font-semibold text-success tabular-nums">
+                    {maxPayout ? `$${maxPayout.toLocaleString()}` : "—"}
+                </span>
+            </td>
+            <td>
+                <div
+                    className={`badge badge-sm ${getJobStatusBadge(job.status)}`}
+                >
                     {job.status}
                 </div>
             </td>
             <td>
-                <span className="text-sm text-base-content/60">{formatRelativeTime(job.created_at)}</span>
+                <span className="text-sm text-base-content/60">
+                    {formatRelativeTime(job.created_at)}
+                </span>
             </td>
             <td onClick={(e) => e.stopPropagation()}>
                 <div className="flex gap-1 justify-end">
-                    {canManageRole && onEditRole && (
-                        <button
-                            onClick={() => onEditRole(job.id)}
-                            className="btn btn-ghost btn-sm btn-square"
-                            title="Edit Role"
-                        >
-                            <i className="fa-duotone fa-regular fa-pen text-xs"></i>
-                        </button>
-                    )}
-                    <Link
-                        href={`/portal/roles/${job.id}`}
-                        className="btn btn-primary btn-sm"
-                        title="View Pipeline"
-                    >
-                        View
-                    </Link>
+                    <RoleActionsToolbar
+                        job={job}
+                        variant="icon-only"
+                        layout="horizontal"
+                        size="sm"
+                        onViewDetails={onViewDetails}
+                        onViewPipeline={onViewPipeline}
+                        showActions={{
+                            viewPipeline: true,
+                        }}
+                    />
                 </div>
             </td>
         </>
@@ -140,10 +160,12 @@ export function RoleTableRow({ job, allJobs, canManageRole, onEditRole }: RoleTa
                         {badges.map((badge: Badge, idx: number) => (
                             <span
                                 key={idx}
-                                className={`badge ${badge.class} gap-1.5 ${badge.animated ? 'animate-pulse' : ''}`}
+                                className={`badge ${badge.class} gap-1.5 ${badge.animated ? "animate-pulse" : ""}`}
                                 title={badge.tooltip}
                             >
-                                <i className={`fa-duotone fa-regular ${badge.icon}`}></i>
+                                <i
+                                    className={`fa-duotone fa-regular ${badge.icon}`}
+                                ></i>
                                 {badge.text}
                             </span>
                         ))}
@@ -160,7 +182,9 @@ export function RoleTableRow({ job, allJobs, canManageRole, onEditRole }: RoleTa
                         <div>
                             <div>{job.company?.name}</div>
                             {job.company?.industry && (
-                                <div className="text-xs text-base-content/50">{job.company.industry}</div>
+                                <div className=" text-base-content/50">
+                                    {job.company.industry}
+                                </div>
                             )}
                         </div>
                     }
@@ -168,7 +192,11 @@ export function RoleTableRow({ job, allJobs, canManageRole, onEditRole }: RoleTa
                 <ExpandedDetailItem
                     icon="fa-location-dot"
                     label="Location"
-                    value={job.location || job.company?.headquarters_location || 'Remote'}
+                    value={
+                        job.location ||
+                        job.company?.headquarters_location ||
+                        "Remote"
+                    }
                 />
                 <ExpandedDetailItem
                     icon="fa-money-bill-wave"
@@ -176,7 +204,7 @@ export function RoleTableRow({ job, allJobs, canManageRole, onEditRole }: RoleTa
                     value={
                         job.salary_min && job.salary_max
                             ? `$${(job.salary_min / 1000).toFixed(0)}k – $${(job.salary_max / 1000).toFixed(0)}k`
-                            : 'Not specified'
+                            : "Not specified"
                     }
                 />
                 <ExpandedDetailItem
@@ -211,7 +239,9 @@ export function RoleTableRow({ job, allJobs, canManageRole, onEditRole }: RoleTa
                     icon="fa-signal"
                     label="Status"
                     value={
-                        <span className={`badge badge-sm ${getJobStatusBadge(job.status)}`}>
+                        <span
+                            className={`badge badge-sm ${getJobStatusBadge(job.status)}`}
+                        >
                             {job.status}
                         </span>
                     }
@@ -220,34 +250,17 @@ export function RoleTableRow({ job, allJobs, canManageRole, onEditRole }: RoleTa
 
             {/* Action Buttons */}
             <div className="flex items-center gap-2 pt-2 border-t border-base-300">
-                <Link
-                    href={`/portal/roles/${job.id}`}
-                    className="btn btn-primary btn-sm gap-2"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <i className="fa-duotone fa-regular fa-eye"></i>
-                    View Pipeline
-                </Link>
-                <Link
-                    href={`/portal/roles/${job.id}?tab=candidates`}
-                    className="btn btn-outline btn-sm gap-2"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <i className="fa-duotone fa-regular fa-user-plus"></i>
-                    Submit Candidate
-                </Link>
-                {canManageRole && (
-                    <button
-                        className="btn btn-ghost btn-sm gap-2"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onEditRole && onEditRole(job.id);
-                        }}
-                    >
-                        <i className="fa-duotone fa-regular fa-pen"></i>
-                        Edit Role
-                    </button>
-                )}
+                <RoleActionsToolbar
+                    job={job}
+                    variant="descriptive"
+                    layout="horizontal"
+                    size="sm"
+                    onViewDetails={onViewDetails}
+                    onViewPipeline={onViewPipeline}
+                    showActions={{
+                        viewPipeline: true,
+                    }}
+                />
             </div>
         </div>
     );

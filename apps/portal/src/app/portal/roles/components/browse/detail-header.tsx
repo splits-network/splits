@@ -1,4 +1,5 @@
 import { Job } from "./types";
+import RoleActionsToolbar from "../role-actions-toolbar";
 
 interface DetailHeaderProps {
     job: Job;
@@ -83,16 +84,15 @@ export default function DetailHeader({
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-                <button
-                    onClick={onEdit}
-                    className="btn btn-ghost btn-sm hidden sm:inline-flex"
-                >
-                    <i className="fa-duotone fa-regular fa-pen-to-square" />
-                    Edit
-                </button>
-                <button className="btn btn-primary btn-sm">
-                    Propose Candidate
-                </button>
+                <RoleActionsToolbar
+                    job={job}
+                    variant="descriptive"
+                    layout="horizontal"
+                    size="sm"
+                    showActions={{
+                        viewDetails: false, // Already in detail view
+                    }}
+                />
             </div>
         </div>
     );

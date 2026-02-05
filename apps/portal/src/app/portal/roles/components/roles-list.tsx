@@ -20,6 +20,8 @@ import {
     calculateStatTrends,
 } from "../../../../components/charts/roles-trends-chart";
 import RoleWizardModal from "./role-wizard-modal";
+import RoleDetailSidebar from "./role-detail-sidebar";
+import RolePipelineSidebar from "./role-pipeline-sidebar";
 import Link from "next/link";
 import { ViewMode } from "@/hooks/use-view-mode";
 
@@ -117,6 +119,13 @@ export default function RolesList({ view }: RolesListProps) {
     const [showAddModal, setShowAddModal] = useState(false);
     const [editingJobId, setEditingJobId] = useState<string | null>(null);
 
+    // Sidebar state for viewing role details
+    const [sidebarRoleId, setSidebarRoleId] = useState<string | null>(null);
+
+    // Pipeline sidebar state for viewing applications
+    const [pipelineRoleId, setPipelineRoleId] = useState<string | null>(null);
+    const [pipelineRoleTitle, setPipelineRoleTitle] = useState<string>("");
+
     // Calculate stat trends based on selected time period
     const statTrends = useMemo(
         () => calculateStatTrends(jobs, trendPeriod),
@@ -131,6 +140,29 @@ export default function RolesList({ view }: RolesListProps) {
     // Handler for closing edit modal
     const handleCloseEditModal = () => {
         setEditingJobId(null);
+    };
+
+    // Handler for opening role detail sidebar
+    const handleViewDetails = (jobId: string) => {
+        setSidebarRoleId(jobId);
+    };
+
+    // Handler for closing sidebar
+    const handleCloseSidebar = () => {
+        setSidebarRoleId(null);
+    };
+
+    // Handler for opening pipeline sidebar
+    const handleViewPipeline = (jobId: string) => {
+        const job = jobs.find(j => j.id === jobId);
+        setPipelineRoleId(jobId);
+        setPipelineRoleTitle(job?.title || "");
+    };
+
+    // Handler for closing pipeline sidebar
+    const handleClosePipeline = () => {
+        setPipelineRoleId(null);
+        setPipelineRoleTitle("");
     };
 
     // Wait for profile to load
@@ -340,6 +372,8 @@ export default function RolesList({ view }: RolesListProps) {
                                     userRole={userRole}
                                     canManageRole={canManageRole}
                                     onEditRole={handleEditRole}
+                                    onViewDetails={handleViewDetails}
+                                    onViewPipeline={handleViewPipeline}
                                 />
                             ))}
                         </div>
@@ -363,6 +397,8 @@ export default function RolesList({ view }: RolesListProps) {
                                     allJobs={jobs}
                                     canManageRole={canManageRole}
                                     onEditRole={handleEditRole}
+                                    onViewDetails={handleViewDetails}
+                                    onViewPipeline={handleViewPipeline}
                                 />
                             ))}
                         </DataTable>
@@ -418,6 +454,20 @@ export default function RolesList({ view }: RolesListProps) {
                         }}
                     />
                 )}
+
+                {/* Role Detail Sidebar */}
+                <RoleDetailSidebar
+                    roleId={sidebarRoleId}
+                    onClose={handleCloseSidebar}
+                    onViewPipeline={handleViewPipeline}
+                />
+
+                {/* Pipeline Sidebar */}
+                <RolePipelineSidebar
+                    roleId={pipelineRoleId}
+                    roleTitle={pipelineRoleTitle}
+                    onClose={handleClosePipeline}
+                />
             </div>
         </>
     );

@@ -15,6 +15,7 @@ import {
 import { AnalyticsChart } from "@/components/charts/analytics-chart";
 import { TrendBadge } from "@/components/ui";
 import RoleWizardModal from "../../roles/components/role-wizard-modal";
+import RoleActionsToolbar from "../../roles/components/role-actions-toolbar";
 
 interface CompanyStats {
     active_roles: number;
@@ -548,12 +549,20 @@ export default function CompanyDashboard() {
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <Link
-                                                        href={`/portal/roles/${role.id}`}
-                                                        className="btn btn-ghost btn-sm btn-square"
-                                                    >
-                                                        <i className="fa-duotone fa-regular fa-chevron-right text-base-content/40"></i>
-                                                    </Link>
+                                                    <div className="flex gap-1 justify-end">
+                                                        <RoleActionsToolbar
+                                                            job={{
+                                                                id: role.id,
+                                                                title: role.title,
+                                                                company_id: '',
+                                                                status: role.status as any,
+                                                            }}
+                                                            variant="icon-only"
+                                                            layout="horizontal"
+                                                            size="xs"
+                                                            onRefresh={loadDashboardData}
+                                                        />
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
