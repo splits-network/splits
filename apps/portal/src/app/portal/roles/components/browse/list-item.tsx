@@ -47,7 +47,7 @@ export default function RoleListItem({
                 {item.company?.name || "Confidential Company"}
             </div>
 
-            <div className="flex items-center justify-between text-xs text-base-content/60 mt-2">
+            <div className="flex items-center justify-between text-base-content/60 mt-2">
                 <div className="flex items-center gap-3">
                     {item.location && (
                         <div className="flex items-center gap-1">
@@ -58,11 +58,14 @@ export default function RoleListItem({
                         </div>
                     )}
                 </div>
-                {(item.fee_percentage || 0) > 0 && (
-                    <div className="font-medium text-base-content/80">
-                        {item.fee_percentage}% Fee
-                    </div>
-                )}
+                <div>
+                    {/** TODO: let's do the calculation for max placement fee or potential commission like we do in hte rolecard here with the fee percentage*/}
+                    {(item.fee_percentage || 0) > 0 && (
+                        <div className="font-medium text-base-content/80">
+                            {item.fee_percentage}% Fee
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

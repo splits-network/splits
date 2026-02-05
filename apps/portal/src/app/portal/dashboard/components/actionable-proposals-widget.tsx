@@ -140,7 +140,7 @@ export default function ActionableProposalsWidget({ compact = true }: Actionable
                                 </td>
                                 <td>
                                     <Link
-                                        href={`/portal/applications/${application.id}`}
+                                        href={`/portal/applications?applicationId=${application.id}`}
                                         className="btn btn-sm btn-ghost"
                                     >
                                         <i className="fa-duotone fa-regular fa-arrow-right mr-1"></i>

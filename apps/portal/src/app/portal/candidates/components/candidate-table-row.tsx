@@ -13,19 +13,20 @@ import {
     ExpandedDetailSection,
 } from "@/components/ui/tables";
 import type { Candidate } from "./candidate-card";
-import { useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import { startChatConversation } from "@/lib/chat-start";
-import { useToast } from "@/lib/toast-context";
-import { useState } from "react";
-import { usePresence } from "@/hooks/use-presence";
-import { Presence } from "@/components/presense";
+import CandidateActionsToolbar from "./candidate-actions-toolbar";
 
 // ===== TYPES =====
 
 interface CandidateTableRowProps {
     candidate: Candidate;
     isRecruiter?: boolean;
+    onViewDetails?: (candidateId: string) => void;
+    onMessage?: (
+        conversationId: string,
+        candidateName: string,
+        candidateUserId: string,
+        context?: any,
+    ) => void;
 }
 
 // ===== COMPONENT =====
@@ -33,19 +34,9 @@ interface CandidateTableRowProps {
 export function CandidateTableRow({
     candidate,
     isRecruiter,
+    onViewDetails,
+    onMessage,
 }: CandidateTableRowProps) {
-    const { getToken } = useAuth();
-    const router = useRouter();
-    const toast = useToast();
-    const [startingChat, setStartingChat] = useState(false);
-    const canChat = Boolean(candidate.user_id);
-    const chatDisabledReason = canChat
-        ? null
-        : "This candidate isn't linked to a user yet.";
-    const presence = usePresence([candidate.user_id], { enabled: canChat });
-    const presenceStatus = candidate.user_id
-        ? presence[candidate.user_id]?.status
-        : undefined;
     // Get initials for avatar
     const getInitials = (name: string) => {
         const names = name.split(" ");
@@ -175,55 +166,18 @@ export function CandidateTableRow({
             </td>
             <td onClick={(e) => e.stopPropagation()}>
                 <div className="flex gap-1 justify-end">
-                    <span title={chatDisabledReason || undefined}>
-                        <button
-                            className="btn btn-outline btn-sm relative"
-                            title="Message Candidate"
-                            disabled={!canChat || startingChat}
-                            onClick={async (e) => {
-                                e.stopPropagation();
-                                if (!candidate.user_id) {
-                                    return;
-                                }
-                                try {
-                                    setStartingChat(true);
-                                    const conversationId =
-                                        await startChatConversation(
-                                            getToken,
-                                            candidate.user_id,
-                                            {
-                                                company_id:
-                                                    candidate.company_id ||
-                                                    null,
-                                            },
-                                        );
-                                    router.push(
-                                        `/portal/messages?conversationId=${conversationId}`,
-                                    );
-                                } catch (err: any) {
-                                    console.error("Failed to start chat:", err);
-                                    toast.error(
-                                        err?.message || "Failed to start chat",
-                                    );
-                                } finally {
-                                    setStartingChat(false);
-                                }
-                            }}
-                        >
-                            <Presence
-                                status={presenceStatus}
-                                className="absolute -top-1 -right-1"
-                            />
-                            <i className="fa-duotone fa-regular fa-messages text-xs"></i>
-                        </button>
-                    </span>
-                    <Link
-                        href={`/portal/candidates/${candidate.id}`}
-                        className="btn btn-primary btn-sm"
-                        title="View Details"
-                    >
-                        <i className="fa-duotone fa-regular fa-arrow-right text-xs"></i>
-                    </Link>
+                    <CandidateActionsToolbar
+                        candidate={candidate}
+                        variant="icon-only"
+                        layout="horizontal"
+                        size="sm"
+                        onViewDetails={onViewDetails}
+                        onMessage={onMessage}
+                        showActions={{
+                            edit: false,
+                            verify: false,
+                        }}
+                    />
                 </div>
             </td>
         </>
@@ -370,65 +324,14 @@ export function CandidateTableRow({
 
                     {/* Action Buttons */}
                     <div className="flex items-center gap-2 pt-2 border-t border-base-300">
-                        <Link
-                            href={`/portal/candidates/${candidate.id}`}
-                            className="btn btn-primary btn-sm gap-2"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <i className="fa-duotone fa-regular fa-eye"></i>
-                            View Pipeline
-                        </Link>
-                        <span title={chatDisabledReason || undefined}>
-                            <button
-                                className="btn btn-outline btn-sm gap-2"
-                                disabled={!canChat || startingChat}
-                                onClick={async (e) => {
-                                    e.stopPropagation();
-                                    if (!candidate.user_id) {
-                                        return;
-                                    }
-                                    try {
-                                        setStartingChat(true);
-                                        const conversationId =
-                                            await startChatConversation(
-                                                getToken,
-                                                candidate.user_id,
-                                                {
-                                                    company_id:
-                                                        candidate.company_id ||
-                                                        null,
-                                                },
-                                            );
-                                        router.push(
-                                            `/portal/messages?conversationId=${conversationId}`,
-                                        );
-                                    } catch (err: any) {
-                                        console.error(
-                                            "Failed to start chat:",
-                                            err,
-                                        );
-                                        toast.error(
-                                            err?.message ||
-                                                "Failed to start chat",
-                                        );
-                                    } finally {
-                                        setStartingChat(false);
-                                    }
-                                }}
-                            >
-                                <Presence status={presenceStatus} />
-                                <i className="fa-duotone fa-regular fa-messages"></i>
-                                Message
-                            </button>
-                        </span>
-                        <Link
-                            href={`/portal/candidates/${candidate.id}?tab=candidates`}
-                            className="btn btn-outline btn-sm gap-2"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <i className="fa-duotone fa-regular fa-user-plus"></i>
-                            Send Job
-                        </Link>
+                        <CandidateActionsToolbar
+                            candidate={candidate}
+                            variant="descriptive"
+                            layout="horizontal"
+                            size="sm"
+                            onViewDetails={onViewDetails}
+                            onMessage={onMessage}
+                        />
                     </div>
                 </ExpandedDetailSection>
             )}

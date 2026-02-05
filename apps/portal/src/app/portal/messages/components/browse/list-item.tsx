@@ -45,7 +45,7 @@ export default function MessageListItem({
             <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                     <div className="flex items-center gap-2 justify-between mb-2">
-                        <div>
+                        <div className="flex items-center gap-2 min-w-0 text-left">
                             <span className="font-semibold">{name}</span>
                             {participant.request_state === "pending" && (
                                 <span className="badge badge-warning badge-sm">

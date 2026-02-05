@@ -1,10 +1,16 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { DataRow, DataList, KeyMetric, MetricCard } from '@/components/ui/cards';
-import { formatRelativeTime } from '@/lib/utils';
-import { getRoleBadges } from '@/lib/utils/role-badges';
-import { getJobStatusBadge } from '@/lib/utils/badge-styles';
+import Link from "next/link";
+import {
+    DataRow,
+    DataList,
+    KeyMetric,
+    MetricCard,
+} from "@/components/ui/cards";
+import { formatRelativeTime } from "@/lib/utils";
+import { getRoleBadges } from "@/lib/utils/role-badges";
+import { getJobStatusBadge } from "@/lib/utils/badge-styles";
+import RoleActionsToolbar from "./role-actions-toolbar";
 
 // ===== TYPES =====
 
@@ -43,46 +49,58 @@ interface RoleCardProps {
     userRole: string | null;
     canManageRole: boolean | undefined;
     onEditRole?: (jobId: string) => void;
+    onViewDetails?: (jobId: string) => void;
+    onViewPipeline?: (jobId: string) => void;
 }
 
-export function RoleCard({ job, allJobs, userRole, canManageRole, onEditRole }: RoleCardProps) {
+export function RoleCard({
+    job,
+    allJobs,
+    userRole,
+    canManageRole,
+    onEditRole,
+    onViewDetails,
+    onViewPipeline,
+}: RoleCardProps) {
     const badges = getRoleBadges(job, allJobs);
-    const maxPayout = job.salary_max ? Math.round(job.fee_percentage * job.salary_max / 100) : null;
-    const isRecruiterView = userRole === 'recruiter' || userRole === 'platform_admin';
-    const isCompanyView = userRole === 'company_admin' || userRole === 'hiring_manager';
+    const maxPayout = job.salary_max
+        ? Math.round((job.fee_percentage * job.salary_max) / 100)
+        : null;
+    const isRecruiterView =
+        userRole === "recruiter" || userRole === "platform_admin";
+    const isCompanyView =
+        userRole === "company_admin" || userRole === "hiring_manager";
 
     // Get key metric based on user role
     const getKeyMetricLabel = () => {
-        if (isRecruiterView) return 'Potential Commission';
-        if (isCompanyView) return 'Placement Fee';
-        return 'Fee Rate';
+        if (isRecruiterView) return "Potential Commission";
+        if (isCompanyView) return "Placement Fee (max)";
+        return "Fee Rate";
     };
 
     const getKeyMetricValue = () => {
         if (isRecruiterView || isCompanyView) {
-            return maxPayout ? `$${maxPayout.toLocaleString()}` : '—';
+            return maxPayout ? `$${maxPayout.toLocaleString()}` : "—";
         }
         return `${job.fee_percentage}%`;
     };
 
     const getKeyMetricColor = () => {
-        if (isRecruiterView) return 'text-success';
-        if (isCompanyView) return 'text-info';
-        return 'text-base-content';
+        if (isRecruiterView) return "text-success";
+        if (isCompanyView) return "text-info";
+        return "text-base-content";
     };
 
-    const getProgressColor = (): 'success' | 'info' | 'primary' => {
-        if (isRecruiterView) return 'success';
-        if (isCompanyView) return 'info';
-        return 'primary';
+    const getProgressColor = (): "success" | "info" | "primary" => {
+        if (isRecruiterView) return "success";
+        if (isCompanyView) return "info";
+        return "primary";
     };
     return (
-        <MetricCard
-            className="group hover:shadow-lg transition-all duration-200"
-        >
+        <MetricCard className="group hover:shadow-lg transition-all duration-200">
             <MetricCard.Header>
                 <div className="flex items-center gap-3 min-w-0">
-                    <div className='flex justify-between w-full items-center'>
+                    <div className="flex justify-between w-full items-center">
                         {/* Company Avatar */}
                         <div className="flex items-center gap-3 min-w-0">
                             <div className="avatar avatar-placeholder shrink-0">
@@ -93,11 +111,16 @@ export function RoleCard({ job, allJobs, userRole, canManageRole, onEditRole }: 
                                             alt={job.company.name}
                                             className="w-full h-full object-contain rounded-lg"
                                             onError={(e) => {
-                                                e.currentTarget.style.display = 'none';
-                                                e.currentTarget.parentElement!.innerHTML = (job.company?.name || 'C')[0].toUpperCase();
+                                                e.currentTarget.style.display =
+                                                    "none";
+                                                e.currentTarget.parentElement!.innerHTML =
+                                                    (job.company?.name ||
+                                                        "C")[0].toUpperCase();
                                             }}
-                                        />) : (
-                                        (job.company?.name || 'C')[0].toUpperCase()
+                                        />
+                                    ) : (
+                                        (job.company?.name ||
+                                            "C")[0].toUpperCase()
                                     )}
                                 </div>
                             </div>
@@ -112,7 +135,9 @@ export function RoleCard({ job, allJobs, userRole, canManageRole, onEditRole }: 
                         </div>
                         <div className="flex items-center gap-2 ml-4">
                             {/* Status Badge */}
-                            <div className={`badge ${getJobStatusBadge(job.status)} shrink-0`}>
+                            <div
+                                className={`badge ${getJobStatusBadge(job.status)} shrink-0`}
+                            >
                                 {job.status}
                             </div>
                         </div>
@@ -125,7 +150,11 @@ export function RoleCard({ job, allJobs, userRole, canManageRole, onEditRole }: 
                     label={getKeyMetricLabel()}
                     value={getKeyMetricValue()}
                     valueColor={getKeyMetricColor()}
-                    progress={job.application_count ? Math.min((job.application_count / 10) * 100, 100) : undefined}
+                    progress={
+                        job.application_count
+                            ? Math.min((job.application_count / 10) * 100, 100)
+                            : undefined
+                    }
                     progressColor={getProgressColor()}
                 />
                 {/* Data Rows */}
@@ -161,11 +190,12 @@ export function RoleCard({ job, allJobs, userRole, canManageRole, onEditRole }: 
                         {badges.map((badge: Badge, idx: number) => (
                             <span
                                 key={idx}
-
-                                className={`badge badge-sm ${badge.class} gap-1 ${badge.animated ? 'animate-pulse' : ''}`}
+                                className={`badge badge-sm ${badge.class} gap-1 ${badge.animated ? "animate-pulse" : ""}`}
                                 title={badge.tooltip}
                             >
-                                <i className={`fa-duotone fa-regular ${badge.icon}`}></i>
+                                <i
+                                    className={`fa-duotone fa-regular ${badge.icon}`}
+                                ></i>
                                 {badge.text}
                             </span>
                         ))}
@@ -174,28 +204,21 @@ export function RoleCard({ job, allJobs, userRole, canManageRole, onEditRole }: 
             </MetricCard.Body>
             <MetricCard.Footer>
                 <div className="flex items-center justify-between w-full">
-                    <span className="text-xs text-base-content/50">
+                    <span className=" text-base-content/50">
                         Posted {formatRelativeTime(job.created_at)}
                     </span>
                     <div className="flex items-center gap-2">
-                        {canManageRole && onEditRole && (
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    onEditRole(job.id);
-                                }}
-                                className="btn btn-ghost btn-xs"
-                                title="Edit Role"
-                            >
-                                <i className="fa-duotone fa-regular fa-pen"></i>
-                            </button>
-                        )}
-                        <span className="text-primary text-sm font-medium group-hover:underline">
-                            <Link href={`/portal/roles/${job.id}`} className='btn btn-primary btn-sm'>
-                                View Details →
-                            </Link>
-                        </span>
+                        <RoleActionsToolbar
+                            job={job}
+                            variant="icon-only"
+                            layout="horizontal"
+                            size="xs"
+                            onViewDetails={onViewDetails}
+                            onViewPipeline={onViewPipeline}
+                            showActions={{
+                                viewPipeline: true,
+                            }}
+                        />
                     </div>
                 </div>
             </MetricCard.Footer>

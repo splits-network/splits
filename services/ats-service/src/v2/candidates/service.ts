@@ -155,6 +155,8 @@ export class CandidateServiceV2 {
             throw new Error('First name cannot be empty');
         }
 
+
+
         const userContext = await this.accessResolver.resolve(clerkUserId);
         const updatedCandidate = await this.repository.updateCandidate(id, updates);
 
@@ -210,5 +212,61 @@ export class CandidateServiceV2 {
             return [];
         }
         return this.repository.getRecentCandidateApplications(userContext.candidateId, limit);
+    }
+
+    /**
+     * Get all resumes for a candidate (for primary resume selection)
+     */
+    async getCandidateResumes(candidateId: string, clerkUserId?: string): Promise<any[]> {
+        // Verify access to this candidate
+        if (clerkUserId) {
+            const userContext = await this.accessResolver.resolve(clerkUserId);
+            const canAccess =
+                userContext.isPlatformAdmin ||
+                userContext.recruiterId !== null ||
+                userContext.roles.some(role =>
+                    ['company_admin', 'hiring_manager', 'platform_admin'].includes(role)
+                ) ||
+                userContext.candidateId === candidateId;
+
+            if (!canAccess) {
+                throw new Error('You do not have permission to view this candidates documents');
+            }
+        }
+
+        return this.repository.getCandidateResumes(candidateId);
+    }
+
+    /**
+     * Set primary resume for a candidate using document metadata
+     */
+    async setPrimaryResume(candidateId: string, resumeId: string, clerkUserId: string): Promise<any> {
+        // Verify access and that the resume belongs to the candidate
+        const userContext = await this.accessResolver.resolve(clerkUserId);
+        const canAccess =
+            userContext.isPlatformAdmin ||
+            userContext.candidateId === candidateId;
+
+        if (!canAccess) {
+            throw new Error('You do not have permission to update this candidate\'s primary resume');
+        }
+
+        return this.repository.setCandidatePrimaryResume(candidateId, resumeId);
+    }
+
+    /**
+     * Clear primary resume for a candidate
+     */
+    async clearPrimaryResume(candidateId: string, clerkUserId: string): Promise<any> {
+        const userContext = await this.accessResolver.resolve(clerkUserId);
+        const canAccess =
+            userContext.isPlatformAdmin ||
+            userContext.candidateId === candidateId;
+
+        if (!canAccess) {
+            throw new Error('You do not have permission to update this candidate\'s primary resume');
+        }
+
+        return this.repository.clearCandidatePrimaryResume(candidateId);
     }
 }

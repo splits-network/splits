@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 interface PreScreenQuestion {
     id: string;
     question_text: string;
-    question_type: 'text' | 'yes_no' | 'select' | 'multi_select';
+    question_type: "text" | "yes_no" | "select" | "multi_select";
 }
 
 interface Answer {
@@ -17,7 +17,6 @@ interface StepReviewProps {
     job: any;
     documents: any[];
     selectedDocuments: string[];
-    primaryResumeId: string | null;
     questions: PreScreenQuestion[];
     answers: Answer[];
     additionalNotes: string;
@@ -30,7 +29,6 @@ export default function StepReview({
     job,
     documents,
     selectedDocuments,
-    primaryResumeId,
     questions,
     answers,
     additionalNotes,
@@ -41,19 +39,26 @@ export default function StepReview({
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const selectedDocs = documents.filter(d => selectedDocuments.includes(d.id));
-    const primaryResume = documents.find(d => d.id === primaryResumeId);
+    const selectedDocs = documents.filter((d) =>
+        selectedDocuments.includes(d.id),
+    );
+    const selectedResume = selectedDocs.find(
+        (d) => d.document_type === "resume",
+    );
 
     const getQuestionText = (questionId: string) => {
-        return questions.find(q => q.id === questionId)?.question_text || 'Unknown question';
+        return (
+            questions.find((q) => q.id === questionId)?.question_text ||
+            "Unknown question"
+        );
     };
 
     const formatAnswer = (answer: string | string[] | boolean) => {
-        if (typeof answer === 'boolean') {
-            return answer ? 'Yes' : 'No';
+        if (typeof answer === "boolean") {
+            return answer ? "Yes" : "No";
         }
         if (Array.isArray(answer)) {
-            return answer.join(', ');
+            return answer.join(", ");
         }
         return answer;
     };
@@ -66,7 +71,10 @@ export default function StepReview({
             await onSubmit();
             // Success - parent modal will handle navigation
         } catch (err: any) {
-            setError(err.message || 'Failed to submit application. Please try again.');
+            setError(
+                err.message ||
+                    "Failed to submit application. Please try again.",
+            );
             setSubmitting(false);
         }
     };
@@ -79,7 +87,7 @@ export default function StepReview({
             await onSaveAsDraft();
             // Success - parent modal will handle navigation
         } catch (err: any) {
-            setError(err.message || 'Failed to save draft. Please try again.');
+            setError(err.message || "Failed to save draft. Please try again.");
             setSubmitting(false);
         }
     };
@@ -87,7 +95,9 @@ export default function StepReview({
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-semibold mb-2">Review Your Application</h2>
+                <h2 className="text-2xl font-semibold mb-2">
+                    Review Your Application
+                </h2>
                 <p className="text-base-content/70">
                     Please review your application before submitting.
                 </p>
@@ -107,11 +117,12 @@ export default function StepReview({
                     <div>
                         <div className="font-semibold">{job.title}</div>
                         <div className="text-sm text-base-content/70">
-                            {job.company?.name || 'Unknown Company'}
+                            {job.company?.name || "Unknown Company"}
                         </div>
                         {job.location && (
                             <div className="text-sm text-base-content/60">
-                                <i className="fa-duotone fa-regular fa-location-dot"></i> {job.location}
+                                <i className="fa-duotone fa-regular fa-location-dot"></i>{" "}
+                                {job.location}
                             </div>
                         )}
                     </div>
@@ -124,13 +135,16 @@ export default function StepReview({
                     <h3 className="card-title text-lg">Documents</h3>
                     <div className="space-y-2">
                         {selectedDocs.map((doc) => (
-                            <div key={doc.id} className="flex items-center gap-2">
+                            <div
+                                key={doc.id}
+                                className="flex items-center gap-2"
+                            >
                                 <i className="fa-duotone fa-regular fa-file text-base-content/60"></i>
                                 <span>{doc.file_name}</span>
-                                {doc.id === primaryResumeId && (
+                                {doc.document_type === "resume" && (
                                     <span className="badge badge-primary badge-sm">
-                                        <i className="fa-duotone fa-regular fa-star"></i>
-                                        Primary
+                                        <i className="fa-duotone fa-regular fa-file-text"></i>
+                                        Resume
                                     </span>
                                 )}
                             </div>
@@ -143,12 +157,15 @@ export default function StepReview({
             {answers.length > 0 && (
                 <div className="card bg-base-200">
                     <div className="card-body">
-                        <h3 className="card-title text-lg">Pre-Screening Answers</h3>
+                        <h3 className="card-title text-lg">
+                            Pre-Screening Answers
+                        </h3>
                         <div className="space-y-3">
                             {answers.map((answer, index) => (
                                 <div key={answer.question_id}>
                                     <div className="font-medium text-sm mb-1">
-                                        {index + 1}. {getQuestionText(answer.question_id)}
+                                        {index + 1}.{" "}
+                                        {getQuestionText(answer.question_id)}
                                     </div>
                                     <div className="text-base-content/70">
                                         {formatAnswer(answer.answer)}
@@ -165,7 +182,9 @@ export default function StepReview({
                 <div className="card bg-base-200">
                     <div className="card-body">
                         <h3 className="card-title text-lg">Additional Notes</h3>
-                        <p className="text-base-content/70 whitespace-pre-wrap">{additionalNotes}</p>
+                        <p className="text-base-content/70 whitespace-pre-wrap">
+                            {additionalNotes}
+                        </p>
                     </div>
                 </div>
             )}
@@ -178,7 +197,9 @@ export default function StepReview({
                     <ul className="list-disc list-inside text-sm mt-1">
                         <li>Review all information for accuracy</li>
                         <li>Ensure you've attached the correct documents</li>
-                        <li>Double-check your answers to pre-screening questions</li>
+                        <li>
+                            Double-check your answers to pre-screening questions
+                        </li>
                     </ul>
                 </div>
             </div>

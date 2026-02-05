@@ -528,4 +528,109 @@ export class CandidateRepository {
             is_new: new Date(candidate.created_at) > sevenDaysAgo,
         }));
     }
+
+    /**
+     * Get all resumes for a candidate with primary flag
+     */
+    async getCandidateResumes(candidateId: string): Promise<any[]> {
+        const { data: resumes, error } = await this.supabase
+
+            .from('documents')
+            .select('*')
+            .eq('entity_type', 'candidate')
+            .eq('entity_id', candidateId)
+            .eq('document_type', 'resume')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            throw new Error(`Failed to fetch candidate resumes: ${error.message}`);
+        }
+
+        return (resumes || []).map(resume => ({
+            ...resume,
+            is_primary: resume.metadata?.is_primary_for_candidate === true
+        }));
+    }
+
+    /**
+     * Set primary resume for a candidate using metadata
+     */
+    async setCandidatePrimaryResume(candidateId: string, resumeId: string): Promise<any> {
+        // First, verify the resume belongs to this candidate
+        const { data: resume, error: resumeError } = await this.supabase
+
+            .from('documents')
+            .select('id, metadata')
+            .eq('id', resumeId)
+            .eq('entity_type', 'candidate')
+            .eq('entity_id', candidateId)
+            .eq('document_type', 'resume')
+            .single();
+
+        if (resumeError || !resume) {
+            throw new Error('Resume not found or does not belong to this candidate');
+        }
+
+        // Clear any existing primary resume for this candidate
+        await this.clearCandidatePrimaryResume(candidateId);
+
+        // Set the new primary resume
+        const updatedMetadata = {
+            ...resume.metadata,
+            is_primary_for_candidate: true
+        };
+
+        const { data: updatedResume, error: updateError } = await this.supabase
+
+            .from('documents')
+            .update({ metadata: updatedMetadata })
+            .eq('id', resumeId)
+            .select()
+            .single();
+
+        if (updateError) {
+            throw new Error(`Failed to set primary resume: ${updateError.message}`);
+        }
+
+        return {
+            ...updatedResume,
+            is_primary: true
+        };
+    }
+
+    /**
+     * Clear primary resume for a candidate
+     */
+    async clearCandidatePrimaryResume(candidateId: string): Promise<void> {
+        // Get all candidate resumes
+        const { data: resumes, error } = await this.supabase
+
+            .from('documents')
+            .select('id, metadata')
+            .eq('entity_type', 'candidate')
+            .eq('entity_id', candidateId)
+            .eq('document_type', 'resume');
+
+        if (error) {
+            throw new Error(`Failed to fetch candidate resumes: ${error.message}`);
+        }
+
+        // Clear primary flag from all resumes
+        if (resumes && resumes.length > 0) {
+            const updates = resumes
+                .filter(resume => resume.metadata?.is_primary_for_candidate === true)
+                .map(resume => {
+                    const updatedMetadata = { ...resume.metadata };
+                    delete updatedMetadata.is_primary_for_candidate;
+
+                    return this.supabase
+
+                        .from('documents')
+                        .update({ metadata: updatedMetadata })
+                        .eq('id', resume.id);
+                });
+
+            await Promise.all(updates);
+        }
+    }
 }

@@ -1,14 +1,17 @@
 import { Application } from "./types";
 import { getApplicationStageBadge } from "@/lib/utils/badge-styles";
+import ApplicationActionsToolbar from "../application-actions-toolbar";
 
 interface DetailHeaderProps {
     application: Application;
     onClose: () => void;
+    onRefresh?: () => void;
 }
 
 export default function DetailHeader({
     application,
     onClose,
+    onRefresh,
 }: DetailHeaderProps) {
     if (!application) {
         return null;
@@ -68,10 +71,7 @@ export default function DetailHeader({
                             <i className="fa-duotone fa-brain text-accent" />
                             <span className="text-base-content/80">
                                 AI Fit Score:{" "}
-                                {Math.round(
-                                    application.ai_review.fit_score * 100,
-                                )}
-                                %
+                                {Math.round(application.ai_review.fit_score)}%
                             </span>
                             <span
                                 className={`badge badge-xs ${
@@ -97,13 +97,16 @@ export default function DetailHeader({
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-                <button className="btn btn-ghost btn-sm hidden sm:inline-flex">
-                    <i className="fa-duotone fa-regular fa-comment" />
-                    Add Note
-                </button>
-                <button className="btn btn-primary btn-sm">
-                    Advance Stage
-                </button>
+                <ApplicationActionsToolbar
+                    application={application}
+                    variant="descriptive"
+                    layout="horizontal"
+                    size="sm"
+                    showActions={{
+                        viewDetails: false, // Already in detail view
+                    }}
+                    onRefresh={onRefresh}
+                />
             </div>
         </div>
     );

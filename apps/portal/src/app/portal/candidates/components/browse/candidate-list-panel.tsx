@@ -17,11 +17,18 @@ import { Candidate, CandidateFilters } from "./types";
 interface CandidateListPanelProps {
     selectedId: string | null;
     onSelect: (id: string) => void;
+    onMessage?: (
+        conversationId: string,
+        candidateName: string,
+        candidateUserId: string,
+        context?: any,
+    ) => void;
 }
 
 export default function CandidateListPanel({
     selectedId,
     onSelect,
+    onMessage,
 }: CandidateListPanelProps) {
     const { getToken } = useAuth();
     const listRef = useRef<HTMLDivElement>(null);
@@ -221,14 +228,17 @@ export default function CandidateListPanel({
                     </div>
                 )}
 
-                {candidates.map((candidate) => (
-                    <CandidateListItem
-                        key={candidate.id}
-                        candidate={candidate}
-                        isSelected={selectedId === candidate.id}
-                        onSelect={onSelect}
-                    />
-                ))}
+                {candidates.map((candidate) => {
+                    return (
+                        <CandidateListItem
+                            key={candidate.id}
+                            candidate={candidate}
+                            isSelected={selectedId === candidate.id}
+                            onSelect={onSelect}
+                            onMessage={onMessage}
+                        />
+                    );
+                })}
 
                 {!loading && candidates.length > 0 && (
                     <div className="p-4 border-t border-base-300 flex justify-center">

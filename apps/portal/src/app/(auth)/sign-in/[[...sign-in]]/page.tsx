@@ -2,7 +2,7 @@
 
 import { useSignIn, useAuth, useClerk } from "@clerk/nextjs";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function SignInPage() {
@@ -148,10 +148,12 @@ export default function SignInPage() {
         });
     };
 
-    // Show message if user is already signed in
-    if (isLoaded && isSignedIn) {
-        router.push(redirectUrl || "/portal/dashboard");
-    }
+    // Handle redirect when user is already signed in
+    useEffect(() => {
+        if (isLoaded && isSignedIn) {
+            router.push(redirectUrl || "/portal/dashboard");
+        }
+    }, [isLoaded, isSignedIn, router, redirectUrl]);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">

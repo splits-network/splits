@@ -7,14 +7,7 @@ import {
     EntityCard,
 } from "@/components/ui/cards";
 import { formatRelativeTime } from "@/lib/utils";
-import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import { startChatConversation } from "@/lib/chat-start";
-import { useToast } from "@/lib/toast-context";
-import { useState } from "react";
-import { usePresence } from "@/hooks/use-presence";
-import { Presence } from "@/components/presense";
+import CandidateActionsToolbar from "./candidate-actions-toolbar";
 
 export interface Candidate {
     id: string;
@@ -132,22 +125,21 @@ function getCandidateBadges(candidate: Candidate): Badge[] {
 
 interface CandidateCardProps {
     candidate: Candidate;
+    onViewDetails?: (candidateId: string) => void;
+    onMessage?: (
+        conversationId: string,
+        candidateName: string,
+        candidateUserId: string,
+        context?: any,
+    ) => void;
 }
 
-export default function CandidateCard({ candidate }: CandidateCardProps) {
-    const { getToken } = useAuth();
-    const router = useRouter();
-    const toast = useToast();
-    const [startingChat, setStartingChat] = useState(false);
+export default function CandidateCard({
+    candidate,
+    onViewDetails,
+    onMessage,
+}: CandidateCardProps) {
     const badges = getCandidateBadges(candidate);
-    const canChat = Boolean(candidate.user_id);
-    const chatDisabledReason = canChat
-        ? null
-        : "This candidate isn't linked to a user yet.";
-    const presence = usePresence([candidate.user_id], { enabled: canChat });
-    const presenceStatus = candidate.user_id
-        ? presence[candidate.user_id]?.status
-        : undefined;
 
     // Compute initials for avatar
     const initials = (() => {
@@ -321,62 +313,19 @@ export default function CandidateCard({ candidate }: CandidateCardProps) {
                     <span className="text-xs text-base-content/50">
                         Added {formatRelativeTime(candidate.created_at)}
                     </span>
-                    <div className="flex items-center gap-2">
-                        <span title={chatDisabledReason || undefined}>
-                            <button
-                                className="btn btn-outline btn-sm relative"
-                                disabled={!canChat || startingChat}
-                                onClick={async (e) => {
-                                    e.stopPropagation();
-                                    if (!candidate.user_id) {
-                                        return;
-                                    }
-                                    try {
-                                        setStartingChat(true);
-                                        const conversationId =
-                                            await startChatConversation(
-                                                getToken,
-                                                candidate.user_id,
-                                                {
-                                                    company_id:
-                                                        candidate.company_id ||
-                                                        null,
-                                                },
-                                            );
-                                        router.push(
-                                            `/portal/messages?conversationId=${conversationId}`,
-                                        );
-                                    } catch (err: any) {
-                                        console.error(
-                                            "Failed to start chat:",
-                                            err,
-                                        );
-                                        toast.error(
-                                            err?.message ||
-                                                "Failed to start chat",
-                                        );
-                                    } finally {
-                                        setStartingChat(false);
-                                    }
-                                }}
-                            >
-                                <Presence
-                                    status={presenceStatus}
-                                    className="absolute -top-1 -right-1"
-                                />
-                                {startingChat ? (
-                                    <span className="loading loading-spinner loading-xs"></span>
-                                ) : (
-                                    <i className="fa-duotone fa-regular fa-messages"></i>
-                                )}
-                            </button>
-                        </span>
-                        <Link
-                            href={`/portal/candidates/${candidate.id}`}
-                            className="btn btn-primary btn-sm"
-                        >
-                            View Details →
-                        </Link>
+                    <div onClick={(e) => e.stopPropagation()}>
+                        <CandidateActionsToolbar
+                            candidate={candidate}
+                            variant="icon-only"
+                            layout="horizontal"
+                            size="xs"
+                            onViewDetails={onViewDetails}
+                            onMessage={onMessage}
+                            showActions={{
+                                edit: false,
+                                verify: false,
+                            }}
+                        />
                     </div>
                 </div>
             </EntityCard.Footer>

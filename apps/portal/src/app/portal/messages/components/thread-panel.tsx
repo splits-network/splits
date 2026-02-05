@@ -71,6 +71,7 @@ export default function ThreadPanel({
     const [jobTitle, setJobTitle] = useState<string | null>(null);
     const [draft, setDraft] = useState("");
     const [sending, setSending] = useState(false);
+    const [useMarkdownEditor, setUseMarkdownEditor] = useState(false);
     const messagesRef = useRef<HTMLDivElement | null>(null);
     const [isAtBottom, setIsAtBottom] = useState(true);
     const initialScrollDoneRef = useRef(false);
@@ -92,7 +93,9 @@ export default function ThreadPanel({
         // New format: same, but conversation includes participant_a and participant_b
         // If old format (no participant_a), we can still use it but won't have inline user data
         if (payload && !payload.conversation?.participant_a) {
-            console.warn('Received old API format without inline participant data');
+            console.warn(
+                "Received old API format without inline participant data",
+            );
         }
 
         setData(payload as ResyncData);
@@ -140,7 +143,6 @@ export default function ThreadPanel({
             }
         }
     };
-
 
     const markRead = async (lastReadMessageId: string) => {
         const token = await getToken();
@@ -204,7 +206,7 @@ export default function ThreadPanel({
         return {
             id: otherUserId,
             name: null,
-            email: 'Loading...',
+            email: "Loading...",
         };
     }, [data, otherUserId]);
 
@@ -567,7 +569,7 @@ export default function ThreadPanel({
                             {data.conversation.application_id && (
                                 <Link
                                     className="link link-hover"
-                                    href={`/portal/applications/${data.conversation.application_id}`}
+                                    href={`/portal/applications?applicationId=${data.conversation.application_id}`}
                                 >
                                     Application:{" "}
                                     {applicationTitle ||
@@ -602,8 +604,14 @@ export default function ThreadPanel({
                         </div>
                     )}
                     {data.messages.length === 0 ? (
-                        <div className="text-center text-base-content/50">
-                            No messages yet.
+                        <div className="flex items-center justify-center h-full text-center text-base-content/50">
+                            <div>
+                                <i className="fa-duotone fa-regular fa-messages text-4xl mb-3 opacity-30"></i>
+                                <p>No messages yet.</p>
+                                <p className="text-sm mt-1 opacity-60">
+                                    Start the conversation!
+                                </p>
+                            </div>
                         </div>
                     ) : (
                         data.messages.map((msg) => {
@@ -671,32 +679,70 @@ export default function ThreadPanel({
                 </div>
             </div>
 
-            <div className="border-t border-base-300 bg-base-100/80 backdrop-blur-sm p-4">
+            <div className="border-t border-base-300 bg-base-100 p-4 mt-auto">
                 <div className="flex gap-2 items-start">
-                    <MarkdownEditor
-                        className="flex-1"
-                        value={draft}
-                        onChange={setDraft}
-                        height={140}
-                        preview="edit"
-                        disabled={disabled}
-                        placeholder={
-                            requestPending
-                                ? "Accept this request to reply."
-                                : requestDeclined
-                                  ? "Conversation declined."
-                                  : data.participant.archived_at
-                                    ? "Unarchive to reply."
-                                    : "Type your message..."
-                        }
-                    />
-                    <button
-                        className="btn btn-primary"
-                        onClick={handleSend}
-                        disabled={disabled || sending}
-                    >
-                        Send
-                    </button>
+                    <div className="flex-1 space-y-2 relative">
+                        {useMarkdownEditor ? (
+                            <MarkdownEditor
+                                className="flex-1"
+                                value={draft}
+                                onChange={setDraft}
+                                height={140}
+                                preview="edit"
+                                disabled={disabled}
+                                placeholder={
+                                    requestPending
+                                        ? "Accept this request to reply."
+                                        : requestDeclined
+                                          ? "Conversation declined."
+                                          : data.participant.archived_at
+                                            ? "Unarchive to reply."
+                                            : "Type your message..."
+                                }
+                            />
+                        ) : (
+                            <textarea
+                                className="textarea textarea-bordered w-full"
+                                value={draft}
+                                onChange={(e) => setDraft(e.target.value)}
+                                rows={5}
+                                disabled={disabled}
+                                placeholder={
+                                    requestPending
+                                        ? "Accept this request to reply."
+                                        : requestDeclined
+                                          ? "Conversation declined."
+                                          : data.participant.archived_at
+                                            ? "Unarchive to reply."
+                                            : "Type your message..."
+                                }
+                            />
+                        )}
+                        <button
+                            className="btn btn-primary btn-circle btn-soft absolute bottom-4 right-2"
+                            onClick={handleSend}
+                            disabled={disabled || sending}
+                            title={"Send message"}
+                        >
+                            <i className="fa-duotone fa-paper-plane" />
+                        </button>
+                    </div>
+                </div>
+                <div className="flex items-center gap-2 pt-2">
+                    <label className="label cursor-pointer gap-2">
+                        <input
+                            type="checkbox"
+                            className="toggle toggle-sm"
+                            checked={useMarkdownEditor}
+                            onChange={(e) =>
+                                setUseMarkdownEditor(e.target.checked)
+                            }
+                            disabled={disabled}
+                        />
+                        <span className="label-text text-sm">
+                            Markdown editor
+                        </span>
+                    </label>
                 </div>
             </div>
         </div>

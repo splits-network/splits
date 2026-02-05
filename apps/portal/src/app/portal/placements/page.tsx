@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
-import Link from "next/link";
+import { useMemo, useState } from "react";
 import {
     useStandardList,
     PaginationControls,
@@ -12,40 +11,15 @@ import {
     ErrorState,
 } from "@/hooks/use-standard-list";
 import { StatCard, StatCardGrid } from "@/components/ui/cards";
-import { formatRelativeTime } from "@/lib/utils";
 import { PageTitle } from "@/components/page-title";
 
-// ===== TYPES =====
+// Import new components
+import PlacementCard from "./components/placement-card";
+import PlacementTableRow from "./components/placement-table-row";
+import PlacementDetailSidebar from "./components/placement-detail-sidebar";
+import { Placement } from "./components/placement-actions-toolbar";
 
-interface Placement {
-    id: string;
-    job_id: string;
-    candidate_id: string;
-    company_id: string;
-    recruiter_id: string;
-    hired_at: string;
-    salary: number;
-    fee_percentage: number;
-    fee_amount: number;
-    recruiter_share: number;
-    platform_share: number;
-    status: string;
-    created_at: string;
-    updated_at: string;
-    candidate?: {
-        id: string;
-        full_name: string;
-        email: string;
-    };
-    job?: {
-        id: string;
-        title: string;
-        company?: {
-            id: string;
-            name: string;
-        };
-    };
-}
+// ===== TYPES =====
 
 interface PlacementFilters {
     status?: string;
@@ -59,6 +33,9 @@ export default function PlacementsPage() {
         () => ({ status: undefined }),
         [],
     );
+
+    // Sidebar state
+    const [sidebarPlacementId, setSidebarPlacementId] = useState<string | null>(null);
 
     const {
         data: placements,
@@ -90,6 +67,15 @@ export default function PlacementsPage() {
         syncToUrl: true,
         viewModeKey: "placementsViewMode",
     });
+
+    // Sidebar handlers
+    const handleViewDetails = (placementId: string) => {
+        setSidebarPlacementId(placementId);
+    };
+
+    const handleCloseSidebar = () => {
+        setSidebarPlacementId(null);
+    };
 
     // Calculate earnings statistics from loaded data (page-level stats)
     const pageEarnings = placements.reduce(
@@ -211,6 +197,8 @@ export default function PlacementsPage() {
                             <PlacementCard
                                 key={placement.id}
                                 placement={placement}
+                                onViewDetails={handleViewDetails}
+                                onRefresh={refresh}
                             />
                         ))}
                     </div>
@@ -223,6 +211,7 @@ export default function PlacementsPage() {
                             <table className="table">
                                 <thead>
                                     <tr>
+                                        <th className="w-10"></th>
                                         <th
                                             className="cursor-pointer hover:bg-base-200"
                                             onClick={() =>
@@ -261,6 +250,7 @@ export default function PlacementsPage() {
                                                 className={`fa-duotone fa-regular ${getSortIcon("recruiter_share")} ml-2 text-xs`}
                                             ></i>
                                         </th>
+                                        <th className="text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -268,6 +258,8 @@ export default function PlacementsPage() {
                                         <PlacementTableRow
                                             key={placement.id}
                                             placement={placement}
+                                            onViewDetails={handleViewDetails}
+                                            onRefresh={refresh}
                                         />
                                     ))}
                                 </tbody>
@@ -300,117 +292,12 @@ export default function PlacementsPage() {
                     loading={loading}
                 />
             </div>
+
+            {/* Detail Sidebar */}
+            <PlacementDetailSidebar
+                placementId={sidebarPlacementId}
+                onClose={handleCloseSidebar}
+            />
         </>
-    );
-}
-
-// ===== SUB-COMPONENTS =====
-
-interface PlacementCardProps {
-    placement: Placement;
-}
-
-function PlacementCard({ placement }: PlacementCardProps) {
-    const candidateName = placement.candidate?.full_name || "Unknown Candidate";
-    const jobTitle = placement.job?.title || "Unknown Role";
-    const companyName = placement.job?.company?.name || "Unknown Company";
-
-    return (
-        <div className="card bg-base-100 shadow hover:shadow-lg transition-shadow">
-            <div className="card-body">
-                <div className="flex justify-between items-start mb-4">
-                    <div className="badge badge-success badge-lg">
-                        ${(placement.recruiter_share || 0).toLocaleString()}
-                    </div>
-                    <div className="text-sm text-base-content/70">
-                        {new Date(placement.hired_at).toLocaleDateString()}
-                    </div>
-                </div>
-
-                <h3 className="card-title text-xl">{candidateName}</h3>
-
-                <div className="space-y-2 text-sm">
-                    <div className="flex items-start gap-2">
-                        <i className="fa-duotone fa-regular fa-briefcase text-base-content/50 mt-1"></i>
-                        <div>
-                            <div className="font-medium">{jobTitle}</div>
-                            <div className="text-base-content/70">
-                                {companyName}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <i className="fa-duotone fa-regular fa-dollar-sign text-base-content/50"></i>
-                        <span>
-                            Salary: ${(placement.salary || 0).toLocaleString()}
-                        </span>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <i className="fa-duotone fa-regular fa-percent text-base-content/50"></i>
-                        <span>Fee: {placement.fee_percentage || 0}%</span>
-                    </div>
-                </div>
-
-                <div className="divider my-2"></div>
-
-                <div className="flex justify-between items-center text-xs">
-                    <span className="text-base-content/70">
-                        Total Fee: $
-                        {(placement.fee_amount || 0).toLocaleString()}
-                    </span>
-                    <span className="font-semibold text-success">
-                        Your Share: $
-                        {(placement.recruiter_share || 0).toLocaleString()}
-                    </span>
-                </div>
-
-                {placement.status && (
-                    <div className="mt-2">
-                        <span
-                            className={`badge ${
-                                placement.status === "completed"
-                                    ? "badge-success"
-                                    : placement.status === "active"
-                                      ? "badge-info"
-                                      : "badge-ghost"
-                            }`}
-                        >
-                            {placement.status}
-                        </span>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-}
-
-interface PlacementTableRowProps {
-    placement: Placement;
-}
-
-function PlacementTableRow({ placement }: PlacementTableRowProps) {
-    const candidateName = placement.candidate?.full_name || "Unknown Candidate";
-    const jobTitle = placement.job?.title || "Unknown Role";
-    const companyName = placement.job?.company?.name || "Unknown Company";
-
-    return (
-        <tr className="hover">
-            <td>{new Date(placement.hired_at).toLocaleDateString()}</td>
-            <td className="font-medium">{candidateName}</td>
-            <td>{jobTitle}</td>
-            <td>{companyName}</td>
-            <td className="text-right">
-                ${(placement.salary || 0).toLocaleString()}
-            </td>
-            <td className="text-right">{placement.fee_percentage || 0}%</td>
-            <td className="text-right">
-                ${(placement.fee_amount || 0).toLocaleString()}
-            </td>
-            <td className="text-right font-semibold text-success">
-                ${(placement.recruiter_share || 0).toLocaleString()}
-            </td>
-        </tr>
     );
 }
