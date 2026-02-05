@@ -565,7 +565,7 @@ services:
       dockerfile: apps/portal/Dockerfile
       target: development
       args:
-        NEXT_PUBLIC_API_URL: http://localhost:3000/api
+        NEXT_PUBLIC_API_URL: http://localhost:3000
         SUPABASE_URL: ${SUPABASE_URL}
         SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
         SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
@@ -574,7 +574,7 @@ services:
       - "3100:3100"
     environment:
       NODE_ENV: development
-      NEXT_PUBLIC_API_URL: http://localhost:3000/api
+      NEXT_PUBLIC_API_URL: http://localhost:3000
       NEXT_PUBLIC_API_GATEWAY_URL: http://api-gateway:3000
       NEXT_PUBLIC_CHAT_GATEWAY_URL: ws://chat-gateway:3020/ws/chat
       CLERK_SECRET_KEY: ${SPLITS_CLERK_SECRET_KEY}
@@ -613,7 +613,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3101
-      NEXT_PUBLIC_API_URL: http://localhost:3000/api
+      NEXT_PUBLIC_API_URL: http://localhost:3000
       NEXT_PUBLIC_API_GATEWAY_URL: http://api-gateway:3000
       NEXT_PUBLIC_CHAT_GATEWAY_URL: ws://chat-gateway:3020/ws/chat
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${APP_CLERK_PUBLISHABLE_KEY}
