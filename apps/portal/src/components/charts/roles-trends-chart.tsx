@@ -14,6 +14,7 @@ import {
 import { dataset, registerChart } from '../charts/chart-options';
 import { Line } from 'react-chartjs-2';
 import type { Job } from '../../app/portal/roles/components/role-card';
+import { ChartLoadingState } from '@splits-network/shared-ui';
 
 // Register Chart.js components
 ChartJS.register(
@@ -288,11 +289,7 @@ export function RolesTrendsChart({ jobs, loading, trendPeriod, onTrendPeriodChan
 
     // Loading state
     if (loading) {
-        return (
-            <div className="flex items-center justify-center h-40">
-                <span className="loading loading-spinner loading-md text-primary"></span>
-            </div>
-        );
+        return <ChartLoadingState height="10rem" />;
     }
 
     // Empty state

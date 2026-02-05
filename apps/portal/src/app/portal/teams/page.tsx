@@ -328,7 +328,10 @@ export default function TeamsPage() {
                     </div>
 
                     {/* Status Filter */}
-                    <div className="fieldset">
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">
+                            Status Filter
+                        </legend>
                         <select
                             className="select select-sm"
                             value={filters.status || ""}
@@ -344,7 +347,7 @@ export default function TeamsPage() {
                             <option value="active">Active</option>
                             <option value="suspended">Suspended</option>
                         </select>
-                    </div>
+                    </fieldset>
 
                     {/* View Mode Toggle */}
                     <ViewModeToggle
@@ -428,8 +431,10 @@ export default function TeamsPage() {
                         </h3>
 
                         <form onSubmit={handleCreateTeam} className="space-y-4">
-                            <div className="fieldset">
-                                <label className="label">Team Name *</label>
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">
+                                    Team Name *
+                                </legend>
                                 <input
                                     type="text"
                                     className="input w-full"
@@ -444,13 +449,11 @@ export default function TeamsPage() {
                                     required
                                     autoFocus
                                 />
-                                <label className="label">
-                                    <span className="label-text-alt">
-                                        Choose a name for your recruiting team
-                                        or agency
-                                    </span>
-                                </label>
-                            </div>
+                                <p className="fieldset-label">
+                                    Choose a name for your recruiting team or
+                                    agency
+                                </p>
+                            </fieldset>
 
                             {createError && (
                                 <div className="alert alert-error">

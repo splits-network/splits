@@ -1,12 +1,11 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { MarkdownEditor } from '@splits-network/shared-ui';
+import { useState } from "react";
 
 interface PreScreenQuestion {
     id: string;
     question_text: string;
-    question_type: 'text' | 'yes_no' | 'select' | 'multi_select';
+    question_type: "text" | "yes_no" | "select" | "multi_select";
     is_required: boolean;
     options?: string[];
 }
@@ -34,11 +33,14 @@ export default function StepQuestions({
     const [error, setError] = useState<string | null>(null);
 
     const getAnswer = (questionId: string) => {
-        return answers.find(a => a.question_id === questionId)?.answer;
+        return answers.find((a) => a.question_id === questionId)?.answer;
     };
 
-    const setAnswer = (questionId: string, answer: string | string[] | boolean) => {
-        const newAnswers = answers.filter(a => a.question_id !== questionId);
+    const setAnswer = (
+        questionId: string,
+        answer: string | string[] | boolean,
+    ) => {
+        const newAnswers = answers.filter((a) => a.question_id !== questionId);
         newAnswers.push({ question_id: questionId, answer });
         onChange(newAnswers);
         setError(null);
@@ -47,16 +49,19 @@ export default function StepQuestions({
     const handleNext = () => {
         // Validate required questions
         const missingRequired = questions
-            .filter(q => q.is_required)
-            .filter(q => {
+            .filter((q) => q.is_required)
+            .filter((q) => {
                 const ans = getAnswer(q.id);
-                if (ans === undefined || ans === null || ans === '') return true;
+                if (ans === undefined || ans === null || ans === "")
+                    return true;
                 if (Array.isArray(ans) && ans.length === 0) return true;
                 return false;
             });
 
         if (missingRequired.length > 0) {
-            setError(`Please answer all required questions (${missingRequired.length} remaining)`);
+            setError(
+                `Please answer all required questions (${missingRequired.length} remaining)`,
+            );
             return;
         }
 
@@ -76,7 +81,11 @@ export default function StepQuestions({
                         <i className="fa-duotone fa-regular fa-arrow-left"></i>
                         Back
                     </button>
-                    <button type="button" className="btn btn-primary" onClick={onNext}>
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={onNext}
+                    >
                         Next: Review
                         <i className="fa-duotone fa-regular fa-arrow-right"></i>
                     </button>
@@ -88,9 +97,12 @@ export default function StepQuestions({
     return (
         <div className="space-y-6">
             <div>
-                <h2 className="text-2xl font-semibold mb-2">Pre-Screening Questions</h2>
+                <h2 className="text-2xl font-semibold mb-2">
+                    Pre-Screening Questions
+                </h2>
                 <p className="text-base-content/70">
-                    Please answer the following questions about your qualifications.
+                    Please answer the following questions about your
+                    qualifications.
                 </p>
             </div>
 
@@ -105,37 +117,52 @@ export default function StepQuestions({
                 {questions.map((question, index) => (
                     <div key={question.id} className="card bg-base-200">
                         <div className="card-body">
-                            <div className="fieldset">
-                                <label className="label">
-                                    <span className="font-medium">
+                            <div>
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">
                                         {index + 1}. {question.question_text}
                                         {question.is_required && (
-                                            <span className="text-error ml-1">*</span>
+                                            <span className="text-error ml-1">
+                                                *
+                                            </span>
                                         )}
-                                    </span>
-                                </label>
+                                    </legend>
 
-                                {/* Text Input */}
-                                {question.question_type === 'text' && (
-                                    <MarkdownEditor
-                                        className="fieldset"
-                                        value={(getAnswer(question.id) as string) || ''}
-                                        onChange={(value) => setAnswer(question.id, value)}
-                                        placeholder="Enter your answer..."
-                                        height={160}
-                                        preview="edit"
-                                    />
-                                )}
+                                    {/* Text Input */}
+                                    {question.question_type === "text" && (
+                                        <textarea
+                                            className="textarea textarea-bordered w-full"
+                                            value={
+                                                (getAnswer(
+                                                    question.id,
+                                                ) as string) || ""
+                                            }
+                                            onChange={(e) =>
+                                                setAnswer(
+                                                    question.id,
+                                                    e.target.value,
+                                                )
+                                            }
+                                            placeholder="Enter your answer..."
+                                            rows={4}
+                                        />
+                                    )}
+                                </fieldset>
 
                                 {/* Yes/No */}
-                                {question.question_type === 'yes_no' && (
+                                {question.question_type === "yes_no" && (
                                     <div className="flex gap-4">
                                         <label className="label cursor-pointer gap-2">
                                             <input
                                                 type="radio"
                                                 className="radio radio-primary"
-                                                checked={getAnswer(question.id) === true}
-                                                onChange={() => setAnswer(question.id, true)}
+                                                checked={
+                                                    getAnswer(question.id) ===
+                                                    true
+                                                }
+                                                onChange={() =>
+                                                    setAnswer(question.id, true)
+                                                }
                                             />
                                             <span>Yes</span>
                                         </label>
@@ -143,8 +170,16 @@ export default function StepQuestions({
                                             <input
                                                 type="radio"
                                                 className="radio radio-primary"
-                                                checked={getAnswer(question.id) === false}
-                                                onChange={() => setAnswer(question.id, false)}
+                                                checked={
+                                                    getAnswer(question.id) ===
+                                                    false
+                                                }
+                                                onChange={() =>
+                                                    setAnswer(
+                                                        question.id,
+                                                        false,
+                                                    )
+                                                }
                                             />
                                             <span>No</span>
                                         </label>
@@ -152,14 +187,25 @@ export default function StepQuestions({
                                 )}
 
                                 {/* Select (Single) */}
-                                {question.question_type === 'select' && (
+                                {question.question_type === "select" && (
                                     <select
                                         className="select"
-                                        value={(getAnswer(question.id) as string) || ''}
-                                        onChange={(e) => setAnswer(question.id, e.target.value)}
+                                        value={
+                                            (getAnswer(
+                                                question.id,
+                                            ) as string) || ""
+                                        }
+                                        onChange={(e) =>
+                                            setAnswer(
+                                                question.id,
+                                                e.target.value,
+                                            )
+                                        }
                                         required={question.is_required}
                                     >
-                                        <option value="">Select an option...</option>
+                                        <option value="">
+                                            Select an option...
+                                        </option>
                                         {question.options?.map((option) => (
                                             <option key={option} value={option}>
                                                 {option}
@@ -169,23 +215,41 @@ export default function StepQuestions({
                                 )}
 
                                 {/* Multi-Select */}
-                                {question.question_type === 'multi_select' && (
+                                {question.question_type === "multi_select" && (
                                     <div className="space-y-2">
                                         {question.options?.map((option) => {
-                                            const currentAnswers = (getAnswer(question.id) as string[]) || [];
-                                            const isChecked = currentAnswers.includes(option);
+                                            const currentAnswers =
+                                                (getAnswer(
+                                                    question.id,
+                                                ) as string[]) || [];
+                                            const isChecked =
+                                                currentAnswers.includes(option);
 
                                             return (
-                                                <label key={option} className="label cursor-pointer justify-start gap-3">
+                                                <label
+                                                    key={option}
+                                                    className="label cursor-pointer justify-start gap-3"
+                                                >
                                                     <input
                                                         type="checkbox"
                                                         className="checkbox checkbox-primary"
                                                         checked={isChecked}
                                                         onChange={(e) => {
-                                                            const newAnswers = e.target.checked
-                                                                ? [...currentAnswers, option]
-                                                                : currentAnswers.filter(a => a !== option);
-                                                            setAnswer(question.id, newAnswers);
+                                                            const newAnswers = e
+                                                                .target.checked
+                                                                ? [
+                                                                      ...currentAnswers,
+                                                                      option,
+                                                                  ]
+                                                                : currentAnswers.filter(
+                                                                      (a) =>
+                                                                          a !==
+                                                                          option,
+                                                                  );
+                                                            setAnswer(
+                                                                question.id,
+                                                                newAnswers,
+                                                            );
                                                         }}
                                                     />
                                                     <span>{option}</span>
@@ -206,7 +270,11 @@ export default function StepQuestions({
                     <i className="fa-duotone fa-regular fa-arrow-left"></i>
                     Back
                 </button>
-                <button type="button" className="btn btn-primary" onClick={handleNext}>
+                <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleNext}
+                >
                     Next: Review
                     <i className="fa-duotone fa-regular fa-arrow-right"></i>
                 </button>

@@ -549,7 +549,6 @@ export default function ApplicationsList({ view }: ApplicationsListProps) {
                     onPageChange={goToPage}
                     onLimitChange={setLimit}
                     loading={loading}
-                    compact={true}
                 />
             </div>
 

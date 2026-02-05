@@ -12,6 +12,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { StripeProvider, PaymentForm } from "@/components/stripe";
+import { ModalLoadingOverlay, ButtonLoading } from "@splits-network/shared-ui";
 
 type BillingPeriod = "monthly" | "annual";
 type PlanTier = "starter" | "pro" | "partner";
@@ -639,7 +640,7 @@ export default function PlanChangeModal({
 
                 {/* Step 1: Select Plan */}
                 {currentStep === "select-plan" && (
-                    <>
+                    <ModalLoadingOverlay loading={loading}>
                         {/* Billing Period Toggle */}
                         <div className="flex justify-center mb-6">
                             <div className="join">
@@ -661,18 +662,8 @@ export default function PlanChangeModal({
                             </div>
                         </div>
 
-                        {/* Loading State */}
-                        {loading && (
-                            <div className="flex items-center justify-center py-12">
-                                <span className="loading loading-spinner loading-lg"></span>
-                                <span className="ml-3 text-base-content/70">
-                                    Loading plans...
-                                </span>
-                            </div>
-                        )}
-
                         {/* Plans Grid */}
-                        {!loading && plans.length > 0 && (
+                        {plans.length > 0 && (
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {plans.map((plan) => (
                                     <PlanCard
@@ -692,13 +683,13 @@ export default function PlanChangeModal({
                         )}
 
                         {/* No Plans State */}
-                        {!loading && plans.length === 0 && (
+                        {plans.length === 0 && !loading && (
                             <div className="alert alert-info">
                                 <i className="fa-duotone fa-regular fa-info-circle"></i>
                                 <span>No plans available at this time.</span>
                             </div>
                         )}
-                    </>
+                    </ModalLoadingOverlay>
                 )}
 
                 {/* Step 2: Payment */}
@@ -929,10 +920,7 @@ export default function PlanChangeModal({
                                 }
                             >
                                 {creatingSetupIntent ? (
-                                    <>
-                                        <span className="loading loading-spinner loading-sm"></span>
-                                        Preparing...
-                                    </>
+                                    <ButtonLoading loading={true} text="Continue" loadingText="Preparing..." />
                                 ) : (
                                     <>
                                         Continue
@@ -980,17 +968,12 @@ export default function PlanChangeModal({
                                 onClick={handleConfirm}
                                 disabled={submitting}
                             >
-                                {submitting ? (
-                                    <>
-                                        <span className="loading loading-spinner loading-sm"></span>
-                                        Processing...
-                                    </>
-                                ) : (
-                                    <>
-                                        <i className="fa-duotone fa-regular fa-check mr-1"></i>
-                                        Confirm & Activate
-                                    </>
-                                )}
+                                <ButtonLoading
+                                    loading={submitting}
+                                    icon="fa-duotone fa-regular fa-check"
+                                    text="Confirm & Activate"
+                                    loadingText="Processing..."
+                                />
                             </button>
                         </>
                     )}

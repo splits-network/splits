@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { MarkdownEditor } from '@splits-network/shared-ui';
-import { useAuth } from '@clerk/nextjs';
-import { createAuthenticatedClient } from '@/lib/api-client';
+import { useState } from "react";
+import { MarkdownEditor, ButtonLoading } from "@splits-network/shared-ui";
+import { useAuth } from "@clerk/nextjs";
+import { createAuthenticatedClient } from "@/lib/api-client";
 
 interface VerificationModalProps {
     candidate: any;
@@ -16,11 +16,13 @@ export default function VerificationModal({
     candidate,
     isOpen,
     onClose,
-    onUpdate
+    onUpdate,
 }: VerificationModalProps) {
     const { getToken } = useAuth();
-    const [status, setStatus] = useState(candidate?.verification_status || 'unverified');
-    const [notes, setNotes] = useState('');
+    const [status, setStatus] = useState(
+        candidate?.verification_status || "unverified",
+    );
+    const [notes, setNotes] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -34,7 +36,7 @@ export default function VerificationModal({
         try {
             const token = await getToken();
             if (!token) {
-                throw new Error('Not authenticated');
+                throw new Error("Not authenticated");
             }
 
             const client = createAuthenticatedClient(token);
@@ -43,14 +45,14 @@ export default function VerificationModal({
             const verificationMetadata = {
                 notes: notes.trim() || undefined,
                 verified_at_timestamp: new Date().toISOString(),
-                verification_method: 'manual_admin_review'
+                verification_method: "manual_admin_review",
             };
 
             // V2 Pattern: Single PATCH endpoint for all updates
             const response = await client.patch(`/candidates/${candidate.id}`, {
                 verification_status: status,
                 verification_metadata: verificationMetadata,
-                verified_at: new Date().toISOString()
+                verified_at: new Date().toISOString(),
                 // verified_by_user_id will be set server-side from auth context
             });
 
@@ -58,12 +60,11 @@ export default function VerificationModal({
             onClose();
 
             // Reset form
-            setNotes('');
-            setStatus('unverified');
-
+            setNotes("");
+            setStatus("unverified");
         } catch (err: any) {
-            console.error('Failed to update verification:', err);
-            setError(err.message || 'Failed to update verification status');
+            console.error("Failed to update verification:", err);
+            setError(err.message || "Failed to update verification status");
         } finally {
             setSubmitting(false);
         }
@@ -79,24 +80,34 @@ export default function VerificationModal({
 
                     <div className="space-y-4">
                         {/* Current Status Display */}
-                        <div className="fieldset">
-                            <label className="label">Candidate</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">
+                                Candidate
+                            </legend>
                             <div className="flex items-center gap-3">
                                 <div className="avatar avatar-placeholder">
                                     <div className="bg-primary text-primary-content rounded-full w-8">
-                                        <span className="text-sm">{candidate.full_name[0]}</span>
+                                        <span className="text-sm">
+                                            {candidate.full_name[0]}
+                                        </span>
                                     </div>
                                 </div>
                                 <div>
-                                    <div className="font-semibold">{candidate.full_name}</div>
-                                    <div className="text-sm text-base-content/70">{candidate.email}</div>
+                                    <div className="font-semibold">
+                                        {candidate.full_name}
+                                    </div>
+                                    <div className="text-sm text-base-content/70">
+                                        {candidate.email}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </fieldset>
 
                         {/* Verification Status */}
-                        <div className="fieldset">
-                            <label className="label">Verification Status *</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">
+                                Verification Status *
+                            </legend>
                             <select
                                 className="select w-full"
                                 value={status}
@@ -108,7 +119,7 @@ export default function VerificationModal({
                                 <option value="verified">Verified</option>
                                 <option value="rejected">Rejected</option>
                             </select>
-                        </div>
+                        </fieldset>
 
                         {/* Notes */}
                         <MarkdownEditor
@@ -128,10 +139,23 @@ export default function VerificationModal({
                             <div className="text-sm">
                                 <strong>Status meanings:</strong>
                                 <ul className="list-disc list-inside mt-1 space-y-1">
-                                    <li><strong>Unverified:</strong> Default state, no verification performed</li>
-                                    <li><strong>Pending:</strong> Verification in progress</li>
-                                    <li><strong>Verified:</strong> Candidate information confirmed and accurate</li>
-                                    <li><strong>Rejected:</strong> Verification failed (e.g., fake profile, incorrect info)</li>
+                                    <li>
+                                        <strong>Unverified:</strong> Default
+                                        state, no verification performed
+                                    </li>
+                                    <li>
+                                        <strong>Pending:</strong> Verification
+                                        in progress
+                                    </li>
+                                    <li>
+                                        <strong>Verified:</strong> Candidate
+                                        information confirmed and accurate
+                                    </li>
+                                    <li>
+                                        <strong>Rejected:</strong> Verification
+                                        failed (e.g., fake profile, incorrect
+                                        info)
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -160,20 +184,15 @@ export default function VerificationModal({
                             className="btn btn-primary"
                             disabled={submitting}
                         >
-                            {submitting ? (
-                                <>
-                                    <span className="loading loading-spinner loading-sm"></span>
-                                    Updating...
-                                </>
-                            ) : (
-                                'Update Status'
-                            )}
+                            <ButtonLoading loading={submitting} text="Update Status" loadingText="Updating..." />
                         </button>
                     </div>
                 </form>
             </div>
             <form method="dialog" className="modal-backdrop">
-                <button type="button" onClick={onClose}>close</button>
+                <button type="button" onClick={onClose}>
+                    close
+                </button>
             </form>
         </div>
     );

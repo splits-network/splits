@@ -6,6 +6,7 @@
  */
 
 import { useOnboarding } from "../onboarding-provider";
+import { ButtonLoading } from "@splits-network/shared-ui";
 
 export function CompletionStep() {
     const { state, actions } = useOnboarding();
@@ -239,17 +240,12 @@ export function CompletionStep() {
                     className="btn btn-primary"
                     disabled={state.submitting}
                 >
-                    {state.submitting ? (
-                        <>
-                            <span className="loading loading-spinner loading-sm"></span>
-                            Completing Setup...
-                        </>
-                    ) : (
-                        <>
-                            <i className="fa-duotone fa-regular fa-check"></i>
-                            Complete Setup
-                        </>
-                    )}
+                    <ButtonLoading
+                        loading={state.submitting}
+                        text="Complete Setup"
+                        loadingText="Completing Setup..."
+                        icon="fa-duotone fa-regular fa-check"
+                    />
                 </button>
             </div>
         </div>

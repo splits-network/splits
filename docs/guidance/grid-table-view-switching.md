@@ -5,6 +5,7 @@ This document outlines the standard pattern for implementing grid/table view swi
 ## Overview
 
 The grid/table view switching pattern provides users with two different ways to view list data:
+
 - **Grid View**: Card-based layout that shows richer content and works well for browsing
 - **Table View**: Compact tabular layout that shows more items at once and works well for scanning
 
@@ -28,7 +29,7 @@ User preference is persisted in `localStorage` so the selected view mode is reme
 The `useViewMode` hook handles view mode state and `localStorage` persistence:
 
 ```tsx
-import { useViewMode } from '@/hooks/useViewMode';
+import { useViewMode } from "@/hooks/useViewMode";
 ```
 
 ### 2. Initialize View Mode State
@@ -36,10 +37,11 @@ import { useViewMode } from '@/hooks/useViewMode';
 In your component, initialize the view mode with a unique storage key:
 
 ```tsx
-const [viewMode, setViewMode] = useViewMode('uniqueStorageKey');
+const [viewMode, setViewMode] = useViewMode("uniqueStorageKey");
 ```
 
 **Storage Key Naming Convention**: Use the pattern `{entity}ViewMode`:
+
 - Roles: `rolesViewMode`
 - Candidates: `candidatesViewMode`
 - Placements: `placementsViewMode`
@@ -51,16 +53,16 @@ Place the view toggle buttons in the filters/controls section using DaisyUI's `j
 
 ```tsx
 <div className="join">
-    <button 
-        className={`btn join-item ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
-        onClick={() => setViewMode('grid')}
+    <button
+        className={`btn join-item ${viewMode === "grid" ? "btn-primary" : "btn-ghost"}`}
+        onClick={() => setViewMode("grid")}
         title="Grid View"
     >
         <i className="fa-duotone fa-regular fa-grid-2"></i>
     </button>
-    <button 
-        className={`btn join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
-        onClick={() => setViewMode('table')}
+    <button
+        className={`btn join-item ${viewMode === "table" ? "btn-primary" : "btn-ghost"}`}
+        onClick={() => setViewMode("table")}
         title="Table View"
     >
         <i className="fa-duotone fa-regular fa-table"></i>
@@ -69,6 +71,7 @@ Place the view toggle buttons in the filters/controls section using DaisyUI's `j
 ```
 
 **Key Features**:
+
 - Buttons are grouped using `join` for visual consistency
 - Active button uses `btn-primary`, inactive uses `btn-ghost`
 - Include `title` attributes for accessibility
@@ -79,27 +82,36 @@ Place the view toggle buttons in the filters/controls section using DaisyUI's `j
 Render different layouts based on the `viewMode` state:
 
 ```tsx
-{/* Grid View */}
-{viewMode === 'grid' && filteredItems.length > 0 && (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {filteredItems.map((item) => (
-            <div key={item.id} className="card bg-base-100 shadow hover:shadow transition-shadow">
-                {/* Card content */}
-            </div>
-        ))}
-    </div>
-)}
-
-{/* Table View */}
-{viewMode === 'table' && filteredItems.length > 0 && (
-    <div className="card bg-base-100 shadow overflow-hidden">
-        <div className="overflow-x-auto">
-            <table className="table">
-                {/* Table content */}
-            </table>
+{
+    /* Grid View */
+}
+{
+    viewMode === "grid" && filteredItems.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {filteredItems.map((item) => (
+                <div
+                    key={item.id}
+                    className="card bg-base-100 shadow hover:shadow transition-shadow"
+                >
+                    {/* Card content */}
+                </div>
+            ))}
         </div>
-    </div>
-)}
+    );
+}
+
+{
+    /* Table View */
+}
+{
+    viewMode === "table" && filteredItems.length > 0 && (
+        <div className="card bg-base-100 shadow overflow-hidden">
+            <div className="overflow-x-auto">
+                <table className="table">{/* Table content */}</table>
+            </div>
+        </div>
+    );
+}
 ```
 
 ---
@@ -111,12 +123,18 @@ Render different layouts based on the `viewMode` state:
 ```tsx
 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
     {items.map((item) => (
-        <div key={item.id} className="card bg-base-100 shadow hover:shadow transition-shadow">
+        <div
+            key={item.id}
+            className="card bg-base-100 shadow hover:shadow transition-shadow"
+        >
             <div className="card-body">
                 {/* Header section with title and status */}
                 <div className="flex justify-between items-start">
                     <div className="flex-1">
-                        <Link href={`/path/${item.id}`} className="hover:text-primary transition-colors">
+                        <Link
+                            href={`/path/${item.id}`}
+                            className="hover:text-primary transition-colors"
+                        >
                             <h3 className="card-title text-xl">{item.title}</h3>
                         </Link>
                         <div className="flex items-center gap-4 mt-2 text-sm text-base-content/70">
@@ -136,9 +154,7 @@ Render different layouts based on the `viewMode` state:
                     <span className="text-sm text-base-content/60">
                         {/* Timestamp or secondary info */}
                     </span>
-                    <div className="flex gap-2">
-                        {/* Action buttons */}
-                    </div>
+                    <div className="flex gap-2">{/* Action buttons */}</div>
                 </div>
             </div>
         </div>
@@ -177,7 +193,10 @@ Render different layouts based on the `viewMode` state:
                 {items.map((item) => (
                     <tr key={item.id} className="hover">
                         <td>
-                            <Link href={`/path/${item.id}`} className="font-semibold hover:text-primary transition-colors">
+                            <Link
+                                href={`/path/${item.id}`}
+                                className="font-semibold hover:text-primary transition-colors"
+                            >
                                 {item.title}
                             </Link>
                             <div className="text-sm text-base-content/60 mt-1">
@@ -186,7 +205,9 @@ Render different layouts based on the `viewMode` state:
                         </td>
                         <td>{/* Column data */}</td>
                         <td>
-                            <div className={`badge ${getStatusBadge(item.status)}`}>
+                            <div
+                                className={`badge ${getStatusBadge(item.status)}`}
+                            >
                                 {item.status}
                             </div>
                         </td>
@@ -224,9 +245,9 @@ The view toggle should be placed alongside other filters in a consistent layout:
     <div className="card-body">
         <div className="flex flex-wrap gap-4 items-end">
             {/* Status Filter */}
-            <div className="fieldset">
-                <label className="label">Status</label>
-                <select 
+            <fieldset className="fieldset">
+                <legend className="fieldset-legend">Status</legend>
+                <select
                     className="select w-full max-w-xs"
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
@@ -234,11 +255,11 @@ The view toggle should be placed alongside other filters in a consistent layout:
                     <option value="all">All Statuses</option>
                     {/* Options */}
                 </select>
-            </div>
+            </fieldset>
 
             {/* Search Input */}
-            <div className="fieldset flex-1">
-                <label className="label">Search</label>
+            <fieldset className="fieldset flex-1">
+                <legend className="fieldset-legend">Search</legend>
                 <input
                     type="text"
                     placeholder="Search..."
@@ -246,20 +267,20 @@ The view toggle should be placed alongside other filters in a consistent layout:
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
-            </div>
+            </fieldset>
 
             {/* View Toggle */}
             <div className="join">
-                <button 
-                    className={`btn join-item ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
-                    onClick={() => setViewMode('grid')}
+                <button
+                    className={`btn join-item ${viewMode === "grid" ? "btn-primary" : "btn-ghost"}`}
+                    onClick={() => setViewMode("grid")}
                     title="Grid View"
                 >
                     <i className="fa-duotone fa-regular fa-grid-2"></i>
                 </button>
-                <button 
-                    className={`btn join-item ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
-                    onClick={() => setViewMode('table')}
+                <button
+                    className={`btn join-item ${viewMode === "table" ? "btn-primary" : "btn-ghost"}`}
+                    onClick={() => setViewMode("table")}
                     title="Table View"
                 >
                     <i className="fa-duotone fa-regular fa-table"></i>
@@ -271,6 +292,7 @@ The view toggle should be placed alongside other filters in a consistent layout:
 ```
 
 **Layout Notes**:
+
 - Use `flex flex-wrap gap-4 items-end` to align filters and controls
 - Place view toggle at the end (right side) of the controls row
 - Use `flex-1` on search input to make it fill available space
@@ -283,21 +305,28 @@ The view toggle should be placed alongside other filters in a consistent layout:
 Both grid and table views should share the same empty state:
 
 ```tsx
-{/* Empty State */}
-{filteredItems.length === 0 && (
-    <div className="card bg-base-100 shadow">
-        <div className="card-body text-center py-12">
-            <i className="fa-duotone fa-regular fa-icon-name text-6xl text-base-content/20"></i>
-            <h3 className="text-xl font-semibold mt-4">No Items Found</h3>
-            <p className="text-base-content/70 mt-2">
-                {searchQuery ? 'Try adjusting your search' : 'No items have been created yet'}
-            </p>
+{
+    /* Empty State */
+}
+{
+    filteredItems.length === 0 && (
+        <div className="card bg-base-100 shadow">
+            <div className="card-body text-center py-12">
+                <i className="fa-duotone fa-regular fa-icon-name text-6xl text-base-content/20"></i>
+                <h3 className="text-xl font-semibold mt-4">No Items Found</h3>
+                <p className="text-base-content/70 mt-2">
+                    {searchQuery
+                        ? "Try adjusting your search"
+                        : "No items have been created yet"}
+                </p>
+            </div>
         </div>
-    </div>
-)}
+    );
+}
 ```
 
 **Key Features**:
+
 - Place empty state outside the grid/table conditionals
 - Use large icon (text-6xl) with low opacity (text-base-content/20)
 - Provide contextual message based on whether filters are active
@@ -312,9 +341,9 @@ Both grid and table views should share the same empty state:
 Located at: `apps/portal/src/hooks/useViewMode.ts`
 
 ```typescript
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-type ViewMode = 'grid' | 'table';
+type ViewMode = "grid" | "table";
 
 /**
  * Custom hook to manage and persist view mode (grid/table) preference in localStorage
@@ -324,20 +353,20 @@ type ViewMode = 'grid' | 'table';
  */
 export function useViewMode(
     storageKey: string,
-    defaultMode: ViewMode = 'grid'
+    defaultMode: ViewMode = "grid",
 ): [ViewMode, (mode: ViewMode) => void] {
     const [viewMode, setViewModeState] = useState<ViewMode>(() => {
         // Initialize from localStorage if available
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
             const saved = localStorage.getItem(storageKey);
-            return (saved === 'grid' || saved === 'table') ? saved : defaultMode;
+            return saved === "grid" || saved === "table" ? saved : defaultMode;
         }
         return defaultMode;
     });
 
     // Persist view mode to localStorage whenever it changes
     useEffect(() => {
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
             localStorage.setItem(storageKey, viewMode);
         }
     }, [viewMode, storageKey]);
@@ -349,10 +378,11 @@ export function useViewMode(
 ### Usage
 
 ```typescript
-const [viewMode, setViewMode] = useViewMode('myEntityViewMode', 'grid');
+const [viewMode, setViewMode] = useViewMode("myEntityViewMode", "grid");
 ```
 
 **Parameters**:
+
 - `storageKey`: Unique identifier for localStorage (required)
 - `defaultMode`: Initial view mode, defaults to `'grid'` (optional)
 
@@ -381,12 +411,14 @@ See [`apps/portal/src/app/portal/roles/components/RolesList.tsx`](../../../apps/
 ## When to Use This Pattern
 
 **Use grid/table view switching when**:
+
 - The list contains 5+ items regularly
 - Each item has rich metadata that benefits from card display
 - Users need both browsing (grid) and scanning (table) modes
 - The data is suitable for tabular representation
 
 **Do NOT use this pattern when**:
+
 - The list rarely exceeds 3-5 items
 - The items don't have rich metadata for cards
 - Only one view makes sense for the data type

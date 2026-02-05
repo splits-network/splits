@@ -12,6 +12,7 @@ import {
 import { dataset, registerChart } from './chart-options';
 import { Line } from 'react-chartjs-2';
 import { TrendPeriodSelector, TIME_PERIODS } from './trend-period-selector';
+import { ChartLoadingState } from '@splits-network/shared-ui';
 
 // Register Chart.js components
 ChartJS.register(
@@ -319,11 +320,7 @@ export default function CompanyTrendsChart({
     }), [changes]);
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <span className="loading loading-spinner loading-lg text-primary"></span>
-            </div>
-        );
+        return <ChartLoadingState height="16rem" />;
     }
 
     return (

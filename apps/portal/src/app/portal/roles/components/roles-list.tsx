@@ -248,7 +248,10 @@ export default function RolesList({ view }: RolesListProps) {
                                 ))}
                             <div className="flex flex-wrap gap-4 items-center">
                                 {/* Status Filter */}
-                                <div className="fieldset w-full">
+                                <fieldset className="fieldset w-full">
+                                    <legend className="fieldset-legend">
+                                        Status Filter
+                                    </legend>
                                     <select
                                         name="status-selector"
                                         className="select w-full"
@@ -270,13 +273,16 @@ export default function RolesList({ view }: RolesListProps) {
                                         <option value="filled">Filled</option>
                                         <option value="closed">Closed</option>
                                     </select>
-                                </div>
+                                </fieldset>
 
                                 {/* Ownership Filter (for recruiters and company users) */}
                                 {(userRole === "recruiter" ||
                                     userRole === "company_admin" ||
                                     userRole === "hiring_manager") && (
-                                    <div className="fieldset w-full">
+                                    <fieldset className="fieldset w-full">
+                                        <legend className="fieldset-legend">
+                                            Job Assignment
+                                        </legend>
                                         <select
                                             name="job-owner-filter"
                                             className="select w-full"
@@ -302,7 +308,7 @@ export default function RolesList({ view }: RolesListProps) {
                                                 My Assigned Jobs
                                             </option>
                                         </select>
-                                    </div>
+                                    </fieldset>
                                 )}
 
                                 {/* Search */}

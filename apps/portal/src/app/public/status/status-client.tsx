@@ -341,10 +341,10 @@ export default function StatusPageClient({
                                     className="mt-4 space-y-4"
                                     onSubmit={handleSubmit}
                                 >
-                                    <div className="fieldset">
-                                        <label className="label">
+                                    <fieldset className="fieldset">
+                                        <legend className="fieldset-legend">
                                             Full name
-                                        </label>
+                                        </legend>
                                         <input
                                             className="input w-full"
                                             required
@@ -357,9 +357,11 @@ export default function StatusPageClient({
                                             }
                                             placeholder="Casey Operations"
                                         />
-                                    </div>
-                                    <div className="fieldset">
-                                        <label className="label">Email</label>
+                                    </fieldset>
+                                    <fieldset className="fieldset">
+                                        <legend className="fieldset-legend">
+                                            Email
+                                        </legend>
                                         <input
                                             className="input w-full"
                                             type="email"
@@ -373,12 +375,12 @@ export default function StatusPageClient({
                                             }
                                             placeholder="you@company.com"
                                         />
-                                    </div>
+                                    </fieldset>
                                     <div className="grid gap-4 md:grid-cols-2">
-                                        <div className="fieldset">
-                                            <label className="label">
+                                        <fieldset className="fieldset">
+                                            <legend className="fieldset-legend">
                                                 Topic
-                                            </label>
+                                            </legend>
                                             <select
                                                 className="select w-full"
                                                 value={formData.topic}
@@ -405,11 +407,11 @@ export default function StatusPageClient({
                                                     Billing/reporting
                                                 </option>
                                             </select>
-                                        </div>
-                                        <div className="fieldset">
-                                            <label className="label">
+                                        </fieldset>
+                                        <fieldset className="fieldset">
+                                            <legend className="fieldset-legend">
                                                 Urgency
-                                            </label>
+                                            </legend>
                                             <select
                                                 className="select w-full"
                                                 value={formData.urgency}
@@ -430,10 +432,12 @@ export default function StatusPageClient({
                                                     Low - FYI
                                                 </option>
                                             </select>
-                                        </div>
+                                        </fieldset>
                                     </div>
-                                    <div className="fieldset">
-                                        <label className="label">Message</label>
+                                    <fieldset className="fieldset">
+                                        <legend className="fieldset-legend">
+                                            Message
+                                        </legend>
                                         <textarea
                                             className="textarea h-24 w-full"
                                             required
@@ -446,7 +450,7 @@ export default function StatusPageClient({
                                             }
                                             placeholder="Include affected teams, timelines, and links."
                                         />
-                                    </div>
+                                    </fieldset>
                                     <button
                                         className="btn btn-primary w-full"
                                         disabled={submitting}

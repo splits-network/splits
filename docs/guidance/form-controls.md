@@ -86,8 +86,8 @@ Do NOT use `<div>` with `<label className="label">` - this causes cursor misalig
 {
     /* WRONG - Do not use this pattern - causes mobile issues */
 }
-<div className="fieldset">
-    <label className="label">Field Label</label>
+<fieldset className="fieldset">
+    <legend className="fieldset-legend">Field Label</legend>
     <input
         type="text"
         className="input w-full"
@@ -97,7 +97,7 @@ Do NOT use `<div>` with `<label className="label">` - this causes cursor misalig
     <label className="label">
         <span className="label-text-alt">Helper text</span>
     </label>
-</div>;
+</fieldset>;
 ```
 
 ---

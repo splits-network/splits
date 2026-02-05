@@ -6,7 +6,7 @@
  */
 
 import { useState, FormEvent } from "react";
-import { MarkdownEditor } from "@splits-network/shared-ui";
+import { MarkdownEditor, ButtonLoading } from "@splits-network/shared-ui";
 import { useOnboarding } from "../onboarding-provider";
 
 export function CompanyInfoStep() {
@@ -53,8 +53,8 @@ export function CompanyInfoStep() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Company Name */}
-                <div className="fieldset">
-                    <label className="label">Company Name *</label>
+                <fieldset className="fieldset">
+                    <legend className="fieldset-legend">Company Name *</legend>
                     <input
                         type="text"
                         className="input w-full"
@@ -63,11 +63,13 @@ export function CompanyInfoStep() {
                         placeholder="Acme Corporation"
                         required
                     />
-                </div>
+                </fieldset>
 
                 {/* Website */}
-                <div className="fieldset">
-                    <label className="label">Company Website *</label>
+                <fieldset className="fieldset">
+                    <legend className="fieldset-legend">
+                        Company Website *
+                    </legend>
                     <input
                         type="url"
                         className="input w-full"
@@ -78,11 +80,13 @@ export function CompanyInfoStep() {
                         placeholder="https://www.example.com"
                         required
                     />
-                </div>
+                </fieldset>
 
                 {/* Headquarters Location */}
-                <div className="fieldset">
-                    <label className="label">Headquarters Location</label>
+                <fieldset className="fieldset">
+                    <legend className="fieldset-legend">
+                        Headquarters Location
+                    </legend>
                     <input
                         type="text"
                         className="input w-full"
@@ -95,11 +99,11 @@ export function CompanyInfoStep() {
                         }
                         placeholder="City, Country"
                     />
-                </div>
+                </fieldset>
 
                 {/* Logo URL */}
-                <div className="fieldset">
-                    <label className="label">Logo URL</label>
+                <fieldset className="fieldset">
+                    <legend className="fieldset-legend">Logo URL</legend>
                     <input
                         type="url"
                         className="input w-full"
@@ -109,12 +113,12 @@ export function CompanyInfoStep() {
                         }
                         placeholder="https://example.com/logo.png"
                     />
-                </div>
+                </fieldset>
 
                 {/* Industry */}
                 <div className="flex justify-evenly gap-4">
-                    <div className="fieldset w-full">
-                        <label className="label">Industry *</label>
+                    <fieldset className="fieldset w-full">
+                        <legend className="fieldset-legend">Industry *</legend>
                         <select
                             className="select"
                             value={formData.industry}
@@ -150,11 +154,13 @@ export function CompanyInfoStep() {
                             </option>
                             <option value="other">Other</option>
                         </select>
-                    </div>
+                    </fieldset>
 
                     {/* Company Size */}
-                    <div className="fieldset w-full">
-                        <label className="label">Company Size *</label>
+                    <fieldset className="fieldset w-full">
+                        <legend className="fieldset-legend">
+                            Company Size *
+                        </legend>
                         <select
                             className="select"
                             value={formData.size}
@@ -174,12 +180,12 @@ export function CompanyInfoStep() {
                             </option>
                             <option value="5001+">5001+ employees</option>
                         </select>
-                    </div>
+                    </fieldset>
                 </div>
 
                 {/* Billing Terms */}
-                <div className="fieldset">
-                    <label className="label">Billing Terms *</label>
+                <fieldset className="fieldset">
+                    <legend className="fieldset-legend">Billing Terms *</legend>
                     <select
                         className="select w-full"
                         value={formData.billing_terms}
@@ -188,21 +194,21 @@ export function CompanyInfoStep() {
                         }
                         required
                     >
-                        <option value="immediate">Immediate (Charge on completion)</option>
+                        <option value="immediate">
+                            Immediate (Charge on completion)
+                        </option>
                         <option value="net_30">Net 30</option>
                         <option value="net_60">Net 60</option>
                         <option value="net_90">Net 90</option>
                     </select>
-                    <label className="label">
-                        <span className="label-text-alt">
-                            Used for invoice timing after guarantee completion.
-                        </span>
-                    </label>
-                </div>
+                    <p className="fieldset-label">
+                        Used for invoice timing after guarantee completion.
+                    </p>
+                </fieldset>
 
                 {/* Billing Email */}
-                <div className="fieldset">
-                    <label className="label">Billing Email *</label>
+                <fieldset className="fieldset">
+                    <legend className="fieldset-legend">Billing Email *</legend>
                     <input
                         type="email"
                         className="input w-full"
@@ -213,7 +219,7 @@ export function CompanyInfoStep() {
                         placeholder="billing@company.com"
                         required
                     />
-                </div>
+                </fieldset>
 
                 {/* Description */}
                 <MarkdownEditor
@@ -249,10 +255,11 @@ export function CompanyInfoStep() {
                         disabled={state.submitting}
                     >
                         {state.submitting ? (
-                            <>
-                                <span className="loading loading-spinner loading-sm"></span>
-                                Saving...
-                            </>
+                            <ButtonLoading
+                                loading={state.submitting}
+                                text="Continue"
+                                loadingText="Saving..."
+                            />
                         ) : (
                             <>
                                 Continue

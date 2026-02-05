@@ -159,7 +159,10 @@ export default function PlacementsPage() {
                     <div className="card-body p-4">
                         <div className="flex flex-wrap gap-4 items-center">
                             {/* Status Filter */}
-                            <div className="fieldset">
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend">
+                                    Status Filter
+                                </legend>
                                 <select
                                     className="select w-full max-w-xs"
                                     value={filters.status || "all"}
@@ -177,7 +180,7 @@ export default function PlacementsPage() {
                                     <option value="completed">Completed</option>
                                     <option value="cancelled">Cancelled</option>
                                 </select>
-                            </div>
+                            </fieldset>
 
                             {/* Search */}
                             <SearchInput

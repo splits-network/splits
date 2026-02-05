@@ -20,7 +20,7 @@ export default function SignInPage() {
 
     // Get redirect URL from search params (Clerk preserves this)
     const redirectUrl = searchParams.get("redirect_url");
-    const isFromInvitation = redirectUrl?.includes('/accept-invitation/');
+    const isFromInvitation = redirectUrl?.includes("/accept-invitation/");
 
     const handleSignOut = async () => {
         setIsLoading(true);
@@ -150,63 +150,7 @@ export default function SignInPage() {
 
     // Show message if user is already signed in
     if (isLoaded && isSignedIn) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
-                <div className="card w-full max-w-md bg-base-100 shadow">
-                    <div className="card-body">
-                        <h2 className="card-title text-2xl font-bold justify-center mb-6 flex flex-col">
-                            <Link href="/" className="mb-6">
-                                <img
-                                    src="/logo.svg"
-                                    alt="Applicant Network"
-                                    className="h-12"
-                                />
-                            </Link>
-                            Already Signed In
-                        </h2>
-
-                        <div className="alert alert-info mb-4">
-                            <i className="fa-duotone fa-regular fa-circle-info"></i>
-                            <span>
-                                You're already signed in to your account.
-                            </span>
-                        </div>
-
-                        <p className="text-center mb-4">
-                            You can continue to your dashboard or sign out if
-                            you'd like to use a different account.
-                        </p>
-
-                        <div className="space-y-2">
-                            <button
-                                onClick={() => router.push("/portal/dashboard")}
-                                className="btn btn-primary w-full"
-                            >
-                                <i className="fa-duotone fa-regular fa-home"></i>
-                                Go to Dashboard
-                            </button>
-                            <button
-                                onClick={handleSignOut}
-                                className="btn btn-outline w-full"
-                                disabled={isLoading}
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <span className="loading loading-spinner loading-sm"></span>
-                                        Signing out...
-                                    </>
-                                ) : (
-                                    <>
-                                        <i className="fa-duotone fa-regular fa-right-from-bracket"></i>
-                                        Sign Out
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
+        router.push(redirectUrl || "/portal/dashboard");
     }
 
     return (
@@ -395,7 +339,11 @@ export default function SignInPage() {
                     <p className="text-center text-sm mt-4">
                         Don't have an account?{" "}
                         <Link
-                            href={redirectUrl ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}` : '/sign-up'}
+                            href={
+                                redirectUrl
+                                    ? `/sign-up?redirect_url=${encodeURIComponent(redirectUrl)}`
+                                    : "/sign-up"
+                            }
                             className="link link-primary"
                         >
                             Sign up

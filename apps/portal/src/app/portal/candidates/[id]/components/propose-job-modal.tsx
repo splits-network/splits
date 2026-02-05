@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MarkdownEditor } from "@splits-network/shared-ui";
+import { MarkdownEditor, ButtonLoading } from "@splits-network/shared-ui";
 import { useRouter } from "next/navigation";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useAuth } from "@clerk/nextjs";
@@ -103,10 +103,7 @@ export default function ProposeJobModal({
                             className="btn btn-primary"
                             disabled={loading || !pitch.trim()}
                         >
-                            {loading && (
-                                <span className="loading loading-spinner loading-sm"></span>
-                            )}
-                            Send Proposal
+                            <ButtonLoading loading={loading} text="Send Proposal" loadingText="Sending..." />
                         </button>
                     </div>
                 </form>

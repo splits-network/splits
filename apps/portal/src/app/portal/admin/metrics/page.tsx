@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createAuthenticatedClient } from "@/lib/api-client";
 import { useAuth } from "@clerk/nextjs";
+import { LoadingState } from "@splits-network/shared-ui";
 
 export default function MarketplaceMetricsPage() {
     const { getToken } = useAuth();
@@ -189,13 +190,7 @@ export default function MarketplaceMetricsPage() {
     };
 
     if (loading) {
-        return (
-            <div className="container mx-auto p-6">
-                <div className="flex justify-center p-8">
-                    <span className="loading loading-spinner loading-lg"></span>
-                </div>
-            </div>
-        );
+        return <LoadingState message="Loading metrics..." />;
     }
 
     return (

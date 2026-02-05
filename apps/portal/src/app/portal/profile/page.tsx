@@ -4,6 +4,7 @@ import { UserProfileSettings } from "./components/user-profile-settings";
 import { MarketplaceSettings } from "./components/marketplace-settings";
 import { useUserProfile } from "@/contexts";
 import { PageTitle } from "@/components/page-title";
+import { LoadingState } from "@splits-network/shared-ui";
 
 export default function SettingsPage() {
     const { profile, isLoading, isAdmin, isRecruiter, isCompanyUser, hasRole } =
@@ -15,11 +16,7 @@ export default function SettingsPage() {
     const isPlatformAdmin = isAdmin;
 
     if (isLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-[400px]">
-                <span className="loading loading-spinner loading-lg"></span>
-            </div>
-        );
+        return <LoadingState message="Loading profile..." />;
     }
 
     return (

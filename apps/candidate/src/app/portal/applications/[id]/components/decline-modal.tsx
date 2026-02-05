@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, FormEvent } from 'react';
-import { MarkdownEditor } from '@splits-network/shared-ui';
+import React, { useState, FormEvent } from "react";
+import { MarkdownEditor } from "@splits-network/shared-ui";
 
 interface DeclineModalProps {
     isOpen: boolean;
@@ -11,17 +11,22 @@ interface DeclineModalProps {
 }
 
 const DECLINE_REASONS = [
-    { value: 'not_interested', label: 'Not interested in this role' },
-    { value: 'timing', label: 'Not the right timing' },
-    { value: 'location', label: 'Location does not work for me' },
-    { value: 'compensation', label: 'Compensation expectations do not align' },
-    { value: 'found_other', label: 'Accepted another opportunity' },
-    { value: 'other', label: 'Other (please specify)' },
+    { value: "not_interested", label: "Not interested in this role" },
+    { value: "timing", label: "Not the right timing" },
+    { value: "location", label: "Location does not work for me" },
+    { value: "compensation", label: "Compensation expectations do not align" },
+    { value: "found_other", label: "Accepted another opportunity" },
+    { value: "other", label: "Other (please specify)" },
 ];
 
-export function DeclineModal({ isOpen, onClose, onSubmit, jobTitle }: DeclineModalProps) {
-    const [reason, setReason] = useState('');
-    const [details, setDetails] = useState('');
+export function DeclineModal({
+    isOpen,
+    onClose,
+    onSubmit,
+    jobTitle,
+}: DeclineModalProps) {
+    const [reason, setReason] = useState("");
+    const [details, setDetails] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -29,11 +34,11 @@ export function DeclineModal({ isOpen, onClose, onSubmit, jobTitle }: DeclineMod
         e.preventDefault();
 
         if (!reason) {
-            setError('Please select a reason');
+            setError("Please select a reason");
             return;
         }
 
-        if (reason === 'other' && !details.trim()) {
+        if (reason === "other" && !details.trim()) {
             setError('Please provide details for "Other"');
             return;
         }
@@ -45,15 +50,19 @@ export function DeclineModal({ isOpen, onClose, onSubmit, jobTitle }: DeclineMod
             await onSubmit(reason, details || undefined);
             handleClose();
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to decline opportunity');
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : "Failed to decline opportunity",
+            );
         } finally {
             setSubmitting(false);
         }
     };
 
     const handleClose = () => {
-        setReason('');
-        setDetails('');
+        setReason("");
+        setDetails("");
         setError(null);
         onClose();
     };
@@ -64,8 +73,8 @@ export function DeclineModal({ isOpen, onClose, onSubmit, jobTitle }: DeclineMod
         <div className="modal modal-open">
             <div className="modal-box max-w-2xl">
                 <h3 className="font-bold text-lg mb-4">
-                    <i className="fa-duotone fa-regular fa-times-circle text-error"></i>
-                    {' '}Decline Opportunity
+                    <i className="fa-duotone fa-regular fa-times-circle text-error"></i>{" "}
+                    Decline Opportunity
                 </h3>
 
                 <div className="mb-6">
@@ -74,8 +83,9 @@ export function DeclineModal({ isOpen, onClose, onSubmit, jobTitle }: DeclineMod
                     </p>
                     <p className="font-semibold mt-2">{jobTitle}</p>
                     <p className="text-sm text-base-content/60 mt-2">
-                        Your recruiter will be notified. This helps them understand your preferences
-                        and find better matches in the future.
+                        Your recruiter will be notified. This helps them
+                        understand your preferences and find better matches in
+                        the future.
                     </p>
                 </div>
 
@@ -87,10 +97,12 @@ export function DeclineModal({ isOpen, onClose, onSubmit, jobTitle }: DeclineMod
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="fieldset">
-                        <label className="label">Reason for declining *</label>
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">
+                            Reason for declining *
+                        </legend>
                         <select
-                            className="select"
+                            className="select w-full"
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
                             disabled={submitting}
@@ -103,11 +115,11 @@ export function DeclineModal({ isOpen, onClose, onSubmit, jobTitle }: DeclineMod
                                 </option>
                             ))}
                         </select>
-                    </div>
+                    </fieldset>
 
                     <MarkdownEditor
                         className="fieldset"
-                        label={`Additional details ${reason === 'other' ? '*' : ''}`}
+                        label={`Additional details ${reason === "other" ? "*" : ""}`}
                         value={details}
                         onChange={setDetails}
                         placeholder="Help your recruiter understand your decision (optional)"

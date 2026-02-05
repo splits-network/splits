@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { MarkdownEditor } from '@splits-network/shared-ui';
-import type { ApplicationStage } from '@splits-network/shared-types';
+import { useState } from "react";
+import { MarkdownEditor, ButtonLoading } from "@splits-network/shared-ui";
+import type { ApplicationStage } from "@splits-network/shared-types";
 
 interface StageUpdateModalProps {
     currentStage: ApplicationStage;
@@ -11,15 +11,16 @@ interface StageUpdateModalProps {
     loading: boolean;
 }
 
-const STAGES: Array<{ value: ApplicationStage; label: string; icon: string }> = [
-    { value: 'draft', label: 'Draft', icon: 'fa-file-lines' },
-    { value: 'screen', label: 'Screening', icon: 'fa-magnifying-glass' },
-    { value: 'submitted', label: 'Submitted', icon: 'fa-paper-plane' },
-    { value: 'interview', label: 'Interview', icon: 'fa-calendar' },
-    { value: 'offer', label: 'Offer', icon: 'fa-handshake' },
-    { value: 'hired', label: 'Hired', icon: 'fa-circle-check' },
-    { value: 'rejected', label: 'Rejected', icon: 'fa-xmark' },
-];
+const STAGES: Array<{ value: ApplicationStage; label: string; icon: string }> =
+    [
+        { value: "draft", label: "Draft", icon: "fa-file-lines" },
+        { value: "screen", label: "Screening", icon: "fa-magnifying-glass" },
+        { value: "submitted", label: "Submitted", icon: "fa-paper-plane" },
+        { value: "interview", label: "Interview", icon: "fa-calendar" },
+        { value: "offer", label: "Offer", icon: "fa-handshake" },
+        { value: "hired", label: "Hired", icon: "fa-circle-check" },
+        { value: "rejected", label: "Rejected", icon: "fa-xmark" },
+    ];
 
 export default function StageUpdateModal({
     currentStage,
@@ -27,8 +28,9 @@ export default function StageUpdateModal({
     onUpdate,
     loading,
 }: StageUpdateModalProps) {
-    const [selectedStage, setSelectedStage] = useState<ApplicationStage>(currentStage);
-    const [notes, setNotes] = useState('');
+    const [selectedStage, setSelectedStage] =
+        useState<ApplicationStage>(currentStage);
+    const [notes, setNotes] = useState("");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -50,47 +52,72 @@ export default function StageUpdateModal({
                             <i className="fa-duotone fa-regular fa-info-circle"></i>
                             <div>
                                 <p className="text-sm">
-                                    Current stage: <strong>{STAGES.find(s => s.value === currentStage)?.label}</strong>
+                                    Current stage:{" "}
+                                    <strong>
+                                        {
+                                            STAGES.find(
+                                                (s) => s.value === currentStage,
+                                            )?.label
+                                        }
+                                    </strong>
                                 </p>
-                                <p className="text-xs">Select a new stage below to update the application.</p>
+                                <p className="text-xs">
+                                    Select a new stage below to update the
+                                    application.
+                                </p>
                             </div>
                         </div>
 
                         {/* Stage Selection */}
-                        <div className="fieldset">
-                            <label className="label">New Stage *</label>
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">
+                                New Stage *
+                            </legend>
                             <select
                                 className="select w-full"
                                 value={selectedStage}
-                                onChange={(e) => setSelectedStage(e.target.value as ApplicationStage)}
+                                onChange={(e) =>
+                                    setSelectedStage(
+                                        e.target.value as ApplicationStage,
+                                    )
+                                }
                                 required
                             >
                                 {STAGES.map((stage) => (
-                                    <option key={stage.value} value={stage.value}>
+                                    <option
+                                        key={stage.value}
+                                        value={stage.value}
+                                    >
                                         {stage.label}
                                     </option>
                                 ))}
                             </select>
-                        </div>
+                        </fieldset>
 
                         {/* Stage Preview */}
                         <div className="grid grid-cols-3 gap-2">
                             {STAGES.map((stage) => {
-                                const isSelected = stage.value === selectedStage;
+                                const isSelected =
+                                    stage.value === selectedStage;
                                 const isCurrent = stage.value === currentStage;
                                 return (
                                     <button
                                         key={stage.value}
                                         type="button"
-                                        onClick={() => setSelectedStage(stage.value)}
-                                        className={`btn btn-sm ${isSelected
-                                            ? 'btn-primary'
-                                            : isCurrent
-                                                ? 'btn-outline'
-                                                : 'btn-ghost'
-                                            }`}
+                                        onClick={() =>
+                                            setSelectedStage(stage.value)
+                                        }
+                                        className={`btn btn-sm ${
+                                            isSelected
+                                                ? "btn-primary"
+                                                : isCurrent
+                                                  ? "btn-outline"
+                                                  : "btn-ghost"
+                                        }`}
                                     >
-                                        <i className={`fa-duotone fa-regular ${stage.icon}`}></i>
+                                        <i
+                                            className={`fa-duotone fa-regular ${stage.icon}`}
+                                        ></i>
                                         {stage.label}
                                     </button>
                                 );
@@ -110,17 +137,24 @@ export default function StageUpdateModal({
                         />
 
                         {/* Warning for Terminal Stages */}
-                        {(selectedStage === 'hired' || selectedStage === 'rejected') && (
-                            <div className={`alert ${selectedStage === 'hired' ? 'alert-success' : 'alert-warning'}`}>
-                                <i className={`fa-duotone fa-regular ${selectedStage === 'hired' ? 'fa-check-circle' : 'fa-exclamation-triangle'}`}></i>
+                        {(selectedStage === "hired" ||
+                            selectedStage === "rejected") && (
+                            <div
+                                className={`alert ${selectedStage === "hired" ? "alert-success" : "alert-warning"}`}
+                            >
+                                <i
+                                    className={`fa-duotone fa-regular ${selectedStage === "hired" ? "fa-check-circle" : "fa-exclamation-triangle"}`}
+                                ></i>
                                 <div>
                                     <p className="text-sm font-semibold">
-                                        {selectedStage === 'hired' ? 'Final Stage' : 'Application Will Be Closed'}
+                                        {selectedStage === "hired"
+                                            ? "Final Stage"
+                                            : "Application Will Be Closed"}
                                     </p>
                                     <p className="text-xs">
-                                        {selectedStage === 'hired'
-                                            ? 'This will mark the application as successfully hired. Consider converting to a placement record.'
-                                            : 'This will close the application. You can reopen it later if needed.'}
+                                        {selectedStage === "hired"
+                                            ? "This will mark the application as successfully hired. Consider converting to a placement record."
+                                            : "This will close the application. You can reopen it later if needed."}
                                     </p>
                                 </div>
                             </div>
@@ -142,17 +176,12 @@ export default function StageUpdateModal({
                             className="btn btn-primary"
                             disabled={loading || selectedStage === currentStage}
                         >
-                            {loading ? (
-                                <>
-                                    <span className="loading loading-spinner loading-sm"></span>
-                                    Updating...
-                                </>
-                            ) : (
-                                <>
-                                    <i className="fa-duotone fa-regular fa-save"></i>
-                                    Update Stage
-                                </>
-                            )}
+                            <ButtonLoading
+                                loading={loading}
+                                icon="fa-duotone fa-regular fa-save"
+                                text="Update Stage"
+                                loadingText="Updating..."
+                            />
                         </button>
                     </div>
                 </form>
