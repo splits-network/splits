@@ -9,7 +9,7 @@
  */
 
 import { createAuthenticatedClient } from '@/lib/api-client';
-import { getCachedCurrentUserProfile, setCachedCurrentUserProfile } from '@/lib/current-user-profile';
+import { getCurrentUserProfile, setCachedCurrentUserProfile } from '@/lib/current-user-profile';
 
 /**
  * Data required to register a new user
@@ -66,10 +66,7 @@ export async function ensureUserInDatabase(
     try {
         // Step 1: Check if user already exists via /users/me
         try {
-            const existing = await getCachedCurrentUserProfile(
-                async () => token,
-                { force: true }
-            );
+            const existing = await getCurrentUserProfile(async () => token);
 
             if (existing) {
                 console.log('[UserRegistration] User already exists:', existing.id);
@@ -90,7 +87,7 @@ export async function ensureUserInDatabase(
 
         // Step 2: Create new user via /users/register
         console.log('[UserRegistration] Creating new user for:', data.email);
-        
+
         const createResponse = await apiClient.post<{ data: UserRegistrationResult['user'] }>('/users/register', {
             clerk_user_id: data.clerk_user_id,
             email: data.email,
@@ -100,7 +97,6 @@ export async function ensureUserInDatabase(
 
         if (createResponse?.data) {
             console.log('[UserRegistration] User created successfully:', createResponse.data.id);
-            setCachedCurrentUserProfile(createResponse.data);
             return {
                 success: true,
                 user: createResponse.data,
@@ -114,7 +110,7 @@ export async function ensureUserInDatabase(
     } catch (error: any) {
         // Handle duplicate key error (race condition with webhook)
         const errorMessage = error?.message || error?.response?.data?.error?.message || '';
-        const isDuplicateKey = 
+        const isDuplicateKey =
             errorMessage.toLowerCase().includes('already registered') ||
             errorMessage.toLowerCase().includes('duplicate') ||
             errorMessage.toLowerCase().includes('already exists') ||
@@ -122,16 +118,12 @@ export async function ensureUserInDatabase(
 
         if (isDuplicateKey) {
             console.log('[UserRegistration] User created by webhook, fetching existing...');
-            
+
             // User was created by webhook during our check, fetch them
             try {
-                const retryUser = await getCachedCurrentUserProfile(
-                    async () => token,
-                    { force: true }
-                );
+                const retryUser = await getCurrentUserProfile(async () => token);
 
                 if (retryUser) {
-                    setCachedCurrentUserProfile(retryUser);
                     return {
                         success: true,
                         user: retryUser as UserRegistrationResult['user'],
@@ -156,7 +148,7 @@ export async function ensureUserInDatabase(
 
 /**
  * Check if a user exists in the database without creating them.
- * 
+ *
  * @param token - Clerk JWT token for authentication
  * @returns User data if exists, null otherwise
  */
@@ -164,7 +156,7 @@ export async function checkUserExists(
     token: string
 ): Promise<UserRegistrationResult['user'] | null> {
     try {
-        return await getCachedCurrentUserProfile(async () => token, { force: true }) as UserRegistrationResult['user'] | null;
+        return await getCurrentUserProfile(async () => token) as UserRegistrationResult['user'] | null;
     } catch {
         return null;
     }

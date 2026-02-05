@@ -20,7 +20,7 @@ export class InvitationServiceV2 {
         private eventPublisher: EventPublisherV2,
         private logger: Logger,
         private resolveAccessContext: (clerkUserId: string) => Promise<AccessContext>
-    ) {}
+    ) { }
 
     private async requirePlatformAdmin(clerkUserId: string): Promise<AccessContext> {
         const access = await this.resolveAccessContext(clerkUserId);
@@ -95,21 +95,62 @@ export class InvitationServiceV2 {
     /**
      * Find invitation by ID
      */
-    async findInvitationById(clerkUserId: string, id: string) {
+    async findInvitationById(clerkUserId: string, id: string, userEmail?: string) {
         this.logger.info({ id }, 'InvitationService.findInvitationById');
         const invitation = await this.repository.findInvitationById(id);
         if (!invitation) {
             throw new Error(`Invitation not found: ${id}`);
         }
 
-        // Verify user has access to this invitation's organization
+        // Verify user has access to this invitation
         const access = await this.resolveAccessContext(clerkUserId);
-        if (!access.isPlatformAdmin) {
-            // Check if user is company admin for this organization
-            if (!access.organizationIds.includes(invitation.organization_id)) {
-                this.logger.warn({ clerkUserId, invitationOrgId: invitation.organization_id }, 'User does not have access to this invitation');
-                throw new Error('You do not have access to this invitation');
-            }
+
+        // Allow access if:
+        // 1. User is platform admin, OR
+        // 2. User is company admin for this organization, OR  
+        // 3. User's email matches the invitation email (the invited user)
+        if (!access.isPlatformAdmin &&
+            !access.organizationIds.includes(invitation.organization_id) &&
+            (!userEmail || userEmail.toLowerCase() !== invitation.email.toLowerCase())) {
+            this.logger.warn({
+                clerkUserId,
+                userEmail,
+                invitationEmail: invitation.email,
+                invitationOrgId: invitation.organization_id
+            }, 'User does not have access to this invitation');
+            throw new Error('You do not have access to this invitation');
+        }
+
+        return invitation;
+    }
+
+    /**
+     * Find invitation for acceptance - allows access if user email matches invitation email
+     */
+    async findInvitationForAcceptance(clerkUserId: string, id: string, userEmail: string) {
+        this.logger.info({ id, userEmail }, 'InvitationService.findInvitationForAcceptance');
+
+        const invitation = await this.repository.findInvitationById(id);
+        if (!invitation) {
+            throw new Error(`Invitation not found: ${id}`);
+        }
+
+        // Allow access if:
+        // 1. User is platform admin, OR
+        // 2. User is company admin for this organization, OR  
+        // 3. User's email matches the invitation email (the invited user)
+        const access = await this.resolveAccessContext(clerkUserId);
+
+        if (!access.isPlatformAdmin &&
+            !access.organizationIds.includes(invitation.organization_id) &&
+            userEmail.toLowerCase() !== invitation.email.toLowerCase()) {
+            this.logger.warn({
+                clerkUserId,
+                userEmail,
+                invitationEmail: invitation.email,
+                invitationOrgId: invitation.organization_id
+            }, 'User does not have access to this invitation');
+            throw new Error('You do not have access to this invitation');
         }
 
         return invitation;
@@ -196,7 +237,7 @@ export class InvitationServiceV2 {
         await this.requirePlatformAdmin(clerkUserId);
         this.logger.info({ id, updates }, 'InvitationService.updateInvitation');
 
-        await this.findInvitationById(clerkUserId, id);
+        await this.findInvitationById(clerkUserId, id, undefined);
 
         const updateData: any = {
             ...updates,
@@ -221,7 +262,7 @@ export class InvitationServiceV2 {
         this.logger.info({ id }, 'InvitationService.deleteInvitation');
 
         // findInvitationById checks authorization
-        await this.findInvitationById(clerkUserId, id);
+        await this.findInvitationById(clerkUserId, id, undefined);
         await this.repository.deleteInvitation(id);
 
         await this.eventPublisher.publish('invitation.deleted', {
@@ -234,8 +275,17 @@ export class InvitationServiceV2 {
     /**
      * Accept an invitation and create membership
      */
-    async acceptInvitation(invitationId: string, userId: string, userEmail: string) {
-        this.logger.info({ invitationId, userId }, 'InvitationService.acceptInvitation');
+    async acceptInvitation(invitationId: string, clerkUserId: string, userEmail: string) {
+        this.logger.info({ invitationId, clerkUserId }, 'InvitationService.acceptInvitation');
+
+        // Convert Clerk user ID to internal user ID
+        const user = await this.userRepository.findUserByClerkId(clerkUserId);
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const userId = user.id;
 
         // Fetch invitation without auth (user has the invitation link)
         const invitation = await this.repository.findInvitationById(invitationId);
@@ -266,6 +316,7 @@ export class InvitationServiceV2 {
         // Mark user's onboarding as completed (they're joining via invitation)
         await this.userRepository.updateUser(userId, {
             onboarding_status: 'completed',
+            onboarding_completed_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
         });
 
@@ -297,6 +348,13 @@ export class InvitationServiceV2 {
             role: membership.role,
         });
 
+        // Final update to ensure onboarding status is correctly set to completed
+        // This handles any potential race conditions or overrides
+        await this.userRepository.updateUser(userId, {
+            onboarding_status: 'completed',
+            updated_at: new Date().toISOString(),
+        });
+
         this.logger.info(
             { invitationId, userId, membershipId: membership.id, role: invitation.role },
             'InvitationService.acceptInvitation - completed, onboarding marked as completed, membership created'
@@ -307,7 +365,7 @@ export class InvitationServiceV2 {
      * Resend an invitation (extends expiration and re-sends email)
      */
     async resendInvitation(clerkUserId: string, invitationId: string): Promise<void> {
-        const invitation = await this.findInvitationById(clerkUserId, invitationId);
+        const invitation = await this.findInvitationById(clerkUserId, invitationId, undefined);
 
         if (invitation.status !== 'pending') {
             throw new Error('Can only resend pending invitations');

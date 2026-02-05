@@ -37,6 +37,7 @@ export function registerIdentityRoutes(app: FastifyInstance, services: ServiceRe
     registerUserRegistrationRoute(app, services);
     registerProfileImageRoute(app, services); // Add profile image route
     registerDeleteProfileImageRoute(app, services); // Add delete profile image route
+    registerInvitationAcceptRoute(app, services);
 
     // Register generic CRUD routes for users
     IDENTITY_RESOURCES.forEach(resource => registerResourceRoutes(app, services, resource));
@@ -62,6 +63,24 @@ function registerUserMeRoute(app: FastifyInstance, services: ServiceRegistry) {
             const data = await identityService().get(
                 '/api/v2/users/me',
                 undefined,
+                correlationId,
+                authHeaders
+            );
+            return reply.send(data);
+        }
+    );
+
+    app.patch(
+        '/api/v2/users/me',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const data = await identityService().patch(
+                '/api/v2/users/me',
+                request.body,
                 correlationId,
                 authHeaders
             );
@@ -190,6 +209,32 @@ function registerDeleteProfileImageRoute(app: FastifyInstance, services: Service
             const authHeaders = buildAuthHeaders(request);
             const data = await identityService().delete(
                 '/api/v2/users/profile-image',
+                correlationId,
+                authHeaders
+            );
+            return reply.send(data);
+        }
+    );
+}
+
+/**
+ * POST /api/v2/invitations/:id/accept - Accept invitation
+ */
+function registerInvitationAcceptRoute(app: FastifyInstance, services: ServiceRegistry) {
+    const identityService = () => services.get('identity');
+
+    app.post(
+        '/api/v2/invitations/:id/accept',
+        {
+            preHandler: requireAuth(),
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const authHeaders = buildAuthHeaders(request);
+            const data = await identityService().post(
+                `/api/v2/invitations/${id}/accept`,
+                request.body,
                 correlationId,
                 authHeaders
             );

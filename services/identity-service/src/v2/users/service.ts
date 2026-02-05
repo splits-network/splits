@@ -208,12 +208,13 @@ export class UserServiceV2 {
 
         // Check if user already exists - return existing user for idempotency
         const existingUser = await this.repository.findUserByClerkId(clerkUserId);
+        // TODO: this is where i'm at.  we need to check if an existing user is returned.  for instance, this should have been created by accept invitation flow
         if (existingUser) {
             this.logger.info({ id: existingUser.id, clerkUserId }, 'UserService.registerUser - user already exists, returning existing');
             return existingUser;
         }
 
-        // Create user data
+        // Create user data  
         const createData: any = {
             clerk_user_id: clerkUserId,
             email: userData.email,
@@ -242,14 +243,14 @@ export class UserServiceV2 {
             // Postgres error code 23505 = unique_violation
             if (error?.code === '23505' || error?.message?.includes('duplicate')) {
                 this.logger.info({ clerkUserId }, 'UserService.registerUser - duplicate key, fetching existing user');
-                
+
                 // User was created by webhook during our check, fetch them
                 const raceUser = await this.repository.findUserByClerkId(clerkUserId);
                 if (raceUser) {
                     return raceUser;
                 }
             }
-            
+
             // Re-throw other errors
             throw error;
         }
@@ -334,7 +335,7 @@ export class UserServiceV2 {
     private async syncProfileImageToClerk(clerkUserId: string, imageUrl: string) {
         try {
             const { createClerkClient } = await import('@clerk/backend');
-            
+
             const secretKey = process.env.CLERK_SECRET_KEY;
             if (!secretKey) {
                 this.logger.warn('CLERK_SECRET_KEY not configured, skipping profile image sync');
@@ -378,7 +379,7 @@ export class UserServiceV2 {
     private async syncUserNameToClerk(clerkUserId: string, fullName: string) {
         try {
             const { createClerkClient } = await import('@clerk/backend');
-            
+
             const secretKey = process.env.CLERK_SECRET_KEY;
             if (!secretKey) {
                 this.logger.warn('CLERK_SECRET_KEY not configured, skipping user name sync');
@@ -449,7 +450,7 @@ export class UserServiceV2 {
     private async clearClerkProfileImage(clerkUserId: string) {
         try {
             const { createClerkClient } = await import('@clerk/backend');
-            
+
             const secretKey = process.env.CLERK_SECRET_KEY;
             if (!secretKey) {
                 this.logger.warn('CLERK_SECRET_KEY not configured, skipping Clerk profile image clear');

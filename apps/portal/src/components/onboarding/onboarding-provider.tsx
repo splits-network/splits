@@ -26,10 +26,7 @@ import {
 import { ApiClient, createAuthenticatedClient } from "@/lib/api-client";
 import { useUserProfile } from "@/contexts";
 import { ensureUserInDatabase } from "@/lib/user-registration";
-import {
-    getCachedCurrentUserProfile,
-    setCachedCurrentUserProfile,
-} from "@/lib/current-user-profile";
+import { getCurrentUserProfile } from "@/lib/current-user-profile";
 
 type InitStatus = "loading" | "creating_account" | "ready" | "error";
 
@@ -72,42 +69,12 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 const token = await getToken();
                 if (!token) throw new Error("No authentication token");
 
-                const apiClient = createAuthenticatedClient(token);
-                let userData = null;
-
-                // Step 1: Try /users/me endpoint first (most direct)
-                try {
-                    const cached = await getCachedCurrentUserProfile(getToken);
-                    if (cached) {
-                        userData = cached;
-                    }
-                } catch (meError: any) {
-                    // 404 or 500 - user doesn't exist, continue to fallback
-                    console.log(
-                        "[OnboardingProvider] /users/me failed, trying fallback...",
-                    );
-                }
-
-                // Step 2: If /me failed, try list endpoint with limit: 1
-                if (!userData) {
-                    try {
-                        const listResponse = await apiClient.get("/users", {
-                            params: { limit: 1 },
-                        });
-                        if (listResponse?.data) {
-                            userData = Array.isArray(listResponse.data)
-                                ? listResponse.data[0]
-                                : listResponse.data;
-                        }
-                    } catch (listError) {
-                        console.log(
-                            "[OnboardingProvider] /users list failed, will create user...",
-                        );
-                    }
-                }
+                const client = createAuthenticatedClient(token);
+                const response: any = await client.get("/users/me");
+                let data = response?.data ?? null;
 
                 // Step 3: If still no user, create via fallback
-                if (!userData) {
+                if (!data) {
                     setInitStatus("creating_account");
                     setInitMessage("Setting up your account...");
 
@@ -119,8 +86,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                     });
 
                     if (result.success && result.user) {
-                        userData = result.user;
-                        setCachedCurrentUserProfile(result.user);
+                        data = result.user;
                     } else {
                         throw new Error(
                             result.error || "Failed to create user account",
@@ -128,14 +94,26 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                     }
                 }
 
-                if (!userData) {
+                if (!data) {
                     throw new Error("Unable to load or create user profile");
+                }
+
+                // Skip onboarding modal for platform_admin users or users with completed onboarding
+                if (isAdmin || data.onboarding_status === "completed") {
+                    setState((prev) => ({
+                        ...prev,
+                        status: "completed", // Mark as completed so modal never shows
+                        isModalOpen: false,
+                        loading: false,
+                    }));
+                    setInitStatus("ready");
+                    return;
                 }
 
                 // Load onboarding state from metadata if available
                 let loadedState = {
-                    currentStep: userData.onboarding_step || 1,
-                    status: userData.onboarding_status || "pending",
+                    currentStep: data.onboarding_step || 1,
+                    status: data.onboarding_status || "pending",
                     selectedRole: null as UserRole | null,
                     selectedPlan: null,
                     stripePaymentInfo: null,
@@ -145,15 +123,13 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 
                 // Restore state from onboarding_metadata if exists
                 if (
-                    userData.onboarding_metadata &&
-                    Object.keys(userData.onboarding_metadata).length > 0
+                    data.onboarding_metadata &&
+                    Object.keys(data.onboarding_metadata).length > 0
                 ) {
-                    const metadata = userData.onboarding_metadata;
+                    const metadata = data.onboarding_metadata;
                     loadedState = {
                         currentStep:
-                            metadata.current_step ||
-                            userData.onboarding_step ||
-                            1,
+                            metadata.current_step || data.onboarding_step || 1,
                         status:
                             metadata.status === "completed"
                                 ? "completed"
@@ -166,19 +142,6 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                         recruiterProfile: metadata.personal_info || {},
                         companyInfo: metadata.company_info || {},
                     };
-                }
-
-                // Skip onboarding modal for platform_admin users (use context value)
-                if (isAdmin) {
-                    setState((prev) => ({
-                        ...prev,
-                        ...loadedState,
-                        status: "completed", // Mark as completed so modal never shows
-                        isModalOpen: false,
-                        loading: false,
-                    }));
-                    setInitStatus("ready");
-                    return;
                 }
 
                 // Show modal if onboarding is pending or in progress
@@ -211,33 +174,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
         fetchOnboardingStatus();
     }, [user, getToken, profileLoading, isAdmin]);
 
-    // Auto-save state changes to database (debounced)
-    useEffect(() => {
-        if (
-            initStatus !== "ready" ||
-            state.loading ||
-            state.status === "completed"
-        )
-            return;
-        if (!user?.id) return;
-
-        const timeoutId = setTimeout(() => {
-            persistOnboardingState();
-        }, 1000); // Debounce 1 second
-
-        return () => clearTimeout(timeoutId);
-    }, [
-        state.currentStep,
-        state.selectedRole,
-        state.selectedPlan,
-        state.stripePaymentInfo,
-        state.recruiterProfile,
-        state.companyInfo,
-        initStatus,
-        state.loading,
-        state.status,
-        user?.id,
-    ]);
+    // No auto-save on load - only save when user explicitly interacts with the wizard
+    // The persistOnboardingState() function is called from the actions below when needed
 
     const persistOnboardingState = async () => {
         if (persisting || !user?.id) return; // Prevent concurrent saves
@@ -294,8 +232,6 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 onboarding_step: state.currentStep,
                 onboarding_status: state.status,
             });
-
-            console.log("Onboarding state persisted to database");
         } catch (error) {
             console.error("Failed to persist onboarding state:", error);
         } finally {
@@ -318,7 +254,10 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
                 currentStep: step,
                 status: step === 2 ? "in_progress" : prev.status,
             }));
-            // State will auto-persist via useEffect
+
+            // Save progress when user navigates between steps
+            // This ensures we don't lose their work if they close the browser
+            await persistOnboardingState();
         },
 
         setRole: (role: UserRole) => {

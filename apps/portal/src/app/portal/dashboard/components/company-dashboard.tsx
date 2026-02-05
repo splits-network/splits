@@ -220,23 +220,30 @@ export default function CompanyDashboard() {
             });
             setPlacements(placementsResponse.data || []);
 
-            // Load company billing profile (if available)
+            // Load company billing profile (if available and user has permission)
             if (profile?.organization_ids?.length) {
-                const companiesResponse: any = await api.get("/companies", {
-                    params: { limit: 50 },
-                });
-                const companies = companiesResponse?.data || [];
-                const company = companies.find(
-                    (c: any) =>
-                        c.identity_organization_id ===
-                        profile.organization_ids[0],
-                );
-                const companyId = company?.id;
-                if (companyId) {
-                    const billingResponse: any = await api.get(
-                        `/company-billing-profiles/${companyId}`,
+                try {
+                    const companiesResponse: any = await api.get("/companies", {
+                        params: { limit: 50 },
+                    });
+                    const companies = companiesResponse?.data || [];
+                    const company = companies.find(
+                        (c: any) =>
+                            c.identity_organization_id ===
+                            profile.organization_ids[0],
                     );
-                    setBillingProfile(billingResponse?.data || null);
+                    const companyId = company?.id;
+                    if (companyId) {
+                        const billingResponse: any = await api.get(
+                            `/company-billing-profiles/${companyId}`,
+                        );
+                        setBillingProfile(billingResponse?.data || null);
+                    }
+                } catch (billingError: any) {
+                    // Billing data not available (likely insufficient permissions)
+                    // This is expected for non-billing users (e.g., hiring_manager)
+                    console.log("[Dashboard] Billing data not available for this user:", billingError?.response?.data?.error?.message || billingError.message);
+                    setBillingProfile(null);
                 }
             }
 

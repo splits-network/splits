@@ -84,6 +84,7 @@ export class UserRepository {
             .single();
 
         if (error) {
+            console.log('Error in findUserByClerkId:', error);
             if (error.code === 'PGRST116') return null; // Not found
             throw error;
         }

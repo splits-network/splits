@@ -22,16 +22,9 @@ export default function SignUpPage() {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    // Check for invitation parameters
-    const invitationId = searchParams.get('invitation_id');
-    const invitationEmail = searchParams.get('email');
-
-    // Pre-fill email if from invitation
-    useEffect(() => {
-        if (invitationEmail && !email) {
-            setEmail(invitationEmail);
-        }
-    }, [invitationEmail]);
+    // Get redirect URL from search params (Clerk preserves this through verification)
+    const redirectUrl = searchParams.get('redirect_url');
+    const isFromInvitation = redirectUrl?.includes('/accept-invitation/');
 
     const handleSignOut = async () => {
         setIsLoading(true);
@@ -111,12 +104,8 @@ export default function SignUpPage() {
                     console.error('Failed to create user in database (webhook will handle):', userCreationError);
                 }
 
-                // If user signed up via invitation, redirect to acceptance page
-                if (invitationId) {
-                    router.push(`/accept-invitation/${invitationId}`);
-                } else {
-                    router.push('/portal/dashboard');
-                }
+                // Redirect to the URL Clerk preserved through verification
+                router.push(redirectUrl || '/portal/dashboard');
             } else {
                 setError(`Sign up incomplete. Status: ${completeSignUp.status}. Please check the console for details.`);
             }
@@ -131,16 +120,10 @@ export default function SignUpPage() {
     const signUpWithOAuth = (provider: 'oauth_google' | 'oauth_github' | 'oauth_microsoft') => {
         if (!isLoaded) return;
 
-        // Build redirect URL with invitation params if present
-        const redirectUrl = '/sso-callback';
-        const redirectUrlComplete = invitationId
-            ? `/accept-invitation/${invitationId}`
-            : '/portal/dashboard';
-
         signUp.authenticateWithRedirect({
             strategy: provider,
-            redirectUrl,
-            redirectUrlComplete,
+            redirectUrl: '/sso-callback',
+            redirectUrlComplete: redirectUrl || '/portal/dashboard',
         });
     };
 
@@ -274,7 +257,7 @@ export default function SignUpPage() {
                         Create Your Splits Account
                     </h2>
 
-                    {invitationId && (
+                    {isFromInvitation && (
                         <div className="alert alert-info mb-4">
                             <i className="fa-duotone fa-regular fa-envelope-open-text"></i>
                             <span>Complete sign-up to accept your invitation</span>
@@ -394,7 +377,10 @@ export default function SignUpPage() {
 
                     <p className="text-center text-sm mt-4">
                         Already have an account?{' '}
-                        <Link href="/sign-in" className="link link-primary">
+                        <Link
+                            href={redirectUrl ? `/sign-in?redirect_url=${encodeURIComponent(redirectUrl)}` : '/sign-in'}
+                            className="link link-primary"
+                        >
                             Sign in
                         </Link>
                     </p>

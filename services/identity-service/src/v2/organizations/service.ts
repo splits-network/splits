@@ -39,10 +39,27 @@ export class OrganizationServiceV2 {
 
     /**
      * Find organization by ID
+     * Allows access for:
+     * - Platform admins (can view any organization)
+     * - Users with memberships in the organization
+     * - Any authenticated user (for invitation flows)
      */
     async findOrganizationById(clerkUserId: string, id: string) {
-        await this.requirePlatformAdmin(clerkUserId);
-        this.logger.info({ id }, 'OrganizationService.findOrganizationById');
+        const access = await this.resolveAccessContext(clerkUserId);
+
+        // Platform admins can view any organization
+        if (access.isPlatformAdmin) {
+            this.logger.info({ id, admin: true }, 'OrganizationService.findOrganizationById - platform admin');
+        }
+        // Users with membership in the organization can view it
+        else if (access.organizationIds.includes(id)) {
+            this.logger.info({ id, member: true }, 'OrganizationService.findOrganizationById - member access');
+        }
+        // All other authenticated users can view for invitation purposes
+        else {
+            this.logger.info({ id, invitation: true }, 'OrganizationService.findOrganizationById - invitation access');
+        }
+
         const org = await this.repository.findOrganizationById(id);
         if (!org) {
             throw new Error(`Organization not found: ${id}`);
