@@ -28,6 +28,8 @@ import ApplicationsTrendsChart, {
 } from "@/components/charts/applications-trends-chart";
 import BulkActionModal from "./bulk-action-modal";
 import ApplicationDetailSidebar from "./application-detail-sidebar";
+import MessageSidebar from "@/components/sidebar/MessageSidebar";
+import { useMessageSidebar } from "@/hooks/use-message-sidebar";
 import type { ApplicationStage } from "@splits-network/shared-types";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -131,7 +133,19 @@ export default function ApplicationsList({ view }: ApplicationsListProps) {
 
     // Sidebar state - check URL param for initial selection
     const urlApplicationId = searchParams.get("applicationId");
-    const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(urlApplicationId);
+    const [selectedApplicationId, setSelectedApplicationId] = useState<
+        string | null
+    >(urlApplicationId);
+
+    // Message sidebar state
+    const {
+        conversationId,
+        candidateName,
+        isOpen: isMessageSidebarOpen,
+        openSidebar: openMessageSidebar,
+        closeSidebar: closeMessageSidebar,
+        resetSidebar: resetMessageSidebar,
+    } = useMessageSidebar();
 
     // Sync sidebar state with URL param changes
     useEffect(() => {
@@ -139,10 +153,6 @@ export default function ApplicationsList({ view }: ApplicationsListProps) {
             setSelectedApplicationId(urlApplicationId);
         }
     }, [urlApplicationId]);
-
-    const handleViewDetails = useCallback((applicationId: string) => {
-        setSelectedApplicationId(applicationId);
-    }, []);
 
     const handleCloseSidebar = useCallback(() => {
         setSelectedApplicationId(null);
@@ -294,6 +304,34 @@ export default function ApplicationsList({ view }: ApplicationsListProps) {
             setAcceptingId(null);
         }
     };
+
+    // Message sidebar handler
+    const handleMessage = useCallback(
+        (
+            conversationId: string,
+            candidateName: string,
+            candidateUserId: string,
+            context?: any,
+        ) => {
+            openMessageSidebar(
+                conversationId,
+                candidateName,
+                candidateUserId,
+                context,
+            );
+        },
+        [openMessageSidebar],
+    );
+
+    // View details handler
+    const handleViewDetails = useCallback(
+        (applicationId: string) => {
+            setSelectedApplicationId(applicationId);
+            // Reset message sidebar when switching applications
+            resetMessageSidebar();
+        },
+        [resetMessageSidebar],
+    );
 
     // Bulk action handlers
     const handleBulkAction = (action: "stage" | "reject") => {
@@ -508,6 +546,7 @@ export default function ApplicationsList({ view }: ApplicationsListProps) {
                                     handleAcceptApplication(application.id)
                                 }
                                 onViewDetails={handleViewDetails}
+                                onMessage={handleMessage}
                                 onRefresh={refresh}
                                 formatDate={formatDate}
                                 isRecruiter={isRecruiter}
@@ -596,6 +635,15 @@ export default function ApplicationsList({ view }: ApplicationsListProps) {
                 applicationId={selectedApplicationId}
                 onClose={handleCloseSidebar}
             />
+
+            {/* Message Sidebar */}
+            {isMessageSidebarOpen && conversationId && (
+                <MessageSidebar
+                    conversationId={conversationId}
+                    candidateName={candidateName}
+                    onClose={closeMessageSidebar}
+                />
+            )}
         </div>
     );
 }

@@ -21,6 +21,9 @@ import {
 import CandidateCard, { type Candidate } from "./candidate-card";
 import { CandidateTableRow } from "./candidate-table-row";
 import AddCandidateModal from "./add-candidate-modal";
+import CandidateDetailSidebar from "./candidate-detail-sidebar";
+import MessageSidebar from "@/components/sidebar/MessageSidebar";
+import { useMessageSidebar } from "@/hooks/use-message-sidebar";
 import { useToast } from "@/lib/toast-context";
 import { StatCardGrid, StatCard } from "@/components/ui";
 import { DataTable, type TableColumn } from "@/components/ui/tables";
@@ -59,6 +62,19 @@ export default function CandidatesListClient({
     const { isRecruiter } = useUserProfile();
     const [showAddModal, setShowAddModal] = useState(false);
     const [trendPeriod, setTrendPeriod] = useState(6);
+    const [sidebarCandidateId, setSidebarCandidateId] = useState<string | null>(
+        null,
+    );
+
+    // Message sidebar state
+    const {
+        conversationId,
+        candidateName,
+        isOpen: isMessageSidebarOpen,
+        openSidebar: openMessageSidebar,
+        closeSidebar: closeMessageSidebar,
+        resetSidebar: resetMessageSidebar,
+    } = useMessageSidebar();
 
     // Memoize fetchCandidates to prevent infinite re-renders in useStandardList
     const fetchCandidates = useCallback(
@@ -120,6 +136,30 @@ export default function CandidatesListClient({
     const handleAddCandidateSuccess = (newCandidate: Candidate) => {
         refresh();
         toast.success("Invitation sent to candidate successfully!");
+    };
+
+    const handleViewDetails = (candidateId: string) => {
+        setSidebarCandidateId(candidateId);
+        // Reset message sidebar when switching candidates
+        resetMessageSidebar();
+    };
+
+    const handleCloseSidebar = () => {
+        setSidebarCandidateId(null);
+    };
+
+    const handleMessage = (
+        conversationId: string,
+        candidateName: string,
+        candidateUserId: string,
+        context?: any,
+    ) => {
+        openMessageSidebar(
+            conversationId,
+            candidateName,
+            candidateUserId,
+            context,
+        );
     };
 
     // Sort icon helper for table headers
@@ -276,6 +316,8 @@ export default function CandidatesListClient({
                             <CandidateCard
                                 candidate={candidate}
                                 key={candidate.id}
+                                onViewDetails={handleViewDetails}
+                                onMessage={handleMessage}
                             />
                         ))}
                     </div>
@@ -297,6 +339,8 @@ export default function CandidatesListClient({
                                 key={candidate.id}
                                 candidate={candidate}
                                 isRecruiter={isRecruiter}
+                                onViewDetails={handleViewDetails}
+                                onMessage={handleMessage}
                             />
                         ))}
                     </DataTable>
@@ -333,6 +377,19 @@ export default function CandidatesListClient({
                 isOpen={showAddModal}
                 onClose={() => setShowAddModal(false)}
                 onSuccess={handleAddCandidateSuccess}
+            />
+
+            {/* Candidate Detail Sidebar */}
+            <CandidateDetailSidebar
+                candidateId={sidebarCandidateId}
+                onClose={handleCloseSidebar}
+            />
+
+            {/* Message Sidebar */}
+            <MessageSidebar
+                conversationId={conversationId}
+                candidateName={candidateName}
+                onClose={closeMessageSidebar}
             />
         </div>
     );

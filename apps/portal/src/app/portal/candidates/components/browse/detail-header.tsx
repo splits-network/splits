@@ -1,30 +1,14 @@
 "use client";
 
 import { Candidate } from "./types";
-import { useAuth } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import { startChatConversation } from "@/lib/chat-start";
-import { useToast } from "@/lib/toast-context";
-import { useState } from "react";
-import { usePresence } from "@/hooks/use-presence";
-import { Presence } from "@/components/presense";
 
-export default function DetailHeader({ candidate }: { candidate: Candidate }) {
-    const { getToken } = useAuth();
-    const router = useRouter();
-    const toast = useToast();
-    const [startingChat, setStartingChat] = useState(false);
-    const canChat = Boolean(candidate.user_id);
-    const chatDisabledReason = canChat
-        ? null
-        : "This candidate isn't linked to a user yet.";
-    const presence = usePresence([candidate.user_id], { enabled: canChat });
-    const presenceStatus = candidate.user_id
-        ? presence[candidate.user_id]?.status
-        : undefined;
+interface DetailHeaderProps {
+    candidate: Candidate;
+}
 
+export default function DetailHeader({ candidate }: DetailHeaderProps) {
     return (
-        <div className="flex flex-col sm:flex-row gap-6 items-start justify-between">
+        <div className="flex flex-col gap-4">
             <div className="flex gap-5 items-start">
                 <div className="avatar avatar-placeholder">
                     <div className="bg-secondary text-neutral-content rounded-full w-20 h-20">
@@ -156,64 +140,6 @@ export default function DetailHeader({ candidate }: { candidate: Candidate }) {
                     </div>
                 </div>
             </div>
-
-            <div className="flex gap-2">
-                <span title={chatDisabledReason || undefined}>
-                    <button
-                        className="btn btn-sm btn-outline"
-                        disabled={!canChat || startingChat}
-                        onClick={async () => {
-                            if (!candidate.user_id) {
-                                return;
-                            }
-                            try {
-                                setStartingChat(true);
-                                const conversationId =
-                                    await startChatConversation(
-                                        getToken,
-                                        candidate.user_id,
-                                        {
-                                            company_id:
-                                                candidate.company_id || null,
-                                        },
-                                    );
-                                router.push(
-                                    `/portal/messages?conversationId=${conversationId}`,
-                                );
-                            } catch (err: any) {
-                                console.error(
-                                    "Failed to start chat:",
-                                    err,
-                                );
-                                toast.error(
-                                    err?.message || "Failed to start chat",
-                                );
-                            } finally {
-                                setStartingChat(false);
-                            }
-                        }}
-                    >
-                        {startingChat ? (
-                            <span className="loading loading-spinner loading-xs"></span>
-                        ) : (
-                            <span className="inline-flex items-center gap-2">
-                                <Presence status={presenceStatus} />
-                                <i className="fa-duotone fa-regular fa-messages"></i>
-                            </span>
-                        )}
-                        Message
-                    </button>
-                </span>
-                <button className="btn btn-sm btn-ghost">
-                    <i className="fa-duotone fa-regular fa-pen"></i> Edit
-                </button>
-                <button className="btn btn-sm btn-primary">
-                    <i className="fa-duotone fa-regular fa-paper-plane"></i>{" "}
-                    Submit
-                </button>
-            </div>
         </div>
     );
 }
-
-

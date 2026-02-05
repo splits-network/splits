@@ -78,6 +78,12 @@ interface ApplicationCardProps {
     onAccept?: () => void;
     onViewDetails?: (applicationId: string) => void;
     onRefresh?: () => void;
+    onMessage?: (
+        conversationId: string,
+        candidateName: string,
+        candidateUserId: string,
+        context?: any,
+    ) => void;
     formatDate: (date: string | Date) => string;
     isRecruiter?: boolean;
     isCompanyUser?: boolean;
@@ -114,6 +120,7 @@ export function ApplicationCard({
     onAccept,
     onViewDetails,
     onRefresh,
+    onMessage,
     formatDate,
     isRecruiter = false,
     isCompanyUser = false,
@@ -312,9 +319,28 @@ export function ApplicationCard({
                                                             ?.id ?? null,
                                                 },
                                             );
-                                        router.push(
-                                            `/portal/messages?conversationId=${conversationId}`,
-                                        );
+
+                                        // Use sidebar callback if provided, otherwise navigate to messages page
+                                        if (onMessage) {
+                                            onMessage(
+                                                conversationId,
+                                                application.candidate
+                                                    .full_name || "Unknown",
+                                                application.candidate.user_id,
+                                                {
+                                                    application_id:
+                                                        application.id,
+                                                    job_id: application.job.id,
+                                                    company_id:
+                                                        application.job.company
+                                                            ?.id ?? null,
+                                                },
+                                            );
+                                        } else {
+                                            router.push(
+                                                `/portal/messages?conversationId=${conversationId}`,
+                                            );
+                                        }
                                     } catch (err: any) {
                                         console.error(
                                             "Failed to start chat:",
