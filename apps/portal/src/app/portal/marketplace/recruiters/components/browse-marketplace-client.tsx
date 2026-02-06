@@ -144,6 +144,13 @@ export function BrowseMarketplaceClient() {
         toast.success("Invitation sent successfully!");
     }, [toast]);
 
+    const handleMessage = useCallback(
+        (conversationId: string, _recruiterName: string, _recruiterUserId: string) => {
+            router.push(`/portal/messages?conversationId=${conversationId}`);
+        },
+        [router],
+    );
+
     if (loading && recruiters.length === 0) {
         return <LoadingState message="Loading recruiters..." />;
     }
@@ -251,6 +258,7 @@ export function BrowseMarketplaceClient() {
                     recruiter={selectedRecruiter}
                     onClose={handleClose}
                     onInvite={canInvite ? handleInvite : undefined}
+                    onMessage={handleMessage}
                 />
             </div>
 

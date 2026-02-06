@@ -32,7 +32,7 @@ export function RecruiterListItem({
         "Unknown Recruiter";
 
     // Format specialties for display
-    const specialties = recruiter.marketplace_specialties || [];
+    const specialties = recruiter.specialties || [];
     const primarySpecialty = specialties[0] || null;
 
     return (
@@ -65,9 +65,7 @@ export function RecruiterListItem({
 
                     {/* Tagline or Location */}
                     <div className="text-xs text-base-content/60 truncate mb-1.5">
-                        {recruiter.marketplace_tagline ||
-                            recruiter.marketplace_location ||
-                            "Recruiter"}
+                        {recruiter.tagline || recruiter.location || "Recruiter"}
                     </div>
 
                     {/* Badges */}
@@ -99,9 +97,9 @@ export function RecruiterListItem({
 
                 {/* Quick Actions - Visible on Hover/Selected */}
                 <div className="shrink-0 flex flex-col items-end gap-1">
-                    {recruiter.marketplace_years_experience && (
+                    {recruiter.years_experience && (
                         <span className="text-[10px] text-base-content/40">
-                            {recruiter.marketplace_years_experience}+ yrs
+                            {recruiter.years_experience}+ yrs
                         </span>
                     )}
 
