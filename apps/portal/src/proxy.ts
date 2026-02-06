@@ -10,28 +10,13 @@ export const config = {
     matcher: [
         // Protected routes that require authentication
         '/portal/(.*)',     // Main authenticated portal
-        //'/sign-in(.*)',     // Auth routes
-        //'/sign-up(.*)',
-        //'/forgot-password(.*)',
-        //'/sso-callback(.*)', // SSO callback
         '/accept-invitation(.*)', // Invitation acceptance
-        // Protected API routes only
-        // Note: /api/v2/plans is excluded as it's a public endpoint for pricing page
-        '/api/v2/applications/(.*)',
-        '/api/v2/candidates/(.*)',
-        '/api/v2/companies/(.*)',
-        '/api/v2/jobs/(.*)',
-        '/api/v2/placements/(.*)',
-        '/api/v2/subscriptions/(.*)',
-        '/api/v2/payouts/(.*)',
-        '/api/v2/recruiters/(.*)',
-        '/api/v2/assignments/(.*)',
-        '/api/v2/notifications/(.*)',
-        '/api/v2/documents/(.*)',
-        '/api/v2/users/(.*)',
-        '/api/v2/organizations/(.*)',
-        '/api/v2/memberships/(.*)',
-        '/api/v2/invitations/(.*)',
+
+        // V2 API routes - exclude public endpoints using negative lookahead
+        // Public endpoints (no auth): GET /api/v2/plans*, GET /api/v2/jobs*, GET /api/v2/recruiters*, /api/v2/status-contact*
+        // Note: This regex excludes the public endpoints from even running the middleware
+        '/api/v2/(?!plans|jobs|recruiters|status-contact).*', // All V2 routes except public endpoints
+
         '/api/notifications/(.*)', // V1 notification APIs
         '/api/healthcheck', // Internal health check
     ],
