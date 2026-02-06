@@ -16,8 +16,23 @@ export const config = {
         //'/sso-callback(.*)', // SSO callback
         '/accept-invitation(.*)', // Invitation acceptance
         // Protected API routes only
-        '/api/v2/(.*)',     // V2 API routes
-        '/api/notifications/(.*)', // Notification APIs
+        // Note: /api/v2/plans is excluded as it's a public endpoint for pricing page
+        '/api/v2/applications/(.*)',
+        '/api/v2/candidates/(.*)',
+        '/api/v2/companies/(.*)',
+        '/api/v2/jobs/(.*)',
+        '/api/v2/placements/(.*)',
+        '/api/v2/subscriptions/(.*)',
+        '/api/v2/payouts/(.*)',
+        '/api/v2/recruiters/(.*)',
+        '/api/v2/assignments/(.*)',
+        '/api/v2/notifications/(.*)',
+        '/api/v2/documents/(.*)',
+        '/api/v2/users/(.*)',
+        '/api/v2/organizations/(.*)',
+        '/api/v2/memberships/(.*)',
+        '/api/v2/invitations/(.*)',
+        '/api/notifications/(.*)', // V1 notification APIs
         '/api/healthcheck', // Internal health check
     ],
 };
