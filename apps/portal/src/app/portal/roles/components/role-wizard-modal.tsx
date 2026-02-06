@@ -29,12 +29,13 @@ export default function RoleWizardModal({
 }: RoleWizardModalProps) {
     const { getToken } = useAuth();
     const toast = useToast();
-    const { profile, isAdmin, isLoading: profileLoading } = useUserProfile();
+    const { profile, isAdmin, isRecruiter, isCompanyUser, isLoading: profileLoading } = useUserProfile();
     const [currentStep, setCurrentStep] = useState(1);
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [companies, setCompanies] = useState<Company[]>([]);
+    const [isRecruiterWithCompanyAccess, setIsRecruiterWithCompanyAccess] = useState(false);
 
     const [formData, setFormData] = useState<FormData>({
         // Step 1
@@ -157,6 +158,7 @@ export default function RoleWizardModal({
         async function loadCompanies() {
             setLoading(true);
             setError(null);
+            setIsRecruiterWithCompanyAccess(false);
 
             try {
                 const token = await getToken();
@@ -173,8 +175,29 @@ export default function RoleWizardModal({
                         pagination: any;
                     }>("/companies");
                     setCompanies(companiesResponse.data || []);
-                } else {
-                    // Company admin: auto-populate from their organization
+                } else if (isRecruiter) {
+                    // Recruiter: fetch companies they can manage via recruiter_companies
+                    try {
+                        const response = await client.get<{
+                            data: Company[];
+                        }>("/recruiter-companies/manageable-companies-with-details");
+                        const manageableCompanies = response.data || [];
+                        setCompanies(manageableCompanies);
+                        setIsRecruiterWithCompanyAccess(manageableCompanies.length > 0);
+
+                        if (manageableCompanies.length === 1) {
+                            // Auto-select if only one company
+                            setFormData((prev) => ({
+                                ...prev,
+                                company_id: manageableCompanies[0].id,
+                            }));
+                        }
+                    } catch (err: any) {
+                        console.error("Failed to load manageable companies:", err);
+                        setCompanies([]);
+                    }
+                } else if (isCompanyUser) {
+                    // Company user (company_admin, hiring_manager): fetch from organization
                     const organizationId = profile?.organization_ids?.[0];
                     if (organizationId) {
                         try {
@@ -221,7 +244,7 @@ export default function RoleWizardModal({
         }
 
         loadCompanies();
-    }, [isOpen, profileLoading, isAdmin, profile, getToken]);
+    }, [isOpen, profileLoading, isAdmin, isRecruiter, isCompanyUser, profile, getToken]);
 
     // Reset form when modal opens
     useEffect(() => {
@@ -457,6 +480,7 @@ export default function RoleWizardModal({
                                     setFormData={setFormData}
                                     companies={companies}
                                     isAdmin={isAdmin}
+                                    isRecruiterWithMultipleCompanies={isRecruiterWithCompanyAccess && companies.length > 1}
                                 />
                             )}
                             {currentStep === 2 && (

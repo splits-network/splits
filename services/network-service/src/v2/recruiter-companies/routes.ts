@@ -293,32 +293,64 @@ export async function recruiterCompanyRoutes(
     app.get('/v2/recruiter-companies/manageable-companies', {
     }, async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
-        
+
         // Get current user's recruiter ID
         const { data: user } = await supabase
             .from('users')
             .select('id')
             .eq('clerk_user_id', clerkUserId)
             .single();
-            
+
         if (!user) {
-            return reply.code(404).send({ 
-                error: { code: 'USER_NOT_FOUND', message: 'User not found' } 
+            return reply.code(404).send({
+                error: { code: 'USER_NOT_FOUND', message: 'User not found' }
             });
         }
-        
+
         const { data: recruiter } = await supabase
             .from('recruiters')
             .select('id')
             .eq('user_id', user.id)
             .single();
-            
+
         if (!recruiter) {
             return reply.send({ data: [] }); // Not a recruiter
         }
-        
+
         const companyIds = await service.getManageableCompanies(recruiter.id);
         return reply.send({ data: companyIds });
+    });
+
+    // GET companies recruiter can manage with details (id, name)
+    app.get('/v2/recruiter-companies/manageable-companies-with-details', {
+    }, async (request, reply) => {
+        const { clerkUserId } = requireUserContext(request);
+
+        // Get current user's recruiter ID
+        const { data: user } = await supabase
+            .from('users')
+            .select('id')
+            .eq('clerk_user_id', clerkUserId)
+            .single();
+
+        if (!user) {
+            return reply.code(404).send({
+                error: { code: 'USER_NOT_FOUND', message: 'User not found' }
+            });
+        }
+
+        const { data: recruiter } = await supabase
+            .from('recruiters')
+            .select('id')
+            .eq('user_id', user.id)
+            .single();
+
+        if (!recruiter) {
+            return reply.send({ data: [] }); // Not a recruiter
+        }
+
+        const companies = await service.getManageableCompaniesWithDetails(recruiter.id);
+        return reply.send({ data: companies });
     });
 
     // GET check if recruiter can manage company jobs

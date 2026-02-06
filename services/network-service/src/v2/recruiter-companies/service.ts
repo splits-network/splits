@@ -281,7 +281,14 @@ export class RecruiterCompanyServiceV2 {
             can_manage_company_jobs: true,
             limit: 1
         });
-        
+
         return data.length > 0;
+    }
+
+    /**
+     * Get all companies a recruiter can manage jobs for, with details
+     */
+    async getManageableCompaniesWithDetails(recruiterId: string): Promise<{ id: string; name: string }[]> {
+        return await this.repository.getManageableCompaniesWithDetails(recruiterId);
     }
 }
