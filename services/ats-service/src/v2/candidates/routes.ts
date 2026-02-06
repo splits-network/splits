@@ -11,7 +11,41 @@ export function registerCandidateRoutes(
     app: FastifyInstance,
     config: RegisterCandidateRoutesConfig
 ) {
-    app.get('/api/v2/candidates', async (request: FastifyRequest, reply: FastifyReply) => {
+    app.get('/api/v2/candidates', {
+        schema: {
+            description: 'List candidates with optional filters and pagination',
+            tags: ['candidates'],
+            querystring: {
+                type: 'object',
+                properties: {
+                    page: { type: 'number', minimum: 1, default: 1 },
+                    limit: { type: 'number', minimum: 1, maximum: 100, default: 25 },
+                    search: { type: 'string' },
+                    status: { type: 'string', enum: ['active', 'archived'] },
+                    source: { type: 'string' },
+                    location: { type: 'string' },
+                    skills: { type: 'string' }, // comma-separated skill IDs
+                },
+            },
+            response: {
+                200: {
+                    type: 'object',
+                    properties: {
+                        data: { type: 'array' },
+                        pagination: {
+                            type: 'object',
+                            properties: {
+                                total: { type: 'number' },
+                                page: { type: 'number' },
+                                limit: { type: 'number' },
+                                total_pages: { type: 'number' },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }, async (request: FastifyRequest, reply: FastifyReply) => {
         try {
             const { clerkUserId } = requireUserContext(request);
             const filters = request.query as any;
@@ -107,6 +141,35 @@ export function registerCandidateRoutes(
                 return reply
                     .code(400)
                     .send({ error: { message: error.message || 'Failed to load recent applications' } });
+            }
+        }
+    );
+
+    app.get(
+        '/api/v2/candidates/:id/primary-resume',
+        {
+            schema: {
+                description: 'Get the primary resume document for a candidate',
+                tags: ['candidates'],
+                params: {
+                    type: 'object',
+                    required: ['id'],
+                    properties: {
+                        id: { type: 'string', format: 'uuid' },
+                    },
+                },
+            },
+        },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                console.log('Received request for primary resume');
+                const { clerkUserId } = requireUserContext(request);
+                const { id } = request.params as any;
+                const resume = await config.candidateService.getCandidatePrimaryResume(id, clerkUserId);
+
+                return reply.send({ data: resume });
+            } catch (error: any) {
+                return reply.code(400).send({ error: { message: error.message || 'Failed to load primary resume' } });
             }
         }
     );

@@ -129,7 +129,7 @@ export class DocumentRepositoryV2 {
                         query = query.eq('entity_type', 'company').in('entity_id', accessContext.organizationIds);
                     } else if (accessContext.recruiterId) {
                         // Recruiters can see primary resumes of candidates they have access to
-                        query = query.eq('entity_type', 'candidate').eq('document_type', 'resume').eq('metadata->>is_primary', 'true');
+                        query = query.eq('entity_type', 'candidate').eq('document_type', 'resume').eq('metadata->>is_primary_for_candidate', 'true');
                     } else {
                         return { data: [], total: 0 };
                     }
@@ -494,7 +494,7 @@ export class DocumentRepositoryV2 {
             row.entity_type === 'candidate' &&
             row.document_type === 'resume' &&
             row.metadata &&
-            (row.metadata as any).is_primary === true
+            (row.metadata as any).is_primary_for_candidate === true
         ) {
             return true;
         }

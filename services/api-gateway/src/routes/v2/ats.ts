@@ -364,6 +364,24 @@ function registerCandidateRoutes(app: FastifyInstance, services: ServiceRegistry
             return reply.send(data);
         }
     );
+
+    // GET candidate primary resume
+    app.get(
+        `${serviceBase}/:id/primary-resume`,
+        { preHandler: requireAuth() },
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            const { id } = request.params as { id: string };
+            const correlationId = getCorrelationId(request);
+            const data = await atsService().get(
+                `${serviceBase}/${id}/primary-resume`,
+                undefined,
+                correlationId,
+                buildAuthHeaders(request)
+            );
+
+            return reply.send(data);
+        }
+    );
 }
 
 // Stats routes have been moved to analytics service

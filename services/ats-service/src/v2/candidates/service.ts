@@ -214,6 +214,26 @@ export class CandidateServiceV2 {
         return this.repository.getRecentCandidateApplications(userContext.candidateId, limit);
     }
 
+    async getCandidatePrimaryResume(candidateId: string, clerkUserId?: string): Promise<any> {
+        // Verify access to this candidate
+        if (clerkUserId) {
+            const userContext = await this.accessResolver.resolve(clerkUserId);
+            const canAccess =
+                userContext.isPlatformAdmin ||
+                userContext.recruiterId !== null ||
+                userContext.roles.some(role =>
+                    ['company_admin', 'hiring_manager', 'platform_admin'].includes(role)
+                ) ||
+                userContext.candidateId === candidateId;
+
+            if (!canAccess) {
+                throw new Error('You do not have permission to view this candidate\'s primary resume');
+            }
+        }
+
+        return this.repository.getCandidatePrimaryResume(candidateId);
+    }
+
     /**
      * Get all resumes for a candidate (for primary resume selection)
      */

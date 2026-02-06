@@ -552,6 +552,39 @@ export class CandidateRepository {
         }));
     }
 
+    async getCandidatePrimaryResume(candidateId: string): Promise<any | null> {
+        const { data: resume, error } = await this.supabase
+            .from('documents')
+            .select('*')
+            .eq('entity_type', 'candidate')
+            .eq('entity_id', candidateId)
+            .eq('document_type', 'resume')
+            .eq('metadata->>is_primary_for_candidate', 'true')
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') return null;
+            throw new Error(`Failed to fetch primary resume: ${error.message}`);
+        }
+
+        if (!resume) return null;
+
+        // Generate signed download URL (1 hour expiry)
+        const { data: signedUrlData, error: signedUrlError } = await this.supabase.storage
+            .from(resume.bucket_name)
+            .createSignedUrl(resume.storage_path, 3600);
+
+        if (signedUrlError) {
+            console.error('Failed to generate signed URL:', signedUrlError);
+            return resume; // Return without download_url if signing fails
+        }
+
+        return {
+            ...resume,
+            download_url: signedUrlData.signedUrl,
+        };
+    }
+
     /**
      * Set primary resume for a candidate using metadata
      */
