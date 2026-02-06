@@ -284,15 +284,6 @@ export function Sidebar() {
                 ...prev,
                 "/portal/messages": totalBadgeCount,
             }));
-
-            // Debug logging in development
-            if (process.env.NODE_ENV === "development") {
-                console.log("Message badge counts:", {
-                    unreadCount,
-                    requestCount,
-                    totalBadgeCount,
-                });
-            }
         } catch (error) {
             console.error("Failed to fetch message counts:", error);
             // Fallback to 0 to prevent UI from breaking
