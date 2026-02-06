@@ -50,7 +50,7 @@ export default function RoleWizardModal({
         salary_max: "",
         show_salary_range: true,
         fee_percentage: 20,
-        guarantee_days: 90,
+        guarantee_days: 0,
         employment_type: "full_time",
         open_to_relocation: false,
 
@@ -261,7 +261,7 @@ export default function RoleWizardModal({
                 salary_max: "",
                 show_salary_range: true,
                 fee_percentage: 20,
-                guarantee_days: 90,
+                guarantee_days: 0,
                 employment_type: "full_time",
                 open_to_relocation: false,
                 recruiter_description: "",

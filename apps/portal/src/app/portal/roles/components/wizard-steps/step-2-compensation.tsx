@@ -116,13 +116,12 @@ export default function Step2Compensation({
                         onChange={(e) =>
                             setFormData((prev) => ({
                                 ...prev,
-                                guarantee_days:
-                                    parseInt(e.target.value, 10) || 0,
+                                guarantee_days: parseInt(e.target.value, 10),
                             }))
                         }
                         required
                     >
-                        <option value={0}>0 days</option>
+                        <option value={0}>No guarantee</option>
                         <option value={15}>15 days</option>
                         <option value={30}>30 days</option>
                         <option value={60}>60 days</option>
@@ -139,7 +138,8 @@ export default function Step2Compensation({
                     onChange={(e) =>
                         setFormData((prev) => ({
                             ...prev,
-                            employment_type: e.target.value as FormData["employment_type"],
+                            employment_type: e.target
+                                .value as FormData["employment_type"],
                         }))
                     }
                     required
