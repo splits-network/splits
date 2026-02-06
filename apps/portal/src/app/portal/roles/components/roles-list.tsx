@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 import {
     useStandardList,
     PaginationControls,
@@ -13,6 +14,7 @@ import {
 import { StatCard, StatCardGrid } from "@/components/ui/cards";
 import { DataTable, type TableColumn } from "@/components/ui/tables";
 import { useUserProfile } from "@/contexts";
+import { createAuthenticatedClient } from "@/lib/api-client";
 import { RoleCard, type Job } from "./role-card";
 import { RoleTableRow } from "./role-table-row";
 import {
@@ -54,12 +56,17 @@ const roleColumns: TableColumn[] = [
 
 export default function RolesList({ view }: RolesListProps) {
     const searchParams = useSearchParams();
+    const { getToken } = useAuth();
     const {
         profile,
         isAdmin,
         isRecruiter,
+        isCompanyUser,
         isLoading: profileLoading,
     } = useUserProfile();
+
+    // State for tracking if recruiter has manageable companies
+    const [hasManageableCompanies, setHasManageableCompanies] = useState(false);
 
     // Derive user role from context
     const userRole = isAdmin
@@ -74,6 +81,27 @@ export default function RolesList({ view }: RolesListProps) {
 
     // Check if user can manage roles
     const canManageRole = isAdmin || profile?.roles?.includes("company_admin");
+
+    // Check if recruiter has manageable companies
+    useEffect(() => {
+        if (isRecruiter && !profileLoading) {
+            async function checkManageableCompanies() {
+                try {
+                    const token = await getToken();
+                    if (!token) return;
+                    const client = createAuthenticatedClient(token);
+                    const response = await client.get<{ data: { id: string; name: string }[] }>(
+                        "/recruiter-companies/manageable-companies-with-details"
+                    );
+                    setHasManageableCompanies((response.data || []).length > 0);
+                } catch (err) {
+                    console.error("Failed to check manageable companies:", err);
+                    setHasManageableCompanies(false);
+                }
+            }
+            checkManageableCompanies();
+        }
+    }, [isRecruiter, profileLoading, getToken]);
 
     // Memoize defaultFilters to prevent unnecessary re-renders
     const defaultFilters = useMemo<JobFilters>(
@@ -268,26 +296,17 @@ export default function RolesList({ view }: RolesListProps) {
                                 <i className="fa-duotone fa-regular fa-filter mr-2" />
                                 Options
                             </h3>
-                            {profile?.is_platform_admin ||
-                                ((profile?.roles?.includes("company_admin") ||
-                                    profile?.roles?.includes(
-                                        "hiring_manager",
-                                    ) ||
-                                    (profile?.roles?.includes("recruiter") &&
-                                        profile?.organization_ids?.length >
-                                            0)) && (
-                                    <>
-                                        <button
-                                            className="btn btn-primary w-full"
-                                            onClick={() =>
-                                                setShowAddModal(true)
-                                            }
-                                        >
-                                            <i className="fa-duotone fa-regular fa-plus"></i>
-                                            Add Role
-                                        </button>
-                                    </>
-                                ))}
+                            {(isAdmin ||
+                                isCompanyUser ||
+                                (isRecruiter && hasManageableCompanies)) && (
+                                <button
+                                    className="btn btn-primary w-full"
+                                    onClick={() => setShowAddModal(true)}
+                                >
+                                    <i className="fa-duotone fa-regular fa-plus"></i>
+                                    Add Role
+                                </button>
+                            )}
                             <div className="flex flex-wrap gap-4 items-center">
                                 {/* Status Filter */}
                                 <fieldset className="fieldset w-full">

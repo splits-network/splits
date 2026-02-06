@@ -139,10 +139,16 @@ export class RecruiterCompanyServiceV2 {
         accept: boolean,
         clerkUserId: string
     ): Promise<RecruiterCompany> {
+        const startTime = Date.now();
+        console.log(`[RESPOND] Start - relationshipId: ${relationshipId}, accept: ${accept}`);
+
         const userContext = await this.accessResolver.resolve(clerkUserId);
-        
+        console.log(`[RESPOND] Access context resolved in ${Date.now() - startTime}ms - recruiterId: ${userContext.recruiterId}`);
+
         // Get the relationship and verify recruiter can respond
         const relationship = await this.repository.findById(relationshipId, clerkUserId);
+        console.log(`[RESPOND] FindById completed in ${Date.now() - startTime}ms - found: ${!!relationship}`);
+
         if (!relationship) {
             throw new Error('Invitation not found or access denied');
         }
@@ -152,19 +158,16 @@ export class RecruiterCompanyServiceV2 {
         }
 
         // Verify the current user is the invited recruiter
+        console.log(`[RESPOND] Checking ownership - relationship.recruiter_id: ${relationship.recruiter_id}, userContext.recruiterId: ${userContext.recruiterId}`);
         if (relationship.recruiter_id !== userContext.recruiterId) {
             throw new Error('You can only respond to your own invitations');
         }
 
         const newStatus = accept ? 'active' : 'declined';
         const updates: RecruiterCompanyUpdate = { status: newStatus };
-        
-        if (accept) {
-            // Note: We don't track start dates, only end dates for termination
-            // The relationship is active when status = 'active'
-        }
 
         const updatedRelationship = await this.repository.update(relationshipId, updates, clerkUserId);
+        console.log(`[RESPOND] Update completed in ${Date.now() - startTime}ms`);
 
         // Publish response event
         const eventType = accept ? 'recruiter_company.accepted' : 'recruiter_company.declined';
@@ -174,6 +177,7 @@ export class RecruiterCompanyServiceV2 {
             companyId: relationship.company_id,
             respondedBy: userContext.identityUserId
         });
+        console.log(`[RESPOND] Event published, total time: ${Date.now() - startTime}ms`);
 
         return updatedRelationship;
     }
@@ -277,7 +281,14 @@ export class RecruiterCompanyServiceV2 {
             can_manage_company_jobs: true,
             limit: 1
         });
-        
+
         return data.length > 0;
+    }
+
+    /**
+     * Get all companies a recruiter can manage jobs for, with details
+     */
+    async getManageableCompaniesWithDetails(recruiterId: string): Promise<{ id: string; name: string }[]> {
+        return await this.repository.getManageableCompaniesWithDetails(recruiterId);
     }
 }

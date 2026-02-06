@@ -421,6 +421,26 @@ function registerRecruiterCompanyRoutes(app: FastifyInstance, services: ServiceR
         }
     );
 
+    // GET manageable companies with details (id, name) for current recruiter
+    app.get(
+        '/api/v2/recruiter-companies/manageable-companies-with-details',
+        routeOptions(),
+        async (request: FastifyRequest, reply: FastifyReply) => {
+            try {
+                const correlationId = getCorrelationId(request);
+                const data = await networkService().get(
+                    '/v2/recruiter-companies/manageable-companies-with-details',
+                    undefined,
+                    correlationId,
+                    buildAuthHeaders(request)
+                );
+                return reply.send(data);
+            } catch (error: any) {
+                return handleNetworkError(request, reply, error, 'Failed to fetch manageable companies');
+            }
+        }
+    );
+
     // GET check if recruiter can manage company jobs
     app.get(
         '/api/v2/recruiter-companies/can-manage/:companyId',

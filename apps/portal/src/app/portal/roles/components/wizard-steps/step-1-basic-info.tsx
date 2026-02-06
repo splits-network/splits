@@ -5,6 +5,7 @@ interface Step1BasicInfoProps {
     setFormData: React.Dispatch<React.SetStateAction<FormData>>;
     companies: Company[];
     isAdmin: boolean;
+    isRecruiterWithMultipleCompanies?: boolean;
 }
 
 export default function Step1BasicInfo({
@@ -12,6 +13,7 @@ export default function Step1BasicInfo({
     setFormData,
     companies,
     isAdmin,
+    isRecruiterWithMultipleCompanies = false,
 }: Step1BasicInfoProps) {
     return (
         <div className="space-y-4">
@@ -29,7 +31,7 @@ export default function Step1BasicInfo({
 
             <fieldset className="fieldset">
                 <legend className="fieldset-legend">Company *</legend>
-                {isAdmin ? (
+                {(isAdmin || isRecruiterWithMultipleCompanies) ? (
                     <select
                         className="select w-full"
                         value={formData.company_id}
@@ -52,7 +54,7 @@ export default function Step1BasicInfo({
                     />
                 )}
                 <p className="fieldset-label">
-                    {isAdmin ? 'Select the company for this role' : 'Your company is automatically selected'}
+                    {(isAdmin || isRecruiterWithMultipleCompanies) ? 'Select the company for this role' : 'Your company is automatically selected'}
                 </p>
             </fieldset>
 

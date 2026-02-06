@@ -74,41 +74,39 @@ export class JobRepository {
                 query = query.eq('status', 'active');
                 if (filters.job_owner_filter === 'assigned') {
                     // Filter to jobs where recruiter has:
-                    // 1. Applications in active stages (recruiter_proposed, draft, ai_review, screen, submitted, interview, offer)
-                    // 2. OR placements (hired candidates)
+                    // 1. Is the job_owner_recruiter_id or company_recruiter_id (they created/own the job)
+                    // 2. OR has applications in active stages
+                    // 3. OR has placements (hired candidates)
 
                     // Get job IDs from applications with active stages
-                    const { data: applications, error: appsError } = await this.supabase
-
+                    const { data: applications } = await this.supabase
                         .from('applications')
-                        .select('job_id, stage, candidate_id')
+                        .select('job_id')
                         .eq('candidate_recruiter_id', accessContext.recruiterId)
                         .in('stage', ['recruiter_proposed', 'draft', 'recruiter_request', 'ai_review', 'screen', 'submitted', 'interview', 'offer']);
 
                     // Get job IDs from placements
-                    const { data: placements, error: placementsError } = await this.supabase
-
+                    const { data: placements } = await this.supabase
                         .from('placements')
-                        .select('job_id, candidate_id')
+                        .select('job_id')
                         .eq('candidate_recruiter_id', accessContext.recruiterId);
 
-                    // we need to query jobs where the current recruiterid is either the job_owner_recruiter_id or company_recruiter_id
-                    query = query.or(
-                        `job_owner_recruiter_id.eq.${accessContext.recruiterId},company_recruiter_id.eq.${accessContext.recruiterId}`
-                    );
-
-
-                    // Combine unique job IDs
+                    // Combine unique job IDs from applications and placements
                     const applicationJobIds = applications?.map(a => a.job_id) || [];
                     const placementJobIds = placements?.map(p => p.job_id) || [];
                     const involvedJobIds = [...new Set([...applicationJobIds, ...placementJobIds])];
 
+                    // Build OR condition: job_owner_recruiter_id OR company_recruiter_id OR in involvedJobIds
+                    const orConditions = [
+                        `job_owner_recruiter_id.eq.${accessContext.recruiterId}`,
+                        `company_recruiter_id.eq.${accessContext.recruiterId}`
+                    ];
+
                     if (involvedJobIds.length > 0) {
-                        query = query.in('id', involvedJobIds);
-                    } else {
-                        // No involved jobs - return empty
-                        return { data: [], total: 0 };
+                        orConditions.push(`id.in.(${involvedJobIds.join(',')})`);
                     }
+
+                    query = query.or(orConditions.join(','));
                 }
             } else if (accessContext.organizationIds.length > 0) {
                 // Company users (company_admin, hiring_manager) see only their organization's jobs
@@ -246,33 +244,39 @@ export class JobRepository {
 
     async createJob(job: any, clerkUserId: string): Promise<any> {
         const accessContext = await resolveAccessContext(this.supabase, clerkUserId);
-        
+
+        // Track if creator is a recruiter for setting ownership fields
+        let creatorRecruiterId: string | null = null;
+
         // Authorize company access
         if (!accessContext.isPlatformAdmin) {
             if (accessContext.recruiterId && accessContext.roles.includes('recruiter')) {
                 // Recruiters can only create jobs for companies they have active relationships with
                 const { data: relationships } = await this.supabase
-                    
+
                     .from('recruiter_companies')
                     .select('company_id')
                     .eq('recruiter_id', accessContext.recruiterId)
                     .eq('status', 'active')
                     .eq('can_manage_company_jobs', true);
-                
+
                 const allowedCompanyIds = relationships?.map(r => r.company_id) || [];
-                
+
                 if (!allowedCompanyIds.includes(job.company_id)) {
                     throw new Error('Forbidden: No active relationship with permission to create jobs for this company');
                 }
+
+                // Set the creator recruiter ID for ownership assignment
+                creatorRecruiterId = accessContext.recruiterId;
             } else if (accessContext.organizationIds.length > 0) {
                 // Company users can create jobs for their organization
                 const { data: company } = await this.supabase
-                    
+
                     .from('companies')
                     .select('identity_organization_id')
                     .eq('id', job.company_id)
                     .single();
-                
+
                 if (!company || !accessContext.organizationIds.includes(company.identity_organization_id)) {
                     throw new Error('Forbidden: Cannot create jobs for companies outside your organization');
                 }
@@ -280,10 +284,17 @@ export class JobRepository {
                 throw new Error('Forbidden: Insufficient permissions to create job');
             }
         }
-        
+
+        // If a recruiter is creating the job, set them as the job owner and company recruiter
+        const jobData = { ...job };
+        if (creatorRecruiterId) {
+            jobData.job_owner_recruiter_id = creatorRecruiterId;
+            jobData.company_recruiter_id = creatorRecruiterId;
+        }
+
         const { data, error } = await this.supabase
             .from('jobs')
-            .insert(job)
+            .insert(jobData)
             .select()
             .single();
 

@@ -296,7 +296,7 @@ export class RecruiterCompanyRepository {
      */
     async hasActiveRelationship(recruiterId: string, companyId: string): Promise<boolean> {
         const { data, error } = await this.supabase
-            
+
             .from('recruiter_companies')
             .select('id')
             .eq('recruiter_id', recruiterId)
@@ -306,5 +306,27 @@ export class RecruiterCompanyRepository {
 
         if (error) throw error;
         return !!data;
+    }
+
+    /**
+     * Get companies a recruiter can manage jobs for, with details
+     */
+    async getManageableCompaniesWithDetails(recruiterId: string): Promise<{ id: string; name: string }[]> {
+        const { data, error } = await this.supabase
+            .from('recruiter_companies')
+            .select(`
+                company_id,
+                company:companies!inner(id, name)
+            `)
+            .eq('recruiter_id', recruiterId)
+            .eq('status', 'active')
+            .eq('can_manage_company_jobs', true);
+
+        if (error) throw error;
+
+        return (data || []).map(row => ({
+            id: (row.company as any).id,
+            name: (row.company as any).name
+        }));
     }
 }

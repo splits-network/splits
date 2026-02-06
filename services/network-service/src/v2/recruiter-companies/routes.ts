@@ -100,7 +100,6 @@ export async function recruiterCompanyRoutes(
 
     // GET relationship by ID
     app.get('/v2/recruiter-companies/:id', {
-        preHandler: requireUserContext,
         schema: {
             params: {
                 type: 'object',
@@ -154,7 +153,6 @@ export async function recruiterCompanyRoutes(
 
     // PATCH - Respond to invitation
     app.patch('/v2/recruiter-companies/:id/respond', {
-        preHandler: requireUserContext,
         schema: {
             params: {
                 type: 'object',
@@ -167,22 +165,43 @@ export async function recruiterCompanyRoutes(
         const { clerkUserId } = requireUserContext(request);
         const { id } = request.params as { id: string };
         const { accept } = request.body as AcceptInvitationRequest;
-        
+
         try {
             const relationship = await service.respondToInvitation(id, accept, clerkUserId);
             return reply.send({ data: relationship });
-        } catch (error) {
+        } catch (error: any) {
+            // Log the full error for debugging
+            console.error('[RESPOND_TO_INVITATION] Error:', {
+                id,
+                accept,
+                clerkUserId,
+                errorMessage: error?.message,
+                errorCode: error?.code,
+                errorDetails: error?.details,
+                errorHint: error?.hint
+            });
+
             if (error instanceof Error) {
                 if (error.message.includes('not found') || error.message.includes('access denied')) {
-                    return reply.code(404).send({ 
-                        error: { code: 'INVITATION_NOT_FOUND', message: error.message } 
+                    return reply.code(404).send({
+                        error: { code: 'INVITATION_NOT_FOUND', message: error.message }
                     });
                 }
                 if (error.message.includes('already responded') || error.message.includes('only respond')) {
-                    return reply.code(400).send({ 
-                        error: { code: 'INVALID_RESPONSE', message: error.message } 
+                    return reply.code(400).send({
+                        error: { code: 'INVALID_RESPONSE', message: error.message }
                     });
                 }
+            }
+            // Handle database constraint violations (Postgres error code 23505)
+            if (error?.code === '23505' || error?.message?.includes('unique') ||
+                error?.message?.includes('duplicate') || error?.message?.includes('violates')) {
+                return reply.code(409).send({
+                    error: {
+                        code: 'RELATIONSHIP_CONFLICT',
+                        message: 'An active relationship already exists for this recruiter and company'
+                    }
+                });
             }
             throw error;
         }
@@ -190,7 +209,6 @@ export async function recruiterCompanyRoutes(
 
     // PATCH - Update relationship
     app.patch('/v2/recruiter-companies/:id', {
-        preHandler: requireUserContext,
         schema: {
             params: {
                 type: 'object',
@@ -219,7 +237,6 @@ export async function recruiterCompanyRoutes(
 
     // PATCH - Terminate relationship
     app.patch('/v2/recruiter-companies/:id/terminate', {
-        preHandler: requireUserContext,
         schema: {
             params: {
                 type: 'object',
@@ -248,7 +265,6 @@ export async function recruiterCompanyRoutes(
 
     // DELETE relationship
     app.delete('/v2/recruiter-companies/:id', {
-        preHandler: requireUserContext,
         schema: {
             params: {
                 type: 'object',
@@ -277,37 +293,68 @@ export async function recruiterCompanyRoutes(
     app.get('/v2/recruiter-companies/manageable-companies', {
     }, async (request, reply) => {
         const { clerkUserId } = requireUserContext(request);
-        
+
         // Get current user's recruiter ID
         const { data: user } = await supabase
             .from('users')
             .select('id')
             .eq('clerk_user_id', clerkUserId)
             .single();
-            
+
         if (!user) {
-            return reply.code(404).send({ 
-                error: { code: 'USER_NOT_FOUND', message: 'User not found' } 
+            return reply.code(404).send({
+                error: { code: 'USER_NOT_FOUND', message: 'User not found' }
             });
         }
-        
+
         const { data: recruiter } = await supabase
             .from('recruiters')
             .select('id')
             .eq('user_id', user.id)
             .single();
-            
+
         if (!recruiter) {
             return reply.send({ data: [] }); // Not a recruiter
         }
-        
+
         const companyIds = await service.getManageableCompanies(recruiter.id);
         return reply.send({ data: companyIds });
     });
 
+    // GET companies recruiter can manage with details (id, name)
+    app.get('/v2/recruiter-companies/manageable-companies-with-details', {
+    }, async (request, reply) => {
+        const { clerkUserId } = requireUserContext(request);
+
+        // Get current user's recruiter ID
+        const { data: user } = await supabase
+            .from('users')
+            .select('id')
+            .eq('clerk_user_id', clerkUserId)
+            .single();
+
+        if (!user) {
+            return reply.code(404).send({
+                error: { code: 'USER_NOT_FOUND', message: 'User not found' }
+            });
+        }
+
+        const { data: recruiter } = await supabase
+            .from('recruiters')
+            .select('id')
+            .eq('user_id', user.id)
+            .single();
+
+        if (!recruiter) {
+            return reply.send({ data: [] }); // Not a recruiter
+        }
+
+        const companies = await service.getManageableCompaniesWithDetails(recruiter.id);
+        return reply.send({ data: companies });
+    });
+
     // GET check if recruiter can manage company jobs
     app.get('/v2/recruiter-companies/can-manage/:companyId', {
-        preHandler: requireUserContext,
         schema: {
             params: {
                 type: 'object',
