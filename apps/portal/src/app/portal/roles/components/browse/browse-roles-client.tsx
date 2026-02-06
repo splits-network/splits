@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useUserProfile } from "@/contexts";
 import { createAuthenticatedClient } from "@/lib/api-client";
@@ -13,14 +13,37 @@ import { Job, JobFilters } from "./types";
 
 export default function BrowseRolesClient() {
     const { getToken } = useAuth();
-    const { isCompanyUser, isRecruiter, profile } = useUserProfile();
+    const { isAdmin, isCompanyUser, isRecruiter, isLoading: profileLoading } = useUserProfile();
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [hasManageableCompanies, setHasManageableCompanies] = useState(false);
+
+    // Check if recruiter has manageable companies
+    useEffect(() => {
+        if (isRecruiter && !profileLoading) {
+            async function checkManageableCompanies() {
+                try {
+                    const token = await getToken();
+                    if (!token) return;
+                    const client = createAuthenticatedClient(token);
+                    const response = await client.get<{ data: { id: string; name: string }[] }>(
+                        "/recruiter-companies/manageable-companies-with-details"
+                    );
+                    setHasManageableCompanies((response.data || []).length > 0);
+                } catch (err) {
+                    console.error("Failed to check manageable companies:", err);
+                    setHasManageableCompanies(false);
+                }
+            }
+            checkManageableCompanies();
+        }
+    }, [isRecruiter, profileLoading, getToken]);
 
     // Permission check for creating roles
-    // Allowed: Company Users (Admin/HM) OR Recruiters with Organization
+    // Allowed: Admins, Company Users (Admin/HM), OR Recruiters with manageable companies
     const canCreateRole =
+        isAdmin ||
         isCompanyUser ||
-        (isRecruiter && (profile?.organization_ids?.length || 0) > 0);
+        (isRecruiter && hasManageableCompanies);
 
     const fetchJobs = useCallback(
         async (params: any) => {
